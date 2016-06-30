@@ -389,12 +389,17 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public GetNewsDetailInfoResponse getNewsDetailInfo(GetNewsDetailInfoCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
-		News news = findNewsById(userId, newsId);
-		news.setViewCount(news.getViewCount() + 1L);
-		updateNews(news);
-		return convertNewsToNewsDTO(userId, news);
+		final Long userId = UserContext.current().getUser().getId();
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		final List<News> list = new ArrayList<>();
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			News news = findNewsById(userId, newsId);
+			news.setViewCount(news.getViewCount() + 1L);
+			newsProvider.updateNews(news);
+			list.add(news);
+			return null;
+		});
+		return convertNewsToNewsDTO(userId, list.get(0));
 	}
 
 	private GetNewsDetailInfoResponse convertNewsToNewsDTO(Long userId, News news) {
@@ -407,20 +412,24 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void setNewsTopFlag(SetNewsTopFlagCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
-		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
-		News news = findNewsById(userId, newsId);
-		if (NewsTopFlag.fromCode(news.getTopFlag()) == NewsTopFlag.NONE) {
-			news.setTopFlag(NewsTopFlag.TOP.getCode());
-			news.setTopIndex(newsProvider.getMaxTopIndex(namespaceId).longValue() + 1L);
-		} else {
-			news.setTopFlag(NewsTopFlag.NONE.getCode());
-			news.setTopIndex(0L);
-		}
-		updateNews(news);
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			
+			News news = findNewsById(userId, newsId);
+			if (NewsTopFlag.fromCode(news.getTopFlag()) == NewsTopFlag.NONE) {
+				news.setTopFlag(NewsTopFlag.TOP.getCode());
+				news.setTopIndex(newsProvider.getMaxTopIndex(namespaceId).longValue() + 1L);
+			} else {
+				news.setTopFlag(NewsTopFlag.NONE.getCode());
+				news.setTopIndex(0L);
+			}
+			newsProvider.updateNews(news);
+			return null;
+		});
 		
-		syncNews(news.getId());
+		syncNews(newsId);
 	}
 
 	private News findNewsById(Long userId, Long newsId) {
@@ -455,13 +464,16 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
-		News news = findNewsById(userId, newsId);
-		news.setDeleterUid(userId);
-		news.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		news.setStatus(NewsStatus.INACTIVE.getCode());
-		updateNews(news);
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			News news = findNewsById(userId, newsId);
+			news.setDeleterUid(userId);
+			news.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			news.setStatus(NewsStatus.INACTIVE.getCode());
+			newsProvider.updateNews(news);
+			return null;
+		});
 		
-		syncNewsWhenDelete(news.getId());
+		syncNewsWhenDelete(newsId);
 	}
 
 	@Override
@@ -473,10 +485,10 @@ public class NewsServiceImpl implements NewsService {
 
 	private void setNewsLikeFlag(Long userId, String newsToken) {
 		final Long newsId = checkNewsToken(userId, newsToken);
-		final News news = findNewsById(userId, newsId);
 		
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
 			dbProvider.execute(s->{
+				News news = findNewsById(userId, newsId);
 				UserLike userLike = findUserLike(userId, newsId);
 				if (userLike == null) {
 					news.setLikeCount(news.getLikeCount() + 1L);
@@ -501,7 +513,7 @@ public class NewsServiceImpl implements NewsService {
 			return null;
 		});
 		
-		syncNews(news.getId());
+		syncNews(newsId);
 	}
 
 	@Override
@@ -509,25 +521,30 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		// 检查参数
-		News news = checkCommentParameter(userId, newsId, cmd);
+		checkCommentParameter(userId, cmd);
 
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
-		dbProvider.execute(s -> {
-			// 创建评论
-			Comment comment = processComment(userId, newsId, cmd);
-			comments.add(comment);
-			commentProvider.createComment(EhNewsComment.class, comment);
-
-			// 创建附件
-			if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
-				attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
-				attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
-			}
-
-			news.setChildCount(news.getChildCount()+1L);
-			updateNews(news);
-			return true;
+		
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			dbProvider.execute(s -> {
+				News news = findNewsById(userId, newsId);
+				// 创建评论
+				Comment comment = processComment(userId, newsId, cmd);
+				comments.add(comment);
+				commentProvider.createComment(EhNewsComment.class, comment);
+	
+				// 创建附件
+				if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+					attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
+					attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+				}
+	
+				news.setChildCount(news.getChildCount()+1L);
+				newsProvider.updateNews(news);
+				return true;
+			});
+			return null;
 		});
 		
 		AddNewsCommentResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentResponse.class);
@@ -538,19 +555,16 @@ public class NewsServiceImpl implements NewsService {
 		return commentDTO;
 	}
 
-	private News checkCommentParameter(Long userId, Long newsId, AddNewsCommentCommand cmd) {
+	private void checkCommentParameter(Long userId, AddNewsCommentCommand cmd) {
 		// 检查owner是否存在
 		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-		// 检查News是否存在
-		News news = findNewsById(userId, newsId);
+		
 		// 检查评论类型
 		checkCommentType(userId, cmd.getContentType());
 		// 检查附件类型
 		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
 			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
 		}
-		
-		return news;
 	}
 
 	private void checkCommentType(Long userId, String contentType) {
@@ -741,26 +755,31 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		// 检查参数
-		News news = checkCommentParameter(userId, newsId, cmd);
+		checkCommentParameter(userId, cmd);
 
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
-		dbProvider.execute(s -> {
-			// 创建评论
-			Comment comment = processComment(userId, newsId, cmd);
-			comments.add(comment);
-			commentProvider.createComment(EhNewsComment.class, comment);
-
-			// 创建附件
-			if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
-				attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
-				attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
-			}
-			
-			news.setChildCount(news.getChildCount()+1L);
-			updateNews(news);
-			
-			return true;
+		
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			dbProvider.execute(s -> {
+				News news = findNewsById(userId, newsId);
+				// 创建评论
+				Comment comment = processComment(userId, newsId, cmd);
+				comments.add(comment);
+				commentProvider.createComment(EhNewsComment.class, comment);
+	
+				// 创建附件
+				if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+					attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
+					attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+				}
+				
+				news.setChildCount(news.getChildCount()+1L);
+				newsProvider.updateNews(news);
+				
+				return true;
+			});
+			return null;
 		});
 
 		AddNewsCommentBySceneResponse commentDTO = ConvertHelper.convert(comments.get(0),
@@ -781,18 +800,16 @@ public class NewsServiceImpl implements NewsService {
 		return comment;
 	}
 
-	private News checkCommentParameter(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
+	private void checkCommentParameter(Long userId, AddNewsCommentBySceneCommand cmd) {
 		// 检查namespace是否存在
 		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		// 检查News是否存在
-		News news = findNewsById(userId, newsId);
+		
 		// 检查评论类型
 		checkCommentType(userId, cmd.getContentType());
 		// 检查附件类型
 		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
 			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
 		}
-		return news;
 	}
 
 	@Override
@@ -804,8 +821,25 @@ public class NewsServiceImpl implements NewsService {
 
 	private void deleteNewsComment(Long userId, String newsToken, Long commentId) {
 		Long newsId = checkNewsToken(userId, newsToken);
-		News news = findNewsById(userId, newsId);
-		Comment comment = commentProvider.findCommentById(EhNewsComment.class, commentId);
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			dbProvider.execute(s->{
+				News news = findNewsById(userId, newsId);
+				Comment comment = commentProvider.findCommentById(EhNewsComment.class, commentId);
+				checkIfCommentCorrect(userId, newsId, commentId, comment);
+				comment.setDeleterUid(userId);
+				comment.setStatus(CommentStatus.INACTIVE.getCode());
+				comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				commentProvider.updateComment(EhNewsComment.class, comment);
+				
+				news.setChildCount(news.getChildCount()-1L);
+				newsProvider.updateNews(news);
+				return true;
+			});
+			return null;
+		});
+	}
+	
+	private void checkIfCommentCorrect(Long userId, Long newsId, Long commentId, Comment comment) {
 		if (comment == null || comment.getOwnerId().longValue() != newsId.longValue()) {
 			LOGGER.error("newsId and commentId not match, operatorId=" + userId + ", newsId=" + newsId + ", commentId"
 					+ commentId);
@@ -818,23 +852,8 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "userId and commentId not match");
 		}
-		comment.setDeleterUid(userId);
-		comment.setStatus(CommentStatus.INACTIVE.getCode());
-		comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		commentProvider.updateComment(EhNewsComment.class, comment);
-		
-		news.setChildCount(news.getChildCount()-1L);
-		updateNews(news);
 	}
 
-	private void updateNews(News news){
-		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
-			newsProvider.updateNews(news);
-			return null;
-		});
-	}
-	
-	
 	@Override
 	public void syncNews(SyncNewsCommand cmd) {
 		if (cmd.getId() != null) {
