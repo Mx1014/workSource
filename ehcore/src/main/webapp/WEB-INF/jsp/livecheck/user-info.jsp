@@ -27,7 +27,7 @@
 </tr>
 
 <tr>
-<td style="text-align: right" width="200px"><b>Avatar</b></td><td><img src="${userInfo.avatarUri}"></img></td>
+<td style="text-align: right" width="200px"><b>Avatar</b></td><td><img src="${userInfo.avatarUrl}"></img></td>
 </tr>
 
 </table>
