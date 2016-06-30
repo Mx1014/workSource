@@ -27,7 +27,7 @@ INSERT INTO `eh_payment_card_issuer_communities` (`id`, `owner_type`, `owner_id`
     VALUES (100001, 'community', '240111044331051500', 100001, '2016-06-14 17:06:44');
 
 INSERT INTO `eh_payment_card_issuers` (`id`, `name`, `description`, `pay_url`, `alipay_recharge_account`, `weixin_recharge_account`, `vendor_name`, `vendor_data`, `create_time`, `status`) 
-    VALUES (100001, 'chuneng', 'chuneng', 'adfasdf', 'adfasdf', 'asdfsdfasdf', 'TAOTAOGU', '{\"BranchCode\":\"10002900\",\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"DstId\":\"00000000\",\"CardPatternid\":\"887093\",\"chnl_type\":\"WEB\",\"chnl_id\":\"12345679\",\"merch_id\":\"862900000000001\",\"termnl_id\":\"00011071\",\"init_password\":\"111111\"}', '2016-06-14 17:07:20', '1');
+    VALUES (100001, 'chuneng', 'chuneng', '', '', '', 'TAOTAOGU', '{"branchCode":"10002900","appName":"ICCard","version":"V0.01","dstId":"00000000","cardPatternid":"887093","chnlType":"WEB","chnlId":"12345679","merchId":"862900000000001","termnlId":"00011071","initPassword":"111111"}', '2016-06-14 17:07:20', '1');
 
 
 
