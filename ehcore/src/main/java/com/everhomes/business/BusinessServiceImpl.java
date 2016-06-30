@@ -533,6 +533,67 @@ public class BusinessServiceImpl implements BusinessService {
 		return response;
 	}
 
+	public List<BusinessDTO> getBusinesses(List<Long> categoryIds,Long communityId){
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		if(null == categoryIds || categoryIds.size() == 0){
+			LOGGER.error("categoryIds is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"categoryIds is null.");
+		}
+		
+		Community community = communityProvider.findCommunityById(communityId);
+		
+		if(community == null){
+			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + communityId);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+					"Invalid paramter communityId,community is not exists.");
+		}
+		
+		//CommunityGeoPoint
+		List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(community.getId());
+		if(points == null || points.isEmpty()){
+			LOGGER.error("Community geo points is not exists,communityId=" + community.getId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+							"Community geo points is not exists.");
+		}
+		List<Long> businessNamespaceOwnerIds = listBusinessAssignedNamespaceIdByNamespaceId(namespaceId,BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+		if(businessNamespaceOwnerIds==null||businessNamespaceOwnerIds.isEmpty()){
+			LOGGER.debug("businessAssignedNamespaceOwnerIds is empty.namespaceId="+namespaceId);
+			return null;
+		}
+		
+		CommunityGeoPoint point = points.get(0);
+		final double lat = point.getLatitude();
+		final double lon = point.getLongitude();
+		List<String> geoHashList = getGeoHashCodeList(lat, lon);
+		
+		long cityId = community.getCityId();
+		List<Long> recommendBizIds = this.businessProvider.listBusinessAssignedScopeByScope(cityId,communityId,businessNamespaceOwnerIds).stream()
+				.map(r->r.getOwnerId()).collect(Collectors.toList());
+		
+		List<Long> childCategoryIds = new ArrayList<Long>();
+		for (Long categoryId : categoryIds) {
+			List<Long> childIds = categoryProvider.getBusinessSubCategories(categoryId);
+			if(null != childIds && childIds.size() > 0){
+				childCategoryIds.addAll(childIds);
+			}
+		}
+		
+		List<Business> scopeBusinesses = filterBusinessByCategorysAndBizIds(recommendBizIds,childCategoryIds);
+		List<Business> geoBusinesses = businessProvider.listBusinessByCategroys(childCategoryIds,geoHashList,businessNamespaceOwnerIds);
+		List<Business> businesses = filterBusinessByDistance(scopeBusinesses,geoBusinesses,lat,lon);
+		
+		if(null != businesses){
+			return businesses.stream().map( r ->{
+				return ConvertHelper.convert(r, BusinessDTO.class);
+			}).collect(Collectors.toList());
+		}
+		
+		return new ArrayList<BusinessDTO>();
+	}
+	
 	private List<Business> filterBusinessByDistance(List<Business> scopeBusinesses, List<Business> geoBusinesses,double lantitude,double longitude) {
 		if(scopeBusinesses==null||scopeBusinesses.isEmpty()){
 			if(geoBusinesses==null||geoBusinesses.isEmpty()){
