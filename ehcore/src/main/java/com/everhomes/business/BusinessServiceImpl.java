@@ -8,6 +8,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+
+
+
+
+
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -17,7 +24,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+
+
+
+
+
+
+
 import ch.hsr.geohash.GeoHash;
+
+
+
+
+
+
+
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
@@ -43,6 +64,7 @@ import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -53,6 +75,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BaiduGeocoderResponse;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
@@ -102,15 +125,19 @@ import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
+import com.everhomes.rest.launchpad.DeleteFlagType;
 import com.everhomes.rest.launchpad.ItemDisplayFlag;
+import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemTargetType;
 import com.everhomes.rest.launchpad.ScaleType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.IdentifierType;
@@ -132,6 +159,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
@@ -186,6 +214,9 @@ public class BusinessServiceImpl implements BusinessService {
 	private CommunityService communityService;
 	@Autowired
 	private AddressService addressService;
+	
+	@Autowired
+	private NamespaceProvider namespaceProvider;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -246,6 +277,8 @@ public class BusinessServiceImpl implements BusinessService {
 	
 	@Override
 	public void reSyncBusiness(ReSyncBusinessCommand cmd) {
+		
+		
 		if(cmd.getUserId() == null){
 			LOGGER.error("Invalid paramter userId,userId is null");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -296,8 +329,58 @@ public class BusinessServiceImpl implements BusinessService {
 							businessProvider.deleteBusinessAssignedScope(r.getId());
 				}
 			}
+			
+			//增加item到launchPadItem表里面  by sfyan 20160701
+			this.addLaunchPadItems(business);
 			return true;
 		});
+	}
+	
+	private void addLaunchPadItems(Business business){
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				List<SceneType> sceneTypes = new ArrayList<SceneType>();
+				List<Namespace> namespaces = namespaceProvider.listNamespaces();
+				for (SceneType sceneType : sceneTypes) {
+					for (Namespace namespace : namespaces) {
+						LaunchPadItem launchPadItem = launchPadProvider.findLaunchPadItemByTargetAndScopeAndSence(ItemTargetType.BIZ.getCode(), business.getId(), ScopeType.ALL.getCode(), 0L, namespace.getId(),sceneType);
+						if(null == launchPadItem){
+							launchPadItem = new LaunchPadItem();
+							launchPadItem.setNamespaceId(namespace.getId());
+							launchPadItem.setAppId(AppConstants.APPID_DEFAULT);
+							launchPadItem.setScopeCode(ScopeType.ALL.getCode());
+							launchPadItem.setScopeId(0L);
+							launchPadItem.setItemLocation("/home");
+							launchPadItem.setItemGroup(ItemGroup.BIZS.getCode());
+							launchPadItem.setItemName(business.getDisplayName());
+							launchPadItem.setItemLabel(business.getName());
+							launchPadItem.setIconUri(business.getLogoUri());
+							launchPadItem.setItemWidth(1);
+							launchPadItem.setItemHeight(1);
+							launchPadItem.setActionType(ActionType.THIRDPART_URL.getCode());
+							launchPadItem.setActionData("");
+							launchPadItem.setDefaultOrder((int) (1000 + business.getId()));
+							launchPadItem.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+							launchPadItem.setMinVersion(1L);
+							launchPadItem.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+							launchPadItem.setTargetType(ItemTargetType.BIZ.getCode());
+							launchPadItem.setTargetId(business.getId());
+							launchPadItem.setDeleteFlag(DeleteFlagType.YES.getCode());
+							launchPadItem.setSceneType(sceneType.getCode());
+							launchPadProvider.createLaunchPadItem(launchPadItem);
+						}else{
+							launchPadItem.setItemName(business.getDisplayName());
+							launchPadItem.setItemLabel(business.getName());
+							launchPadItem.setIconUri(business.getLogoUri());
+							launchPadProvider.updateLaunchPadItem(launchPadItem);
+						}
+					}
+				}
+				
+			}
+		});
+		
 	}
 	
 	private void reCreateBusinessAssignedNamespaceOnDelOther(Long ownerId,List<Integer> namespaceIds) {
