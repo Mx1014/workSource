@@ -104,18 +104,22 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		cmd.getAttachments().add(attachement);
 
 		cmd.setRentalType(RentalType.DAY.getCode());
-		cmd.setRentalEndTime(1 * 60 * 60 * 24 * 100L);
-		cmd.setRentalStartTime(10 * 60 * 60 * 24 * 100L);
+		cmd.setRentalEndTime(1 * 60 * 60 * 24 * 1000L);
+		cmd.setRentalStartTime(10 * 60 * 60 * 24 * 1000L);
 
 		// cmd.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
 		cmd.setBeginDate(new Date().getTime());
 		// 当前时间+49天7周
 		cmd.setEndDate(new Date().getTime() + 1000 * 60 * 60 * 24 * 49L);
-		cmd.setOpenWeekday(new ArrayList<Integer>());
+		cmd.setOpenWeekday(new ArrayList<Integer>()); 
 		cmd.getOpenWeekday().add(1);
 		cmd.getOpenWeekday().add(2);
 		cmd.getOpenWeekday().add(3);
 		cmd.getOpenWeekday().add(4);
+		cmd.getOpenWeekday().add(5);
+		cmd.getOpenWeekday().add(6);
+		cmd.getOpenWeekday().add(7);
+		
 		cmd.setCloseDates(null);
 		cmd.setWorkdayPrice(new BigDecimal(100));
 		cmd.setWeekendPrice(new BigDecimal(200));
@@ -144,8 +148,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 							EhRentalSiteRules.class));
 					return null;
 				});
-		// 7周，其中每周四天也就是28天有效的，每天10场所，按日租，为280个单元格
-		assertEquals(280, resultRules1.size());
+		// 7周，其中每周7天也就是49天有效的，每天10场所，按日租，为280个单元格
+		assertEquals(490, resultRules1.size());
 
 		List<EhRentalSites> resultSite1 = new ArrayList<EhRentalSites>();
 		dslContext
@@ -218,8 +222,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 							EhRentalSiteRules.class));
 					return null;
 				});
-		// 28天有效的，每天10场所，10-17点18-20，2小时为一个周期 每天4个单元格 总共
-		assertEquals(1120, resultRules2.size());
+		// 49天有效的，每天10场所，10-17点18-20，2小时为一个周期 每天4个单元格 总共
+		assertEquals(1960, resultRules2.size());
 
 		List<EhRentalSites> resultSite2 = new ArrayList<EhRentalSites>();
 		dslContext
@@ -300,8 +304,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 							EhRentalSiteRules.class));
 					return null;
 				});
-		// 28天有效的，1场所，10-17点18-20，2小时为一个周期 每天4个单元格 总共
-		assertEquals(112, resultRules3.size());
+		// 49天有效的，1场所，10-17点18-20，2小时为一个周期 每天4个单元格 总共
+		assertEquals(196, resultRules3.size());
 
 		List<EhRentalSites> resultSite3 = new ArrayList<EhRentalSites>();
 		dslContext

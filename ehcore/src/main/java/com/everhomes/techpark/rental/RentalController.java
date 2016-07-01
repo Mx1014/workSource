@@ -161,38 +161,6 @@ public class RentalController extends ControllerBase {
 //		return response;
 //	}
 //	
-
-	/**
-	 * <b>URL: /rental/deleteRentalSite</b>
-	 * <p>
-	 * 删除具体场所
-	 * </p>
-	 */
-	@RequestMapping("disableRentalSite")
-	@RestReturn(value = String.class)
-	public RestResponse disableRentalSite(@Valid DisableRentalSiteCommand cmd) {
-		rentalService.disableRentalSite(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /rental/deleteRentalSite</b>
-	 * <p>
-	 * 删除具体场所
-	 * </p>
-	 */
-	@RequestMapping("enableRentalSite")
-	@RestReturn(value = String.class)
-	public RestResponse enableRentalSite(@Valid EnableRentalSiteCommand cmd) {
-		rentalService.enableRentalSite(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
 	/**
 	 * <b>URL: /rental/findRentalSites</b>
 	 * <p>
@@ -210,6 +178,93 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
+	 * <p>
+	 * 查询某服务预约某周的状态
+	 * </p>
+	 */
+
+	@RequestMapping("findRentalSiteWeekStatus")
+	@RestReturn(value = FindRentalSiteWeekStatusCommandResponse.class)
+	public RestResponse findRentalSiteWeekStatus(@Valid FindRentalSiteWeekStatusCommand cmd) {
+		FindRentalSiteWeekStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findRentalSiteWeekStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteWeekStatus</b>
+	 * <p>
+	 * 查询带场所编号的资源一周的单元格
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteWeekStatus")
+	@RestReturn(value = FindAutoAssignRentalSiteWeekStatusResponse.class)
+	public RestResponse findAutoAssignRentalSiteWeekStatus(@Valid FindAutoAssignRentalSiteWeekStatusCommand cmd) {
+		FindAutoAssignRentalSiteWeekStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findAutoAssignRentalSiteWeekStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteDayStatus</b>
+	 * <p>
+	 * 查询带场所编号的资源一天的单元格
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteDayStatus")
+	@RestReturn(value = FindAutoAssignRentalSiteDayStatusResponse.class)
+	public RestResponse findAutoAssignRentalSiteDayStatus(@Valid FindAutoAssignRentalSiteDayStatusCommand cmd) {
+		FindAutoAssignRentalSiteDayStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findAutoAssignRentalSiteDayStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+//	
+//	/**
+//	 * <b>URL: /rental/deleteRentalSite</b>
+//	 * <p>
+//	 * 删除具体场所
+//	 * </p>
+//	 */
+//	@RequestMapping("disableRentalSite")
+//	@RestReturn(value = String.class)
+//	public RestResponse disableRentalSite(@Valid DisableRentalSiteCommand cmd) {
+//		rentalService.disableRentalSite(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	/**
+//	 * <b>URL: /rental/deleteRentalSite</b>
+//	 * <p>
+//	 * 删除具体场所
+//	 * </p>
+//	 */
+//	@RequestMapping("enableRentalSite")
+//	@RestReturn(value = String.class)
+//	public RestResponse enableRentalSite(@Valid EnableRentalSiteCommand cmd) {
+//		rentalService.enableRentalSite(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+	
 	
 //	
 //	/**
@@ -359,6 +414,27 @@ public class RentalController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
+	
+
+	/**
+	 * <b>URL: /rental/findRentalSiteItems</b>
+	 * <p>
+	 * 查询某场所的可预订物品
+	 * </p>
+	 */
+	@RequestMapping("findRentalSiteItems")
+	@RestReturn(value = FindRentalSiteItemsCommandResponse.class)
+	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsCommand cmd) { 
+		FindRentalSiteItemsCommandResponse findRentalSiteItemsCommandResponse = rentalService.findRentalSiteItems(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteItemsCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	 
+	
+	
 	/**
 	 * <b>URL: /rental/addRentalItemBill</b>
 	 * <p>
@@ -475,79 +551,6 @@ public class RentalController extends ControllerBase {
 //		return response;
 //	}
 
-	/**
-	 * <b>URL: /rental/findRentalSiteItems</b>
-	 * <p>
-	 * 查询某场所的可预订物品
-	 * </p>
-	 */
-	@RequestMapping("findRentalSiteItems")
-	@RestReturn(value = FindRentalSiteItemsCommandResponse.class)
-	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsCommand cmd) { 
-		FindRentalSiteItemsCommandResponse findRentalSiteItemsCommandResponse = rentalService
-				.findRentalSiteItems(cmd);
-		RestResponse response = new RestResponse(
-				findRentalSiteItemsCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	 
-	
-	/**
-	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
-	 * <p>
-	 * 查询某服务预约某周的状态
-	 * </p>
-	 */
-
-	@RequestMapping("findRentalSiteWeekStatus")
-	@RestReturn(value = FindRentalSiteWeekStatusCommandResponse.class)
-	public RestResponse findRentalSiteWeekStatus(@Valid FindRentalSiteWeekStatusCommand cmd) {
-		FindRentalSiteWeekStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
-				.findRentalSiteWeekStatus(cmd);
-		RestResponse response = new RestResponse(
-				findRentalSiteDayStatusCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /rental/findAutoAssignRentalSiteWeekStatus</b>
-	 * <p>
-	 * 查询带场所编号的资源一周的单元格
-	 * </p>
-	 */
-
-	@RequestMapping("findAutoAssignRentalSiteWeekStatus")
-	@RestReturn(value = FindAutoAssignRentalSiteWeekStatusResponse.class)
-	public RestResponse findAutoAssignRentalSiteWeekStatus(@Valid FindAutoAssignRentalSiteWeekStatusCommand cmd) {
-		FindAutoAssignRentalSiteWeekStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
-				.findAutoAssignRentalSiteWeekStatus(cmd);
-		RestResponse response = new RestResponse(
-				findRentalSiteDayStatusCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /rental/findAutoAssignRentalSiteDayStatus</b>
-	 * <p>
-	 * 查询带场所编号的资源一天的单元格
-	 * </p>
-	 */
-
-	@RequestMapping("findAutoAssignRentalSiteDayStatus")
-	@RestReturn(value = FindAutoAssignRentalSiteDayStatusResponse.class)
-	public RestResponse findAutoAssignRentalSiteDayStatus(@Valid FindAutoAssignRentalSiteDayStatusCommand cmd) {
-		FindAutoAssignRentalSiteDayStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
-				.findAutoAssignRentalSiteDayStatus(cmd);
-		RestResponse response = new RestResponse(
-				findRentalSiteDayStatusCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 		
 //	
 //	/**

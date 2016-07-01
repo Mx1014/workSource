@@ -880,30 +880,20 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public RentalBillDTO addRentalBill(AddRentalBillCommand cmd) {
 
+		if(cmd.getRentalSiteId()==null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rental site id");
+
+		if(cmd.getRules()==null||cmd.getRules().size()==0)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rules");
 		Long userId = UserContext.current().getUser().getId(); 
 		RentalBillDTO billDTO = new RentalBillDTO();
 		RentalSite rs =this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
-			if (reserveTime.before(new java.util.Date(cmd.getStartTime()
-					- rs.getRentalStartTime()))) {
-				LOGGER.error("reserve Time before reserve start time");
-				throw RuntimeErrorException
-						.errorWith(
-								RentalServiceErrorCode.SCOPE,
-								RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
-										"reserve Time before reserve start time");
-			}
-			if (reserveTime.after(new java.util.Date(cmd.getStartTime()
-					- rs.getRentalEndTime()))) {
-				LOGGER.error("reserve Time after reserve end time");
-				throw RuntimeErrorException
-						.errorWith(
-								RentalServiceErrorCode.SCOPE,
-								RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
-										"reserve Time after reserve end time");
-			}
+
 			RentalBill rentalBill = ConvertHelper.convert(rs, RentalBill.class);
 			rentalBill.setSiteName(rs.getSiteName());
 			rentalBill.setRentalSiteId(cmd.getRentalSiteId());
@@ -915,6 +905,10 @@ public class RentalServiceImpl implements RentalService {
 			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
 			Map<java.sql.Date  , Set<Byte>> dayMap= new HashMap<Date, Set<Byte>>();
 			for (rentalBillRuleDTO siteRule : cmd.getRules()) {
+
+				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter siteRule");
 				if (null == siteRule)
 					continue;
 				RentalSiteRule rentalSiteRule = rentalProvider
@@ -978,6 +972,7 @@ public class RentalServiceImpl implements RentalService {
 					}
 				}
 			}
+			
 			if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
 				//优惠
 				if(DiscountType.FULL_MOENY_CUT_MONEY.equals(rs.getDiscountType())){
@@ -1003,6 +998,26 @@ public class RentalServiceImpl implements RentalService {
 					siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 				}
 			}
+			//不可以在开始时间-最多提前时间之前 预定 太早了
+			if (reserveTime.before(new java.util.Date(rentalBill.getStartTime().getTime()
+					- rs.getRentalStartTime()))) {
+				LOGGER.error("reserve Time before reserve start time reserveTime = "+ datetimeSF.format(reserveTime));
+				throw RuntimeErrorException 
+						.errorWith(
+								RentalServiceErrorCode.SCOPE,
+								RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
+										"reserve Time before reserve start time");
+			}
+			//也不可以在结束时间-最少提前时间之后预定  太迟了
+			if (reserveTime.after(new java.util.Date(rentalBill.getEndTime().getTime()
+					- rs.getRentalEndTime()))) {
+				LOGGER.error("reserve Time after reserve end time  reserveTime = "+ datetimeSF.format(reserveTime));
+				throw RuntimeErrorException
+						.errorWith(
+								RentalServiceErrorCode.SCOPE,
+								RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
+										"reserve Time after reserve end time");
+			}
 			// for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			// totalMoney += siDto.getItemPrice() * siDto.getCounts();
 			// }
@@ -1010,8 +1025,8 @@ public class RentalServiceImpl implements RentalService {
 			rentalBill.setPayTotalMoney(siteTotalMoney);
 	//		rentalBill.setReserveMoney(siteTotalMoney.multiply(
 	//				 new java.math.BigDecimal((rs.getPaymentRatio()==null?0:rs.getPaymentRatio())/ 100)));
-	//		rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
-	//				.format(reserveTime)));
+			rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
+					.format(reserveTime)));
 	//		if(rs.getPayStartTime()!=null){
 	//			rentalBill.setPayStartTime(new Timestamp(cmd.getStartTime()
 	//					- rs.getPayStartTime()));
@@ -1048,32 +1063,33 @@ public class RentalServiceImpl implements RentalService {
 						return this.rentalProvider.createRentalBill(rentalBill);
 					});
 			Long rentalBillId = tuple.first();
-			if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-	//			// 20分钟后，取消状态为锁定的订单
-	//			final Job job1 = new Job(
-	//					CancelLockedRentalBillAction.class.getName(),
-	//					new Object[] { String.valueOf(rentalBillId) });
-	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-	//					System.currentTimeMillis() + cancelTime);
-	//			// 在支付时间开始时，把订单状态更新为待支付全款
-	//			final Job job2 = new Job(
-	//					UpdateRentalBillStatusToPayingFinalAction.class.getName(),
-	//					new Object[] { String.valueOf(rentalBill.getId()) });
-	//			// 20min cancel order if status still is locked or paying
-	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
-	//					cmd.getStartTime() - rentalRule.getPayStartTime());
-	//			
-	//
-	//			// 在支付时间截止时，取消未成功的订单
-	//			final Job job3 = new Job(
-	//					CancelUnsuccessRentalBillAction.class.getName(),
-	//					new Object[] { String.valueOf(rentalBill.getId()) });
-	//			// 20min cancel order if status still is locked or paying
-	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-	//					cmd.getStartTime() - rentalRule.getPayEndTime());
-				
-				
-			} else if (rentalBill.getStatus().equals(
+//			if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+//	//			// 20分钟后，取消状态为锁定的订单
+//	//			final Job job1 = new Job(
+//	//					CancelLockedRentalBillAction.class.getName(),
+//	//					new Object[] { String.valueOf(rentalBillId) });
+//	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+//	//					System.currentTimeMillis() + cancelTime);
+//	//			// 在支付时间开始时，把订单状态更新为待支付全款
+//	//			final Job job2 = new Job(
+//	//					UpdateRentalBillStatusToPayingFinalAction.class.getName(),
+//	//					new Object[] { String.valueOf(rentalBill.getId()) });
+//	//			// 20min cancel order if status still is locked or paying
+//	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
+//	//					cmd.getStartTime() - rentalRule.getPayStartTime());
+//	//			
+//	//
+//	//			// 在支付时间截止时，取消未成功的订单
+//	//			final Job job3 = new Job(
+//	//					CancelUnsuccessRentalBillAction.class.getName(),
+//	//					new Object[] { String.valueOf(rentalBill.getId()) });
+//	//			// 20min cancel order if status still is locked or paying
+//	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+//	//					cmd.getStartTime() - rentalRule.getPayEndTime());
+//				
+//				
+//			} else
+			if (rentalBill.getStatus().equals(
 					SiteBillStatus.PAYINGFINAL.getCode())) {
 				// 20分钟后，取消未成功的订单
 				final Job job1 = new Job(
@@ -1903,7 +1919,10 @@ public class RentalServiceImpl implements RentalService {
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
 					
-					
+					if(rSiteItem.getRentalSiteId()!=bill.getRentalSiteId())
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item id is not this site");
+						
 					RentalItemsBill rib = new RentalItemsBill();
 					rib.setTotalMoney(rSiteItem.getPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
 					rib.setRentalSiteItemId(siDto.getId());
@@ -2126,7 +2145,11 @@ public class RentalServiceImpl implements RentalService {
 				else{
 					
 				}
-			} 
+			}else if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+				LOGGER.error("付款尚未完成订单为何自己变成了成功");
+			}else{
+				LOGGER.error("待付款订单:["+bill.getId()+"]状态有问题： 订单状态是："+bill.getStatus());
+			}
 			rentalProvider.updateRentalBill(bill);
 		}
 		return response;
@@ -2315,6 +2338,7 @@ public class RentalServiceImpl implements RentalService {
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalSiteRule rsr : rentalSiteRules) {
 					RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
+					dto.setSiteNumber(String.valueOf(rsr.getSiteNumber()));
 					dto.setId(rsr.getId()); 
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						dto.setTimeStep(rsr.getTimeStep());
@@ -2437,6 +2461,7 @@ public class RentalServiceImpl implements RentalService {
 		if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 			for (RentalSiteRule rsr : rentalSiteRules) {
 				RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
+				dto.setSiteNumber(String.valueOf(rsr.getSiteNumber() ));
 				dto.setId(rsr.getId()); 
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 					dto.setTimeStep(rsr.getTimeStep());

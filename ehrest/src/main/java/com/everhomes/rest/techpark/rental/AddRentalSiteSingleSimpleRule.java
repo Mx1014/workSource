@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>timeIntervals: 开放时段</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
- * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天List< Integer></li>
+ * <li>openWeekday: 开放日期，从周日到周六是1234567，开放哪天就在数组传哪天List< Integer></li>
  * <li>closeDates: 关闭日期</li>
  * <li>workdayPrice: 工作日价格</li>
  * <li>weekendPrice: 周末价格</li>

@@ -14,7 +14,7 @@
 		"rental_site_id":2,
 		"name":"shangpin",
 		"price":100.00,
-		"counts":100,
+		"counts":2,
 		"default_order":2,
 		"item_type":2
 		},
