@@ -787,7 +787,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 	
                 	Business b = this.businessProvider.findBusinessById(r.getTargetId());
                 	if(b != null){
-                		 
                 		if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
                 				|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN 
                 				|| (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
@@ -800,9 +799,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                                 itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
                             else
                                 itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
+                            
+                            itemDTO.setEditFlag(r.getDeleteFlag());
+                            distinctDto.add(itemDTO);
                         }
-                        itemDTO.setEditFlag(r.getDeleteFlag());
-                        distinctDto.add(itemDTO);
                 	}
                 }else{
                     String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
