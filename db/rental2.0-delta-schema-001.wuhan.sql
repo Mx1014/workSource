@@ -293,6 +293,13 @@ CREATE TABLE `eh_rental_sites_bills` (
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id', 
+`begin_time` DATETIME   COMMENT '开始时间 对于按时间定',
+`end_time` DATETIME   COMMENT '结束时间 对于按时间定',
+`price` DECIMAL(10,2)   COMMENT '折后价',
+`site_rental_date` DATE   COMMENT 'which day',
+`amorpm` TINYINT(4)   COMMENT '0:am 1:pm 2:night',
+`rental_step` INT(11)   COMMENT 'how many time_step must be rental every time',
+
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
@@ -331,6 +338,9 @@ CREATE TABLE `eh_rental_items_bills` (
 `operate_time` DATETIME NULL  COMMENT '',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
 
+`item_name` VARCHAR(128)   COMMENT '',
+`img_uri` VARCHAR(1024)   COMMENT '',
+`item_type` TINYINT(4)   COMMENT '',
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
