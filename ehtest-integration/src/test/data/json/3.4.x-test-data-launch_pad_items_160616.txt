@@ -1268,6 +1268,33 @@
       "target_id": 0,
       "delete_flag": "1",
       "scene_type": "pm_admin"
+    },
+    {
+      "id": "48",
+      "namespace_id": "0",
+      "app_id": "0",
+      "scope_code": "0",
+      "scope_id": "0",
+      "item_location": "/home",
+      "item_group": "Bizs",
+      "item_name": "用膳了",
+      "item_label": "用膳了",
+      "icon_uri": "cs://1/image/aW1hZ2UvTVRvek1qVXdOVFl3TVRkak16STFORFZqTm1Ka05qY3daVEk1TXpZeVlUbGlPQQ",
+      "item_width": "1",
+      "item_height": "1",
+      "action_type": "14",
+      "action_data": "",
+      "default_order": "1001",
+      "apply_policy": "0",
+      "min_version": "1",
+      "display_flag": "0",
+      "display_layout": "",
+      "bgcolor": "0",
+      "tag": "",
+      "target_type": "biz",
+      "target_id": 1,
+      "delete_flag": "1",
+      "scene_type": "default"
     }
   ]
 }
