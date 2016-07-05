@@ -4,7 +4,6 @@ SET foreign_key_checks = 0;
 
 TRUNCATE TABLE  `eh_rental_bill_attachments`;
 TRUNCATE TABLE `eh_rental_bill_paybill_map`;
-TRUNCATE TABLE `eh_rental_bill_paybill_maps`;
 TRUNCATE TABLE `eh_rental_bills`;
 TRUNCATE TABLE `eh_rental_close_dates`;
 TRUNCATE TABLE `eh_rental_config_attachments`;

@@ -29,8 +29,8 @@ import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusComm
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusResponse;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommandResponse;
-import com.everhomes.rest.techpark.rental.FindRentalSiteItemsCommand;
-import com.everhomes.rest.techpark.rental.FindRentalSiteItemsCommandResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsCommand;
+import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
@@ -417,15 +417,15 @@ public class RentalController extends ControllerBase {
 	
 
 	/**
-	 * <b>URL: /rental/findRentalSiteItems</b>
+	 * <b>URL: /rental/findRentalSiteItemsAndAttachments</b>
 	 * <p>
-	 * 查询某场所的可预订物品
+	 * 查询某场所的可预订物品和附件
 	 * </p>
 	 */
-	@RequestMapping("findRentalSiteItems")
-	@RestReturn(value = FindRentalSiteItemsCommandResponse.class)
-	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsCommand cmd) { 
-		FindRentalSiteItemsCommandResponse findRentalSiteItemsCommandResponse = rentalService.findRentalSiteItems(cmd);
+	@RequestMapping("findRentalSiteItemsAndAttachments")
+	@RestReturn(value = FindRentalSiteItemsAndAttachmentsResponse.class)
+	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsAndAttachmentsCommand cmd) { 
+		FindRentalSiteItemsAndAttachmentsResponse findRentalSiteItemsCommandResponse = rentalService.findRentalSiteItems(cmd);
 		RestResponse response = new RestResponse(
 				findRentalSiteItemsCommandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

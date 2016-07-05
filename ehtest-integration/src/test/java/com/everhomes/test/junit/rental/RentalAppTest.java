@@ -1,6 +1,5 @@
 package com.everhomes.test.junit.rental;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -12,6 +11,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillRestResponse;
@@ -22,24 +24,23 @@ import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusComma
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusRestResponse;
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusCommand;
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusRestResponse;
-import com.everhomes.rest.techpark.rental.FindRentalSiteItemsCommand;
+import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsRestResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusRestResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSitesCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSitesRestResponse;
+import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommand;
 import com.everhomes.rest.techpark.rental.RentalOwnerType;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.techpark.rental.RentalSiteDayRulesDTO;
 import com.everhomes.rest.techpark.rental.RentalSiteNumberDayRulesDTO;
 import com.everhomes.rest.techpark.rental.RentalSiteNumberRuleDTO;
-import com.everhomes.rest.techpark.rental.RentalSiteStatus;
 import com.everhomes.rest.techpark.rental.SiteBillStatus;
 import com.everhomes.rest.techpark.rental.SiteItemDTO;
 import com.everhomes.rest.techpark.rental.rentalBillRuleDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
-import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -221,6 +222,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 			 
 	}
 	
+	
 	//正常订单
 	@Test
 	public void testAddRentalBill (){
@@ -257,14 +259,20 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		cmd.getRules().add(dto);
 		AddRentalBillRestResponse response = httpClientService
 				.restGet(commandRelativeUri, cmd,AddRentalBillRestResponse.class, context);
-
+		AddRentalBillRestResponse responseBill2 = httpClientService
+				.restGet(commandRelativeUri, cmd,AddRentalBillRestResponse.class, context);
 		assertNotNull("The reponse of may not be null", response);
 		assertTrue("The user scenes should be get from server, response="
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 
+		assertNotNull("The reponse of may not be null", responseBill2);
+		assertTrue("The user scenes should be get from server, response="
+				+ StringHelper.toJsonString(responseBill2),
+				httpClientService.isReponseSuccess(responseBill2));
+		
 		commandRelativeUri = "/rental/findRentalSiteItems";
-		FindRentalSiteItemsCommand itemCmd = new FindRentalSiteItemsCommand();
+		FindRentalSiteItemsAndAttachmentsCommand itemCmd = new FindRentalSiteItemsAndAttachmentsCommand();
 		itemCmd.setRentalSiteId(hourSitenumberSiteId);
 		itemCmd.setRentalSiteRuleIds(new ArrayList<Long>());
 		itemCmd.getRentalSiteRuleIds().add(dto.getRuleId());
@@ -280,6 +288,10 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		
 		commandRelativeUri = "/rental/addRentalItemBill";
 		AddRentalBillItemCommand itemBillCmd = new AddRentalBillItemCommand(); 
+
+		itemBillCmd.setRentalBillId(response.getResponse().getRentalBillId());
+		
+		//附件
 		itemBillCmd.setRentalAttachments(new ArrayList<AttachmentDTO>());
 		AttachmentDTO attach = new AttachmentDTO();
 		attach.setAttachmentType(AttachmentType.SHOW_CONTENT.getCode());
@@ -289,8 +301,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		attach.setAttachmentType(AttachmentType.LICENSE_NUMBER.getCode());
 		attach.setContent("粤A39342");
 		itemBillCmd.getRentalAttachments().add(attach);
-		
-		itemBillCmd.setRentalBillId(response.getResponse().getRentalBillId());
+		//物品
 		itemBillCmd.setRentalItems(new ArrayList<SiteItemDTO>());
 		SiteItemDTO itemDTO = new SiteItemDTO();
 		itemDTO.setCounts(2);
@@ -309,6 +320,48 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 		
+		itemBillCmd.setRentalBillId(responseBill2.getResponse().getRentalBillId());
+		//不修改物品，造成物品超额订单，预定失败
+		AddRentalItemBillRestResponse itemBillResponseFail = httpClientService
+				.restGet(commandRelativeUri, itemBillCmd,AddRentalItemBillRestResponse.class, context);
+		assertNotNull("The reponse of may not be null", itemBillResponseFail);
+		assertTrue("The user scenes should be get from server, response="
+				+ StringHelper.toJsonString(itemBillResponseFail),
+				itemBillResponseFail.getErrorCode().equals(RentalServiceErrorCode.ERROR_NO_ENOUGH_ITEMS));
+		//修改物品数量 预定成功
+		itemBillCmd.setRentalItems(new ArrayList<SiteItemDTO>());
+		itemDTO = new SiteItemDTO();
+		itemDTO.setCounts(10);
+		itemDTO.setId(1L);
+		itemBillCmd.getRentalItems().add(itemDTO); 
+		AddRentalItemBillRestResponse itemBillResponseSucess = httpClientService
+				.restGet(commandRelativeUri, itemBillCmd,AddRentalItemBillRestResponse.class, context);
+		assertNotNull("The reponse of may not be null", itemBillResponseSucess);
+		assertTrue("The user scenes should be get from server, response="
+				+ StringHelper.toJsonString(itemBillResponseSucess),
+				httpClientService.isReponseSuccess(itemBillResponseSucess));
+		
+		//支付成功的回调函数
+		commandRelativeUri = "/rental/onlinePayCallback";
+		OnlinePayCallbackCommand callBackCmd = new OnlinePayCallbackCommand(); 
+		callBackCmd.setDescription("说明字段，不造啥用");
+		callBackCmd.setOrderNo(itemBillResponseSucess.getResponse().getOrderNo());
+		callBackCmd.setOrderType(itemBillResponseSucess.getResponse().getOrderType());
+		callBackCmd.setPayAccount("支付账号-test");
+		callBackCmd.setPayAmount(itemBillResponseSucess.getResponse().getAmount().toString());
+		callBackCmd.setPayStatus("success");
+		callBackCmd.setPayTime("2016-7-4 10:53:40"); 
+		callBackCmd.setVendorType(VendorType.WEI_XIN.getCode());
+		RestResponse callBackResponse = httpClientService
+				.restGet(commandRelativeUri, callBackCmd,RestResponse.class, context);
+
+
+		assertNotNull("The reponse of may not be null", callBackResponse);
+		assertTrue("The user scenes should be get from server, response="
+				+ StringHelper.toJsonString(callBackResponse),
+				httpClientService.isReponseSuccess(callBackResponse));
+		
+		
 		DSLContext dslContext = dbProvider.getDslContext();
 		List<EhRentalBills> resultBill = new ArrayList<EhRentalBills>();
 		dslContext
@@ -322,12 +375,28 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 					return null;
 				});
 		assertEquals(SiteBillStatus.PAYINGFINAL.getCode(), resultBill.get(0).getStatus().byteValue());
+		
+		 
+		List<EhRentalBills> resultBillSucess = new ArrayList<EhRentalBills>();
+		dslContext
+				.select()
+				.from(Tables.EH_RENTAL_BILLS)
+				.where(Tables.EH_RENTAL_BILLS.ID.eq(responseBill2.getResponse().getRentalBillId()))
+				.fetch()
+				.map((r) -> {
+					resultBillSucess.add(ConvertHelper.convert(r,
+							EhRentalBills.class));
+					return null;
+				});
+		assertEquals(SiteBillStatus.SUCCESS.getCode(), resultBillSucess.get(0).getStatus().byteValue());
+		
+		//休眠15分钟，测订单自动失效
 		try {
 			Thread.sleep(1000*60*15);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//未完成付款的订单失败了
 		List<EhRentalBills> resultBill2 = new ArrayList<EhRentalBills>();
 		dslContext
 				.select()
@@ -340,6 +409,23 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 					return null;
 				});
 		assertEquals(SiteBillStatus.FAIL.getCode(), resultBill2.get(0).getStatus().byteValue());
+		
+		
+		//	完成付款的订单状态不变
+		List<EhRentalBills> resultBillSucess2 = new ArrayList<EhRentalBills>();
+		dslContext
+				.select()
+				.from(Tables.EH_RENTAL_BILLS)
+				.where(Tables.EH_RENTAL_BILLS.ID.eq(responseBill2.getResponse().getRentalBillId()))
+				.fetch()
+				.map((r) -> {
+					resultBillSucess2.add(ConvertHelper.convert(r,
+							EhRentalBills.class));
+					return null;
+				});
+		assertEquals(SiteBillStatus.SUCCESS.getCode(), resultBillSucess2.get(0).getStatus().byteValue());
+		
+		
 	}
 	
 	//预定时间过早的订单

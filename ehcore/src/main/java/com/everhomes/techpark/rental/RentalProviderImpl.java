@@ -506,7 +506,8 @@ public class RentalProviderImpl implements RentalProvider {
 
 		return result;
 	}
-
+ 
+	
 	@Override
 	public RentalSite getRentalSiteById(Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -820,16 +821,16 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
 		//TODO
-		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
-				.equal(launchPadItemId);
+		Condition condition = Tables.EH_RENTAL_BILLS.ORGANIZATION_ID
+				.equal( organizationId);
 //		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
 //				.equal(ownerType));
 		if (StringUtils.isNotEmpty(vendorType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.VENDOR_TYPE
 					.equal(vendorType));
-		if(null!=organizationId)
-			condition = condition.and(Tables.EH_RENTAL_BILLS.ORGANIZATION_ID
-					.equal(organizationId));
+		if(null!=launchPadItemId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID 
+					.equal(launchPadItemId));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
@@ -1057,7 +1058,22 @@ public class RentalProviderImpl implements RentalProvider {
 			return result.get(0);
 		return null;
 	}
-
+	public List<RentalBillPaybillMap> findRentalBillPaybillMapByBillId(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_BILL_PAYBILL_MAP);
+		Condition condition = Tables.EH_RENTAL_BILL_PAYBILL_MAP.RENTAL_BILL_ID
+				.equal(id);
+		step.where(condition);
+		List<RentalBillPaybillMap> result = step
+				.orderBy(Tables.EH_RENTAL_BILL_PAYBILL_MAP.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalBillPaybillMap.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
 	@Override
 	public List<RentalBill> listRentalBills(Long ownerId, String ownerType,
 			String siteType, Long rentalSiteId, Long beginDate, Long endDate) {
@@ -1463,6 +1479,22 @@ public class RentalProviderImpl implements RentalProvider {
 
 
 	@Override
+	public Integer countRentalSiteItemRentalCount(List<Long> rentalBillIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context
+				.select(Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_COUNT.sum())
+				.from(Tables.EH_RENTAL_ITEMS_BILLS);
+				 
+		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_BILL_ID.in(rentalBillIds);
+		 
+		step.where(condition);
+		Record1<BigDecimal> record1 = step.fetchOne();
+		if(null == record1||null == record1.value1())
+			return 0;
+		Integer result = record1.value1().intValue();
+		return result;
+	}
+	@Override
 	public void updateRentalSiteRule(RentalSiteRule rsr) {
 		assert (rsr.getId() == null);
 
@@ -1555,6 +1587,7 @@ public class RentalProviderImpl implements RentalProvider {
 			return result.get(0) ;
 		return null;
 	}
+
 
 
 	

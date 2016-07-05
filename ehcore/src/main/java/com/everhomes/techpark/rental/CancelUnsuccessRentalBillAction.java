@@ -67,6 +67,8 @@ public class CancelUnsuccessRentalBillAction implements Runnable {
 		// 如果还没成功付全款，则取消订单
 		//TODO：加锁
 		RentalBill rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
+		if(null==rentalBill)
+			return ;
 		if (!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) ) {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
