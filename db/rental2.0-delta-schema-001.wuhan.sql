@@ -372,9 +372,9 @@ CREATE TABLE `eh_rental_bill_attachments` (
 -- 
 -- 订单-支付关联表
 -- 
-DROP TABLE IF EXISTS eh_rental_bill_paybill_maps;
+DROP TABLE IF EXISTS eh_rental_bill_paybill_map;
 
-CREATE TABLE `eh_rental_bill_paybill_maps` (
+CREATE TABLE `eh_rental_bill_paybill_map` (
 `id` BIGINT(20) NOT NULL  COMMENT 'id',
 `rental_bill_id` BIGINT(20) NULL  COMMENT '',
 `online_pay_bill_id` BIGINT(20) NULL  COMMENT '',
