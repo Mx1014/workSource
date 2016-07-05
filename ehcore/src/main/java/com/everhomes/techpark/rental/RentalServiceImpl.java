@@ -2693,12 +2693,11 @@ public class RentalServiceImpl implements RentalService {
 //		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
 		RentalSite rs = this.rentalProvider.getRentalSiteById(bill.getRentalSiteId());
 		java.util.Date cancelTime = new java.util.Date();
-//		if (cancelTime.before(new java.util.Date(bill.getEndTime().getTime()
-//				+ rs.getOvertimeTime()))) {
+		if (cancelTime.before(new java.util.Date(bill.getEndTime().getTime()))) {
 			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-//		}else{
-//			bill.setStatus(SiteBillStatus.OVERTIME.getCode());
-//		}
+		}else{
+			bill.setStatus(SiteBillStatus.OVERTIME.getCode());
+		}
 		
 		rentalProvider.updateRentalBill(bill);
 	 

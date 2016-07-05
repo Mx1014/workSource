@@ -16,6 +16,7 @@ import com.everhomes.rest.techpark.rental.ListRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.RentalOwnerType;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.techpark.rental.SiteBillStatus;
+import com.everhomes.rest.techpark.rental.admin.AdminCompleteBillRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
@@ -205,14 +206,15 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		CompleteBillCommand cmd = new CompleteBillCommand();
 		cmd.setRentalBillId(3L); 
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
+		AdminCompleteBillRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
 				context);
 
 		assertNotNull("The reponse of may not be null", response);
 		assertTrue("The user scenes should be get from server, response="
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
+		assertEquals(SiteBillStatus.COMPLETE.getCode(), response.getResponse().getStatus().byteValue());
 
 		DSLContext dslContext = dbProvider.getDslContext();
 		List<EhRentalBills> resultBill = new ArrayList<EhRentalBills>();
@@ -238,8 +240,8 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		CompleteBillCommand cmd = new CompleteBillCommand();
 		cmd.setRentalBillId(22L); 
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
+		AdminCompleteBillRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
 				context);
 
 		assertNotNull("The reponse of may not be null", response);
@@ -247,6 +249,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 
+		assertEquals(SiteBillStatus.COMPLETE.getCode(), response.getResponse().getStatus().byteValue());
 		DSLContext dslContext = dbProvider.getDslContext();
 		List<EhRentalBills> resultBill = new ArrayList<EhRentalBills>();
 		dslContext
@@ -271,8 +274,8 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		CompleteBillCommand cmd = new CompleteBillCommand();
 		cmd.setRentalBillId(4L); 
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
+		AdminCompleteBillRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
 				context);
 
 		assertNotNull("The reponse of may not be null", response);
@@ -291,8 +294,8 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		CompleteBillCommand cmd = new CompleteBillCommand();
 		cmd.setRentalBillId(5L); 
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
+		AdminCompleteBillRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
 				context);
 
 		assertNotNull("The reponse of may not be null", response);
@@ -303,7 +306,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		cmd.setRentalBillId(6L); 
 		response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
+				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
 				context);
 
 		assertNotNull("The reponse of may not be null", response);
