@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 返回值
- * <li>Id: 评论id</li>
+ * <li>id: 评论id</li>
  * <li>newsToken: 新闻标识</li>
  * <li>creatorUid: 创建者id</li>
  * <li>creatorNickName: 创建者昵称</li>
@@ -25,7 +25,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class NewsCommentDTO {
-	private Long Id;
+	private Long id;
 	private String newsToken;
 	private Long creatorUid;
 	private String creatorNickName;
@@ -39,11 +39,11 @@ public class NewsCommentDTO {
 	private Byte deleteFlag;
 
 	public Long getId() {
-		return Id;
+		return id;
 	}
 
-	public void setId(Long Id) {
-		this.Id = Id;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getNewsToken() {
