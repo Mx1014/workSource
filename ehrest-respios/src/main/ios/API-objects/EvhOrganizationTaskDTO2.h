@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhForumAttachmentDTO.h"
+#import "EvhAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationTaskDTO2
@@ -114,7 +114,7 @@
 
 @property(nonatomic, copy) NSNumber* createTime;
 
-// item type EvhForumAttachmentDTO*
+// item type EvhAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* assignedFlag;

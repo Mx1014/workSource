@@ -6,11 +6,11 @@ import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsResponse;
 
-public class RentalFindRentalSiteItemsRestResponse extends RestResponseBase {
+public class FindRentalSiteItemsAndAttachmentsRestResponse extends RestResponseBase {
 
     private FindRentalSiteItemsAndAttachmentsResponse response;
 
-    public RentalFindRentalSiteItemsRestResponse () {
+    public FindRentalSiteItemsAndAttachmentsRestResponse () {
     }
 
     public FindRentalSiteItemsAndAttachmentsResponse getResponse() {

@@ -68,7 +68,7 @@
 
 @property(nonatomic, copy) NSNumber* rentalCount;
 
-@property(nonatomic, copy) NSString* useTime;
+@property(nonatomic, copy) NSString* useDetail;
 
 @property(nonatomic, copy) NSString* vendorType;
 

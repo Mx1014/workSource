@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-28 14:56:17
+// generated at 2016-07-05 11:02:20
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -755,15 +755,10 @@ public interface ApiConstants {
     public static final String RENTAL_ADMIN_UPDATERESOURCE_URL = "/rental/admin/updateResource";
     public static final String RENTAL_CANCELRENTALBILL_URL = "/rental/cancelRentalBill";
     public static final String RENTAL_DELETERENTALBILL_URL = "/rental/deleteRentalBill";
-    public static final String RENTAL_DELETERENTALSITEITEM_URL = "/rental/deleteRentalSiteItem";
-    public static final String RENTAL_DELETERENTALSITERULES_URL = "/rental/deleteRentalSiteRules";
-    public static final String RENTAL_DISABLERENTALSITE_URL = "/rental/disableRentalSite";
-    public static final String RENTAL_ENABLERENTALSITE_URL = "/rental/enableRentalSite";
     public static final String RENTAL_EXPORTRENTALBILLS_URL = "/rental/exportRentalBills";
     public static final String RENTAL_FINDAUTOASSIGNRENTALSITEDAYSTATUS_URL = "/rental/findAutoAssignRentalSiteDayStatus";
     public static final String RENTAL_FINDAUTOASSIGNRENTALSITEWEEKSTATUS_URL = "/rental/findAutoAssignRentalSiteWeekStatus";
-    public static final String RENTAL_FINDRENTALSITEITEMS_URL = "/rental/findRentalSiteItems";
-    public static final String RENTAL_FINDRENTALSITERULES_URL = "/rental/findRentalSiteRules";
+    public static final String RENTAL_FINDRENTALSITEITEMSANDATTACHMENTS_URL = "/rental/findRentalSiteItemsAndAttachments";
     public static final String RENTAL_FINDRENTALSITEWEEKSTATUS_URL = "/rental/findRentalSiteWeekStatus";
     public static final String RENTAL_FINDRENTALSITES_URL = "/rental/findRentalSites";
     public static final String RENTAL_FINDUSERRENTALBILLS_URL = "/rental/findUserRentalBills";

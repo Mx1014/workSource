@@ -90,8 +90,8 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.rentalCount)
         [jsonObject setObject: self.rentalCount forKey: @"rentalCount"];
-    if(self.useTime)
-        [jsonObject setObject: self.useTime forKey: @"useTime"];
+    if(self.useDetail)
+        [jsonObject setObject: self.useDetail forKey: @"useDetail"];
     if(self.vendorType)
         [jsonObject setObject: self.vendorType forKey: @"vendorType"];
     if(self.launchPadItemId)
@@ -238,9 +238,9 @@
         if(self.rentalCount && [self.rentalCount isEqual:[NSNull null]])
             self.rentalCount = nil;
 
-        self.useTime = [jsonObject objectForKey: @"useTime"];
-        if(self.useTime && [self.useTime isEqual:[NSNull null]])
-            self.useTime = nil;
+        self.useDetail = [jsonObject objectForKey: @"useDetail"];
+        if(self.useDetail && [self.useDetail isEqual:[NSNull null]])
+            self.useDetail = nil;
 
         self.vendorType = [jsonObject objectForKey: @"vendorType"];
         if(self.vendorType && [self.vendorType isEqual:[NSNull null]])

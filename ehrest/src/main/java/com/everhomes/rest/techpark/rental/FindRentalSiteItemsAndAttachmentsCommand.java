@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串 </li> 
  * </ul>
  */
-public class FindRentalSiteItemsCommand {
+public class FindRentalSiteItemsAndAttachmentsCommand {
  
 	private Long rentalSiteId;  
     @ItemType(Long.class)

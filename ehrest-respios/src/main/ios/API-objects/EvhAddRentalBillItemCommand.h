@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhSiteItemDTO.h"
-#import "EvhAttachmentDTO.h"
+#import "EvhRentalAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddRentalBillItemCommand
@@ -20,7 +20,7 @@
 // item type EvhSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* rentalItems;
 
-// item type EvhAttachmentDTO*
+// item type EvhRentalAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* rentalAttachments;
 
 -(id) init;

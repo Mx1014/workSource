@@ -28,6 +28,9 @@ import com.everhomes.util.StringHelper;
  * <li>unPayPrice：未付金额</li>
  * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>  
  * <li>rentalCount：场所预定数量</li> 
+ * <li>useDetail：使用详情</li> 
+ * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
+ * <li>launchPadItemId：广场图标id</li> 
  * <li>siteItems：场所商品</li> 
  * <li>rentalSiteRules：场所时间段</li>
  * <li>billAttachments：订单附加信息</li>
@@ -62,7 +65,7 @@ public class RentalBillDTO {
 	private Byte invoiceFlag;
 	private Byte status;
 	private Double rentalCount; 
-	private java.lang.String     useTime;
+	private java.lang.String     useDetail;
 	private java.lang.String     vendorType;
 	private java.lang.Long       launchPadItemId; 
 	@ItemType(SiteItemDTO.class)
@@ -310,14 +313,16 @@ public class RentalBillDTO {
 		this.notice = notice;
 	}
  
+ 
 
-	public java.lang.String getUseTime() {
-		return useTime;
+
+	public java.lang.String getUseDetail() {
+		return useDetail;
 	}
 
 
-	public void setUseTime(java.lang.String useTime) {
-		this.useTime = useTime;
+	public void setUseDetail(java.lang.String useDetail) {
+		this.useDetail = useDetail;
 	}
 
 
