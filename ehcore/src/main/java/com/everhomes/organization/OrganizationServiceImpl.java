@@ -4552,6 +4552,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), org.getId());
 		if(null != desOrgMember){
 			LOGGER.error("phone number already exists.");
@@ -4583,8 +4585,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, organizationMember.getId());
 		}
+		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-		userSearcher.feedDoc(organizationMember);
+	//	userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
