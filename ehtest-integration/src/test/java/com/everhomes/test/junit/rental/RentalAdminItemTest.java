@@ -44,6 +44,7 @@ public class RentalAdminItemTest extends BaseLoginAuthTestCase {
 		super.setUp();
 		truncateRentalTable();
 		initSrouceData();
+		initCustomData();
 	} 
 	private void truncateRentalTable() {
 
@@ -334,5 +335,11 @@ public class RentalAdminItemTest extends BaseLoginAuthTestCase {
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }
 	
+
+    protected void initCustomData() {
+        String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
+    }
 	
 }

@@ -60,7 +60,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 	private int[] weekdays={0,1,2,3,4,5,6,7};
 	@Before
 	public void setUp() {
-		// super.setUp();
+		 super.setUp();
 		truncateRentalTable();
 		initSrouceData();
 
@@ -69,9 +69,15 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 
 		// 同步索引
 		syncSequence();
-
+		initCustomData();
 	}
 
+    protected void initCustomData() {
+        String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
+    }
+	
 	private void truncateRentalTable() {
 
 		String serverInitfilePath = "data/tables/rental2.0_truncate_tables.sql";

@@ -57,7 +57,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 
 	@Before
 	public void setUp() {
-//		super.setUp();
+		super.setUp();
 		truncateRentalTable();
 		initSrouceData();
 
