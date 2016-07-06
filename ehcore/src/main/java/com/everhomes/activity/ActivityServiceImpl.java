@@ -328,7 +328,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setForumId(post.getForumId());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         
         //Send message to creator
         Map<String, String> map = new HashMap<String, String>();
@@ -414,7 +414,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         
         //Send message to creator
         Map<String, String> map = new HashMap<String, String>();
@@ -495,7 +495,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
         dto.setForumId(post.getForumId());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         return dto;
     }
 
@@ -543,7 +543,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
         /////////////////////////////////////
@@ -694,7 +694,7 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
         dto.setForumId(post.getForumId());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
@@ -759,7 +759,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
@@ -888,7 +888,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
@@ -1038,7 +1038,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
             dto.setGroupId(activity.getGroupId());
-            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+            dto.setPosterUrl(getActivityPosterUrl(activity));
             dto.setForumId(post.getForumId());
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
@@ -1091,7 +1091,7 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
           dto.setProcessStatus(getStatus(activity).getCode());
           dto.setFamilyId(activity.getCreatorFamilyId());
-          dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+          dto.setPosterUrl(getActivityPosterUrl(activity));
           dto.setStartTime(activity.getStartTime().toString());
           dto.setStopTime(activity.getEndTime().toString());
           dto.setGroupId(activity.getGroupId());
@@ -1177,7 +1177,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 			dto.setProcessStatus(getStatus(activity).getCode());
 			dto.setFamilyId(activity.getCreatorFamilyId());
-			dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+			dto.setPosterUrl(getActivityPosterUrl(activity));
 			dto.setStartTime(activity.getStartTime().toString());
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
@@ -1246,7 +1246,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 			dto.setProcessStatus(getStatus(activity).getCode());
 			dto.setFamilyId(activity.getCreatorFamilyId());
-			dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+			dto.setPosterUrl(getActivityPosterUrl(activity));
 			dto.setStartTime(activity.getStartTime().toString());
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
@@ -1373,7 +1373,7 @@ public class ActivityServiceImpl implements ActivityService {
 //            dto.setStartTime(activity.getStartTime().toString());
 //            dto.setStopTime(activity.getEndTime().toString());
 //            dto.setGroupId(activity.getGroupId());
-//            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+//            dto.setPosterUrl(getActivityPosterUrl(activity));
 //            dto.setForumId(post.getForumId());
 //            return dto;
 //        }).filter(r->r!=null).collect(Collectors.toList());
@@ -1433,7 +1433,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
             dto.setGroupId(activity.getGroupId());
-//            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+//            dto.setPosterUrl(getActivityPosterUrl(activity));
             String posterUrl = getActivityPosterUrl(activity);
             dto.setPosterUrl(posterUrl);
             if(post != null) {
@@ -1468,6 +1468,9 @@ public class ActivityServiceImpl implements ActivityService {
 			return posterUrl;
 		} else {
 			String posterUrl = contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId());
+			if(posterUrl.equals(activity.getPosterUri())) {
+				posterUrl = contentServerService.parserUri(configurationProvider.getValue(ConfigConstants.ACTIVITY_POSTER_DEFAULT_URL, ""), EntityType.ACTIVITY.getCode(), activity.getId());
+			}
 			return posterUrl;
 		}
 		
@@ -1598,7 +1601,7 @@ public class ActivityServiceImpl implements ActivityService {
 //            dto.setStartTime(activity.getStartTime().toString());
 //            dto.setStopTime(activity.getEndTime().toString());
 //            dto.setGroupId(activity.getGroupId());
-//            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+//            dto.setPosterUrl(getActivityPosterUrl(activity));
 //            dto.setForumId(post.getForumId());
 //            dto.setGuest(activity.getGuest());
 //            return dto;
@@ -1647,7 +1650,7 @@ public class ActivityServiceImpl implements ActivityService {
 		    	        dto.setStartTime(activity.getStartTime().toString());
 		    	        dto.setStopTime(activity.getEndTime().toString());
 		    	        dto.setGroupId(activity.getGroupId());
-		    	        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+		    	        dto.setPosterUrl(getActivityPosterUrl(activity));
 		    	        dto.setForumId(r.getForumId());
 		    	        dto.setGuest(activity.getGuest());
 		    			
@@ -1893,7 +1896,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
-        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
         dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         response.setActivity(dto);
