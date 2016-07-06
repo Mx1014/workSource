@@ -39,8 +39,10 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -763,6 +765,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
             final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
             final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
+            List<Long> categoryIds = new ArrayList<Long>();
+            categoryIds.add(CategoryConstants.CATEGORY_ID_BUSINESS_AROUND);
+            categoryIds.add(CategoryConstants.CATEGORY_ID_BUSINESS_NEXTDOOR);
+            List<BusinessDTO> businessDTOs = businessService.getBusinesses(categoryIds, communityId);
+            List<Long> businessIds = new ArrayList<Long>();
+            if(null != businessDTOs && businessDTOs.size() > 0){
+            	businessIds = businessDTOs.stream().map( r->r.getId()).collect(Collectors.toList());
+        	}
+            LOGGER.debug("need business item size = {} id = {},", businessIds.size(), businessIds);
+            List<Long> bizIds = businessIds;
+            
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
                 if(null != request){
@@ -770,27 +783,37 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 }
                 itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                 if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
-                    Business b = this.businessProvider.findBusinessById(r.getTargetId());
-                    if(b != null){
-                        itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
-                        jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
-                        itemDTO.setActionData(jsonObject.toJSONString());
-                        if(b.getCreatorUid().longValue() == userId)
-                            itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
-                        else
-                            itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
-                    }
+                	
+                	
+                	Business b = this.businessProvider.findBusinessById(r.getTargetId());
+                	if(b != null){
+                		if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
+                				|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN 
+                				|| (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
+                            itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
+                            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
+                            itemDTO.setActionData(jsonObject.toJSONString());
+                            if(b.getCreatorUid().longValue() == userId)
+                                itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
+                            else
+                                itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
+                            
+                            itemDTO.setEditFlag(r.getDeleteFlag());
+                            distinctDto.add(itemDTO);
+                        }
+                	}
                 }else{
                     String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
                     itemDTO.setIconUrl(url);
 //                    if(LOGGER.isDebugEnabled()) {
 //                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
 //                    }
+                    itemDTO.setEditFlag(r.getDeleteFlag());
+                    distinctDto.add(itemDTO);
                 }
-                itemDTO.setEditFlag(r.getDeleteFlag());
-                distinctDto.add(itemDTO);
+                
             });
             if(distinctDto != null && !distinctDto.isEmpty()){
                 distinctDto.forEach(r ->{

@@ -61,5 +61,21 @@
       "item_value": "24210090697425925",
       "integral_tag2":"0"
     }
+  ],
+   "eh_organization_community_requests": [
+    {
+      "id": "1",
+      "community_id": "24210090697425925",
+      "member_type": "organization",
+      "member_id": "1000750",
+      "member_status": "3"
+    },
+    {
+      "id": "2",
+      "community_id": "24210090697425925",
+      "member_type": "organization",
+      "member_id": "1000760",
+      "member_status": "3"
+    }
   ]
 }

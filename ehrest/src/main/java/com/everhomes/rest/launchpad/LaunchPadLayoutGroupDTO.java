@@ -5,7 +5,6 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.everhomes.util.StringHelper;
-import com.google.gson.JsonObject;
 
 /**
  * <ul>
@@ -17,6 +16,7 @@ import com.google.gson.JsonObject;
  * <li>separatorFlag: 组底部是否有分隔条，0: no, 1: yes"</li>
  * <li>separatorHeight: 组底部分隔条高度</li>
  * <li>columnCount: 组件一行显示的图标数，目前针对Navigator</li>
+ * <li>editFlag: 0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
  * </ul>
  */
 public class LaunchPadLayoutGroupDTO {
@@ -28,6 +28,7 @@ public class LaunchPadLayoutGroupDTO {
     private Integer separatorFlag;
     private Double separatorHeight;
     private Integer columnCount;
+    private Byte editFlag;
 
    
     public String getGroupName() {
@@ -94,7 +95,15 @@ public class LaunchPadLayoutGroupDTO {
         this.columnCount = columnCount;
     }
 
-    @Override
+    public Byte getEditFlag() {
+		return editFlag;
+	}
+
+	public void setEditFlag(Byte editFlag) {
+		this.editFlag = editFlag;
+	}
+
+	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

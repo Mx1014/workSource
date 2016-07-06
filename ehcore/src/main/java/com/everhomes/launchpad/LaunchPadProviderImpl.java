@@ -21,6 +21,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
@@ -281,6 +282,43 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         });
         
         return items;
+    }
+    
+    @Override
+    public LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType){
+    	 List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+         SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+
+         Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namesapceId);
+         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType.getCode()));
+         if(scopeCode != null){
+             condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
+             if(scopeId != 0)
+                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+         }
+         
+         if(targetType != null){
+             if(condition != null){
+                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType));
+                 if(targetId != 0) 
+                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+             }else{
+                 condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
+                 if(targetId != 0)
+                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+             }
+         }
+        
+         step.where(condition).fetch().map(r ->{
+             items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+             return null;
+         });
+         
+         if(items.size() > 0){
+        	 return items.get(0);
+         }
+         return null;
     }
     
     @Override
