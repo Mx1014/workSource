@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
 
  * <li>sourceId：来源ID：黄页ID</li>
- * <li>sourceType：来源类型building /market_zone /for_rent 的 参考{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}}</li>
+ * <li>sourceType：来源类型building /market_zone /for_rent/office_cubicle(工位)的 参考{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}}</li>
  * <li>enterpriseName：申请公司名</li>
  * <li>enterpriseId：申请公司ID</li>
  * <li>applyUserName：申请人 </li>
