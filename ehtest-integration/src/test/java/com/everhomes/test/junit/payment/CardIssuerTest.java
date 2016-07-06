@@ -28,7 +28,7 @@ public class CardIssuerTest extends BaseLoginAuthTestCase {
     public void testListCardIssuer() {
         String ownerType = "community";
         Long ownerId = 240111044331051500L;
-        String userIdentifier = "root";
+        String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
         // 登录时不传namepsace，默认为左邻域空间
         logon(null, userIdentifier, plainTexPassword);
