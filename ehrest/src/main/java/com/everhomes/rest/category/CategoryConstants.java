@@ -23,6 +23,8 @@ import java.util.List;
  * <li>CATEGORY_ID_CONF_TYPE(1011):视频会议会议类型（仅视频; 支持电话）</li>
  * <li>CATEGORY_ID_ACCOUNT_TYPE(1011): 视频会议账号模式（单账号or多账号）</li>
  * <li>CATEGORY_ID_QUALITY_INSPECTION(6): 品质核查根类型</li>
+ * <li>CATEGORY_ID_BUSINESS_AROUND(3001): 周边商铺</li>
+ * <li>CATEGORY_ID_BUSINESS_NEXTDOOR(3002): 邻家小店</li>
  * </ul>
  */
 public interface CategoryConstants {
@@ -81,6 +83,11 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_CLEANING = 102021L;
     public static final long CATEGORY_ID_HOUSE_KEEPING = 102022L;
     public static final long CATEGORY_ID_MAINTENANCE = 102023L;
+    
+    /**周边商铺 **/
+    public static final long CATEGORY_ID_BUSINESS_AROUND = 3001L;
+    /**邻家小店 **/
+    public static final long CATEGORY_ID_BUSINESS_NEXTDOOR = 3002L;
     
     
     /** 政府机构相关的类型 */

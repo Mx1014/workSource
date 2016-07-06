@@ -59,3 +59,6 @@ ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scope_code` tinyint(4) NOT NULL 
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scope_id` bigint(20) DEFAULT 0;
 ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `apply_policy` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: default, 1: override, 2: revert 3:customized';
 
+-- 20160705
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `edit_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'whether the item can be edit from desk, 0: no, 1: yes';
+ 
