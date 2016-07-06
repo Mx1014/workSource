@@ -27,6 +27,8 @@
 
 @property(nonatomic, copy) NSNumber* columnCount;
 
+@property(nonatomic, copy) NSNumber* editFlag;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

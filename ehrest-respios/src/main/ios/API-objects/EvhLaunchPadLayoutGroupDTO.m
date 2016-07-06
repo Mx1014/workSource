@@ -46,6 +46,8 @@
         [jsonObject setObject: self.separatorHeight forKey: @"separatorHeight"];
     if(self.columnCount)
         [jsonObject setObject: self.columnCount forKey: @"columnCount"];
+    if(self.editFlag)
+        [jsonObject setObject: self.editFlag forKey: @"editFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -82,6 +84,10 @@
         self.columnCount = [jsonObject objectForKey: @"columnCount"];
         if(self.columnCount && [self.columnCount isEqual:[NSNull null]])
             self.columnCount = nil;
+
+        self.editFlag = [jsonObject objectForKey: @"editFlag"];
+        if(self.editFlag && [self.editFlag isEqual:[NSNull null]])
+            self.editFlag = nil;
 
         return self;
     }
