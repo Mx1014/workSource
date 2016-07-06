@@ -94,8 +94,6 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
     private CoordinationProvider coordinationProvider;
 	
 	private static CloseableHttpClient httpClient = HttpClients.createDefault();
-	private final String cardUrl = configProvider.getValue("taotaogu.card.url", "");
-	private final String orderUrl = configProvider.getValue("taotaogu.order.url", "");
 
 	@Override
 	public List<CardInfoDTO> getCardInfoByVendor(ListCardInfoCommand cmd) {
@@ -699,6 +697,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		}
 	//卡信息，http请求方法，返回解析responseEntity之后的结果
 	private Map<String,Object> post(String msg){
+		String cardUrl = configProvider.getValue("taotaogu.card.url", "");
 		HttpPost request = new HttpPost(cardUrl);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		try{
@@ -731,7 +730,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	}
 	//卡信息接口，直接返回淘淘谷responseEntity信息
 	private TaotaoguResponseEntiy postForTaotaoguResponseEntiy(String msg){
-		
+		String cardUrl = configProvider.getValue("taotaogu.card.url", "");
 		HttpPost request = new HttpPost(cardUrl);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		try{
@@ -768,6 +767,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		String rspText = null;
 		JSONObject json = createLoginParam(taotaoguVendorData);
 		try{
+			String orderUrl = configProvider.getValue("taotaogu.order.url", "");
 			HttpPost request = new HttpPost(orderUrl+"/iips2/order/login");
 			
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
@@ -813,6 +813,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	}
 	//订单接口，http请求方法
 	private Map<String,Object> post(String method,String token,String aesKey,JSONObject json){
+		String orderUrl = configProvider.getValue("taotaogu.order.url", "");
 		Map<String,Object> result = null;
 		String rspText = null;
 		try{
