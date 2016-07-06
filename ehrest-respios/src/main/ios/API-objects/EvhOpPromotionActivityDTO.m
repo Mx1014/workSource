@@ -62,6 +62,8 @@
         [jsonObject setObject: self.policyType forKey: @"policyType"];
     if(self.iconUri)
         [jsonObject setObject: self.iconUri forKey: @"iconUri"];
+    if(self.iconUrl)
+        [jsonObject setObject: self.iconUrl forKey: @"iconUrl"];
     if(self.endTime)
         [jsonObject setObject: self.endTime forKey: @"endTime"];
     if(self.id)
@@ -143,6 +145,10 @@
         self.iconUri = [jsonObject objectForKey: @"iconUri"];
         if(self.iconUri && [self.iconUri isEqual:[NSNull null]])
             self.iconUri = nil;
+
+        self.iconUrl = [jsonObject objectForKey: @"iconUrl"];
+        if(self.iconUrl && [self.iconUrl isEqual:[NSNull null]])
+            self.iconUrl = nil;
 
         self.endTime = [jsonObject objectForKey: @"endTime"];
         if(self.endTime && [self.endTime isEqual:[NSNull null]])

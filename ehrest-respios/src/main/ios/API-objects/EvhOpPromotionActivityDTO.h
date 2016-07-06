@@ -42,6 +42,8 @@
 
 @property(nonatomic, copy) NSString* iconUri;
 
+@property(nonatomic, copy) NSString* iconUrl;
+
 @property(nonatomic, copy) NSNumber* endTime;
 
 @property(nonatomic, copy) NSNumber* id;
