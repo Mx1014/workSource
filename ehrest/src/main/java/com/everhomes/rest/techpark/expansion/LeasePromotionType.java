@@ -1,11 +1,12 @@
 package com.everhomes.rest.techpark.expansion;
 
 /**
- * ORDINARY(1):普通招租
+ * ORDINARY("building"):园区入驻
+ * OFFICE_CUBICLE("office_cubicle"): 工位预定
  * */
 public enum LeasePromotionType {
 	
-	ORDINARY("building");
+	ORDINARY("building"),OFFICE_CUBICLE("office_cubicle");
 	
     private String code;
     private LeasePromotionType(String code) {

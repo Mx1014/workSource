@@ -3,7 +3,12 @@ package com.everhomes.rest.techpark.expansion;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-
+/**
+ * <ul>
+ * <li>nextPageAnchor：下页锚点</li> 
+ * <li>applyEntrys：  参考{@link com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO}}</li> 
+ * </ul>
+ */
 public class EnterpriseApplyEntryResponse {
     private Long nextPageAnchor;
     

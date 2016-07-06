@@ -229,7 +229,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			if(ApplyEntrySourceType.BUILDING.getCode().equals(enterpriseOpRequest.getSourceType())){
 				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
 				if(null != building)enterpriseOpRequest.setSourceName(building.getName());
-			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(enterpriseOpRequest.getSourceType())){
+			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(enterpriseOpRequest.getSourceType())||
+					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(enterpriseOpRequest.getSourceType())){
 				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(enterpriseOpRequest.getSourceId());
 				if(null != leasePromotion)enterpriseOpRequest.setSourceName(leasePromotion.getSubject());
 			}
@@ -276,7 +277,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public ListBuildingForRentResponse listLeasePromotions(
 			ListBuildingForRentCommand cmd) {
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
-		
+		if (null==cmd.getRentType())
+			cmd.setRentType( LeasePromotionType.ORDINARY.getCode());
 		LeasePromotion lease = ConvertHelper.convert(cmd, LeasePromotion.class);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -319,7 +321,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
-		leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
+		if (null==cmd.getRentType())
+			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
+		leasePromotion.setRentType(cmd.getRentType());
 		leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();

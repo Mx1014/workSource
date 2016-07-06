@@ -11,7 +11,7 @@ import com.everhomes.discover.ItemType;
 
  * <li>buildingId：楼栋ID</li>
  * <li>rentPosition：招租位置</li>
- * <li>rentType：招租类型：1：出租 </li>
+ * <li>rentType：招租类型：1：出租{@link com.everhomes.rest.techpark.expansion.LeasePromotionType} </li>
  * <li>posterUri：标题图 </li>
  * <li>rentAreas：招租面积</li>
  * <li>contacts：联系人</li>

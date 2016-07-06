@@ -4,6 +4,13 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
+
+/**
+ * <ul>
+ * <li>nextPageAnchor：下页锚点</li>
+ * <li>dtos：招租实体列表{@link com.everhomes.rest.techpark.expansion.BuildingForRentDTO}</li> 
+ * </ul>
+ */
 public class ListBuildingForRentResponse {
     private Long nextPageAnchor;
     
