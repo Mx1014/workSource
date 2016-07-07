@@ -1711,6 +1711,7 @@ public class CommunityServiceImpl implements CommunityService {
 		if (region != null && region.getId() != null) {
 			region.setParentId(parentId);
 			region.setId(null);
+			region.setNamespaceId(namespaceId);
 			regionProvider.createRegion(region);
 			return region.getId();
 		}
