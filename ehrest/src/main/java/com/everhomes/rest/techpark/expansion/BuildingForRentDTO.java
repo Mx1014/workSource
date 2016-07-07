@@ -5,7 +5,26 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
-
+/**
+ * <ul>
+ * <li>id：实体id</li>
+ * <li>namespaceId：命名空间</li>
+ * <li>buildingId：楼栋ID</li>
+ * <li>buildingName：楼栋名</li>
+ * <li>rentPosition：招租位置</li>
+ * <li>rentType：招租类型：1：出租{@link com.everhomes.rest.techpark.expansion.LeasePromotionType} </li>
+ * <li>posterUri：标题图 </li>
+ * <li>posterUrl：标题图的URL </li>
+ * <li>rentAreas：招租面积</li>
+ * <li>contacts：联系人</li>
+ * <li>contactPhone：联系电话</li>
+ * <li>enterTime：入住时间</li>
+ * <li>status：命名空间 参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li>
+ * <li>description：随便写一点什么</li> 
+ * <li>address：地址</li> 
+ * <li>attachments：附件{@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO}</li> 
+ * </ul>
+ */
 public class BuildingForRentDTO {
 	private Long id;
 	private Integer  namespaceId;

@@ -217,7 +217,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/deleteApplyEntry
-	 * <p>删除招租
+	 * <p>删除申请
 	 */
 	@RequestMapping("deleteApplyEntry")
 	@RestReturn(value=String.class)

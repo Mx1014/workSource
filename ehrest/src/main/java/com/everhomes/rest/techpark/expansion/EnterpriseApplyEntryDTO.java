@@ -3,7 +3,25 @@ package com.everhomes.rest.techpark.expansion;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * <li>id：id</li> 
+ * <li>sourceType：类型{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}</li> 
+ * <li>sourceId：来源id </li> 
+ * <li>enterpriseName：公司名 </li> 
+ * <li>enterpriseId： 公司id</li> 
+ * <li>applyContact： 申请联系人</li> 
+ * <li>applyUserId： 申请人id</li> 
+ * <li>applyUserName： 申请人用户名</li> 
+ * <li>applyType： 申请类型</li> 
+ * <li>sizeUnit： 这啥</li> 
+ * <li>status： 状态</li> 
+ * <li>areaSize：申请空间大小(面积或者工位数) </li> 
+ * <li>description： </li> 
+ * <li>createTime： </li> 
+ * <li>sourceName： </li>  
+ * </ul>
+ */
 public class EnterpriseApplyEntryDTO {
 	
 	private Long id;

@@ -165,6 +165,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
 		}
+		if(!StringUtils.isEmpty(leasePromotion.getRentType())){
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_TYPE.eq(leasePromotion.getRentType()));
+		}
 		if(!StringUtils.isEmpty(leasePromotion.getStatus())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.eq(leasePromotion.getStatus()));
 		}

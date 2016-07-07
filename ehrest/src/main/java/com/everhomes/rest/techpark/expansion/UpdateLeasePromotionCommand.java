@@ -9,7 +9,7 @@ import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
-
+ * <li>id：要修改的招租信息id</li>
  * <li>buildingId：楼栋ID</li>
  * <li>rentPosition：招租位置</li>
  * <li>rentType：招租类型：1：出租 </li>

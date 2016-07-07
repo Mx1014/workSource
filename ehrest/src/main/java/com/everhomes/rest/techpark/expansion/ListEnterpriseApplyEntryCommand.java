@@ -1,5 +1,17 @@
 package com.everhomes.rest.techpark.expansion;
 
+
+/**
+ * <ul>
+ * <li>pageAnchor：锚点</li>
+ * <li>pageSize：每页数量</li>
+ * <li>namespaceId：命名空间 </li>
+ * <li>communityId：小区id</li>
+ * <li>applyType：不知道是什么,原来怎么样就怎么样吧</li>
+ * <li>sourceType：招租类型{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}</li> 
+ * <li>status：  参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li> 
+ * </ul>
+ */
 public class ListEnterpriseApplyEntryCommand {
     private Long pageAnchor;
     private Integer pageSize;
