@@ -619,7 +619,7 @@ public class LaunchPadTest extends CoreServerTestCase {
         GetLaunchPadLayoutByVersionCodeCommand cmd = new GetLaunchPadLayoutByVersionCodeCommand();
         cmd.setVersionCode(3L);
         cmd.setName("ServiceMarket");
-        System.out.println(this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd));
+        System.out.println(this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd, ScopeType.ALL, 0L));
     }
     
 }

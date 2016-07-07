@@ -1259,31 +1259,35 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<String> phones = cmd.getMobilePhones();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
 		
-		if(null != addressIds && 0 != addressIds.size()){
-
-			/** 根据楼栋Id获取要推送的企业  **/
-		}else if(null != buildingIds && 0 != buildingIds.size()){
-
-			/** 根据楼栋名称获取要推送的企业**/
-		}else if(null != buildingNames && 0 != buildingNames.size()){
-
-		/** 根据电话号码推送   **/
-		}else if(null != phones && 0 != phones.size()){
-			
-		/** 根据小区获取要推送的企业  **/
-		}else if(null != cmd.getCommunityId()){
-			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
-			Date now = new Date();
-			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
-			command.setScopeId(cmd.getCommunityId());
-			command.setNamespaceId(namespaceId);
-			command.setContent(cmd.getMessage());
-			command.setStartTime(now.getTime());
-			command.setEndTime(DateUtils.addDays(now, 1).getTime());
-			promotionService.createRegionPushing(command);
-			
-			return;
-		}
+//		if(null != addressIds && 0 != addressIds.size()){
+//
+//			/** 根据楼栋Id获取要推送的企业  **/
+//		}else if(null != buildingIds && 0 != buildingIds.size()){
+//
+//			/** 根据楼栋名称获取要推送的企业**/
+//		}else if(null != buildingNames && 0 != buildingNames.size()){
+//
+//		/** 根据电话号码推送   **/
+//		}else if(null != phones && 0 != phones.size()){
+//			
+//		/** 根据小区获取要推送的企业  **/
+//		}else if(null != cmd.getCommunityId()){
+//			LOGGER.debug("All Park push message, cmd = {}", cmd);
+//			
+//			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
+//			Date now = new Date();
+//			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
+//			command.setScopeId(cmd.getCommunityId());
+//			command.setNamespaceId(namespaceId);
+//			command.setContent(cmd.getMessage());
+//			command.setStartTime(now.getTime());
+//			command.setEndTime(DateUtils.addDays(now, 1).getTime());
+//			promotionService.createRegionPushing(command);
+//			
+//			return;
+//		}
+		
+		LOGGER.debug("push message task scheduling, cmd = {}", cmd);
 		
 		/**
 		 * 调度执行一键推送
@@ -1384,9 +1388,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Long> addressIds = cmd.getAddressIds();
 		List<String> phones = cmd.getMobilePhones();
 		List<Organization> orgs = new ArrayList<Organization>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+		Integer namespaceId = user.getNamespaceId();
 		/** 获取全部企业的全部人员 **/
 		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+		
+		LOGGER.debug("send notice to organizationMember , phones = {}, namespaceId = {}", phones, namespaceId);
+		
 		/** 根据地址获取要推送的企业 **/
 		if(null != addressIds && 0 != addressIds.size()){
 			for (Long addressId : addressIds) {
@@ -1441,6 +1448,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			/** 获取全部企业的全部人员 **/
 			members = this.getOrganizationMembersByAddress(orgs);
 		}
+		
+		LOGGER.debug("send message to organization member, members = {}", members);
 		
 		/** 推送消息 **/
 		this.processSmsByMembers(members, cmd.getMessage(), user);
@@ -1535,7 +1544,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd,User user) {
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = user.getNamespaceId();
 		
 		Long communityId = cmd.getCommunityId();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
@@ -1621,7 +1630,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-不是user，发短信。  4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
 		if(null != owners && owners.size() > 0)
-			processCommunityPmOwner(communityId,owners,cmd.getMessage());
+			processCommunityPmOwner(communityId,owners,cmd.getMessage(), user);
 	}
 
 	public void sendNoticeToFamilyById(Long familyId,String message){
@@ -2334,12 +2343,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return bills;
 	}
 
-	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message) {
-		User operator = UserContext.current().getUser();
-		Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-		if(operator != null) {
-			namespaceId = operator.getNamespaceId();
-		}
+	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message, User user) {
+		User operator = user;
+		Integer namespaceId = operator.getNamespaceId();
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
@@ -2378,7 +2384,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
 		String templateScope = SmsTemplateCode.SCOPE;
 		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = user.getLocale();
 		String[] phoneArray = new String[phones.size()];  
 		phones.toArray(phoneArray);  
 		smsProvider.sendSms(namespaceId,phoneArray , templateScope, templateId, templateLocale, variables);
