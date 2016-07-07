@@ -342,7 +342,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			Map<String, Object> param = new HashMap<String, Object>();
 			param.put("BranchCode", brandCode);
 			param.put("CardId", cardId);
-			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, ""));
+			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, TaotaoguVendorConstant.PIN3_CRT));
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			
 			byte[] oldpsd;
@@ -681,7 +681,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			requestParam.put("Param",param);
 			byte[] data = StringHelper.toJsonString(requestParam).getBytes();
 			try {
-				Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.KEY_STORE, ""));
+				Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.KEY_STORE, TaotaoguVendorConstant.KEY_STORE));
 				InputStream in = new ByteArrayInputStream(cert.getData());
 				String pass = cert.getCertPass();
 				String[] passArr = pass.split(",");
@@ -771,9 +771,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			HttpPost request = new HttpPost(orderUrl+"/iips2/order/login");
 			
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.SERVER_CER, ""));
+			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.SERVER_CER, TaotaoguVendorConstant.SERVER_CER));
 			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
-			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.CLIENT_PFX, ""));
+			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.CLIENT_PFX, TaotaoguVendorConstant.CLIENT_PFX));
 			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
 			
 			String msg = json.toString();

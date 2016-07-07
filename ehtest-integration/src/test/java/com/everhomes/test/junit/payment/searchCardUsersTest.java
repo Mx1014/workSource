@@ -40,11 +40,7 @@ public class searchCardUsersTest extends BaseLoginAuthTestCase {
     public void setUp() {
         super.setUp();
     }
-    public static void main(String[] args) {
-		Date date = new Date(1466152763000L);
-
-    	System.out.println(date);
-	}
+   
     @Test
     public void testSearchCardUsers() {
     
@@ -54,10 +50,11 @@ public class searchCardUsersTest extends BaseLoginAuthTestCase {
         Long pageAnchor = null;
         Integer pageSize = 5;
         
-        String userIdentifier = "12000000001";
+        String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
+        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
         SearchCardUsersCommand cmd = new SearchCardUsersCommand();
         cmd.setOwnerId(ownerId);

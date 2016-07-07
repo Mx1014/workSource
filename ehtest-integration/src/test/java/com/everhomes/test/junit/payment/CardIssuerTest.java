@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.payment.CardIssuerDTO;
+import com.everhomes.rest.payment.ListCardIssuerCommand;
 import com.everhomes.rest.payment.ListCardIssuerRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
@@ -28,19 +29,21 @@ public class CardIssuerTest extends BaseLoginAuthTestCase {
     public void testListCardIssuer() {
         String ownerType = "community";
         Long ownerId = 240111044331051500L;
-        String userIdentifier = "12000000001";
+        String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
+        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
         String commandRelativeUri = "/payment/listCardIssuer";
-        ListCardIssuerRestResponse response = httpClientService.restGet(commandRelativeUri, null, ListCardIssuerRestResponse.class,context);
+        ListCardIssuerCommand cmd = new ListCardIssuerCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        ListCardIssuerRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, ListCardIssuerRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("The user info should be get from server, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-//        assertEquals("User should be in 0 namespace", namespaceId, response.getResponse().getNamespaceId());
-//        assertEquals("左邻李四", response.getResponse().getNickName());
         
         DSLContext context = dbProvider.getDslContext();
         SelectJoinStep<Record> query = context.select(Tables.EH_PAYMENT_CARD_ISSUERS.fields()).from(Tables.EH_PAYMENT_CARD_ISSUERS);
@@ -68,7 +71,7 @@ public class CardIssuerTest extends BaseLoginAuthTestCase {
         		});
         List<CardIssuerDTO> list = response.getResponse();
         assertEquals(list.size(), result.size());
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
         
     }
     

@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
 import com.everhomes.rest.payment.GetCardUserStatisticsRestResponse;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
@@ -17,15 +18,19 @@ public class getCardUserStatisticsTest extends BaseLoginAuthTestCase {
     
     @Test
     public void testGetCardUserStatistics() {
-        Integer namespaceId = 999990;
-        
-        String userIdentifier = "12000000001";
+        String ownerType = "community";
+        Long ownerId = 240111044331051500L;
+        String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
+        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
         String commandRelativeUri = "/payment/getCardUserStatistics";
-        GetCardUserStatisticsRestResponse response = httpClientService.restGet(commandRelativeUri, null, GetCardUserStatisticsRestResponse.class,context);
+        GetCardUserStatisticsCommand cmd = new GetCardUserStatisticsCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        GetCardUserStatisticsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, GetCardUserStatisticsRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("response=" + 

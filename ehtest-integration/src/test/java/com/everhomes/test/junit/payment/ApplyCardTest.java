@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.payment.ApplyCardCommand;
+import com.everhomes.rest.payment.ApplyCardRestResponse;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.server.schema.Tables;
@@ -36,10 +37,11 @@ public class ApplyCardTest extends BaseLoginAuthTestCase {
         String password = "123456";
         Long issuerId = 1L;
     	
-        String userIdentifier = "12000000001";
+        String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
+        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
         ApplyCardCommand cmd = new ApplyCardCommand();
         cmd.setIssuerId(issuerId);
@@ -49,7 +51,7 @@ public class ApplyCardTest extends BaseLoginAuthTestCase {
         cmd.setPassword(password);
         
         String commandRelativeUri = "/payment/applyCard";
-        RestResponse response = httpClientService.restPost(commandRelativeUri, cmd, RestResponse.class,context);
+        ApplyCardRestResponse response = httpClientService.restPost(commandRelativeUri, cmd, ApplyCardRestResponse.class,context);
         
         assertNotNull("The reponse of updateCardRechargeOrder may not be null", response);
         assertTrue("updateCardRechargeOrder, response=" + 
@@ -57,12 +59,12 @@ public class ApplyCardTest extends BaseLoginAuthTestCase {
         
         DSLContext context = dbProvider.getDslContext();
         SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
-		query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.MOBILE.eq(mobile));
+		query.addConditions(Tables.EH_PAYMENT_CARDS.MOBILE.eq(mobile));
 		EhPaymentCards result = ConvertHelper.convert(query.fetchOne(), EhPaymentCards.class);
         
 		assertNotNull(result);
 		assertEquals(mobile, result.getMobile());
-		assertEquals(password, result.getPassword());
+		assertEquals(EncryptionUtils.hashPassword(password), result.getPassword());
         
     }
     

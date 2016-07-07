@@ -402,9 +402,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		//User user = UserContext.current().getUser();
 		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
 				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardUserDTO.class))
+				.collect(Collectors.toList()));
     	if(list.size() > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardUserDTO.class))
-    				.collect(Collectors.toList()));
+    		
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
@@ -440,9 +441,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		List<PaymentCardRechargeOrder> list = paymentCardProvider.searchCardRechargeOrder(cmd.getOwnerType(),
 				cmd.getOwnerId(), startDate,endDate,cmd.getRechargeType(), cmd.getRechargeStatus(), cmd.getKeyword(),
 				cmd.getPageAnchor(), pageSize);
+		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardRechargeOrderDTO.class))
+				.collect(Collectors.toList()));
     	if(list.size() > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardRechargeOrderDTO.class))
-    				.collect(Collectors.toList()));
+    		
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
@@ -466,9 +468,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		List<PaymentCardTransaction> list = paymentCardProvider.searchCardTransactions(cmd.getOwnerType(),
 				cmd.getOwnerId(), startDate,endDate,cmd.getConsumeType(), cmd.getStatus(), cmd.getKeyword(),
 				cmd.getPageAnchor(), pageSize);
+		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardTransactionDTO.class))
+				.collect(Collectors.toList()));
     	if(list.size() > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardTransactionDTO.class))
-    				.collect(Collectors.toList()));
+    		
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
