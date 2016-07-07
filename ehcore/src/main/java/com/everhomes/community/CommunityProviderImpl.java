@@ -40,6 +40,7 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.CommunityGeoPointDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -1138,6 +1139,5 @@ public class CommunityProviderImpl implements CommunityProvider {
 	        });
 		return results;
 	}
-
 
 }

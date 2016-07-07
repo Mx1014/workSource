@@ -56,7 +56,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
-import com.everhomes.rest.community.admin.listCommunityByNamespaceIdResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.SearchSyncManager;
@@ -552,9 +552,9 @@ public class CommunityAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("listCommunityByNamespaceId")
-	@RestReturn(value = listCommunityByNamespaceIdResponse.class)
+	@RestReturn(value = ListCommunityByNamespaceIdResponse.class)
 	public RestResponse listCommunityByNamespaceId(ListCommunityByNamespaceIdCommand cmd) {
-		listCommunityByNamespaceIdResponse result = communityService.listCommunityByNamespaceId(cmd);
+		ListCommunityByNamespaceIdResponse result = communityService.listCommunityByNamespaceId(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

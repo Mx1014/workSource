@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>nextPageAnchor: 下一个锚点</li>
  * </ul>
  */
-public class listCommunityByNamespaceIdResponse {
+public class ListCommunityByNamespaceIdResponse {
 	@ItemType(CommunityDTO.class)
 	private List<CommunityDTO> communities;
 	private Long nextPageAnchor;

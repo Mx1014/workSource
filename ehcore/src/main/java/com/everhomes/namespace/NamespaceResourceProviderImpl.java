@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.namespace;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.Condition;
@@ -12,12 +13,20 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhNamespaceResourcesDao;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhNamespaceResources;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 /**
  * NamespaceResource management implementation
@@ -29,7 +38,21 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
 
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
+    @Override
+	public void createNamespaceResource(NamespaceResource resource){
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNamespaceResources.class));
+		resource.setId(id);
+		resource.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhNamespaceResourcesDao dao = new EhNamespaceResourcesDao(context.configuration());
+        dao.insert(resource);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhNamespaceResources.class, null);
+	}
+	
     @Override
     public NamespaceResource findNamespaceResourceById(Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
