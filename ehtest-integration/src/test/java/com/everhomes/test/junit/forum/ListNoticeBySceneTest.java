@@ -22,7 +22,7 @@ public class ListNoticeBySceneTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
     
-    @Ignore  @Test
+    @Test
     public void testListNoticeByScene1() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
@@ -63,7 +63,7 @@ public class ListNoticeBySceneTest extends BaseLoginAuthTestCase {
         assertEquals(true, flag);
     }
     
-    @Ignore @Test
+    @Test
     public void testListNoticeByScene2() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
@@ -104,7 +104,7 @@ public class ListNoticeBySceneTest extends BaseLoginAuthTestCase {
         assertEquals(true, flag);
     }
     
-    @Ignore @Test
+    @Test
     public void testListNoticeByScene3() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000010"; // 管理员帐号
@@ -198,11 +198,11 @@ public class ListNoticeBySceneTest extends BaseLoginAuthTestCase {
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-community_address_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-community_address_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-family_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-family_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         

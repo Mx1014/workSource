@@ -27,7 +27,7 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
     
-    @Ignore @Test
+    @Test
     public void testDeleteLaunchPadItemByScene1() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
@@ -74,7 +74,7 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         
     }
     
-    @Ignore @Test
+    @Test
     public void testDeleteLaunchPadItemByScene2() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
@@ -121,7 +121,7 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         
     }
     
-    @Ignore @Test
+    @Test
     public void testDeleteLaunchPadItemByScene3() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000010"; // 管理员帐号
@@ -168,7 +168,7 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         
     }
     
-    @Ignore @Test
+    @Test
     public void testDeleteLaunchPadItemByScene4() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000020"; // 管理员帐号
@@ -228,11 +228,11 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-community_address_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-community_address_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-family_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-family_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
