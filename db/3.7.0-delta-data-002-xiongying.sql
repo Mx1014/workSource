@@ -35,3 +35,41 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 VALUES ('10428', '0', '0', '0', '0', '/home', 'Bizs', 'CONTACTS', '企业通讯录', 'cs://1/image/aW1hZ2UvTVRwak16azJOelEwWW1RNU5HRTFZalF4T1dGaE1qWTBOelE1TVRjNU4yTmhNQQ', '1', '1', '46', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 VALUES ('10429', '0', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwak9EUTVaRFF4TmpkbE5UTmxNalF4WTJRM05UUXdOMlJtTWpaaU5XUm1Odw', '1', '1', '23', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+
+
+
+-- 20160707
+
+delete from eh_launch_pad_items where id in (24,28);
+ 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('24', '0', '0', '0', '0', '/home', 'Bizs', 'VIPPARKING', 'vip车位', 'cs://1/image/aW1hZ2UvTVRvNVlUSmpZMkprTnpSbU5ETXlPRGN4TXprd016ZzFaakkzTkdaaU4yTTNNZw', '1', '1', '25', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+ 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('28', '0', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '公共会议室', 'cs://1/image/aW1hZ2UvTVRwbE5XRTVaRFU1T1RrMk1HUmhORFUyT0RFM09HVmlZVEppTVRKaFlUQmxPQQ', '1', '1', '24', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+ 
+ 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10430', '0', '0', '0', '0', '/home', 'Bizs', 'ENTER_PARK', '园区入驻', 'cs://1/image/aW1hZ2UvTVRwa00ySTNZMlJpWVRFMlpUZGxPV00xT0dGaFltUXhaVEF6TkdRMk5qRXlOZw', '1', '1', '28', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10431', '0', '0', '0', '0', '/home', 'Bizs', '预订工位', '预订工位', 'cs://1/image/aW1hZ2UvTVRvNVlUWTRNekZqWTJJeU5EZGtNak0zTURNeFpqRTNZbVEwTkRNMU1EQTNZdw', '1', '1', '14', 'https://core.zuolin.com/mobile/static/coming_soon/index.html', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10432', '0', '0', '0', '0', '/home', 'Bizs', '预约参观', '预约参观', 'cs://1/image/aW1hZ2UvTVRwa01UWTBNbU15WW1Oak9UQTVZVFkxWXpBNU1XTm1aRFF4TkRrME1XWm1ZZw', '1', '1', '14', 'https://core.zuolin.com/mobile/static/coming_soon/index.html', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10433', '0', '0', '0', '0', '/home', 'Bizs', 'MAKERZONE', '创客空间', 'cs://1/image/aW1hZ2UvTVRveFptRm1PR1prTlRrMVlqUTJORFUwTVdRMllXRTNOamRsTkdReU9UQTNOUQ', '1', '1', '32', '{"type":1,"forumId":177000,"categoryId":1003,"parentId":110001,"tag":"创客"}', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10434', '0', '0', '0', '0', '/home', 'Bizs', 'ELECSCREEN', '电子屏预订', 'cs://1/image/aW1hZ2UvTVRveU0ySXpOREUwTkdFM04yRm1ORE16TVROaVpHRTRPVE5sT0RKbU1EY3hZdw', '1', '1', '26', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10435', '0', '0', '0', '0', '/home', 'Bizs', 'CONTACTS', '企业通讯录', 'cs://1/image/aW1hZ2UvTVRwak16azJOelEwWW1RNU5HRTFZalF4T1dGaE1qWTBOelE1TVRjNU4yTmhNQQ', '1', '1', '46', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES ('10436', '0', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwak9EUTVaRFF4TmpkbE5UTmxNalF4WTJRM05UUXdOMlJtTWpaaU5XUm1Odw', '1', '1', '23', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+
+update  eh_launch_pad_items set namespace_id = 0 where id = 15;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES (10430, '0', '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvek1qVXdOVFl3TVRkak16STFORFZqTm1Ka05qY3daVEk1TXpZeVlUbGlPQQ', '1', '1', '1', '{\"itemLocation\":\"/home\",\"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+ 
+
+
+
+
+
