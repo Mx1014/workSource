@@ -154,7 +154,7 @@ public class NewsServiceImpl implements NewsService {
 			news.setContentAbstract(news.getContent().substring(0,
 					news.getContent().length() > 100 ? 100 : news.getContent().length()));
 		}
-		if (!StringUtils.isEmpty(cmd.getPublishTime())) {
+		if (cmd.getPublishTime() != null) {
 			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
 		}
 		return news;
@@ -259,6 +259,9 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private Long covertStringToLongTime(String string){
+		if (StringUtils.isEmpty(string)) {
+			return null;
+		}
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
 			Date date = format.parse(string);
