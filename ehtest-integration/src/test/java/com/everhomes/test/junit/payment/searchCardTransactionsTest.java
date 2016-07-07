@@ -42,10 +42,11 @@ public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
         Long endDate = null;
         Byte status = CardTransactionStatus.PAIDED.getCode();
         
-        String userIdentifier = "12000000001";
+        String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
+        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
         SearchCardTransactionsCommand cmd = new SearchCardTransactionsCommand();
         cmd.setOwnerId(ownerId);
