@@ -36,7 +36,12 @@ import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
@@ -53,6 +58,9 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Autowired
     private GroupProvider groupProvider;
 
+    @Autowired
+    private UserActivityProvider userActivityProvider;
+    
     @Override
     public void createActity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class));
@@ -301,64 +309,102 @@ public class ActivityProviderImpl implements ActivityProivider {
                 });
         return rosters;
     }
-
+    
     @Override
-    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition) {
-        List<Activity> activities=new ArrayList<Activity>();
-        List<Activity> overdue =new ArrayList<Activity>();
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        if (locator.getShardIterator() == null) {
+    public List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime) {
+    	List<Activity> activities = new ArrayList<Activity>();
+    	List<Long> ids = new ArrayList<Long>();
+    	
+    	if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             locator.setShardIterator(shardIterator);
         }
-        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+    	
+    	this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
             
-            if (locator.getAnchor() == null){
-            	locator.setAnchor(0L);
-            	query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            if (lastViewedTime != null){
+            	query.addConditions(Tables.EH_ACTIVITIES.CREATE_TIME.gt(lastViewedTime));
             }
-            if(locator.getAnchor() != 0L){
-            	query.addConditions(Tables.EH_ACTIVITIES.ID.lt(locator.getAnchor()));
-            }
-            
-            if(condition != null){
-                query.addConditions(condition);
-            }
-            
 
             query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
-            query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
+            query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
             query.addLimit(count - activities.size());
             
             if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Query activities by geohash, sql=" + query.getSQL());
-                LOGGER.debug("Query activities by geohash, bindValues=" + query.getBindValues());
+                LOGGER.debug("listNewActivities, sql=" + query.getSQL());
+                LOGGER.debug("listNewActivities, bindValues=" + query.getBindValues());
             }
 
             query.fetch().map((r) -> {
-            	if(r.getEndTime().after(now)){
-            		activities.add(ConvertHelper.convert(r, Activity.class));
+            	if(r != null) {
+            		ids.add(r.getId());
+            		return activities.add(ConvertHelper.convert(r, Activity.class));
             	}
-            	else
-            		overdue.add(ConvertHelper.convert(r, Activity.class));
-                return null;
+				return null;
             });
 
-            activities.addAll(overdue);
-            if (activities.size() >= count) {
-                locator.setAnchor(activities.get(activities.size() - 1).getId());
-                return AfterAction.done;
-            }
             return AfterAction.next;
         });
+    
+    	userActivityProvider.updateViewedActivityProfileIfNotExist(UserContext.current().getUser().getId(), 
+    			UserProfileContstant.VIEWED_ACTIVITY_NEW, System.currentTimeMillis(), ids);
+    	return activities;
+    }
 
-        if (activities.size() > 0) {
-            locator.setAnchor(activities.get(activities.size() - 1).getId());
+    @Override
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition) {
+    	
+    	//按时间排序 用offset方式替代原有anchor modified by xiongying 20160707
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	
+    	List<Activity> activities=new ArrayList<Activity>();
+        List<Activity> overdue =new ArrayList<Activity>();
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        
+        SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
+        long pageOffset = 0L;
+        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
+        	locator.setAnchor(0L);
+        	pageOffset = 1L;
+//            	query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
         }
+        if(locator.getAnchor() != 0L){
+        	pageOffset = locator.getAnchor();
+//            	query.addConditions(Tables.EH_ACTIVITIES.ID.lt(locator.getAnchor()));
+        }
+        
+        if(condition != null){
+            query.addConditions(condition);
+        }
+        Integer offset =  (int) ((pageOffset - 1 ) * count);
+        query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
+        query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
+//            query.addLimit(count - activities.size());
+        query.addLimit(offset, count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query activities by geohash, sql=" + query.getSQL());
+            LOGGER.debug("Query activities by geohash, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((r) -> {
+        	if(r.getEndTime().after(now)){
+        		activities.add(ConvertHelper.convert(r, Activity.class));
+        	}
+        	else
+        		overdue.add(ConvertHelper.convert(r, Activity.class));
+            return null;
+        });
+
+        activities.addAll(overdue);
+        if (activities.size() >= count) {
+            locator.setAnchor(pageOffset+1);
+        }
+
        if(activities.size()>=count){
-            return activities.subList(0, activities.size()-1);
+            return activities.subList(0, count);
         }
         return activities;
     }
