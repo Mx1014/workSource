@@ -27,6 +27,14 @@
 
 @property(nonatomic, copy) NSNumber* rightRemote;
 
+@property(nonatomic, copy) NSNumber* companyId;
+
+@property(nonatomic, copy) NSString* buildingName;
+
+@property(nonatomic, copy) NSNumber* buildingId;
+
+@property(nonatomic, copy) NSString* company;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

@@ -17,6 +17,8 @@
 // item type EvhPostDTO*
 @property(nonatomic, strong) NSMutableArray* posts;
 
+@property(nonatomic, copy) NSNumber* commentCount;
+
 @property(nonatomic, copy) NSString* keywords;
 
 -(id) init;

@@ -40,6 +40,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -237,7 +238,12 @@ public class ForumProviderImpl implements ForumProvider {
                     post.setFloorNumber(floorNumber);
                     
                 } else {
-                    userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
+                	if(post.getCategoryId() == 1010) {
+                		userActivityProvider.addPostedTopic(post.getCreatorUid(), UserFavoriteTargetType.ACTIVITY.getCode(), id);
+                    } else {
+                    	userActivityProvider.addPostedTopic(post.getCreatorUid(), UserFavoriteTargetType.TOPIC.getCode(), id);
+                    }
+                    
                     userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, 1);
                 }
                 

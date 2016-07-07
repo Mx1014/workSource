@@ -48,6 +48,8 @@
 
 @property(nonatomic, copy) NSNumber* processCount;
 
+@property(nonatomic, copy) NSString* nickName;
+
 // item type EvhOpPromotionAssignedScopeDTO*
 @property(nonatomic, strong) NSMutableArray* assignedScopes;
 

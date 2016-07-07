@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>endTime: 整改截止时间</li>
  *  <li>operatorType: 整改执行人类型</li>
  *  <li>operatorId: 整改执行人id</li>
+ *  <li>categoryId: 违反的规范id</li>
  * </ul>
  */
 public class ReportVerificationResultCommand {
@@ -38,6 +39,8 @@ public class ReportVerificationResultCommand {
 	private Long operatorId;
 	
 	private String message;
+	
+	private Long categoryId;
 	
 	public String getMessage() {
 		return message;
@@ -93,6 +96,14 @@ public class ReportVerificationResultCommand {
 
 	public void setOperatorId(Long operatorId) {
 		this.operatorId = operatorId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	@Override

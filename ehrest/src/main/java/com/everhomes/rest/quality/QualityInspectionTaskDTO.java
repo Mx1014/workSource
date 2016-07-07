@@ -40,6 +40,9 @@ import com.everhomes.util.StringHelper;
  *  <li>executiveGroupId: 执行业务组id</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  *  <li>standardDescription: 标准内容</li>
+ *  <li>categoryId: 类型id</li>
+ *  <li>categoryDescription: 规范内容</li>
+ *  <li>manualFlag : 是否手动添加 0：自动生成，1：手动添加</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -92,6 +95,8 @@ public class QualityInspectionTaskDTO {
 	
 	private String reviewerName;
 	
+	private Long categoryId;
+	
 	@ItemType(QualityInspectionTaskRecordsDTO.class)
     private QualityInspectionTaskRecordsDTO record;
 	
@@ -100,7 +105,11 @@ public class QualityInspectionTaskDTO {
 	
 	private Byte taskFlag;
 	
+	private Byte manualFlag;
+	
 	private String standardDescription;
+	
+	private String categoryDescription;
 
 	public Long getId() {
 		return id;
@@ -324,6 +333,30 @@ public class QualityInspectionTaskDTO {
 
 	public void setStandardDescription(String standardDescription) {
 		this.standardDescription = standardDescription;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Byte getManualFlag() {
+		return manualFlag;
+	}
+
+	public void setManualFlag(Byte manualFlag) {
+		this.manualFlag = manualFlag;
+	}
+
+	public String getCategoryDescription() {
+		return categoryDescription;
+	}
+
+	public void setCategoryDescription(String categoryDescription) {
+		this.categoryDescription = categoryDescription;
 	}
 
 	@Override

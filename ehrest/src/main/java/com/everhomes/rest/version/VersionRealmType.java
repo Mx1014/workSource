@@ -31,6 +31,8 @@ package com.everhomes.rest.version;
  * <li>IOS_JINDI("iOS_Jindi"): 金地商置iOS版APP</li>
  * <li>ANDROID_CHUNENG("Android_Chuneng"): 储能Android版APP</li>
  * <li>IOS_CHUNENG("iOS_Chuneng"): 储能iOS版APP</li>
+ * <li>ANDROID_IBASE("Android_Ibase"): Ibase Android版APP</li>
+ * <li>IOS_IBASE("iOS_Ibase"): Ibase iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -60,7 +62,9 @@ public enum VersionRealmType {
     ANDROID_JINDI("Android_Jindi"), 
     IOS_JINDI("iOS_Jindi"),
     ANDROID_CHUNENG("Android_Chuneng"), 
-    IOS_CHUNENG("iOS_Chuneng");
+    IOS_CHUNENG("iOS_Chuneng"),
+    ANDROID_IBASE("Android_Ibase"), 
+    IOS_IBASE("iOS_Ibase");
     
     private String code;
     private VersionRealmType(String code) {

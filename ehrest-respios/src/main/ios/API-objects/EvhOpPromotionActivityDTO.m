@@ -68,6 +68,8 @@
         [jsonObject setObject: self.id forKey: @"id"];
     if(self.processCount)
         [jsonObject setObject: self.processCount forKey: @"processCount"];
+    if(self.nickName)
+        [jsonObject setObject: self.nickName forKey: @"nickName"];
     if(self.assignedScopes) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhOpPromotionAssignedScopeDTO* item in self.assignedScopes) {
@@ -153,6 +155,10 @@
         self.processCount = [jsonObject objectForKey: @"processCount"];
         if(self.processCount && [self.processCount isEqual:[NSNull null]])
             self.processCount = nil;
+
+        self.nickName = [jsonObject objectForKey: @"nickName"];
+        if(self.nickName && [self.nickName isEqual:[NSNull null]])
+            self.nickName = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"assignedScopes"];

@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *<li>myOrderUrl:我的订单</li>
  *<li>applyShopUrl:申请开店</li>
  *<li>isAppliedShop:是否已申请过开店</li>
+ *<li>orderCount:待发货订单数量</li>
  *</ul>
  */
 public class ListTreasureResponse {
@@ -28,7 +29,7 @@ public class ListTreasureResponse {
     private String myOrderUrl;
     private String applyShopUrl;
     private Integer isAppliedShop;
-    
+    private Integer orderCount;
 	
 	public String getMyOrderUrl() {
 		return myOrderUrl;
@@ -111,7 +112,15 @@ public class ListTreasureResponse {
         this.myCoupon = myCoupon;
     }
 
-    @Override
+    public Integer getOrderCount() {
+		return orderCount;
+	}
+
+	public void setOrderCount(Integer orderCount) {
+		this.orderCount = orderCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

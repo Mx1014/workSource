@@ -6,10 +6,11 @@ package com.everhomes.rest.launchpad;
  * <li>DEFAULT(0): 默认</li>
  * <li>OVERRIDE(1): 覆盖</li>
  * <li>REVERT(2): 恢复</li>
+ * <li>CUSTOMIZED(3): 定制</li>
  * </ul>
  */
 public enum ApplyPolicy {
-    DEFAULT((byte)0), OVERRIDE((byte)1), REVERT((byte)2);
+    DEFAULT((byte)0), OVERRIDE((byte)1), REVERT((byte)2), CUSTOMIZED((byte)3);
     
     private byte code;
     private ApplyPolicy(byte code) {
@@ -33,6 +34,9 @@ public enum ApplyPolicy {
         
         case 2: 
             return REVERT;
+            
+        case 3: 
+            return CUSTOMIZED;
             
         default :
             assert(false);

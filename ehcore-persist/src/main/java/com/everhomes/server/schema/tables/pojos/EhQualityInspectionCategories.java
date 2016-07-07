@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = -477274076;
+	private static final long serialVersionUID = -1122495670;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -23,6 +23,8 @@ public class EhQualityInspectionCategories implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Double   score;
+	private java.lang.String   description;
 
 	public EhQualityInspectionCategories() {}
 
@@ -36,7 +38,9 @@ public class EhQualityInspectionCategories implements java.io.Serializable {
 		java.lang.Integer  defaultOrder,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Double   score,
+		java.lang.String   description
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -48,6 +52,8 @@ public class EhQualityInspectionCategories implements java.io.Serializable {
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.score = score;
+		this.description = description;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +134,21 @@ public class EhQualityInspectionCategories implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Double getScore() {
+		return this.score;
+	}
+
+	public void setScore(java.lang.Double score) {
+		this.score = score;
+	}
+
+	public java.lang.String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(java.lang.String description) {
+		this.description = description;
 	}
 }

@@ -50,6 +50,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
@@ -333,8 +334,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 
                 if(cmd.getGroupId() == null) {
                     //Select door access only
-                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.ne(0l));
+                    Condition cond = Tables.EH_DOOR_ACCESS.GROUPID.ne(0l)
+                    .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
+                            .and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_ZL_GROUP.getCode())));
+                    query.addConditions(cond);
                 } else if(cmd.getGroupId().equals(-1l)) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
+                    .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_ZL_GROUP.getCode())));
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
                 } else if(!cmd.getGroupId().equals(0l)) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
@@ -401,13 +407,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<User> users = null;
+        List<AclinkUser> users = null;
         users = userProvider.searchDoorUsers(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getBuildingId(),
-                cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
+                cmd.getBuildingName(), cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
-        for(User u : users) {
+        for(AclinkUser u : users) {
             AclinkUserDTO dto = ConvertHelper.convert(u, AclinkUserDTO.class);
+            if(dto.getCompanyId() != null) {
+                Organization org = organizationProvider.findOrganizationById(dto.getCompanyId());    
+                if(org != null) {
+                    dto.setCompany(org.getName());
+                }
+            }
+            
             dto.setPhone(u.getIdentifierToken());
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {

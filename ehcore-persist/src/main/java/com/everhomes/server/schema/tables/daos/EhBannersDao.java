@@ -179,4 +179,11 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchBySceneType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.SCENE_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>apply_policy IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByApplyPolicy(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.APPLY_POLICY, values);
+	}
 }

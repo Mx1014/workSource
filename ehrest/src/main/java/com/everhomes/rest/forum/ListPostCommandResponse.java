@@ -17,6 +17,8 @@ public class ListPostCommandResponse {
     @ItemType(PostDTO.class)
     private List<PostDTO> posts;
     
+    private Long commentCount; 
+    
     private String keywords;
     
     public ListPostCommandResponse() {
@@ -51,7 +53,15 @@ public class ListPostCommandResponse {
         this.keywords = keywords;
     }
 
-    @Override
+    public Long getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Long commentCount) {
+		this.commentCount = commentCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -76,6 +76,8 @@
         [jsonObject setObject: self.scaleType forKey: @"scaleType"];
     if(self.deleteFlag)
         [jsonObject setObject: self.deleteFlag forKey: @"deleteFlag"];
+    if(self.editFlag)
+        [jsonObject setObject: self.editFlag forKey: @"editFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -172,6 +174,10 @@
         self.deleteFlag = [jsonObject objectForKey: @"deleteFlag"];
         if(self.deleteFlag && [self.deleteFlag isEqual:[NSNull null]])
             self.deleteFlag = nil;
+
+        self.editFlag = [jsonObject objectForKey: @"editFlag"];
+        if(self.editFlag && [self.editFlag isEqual:[NSNull null]])
+            self.editFlag = nil;
 
         return self;
     }

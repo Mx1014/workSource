@@ -38,6 +38,8 @@
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
+    if(self.parentId)
+        [jsonObject setObject: self.parentId forKey: @"parentId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -58,6 +60,10 @@
         self.pageSize = [jsonObject objectForKey: @"pageSize"];
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
             self.pageSize = nil;
+
+        self.parentId = [jsonObject objectForKey: @"parentId"];
+        if(self.parentId && [self.parentId isEqual:[NSNull null]])
+            self.parentId = nil;
 
         return self;
     }

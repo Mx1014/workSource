@@ -4,6 +4,21 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>doorId: 门禁ID</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>keyword：搜索关键字，可以是手机号或昵称</li>
+ * <li>organizationId： 公司ID，通过名字找公司用 /admin/org/listOrganizationByName</li>
+ * <li>buildingId: 暂时不支持,因为后台没数据 </li>
+ * <li>isAuth: 认证则为1, 非认证为0</li>
+ * <li>buildName: /community/listBuildings </li>
+ * <li></li>
+ * </ul>
+ * 
+ * @author janson
+ *
+ */
 public class ListAclinkUserCommand {
     private Long pageAnchor;
     
@@ -20,6 +35,8 @@ public class ListAclinkUserCommand {
     private Long organizationId;
     
     private Long buildingId;
+    
+    private String buildingName;
     
     private Byte isAuth;
 
@@ -85,6 +102,14 @@ public class ListAclinkUserCommand {
 
     public void setIsAuth(Byte isAuth) {
         this.isAuth = isAuth;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
     @Override

@@ -81,6 +81,8 @@
         [jsonObject setObject: self.reviewerId forKey: @"reviewerId"];
     if(self.reviewerName)
         [jsonObject setObject: self.reviewerName forKey: @"reviewerName"];
+    if(self.categoryId)
+        [jsonObject setObject: self.categoryId forKey: @"categoryId"];
     if(self.record) {
         NSMutableDictionary* dic = [NSMutableDictionary new];
         [self.record toJson: dic];
@@ -98,8 +100,12 @@
     }
     if(self.taskFlag)
         [jsonObject setObject: self.taskFlag forKey: @"taskFlag"];
+    if(self.manualFlag)
+        [jsonObject setObject: self.manualFlag forKey: @"manualFlag"];
     if(self.standardDescription)
         [jsonObject setObject: self.standardDescription forKey: @"standardDescription"];
+    if(self.categoryDescription)
+        [jsonObject setObject: self.categoryDescription forKey: @"categoryDescription"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -201,6 +207,10 @@
         if(self.reviewerName && [self.reviewerName isEqual:[NSNull null]])
             self.reviewerName = nil;
 
+        self.categoryId = [jsonObject objectForKey: @"categoryId"];
+        if(self.categoryId && [self.categoryId isEqual:[NSNull null]])
+            self.categoryId = nil;
+
         NSMutableDictionary* itemJson =  (NSMutableDictionary*)[jsonObject objectForKey: @"record"];
 
         self.record = [EvhQualityInspectionTaskRecordsDTO new];
@@ -218,9 +228,17 @@
         if(self.taskFlag && [self.taskFlag isEqual:[NSNull null]])
             self.taskFlag = nil;
 
+        self.manualFlag = [jsonObject objectForKey: @"manualFlag"];
+        if(self.manualFlag && [self.manualFlag isEqual:[NSNull null]])
+            self.manualFlag = nil;
+
         self.standardDescription = [jsonObject objectForKey: @"standardDescription"];
         if(self.standardDescription && [self.standardDescription isEqual:[NSNull null]])
             self.standardDescription = nil;
+
+        self.categoryDescription = [jsonObject objectForKey: @"categoryDescription"];
+        if(self.categoryDescription && [self.categoryDescription isEqual:[NSNull null]])
+            self.categoryDescription = nil;
 
         return self;
     }

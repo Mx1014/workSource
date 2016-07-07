@@ -71,6 +71,8 @@
 
 @property(nonatomic, copy) NSString* sceneToken;
 
+@property(nonatomic, copy) NSString* registerDaysDesc;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

@@ -1,7 +1,5 @@
 // @formatter:off
-
-// generated at 2016-06-20 15:02:06
-
+// generated at 2016-06-29 16:10:25
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -32,6 +30,7 @@ public interface ApiConstants {
     public static final String ACTIVITY_CHECKIN_URL = "/activity/checkin";
     public static final String ACTIVITY_CONFIRM_URL = "/activity/confirm";
     public static final String ACTIVITY_FINDACTIVITYDETAILS_URL = "/activity/findActivityDetails";
+    public static final String ACTIVITY_GETACTIVITYSHAREDETAIL_URL = "/activity/getActivityShareDetail";
     public static final String ACTIVITY_LIST_URL = "/activity/list";
     public static final String ACTIVITY_LISTACTIVITIESBYNAMESPACEIDANDTAG_URL = "/activity/listActivitiesByNamespaceIdAndTag";
     public static final String ACTIVITY_LISTACTIVITIESBYTAG_URL = "/activity/listActivitiesByTag";
@@ -225,6 +224,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTMYTASKTOPICS_URL = "/admin/org/listMyTaskTopics";
     public static final String ADMIN_ORG_LISTORGAUTHPERSONNELS_URL = "/admin/org/listOrgAuthPersonnels";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
+    public static final String ADMIN_ORG_LISTORGANIZATIONBYNAME_URL = "/admin/org/listOrganizationByName";
     public static final String ADMIN_ORG_LISTORGANIZATIONPERSONNELS_URL = "/admin/org/listOrganizationPersonnels";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
     public static final String ADMIN_ORG_LISTPERSONNELNOTJOINGROUPS_URL = "/admin/org/listPersonnelNotJoinGroups";
@@ -291,6 +291,7 @@ public interface ApiConstants {
     public static final String ADMIN_USER_SENDUSERRICHLINKMESSAGE_URL = "/admin/user/sendUserRichLinkMessage";
     public static final String ADMIN_USER_SENDUSERTESTMAIL_URL = "/admin/user/sendUserTestMail";
     public static final String ADMIN_USER_SENDUSERTESTSMS_URL = "/admin/user/sendUserTestSms";
+    public static final String APPURL_GETAPPINFO_URL = "/appUrl/getAppInfo";
     public static final String APPKEY_ISTRUSTEDAPP_URL = "/appkey/isTrustedApp";
     public static final String APPKEY_ISVALIDAPPURLBINDING_URL = "/appkey/isValidAppUrlBinding";
     public static final String BANNER_CLICKBANNER_URL = "/banner/clickBanner";
@@ -460,6 +461,7 @@ public interface ApiConstants {
     public static final String FORUM_DELETECOMMENT_URL = "/forum/deleteComment";
     public static final String FORUM_DELETETOPIC_URL = "/forum/deleteTopic";
     public static final String FORUM_GETTOPIC_URL = "/forum/getTopic";
+    public static final String FORUM_INCREASEPOSTVIEWCOUNT_URL = "/forum/increasePostViewCount";
     public static final String FORUM_LIKETOPIC_URL = "/forum/likeTopic";
     public static final String FORUM_LISTTOPICCOMMENTS_URL = "/forum/listTopicComments";
     public static final String FORUM_LISTTOPICS_URL = "/forum/listTopics";
@@ -509,6 +511,10 @@ public interface ApiConstants {
     public static final String GROUP_SEARCH_URL = "/group/search";
     public static final String GROUP_UPDATE_URL = "/group/update";
     public static final String GROUP_UPDATEGROUPMEMBER_URL = "/group/updateGroupMember";
+    public static final String HOTTAG_DELETEHOTTAG_URL = "/hotTag/deleteHotTag";
+    public static final String HOTTAG_LISTHOTTAG_URL = "/hotTag/listHotTag";
+    public static final String HOTTAG_SEARCHTAG_URL = "/hotTag/searchTag";
+    public static final String HOTTAG_SETHOTTAG_URL = "/hotTag/setHotTag";
     public static final String LAUNCHPAD_DELETELAUNCHPADBYID_URL = "/launchpad/deleteLaunchPadById";
     public static final String LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYVERSIONCODE_URL = "/launchpad/getLastLaunchPadLayoutByVersionCode";
     public static final String LAUNCHPAD_GETLAUNCHPADITEMBYID_URL = "/launchpad/getLaunchPadItemById";
@@ -516,6 +522,8 @@ public interface ApiConstants {
     public static final String LAUNCHPAD_GETLAUNCHPADLAYOUT_URL = "/launchpad/getLaunchPadLayout";
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
+    public static final String LIVECHECK_HOME_URL = "/livecheck/home";
+    public static final String LIVECHECK_LOGINDETAIL_URL = "/livecheck/loginDetail";
     public static final String LOCALE_GETLOCALIZEDSTRING_URL = "/locale/getLocalizedString";
     public static final String NAMESPACE_GETNAMESPACEDETAIL_URL = "/namespace/getNamespaceDetail";
     public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
@@ -562,6 +570,7 @@ public interface ApiConstants {
     public static final String OPENAPI_UPDATERECEIVEDCOUPONCOUNT_URL = "/openapi/updateReceivedCouponCount";
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
+    public static final String ORDER_PAYCALLBACK_URL = "/order/payCallback";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYFORENTERPRISECONTACT_URL = "/org/applyForEnterpriseContact";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
@@ -725,6 +734,7 @@ public interface ApiConstants {
     public static final String QRCODE_GETQRCODEINFO_URL = "/qrcode/getQRCodeInfo";
     public static final String QRCODE_NEWQRCODE_URL = "/qrcode/newQRCode";
     public static final String QUALITY_CREATQUALITYSTANDARD_URL = "/quality/creatQualityStandard";
+    public static final String QUALITY_CREATEQUALITYINSPECTIONTASK_URL = "/quality/createQualityInspectionTask";
     public static final String QUALITY_CREATETASKBYSTANDARD_URL = "/quality/createTaskByStandard";
     public static final String QUALITY_DELETEFACTOR_URL = "/quality/deleteFactor";
     public static final String QUALITY_DELETEQUALITYCATEGORY_URL = "/quality/deleteQualityCategory";
@@ -735,9 +745,11 @@ public interface ApiConstants {
     public static final String QUALITY_LISTEVALUATIONS_URL = "/quality/listEvaluations";
     public static final String QUALITY_LISTFACTORS_URL = "/quality/listFactors";
     public static final String QUALITY_LISTQUALITYCATEGORIES_URL = "/quality/listQualityCategories";
+    public static final String QUALITY_LISTQUALITYINSPECTIONLOGS_URL = "/quality/listQualityInspectionLogs";
     public static final String QUALITY_LISTQUALITYINSPECTIONTASKS_URL = "/quality/listQualityInspectionTasks";
     public static final String QUALITY_LISTQUALITYSTANDARDS_URL = "/quality/listQualityStandards";
     public static final String QUALITY_LISTRECORDSBYTASKID_URL = "/quality/listRecordsByTaskId";
+    public static final String QUALITY_LISTUSERRELATEORGGROUPS_URL = "/quality/listUserRelateOrgGroups";
     public static final String QUALITY_REPORTRECTIFYRESULT_URL = "/quality/reportRectifyResult";
     public static final String QUALITY_REPORTVERIFICATIONRESULT_URL = "/quality/reportVerificationResult";
     public static final String QUALITY_REVIEWVERIFICATIONRESULT_URL = "/quality/reviewVerificationResult";
@@ -831,17 +843,24 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_UPDATERENTALRULE_URL = "/techpark/rental/updateRentalRule";
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
+    public static final String UI_ACTIVITY_LISTNEARBYACTIVITIESBYSCENE_URL = "/ui/activity/listNearbyActivitiesByScene";
     public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
     public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
     public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
     public static final String UI_FORUM_GETTOPICSENTSCOPES_URL = "/ui/forum/getTopicSentScopes";
+    public static final String UI_FORUM_LISTNOTICEBYSCENE_URL = "/ui/forum/listNoticeByScene";
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL = "/ui/group/listNearbyGroupsByScene";
+    public static final String UI_LAUNCHPAD_ADDLAUNCHPADITEMBYSCENE_URL = "/ui/launchpad/addLaunchPadItemByScene";
     public static final String UI_LAUNCHPAD_CANCELFAVORITEBUSINESSBYSCENE_URL = "/ui/launchpad/cancelFavoriteBusinessByScene";
+    public static final String UI_LAUNCHPAD_DELETELAUNCHPADITEMBYSCENE_URL = "/ui/launchpad/deleteLaunchPadItemByScene";
     public static final String UI_LAUNCHPAD_FAVORITEBUSINESSESBYSCENE_URL = "/ui/launchpad/favoriteBusinessesByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
+    public static final String UI_LAUNCHPAD_GETMOREITEMSBYSCENE_URL = "/ui/launchpad/getMoreItemsByScene";
+    public static final String UI_LAUNCHPAD_REORDERLAUNCHPADITEMBYSCENE_URL = "/ui/launchpad/reorderLaunchPadItemByScene";
+    public static final String UI_LAUNCHPAD_REORDERMOREITEMBYSCENE_URL = "/ui/launchpad/reorderMoreItemByScene";
     public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";
     public static final String UI_ORG_GRABTASK_URL = "/ui/org/grabTask";
     public static final String UI_ORG_LISTGRABTASKTOPICS_URL = "/ui/org/listGrabTaskTopics";
@@ -873,9 +892,12 @@ public interface ApiConstants {
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
     public static final String USER_GETUSERSNAPSHOTINFO_URL = "/user/getUserSnapshotInfo";
+    public static final String USER_LISTACTIVITYFAVORITE_URL = "/user/listActivityFavorite";
     public static final String USER_LISTCONTACTS_URL = "/user/listContacts";
+    public static final String USER_LISTPOSTEDACTIVITIES_URL = "/user/listPostedActivities";
     public static final String USER_LISTPOSTEDTOPICS_URL = "/user/listPostedTopics";
     public static final String USER_LISTRECIPIENT_URL = "/user/listRecipient";
+    public static final String USER_LISTSIGNUPACTIVITIES_URL = "/user/listSignupActivities";
     public static final String USER_LISTTOPICFAVORITE_URL = "/user/listTopicFavorite";
     public static final String USER_LISTTREASURE_URL = "/user/listTreasure";
     public static final String USER_LISTUSERIDENTIFIERS_URL = "/user/listUserIdentifiers";

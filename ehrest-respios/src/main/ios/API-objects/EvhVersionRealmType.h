@@ -29,6 +29,8 @@
 #define EvhVersionRealmType_IOS_JINDI @"iOS_Jindi"
 #define EvhVersionRealmType_ANDROID_CHUNENG @"Android_Chuneng"
 #define EvhVersionRealmType_IOS_CHUNENG @"iOS_Chuneng"
+#define EvhVersionRealmType_ANDROID_IBASE @"Android_Ibase"
+#define EvhVersionRealmType_IOS_IBASE @"iOS_Ibase"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -53,6 +53,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -62,6 +63,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -101,6 +103,7 @@ import com.everhomes.rest.forum.OrganizationTopicMixType;
 import com.everhomes.rest.forum.PostAssignedFlag;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
@@ -132,6 +135,7 @@ import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
+import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.PostFilterType;
 import com.everhomes.rest.ui.forum.PostSentScopeType;
@@ -143,6 +147,8 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserFavoriteDTO;
+import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -543,7 +549,8 @@ public class ForumServiceImpl implements ForumService {
         for(Long topicId : topicIds) {
             try {
                 postDto = getTopicById(topicId, communityId, isDetail, getByOwnerId);
-                postDtoList.add(postDto);
+                if(postDto != null) 
+                	postDtoList.add(postDto);
             } catch(Exception e) {
                 LOGGER.error(e.toString());
             }
@@ -565,19 +572,41 @@ public class ForumServiceImpl implements ForumService {
         Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
         if(post != null) {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
-                //Added by Janson
-                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
-                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
+            	
+            	//查我发的贴&&当前用户=发帖人 && 发帖人=删帖人时 可以看到该帖 modified by xiongying 20160617
+            	if(getByOwnerId && post.getCreatorUid().equals(userId) && post.getCreatorUid().equals(post.getDeleterUid())) {
+            		this.forumProvider.populatePostAttachments(post);
+                    populatePost(userId, post, communityId, isDetail, getByOwnerId);
+                    return ConvertHelper.convert(post, PostDTO.class);
+            	} else {
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-//            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-//            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
             		return null;
             	}
             }
-            
+                //Added by Janson
+//                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
+//                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
+//            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
+////            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+////            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+//            		return null;
+//            	}
+//            }
+//            
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
-            return ConvertHelper.convert(post, PostDTO.class);
+            
+            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
+            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
+            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
+            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
+            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            } else {
+            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+            }
+            
+            return dto;
         } else {
             LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
             return null;
@@ -607,7 +636,8 @@ public class ForumServiceImpl implements ForumService {
                 (DSLContext context, Object reducingContext)-> {
                     context.select().from(Tables.EH_USER_FAVORITES)
                         .where(Tables.EH_USER_FAVORITES.TARGET_ID.eq(postId))
-                        .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq("topic"))
+                        .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(UserFavoriteTargetType.TOPIC.getCode())
+                        		.or(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(UserFavoriteTargetType.ACTIVITY.getCode())))
                         .fetch().map( (r) ->{
                         	
                         	userIds.add(r.getValue(Tables.EH_USER_FAVORITES.OWNER_UID));
@@ -641,7 +671,8 @@ public class ForumServiceImpl implements ForumService {
                         }
                     if(userIds.size() != 0){
                     	for(Long id:userIds){
-                    		userActivityProvider.deleteFavorite(id, postId, "topic");
+                    		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.TOPIC.getCode());
+                    		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
                     	}
                     }
                    return null;
@@ -665,7 +696,12 @@ public class ForumServiceImpl implements ForumService {
                                     userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);    
                                     }
                                 }
-                            
+                            if(userIds.size() != 0){
+                            	for(Long id:userIds){
+                            		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.TOPIC.getCode());
+                            		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
+                            	}
+                            }
                         return null;
                         });
                 } catch(Exception e) {
@@ -1351,7 +1387,7 @@ public class ForumServiceImpl implements ForumService {
         Forum forum = checkForumParameter(operatorId, forumId, tag);
         
         Long topicId = cmd.getTopicId();
-        checkPostParameter(operatorId, forumId, topicId, tag);
+        Post post = checkPostParameter(operatorId, forumId, topicId, tag);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
@@ -1378,8 +1414,12 @@ public class ForumServiceImpl implements ForumService {
           return ConvertHelper.convert(r, PostDTO.class);  
         }).collect(Collectors.toList());
         
-        
-        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+        //add commentCount when listTopicComments modified by xiongying 20160629
+        ListPostCommandResponse response = new ListPostCommandResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setPosts(postDtoList);
+        response.setCommentCount(post.getChildCount());
+        return response;
     }
     
     public void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy) {
@@ -3021,7 +3061,17 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
-                    post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	//单独处理活动的分享链接 modified by xiongying 20160622
+                	if(post.getCategoryId() == 1010) {
+                		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
+                		ActivityTokenDTO dto = new ActivityTokenDTO();
+                		dto.setPostId(post.getId());
+                		dto.setForumId(post.getForumId());
+                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
+                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+                	} else {
+                		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	}
                 }
             } catch(Exception e) {
                 LOGGER.error("Failed to populate the post info, userId=" + userId + ", postId=" + post.getId(), e);
@@ -3577,6 +3627,92 @@ public class ForumServiceImpl implements ForumService {
         topicCmd.setVisibleRegionId(visibleRegionId);
         
         return this.createTopic(topicCmd);
+    }
+    
+    @Override
+    public ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        List<Long> visibleRegionIds = new ArrayList<Long>();
+        VisibleRegionType visibleRegionType = VisibleRegionType.COMMUNITY;
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+        	visibleRegionIds.add(sceneToken.getEntityId());
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                visibleRegionIds.add(family.getCommunityId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        case PM_ADMIN:// 无小区ID
+        case ENTERPRISE: 
+        case ENTERPRISE_NOAUTH: 
+            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            if(org != null) {
+
+            	if(OrganizationType.ENTERPRISE == OrganizationType.fromCode(org.getOrganizationType())){
+            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
+            		if(null != organizationCommunityRequest){
+                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
+            		}
+            	}else{
+//                	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+//                	command.setOrganizationId(org.getId());		
+//                	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
+//                	for (CommunityDTO communityDTO : communityDTOs) {
+//                		visibleRegionIds.add(communityDTO.getId());
+//    				}
+            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
+            		if(null != organizationCommunityRequest){
+                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
+            		}
+            	}
+            	
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        default:
+            break;
+        }
+        
+        return this.listNoticeTopic(visibleRegionType, visibleRegionIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
+    }
+    
+    @Override
+    public ListPostCommandResponse listNoticeTopic(VisibleRegionType visibleRegionType, List<Long> visibleRegionIds, String publishStatus, Integer pageSize, Long pageAnchor){
+    	if(visibleRegionIds.size() == 0){
+    		LOGGER.error("visibleRegionIds is null, visibleRegionIds =" + visibleRegionIds);
+    		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, ForumServiceErrorCode.ERROR_INVALID_PARAMETER, 
+   					"visibleRegionIds is null.");
+    	}
+    	pageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+    	CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+        locator.setAnchor(pageAnchor);
+        
+    	Category contentCatogry = this.categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_NOTICE);
+    	Condition condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+    	Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(visibleRegionType.getCode());
+        communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(visibleRegionIds));
+        condition = condition.and(communityCondition);
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus);
+        
+        ListPostCommandResponse response = new ListPostCommandResponse();
+        response.setPosts(dtos);
+        response.setNextPageAnchor(locator.getAnchor());
+        
+        return response;
     }
     
     /**

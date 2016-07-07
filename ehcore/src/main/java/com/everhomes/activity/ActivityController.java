@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,10 @@ import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityListCommand;
 import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityRejectCommand;
+import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
@@ -36,7 +40,9 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/activity")
@@ -240,5 +246,24 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
+    
+    /**
+     * 查询分享出去的活动信息
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityShareDetail")
+    @RestReturn(value=ActivityShareDetailResponse.class)
+    public RestResponse getActivityShareDetail(@Valid GetActivityShareDetailCommand cmd) {
+    	if(cmd == null || StringUtils.isEmpty(cmd.getPostToken())) {
+    		return new RestResponse();
+    	}
+    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+ 	    ActivityTokenDTO postToken = webToken.fromWebToken(cmd.getPostToken(), ActivityTokenDTO.class);
+        ActivityShareDetailResponse activity = activityService.getActivityShareDetail(postToken);
+        RestResponse response = new RestResponse(activity);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }

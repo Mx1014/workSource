@@ -1,0 +1,60 @@
+{
+  "eh_businesses": [
+    {
+      "id": "1",
+      "target_type": "1",
+      "target_id": "14454796321398120148",
+      "biz_owner_uid": "113571",
+      "name": "用膳了",
+      "display_name": "用膳了",
+      "logo_uri": "shop/3010/14454796321401143171989.png",
+      "url": "",
+      "longitude": "113.951065",
+      "latitude": "22.535635",
+      "geohash": "ws101n2xs6b7",
+      "address": "广东省深圳市南山区粤兴二道6武汉大学产学研大楼",
+      "visible_distance": "5000",
+      "description":"",
+      "creator_uid":"0"
+    }
+  ],
+  "eh_business_categories": [
+    {
+      "id": "1",
+      "owner_id": "1",
+      "category_id": "3010",
+      "category_path": "商家和服务/邻家小店/邻家小店"
+    }
+  ],
+  "eh_categories": [
+    {
+      "id": "3002",
+      "parent_id": "3",
+      "link_id": "0",
+      "name":"邻家小店",
+      "status": "2",
+      "logo_uri": "cs://1/image/aW1hZ2UvTVRvelpqRTBZMk0wWkRsa1pUVTVOamN4TmpJMlltWXpOalUxWWpreE1ETTBaUQ",
+      "namespace_id": "0",
+      "path": "商家和服务/邻家小店"
+    },
+    {
+      "id": "3010",
+      "parent_id": "3002",
+      "link_id": "0",
+      "name":"邻家小店",
+      "status": "2",
+      "logo_uri": "cs://1/image/aW1hZ2UvTVRvelpqRTBZMk0wWkRsa1pUVTVOamN4TmpJMlltWXpOalUxWWpreE1ETTBaUQ",
+      "namespace_id": "0",
+      "path": "商家和服务/邻家小店/邻家小店"
+    }
+  ],
+    "eh_business_assigned_namespaces": [
+    {
+      "id": "1",
+      "owner_id": "1",
+      "namespace_id": "0",
+      "visible_flag": "1",
+      "create_time": "2016-07-04 17:52:51"
+    }
+  ]
+}

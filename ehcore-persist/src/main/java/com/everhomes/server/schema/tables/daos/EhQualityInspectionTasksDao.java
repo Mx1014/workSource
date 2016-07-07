@@ -228,4 +228,32 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>category_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CATEGORY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>category_path IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCategoryPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CATEGORY_PATH, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCreateUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CREATE_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>manual_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByManualFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG, values);
+	}
 }

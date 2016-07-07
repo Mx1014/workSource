@@ -65,6 +65,10 @@
 
 @property(nonatomic, copy) NSString* guest;
 
+@property(nonatomic, copy) NSString* mediaUrl;
+
+@property(nonatomic, copy) NSNumber* favoriteFlag;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

@@ -61,6 +61,8 @@
 
 @property(nonatomic, copy) NSString* reviewerName;
 
+@property(nonatomic, copy) NSNumber* categoryId;
+
 @property(nonatomic, strong) EvhQualityInspectionTaskRecordsDTO* record;
 
 // item type EvhGroupUserDTO*
@@ -68,7 +70,11 @@
 
 @property(nonatomic, copy) NSNumber* taskFlag;
 
+@property(nonatomic, copy) NSNumber* manualFlag;
+
 @property(nonatomic, copy) NSString* standardDescription;
+
+@property(nonatomic, copy) NSString* categoryDescription;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

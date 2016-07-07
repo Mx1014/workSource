@@ -64,6 +64,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
 
 	/**
+	 * The table ehcore.eh_app_urls
+	 */
+	public static final com.everhomes.server.schema.tables.EhAppUrls EH_APP_URLS = com.everhomes.server.schema.tables.EhAppUrls.EH_APP_URLS;
+
+	/**
 	 * The table ehcore.eh_audit_logs
 	 */
 	public static final com.everhomes.server.schema.tables.EhAuditLogs EH_AUDIT_LOGS = com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS;
@@ -387,6 +392,11 @@ public class Tables {
 	 * The table ehcore.eh_group_visible_scopes
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroupVisibleScopes EH_GROUP_VISIBLE_SCOPES = com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES;
+
+	/**
+	 * The table ehcore.eh_hot_tags
+	 */
+	public static final com.everhomes.server.schema.tables.EhHotTags EH_HOT_TAGS = com.everhomes.server.schema.tables.EhHotTags.EH_HOT_TAGS;
 
 	/**
 	 * The table ehcore.eh_launch_pad_items
@@ -734,6 +744,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors EH_QUALITY_INSPECTION_EVALUATION_FACTORS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS;
 
 	/**
+	 * The table ehcore.eh_quality_inspection_logs
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionLogs EH_QUALITY_INSPECTION_LOGS = com.everhomes.server.schema.tables.EhQualityInspectionLogs.EH_QUALITY_INSPECTION_LOGS;
+
+	/**
 	 * The table ehcore.eh_quality_inspection_standards
 	 */
 	public static final com.everhomes.server.schema.tables.EhQualityInspectionStandards EH_QUALITY_INSPECTION_STANDARDS = com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS;
@@ -947,6 +962,11 @@ public class Tables {
 	 * The table ehcore.eh_user_invitation_roster
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserInvitationRoster EH_USER_INVITATION_ROSTER = com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER;
+
+	/**
+	 * The table ehcore.eh_user_launch_pad_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserLaunchPadItems EH_USER_LAUNCH_PAD_ITEMS = com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS;
 
 	/**
 	 * The table ehcore.eh_user_likes

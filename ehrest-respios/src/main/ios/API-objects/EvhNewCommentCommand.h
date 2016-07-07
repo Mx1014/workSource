@@ -16,6 +16,8 @@
 
 @property(nonatomic, copy) NSNumber* topicId;
 
+@property(nonatomic, copy) NSNumber* parentId;
+
 @property(nonatomic, copy) NSString* contentType;
 
 @property(nonatomic, copy) NSString* content;

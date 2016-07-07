@@ -24,6 +24,10 @@ public class AclinkUserDTO {
     private Byte     rightOpen;
     private Byte     rightVisitor;
     private Byte     rightRemote;
+    private Long companyId;
+    private String buildingName;
+    private Long buildingId;
+    private String company;
     
     public Long getId() {
         return id;
@@ -73,6 +77,32 @@ public class AclinkUserDTO {
     }
     public void setRightRemote(Byte rightRemote) {
         this.rightRemote = rightRemote;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+    public String getBuildingName() {
+        return buildingName;
+    }
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+    public Long getBuildingId() {
+        return buildingId;
+    }
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+    
+    public String getCompany() {
+        return company;
+    }
+    public void setCompany(String company) {
+        this.company = company;
     }
     @Override
     public String toString() {

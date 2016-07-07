@@ -12,11 +12,15 @@ import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.hotTag.HotTags;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.hotTag.HotTagServiceType;
+import com.everhomes.rest.hotTag.HotTagStatus;
+import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.StringHelper;
@@ -33,6 +37,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Autowired
     private ForumProvider forumProvider;
+    
+    @Autowired
+	private HotTagSearcher hotTagSearcher;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -97,6 +104,13 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             else{
             	activityService.createPost(cmd, post.getId()); 
             }
+            
+            HotTags tag = new HotTags();
+            tag.setName(cmd.getTag());
+            tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
+            tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+            hotTagSearcher.feedDoc(tag);
+            
         }catch(Exception e){
             LOGGER.error("create activity error",e);
         }

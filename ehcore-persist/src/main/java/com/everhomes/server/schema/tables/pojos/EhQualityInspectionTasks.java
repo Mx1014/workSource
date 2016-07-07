@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 809157220;
+	private static final long serialVersionUID = 44670304;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -40,6 +40,10 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 	private java.lang.Byte     reviewResult;
 	private java.sql.Timestamp reviewTime;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     categoryId;
+	private java.lang.String   categoryPath;
+	private java.lang.Long     createUid;
+	private java.lang.Byte     manualFlag;
 
 	public EhQualityInspectionTasks() {}
 
@@ -70,7 +74,11 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		java.lang.Long     reviewerId,
 		java.lang.Byte     reviewResult,
 		java.sql.Timestamp reviewTime,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Long     categoryId,
+		java.lang.String   categoryPath,
+		java.lang.Long     createUid,
+		java.lang.Byte     manualFlag
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -99,6 +107,10 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.reviewResult = reviewResult;
 		this.reviewTime = reviewTime;
 		this.createTime = createTime;
+		this.categoryId = categoryId;
+		this.categoryPath = categoryPath;
+		this.createUid = createUid;
+		this.manualFlag = manualFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -315,5 +327,37 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Long getCategoryId() {
+		return this.categoryId;
+	}
+
+	public void setCategoryId(java.lang.Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public java.lang.String getCategoryPath() {
+		return this.categoryPath;
+	}
+
+	public void setCategoryPath(java.lang.String categoryPath) {
+		this.categoryPath = categoryPath;
+	}
+
+	public java.lang.Long getCreateUid() {
+		return this.createUid;
+	}
+
+	public void setCreateUid(java.lang.Long createUid) {
+		this.createUid = createUid;
+	}
+
+	public java.lang.Byte getManualFlag() {
+		return this.manualFlag;
+	}
+
+	public void setManualFlag(java.lang.Byte manualFlag) {
+		this.manualFlag = manualFlag;
 	}
 }

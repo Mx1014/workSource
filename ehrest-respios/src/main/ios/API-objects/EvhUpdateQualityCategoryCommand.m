@@ -40,6 +40,10 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
+    if(self.score)
+        [jsonObject setObject: self.score forKey: @"score"];
+    if(self.description_)
+        [jsonObject setObject: self.description_ forKey: @"description"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -64,6 +68,14 @@
         self.ownerType = [jsonObject objectForKey: @"ownerType"];
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
+
+        self.score = [jsonObject objectForKey: @"score"];
+        if(self.score && [self.score isEqual:[NSNull null]])
+            self.score = nil;
+
+        self.description_ = [jsonObject objectForKey: @"description"];
+        if(self.description_ && [self.description_ isEqual:[NSNull null]])
+            self.description_ = nil;
 
         return self;
     }

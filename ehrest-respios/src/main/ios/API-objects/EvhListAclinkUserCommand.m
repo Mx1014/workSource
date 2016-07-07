@@ -40,6 +40,14 @@
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.keyword)
         [jsonObject setObject: self.keyword forKey: @"keyword"];
+    if(self.organizationId)
+        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.buildingId)
+        [jsonObject setObject: self.buildingId forKey: @"buildingId"];
+    if(self.buildingName)
+        [jsonObject setObject: self.buildingName forKey: @"buildingName"];
+    if(self.isAuth)
+        [jsonObject setObject: self.isAuth forKey: @"isAuth"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -64,6 +72,22 @@
         self.keyword = [jsonObject objectForKey: @"keyword"];
         if(self.keyword && [self.keyword isEqual:[NSNull null]])
             self.keyword = nil;
+
+        self.organizationId = [jsonObject objectForKey: @"organizationId"];
+        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
+            self.organizationId = nil;
+
+        self.buildingId = [jsonObject objectForKey: @"buildingId"];
+        if(self.buildingId && [self.buildingId isEqual:[NSNull null]])
+            self.buildingId = nil;
+
+        self.buildingName = [jsonObject objectForKey: @"buildingName"];
+        if(self.buildingName && [self.buildingName isEqual:[NSNull null]])
+            self.buildingName = nil;
+
+        self.isAuth = [jsonObject objectForKey: @"isAuth"];
+        if(self.isAuth && [self.isAuth isEqual:[NSNull null]])
+            self.isAuth = nil;
 
         return self;
     }

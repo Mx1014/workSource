@@ -33,3 +33,4 @@
 #define EvhPrivilegeConstants_OrgAdminList 604
 #define EvhPrivilegeConstants_OrgAdminUpdate 605
 #define EvhPrivilegeConstants_AclinkManager 720
+#define EvhPrivilegeConstants_AclinkInnerManager 725

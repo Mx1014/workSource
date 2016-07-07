@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadLayouts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -102924702;
+	private static final long serialVersionUID = 928937700;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -22,6 +22,9 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
 	private java.lang.String   sceneType;
+	private java.lang.Byte     scopeCode;
+	private java.lang.Long     scopeId;
+	private java.lang.Byte     applyPolicy;
 
 	public EhLaunchPadLayouts() {}
 
@@ -34,7 +37,10 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 		java.lang.Long     minVersionCode,
 		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
-		java.lang.String   sceneType
+		java.lang.String   sceneType,
+		java.lang.Byte     scopeCode,
+		java.lang.Long     scopeId,
+		java.lang.Byte     applyPolicy
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -45,6 +51,9 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 		this.status = status;
 		this.createTime = createTime;
 		this.sceneType = sceneType;
+		this.scopeCode = scopeCode;
+		this.scopeId = scopeId;
+		this.applyPolicy = applyPolicy;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +126,29 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 
 	public void setSceneType(java.lang.String sceneType) {
 		this.sceneType = sceneType;
+	}
+
+	public java.lang.Byte getScopeCode() {
+		return this.scopeCode;
+	}
+
+	public void setScopeCode(java.lang.Byte scopeCode) {
+		this.scopeCode = scopeCode;
+	}
+
+	public java.lang.Long getScopeId() {
+		return this.scopeId;
+	}
+
+	public void setScopeId(java.lang.Long scopeId) {
+		this.scopeId = scopeId;
+	}
+
+	public java.lang.Byte getApplyPolicy() {
+		return this.applyPolicy;
+	}
+
+	public void setApplyPolicy(java.lang.Byte applyPolicy) {
+		this.applyPolicy = applyPolicy;
 	}
 }

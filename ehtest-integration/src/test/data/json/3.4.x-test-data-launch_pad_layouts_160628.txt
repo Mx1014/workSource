@@ -1,0 +1,32 @@
+{
+  "eh_launch_pad_layouts": [
+    {
+      "id": "1",
+      "namespace_id": "0",
+      "name": "ServiceMarketLayout",
+      "layout_json": "asdfadfadfadf",
+      "version_code": "2016021401",
+      "min_version_code": "2016021401",
+      "status": "2",
+      "create_time": "2015-06-24 16:09:30",
+      "scene_type": "default",
+      "scope_code": "0",
+      "apply_policy": "0",
+      "scope_id": "0"
+    },
+    {
+      "id": "2",
+      "namespace_id": "0",
+      "name": "ServiceMarketLayout",
+      "layout_json": "asdfadfadfadf",
+      "version_code": "2016021401",
+      "min_version_code": "2016021401",
+      "status": "2",
+      "create_time": "2015-06-24 16:09:30",
+      "scene_type": "default",
+      "scope_code": "1",
+      "apply_policy": "3",
+      "scope_id": "24210090697425925"
+    }
+  ]
+}

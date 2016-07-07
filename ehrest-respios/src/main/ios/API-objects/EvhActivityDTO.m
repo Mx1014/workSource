@@ -84,6 +84,10 @@
         [jsonObject setObject: self.uuid forKey: @"uuid"];
     if(self.guest)
         [jsonObject setObject: self.guest forKey: @"guest"];
+    if(self.mediaUrl)
+        [jsonObject setObject: self.mediaUrl forKey: @"mediaUrl"];
+    if(self.favoriteFlag)
+        [jsonObject setObject: self.favoriteFlag forKey: @"favoriteFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -196,6 +200,14 @@
         self.guest = [jsonObject objectForKey: @"guest"];
         if(self.guest && [self.guest isEqual:[NSNull null]])
             self.guest = nil;
+
+        self.mediaUrl = [jsonObject objectForKey: @"mediaUrl"];
+        if(self.mediaUrl && [self.mediaUrl isEqual:[NSNull null]])
+            self.mediaUrl = nil;
+
+        self.favoriteFlag = [jsonObject objectForKey: @"favoriteFlag"];
+        if(self.favoriteFlag && [self.favoriteFlag isEqual:[NSNull null]])
+            self.favoriteFlag = nil;
 
         return self;
     }

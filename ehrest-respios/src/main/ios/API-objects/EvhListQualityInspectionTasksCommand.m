@@ -50,6 +50,8 @@
         [jsonObject setObject: self.executeStatus forKey: @"executeStatus"];
     if(self.reviewStatus)
         [jsonObject setObject: self.reviewStatus forKey: @"reviewStatus"];
+    if(self.manualFlag)
+        [jsonObject setObject: self.manualFlag forKey: @"manualFlag"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -98,6 +100,10 @@
         self.reviewStatus = [jsonObject objectForKey: @"reviewStatus"];
         if(self.reviewStatus && [self.reviewStatus isEqual:[NSNull null]])
             self.reviewStatus = nil;
+
+        self.manualFlag = [jsonObject objectForKey: @"manualFlag"];
+        if(self.manualFlag && [self.manualFlag isEqual:[NSNull null]])
+            self.manualFlag = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

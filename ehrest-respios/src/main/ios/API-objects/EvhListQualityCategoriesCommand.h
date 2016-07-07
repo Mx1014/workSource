@@ -19,6 +19,8 @@
 
 @property(nonatomic, copy) NSNumber* pageSize;
 
+@property(nonatomic, copy) NSNumber* parentId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

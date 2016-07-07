@@ -43,6 +43,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"posts"];
     }
+    if(self.commentCount)
+        [jsonObject setObject: self.commentCount forKey: @"commentCount"];
     if(self.keywords)
         [jsonObject setObject: self.keywords forKey: @"keywords"];
 }
@@ -63,6 +65,10 @@
                 [self.posts addObject: item];
             }
         }
+        self.commentCount = [jsonObject objectForKey: @"commentCount"];
+        if(self.commentCount && [self.commentCount isEqual:[NSNull null]])
+            self.commentCount = nil;
+
         self.keywords = [jsonObject objectForKey: @"keywords"];
         if(self.keywords && [self.keywords isEqual:[NSNull null]])
             self.keywords = nil;
