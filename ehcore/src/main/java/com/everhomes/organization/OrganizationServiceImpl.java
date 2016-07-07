@@ -396,11 +396,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
 		
+		User user = UserContext.current().getUser();
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		//default show navi, add by sfyan 20160505
 		if(null == cmd.getNaviFlag()){
-			cmd.setNaviFlag((byte)1);
+			cmd.setNaviFlag(OrganizationNaviFlag.SHOW_NAVI.getCode());
 		}
-		
 		organization.setShowFlag(cmd.getNaviFlag());
 		organization.setPath(parOrg.getPath());
 		organization.setLevel(parOrg.getLevel()+1);
@@ -415,16 +418,39 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 		}
 		
-		organizationProvider.createOrganization(organization);
-		if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-			OrganizationDetail enterprise = new OrganizationDetail();
-			enterprise.setOrganizationId(organization.getId());
-			enterprise.setAddress(cmd.getAddress());
-			enterprise.setCreateTime(organization.getCreateTime());
-			organizationProvider.createOrganizationDetail(enterprise);
-			
-		}
-		return ConvertHelper.convert(organization, OrganizationDTO.class);
+		Organization org = dbProvider.execute((TransactionStatus status) -> {
+			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				//添加子公司的时候默认给公司添加圈 sfyan 20160706
+				Group group = new Group();
+				group.setName(cmd.getName());
+				group.setDisplayName(cmd.getName());
+				group.setEnterpriseAddress(cmd.getAddress());
+				
+				group.setDescription(cmd.getName());
+				group.setStatus(OrganizationStatus.ACTIVE.getCode());
+				
+				group.setCreatorUid(user.getId());
+				
+				group.setNamespaceId(namespaceId);
+				
+				group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+				groupProvider.createGroup(group);
+				
+				organization.setGroupId(group.getId());
+				organizationProvider.createOrganization(organization);
+				
+				OrganizationDetail enterprise = new OrganizationDetail();
+				enterprise.setOrganizationId(organization.getId());
+				enterprise.setAddress(cmd.getAddress());
+				enterprise.setCreateTime(organization.getCreateTime());
+				organizationProvider.createOrganizationDetail(enterprise);
+			}else{
+				organizationProvider.createOrganization(organization);
+			}
+			return organization;
+		});
+		
+		return ConvertHelper.convert(org, OrganizationDTO.class);
 	}
 	
 	@Override
@@ -512,9 +538,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null == org){
 			org = new OrganizationDetail();
 		}
+		org.setOrganizationId(organization.getId());
+		org.setDisplayName(organization.getName());
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
-		dto.setOrganizationId(organization.getId());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
@@ -769,16 +796,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationProvider.updateOrganization(organization);
 			
 			OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-			organizationDetail.setAddress(cmd.getAddress());
-			organizationDetail.setDescription(cmd.getDescription());
-			organizationDetail.setAvatar(cmd.getAvatar());
-			if(!StringUtils.isEmpty(cmd.getCheckinDate())){
-				organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+			if(null == organizationDetail){
+				organizationDetail = new OrganizationDetail();
+				organizationDetail.setOrganizationId(organization.getId());
+				organizationDetail.setCreateTime(organization.getCreateTime());
+				organizationDetail.setAddress(cmd.getAddress());
+				organizationDetail.setDescription(cmd.getDescription());
+				organizationDetail.setAvatar(cmd.getAvatar());
+				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
+					organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+				}
+				organizationDetail.setContact(cmd.getContactsPhone());
+				organizationDetail.setDisplayName(cmd.getDisplayName());
+				organizationDetail.setPostUri(cmd.getPostUri());
+				organizationProvider.createOrganizationDetail(organizationDetail);
+			}else{
+				organizationDetail.setAddress(cmd.getAddress());
+				organizationDetail.setDescription(cmd.getDescription());
+				organizationDetail.setAvatar(cmd.getAvatar());
+				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
+					organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+				}
+				organizationDetail.setContact(cmd.getContactsPhone());
+				organizationDetail.setDisplayName(cmd.getDisplayName());
+				organizationDetail.setPostUri(cmd.getPostUri());
+				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
-			organizationDetail.setContact(cmd.getContactsPhone());
-			organizationDetail.setDisplayName(cmd.getDisplayName());
-			organizationDetail.setPostUri(cmd.getPostUri());
-			organizationProvider.updateOrganizationDetail(organizationDetail);
+			
 			
 			// 把小区ID移到eh_organization_community_requests后，在企业更新时需要补充小区修改，但修改小区逻辑未想好故暂时不支持 by lqs 20160512
 //			if(cmd.getCommunityId() != null) {
@@ -4508,6 +4552,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), org.getId());
 		if(null != desOrgMember){
 			LOGGER.error("phone number already exists.");
@@ -4539,8 +4585,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, organizationMember.getId());
 		}
+		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-		userSearcher.feedDoc(organizationMember);
+	//	userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
@@ -5431,6 +5478,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 	    User user = userProvider.findUserById(member.getTargetId());
 
+	    Long groupId = org.getGroupId();
+	    
+	    if(null != groupId){
+	    	Group group = groupProvider.findGroupById(groupId);
+	    	if(null == group){
+	    		LOGGER.error("group non-existent。organizationId = {}, groupId = {}", org.getId(), groupId);
+//				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PARAMETER_NOT_EXIST,
+//						"group non-existent。");
+	    		return;
+	    	}
+	    }else{
+	    	LOGGER.error("organization groupId is null。organizationId=" + org.getId());
+//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+//					"organization groupId is null");
+	    	return;
+	    }
+	    
          // send notification to who is requesting to join the enterprise
         String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
          
@@ -5440,16 +5504,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Long> includeList = new ArrayList<Long>();
         
         includeList.add(member.getTargetId());
-		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, null, null);
 		
 		
 		//同意加入公司通知客户端  by sfyan 20160526
-		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
+		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
-		includeList = this.includeOrgList(org, member.getTargetId());
-		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+		//传入groupId，排除自己 by sfyan 20160706
+		List<Long> excludeList = new ArrayList<Long>();
+		excludeList.add(member.getTargetId());
+		sendEnterpriseNotification(groupId, null, excludeList, notifyTextForApplicant, null, null);
 		
 	}
 	
@@ -5528,12 +5594,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	   return includeList;
    }
 
-	private void sendEnterpriseNotification(Long enterpriseId,
+	private void sendEnterpriseNotification(Long groupId,
 			List<Long> includeList, List<Long> excludeList, String message,
 			MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
 		if (message != null && message.length() != 0) {
 			String channelType = MessageChannelType.GROUP.getCode();
-			String channelToken = String.valueOf(enterpriseId);
+			String channelToken = String.valueOf(groupId);
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
