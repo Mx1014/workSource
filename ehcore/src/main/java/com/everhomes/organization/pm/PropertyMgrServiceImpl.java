@@ -1391,6 +1391,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
 		/** 获取全部企业的全部人员 **/
 		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+		
+		LOGGER.debug("send notice to organizationMember , phones = {}, namespaceId = {}", phones, namespaceId);
+		
 		/** 根据地址获取要推送的企业 **/
 		if(null != addressIds && 0 != addressIds.size()){
 			for (Long addressId : addressIds) {
@@ -1445,6 +1448,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			/** 获取全部企业的全部人员 **/
 			members = this.getOrganizationMembersByAddress(orgs);
 		}
+		
+		LOGGER.debug("send message to organization member, members = {}", members);
 		
 		/** 推送消息 **/
 		this.processSmsByMembers(members, cmd.getMessage(), user);
