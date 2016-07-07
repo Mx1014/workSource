@@ -9,50 +9,57 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.payment.CardRechargeStatus;
-import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
+import com.everhomes.rest.payment.SetCardPasswordCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
-import com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord;
+import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
+import com.everhomes.server.schema.tables.records.EhPaymentCardsRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class updateCardRechargeOrderTest extends BaseLoginAuthTestCase {
+public class SetCardPasswordTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {
         super.setUp();
     }
     
     @Test
-    public void testUpdateCardRechargeOrder() {
-        Long id = 1L;
-        Byte rechargeStatus = CardRechargeStatus.COMPLETE.getCode();
+    public void testSetCardPassword() {
+        
+    	String ownerType = "community";
+        Long ownerId = 240111044331051500L;
+        String mobile = "13632650699";
+        String oldPassword = "123456";
+        String newPassword = "654321";
+        Long cardId = 1L;
+    	
         String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
         Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
         logon(namespaceId, userIdentifier, plainTexPassword);
         
-        UpdateCardRechargeOrderCommand cmd = new UpdateCardRechargeOrderCommand();
-        cmd.setId(id);
-        cmd.setRechargeStatus(rechargeStatus);
+        SetCardPasswordCommand cmd = new SetCardPasswordCommand();
+        cmd.setCardId(cardId);
+        cmd.setNewPassword(newPassword);
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setOldPassword(oldPassword);
         
-        String commandRelativeUri = "/payment/updateCardRechargeOrder";
+        String commandRelativeUri = "/payment/setCardPassword";
         RestResponse response = httpClientService.restPost(commandRelativeUri, cmd, RestResponse.class,context);
         
         assertNotNull("The reponse of updateCardRechargeOrder may not be null", response);
-        assertTrue("updateCardRechargeOrder, response=" + 
+        assertTrue("SetCardPassword, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
         DSLContext context = dbProvider.getDslContext();
-        SelectQuery<EhPaymentCardRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS);
-		query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.ID.eq(id));
-		EhPaymentCardRechargeOrders result = ConvertHelper.convert(query.fetchOne(), EhPaymentCardRechargeOrders.class);
+        SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
+		query.addConditions(Tables.EH_PAYMENT_CARDS.MOBILE.eq(mobile));
+		EhPaymentCards result = ConvertHelper.convert(query.fetchOne(), EhPaymentCards.class);
         
 		assertNotNull(result);
-		assertEquals(new Long(1), result.getId());
-		assertEquals(rechargeStatus, result.getRechargeStatus());
+		assertEquals(EncryptionUtils.hashPassword(newPassword), result.getPassword());
         
     }
     

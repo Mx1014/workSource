@@ -5,11 +5,14 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -114,6 +117,8 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -1383,6 +1388,28 @@ public class ActivityServiceImpl implements ActivityService {
 //        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
 	}
 	
+	private List<Long> getViewedActivityIds() {
+		
+		List<Long> ids = new ArrayList<Long>();
+		UserProfile userProfile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), 
+				UserProfileContstant.VIEWED_ACTIVITY_NEW);
+        
+		if(userProfile != null) {
+	        String idString = userProfile.getStringTag1();
+	        String id = idString.substring(1, idString.toString().length()-1);
+	        if(!StringUtils.isEmpty(id)) {
+	        	String[] idArr = id.split(", ");
+				Long[] idLong = new Long[idArr.length];
+				for(int i = 0; i < idArr.length; i++) {
+					idLong[i] = Long.parseLong(idArr[i]);
+				}
+				ids = Arrays.asList(idLong);
+			}
+        }
+		
+		return ids;
+	}
+	
 	@Override
 	public ListActivitiesReponse listActivitiesByLocation(ListActivitiesByLocationCommand cmd) {
 		User user = UserContext.current().getUser();
@@ -1408,8 +1435,40 @@ public class ActivityServiceImpl implements ActivityService {
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int ipageSize = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        List<Activity> ret = activityProvider.listActivities(locator, ipageSize + 1, condition);
-        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
+        
+        List<Activity> activities=new ArrayList<Activity>();
+        
+        //查第一页时，一部分为上次查询过后新发的贴 modified by xiongying 20160707
+        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
+        	Timestamp lastViewedTime = null;
+        	String counts = configurationProvider.getValue(ConfigConstants.ACTIVITY_LIST_NUM, "3");
+        	UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), 
+        								UserProfileContstant.VIEWED_ACTIVITY_NEW);
+	    	
+        	if(profile != null) {
+        		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
+        	}
+        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime);
+	    	if(newActivities != null && newActivities.size() > 0) {
+	    		activities.addAll(newActivities);
+	    	}
+        }
+    	
+		List<Long> ids = getViewedActivityIds();
+		
+        List<Activity> ret = activityProvider.listActivities(locator, ipageSize - activities.size() + 1, condition);
+        
+        if(ret != null && ret.size() > 0) {
+        	for(Activity act : ret) {
+        		if(!ids.contains(act.getId())) {
+        			activities.add(act);
+            	}
+        	}
+        }
+        
+        
+        List<ActivityDTO> activityDtos = activities.stream().map(activity->{
+        	
             Post post = forumProvider.findPostById(activity.getPostId());
             if(activity.getPosterUri() == null && post != null){
                 this.forumProvider.populatePostAttachments(post);
@@ -1451,11 +1510,7 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         
-        Long nextPageAnchor = null;
-        if(activityDtos.size() > ipageSize) {
-            activityDtos.remove(activityDtos.size() - 1);
-            nextPageAnchor = activityDtos.get(activityDtos.size() - 1).getActivityId();
-        }
+        Long nextPageAnchor = locator.getAnchor();
         
         response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
         return response;
