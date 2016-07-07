@@ -3,7 +3,10 @@ package com.everhomes.news;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,6 +154,9 @@ public class NewsServiceImpl implements NewsService {
 			news.setContentAbstract(news.getContent().substring(0,
 					news.getContent().length() > 100 ? 100 : news.getContent().length()));
 		}
+		if (!StringUtils.isEmpty(cmd.getPublishTime())) {
+			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		}
 		return news;
 	}
 
@@ -221,8 +227,9 @@ public class NewsServiceImpl implements NewsService {
 				String coverUri = RowResult.trimString(result.getC());
 				String content = RowResult.trimString(result.getD());
 				String author = RowResult.trimString(result.getE());
-				String sourceDesc = RowResult.trimString(result.getF());
-				String sourceUrl = RowResult.trimString(result.getG());
+				String publishTime = RowResult.trimString(result.getF());
+				String sourceDesc = RowResult.trimString(result.getG());
+				String sourceUrl = RowResult.trimString(result.getH());
 
 				// 判断有效行，有一个单元格不为空即为有效行
 				if (!StringUtils.isEmpty(title) || !StringUtils.isEmpty(contentAbstract)
@@ -237,6 +244,7 @@ public class NewsServiceImpl implements NewsService {
 					command.setContent(content);
 					command.setCoverUri(coverUri);
 					command.setAuthor(author);
+					command.setPublishTime(covertStringToLongTime(publishTime));
 					command.setSourceDesc(sourceDesc);
 					command.setSourceUrl(sourceUrl);
 					checkNewsParameter(userId, command);
@@ -250,6 +258,18 @@ public class NewsServiceImpl implements NewsService {
 				"excel data format is not correct");
 	}
 
+	private Long covertStringToLongTime(String string){
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			Date date = format.parse(string);
+			return date.getTime();
+		} catch (ParseException e) {
+			LOGGER.error("date format error, date: " + string);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"date format error, date: " + string);
+		}
+	}
+	
 	@Override
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();

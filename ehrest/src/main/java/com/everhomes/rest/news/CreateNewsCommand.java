@@ -2,6 +2,8 @@
 
 package com.everhomes.rest.news;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -16,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>coverUri: 封面</li>
  * <li>content: 正文</li>
  * <li>author: 作者</li>
+ * <li>publishTime: 发布时间</li>
  * <li>sourceDesc: 来源</li>
  * <li>sourceUrl: 原文链接</li>
  * </ul>
@@ -32,6 +35,7 @@ public class CreateNewsCommand {
 	@NotNull
 	private String content;
 	private String author;
+	private Long publishTime;
 	private String sourceDesc;
 	private String sourceUrl;
 
@@ -105,6 +109,14 @@ public class CreateNewsCommand {
 
 	public void setSourceUrl(String sourceUrl) {
 		this.sourceUrl = sourceUrl;
+	}
+
+	public Long getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(Long publishTime) {
+		this.publishTime = publishTime;
 	}
 
 	@Override

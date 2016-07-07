@@ -36,7 +36,9 @@ public class NewsProviderImpl implements NewsProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNews.class));
 		news.setId(id);
 		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		news.setPublishTime(news.getCreateTime());
+		if (news.getPublishTime() == null) {
+			news.setPublishTime(news.getCreateTime());
+		}
 		getReadWriteDao().insert(news);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 	}
@@ -49,7 +51,9 @@ public class NewsProviderImpl implements NewsProvider {
 			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNews.class));
 			news.setId(id);
 			news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			news.setPublishTime(news.getCreateTime());
+			if (news.getPublishTime() == null) {
+				news.setPublishTime(news.getCreateTime());
+			}
 			return ConvertHelper.convert(news, EhNews.class);
 		}).collect(Collectors.toList());
 		getReadWriteDao().insert(list);
@@ -82,7 +86,7 @@ public class NewsProviderImpl implements NewsProvider {
 	public List<News> listNews(Integer namespaceId, Long from, Integer pageSize) {
 		return getReadOnlyContext().select().from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()))
-				.orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.CREATE_TIME.desc(), Tables.EH_NEWS.ID.desc())
+				.orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
 				.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
 	}
 

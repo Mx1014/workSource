@@ -60,5 +60,14 @@
       "organization_id": "2",
       "status": "2"
     }
+  ],
+  "eh_configurations": [
+    {
+      "namespace_id": "0",
+      "name": "news.content.url",
+      "description": "news content url",
+      "id": "-999",
+      "value": "/web/lib/html/news_text_review.html"
+    }
   ]
 }
