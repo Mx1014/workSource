@@ -343,6 +343,11 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			param.put("BranchCode", brandCode);
 			param.put("CardId", cardId);
 			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, TaotaoguVendorConstant.PIN3_CRT));
+			if(cert == null){
+				LOGGER.error("taotaogu.pin3.crt is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.pin3.crt is null.");
+			}
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			
 			byte[] oldpsd;
