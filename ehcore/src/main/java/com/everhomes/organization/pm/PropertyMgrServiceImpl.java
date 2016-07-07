@@ -1259,33 +1259,33 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<String> phones = cmd.getMobilePhones();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
 		
-		if(null != addressIds && 0 != addressIds.size()){
-
-			/** 根据楼栋Id获取要推送的企业  **/
-		}else if(null != buildingIds && 0 != buildingIds.size()){
-
-			/** 根据楼栋名称获取要推送的企业**/
-		}else if(null != buildingNames && 0 != buildingNames.size()){
-
-		/** 根据电话号码推送   **/
-		}else if(null != phones && 0 != phones.size()){
-			
-		/** 根据小区获取要推送的企业  **/
-		}else if(null != cmd.getCommunityId()){
-			LOGGER.debug("All Park push message, cmd = {}", cmd);
-			
-			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
-			Date now = new Date();
-			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
-			command.setScopeId(cmd.getCommunityId());
-			command.setNamespaceId(namespaceId);
-			command.setContent(cmd.getMessage());
-			command.setStartTime(now.getTime());
-			command.setEndTime(DateUtils.addDays(now, 1).getTime());
-			promotionService.createRegionPushing(command);
-			
-			return;
-		}
+//		if(null != addressIds && 0 != addressIds.size()){
+//
+//			/** 根据楼栋Id获取要推送的企业  **/
+//		}else if(null != buildingIds && 0 != buildingIds.size()){
+//
+//			/** 根据楼栋名称获取要推送的企业**/
+//		}else if(null != buildingNames && 0 != buildingNames.size()){
+//
+//		/** 根据电话号码推送   **/
+//		}else if(null != phones && 0 != phones.size()){
+//			
+//		/** 根据小区获取要推送的企业  **/
+//		}else if(null != cmd.getCommunityId()){
+//			LOGGER.debug("All Park push message, cmd = {}", cmd);
+//			
+//			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
+//			Date now = new Date();
+//			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
+//			command.setScopeId(cmd.getCommunityId());
+//			command.setNamespaceId(namespaceId);
+//			command.setContent(cmd.getMessage());
+//			command.setStartTime(now.getTime());
+//			command.setEndTime(DateUtils.addDays(now, 1).getTime());
+//			promotionService.createRegionPushing(command);
+//			
+//			return;
+//		}
 		
 		LOGGER.debug("push message task scheduling, cmd = {}", cmd);
 		
@@ -1388,7 +1388,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Long> addressIds = cmd.getAddressIds();
 		List<String> phones = cmd.getMobilePhones();
 		List<Organization> orgs = new ArrayList<Organization>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+		Integer namespaceId = user.getNamespaceId();
 		/** 获取全部企业的全部人员 **/
 		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
 		
