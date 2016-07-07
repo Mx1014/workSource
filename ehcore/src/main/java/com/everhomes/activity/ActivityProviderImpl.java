@@ -311,7 +311,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
     
     @Override
-    public List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime) {
+    public List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition) {
     	List<Activity> activities = new ArrayList<Activity>();
     	List<Long> ids = new ArrayList<Long>();
     	
@@ -326,6 +326,10 @@ public class ActivityProviderImpl implements ActivityProivider {
             
             if (lastViewedTime != null){
             	query.addConditions(Tables.EH_ACTIVITIES.CREATE_TIME.gt(lastViewedTime));
+            }
+            
+            if(condition != null){
+                query.addConditions(condition);
             }
 
             query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
