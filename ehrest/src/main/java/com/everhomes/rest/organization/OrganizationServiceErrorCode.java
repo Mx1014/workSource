@@ -27,5 +27,7 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_COMMUNITY_EXISTS=300001; //小区已存在
     
     static final int ERROR_ENTERPRISE_CONTACT_NOT_FOUND = 10101; //人员已不在在公司通讯录
+    
+    static final int ERROR_PARAMETER_NOT_EXIST = 400001;
    
 }

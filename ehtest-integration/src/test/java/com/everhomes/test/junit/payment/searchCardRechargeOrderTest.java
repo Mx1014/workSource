@@ -54,12 +54,14 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
         String paidType = PaidTypeStatus.ALIPAY.getCode();
         Long startDate = null;
         Long endDate = null;
-        Byte rechargeStatus = CardRechargeStatus.RECHARGED.getCode();
+//        Byte rechargeStatus = CardRechargeStatus.RECHARGED.getCode();
+        Byte rechargeStatus = null;
         
-        String userIdentifier = "12000000001";
+        String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
+        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
         SearchCardRechargeOrderCommand cmd = new SearchCardRechargeOrderCommand();
         cmd.setOwnerId(ownerId);
@@ -78,8 +80,6 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("The user info should be get from server, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-//        assertEquals("User should be in 0 namespace", namespaceId, response.getResponse().getNamespaceId());
-//        assertEquals("左邻李四", response.getResponse().getNickName());
         
         DSLContext context = dbProvider.getDslContext();
 		SelectQuery<EhPaymentCardRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS);

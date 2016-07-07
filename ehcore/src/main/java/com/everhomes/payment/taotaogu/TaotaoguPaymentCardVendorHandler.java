@@ -66,7 +66,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.google.gson.Gson;
 
 @Component(PaymentCardVendorHandler.PAYMENTCARD_VENDOR_PREFIX + "TAOTAOGU")
 public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandler{
@@ -343,7 +342,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			Map<String, Object> param = new HashMap<String, Object>();
 			param.put("BranchCode", brandCode);
 			param.put("CardId", cardId);
-			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, ""));
+			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, TaotaoguVendorConstant.PIN3_CRT));
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			
 			byte[] oldpsd;
@@ -647,126 +646,59 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			Map<String, Object> result = post(createRequestParam(taotaoguVendorData, BUSINESS_QUERY_TYPE, param));
 			return result;
 		}
-	private Map login(TaotaoguVendorData taotaoguVendorData){
-		Map result = null;
-		String rspText = null;
+	//创建登录参数
+	private JSONObject createLoginParam(TaotaoguVendorData taotaoguVendorData){
 		JSONObject json = new JSONObject();
-		try{
-			
-			Gson gson = new Gson();
-			String url = configProvider.getValue("taotaogu.order.url", "");
-			HttpPost request = new HttpPost(url+"/iips2/order/login");
-			
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-			Date now = new Date();
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
-			String timeStr = dateFormat.format(now);
-			
-			String chnl_type = taotaoguVendorData.getChnlType();
-			String chnl_id = taotaoguVendorData.getChnlId();
-			String merch_id = taotaoguVendorData.getMerchId();
-			String termnl_id = taotaoguVendorData.getTermnlId();
-			json.put("chnl_type", chnl_type);
-			json.put("chnl_id", chnl_id);
-			json.put("chnl_sn", System.currentTimeMillis());
-			json.put("merch_id", merch_id);
-			json.put("termnl_id", termnl_id);
-		
-			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.SERVER_CER, ""));
-			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
-			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.CLIENT_PFX, ""));
-			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
-			
-			String msg = json.toString();
-			msg = Base64.encodeBase64String(OrderCertCoder.encryptByPublicKey(msg.getBytes(), serverCerIn));
-			
-			byte[] r=  OrderCertCoder.sign(msg.getBytes(), clientPfxIn,null, clientPfx.getCertPass());
-			String sign = Base64.encodeBase64String(r);
-			
-			pairs.add(new BasicNameValuePair("msg", msg));
-			pairs.add(new BasicNameValuePair("sign", sign));
-			
-			request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
-			HttpResponse rsp = httpClient.execute(request);
-			StatusLine status = rsp.getStatusLine();
-			rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
-			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("rspText={}",rspText);   
-			int a = rspText.indexOf("msg=");
-			int b = rspText.indexOf("&sign=");
-			String r1 = null; //结果字符串
-			if(b != -1){
-				msg = rspText.substring(a + 4, b);
-				sign = rspText.substring(b + 6);
-				boolean bSign = OrderCertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), serverCerIn);
-				r = OrderCertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), clientPfxIn, null, clientPfx.getCertPass());
-				r1 = new String(r, "GBK");
-			}else{
-				r1 = rspText.substring(a + 4);
-			}
-			result = gson.fromJson(r1, Map.class);
-		}catch(Exception e){
-			LOGGER.error("the login request of taotaogu is failed rspText={},json={}.",rspText,json,e);
-			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"the login request of taotaogu is failed.");
-		}
-		return result;
+		String chnl_type = taotaoguVendorData.getChnlType();
+		String chnl_id = taotaoguVendorData.getChnlId();
+		String merch_id = taotaoguVendorData.getMerchId();
+		String termnl_id = taotaoguVendorData.getTermnlId();
+		json.put("chnl_type", chnl_type);
+		json.put("chnl_id", chnl_id);
+		json.put("chnl_sn", System.currentTimeMillis());
+		json.put("merch_id", merch_id);
+		json.put("termnl_id", termnl_id);
+		return json;
 	}
+	//卡信息接口，创建请求参数方法
+		private String createRequestParam(TaotaoguVendorData taotaoguVendorData,String msgType,Map<String, Object> param){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			
+			Map<String, Object> requestParam = new HashMap<String, Object>();
+			String appName = taotaoguVendorData.getAppName();
+			String version = taotaoguVendorData.getVersion();
+			String dstId = taotaoguVendorData.getDstId();
+			String brandCode = (String) taotaoguVendorData.getBranchCode();
+			requestParam.put("AppName", appName);
+			requestParam.put("Version",version);
+			requestParam.put("ClientDt",sdf.format(new Date()));
+			requestParam.put("SrcId",brandCode);
+			requestParam.put("DstId",dstId);
+			requestParam.put("MsgType",msgType);
+			requestParam.put("MsgID",brandCode + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
+			requestParam.put("Sign", "");
 
-	private Map<String,Object> post(String method,String token,String aesKey,JSONObject json){
-		Map<String,Object> result = null;
-		String rspText = null;
-		try{
-			String url = configProvider.getValue("taotaogu.order.url", "");
-			HttpPost request = new HttpPost(url+method);
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-				
-			pairs.add(new BasicNameValuePair("token", token));
-			String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));
-			pairs.add(new BasicNameValuePair("msg", msg));
-			pairs.add(new BasicNameValuePair("sign", SHA1.EnCodeSHA1(msg + aesKey + token)));
-			request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
-			HttpResponse rsp = httpClient.execute(request);
-			
-			StatusLine status = rsp.getStatusLine();
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("the login request of taotaogu failed method={},token={},aesKey={},param={},rspText={},status={}.",
-						method,token,aesKey,json,rspText,status);
-			if(status.getStatusCode() == 200){
-				rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
-				int a = rspText.indexOf("msg=");
-				String data1 = null; //结果字符串
-				if(a != -1){
-					int b = rspText.indexOf("&sign=");
-					if(b != -1){
-						msg = rspText.substring(a + 4, b);
-						String sign = rspText.substring(b + 6);
-						Map<String,Object> map = (Map<String,Object>) StringHelper.fromJsonString(msg, Map.class);
-						String data = (String) map.get("data");
-						data1 = new String (AESCoder.decrypt(Base64.decodeBase64(data), aesKey.getBytes()), "GBK");
-					}else{
-						data1 = rspText.substring(a + 4);
-					}
-					result = (Map<String,Object>) StringHelper.fromJsonString(data1, Map.class);
-				}
-				return result;
-			}else{
-				LOGGER.error("the request of taotaogu failed method={},token={},aesKey={},param={},rspText={}.",
-						method,token,aesKey,json,rspText);
-				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"the request of taotaogu failed.");
+			requestParam.put("Param",param);
+			byte[] data = StringHelper.toJsonString(requestParam).getBytes();
+			try {
+				Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.KEY_STORE, TaotaoguVendorConstant.KEY_STORE));
+				InputStream in = new ByteArrayInputStream(cert.getData());
+				String pass = cert.getCertPass();
+				String[] passArr = pass.split(",");
+				byte[] sign = null;
+				sign = CertCoder.sign(data, in,passArr[0], passArr[1], passArr[2]);
+				requestParam.put("Sign",ByteTools.BytesToHexStr(sign));
+			} catch (Exception e) {
+				LOGGER.error("createRequestParam failed taotaoguVendorData={},msgType={},param={}.",taotaoguVendorData,msgType,StringHelper.toJsonString(param),e);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"createRequestParam failed.");
 			}
-		}catch(Exception e){
-			LOGGER.error("the request of taotaogu failed method={},token={},aesKey={},param={},rspText={}.",
-					method,token,aesKey,json,rspText,e);
-			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"the request of taotaogu failed.");
+			return StringHelper.toJsonString(requestParam);
 		}
-	}
-	
+	//卡信息，http请求方法，返回解析responseEntity之后的结果
 	private Map<String,Object> post(String msg){
-		String url = configProvider.getValue("taotaogu.card.url", "");
-		HttpPost request = new HttpPost(url);
+		String cardUrl = configProvider.getValue("taotaogu.card.url", "");
+		HttpPost request = new HttpPost(cardUrl);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		try{
 			pairs.add(new BasicNameValuePair("msg", msg));
@@ -777,7 +709,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			if(status.getStatusCode() == 200){
 				String rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
 				if(LOGGER.isDebugEnabled())
-					LOGGER.debug("post(String msg) of taotaogu failed,rspText={}, status={}.",rspText,status);
+					LOGGER.debug("post(String msg),rspText={}, status={}.",rspText,status);
 				TaotaoguResponseEntiy resp = (TaotaoguResponseEntiy) StringHelper.fromJsonString(rspText, TaotaoguResponseEntiy.class);
 				if(!resp.isSuccess()) {
 					LOGGER.error("post(String msg) of taotaogu failed,msg={}, result={}.",msg,rspText);
@@ -786,55 +718,20 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				}
 				return resp.getData();
 			}else{
-				LOGGER.error("post(String msg) of taotaogu failed,msg={}, status={}.",msg,status);
+				LOGGER.error("post(String msg) http request of taotaogu status is not 200,msg={}, status={}.",msg,status);
 				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"post(String msg) of taotaogu failed.");
+						"post(String msg) http request of taotaogu status is not 200.");
 			}
 		}catch(Exception e){
-			LOGGER.error("post(String msg) of taotaogu failed.",e);
+			LOGGER.error("post(String msg) http request of taotaogu exception.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"post(String msg) of taotaogu failed.");
+					"post(String msg) http request of taotaogu exception.");
 		}
 	}
-	
-	private String createRequestParam(TaotaoguVendorData taotaoguVendorData,String msgType,Map<String, Object> param){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		
-		Map<String, Object> requestParam = new HashMap<String, Object>();
-		String appName = taotaoguVendorData.getAppName();
-		String version = taotaoguVendorData.getVersion();
-		String dstId = taotaoguVendorData.getDstId();
-		String brandCode = (String) taotaoguVendorData.getBranchCode();
-		requestParam.put("AppName", appName);
-		requestParam.put("Version",version);
-		requestParam.put("ClientDt",sdf.format(new Date()));
-		requestParam.put("SrcId",brandCode);
-		requestParam.put("DstId",dstId);
-		requestParam.put("MsgType",msgType);
-		requestParam.put("MsgID",brandCode + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
-		requestParam.put("Sign", "");
-
-		requestParam.put("Param",param);
-		byte[] data = StringHelper.toJsonString(requestParam).getBytes();
-		try {
-			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.KEY_STORE, ""));
-			InputStream in = new ByteArrayInputStream(cert.getData());
-			String pass = cert.getCertPass();
-			String[] passArr = pass.split(",");
-			byte[] sign = null;
-			sign = CertCoder.sign(data, in,passArr[0], passArr[1], passArr[2]);
-			requestParam.put("Sign",ByteTools.BytesToHexStr(sign));
-		} catch (Exception e) {
-			LOGGER.error("createRequestParam failed taotaoguVendorData={},msgType={},param={}.",taotaoguVendorData,msgType,StringHelper.toJsonString(param),e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"createRequestParam failed.");
-		}
-		return StringHelper.toJsonString(requestParam);
-	}
-	
+	//卡信息接口，直接返回淘淘谷responseEntity信息
 	private TaotaoguResponseEntiy postForTaotaoguResponseEntiy(String msg){
-		String url = configProvider.getValue("taotaogu.card.url", "");
-		HttpPost request = new HttpPost(url);
+		String cardUrl = configProvider.getValue("taotaogu.card.url", "");
+		HttpPost request = new HttpPost(cardUrl);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		try{
 			pairs.add(new BasicNameValuePair("msg", msg));
@@ -854,14 +751,129 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				}
 				return resp;
 			}else{
-				LOGGER.error("postForTaotaoguResponseEntiy failed,msg={}, status={}.",msg,status);
+				LOGGER.error("postForTaotaoguResponseEntiy http status is {},msg={}, status={}.",status.getStatusCode(),msg,status);
 				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"postForTaotaoguResponseEntiy failed.");
+						"postForTaotaoguResponseEntiy http status is not 200.");
 			}
 		}catch(Exception e){
-			LOGGER.error("postForTaotaoguResponseEntiy failed.",e);
+			LOGGER.error("postForTaotaoguResponseEntiy post request exception.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"postForTaotaoguResponseEntiy failed.");
+					"postForTaotaoguResponseEntiy post request exception.");
 		}
+	}
+	//订单登录方法，因为参数，和返回结果解析和其他普通订单方法不一样，所以单独写一个方法，获取token和aesKey
+	private Map<String,Object> login(TaotaoguVendorData taotaoguVendorData){
+		Map<String,Object> result = null;
+		String rspText = null;
+		JSONObject json = createLoginParam(taotaoguVendorData);
+		try{
+			String orderUrl = configProvider.getValue("taotaogu.order.url", "");
+			HttpPost request = new HttpPost(orderUrl+"/iips2/order/login");
+			
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.SERVER_CER, TaotaoguVendorConstant.SERVER_CER));
+			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
+			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.CLIENT_PFX, TaotaoguVendorConstant.CLIENT_PFX));
+			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
+			
+			String msg = json.toString();
+			msg = Base64.encodeBase64String(OrderCertCoder.encryptByPublicKey(msg.getBytes(), serverCerIn));
+			
+			byte[] r=  OrderCertCoder.sign(msg.getBytes(), clientPfxIn,null, clientPfx.getCertPass());
+			String sign = Base64.encodeBase64String(r);
+			
+			pairs.add(new BasicNameValuePair("msg", msg));
+			pairs.add(new BasicNameValuePair("sign", sign));
+			
+			request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
+			HttpResponse rsp = httpClient.execute(request);
+			StatusLine status = rsp.getStatusLine();
+			rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
+			if(LOGGER.isDebugEnabled())
+				LOGGER.debug("login info :rspText={}",rspText);   
+			int a = rspText.indexOf("msg=");
+			int b = rspText.indexOf("&sign=");
+			String r1 = null; //结果字符串
+			if(b != -1){
+				msg = rspText.substring(a + 4, b);
+				sign = rspText.substring(b + 6);
+				boolean bSign = OrderCertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), serverCerIn);
+				r = OrderCertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), clientPfxIn, null, clientPfx.getCertPass());
+				r1 = new String(r, "GBK");
+			}else{
+				r1 = rspText.substring(a + 4);
+			}
+			result = (Map<String,Object>) StringHelper.fromJsonString(r1, Map.class);
+		}catch(Exception e){
+			LOGGER.error("the login request of taotaogu failed rspText={},json={}.",rspText,json,e);
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					"the login request of taotaogu failed.");
+		}
+		return result;
+	}
+	//订单接口，http请求方法
+	private Map<String,Object> post(String method,String token,String aesKey,JSONObject json){
+		String orderUrl = configProvider.getValue("taotaogu.order.url", "");
+		Map<String,Object> result = null;
+		String rspText = null;
+		try{
+			HttpPost request = new HttpPost(orderUrl+method);
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+				
+			pairs.add(new BasicNameValuePair("token", token));
+			String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));
+			pairs.add(new BasicNameValuePair("msg", msg));
+			pairs.add(new BasicNameValuePair("sign", SHA1.EnCodeSHA1(msg + aesKey + token)));
+			request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
+			HttpResponse rsp = httpClient.execute(request);
+			
+			StatusLine status = rsp.getStatusLine();
+			if(LOGGER.isDebugEnabled())
+				LOGGER.debug("the login request of taotaogu info method={},token={},aesKey={},param={},rspText={},status={}.",
+						method,token,aesKey,json,rspText,status);
+			if(status.getStatusCode() == 200){
+				rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
+				result = resolveOrderResult(rspText, aesKey);
+				return result;
+			}else{
+				LOGGER.error("the http request of taotaogu status is not 200 method={},token={},aesKey={},param={},rspText={}.",
+						method,token,aesKey,json,rspText);
+				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+						"the http request of taotaogu status is not 200.");
+			}
+		}catch(Exception e){
+			LOGGER.error("the http request of taotaogu exception method={},token={},aesKey={},param={},rspText={}.",
+					method,token,aesKey,json,rspText,e);
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					"the http request of taotaogu exception.");
+		}
+	}
+	//订单接口，解析返回结果
+	private Map<String,Object> resolveOrderResult(String rspText,String aesKey){
+		String msg = "";
+		Map<String,Object> result = null;
+		try{
+			int a = rspText.indexOf("msg=");
+			String data1 = null; //结果字符串
+			if(a != -1){
+				int b = rspText.indexOf("&sign=");
+				if(b != -1){
+					msg = rspText.substring(a + 4, b);
+					String sign = rspText.substring(b + 6);
+					Map<String,Object> map = (Map<String,Object>) StringHelper.fromJsonString(msg, Map.class);
+					String data = (String) map.get("data");
+					data1 = new String (AESCoder.decrypt(Base64.decodeBase64(data), aesKey.getBytes()), "GBK");
+				}else{
+					data1 = rspText.substring(a + 4);
+				}
+				result = (Map<String,Object>) StringHelper.fromJsonString(data1, Map.class);
+			}
+		}catch(Exception e){
+			LOGGER.error("resolveOrderResult failed rspText={},aesKey={}.",
+					rspText,aesKey,e);
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					"resolveOrderResult failed.");
+		}
+		return result;
 	}
 }
