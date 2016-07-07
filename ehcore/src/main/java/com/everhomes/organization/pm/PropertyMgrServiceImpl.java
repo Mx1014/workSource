@@ -1272,6 +1272,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			
 		/** 根据小区获取要推送的企业  **/
 		}else if(null != cmd.getCommunityId()){
+			LOGGER.debug("All Park push message, cmd = {}", cmd);
+			
 			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
 			Date now = new Date();
 			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
@@ -1284,6 +1286,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			
 			return;
 		}
+		
+		LOGGER.debug("push message task scheduling, cmd = {}", cmd);
 		
 		/**
 		 * 调度执行一键推送
