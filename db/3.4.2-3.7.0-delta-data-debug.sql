@@ -67,3 +67,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)VALUES(1
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 VALUES(10655, 'EhOrganizations', 1001187, 'EhUsers', 190000  , 1001, 1, UTC_TIMESTAMP());
+
+
+INSERT INTO `eh_groups` (`id`, `uuid`, `namespace_id`, `name`, `display_name`, `avatar`, `description`, `creator_uid`, `private_flag`, `join_policy`, `discriminator`, `visibility_scope`, `visibility_scope_id`, `category_id`, `category_path`, `status`, `member_count`, `share_count`, `post_flag`, `tag`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `update_time`, `create_time`, `delete_time`, `visible_region_type`, `visible_region_id`) VALUES('1001301','4b6cebff-9113-1225-adde-00163e005fce','0','武汉大学','武汉大学',NULL,NULL,'1','1','1','enterprise',NULL,NULL,NULL,NULL,'1','2','0','0',NULL,NULL,NULL,NULL,'176531',NULL,NULL,NULL,NULL,NULL,NULL,'2015-12-15 15:51:35','2015-11-12 22:05:33',NULL,'0','240111044331048623');
+UPDATE eh_organizations SET group_id = 1001301 WHERE id = 1001027;
