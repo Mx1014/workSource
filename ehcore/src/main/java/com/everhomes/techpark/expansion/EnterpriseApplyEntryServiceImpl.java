@@ -206,7 +206,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	            
 	            dto.setAttachments(attachmentDtoList);
 	        }
-	    }
+	    }	
 	    
 	    return dto;
 	}

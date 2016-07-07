@@ -13,9 +13,11 @@ import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.EntryListApplyEntrysRestResponse;
 import com.everhomes.rest.techpark.expansion.EntryListForRentsRestResponse;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
 import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
@@ -213,5 +215,29 @@ public class ExpansionTest  extends BaseLoginAuthTestCase {
         assertEquals(1, resultLP.size());
         assertEquals(ApplyEntrySourceType.OFFICE_CUBICLE.getCode(), resultLP.get(0).getSourceType());
     }
-    	
+
+    //查询申请
+    @Test
+    public void testListApplyEntrys() {
+    	initLPData();
+    	//admin add 
+        Integer namespaceId = 0;
+        String userIdentifier = "root";
+        String plainTexPassword = "123456";
+        logon(namespaceId, userIdentifier, plainTexPassword);
+        
+        String commandRelativeUri = "/techpark/entry/listApplyEntrys";
+        
+        ListEnterpriseApplyEntryCommand cmd = new ListEnterpriseApplyEntryCommand(); 
+        cmd.setSourceType(ApplyEntrySourceType.OFFICE_CUBICLE.getCode());
+        cmd.setNamespaceId(namespaceId);
+        EntryListApplyEntrysRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, EntryListApplyEntrysRestResponse.class);
+        
+        assertNotNull("The reponse of getting user info may not be null", response);
+        assertTrue("The user info should be get from server, response=" + 
+            StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        
+         
+        assertEquals(2, response.getResponse().getApplyEntrys().size()); 
+    }
 }
