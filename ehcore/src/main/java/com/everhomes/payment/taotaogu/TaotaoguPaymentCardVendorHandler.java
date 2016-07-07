@@ -343,6 +343,11 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			param.put("BranchCode", brandCode);
 			param.put("CardId", cardId);
 			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, TaotaoguVendorConstant.PIN3_CRT));
+			if(cert == null){
+				LOGGER.error("taotaogu.pin3.crt is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.pin3.crt is null.");
+			}
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			
 			byte[] oldpsd;
@@ -682,6 +687,11 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			byte[] data = StringHelper.toJsonString(requestParam).getBytes();
 			try {
 				Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.KEY_STORE, TaotaoguVendorConstant.KEY_STORE));
+				if(cert == null){
+					LOGGER.error("taotaogu.keystore is null.");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"taotaogu.keystore is null.");
+				}
 				InputStream in = new ByteArrayInputStream(cert.getData());
 				String pass = cert.getCertPass();
 				String[] passArr = pass.split(",");
@@ -772,8 +782,18 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.SERVER_CER, TaotaoguVendorConstant.SERVER_CER));
+			if(serverCer == null){
+				LOGGER.error("taotaogu.server.cer is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.server.cer is null.");
+			}
 			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
 			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.CLIENT_PFX, TaotaoguVendorConstant.CLIENT_PFX));
+			if(clientPfx == null){
+				LOGGER.error("taotaogu.server.cer is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.server.cer is null.");
+			}
 			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
 			
 			String msg = json.toString();

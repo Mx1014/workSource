@@ -64,4 +64,6 @@ public interface HttpClientService {
     void setServerAddress(String serverAddress);
     
     <T extends RestResponseBase> T postFile(String commandRelativeUri, Object cmd, File file, Class<T> responseClz);
+    
+    <T extends RestResponseBase> T postFile(String commandRelativeUri, Object cmd, File file, Class<T> responseClz, UserContext context);
 }

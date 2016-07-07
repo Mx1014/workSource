@@ -14,6 +14,7 @@ import com.everhomes.rest.payment.ApplyCardRestResponse;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhPaymentCardsDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
 import com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord;
@@ -30,13 +31,21 @@ public class ApplyCardTest extends BaseLoginAuthTestCase {
     
     @Test
     public void testApplyCard() {
-        
+    	
+    	
     	String ownerType = "community";
         Long ownerId = 240111044331051500L;
-        String mobile = "13632650699";
+        String mobile = "13265549907";
         String password = "123456";
         Long issuerId = 1L;
     	
+        DSLContext dslcontext = dbProvider.getDslContext();
+        EhPaymentCardsDao dao = new EhPaymentCardsDao(dslcontext.configuration());
+		EhPaymentCards card = ConvertHelper.convert(dao.fetchByMobile(mobile).isEmpty()?null:dao.fetchByMobile(mobile).get(0), EhPaymentCards.class);
+		
+		if(card != null)
+			dao.delete(card);
+        
         String userIdentifier = "13265549907";
         String plainTexPassword = "123456";
         Integer namespaceId = 999990;

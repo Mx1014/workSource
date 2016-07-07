@@ -605,4 +605,51 @@ public class HttpUtils {
 		return retVal;
 	}
 	
+	public static String postFile1(String url, Map<String, String> params, int timeout, HttpContext context, Object... objects) throws IOException {
+		HttpClient httpclient = new DefaultHttpClient();
+		httpclient.getParams().setIntParameter("http.socket.timeout", timeout * 1000);
+		httpclient.getParams().setBooleanParameter("http.protocol.expect-continue", false);
+		String retVal = "";
+		try {
+			String encoding = HTTP.UTF_8;
+			if (objects != null && objects.length > 0) { 
+				encoding = objects[0].toString();
+			}
+			HttpPost httppost = new HttpPost(url);
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			for (Entry<String, String> entry : params.entrySet()) {
+				StringBody stringBody = new StringBody(entry.getValue(), ContentType.MULTIPART_FORM_DATA);
+				builder.addPart(entry.getKey(), stringBody);
+			}
+			for(int i=1, len=objects.length; i<len; i++){
+				if (objects[i] instanceof File) {
+					File file = (File) objects[i];
+					FileBody fileBody = new FileBody(file);
+					builder.addPart("attachment_file_", fileBody);
+				}
+			}
+			HttpEntity entity = builder.build();
+			
+			httppost.setEntity(entity);
+			
+			ResponseHandler<String> responseHandler = new BasicResponseHandler();
+			if (objects == null || objects.length == 0) {
+				retVal = new String(httpclient.execute(httppost, responseHandler, context).getBytes(HTTP.ISO_8859_1),
+						HTTP.UTF_8);
+			} else if (objects != null && objects[0].equals(HTTP.UTF_8)) {
+				retVal = httpclient.execute(httppost, responseHandler, context);
+			} else if (objects != null && objects[0].equals("gb2312")) {
+				retVal = new String(httpclient.execute(httppost, responseHandler, context).getBytes("iso-8859-1"), "gb2312");
+			} else {
+				retVal = new String(httpclient.execute(httppost, responseHandler, context).getBytes(), HTTP.UTF_8);
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			httpclient.getConnectionManager().shutdown();
+		}
+		logger.debug(retVal);
+		return retVal;
+	}
 }

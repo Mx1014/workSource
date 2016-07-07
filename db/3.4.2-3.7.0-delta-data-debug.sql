@@ -51,3 +51,19 @@ set @banner_id = (select max(id) from `eh_banners`);
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`,apply_policy) VALUES ((@banner_id := @banner_id + 1),0,NULL,'/home','DEFAULT',1,24210090697430842,'wowowowowowowoowowow~',NULL,'cs://1/image/aW1hZ2UvTVRvelpqY3laV0UzTmprMlptWXlZalF3WVRRNU16WTFabU5oTUdWbU1HVmpPQQ',9,'{\"forumId\":100334,\"topicId\":176119}',NULL,NULL,2,10,1,'2016-06-17 15:34:35',NULL,'default',3);
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`,apply_policy) VALUES ((@banner_id := @banner_id + 1),0,NULL,'/home','DEFAULT',1,24210090697430842,'办公司啦,办公司啦...',NULL,'cs://1/image/aW1hZ2UvTVRveE5qSTRaREZqWVdFd09URXpabVZtWVRFeE9ERTFZekV6TURJMU9XWTFNUQ',9,'{\"forumId\":100334,\"topicId\":180523}',NULL,NULL,2,10,67663,'2016-06-29 00:09:58',NULL,'default',3);
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`,apply_policy) VALUES ((@banner_id := @banner_id + 1),0,NULL,'/home','DEFAULT',4,1000631,'世纪春城物业唯一的banner...',NULL,'cs://1/image/aW1hZ2UvTVRveE5qSTRaREZqWVdFd09URXpabVZtWVRFeE9ERTFZekV6TURJMU9XWTFNUQ',9,'{\"forumId\":100334,\"topicId\":180523}',NULL,NULL,2,10,67663,'2016-06-29 00:09:58',NULL,'pm_admin',0);
+
+
+-- by sfyan 20160707
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
+VALUES(1001187, 0, 'PM', '左邻管理公司', 0, '', '/1001187', 1, 2, 'ENTERPRISE', 0);
+
+INSERT INTO `eh_organization_details` (`id`, `organization_id`, `contact`, `address`, `longitude`, `latitude`, `display_name`, `contactor`, `post_uri`, `avatar`) 
+VALUES(10485, 1001187, '', '深圳市南山区科发路8号金融基地2栋7F', 113.951444, 22.536384, '深圳市南山区科发路8号金融基地2栋7F', '', '', '');	
+
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+VALUES(2102923, 1001187, 'USER', 190000  , 'manager', '颜少凡', 0, '13510701575', 3, 0);	
+
+INSERT INTO `eh_organization_communities`(organization_id, community_id)VALUES(1001187, 240111044331051380);
+
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+VALUES(10655, 'EhOrganizations', 1001187, 'EhUsers', 190000  , 1001, 1, UTC_TIMESTAMP());

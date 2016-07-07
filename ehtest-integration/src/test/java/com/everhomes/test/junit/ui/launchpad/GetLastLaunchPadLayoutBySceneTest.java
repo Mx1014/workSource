@@ -18,7 +18,7 @@ public class GetLastLaunchPadLayoutBySceneTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
     
-    @Ignore @Test
+    @Test
     public void testGetLastLaunchPadLayoutByScene1() {
         String jsonFilePath = "data/json/3.4.x-test-data-launch_pad_layouts_160628.txt";
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
@@ -44,7 +44,7 @@ public class GetLastLaunchPadLayoutBySceneTest extends BaseLoginAuthTestCase {
         assertEquals(true, response.getResponse().getId() == 2L);
     }
     
-    @Ignore @Test
+    @Test
     public void testGetLastLaunchPadLayoutByScene2() {
     	
     	String jsonFilePath = "data/json/3.4.x-test-data-launch_pad_layouts_160628_1.txt";
@@ -72,7 +72,7 @@ public class GetLastLaunchPadLayoutBySceneTest extends BaseLoginAuthTestCase {
   
     }
     
-    @Ignore @Test
+    @Test
     public void testGetLastLaunchPadLayoutByScene3() {
     	String jsonFilePath = "data/json/3.4.x-test-data-launch_pad_layouts_160628_2.txt";
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
@@ -99,7 +99,7 @@ public class GetLastLaunchPadLayoutBySceneTest extends BaseLoginAuthTestCase {
     }
         
     @Test
-    public void testGetLaunchPadItemsByScene4() {
+    public void testGetLastLaunchPadLayoutByScene4() {
     	String jsonFilePath = "data/json/3.4.x-test-data-launch_pad_layouts_160628_3.txt";
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
@@ -136,11 +136,11 @@ public class GetLastLaunchPadLayoutBySceneTest extends BaseLoginAuthTestCase {
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-community_address_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-community_address_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-family_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-family_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
