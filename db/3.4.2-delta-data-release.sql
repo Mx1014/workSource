@@ -5,20 +5,23 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('biz.op.
 
 --海岸物业初始数据
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES 
-('94', 'haian.siyuan', 'http://183.62.221.2:8082/NetApp/SYS86Service.asmx/GetSYS86Service', 'the url of siyuan wuye', '0', NULL);
+('95', 'haian.siyuan', 'http://183.62.221.2:8082/NetApp/SYS86Service.asmx/GetSYS86Service', 'the url of siyuan wuye', '0', NULL);
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('1', '0', '24210090697427178', '00100120131200000003', '联系电话', '提示信息');
+('1', '999993', '240111044331050812', '00100120131200000003', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('2', '0', '24210090697427178', '00100120131200000005', '联系电话', '提示信息');
+('2', '999993', '240111044331050812', '00100120131200000005', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('3', '0', '24210090697427178', '00100120131200000007', '联系电话', '提示信息');
+('3', '999993', '240111044331050812', '00100120131200000007', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('4', '0', '24210090697427178', '00100120131200000009', '联系电话', '提示信息');
+('4', '999993', '240111044331050812', '00100120131200000009', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('5', '0', '24210090697427178', '00100120131200000011', '联系电话', '提示信息');
+('5', '999993', '240111044331050812', '00100120131200000011', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('6', '0', '24210090697427178', '00100120131200000013', '联系电话', '提示信息');
+('6', '999993', '240111044331050812', '00100120131200000013', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('7', '0', '24210090697427178', '00100120131200000015', '联系电话', '提示信息');
+('7', '999993', '240111044331050812', '00100120131200000015', '联系电话', '提示信息');
 INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) VALUES 
-('8', '0', '24210090697427178', '00100120131200000017', '联系电话', '提示信息');
+('8', '999993', '240111044331050812', '00100120131200000017', '联系电话', '提示信息');
+
+--海岸停车充值加停车场数据
+INSERT INTO `eh_parking_lots` VALUES ('10002', 'community', '240111044331050812', '金融基地停车场', 'BOSIGAO', null, '1', '2', '1025', '2016-03-31 17:07:20');

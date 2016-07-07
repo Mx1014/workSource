@@ -1,0 +1,20 @@
+//
+// EvhRechargeCardDTO.h
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhRechargeCardDTO
+//
+@interface EvhRechargeCardDTO
+    : NSObject<EvhJsonSerializable>
+
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

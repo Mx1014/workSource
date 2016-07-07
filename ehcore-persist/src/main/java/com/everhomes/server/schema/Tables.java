@@ -604,6 +604,31 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhParkCharge EH_PARK_CHARGE = com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE;
 
 	/**
+	 * The table ehcore.eh_payment_cards
+	 */
+	public static final com.everhomes.server.schema.tables.EhPaymentCards EH_PAYMENT_CARDS = com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS;
+
+	/**
+	 * The table ehcore.eh_payment_card_issuers
+	 */
+	public static final com.everhomes.server.schema.tables.EhPaymentCardIssuers EH_PAYMENT_CARD_ISSUERS = com.everhomes.server.schema.tables.EhPaymentCardIssuers.EH_PAYMENT_CARD_ISSUERS;
+
+	/**
+	 * The table ehcore.eh_payment_card_issuer_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhPaymentCardIssuerCommunities EH_PAYMENT_CARD_ISSUER_COMMUNITIES = com.everhomes.server.schema.tables.EhPaymentCardIssuerCommunities.EH_PAYMENT_CARD_ISSUER_COMMUNITIES;
+
+	/**
+	 * The table ehcore.eh_payment_card_recharge_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhPaymentCardRechargeOrders EH_PAYMENT_CARD_RECHARGE_ORDERS = com.everhomes.server.schema.tables.EhPaymentCardRechargeOrders.EH_PAYMENT_CARD_RECHARGE_ORDERS;
+
+	/**
+	 * The table ehcore.eh_payment_card_transactions
+	 */
+	public static final com.everhomes.server.schema.tables.EhPaymentCardTransactions EH_PAYMENT_CARD_TRANSACTIONS = com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS;
+
+	/**
 	 * The table ehcore.eh_pmsy_communities
 	 */
 	public static final com.everhomes.server.schema.tables.EhPmsyCommunities EH_PMSY_COMMUNITIES = com.everhomes.server.schema.tables.EhPmsyCommunities.EH_PMSY_COMMUNITIES;
