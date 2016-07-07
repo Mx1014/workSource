@@ -1544,7 +1544,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd,User user) {
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = user.getNamespaceId();
 		
 		Long communityId = cmd.getCommunityId();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
@@ -1630,7 +1630,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-不是user，发短信。  4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
 		if(null != owners && owners.size() > 0)
-			processCommunityPmOwner(communityId,owners,cmd.getMessage());
+			processCommunityPmOwner(communityId,owners,cmd.getMessage(), user);
 	}
 
 	public void sendNoticeToFamilyById(Long familyId,String message){
@@ -2343,12 +2343,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return bills;
 	}
 
-	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message) {
-		User operator = UserContext.current().getUser();
-		Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-		if(operator != null) {
-			namespaceId = operator.getNamespaceId();
-		}
+	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message, User user) {
+		User operator = user;
+		Integer namespaceId = operator.getNamespaceId();
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
@@ -2387,7 +2384,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
 		String templateScope = SmsTemplateCode.SCOPE;
 		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = user.getLocale();
 		String[] phoneArray = new String[phones.size()];  
 		phones.toArray(phoneArray);  
 		smsProvider.sendSms(namespaceId,phoneArray , templateScope, templateId, templateLocale, variables);
