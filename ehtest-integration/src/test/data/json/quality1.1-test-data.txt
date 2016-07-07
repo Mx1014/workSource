@@ -1,0 +1,170 @@
+{
+  "eh_users": [
+    {
+      "gender": "2",
+      "locale": "zh_CN",
+      "uuid": "63c07961-fb8f-444d-9a56-dc628a6dbe28",
+      "points": "10",
+      "community_id": "240111044331051220",
+      "reg_channel_id": "1",
+      "account_name": "10003",
+      "password_hash": "4f8dfbe68e0d4c7cac0bef2754a612d6af2f9eb962fcc5c5b70663a3d6e0b602",
+      "id": "211307",
+      "namespace_user_token": "",
+      "address": "0",
+      "salt": "aabbe8981182ba60d43dc9481333080d",
+      "create_time": "2016-06-07 14:49:29",
+      "level": "2",
+      "address_id": "0",
+      "namespace_id": "999992",
+      "nick_name": "dd",
+      "reg_ip": "",
+      "reg_city_id": "0",
+      "status": "1"
+    }
+  ],
+  "eh_user_identifiers": [
+    {
+      "identifier_token": "19112349996",
+      "claim_status": "3",
+      "create_time": "2016-06-07 14:49:29",
+      "namespace_id": "999992",
+      "owner_uid": "211307",
+      "identifier_type": "0",
+      "id": "217887"
+    }
+  ],
+  "eh_organizations": [
+    {
+      "group_type": "ENTERPRISE",
+      "path": "/1000750",
+      "update_time": "2016-02-27 11:02:25",
+      "id": "1000750",
+      "level": "1",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "0",
+      "name": "深业集团（深圳）物业管理有限公司",
+      "directly_enterprise_id": "0",
+      "organization_type": "PM",
+      "status": "2"
+    },
+    {
+      "group_type": "GROUP",
+      "path": "/1000750/1000753",
+      "update_time": "2016-06-07 14:54:54",
+      "id": "1000753",
+      "level": "2",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "1000750",
+      "name": "执行一队",
+      "directly_enterprise_id": "1000750",
+      "organization_type": "PM",
+      "status": "2"
+    },
+    {
+      "group_type": "GROUP",
+      "path": "/1000750/1000754",
+      "update_time": "2016-06-07 14:54:54",
+      "id": "1000754",
+      "level": "2",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "1000750",
+      "name": "执行二队",
+      "directly_enterprise_id": "1000750",
+      "organization_type": "PM",
+      "status": "2"
+    },
+    {
+      "group_type": "DEPARTMENT",
+      "path": "/1000750/1000752",
+      "update_time": "2016-06-07 14:54:54",
+      "id": "1000752",
+      "level": "2",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "1000750",
+      "name": "核查部",
+      "directly_enterprise_id": "1000750",
+      "organization_type": "PM",
+      "status": "2"
+    }
+  ],
+  "eh_organization_members": [
+    {
+      "gender": "1",
+      "contact_type": "0",
+      "id": "2101304",
+      "contact_token": "19112349996",
+      "contact_name": "dd",
+      "target_type": "USER",
+      "target_id": "211307",
+      "member_group": "manager",
+      "namespace_id": "999992",
+      "group_id": "1000752",
+      "group_path": "/1000750/1000752",
+      "organization_id": "1000750",
+      "status": "3"
+    },
+    {
+      "gender": "1",
+      "contact_type": "0",
+      "id": "2101306",
+      "contact_token": "19112349996",
+      "contact_name": "dd",
+      "target_type": "USER",
+      "target_id": "211307",
+      "member_group": "manager",
+      "namespace_id": "999992",
+      "group_id": "0",
+      "organization_id": "1000753",
+      "status": "3"
+    },
+    {
+      "gender": "1",
+      "contact_type": "0",
+      "id": "2101310",
+      "contact_token": "19112349996",
+      "contact_name": "dd",
+      "target_type": "USER",
+      "target_id": "211307",
+      "member_group": "manager",
+      "namespace_id": "999992",
+      "group_id": "0",
+      "organization_id": "1000754",
+      "status": "3"
+    }
+  ],
+  "eh_quality_inspection_categories": [
+    {
+      "path": "/1",
+      "create_time": "2016-05-05 11:58:34",
+      "owner_id": "1000750",
+      "parent_id": "0",
+      "name": "环境服务",
+      "creator_uid": "212500",
+      "id": "1",
+      "owner_type": "PM",
+      "status": "2"
+    },
+    {
+      "path": "/1/2",
+      "create_time": "2016-05-05 11:58:51",
+      "owner_id": "1000750",
+      "parent_id": "1",
+      "name": "绿化",
+      "creator_uid": "212500",
+      "id": "2",
+      "owner_type": "PM",
+      "status": "2",
+      "score": "10",
+      "description": "隔热个人刚刚突然"
+    }
+  ]
+}

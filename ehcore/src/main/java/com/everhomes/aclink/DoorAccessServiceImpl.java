@@ -1603,7 +1603,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         qr.setId(auth.getId());
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
+        
         extra.setAuthLevel(0l);
+        if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
+            extra.setAuthLevel(1l);
+        }
+        
         extra.setAuthStorey(1l);
         
         List<Long> storeyAuthList = new ArrayList<Long>();
