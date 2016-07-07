@@ -89,8 +89,12 @@ import com.everhomes.rest.community.admin.CommunityUserDto;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
+import com.everhomes.rest.community.admin.CreateCommunityCommand;
+import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
@@ -103,6 +107,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.community.admin.listCommunityByNamespaceIdResponse;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.GroupMemberDTO;
@@ -1652,5 +1657,33 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		return dtos;
+	}
+
+
+	@Override
+	public CreateCommunityResponse createCommunity(CreateCommunityCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (cmd.getNamespaceId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getName()) || cmd.getCommunityType() == null || cmd.getProvinceId() == null 
+				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getProvinceName()) || cmd.getCityId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getCityName())) {
+			LOGGER.error(
+					"Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		
+		
+		
+		return null;
+	}
+
+
+	@Override
+	public void importCommunity(ImportCommunityCommand cmd, MultipartFile[] files) {
+	}
+
+
+	@Override
+	public listCommunityByNamespaceIdResponse listCommunityByNamespaceId(ListCommunityByNamespaceIdCommand cmd) {
+		return null;
 	}
 }
