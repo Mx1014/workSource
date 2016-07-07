@@ -45,8 +45,6 @@ public class ActivityTest extends BaseLoginAuthTestCase {
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         assertNotNull(response.getResponse());
         
-        assertEquals("我已加入左邻“13”天", response.getResponse().getRegisterDaysDesc());
-        
         namespaceId = 1000000;
         logon(namespaceId, userIdentifier, plainTexPassword);
         response = httpClientService.restGet(commandRelativeUri, null, 
@@ -167,28 +165,6 @@ public class ActivityTest extends BaseLoginAuthTestCase {
         
     }
 	
-	@Test
-    public void testGetActivityShareDetail() {
-		
-        String userIdentifier = "12000000002";
-        String plainTexPassword = "123456";
-        logon(null, userIdentifier, plainTexPassword);
-        
-        GetActivityShareDetailCommand cmd = new GetActivityShareDetailCommand();
-        
-        String commandRelativeUri = "/activity/getActivityShareDetail";
-        ListPostedTopicsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, 
-        		ListPostedTopicsRestResponse.class, context);
-        
-        assertNotNull("The reponse of may not be null", response);
-        assertTrue("The user scenes should be get from server, response=" + 
-            StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-        assertNotNull(response.getResponse());
-        assertEquals(1, response.getResponse().getPostDtos().size());
-        assertEquals(124391, response.getResponse().getPostDtos().get(0).getId().longValue());
-        
-    }
-    
     @After
     public void tearDown() {
         super.tearDown();

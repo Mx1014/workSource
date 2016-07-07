@@ -25,7 +25,7 @@ public class GetBannerBySceneTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
     
-    @Ignore @Test
+    @Test
     public void testGetBannersByScene() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001";
@@ -76,8 +76,8 @@ public class GetBannerBySceneTest extends BaseLoginAuthTestCase {
         assertEquals(1, bannerResponse2.getResponse().size());
     }
     
-    @Ignore @Test
-    public void testGetLastLaunchPadLayoutByScene2() {
+    @Test
+    public void testGetBannersByScene2() {
     	
         Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
@@ -103,7 +103,7 @@ public class GetBannerBySceneTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testGetLaunchPadItemsByScene3() {
+    public void testGetBannersByScene3() {
     	Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
         String plainTexPassword = "123456";
@@ -155,7 +155,7 @@ public class GetBannerBySceneTest extends BaseLoginAuthTestCase {
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-community_address_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-community_address_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
@@ -163,7 +163,7 @@ public class GetBannerBySceneTest extends BaseLoginAuthTestCase {
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/3.4.x-test-data-family_160605.txt";
+        jsonFilePath = "data/json/3.4.x-test-data-family_160628.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         

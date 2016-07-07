@@ -177,6 +177,7 @@ public class QualityTest extends BaseLoginAuthTestCase {
     	cmd.setName("任务");
     	cmd.setCategoryId(1L);
     	cmd.setGroup(group);
+    	cmd.setExecutiveExpireTime(1469504822000L);
     	
     	String commandRelativeUri = "/quality/createQualityInspectionTask";
     	CreateQualityInspectionTaskRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, 
