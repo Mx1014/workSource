@@ -207,3 +207,4 @@ CREATE TABLE `eh_quality_inspection_logs` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
