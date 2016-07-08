@@ -10,4 +10,5 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_INVALID_CONTACT_FAMILY=10004;
     static final int ERROR_INVALID_USER=10005;
     static final int ERROR_INVALID_ACTIVITY_ROSTER=10006;
+    static final int ERROR_CHECKIN_BEFORE=10007;
 }
