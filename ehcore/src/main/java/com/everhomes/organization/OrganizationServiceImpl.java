@@ -64,7 +64,7 @@ import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
