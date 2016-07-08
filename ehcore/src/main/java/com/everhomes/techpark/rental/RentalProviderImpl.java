@@ -41,6 +41,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalBillsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalDefaultRulesDao;
+import com.everhomes.server.schema.tables.daos.EhRentalRefundOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteItemsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteRulesDao;
@@ -53,6 +54,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalCloseDates;
 import com.everhomes.server.schema.tables.pojos.EhRentalConfigAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
+import com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteOwners;
@@ -70,6 +72,7 @@ import com.everhomes.server.schema.tables.records.EhRentalCloseDatesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalConfigAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhRentalRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteOwnersRecord;
@@ -1590,5 +1593,53 @@ public class RentalProviderImpl implements RentalProvider {
 
 
 
+	@Override
+	public Long createRentalRefundOrder(RentalRefundOrder rentalRefundOrder) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalRefundOrders.class));
+		rentalRefundOrder.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalRefundOrdersRecord record = ConvertHelper.convert(rentalRefundOrder,
+				EhRentalRefundOrdersRecord.class);
+		InsertQuery<EhRentalRefundOrdersRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_REFUND_ORDERS);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalRefundOrders.class, null);
+		return id;
+	}
 	
+
+
+	@Override
+	public void deleteRentalRefundOrder(RentalRefundOrder rentalRefundOrder) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalRefundOrdersDao dao = new EhRentalRefundOrdersDao(context.configuration());
+		dao.deleteById(rentalRefundOrder.getId());
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalRefundOrders.class,rentalRefundOrder.getId());
+	}
+	
+	@Override
+	public void deleteRentalRefundOrder(Long rentalRefundOrderId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalRefundOrdersDao dao = new EhRentalRefundOrdersDao(context.configuration());
+		dao.deleteById(rentalRefundOrderId);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalRefundOrders.class,rentalRefundOrderId);
+	}
+	
+
+	@Override
+	public void updateRentalRefundOrder(RentalRefundOrder rentalRefundOrder) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalRefundOrdersDao dao = new EhRentalRefundOrdersDao(context.configuration());
+		dao.update(rentalRefundOrder); 
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalRefundOrders.class,rentalRefundOrder.getId());
+	}
 }

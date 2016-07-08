@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -40,8 +42,21 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -57,6 +72,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.techpark.rental.AddItemAdminCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
@@ -110,6 +126,8 @@ import com.everhomes.rest.techpark.rental.LoopType;
 import com.everhomes.rest.techpark.rental.NormalFlag;
 import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommand;
 import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommandResponse;
+import com.everhomes.rest.techpark.rental.PayZuolinRefundCommand;
+import com.everhomes.rest.techpark.rental.PayZuolinRefundResponse;
 import com.everhomes.rest.techpark.rental.RentalBillCountDTO;
 import com.everhomes.rest.techpark.rental.RentalBillDTO;
 import com.everhomes.rest.techpark.rental.RentalItemType;
@@ -161,6 +179,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -208,7 +227,8 @@ public class RentalServiceImpl implements RentalService {
 	private UserProvider userProvider;
 	@Autowired
 	private AppProvider appProvider;
-
+	
+	
 	private int getPageCount(int totalCount, int pageSize) {
 		int pageCount = totalCount / pageSize;
 
@@ -227,6 +247,85 @@ public class RentalServiceImpl implements RentalService {
 		}
 
 	}
+	
+	
+	public Object restCall(String api, Object command, Class<?> responseType) {
+		String host = this.configurationProvider.getValue("pay.zuolin.host", "https://pay.zuolin.com");
+		return restCall(api, command, responseType, host);
+	}
+	public Object restCall(String api, Object o, Class<?> responseType,String host) {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new StringHttpMessageConverter(Charset
+				.forName("UTF-8")));
+		template.setMessageConverters(messageConverters);
+		String[] apis = api.split(" ");
+		String method = apis[0];
+
+		String url = host
+				+ api.substring(method.length() + 1, api.length()).trim();
+
+		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
+		HttpEntity<String> requestEntity = null;
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Host", host); 
+		headers.add("charset", "UTF-8");
+
+		ListenableFuture<ResponseEntity<String>> future = null;
+
+		if (method.equalsIgnoreCase("POST")) {
+			requestEntity = new HttpEntity<>(StringHelper.toJsonString(o),
+					headers);
+			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
+			future = template.exchange(url, HttpMethod.POST, requestEntity,
+					String.class);
+		} else {
+			Map<String, String> params = new HashMap<String, String>();
+			StringHelper.toStringMap("", o, params);
+			LOGGER.debug("params is :" + params.toString());
+
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				paramMap.add(entry.getKey().substring(1),
+						URLEncoder.encode(entry.getValue()));
+			}
+
+			url = UriComponentsBuilder.fromHttpUrl(url).queryParams(paramMap)
+					.build().toUriString();
+			requestEntity = new HttpEntity<>(null, headers);
+			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
+			future = template.exchange(url, HttpMethod.GET, requestEntity,
+					String.class);
+		}
+
+		ResponseEntity<String> responseEntity = null;
+		try {
+			responseEntity = future.get();
+		} catch (InterruptedException | ExecutionException e) {
+			LOGGER.info("restCall error " + e.getMessage());
+			return null;
+		}
+
+		if (responseEntity != null
+				&& responseEntity.getStatusCode() == HttpStatus.OK) {
+
+			// String bodyString = new
+			// String(responseEntity.getBody().getBytes("ISO-8859-1"), "UTF-8")
+			// ;
+			String bodyString = responseEntity.getBody();
+			LOGGER.debug(bodyString);
+			LOGGER.debug("HEADER" + responseEntity.getHeaders());
+//			return bodyString;
+			return StringHelper.fromJsonString(bodyString, responseType);
+
+		}
+
+		LOGGER.info("restCall error " + responseEntity.getStatusCode());
+		return null;
+
+	}
+	
 	@Override
 	public void addDefaultRule( AddDefaultRuleAdminCommand cmd){
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -1334,8 +1433,8 @@ public class RentalServiceImpl implements RentalService {
 		}
 		else if(cmd.getBillStatus().equals(BillQueryStatus.CANCELED.getCode())){
 			status.add(SiteBillStatus.FAIL.getCode()); 
-			status.add(SiteBillStatus.REFOUNDED.getCode()); 
-			status.add(SiteBillStatus.REFOUNDING.getCode()); 
+			status.add(SiteBillStatus.REFUNDED.getCode()); 
+			status.add(SiteBillStatus.REFUNDING.getCode()); 
 		}
 		else if(cmd.getBillStatus().equals(BillQueryStatus.FINISHED.getCode())){
 			status.add(SiteBillStatus.COMPLETE.getCode());
@@ -1811,8 +1910,9 @@ public class RentalServiceImpl implements RentalService {
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
 		java.util.Date cancelTime = new java.util.Date();
 		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
-		RentalSite rs = this.rentalProvider.getRentalSiteById(bill.getRentalSiteId())
-;		if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())&&cancelTime.after(new java.util.Date(bill.getStartTime().getTime()
+		
+		RentalSite rs = this.rentalProvider.getRentalSiteById(bill.getRentalSiteId());		
+		if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())&&cancelTime.after(new java.util.Date(bill.getStartTime().getTime()
 				- rs.getCancelTime()))) {
 			//当成功预约之后要判断是否过了取消时间
 			LOGGER.error("cancel over time");
@@ -1823,16 +1923,93 @@ public class RentalServiceImpl implements RentalService {
 									"cancel bill over time");
 		}else{
 			this.dbProvider.execute((TransactionStatus status) -> {
-				rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
+				//默认是已退款
+				bill.setStatus(SiteBillStatus.REFUNDED.getCode());
 				if (rs.getRefundFlag().equals(NormalFlag.NEED)){
 					//TODO:退款
 					
+					List<RentalBillPaybillMap>  billmaps = this.rentalProvider.findRentalBillPaybillMapByBillId(bill.getId());
+					for(RentalBillPaybillMap billMap : billmaps){
+						//循环退款
+						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+						String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+						String appKey = configurationProvider.getValue("pay.appKey", "b86ddb3b-ac77-4a65-ae03-7e8482a3db70");
+						refundCmd.setAppKey(appKey);
+						Long timestamp = System.currentTimeMillis();
+						refundCmd.setTimestamp(timestamp);
+						Integer randomNum = (int) (Math.random()*1000);
+						refundCmd.setNonce(randomNum);
+						Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
+								.currentGMTTime().getTime());
+						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
+						refundCmd.setOrderNo(String.valueOf(billMap.getOnlinePayBillId()));
+						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getCode()))
+							refundCmd.setOnlinePayStyleNo("wechat");
+						else if(billMap.getVendorType().equals(VendorType.ZHI_FU_BAO.getCode()))
+							refundCmd.setOnlinePayStyleNo("alipay");
+						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALREFUND.getPycode());
+						//已付金额乘以退款比例除以100
+						refundCmd.setRefundAmount(bill.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio()/100)));
+						refundCmd.setRefundMsg("预订单取消退款");
+						this.setSignatureParam(refundCmd);
+						PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+						if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+							//退款成功保存退款单信息，修改bill状态
+							RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd,RentalRefundOrder.class);
+							rentalRefundOrder.setOrderNo(billMap.getOnlinePayBillId());
+							rentalRefundOrder.setRefoundOrderNo(refoundOrderNo);
+							rentalRefundOrder.setRentalBillId(bill.getId()); 
+							rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
+							rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+							if(billMap.getVendorType().equals(VendorType.WEI_XIN.getCode())){
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+								
+							}
+							else{
+								rentalRefundOrder.setUrl(refundResponse.getResponse());
+								//如果有一个支付宝的订单，那bill的状态也是退款中
+								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
+								bill.setStatus(SiteBillStatus.REFUNDING.getCode());
+							}
+							this.rentalProvider.createRentalRefundOrder(rentalRefundOrder);
+						}
+						else{
+							LOGGER.error("bill id=["+bill.getId()+"] refound error param is "+refundCmd.toString());
+							throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+									RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+											"bill  refound error"); 
+						}
+					}
 				}
+				else{
+					//如果不需要退款，直接状态为已取消
+					bill.setStatus(SiteBillStatus.FAIL.getCode());
+				}
+				//更新bill状态
+				rentalProvider.updateRentalBill(bill); 
 				return null;
 			});
 		}
 	}
-
+	/***給支付相關的參數簽名*/
+	private void setSignatureParam(PayZuolinRefundCommand cmd) {
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",cmd.getAppKey());
+		map.put("timestamp",cmd.getTimestamp()+"");
+		map.put("nonce",cmd.getNonce()+"");
+		map.put("refundOrderNo",cmd.getRefundOrderNo());
+		map.put("orderNo", cmd.getOrderNo());
+		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
+		map.put("orderType",cmd.getOrderType() );
+		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		map.put("refundMsg", cmd.getRefundMsg()); 
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		cmd.setSignature(signature);
+	}
 	@Override
 	public void updateRentalSite(UpdateRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能修改
@@ -2978,9 +3155,9 @@ public class RentalServiceImpl implements RentalService {
 			return "已完成";
 		if(status.equals(SiteBillStatus.OVERTIME.getCode()))
 			return "已过期";
-		if(status.equals(SiteBillStatus.REFOUNDED.getCode()))
+		if(status.equals(SiteBillStatus.REFUNDED.getCode()))
 			return "已退款";
-		if(status.equals(SiteBillStatus.REFOUNDING.getCode()))
+		if(status.equals(SiteBillStatus.REFUNDING.getCode()))
 			return "退款中";
 		return String.valueOf(status);
 	}

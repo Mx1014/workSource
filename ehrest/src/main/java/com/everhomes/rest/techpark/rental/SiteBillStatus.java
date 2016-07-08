@@ -11,8 +11,8 @@ package com.everhomes.rest.techpark.rental;
  * <li>TOPAYFINAL(6): 进入支付全款</li>
  * <li>COMPLETE(7): 完成预约</li>
  * <li>OVERTIME(8): 超时未完成</li>
- * <li>REFOUNDING(9): 退款中</li>
- * <li>REFOUNDED(10): 已退款</li>
+ * <li>REFUNDING(9): 退款中</li>
+ * <li>REFUNDED(10): 已退款</li>
  * </ul>
  */
 public enum SiteBillStatus {
@@ -27,8 +27,8 @@ public enum SiteBillStatus {
 	TOPAYFINAL((byte)6),
 	COMPLETE((byte)7),
 	OVERTIME((byte)8),
-	REFOUNDING((byte)9),
-	REFOUNDED((byte)10);
+	REFUNDING((byte)9),
+	REFUNDED((byte)10);
 	
     
     private byte code;

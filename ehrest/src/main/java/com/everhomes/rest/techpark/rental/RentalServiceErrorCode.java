@@ -24,4 +24,7 @@ public interface RentalServiceErrorCode {
 	static final int ERROR_LOOP_TOOMUCH = 12000; // 循环过多次
 
 	static final int ERROR_DEFAULT_RULE_NOTFOUND = 13000;// 默认的rule没有找到
+	
+	
+	static final int ERROR_REFOUND_ERROR = 15000; // 退款失敗
 }

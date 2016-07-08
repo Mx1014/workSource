@@ -793,6 +793,12 @@ public class Tables {
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalItemsBills EH_RENTAL_ITEMS_BILLS = com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS;
 
+
+	/**
+	 * The table ehcore.eh_rental_refund_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalRefundOrders EH_RENTAL_REFUND_ORDERS = com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS;
+
 	/**
 	 * The table ehcore.eh_rental_rules
 	 */
