@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -380,6 +381,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	User user = UserContext.current().getUser();
     	ListCardTransactionsResponse response = new ListCardTransactionsResponse();
     	List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
+    	if(CollectionUtils.isEmpty(cardList)) {
+    		
+    	}
 		//for(PaymentCard card:cardList){
     	PaymentCard card = cardList.get(0);
 			PaymentCardVendorHandler handler = getPaymentCardVendorHandler(card.getVendorName());

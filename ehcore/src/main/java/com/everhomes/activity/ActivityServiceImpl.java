@@ -111,6 +111,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -577,7 +578,7 @@ public class ActivityServiceImpl implements ActivityService {
             d.setId(r.getId());
             if (currentUser != null) {
                 d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
-                d.setUserName(currentUser.getNickName());
+                d.setUserName(populateUserName(currentUser, activity.getPostId()));
                 
                 List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
                 
@@ -605,6 +606,41 @@ public class ActivityServiceImpl implements ActivityService {
             response.setCreatorFlag(1);
         }
         return response;
+    }
+    
+    private String populateUserName(User user, long postId) {
+    	
+    	Post post = this.forumProvider.findPostById(postId);
+        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+        Long regionId = post.getVisibleRegionId();
+        
+        if(regionType != null && regionId != null) {
+            String creatorNickName = user.getNickName();
+            if(creatorNickName == null) {
+                creatorNickName = "";
+            }
+            switch(regionType) {
+            case COMMUNITY:
+                Community community = communityProvider.findCommunityById(regionId);
+                if(community != null)
+                	creatorNickName = creatorNickName + "@" + community.getName();
+                break;
+            case REGION:
+                Organization organization = organizationProvider.findOrganizationById(regionId);
+                if(organization !=null)
+                	creatorNickName = creatorNickName + "@" + organization.getName();
+                break;
+            default:
+                LOGGER.error("Unsupported visible region type, userId=" + user.getId() 
+                    + ", regionType=" + regionType + ", postId=" + post.getId());
+            }
+            return creatorNickName;
+        } else {
+            LOGGER.error("Region type or id is null, userId=" + user.getId() + ", postId=" + post.getId());
+        }
+        
+        return "";
+        
     }
 
     private Integer convertToInt(Long val) {
