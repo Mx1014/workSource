@@ -133,7 +133,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 					cardInfo.setCardId(card.getId());
 					List list = (List) queryAccountResultMap.get("Row");
 					for(int i=0;i<list.size();i++){
-						Map map = (Map) list.get(i);
+						Map<String,Object> map = (Map<String,Object>) list.get(i);
 						if("fund".equals(((String)map.get("SubAcctType")).trim())){
 							cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
 							break;
@@ -303,7 +303,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 						rechargeAmount = rechargeAmount.add(d.getAmount());
 				}else
 					continue outer;
-				
+				//在结果列表里面查找，如果有当前月份，则加进去，没有，就表示是新月份的数据
 				for(CardTransactionOfMonth ctm:resultList){
 					if(ctm.getDate().equals(longToDate(d.getTransactionTime()))){
 						List<CardTransactionFromVendorDTO> requests = ctm.getRequests();
