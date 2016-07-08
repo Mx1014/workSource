@@ -212,7 +212,8 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRveU1tVXlaak01Wm1NNF
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMVltTXlPRFUyT0dVMFlUTTVaVGRtWWpNek16TTBOVEUyT1daaE1XVXhNZw' where id in(76,1016);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMFkyUm1OekJpTlRrME1EWXdPVGs1WlRObVltRTRaREV3TWpsak5USmlZdw' where id in(77,1017);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU5EaGxNalV3T1RBMlpETXpNVEkyWVRoaU9HWXdNVGxpWkRFM09URmlaUQ' where id in(78,1018);
-update eh_banners set poster_path = '' where id in(79,1019);
+--update eh_banners set poster_path = '' where id in(79,1019);
+delete from eh_banners where id in (79,1019);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbVpEUTJNek5pWWpabE1tWXhPRFJoT1RRMFlUSTVZbVl5TnpsbU1HVm1OQQ' where id in(1022,1023);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbU1qTmpOVEkwWkdRek5UWmxaV0k0T1RreU5EbGpZakF5T1dSa1pHRmhOZw' where id in(1026,1024);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9XWTVPV00wWmpVNVlXSTFNREZqWlRReFpETmtORFZpTUROak16QXhOdw' where id in(1027,1025);
