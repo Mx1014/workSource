@@ -223,9 +223,9 @@ VALUES ('10440', '999992', '0', '0', '0', '/home', 'Bizs', 'CONTACTS', '企业�
 -- 储能园区公告换成通讯录    
 delete from eh_launch_pad_items where id in(10615, 10633);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-VALUES ('10615', '999990', '0', '0', '0', '/home', 'GovAgencies', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRvNVpERTFaVEExTkdVeU1qSTRNV1psWW1VM05EWXpORFZtWldabE9EazJOZw', '1', '1', '46', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+VALUES ('10615', '999990', '0', '0', '0', '/home', 'GovAgencies', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRvNVpERTFaVEExTkdVeU1qSTRNV1psWW1VM05EWXpORFZtWldabE9EazJOZw', '2', '1', '46', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-VALUES ('10633', '999990', '0', '0', '0', '/home', 'GovAgencies', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRvNVpERTFaVEExTkdVeU1qSTRNV1psWW1VM05EWXpORFZtWldabE9EazJOZw', '1', '1', '46', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+VALUES ('10633', '999990', '0', '0', '0', '/home', 'GovAgencies', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRvNVpERTFaVEExTkdVeU1qSTRNV1psWW1VM05EWXpORFZtWldabE9EazJOZw', '2', '1', '46', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
 -- 左邻品质核查和深业一样
 update eh_launch_pad_items set action_data = '{"realm":"quality","entryUrl":"https://core.zuolin.com/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix"}' where action_type = 44 and namespace_id = 0;
