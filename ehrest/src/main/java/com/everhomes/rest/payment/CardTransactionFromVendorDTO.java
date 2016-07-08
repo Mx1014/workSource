@@ -4,12 +4,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: id</li>
- * <li>mobile: 手机号</li>
- * <li>userName: 用户名称</li>
- * <li>cardNo: 卡号</li>
- * <li>orderNo: 订单号</li>
- * <li>comsumeType: 消费类型</li>
  * <li>itemName: 商品名称</li>
  * <li>amount: 金额</li>
  * <li>transactionTime: 交易时间</li>
@@ -19,19 +13,22 @@ import com.everhomes.util.StringHelper;
  * <li>transactionType: 交易类型   1：充值   2 ：消费</li>
  * <li>vendorName: 第三方厂商</li>
  * <li>vendorResult: </li>
- * <li>token: </li>
- * <li>cardNo: </li>
- * <li>payerUid: </li>
  * </ul>
  */
+//<li>id: id</li>
+//* <li>mobile: 手机号</li>
+//* <li>userName: 用户名称</li>
+//* <li>cardNo: 卡号</li>
+//* <li>orderNo: 订单号</li>
+//* <li>comsumeType: 消费类型</li>
 public class CardTransactionFromVendorDTO implements Comparable<CardTransactionFromVendorDTO>{
 	
-	private java.lang.Long       id;
-	private java.lang.String     userName;
-	private java.lang.String     mobile;
-	private java.lang.String     cardNo;
-	private java.lang.Long       orderNo;
-	private java.lang.Byte       consumeType;
+//	private java.lang.Long       id;
+//	private java.lang.String     userName;
+//	private java.lang.String     mobile;
+//	private java.lang.String     cardNo;
+//	private java.lang.Long       orderNo;
+//	private java.lang.Byte       consumeType;
 	private java.lang.String     itemName;
 	private java.math.BigDecimal amount;
 	private Long   transactionTime;
@@ -44,54 +41,6 @@ public class CardTransactionFromVendorDTO implements Comparable<CardTransactionF
 	
     private Long nextPageAnchor;
 	
-	public java.lang.Long getId() {
-		return id;
-	}
-
-	public void setId(java.lang.Long id) {
-		this.id = id;
-	}
-
-	public java.lang.String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(java.lang.String userName) {
-		this.userName = userName;
-	}
-
-	public java.lang.String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(java.lang.String mobile) {
-		this.mobile = mobile;
-	}
-
-	public java.lang.String getCardNo() {
-		return cardNo;
-	}
-
-	public void setCardNo(java.lang.String cardNo) {
-		this.cardNo = cardNo;
-	}
-
-	public java.lang.Long getOrderNo() {
-		return orderNo;
-	}
-
-	public void setOrderNo(java.lang.Long orderNo) {
-		this.orderNo = orderNo;
-	}
-
-	public java.lang.Byte getConsumeType() {
-		return consumeType;
-	}
-
-	public void setConsumeType(java.lang.Byte consumeType) {
-		this.consumeType = consumeType;
-	}
-
 	public java.lang.String getItemName() {
 		return itemName;
 	}
