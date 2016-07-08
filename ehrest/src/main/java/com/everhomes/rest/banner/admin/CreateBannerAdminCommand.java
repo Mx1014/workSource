@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态，参考{@link com.everhomes.rest.banner.BannerStatus}</li>
  * <li>order: banner顺序</li>
  *  <li>sceneType: 场景类型，{@link com.everhomes.rest.ui.user.SceneType}</li>
+ *  <li>applyPolicy: 应用类型，{@link com.everhomes.rest.launchpad.ApplyPolicy}</li>
  * </ul>
  */
 public class CreateBannerAdminCommand {
@@ -53,7 +54,7 @@ public class CreateBannerAdminCommand {
     private Integer  order;
     @ItemType(String.class)
     private List<String> sceneTypeList;
-
+    private Byte applyPolicy;
     
     public Integer getNamespaceId() {
         return namespaceId;
@@ -148,6 +149,13 @@ public class CreateBannerAdminCommand {
     }
     public void setSceneTypeList(List<String> sceneTypeList) {
         this.sceneTypeList = sceneTypeList;
+    }
+    
+    public Byte getApplyPolicy() {
+        return applyPolicy;
+    }
+    public void setApplyPolicy(Byte applyPolicy) {
+        this.applyPolicy = applyPolicy;
     }
     @Override
     public String toString() {
