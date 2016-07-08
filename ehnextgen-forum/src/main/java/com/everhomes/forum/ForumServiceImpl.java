@@ -3593,18 +3593,18 @@ public class ForumServiceImpl implements ForumService {
                 visibleRegionId = cmd.getVisibleRegionId();
                 visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
-                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-                    	creatorTag = PostEntityTag.fromCode(orgType);
-                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
-                    		creatorTag = PostEntityTag.USER;
-                    	}
-                        visibleRegionType = VisibleRegionType.COMMUNITY;
-                        visibleRegionId = cmd.getVisibleRegionId();
-                    }else{
-                        creatorTag = PostEntityTag.fromCode(orgType);
-                        visibleRegionType = VisibleRegionType.REGION;
-                        visibleRegionId = sceneToken.getEntityId();
-                    }
+//                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+//                    	creatorTag = PostEntityTag.fromCode(orgType);
+//                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
+//                    		creatorTag = PostEntityTag.USER;
+//                    	}
+//                        visibleRegionType = VisibleRegionType.COMMUNITY;
+//                        visibleRegionId = cmd.getVisibleRegionId();
+//                    }else{
+//                        creatorTag = PostEntityTag.fromCode(orgType);
+//                        visibleRegionType = VisibleRegionType.REGION;
+//                        visibleRegionId = sceneToken.getEntityId();
+//                    }
                     
                     creatorTag = PostEntityTag.fromCode(orgType);
                 }

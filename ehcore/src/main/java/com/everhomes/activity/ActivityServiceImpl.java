@@ -1448,7 +1448,7 @@ public class ActivityServiceImpl implements ActivityService {
         	if(profile != null) {
         		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
         	}
-        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime);
+        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime, condition);
 	    	if(newActivities != null && newActivities.size() > 0) {
 	    		activities.addAll(newActivities);
 	    	}
