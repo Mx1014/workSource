@@ -574,6 +574,13 @@ public class BannerServiceImpl implements BannerService {
                 banner.setOrder(scope.getOrder());
                 banner.setVendorTag(cmd.getVendorTag());
                 
+                // 在3.7.0版本，banner也需要能够为某指定园区配置不同的banner，故需要支持apply_policy  by yanshaofan
+                ApplyPolicy applyPolicy = ApplyPolicy.fromCode(cmd.getApplyPolicy());
+                if(applyPolicy == null) {
+                    applyPolicy = ApplyPolicy.DEFAULT;
+                }
+                banner.setApplyPolicy(applyPolicy.getCode());
+                
                 banner.setSceneType(sceneType.getCode());
                 bannerProvider.createBanner(banner);
             });

@@ -216,10 +216,27 @@ delete from eh_launch_pad_items where id in(10021,10022,10023);
 update eh_launch_pad_items set action_data = '{"isSupportQR":1,"isSupportSmart":1}' where action_type = 40 and namespace_id = 999992;
 update eh_launch_pad_items set delete_flag = 0 where id = 10031;
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id, `delete_flag`, `scene_type`) 
-	VALUES (10021, 999992, 0, '0', 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 1, '{"itemLocation":"/home", "itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL, NULL, NULL, '0', 'pm_admin');
+	VALUES (10021, 999992, 0, '0', 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNU0yVTJaall3WWpZNE1EVTRaV0k1WkdNMk1tWXdORGMzTXpRelpUVmxZdw', 1, 1, 1, '{"itemLocation":"/home", "itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-VALUES ('10440', '999992', '0', '0', '0', '/home', 'Bizs', 'CONTACTS', '企业通讯录', 'cs://1/image/aW1hZ2UvTVRvNVpERTFaVEExTkdVeU1qSTRNV1psWW1VM05EWXpORFZtWldabE9EazJOZw', '1', '1', '46', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
-    
+VALUES ('10440', '999992', '0', '0', '0', '/home', 'Bizs', 'CONTACTS', '企业通讯录', 'cs://1/image/aW1hZ2UvTVRwak16azJOelEwWW1RNU5HRTFZalF4T1dGaE1qWTBOelE1TVRjNU4yTmhNQQ', '1', '1', '46', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+  
+
+-- 深业广场图片
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU0yVTJaall3WWpZNE1EVTRaV0k1WkdNMk1tWXdORGMzTXpRelpUVmxZdw' where id = 10031;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd01qSmxNRFUxTVdFMU1qZGxZVEpoTldOa05qSmxZV0pqWmpJNE5UQTROZw' where id = 10053;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa056UmpOakZqWWpjeE1qZzJaRGN5TTJNeE1UVmlNRGcyTVRaak1UYzJaQQ' where id in(10030,10059);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMU5UWTNNRGRrWXpKaVpERmtZMkk0WkdFeU5UWTROemt6WXpWa05UVTJPUQ' where id = 10054;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvelpXRm1ObUptTURkallUUmtZV0U1WVRNME1USTFNbVkwTTJGak5USTJOUQ' where id = 10057;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveE9UazFOMk00TkdZd04yTmtPVGc1TnpNMU9EZ3pOREEzWTJJd05tRXhaQQ' where id = 10027;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveU5EaGtNbU5sTkRRNE1ESTBZMlJrTkRJek16QXhObVZpWmpRNU1qTmtaZw' where id in(10026,10123);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVlqVTBNMll5WlRoak9EUTRaRGN4TlRBMk9HSTJabUZtWVRaaU1EWTFOUQ' where id = 10020;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvek1ERTBZbVJtTldGbVpXUTFOMkZoTjJGaVpXUmhZemMwT1RsaU1tUm1ZZw' where id = 10029;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd1lUazNOR1JrTmpVek1UVTNOR1F5TUdNNFptSmpaVGxqWVRnek1UQTFaUQ' where id in(10028,10058);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU5UQTRNbUU1TlRObU5qRmlZVGhtTnpSak1qQTBOekkzWm1JNU9UQm1PQQ' where id in(10003,10024);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk9EZG1PVE14TTJRNU5UZzBPRFE1WldRMU9UYzFNekJpTXpReU1EZGxPQQ' where id in(10002,10025);
+
+update eh_launch_pad_items set item_label = '物业服务' where id = 10020;
+  
 -- 储能园区公告换成通讯录    
 delete from eh_launch_pad_items where id in(10615, 10633);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
