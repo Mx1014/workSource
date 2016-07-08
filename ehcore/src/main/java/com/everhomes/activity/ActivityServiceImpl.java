@@ -470,7 +470,7 @@ public class ActivityServiceImpl implements ActivityService {
                 activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
                         + (roster.getAdultCount() + roster.getChildCount()));
                 
-                roster.setCheckinFlag((byte)1);
+//                roster.setCheckinFlag((byte)1);
 //                forumProvider.createPost(p);
                 LOGGER.debug("roster={}", roster);
         	}
