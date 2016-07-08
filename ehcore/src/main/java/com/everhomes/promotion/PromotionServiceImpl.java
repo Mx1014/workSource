@@ -330,6 +330,23 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         return resp;
     }
     
+    private String getScopeNameById(OpPromotionAssignedScope scope) {
+        OpPromotionScopeType t = OpPromotionScopeType.fromCode(scope.getScopeCode());
+        
+        switch(t) {
+         case ALL:
+             return "";
+         case COMMUNITY:
+             return "";
+         case ORGANIZATION:
+             return "";
+         case CITY:
+             return "";
+         default:
+             return "";
+        }
+    }
+    
     @Override
     public OpPromotionActivityDTO getPromotionById(GetOpPromotionActivityByPromotionId cmd) {
         OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
@@ -339,7 +356,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             
             List<OpPromotionAssignedScopeDTO> scopeDtos = new ArrayList<OpPromotionAssignedScopeDTO>();
             for(OpPromotionAssignedScope r : scopes) {
-                scopeDtos.add(ConvertHelper.convert(r, OpPromotionAssignedScopeDTO.class));
+                OpPromotionAssignedScopeDTO sdto = ConvertHelper.convert(r, OpPromotionAssignedScopeDTO.class);
+                sdto.setName(getScopeNameById(r));
+                scopeDtos.add(sdto);
             }
             dto.setAssignedScopes(scopeDtos);
             
