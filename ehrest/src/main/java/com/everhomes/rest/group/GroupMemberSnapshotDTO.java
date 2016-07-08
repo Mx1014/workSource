@@ -17,7 +17,6 @@ import com.everhomes.util.StringHelper;
  * <li>memberAvatarUrl：成员在group内的头像URL</li>
  * <li>updateTime：更新时间</li>
  * <li>createTime：创建时间</li>
- * <li>discriminator: group标识，参考{@link com.everhomes.group.GroupDiscriminator}</li>
  * </ul>
  */
 public class GroupMemberSnapshotDTO {
@@ -31,8 +30,6 @@ public class GroupMemberSnapshotDTO {
     private String memberAvatarUrl;
     private Timestamp updateTime;
     private Timestamp createTime;
-    
-    private String discriminator;
     
     public GroupMemberSnapshotDTO() {
     }
@@ -115,14 +112,6 @@ public class GroupMemberSnapshotDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
-    }
-
-    public String getDiscriminator() {
-        return discriminator;
-    }
-
-    public void setDiscriminator(String discriminator) {
-        this.discriminator = discriminator;
     }
 
     @Override
