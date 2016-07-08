@@ -152,7 +152,7 @@ public class ActivityProviderImpl implements ActivityProivider {
             // concurrent?
             LOGGER.warn("the user is checkin before");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "the user is checkin before");
+                    ActivityServiceErrorCode.ERROR_CHECKIN_BEFORE, "the user is checkin before");
         }
         activityRosters[0].setCheckinFlag(CheckInStatus.CHECKIN.getCode());
         activityRosters[0].setCheckinUid(uid);

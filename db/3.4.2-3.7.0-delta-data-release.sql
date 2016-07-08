@@ -261,3 +261,7 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9XWTVPV00wWmpVNV
 update eh_banners set poster_path = '' where id in(10412,10413);
 
 
+--增加你已签到
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('activity', '10007', 'zh_CN', '你已签到');
+
+
