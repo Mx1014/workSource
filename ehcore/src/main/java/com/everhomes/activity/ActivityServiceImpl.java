@@ -450,6 +450,11 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         
         dbProvider.execute(status->{
+        	LOGGER.info("activity ConfirmFlag = " + activity.getConfirmFlag() + ", acroster ConfirmFlag = " + acroster.getConfirmFlag());
+        	LOGGER.info("activity.getConfirmFlag() == null is " + (activity.getConfirmFlag() == null) 
+        			+ "activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode())
+        			+ "activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode())
+        			+ "acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()" + (acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()));
         	if(activity.getConfirmFlag() == null || activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() 
         			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
         		
@@ -459,10 +464,12 @@ public class ActivityServiceImpl implements ActivityService {
 //                p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
 //                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CHECKIN), UserContext.current().getUser().getLocale(), ""));
                 Long familyId = getFamilyId();
+                //字段错了 签到应记录到checkin字段中 modified by xiongying 20160708
                 if (familyId != null)
-                    activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
-                activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
+                    activity.setCheckinFamilyCount(activity.getCheckinFamilyCount() + 1);
+                activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
                         + (roster.getAdultCount() + roster.getChildCount()));
+                
                 roster.setCheckinFlag((byte)1);
 //                forumProvider.createPost(p);
                 LOGGER.debug("roster={}", roster);
@@ -478,6 +485,10 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setProcessStatus(getStatus(activity).getCode());
+        
+        //dto checkin名字不用 要手动转 modified by xiongying 20160708
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
 //        //是否需要确认，要确认则确认后才能签到
 //        if(activity.getConfirmFlag()==null) {
 //        	dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
