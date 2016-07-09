@@ -21,6 +21,7 @@ public class GroupInfoTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
     
+    // 由于客户端拿group信息时，由于没有Discriminator信息，故无法判断m
     @Test
     public void testGetGroupInfo() {
         Integer namespaceId = 0;
@@ -52,7 +53,7 @@ public class GroupInfoTest extends BaseLoginAuthTestCase {
         assertTrue("Group should be group type", GroupDiscriminator.fromCode(response.getResponse().getDiscriminator()) == GroupDiscriminator.GROUP);
     }
     
-    @Ignore @Test
+    @Test
     public void testCreateGroupInfo() {
         Integer namespaceId = 1000000;
         String userIdentifier = "12000000001";

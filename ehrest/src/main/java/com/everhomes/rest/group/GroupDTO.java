@@ -32,7 +32,7 @@ import com.everhomes.util.StringHelper;
  * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
  * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
- * <li>discriminator: group标识，参考{@link com.everhomes.group.GroupDiscriminator}</li>
+ * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
  * </ul>
  */
 public class GroupDTO {
