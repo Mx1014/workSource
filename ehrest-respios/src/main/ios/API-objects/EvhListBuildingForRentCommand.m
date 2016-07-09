@@ -42,6 +42,8 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.buildingId)
         [jsonObject setObject: self.buildingId forKey: @"buildingId"];
+    if(self.rentType)
+        [jsonObject setObject: self.rentType forKey: @"rentType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -70,6 +72,10 @@
         self.buildingId = [jsonObject objectForKey: @"buildingId"];
         if(self.buildingId && [self.buildingId isEqual:[NSNull null]])
             self.buildingId = nil;
+
+        self.rentType = [jsonObject objectForKey: @"rentType"];
+        if(self.rentType && [self.rentType isEqual:[NSNull null]])
+            self.rentType = nil;
 
         return self;
     }

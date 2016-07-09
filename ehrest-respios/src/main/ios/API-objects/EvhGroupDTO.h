@@ -67,6 +67,8 @@
 
 @property(nonatomic, copy) NSNumber* updateTime;
 
+@property(nonatomic, copy) NSString* discriminator;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

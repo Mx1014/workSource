@@ -30,18 +30,6 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.id)
-        [jsonObject setObject: self.id forKey: @"id"];
-    if(self.userName)
-        [jsonObject setObject: self.userName forKey: @"userName"];
-    if(self.mobile)
-        [jsonObject setObject: self.mobile forKey: @"mobile"];
-    if(self.cardNo)
-        [jsonObject setObject: self.cardNo forKey: @"cardNo"];
-    if(self.orderNo)
-        [jsonObject setObject: self.orderNo forKey: @"orderNo"];
-    if(self.consumeType)
-        [jsonObject setObject: self.consumeType forKey: @"consumeType"];
     if(self.itemName)
         [jsonObject setObject: self.itemName forKey: @"itemName"];
     if(self.amount)
@@ -65,30 +53,6 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.id = [jsonObject objectForKey: @"id"];
-        if(self.id && [self.id isEqual:[NSNull null]])
-            self.id = nil;
-
-        self.userName = [jsonObject objectForKey: @"userName"];
-        if(self.userName && [self.userName isEqual:[NSNull null]])
-            self.userName = nil;
-
-        self.mobile = [jsonObject objectForKey: @"mobile"];
-        if(self.mobile && [self.mobile isEqual:[NSNull null]])
-            self.mobile = nil;
-
-        self.cardNo = [jsonObject objectForKey: @"cardNo"];
-        if(self.cardNo && [self.cardNo isEqual:[NSNull null]])
-            self.cardNo = nil;
-
-        self.orderNo = [jsonObject objectForKey: @"orderNo"];
-        if(self.orderNo && [self.orderNo isEqual:[NSNull null]])
-            self.orderNo = nil;
-
-        self.consumeType = [jsonObject objectForKey: @"consumeType"];
-        if(self.consumeType && [self.consumeType isEqual:[NSNull null]])
-            self.consumeType = nil;
-
         self.itemName = [jsonObject objectForKey: @"itemName"];
         if(self.itemName && [self.itemName isEqual:[NSNull null]])
             self.itemName = nil;

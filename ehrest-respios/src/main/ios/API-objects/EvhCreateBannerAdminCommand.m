@@ -75,6 +75,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"sceneTypeList"];
     }
+    if(self.applyPolicy)
+        [jsonObject setObject: self.applyPolicy forKey: @"applyPolicy"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -147,6 +149,10 @@
                 [self.sceneTypeList addObject: itemJson];
             }
         }
+        self.applyPolicy = [jsonObject objectForKey: @"applyPolicy"];
+        if(self.applyPolicy && [self.applyPolicy isEqual:[NSNull null]])
+            self.applyPolicy = nil;
+
         return self;
     }
     

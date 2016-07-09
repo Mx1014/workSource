@@ -11,18 +11,6 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* id;
-
-@property(nonatomic, copy) NSString* userName;
-
-@property(nonatomic, copy) NSString* mobile;
-
-@property(nonatomic, copy) NSString* cardNo;
-
-@property(nonatomic, copy) NSNumber* orderNo;
-
-@property(nonatomic, copy) NSNumber* consumeType;
-
 @property(nonatomic, copy) NSString* itemName;
 
 @property(nonatomic, copy) NSNumber* amount;

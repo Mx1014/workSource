@@ -96,6 +96,8 @@
     }
     if(self.updateTime)
         [jsonObject setObject: self.updateTime forKey: @"updateTime"];
+    if(self.discriminator)
+        [jsonObject setObject: self.discriminator forKey: @"discriminator"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -212,6 +214,10 @@
         self.updateTime = [jsonObject objectForKey: @"updateTime"];
         if(self.updateTime && [self.updateTime isEqual:[NSNull null]])
             self.updateTime = nil;
+
+        self.discriminator = [jsonObject objectForKey: @"discriminator"];
+        if(self.discriminator && [self.discriminator isEqual:[NSNull null]])
+            self.discriminator = nil;
 
         return self;
     }

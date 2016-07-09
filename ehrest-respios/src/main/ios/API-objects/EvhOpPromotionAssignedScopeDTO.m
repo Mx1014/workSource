@@ -38,6 +38,8 @@
         [jsonObject setObject: self.id forKey: @"id"];
     if(self.promotionId)
         [jsonObject setObject: self.promotionId forKey: @"promotionId"];
+    if(self.name)
+        [jsonObject setObject: self.name forKey: @"name"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -58,6 +60,10 @@
         self.promotionId = [jsonObject objectForKey: @"promotionId"];
         if(self.promotionId && [self.promotionId isEqual:[NSNull null]])
             self.promotionId = nil;
+
+        self.name = [jsonObject objectForKey: @"name"];
+        if(self.name && [self.name isEqual:[NSNull null]])
+            self.name = nil;
 
         return self;
     }

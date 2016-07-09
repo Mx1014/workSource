@@ -23,6 +23,8 @@
 
 @property(nonatomic, copy) NSNumber* buildingId;
 
+@property(nonatomic, copy) NSString* rentType;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 
