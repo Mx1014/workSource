@@ -253,7 +253,7 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRveU1tVXlaak01Wm1NNF
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMVltTXlPRFUyT0dVMFlUTTVaVGRtWWpNek16TTBOVEUyT1daaE1XVXhNZw' where id in(76,1016);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMFkyUm1OekJpTlRrME1EWXdPVGs1WlRObVltRTRaREV3TWpsak5USmlZdw' where id in(77,1017);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU5EaGxNalV3T1RBMlpETXpNVEkyWVRoaU9HWXdNVGxpWkRFM09URmlaUQ' where id in(78,1018);
---update eh_banners set poster_path = '' where id in(79,1019);
+-- update eh_banners set poster_path = '' where id in(79,1019);
 delete from eh_banners where id in (79,1019);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbVpEUTJNek5pWWpabE1tWXhPRFJoT1RRMFlUSTVZbVl5TnpsbU1HVm1OQQ' where id in(1022,1023);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbU1qTmpOVEkwWkdRek5UWmxaV0k0T1RreU5EbGpZakF5T1dSa1pHRmhOZw' where id in(1026,1024);
@@ -261,7 +261,12 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9XWTVPV00wWmpVNV
 update eh_banners set poster_path = '' where id in(10412,10413);
 
 
---增加你已签到
+-- 增加你已签到
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('activity', '10007', 'zh_CN', '你已签到');
 
+-- 深业 添加场地预约  by lqs 20160709
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES(12831, 999992, '0', '0', '0', '/home', 'Bizs', 'site_reservation', '场地预约', 'cs://1/image/aW1hZ2UvTVRvM1pEa3dNak16TXpCaU9XVXlOak01WkdWbVpUazJOelkwTnpRd1pUSTJOQQ', 1, 1, '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES(12832, 999992, '0', '0', '0', '/home', 'Bizs', 'site_reservation', '场地预约', 'cs://1/image/aW1hZ2UvTVRvM1pEa3dNak16TXpCaU9XVXlOak01WkdWbVpUazJOelkwTnpRd1pUSTJOQQ', 1, 1, '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 
