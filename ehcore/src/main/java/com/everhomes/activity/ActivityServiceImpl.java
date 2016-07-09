@@ -448,6 +448,16 @@ public class ActivityServiceImpl implements ActivityService {
         }
         
         ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        if(acroster == null) {
+        	LOGGER.error("handle activityRoster error ,the activityRoster does not exsit.activityId=" + cmd.getActivityId()
+        			+ ", userId = " + user.getId());
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+        }
+        
+        if(acroster.getConfirmFlag() == null) {
+        	acroster.setConfirmFlag(0L);
+        }
         
         dbProvider.execute(status->{
         	LOGGER.info("activity ConfirmFlag = " + activity.getConfirmFlag() + ", acroster ConfirmFlag = " + acroster.getConfirmFlag());
@@ -455,8 +465,8 @@ public class ActivityServiceImpl implements ActivityService {
         			+ "activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode())
         			+ "activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode())
         			+ "acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()" + (acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()));
-        	if(activity.getConfirmFlag() == null || activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() 
-        			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
+        	if(activity.getConfirmFlag() == null || ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.UN_CONFIRMED 
+        			|| (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
         		
         		ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
 //                Post p = createPost(user.getId(),post,null,"");
