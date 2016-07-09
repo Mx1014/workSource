@@ -25,7 +25,10 @@ CREATE TABLE `eh_news` (
 	`deleter_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'deleter uid',
 	`delete_time` DATETIME NULL DEFAULT NULL COMMENT 'mark-deletion policy. historic data may be useful',
 	PRIMARY KEY (`id`)
-);
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
 
 DROP TABLE IF EXISTS `eh_news_attachments`;
 CREATE TABLE `eh_news_attachments` (
@@ -36,7 +39,10 @@ CREATE TABLE `eh_news_attachments` (
 	`creator_uid` BIGINT(20) NOT NULL,
 	`create_time` DATETIME NOT NULL,
 	PRIMARY KEY (`id`)
-);
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
 
 DROP TABLE IF EXISTS `eh_news_comment`;
 CREATE TABLE `eh_news_comment` (
@@ -50,4 +56,7 @@ CREATE TABLE `eh_news_comment` (
 	`deleter_uid` BIGINT(20) NULL DEFAULT NULL COMMENT 'deleter uid',
 	`delete_time` DATETIME NULL DEFAULT NULL COMMENT 'delete time',
 	PRIMARY KEY (`id`)
-);
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
