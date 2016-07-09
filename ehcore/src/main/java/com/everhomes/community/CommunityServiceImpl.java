@@ -1776,6 +1776,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void importCommunity(ImportCommunityCommand cmd, MultipartFile[] files) {
 		Long userId = UserContext.current().getUser().getId();
+		if (cmd.getNamespaceId()==null) {
+			LOGGER.error(
+					"Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
 		List<CreateCommunityCommand> list = getCommunitiesFromExcel(userId, cmd, files);
 		list.forEach(c->createCommunity(userId, cmd.getNamespaceId(), c));
 	}
