@@ -676,8 +676,15 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
+    	NotifyEntityDTO dto = new NotifyEntityDTO();
     	PaymentCardTransaction transaction = new PaymentCardTransaction();
-    	String key = "taotaogu-token-1";
+    	if(StringUtils.isBlank(cmd.getToken())){
+			dto.setMsg_sn("invalid parameter");
+			dto.setReturn_code("01");
+			return dto;
+		}
+    	PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerByToken(cmd.getToken());
+    	String key = "taotaogu-token-" + issuer.getId();
     	Object cache = this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
 			
 	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
@@ -697,7 +704,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		String token = cacheItem.getToken();
     	Gson gson = new Gson();
 		String msg = null;
-		NotifyEntityDTO dto = new NotifyEntityDTO();
+		
 		try {
 			if(StringUtils.isBlank(cmd.getToken()) || StringUtils.isBlank(cmd.getSign()) ||
 					StringUtils.isBlank(cmd.getMsg()) || !cmd.getToken().equals(token)){

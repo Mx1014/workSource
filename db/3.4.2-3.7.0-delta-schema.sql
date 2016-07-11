@@ -208,3 +208,8 @@ CREATE TABLE `eh_quality_inspection_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
+-- item表增加是否財經配置  by sfyan 20160711
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `scale_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: 不需要, 1: 需要';
+

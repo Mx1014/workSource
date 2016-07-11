@@ -560,9 +560,15 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
         cacheItem.setCreateTime(new Date());
         cacheItem.setExpireTime(20 * 60 * 60 * 1000);
         cacheItem.setAesKey((String) map.get("aes_key"));
+        String token = (String) map.get("token");
         cacheItem.setToken((String) map.get("token"));
         redisTemplate.opsForValue().set(key,StringHelper.toJsonString(cacheItem));
         redisTemplate.expire(key, 20, TimeUnit.HOURS);
+        
+		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(issuerId);
+		taotaoguVendorData.setToken(token);
+		issuer.setVendorData(StringHelper.toJsonString(taotaoguVendorData));
+		paymentCardProvider.updatePaymentCardIssuer(issuer);
     }
     
     private Object getTokenFromCache(Long issuerId) {
