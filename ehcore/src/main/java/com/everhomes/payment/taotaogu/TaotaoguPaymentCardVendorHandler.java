@@ -879,7 +879,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			
 			StatusLine status = rsp.getStatusLine();
 			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("the login request of taotaogu info method={},token={},aesKey={},param={},rspText={},status={}.",
+				LOGGER.debug("the request info method={},token={},aesKey={},param={},rspText={},status={}.",
 						method,token,aesKey,json,rspText,status);
 			if(status.getStatusCode() == 200){
 				rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
@@ -892,10 +892,10 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 						"the http request of taotaogu status is not 200.");
 			}
 		}catch(Exception e){
-			LOGGER.error("the http request of taotaogu exception method={},token={},aesKey={},param={},rspText={}.",
+			LOGGER.error("the http request exception method={},token={},aesKey={},param={},rspText={}.",
 					method,token,aesKey,json,rspText,e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"the http request of taotaogu exception.");
+					"the http request exception.");
 		}
 	}
 	//订单接口，解析返回结果
@@ -919,10 +919,10 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				result = (Map<String,Object>) StringHelper.fromJsonString(data1, Map.class);
 			}
 		}catch(Exception e){
-			LOGGER.error("resolveOrderResult failed rspText={},aesKey={}.",
-					rspText,aesKey,e);
+			LOGGER.error("resolve order response failed rspText={},aesKey={}.",
+					rspText, aesKey, e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"resolveOrderResult failed.");
+					"resolve order response failed.");
 		}
 		return result;
 	}
