@@ -26,9 +26,6 @@ if not exist %prop_template_file% (
 REM Check if the pom.properties file exists, if not then copy from template
 set property_file=%project_dir%\pom.properties
 echo property_file=%property_file%
-if exist %property_file% (
-	del /q %property_file%
-)
 if not exist %property_file% (
 	COPY "%prop_template_file%" "%property_file%" /Y
 )
