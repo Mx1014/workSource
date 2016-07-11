@@ -76,10 +76,10 @@ UPDATE eh_organizations SET group_id = 1001301 WHERE id = 1001027;
 -- luanch pad item add office cubicle  icon_uri = yuan qu ru zhu
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`,
  `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
-  VALUES('2022','1000000','0','0','0','/home','Bizs','工位申请','工位申请','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28','{"rentType":"office_cubicle"}',
+  VALUES('2022','999989','0','0','0','/home','Bizs','工位申请','工位申请','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28','{"rentType":"office_cubicle"}',
   '0','0','1','1','','10',NULL,NULL,NULL,'0','park_pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`,
  `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
-  VALUES('2023','1000000','0','0','0','/home','Bizs','工位申请','工位申请','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28','{"rentType":"office_cubicle"}',
+  VALUES('2023','999989','0','0','0','/home','Bizs','工位申请','工位申请','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28','{"rentType":"office_cubicle"}',
   '0','0','1','1','','10',NULL,NULL,NULL,'0','park_tourist');
  
