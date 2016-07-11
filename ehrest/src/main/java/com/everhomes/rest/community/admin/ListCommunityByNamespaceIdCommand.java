@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.community.admin;
 
 import javax.validation.constraints.NotNull;
@@ -5,52 +7,19 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <p>
  * <ul>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
- * <li>pageSize: 每页的数量</li>
- * <li>keyword: 小区关键字</li>
+ * 参数
  * <li>namespaceId: 域空间id</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页的数量</li>
  * </ul>
- *
  */
-public class ListComunitiesByKeywordAdminCommand {
-	
-	private Long pageAnchor;
-	
-	private Integer pageSize;
-	
-	private String keyword;
-	
+public class ListCommunityByNamespaceIdCommand {
+	@NotNull
 	private Integer namespaceId;
-	
-	
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-	
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-	
-	public Integer getPageSize() {
-		return pageSize;
-	}
-	
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-	
-	public String getKeyword() {
-		return keyword;
-	}
-	
-	public void setKeyword(String keyword) {
-		this.keyword = keyword;
-	}
-	
-	
+	private Long pageAnchor;
+	private Integer pageSize;
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -59,10 +28,25 @@ public class ListComunitiesByKeywordAdminCommand {
 		this.namespaceId = namespaceId;
 	}
 
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 
 }

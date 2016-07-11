@@ -30,3 +30,6 @@ ehcore/logs
 ehrest/src/test/java/com/everhomes/generate
 
 ehtest-integration/src/test/config/ehcore.properties
+
+/ehcore/src/test/java/com/everhomes/generate
+

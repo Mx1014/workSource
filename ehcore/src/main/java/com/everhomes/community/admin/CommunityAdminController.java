@@ -38,8 +38,12 @@ import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.CreateCommunityCommand;
+import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
@@ -52,6 +56,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.SearchSyncManager;
@@ -506,4 +511,53 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+
+	/**
+	 * <b>URL: /admin/community/createCommunity</b>
+	 * <p>
+	 * 创建小区
+	 * </p>
+	 */
+	@RequestMapping("createCommunity")
+	@RestReturn(value = CreateCommunityResponse.class)
+	public RestResponse createCommunity(CreateCommunityCommand cmd) {
+		CreateCommunityResponse result = communityService.createCommunity(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /admin/community/importCommunity</b>
+	 * <p>
+	 * 导入小区
+	 * </p>
+	 */
+	@RequestMapping("importCommunity")
+	@RestReturn(value = String.class)
+	public RestResponse importCommunity(ImportCommunityCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
+		communityService.importCommunity(cmd, files);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /admin/community/listCommunityByNamespaceId</b>
+	 * <p>
+	 * 按域空间查询社区
+	 * </p>
+	 */
+	@RequestMapping("listCommunityByNamespaceId")
+	@RestReturn(value = ListCommunityByNamespaceIdResponse.class)
+	public RestResponse listCommunityByNamespaceId(ListCommunityByNamespaceIdCommand cmd) {
+		ListCommunityByNamespaceIdResponse result = communityService.listCommunityByNamespaceId(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

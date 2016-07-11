@@ -435,4 +435,18 @@ public class RegionProviderImpl implements RegionProvider {
 		}
 		return ConvertHelper.convert(r.get(0), Region.class);
 	}
+
+	@Override
+	public Region findRegionByPath(Integer namespaceId, String path) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		//fetchOne()没查到记录会返回null
+		try {
+			return context.select().from(Tables.EH_REGIONS).where(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_REGIONS.PATH.eq(path)).fetchOne().map(t->ConvertHelper.convert(t, Region.class));
+		} catch (NullPointerException e) {
+			return null;
+		}
+	}
+
+
 }

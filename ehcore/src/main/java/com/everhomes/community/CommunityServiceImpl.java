@@ -89,8 +89,13 @@ import com.everhomes.rest.community.admin.CommunityUserDto;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
+import com.everhomes.rest.community.admin.CreateCommunityCommand;
+import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
@@ -1652,5 +1657,206 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		return dtos;
+	}
+
+
+	@Override
+	public CreateCommunityResponse createCommunity(final CreateCommunityCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = cmd.getNamespaceId();
+		checkCreateCommunityParameters(userId, cmd);
+		
+		CommunityDTO community = createCommunity(userId, namespaceId, cmd);
+		
+		CreateCommunityResponse response = new CreateCommunityResponse();
+		response.setCommunityDTO(community);
+		return response;
+	}
+	
+	private CommunityDTO createCommunity(final Long userId, final Integer namespaceId, final CreateCommunityCommand cmd){
+		List<CommunityDTO> communities = new ArrayList<>();
+		List<CommunityGeoPointDTO> points = new ArrayList<>();
+		dbProvider.execute(s->{
+			Long provinceId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName()), 0L);  //创建省
+			Long cityId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName(), cmd.getCityName()), provinceId);  //创建市
+			Long areaId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName(), cmd.getCityName(), cmd.getAreaName()), cityId);  //创建区县
+			
+			cmd.setProvinceId(provinceId);
+			cmd.setCityId(cityId);
+			cmd.setAreaId(areaId);
+			Community community = createCommunity(userId, cmd);
+			
+			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
+			
+			createNamespaceResource(namespaceId, community.getId());
+			
+			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
+			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
+			cd.setGeoPointList(points);
+			communities.add(cd);
+			return true;
+		});
+		return communities.get(0);
+	} 
+	
+	private Long createRegion(Long userId, Integer namespaceId, String path, Long parentId) {
+		Region region = null;
+		//查看此域空间是否存在该区域，若存在，则不添加
+		region = regionProvider.findRegionByPath(namespaceId, path);
+		if (region != null && region.getId() != null) {
+			return region.getId();
+		}
+		//查看左邻域下是否存在该区域，若存在，则复制
+		region = regionProvider.findRegionByPath(Namespace.DEFAULT_NAMESPACE, path);
+		if (region != null && region.getId() != null) {
+			region.setParentId(parentId);
+			region.setId(null);
+			region.setNamespaceId(namespaceId);
+			regionProvider.createRegion(region);
+			return region.getId();
+		}
+		//如果左邻域下也没有就抛出异常
+		LOGGER.error(
+				"Invalid region, operatorId=" + userId + ", path=" + path);
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				"Invalid region");
+	}
+
+	private Community createCommunity(Long userId, CreateCommunityCommand cmd) {
+		//创建社区
+		Community community = ConvertHelper.convert(cmd, Community.class);
+		community.setAptCount(0);
+		community.setDefaultForumId(1L);
+		community.setFeedbackForumId(2L);
+		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		communityProvider.createCommunity(userId, community);
+		
+		return community;
+	}
+	
+	private CommunityGeoPoint createCommunityGeoPoint(Long communityId, Double latitude, Double longitude){
+		//创建经纬度
+		CommunityGeoPoint point = new CommunityGeoPoint();
+		point.setCommunityId(communityId);
+		point.setLatitude(latitude);
+		point.setLongitude(longitude);
+		point.setGeohash(GeoHashUtils.encode(latitude, longitude));
+		communityProvider.createCommunityGeoPoint(point);
+		return point;
+	}
+
+	private NamespaceResource createNamespaceResource(Integer namespaceId, Long resourceId) {
+		NamespaceResource resource = new NamespaceResource();
+		resource.setNamespaceId(namespaceId);
+		resource.setResourceId(resourceId);
+		resource.setResourceType(NamespaceResourceType.COMMUNITY.getCode());
+		namespaceResourceProvider.createNamespaceResource(resource);
+		return resource;
+	}
+
+	private void checkCreateCommunityParameters(final Long userId, final CreateCommunityCommand cmd) {
+		if (cmd.getNamespaceId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getName()) || cmd.getCommunityType() == null 
+				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getProvinceName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getCityName())
+				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getAreaName()) || CommunityType.fromCode(cmd.getCommunityType()) == null) {
+			LOGGER.error(
+					"Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+	}
+
+	private String getPath(String... names) {
+		StringBuilder sb = new StringBuilder();
+		for (String name : names) {
+			sb.append("/").append(name.trim());
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public void importCommunity(ImportCommunityCommand cmd, MultipartFile[] files) {
+		Long userId = UserContext.current().getUser().getId();
+		if (cmd.getNamespaceId()==null) {
+			LOGGER.error(
+					"Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		List<CreateCommunityCommand> list = getCommunitiesFromExcel(userId, cmd, files);
+		list.forEach(c->createCommunity(userId, cmd.getNamespaceId(), c));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private List<CreateCommunityCommand> getCommunitiesFromExcel(Long userId, ImportCommunityCommand cmd, MultipartFile[] files) {
+		List<RowResult> resultList = null;
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "process Excel error");
+		}
+
+		if (resultList != null && resultList.size() > 0) {
+			final List<CreateCommunityCommand> list = new ArrayList<>();
+			for (int i = 1, len = resultList.size(); i < len; i++) {
+				RowResult result = resultList.get(i);
+				
+				CreateCommunityCommand ccmd = new CreateCommunityCommand();
+				ccmd.setNamespaceId(cmd.getNamespaceId());
+				ccmd.setName(RowResult.trimString(result.getA()));
+				ccmd.setAliasName(RowResult.trimString(result.getB()));
+				ccmd.setAddress(RowResult.trimString(result.getC()));
+				ccmd.setDescription(RowResult.trimString(result.getD()));
+				ccmd.setCommunityType(Byte.parseByte(RowResult.trimString(result.getE())));
+				ccmd.setProvinceName(RowResult.trimString(result.getF()));
+				ccmd.setCityName(RowResult.trimString(result.getG()));
+				ccmd.setAreaName(RowResult.trimString(result.getH()));
+				ccmd.setLatitude(Double.parseDouble(RowResult.trimString(result.getI())));
+				ccmd.setLongitude(Double.parseDouble(RowResult.trimString(result.getJ())));
+				
+				checkCreateCommunityParameters(userId, ccmd);
+				list.add(ccmd);
+			}
+			return list;
+		}
+		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"excel data format is not correct");
+	}
+
+
+	@Override
+	public ListCommunityByNamespaceIdResponse listCommunityByNamespaceId(ListCommunityByNamespaceIdCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
+		
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(pageAnchor);
+		
+		List<CommunityDTO> communities = communityProvider.listCommunitiesByNamespaceId(null, cmd.getNamespaceId(), locator, pageSize+1);
+		
+		ListCommunityByNamespaceIdResponse response = new ListCommunityByNamespaceIdResponse();
+		if (communities != null && communities.size() > 0) {
+			if (communities.size() > pageSize) {
+				communities.remove(communities.size()-1);
+				pageAnchor = communities.get(communities.size()-1).getId();
+			}else {
+				pageAnchor = null;
+			}
+			populateCommunityGeoPoint(communities);
+			response.setCommunities(communities);
+			response.setNextPageAnchor(pageAnchor);
+		}
+		
+		return response;
+	}
+
+	private void populateCommunityGeoPoint(List<CommunityDTO> communities) {
+		communities.forEach(c->c.setGeoPointList(
+				communityProvider.listCommunityGeoPoints(c.getId()).stream().map(r->ConvertHelper.convert(r, CommunityGeoPointDTO.class))
+				.collect(Collectors.toList()))
+				);
 	}
 }
