@@ -21,6 +21,7 @@ import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhPaymentCardIssuersDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardTransactionsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardsDao;
@@ -99,6 +100,25 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARD_ISSUERS.ID.eq(issuerId));
         
         return ConvertHelper.convert(query.fetchOne(), PaymentCardIssuer.class);
+    }
+    @Override
+    public PaymentCardIssuer findPaymentCardIssuerByToken(String token){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardIssuers.class));
+    	SelectQuery<EhPaymentCardIssuersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_ISSUERS);
+
+        query.addConditions(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_DATA.like("%"+token+"%"));
+        
+        return ConvertHelper.convert(query.fetchOne(), PaymentCardIssuer.class);
+    }
+    
+    @Override
+    public void updatePaymentCardIssuer(PaymentCardIssuer paymentCardIssuer){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardIssuers.class));
+    	EhPaymentCardIssuersDao dao = new EhPaymentCardIssuersDao(context.configuration());
+
+        dao.update(paymentCardIssuer);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentCardIssuers.class, null);
+
     }
     
     @Override
