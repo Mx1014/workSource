@@ -1604,9 +1604,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         
-        extra.setAuthLevel(0l);
+        extra.setAuthLevel(1l);
         if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
-            extra.setAuthLevel(1l);
+            extra.setAuthLevel(2l);
         }
         
         extra.setAuthStorey(1l);
@@ -1617,7 +1617,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
-                extra.setAuthLevel(1l);    
+                extra.setAuthLevel(2l);    
             }            
             storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
@@ -1736,7 +1736,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         qr.setId(1008l);
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
-        extra.setAuthLevel(0l);
+        extra.setAuthLevel(1l);
         extra.setAuthStorey(8l);
         
         List<Long> storeyAuthList = new ArrayList<Long>();
