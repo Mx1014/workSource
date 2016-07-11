@@ -524,10 +524,16 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
     		TaotaoguTokenCacheItem cacheItem = null;
             if(obj != null) {
             	cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(obj.toString(), TaotaoguTokenCacheItem.class);
+            	boolean isTokenValid = true;
+            	if(cacheItem.getToken() == null || cacheItem.getAesKey() == null) {
+            		isTokenValid = false;
+            		LOGGER.error("Token or aesKey is invalid in cache, issuerId={}, tokens={}", issuerId, obj);
+            	}
                 // 如果过期
-                if(cacheItem.isExpired()){
+                if(cacheItem.isExpired() || !isTokenValid){
                     if(LOGGER.isDebugEnabled())
-                    	LOGGER.debug("Token expired, try to refresh token, issuerId={}, token={}", issuerId, cacheItem);
+                    	LOGGER.debug("Token expired or invalid, try to refresh token, issuerId={}, isExpired={}, token={}", 
+                    			issuerId, cacheItem.isExpired(), cacheItem);
                 	refreshToken(issuerId,taotaoguVendorData);
                 	cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(getTokenFromCache(issuerId).toString(),
                 			TaotaoguTokenCacheItem.class);
