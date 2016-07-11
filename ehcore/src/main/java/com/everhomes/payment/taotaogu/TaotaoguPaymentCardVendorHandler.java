@@ -526,6 +526,8 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
             	cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(obj.toString(), TaotaoguTokenCacheItem.class);
                 // 如果过期
                 if(cacheItem.isExpired()){
+                    if(LOGGER.isDebugEnabled())
+                    	LOGGER.debug("Token expired, try to refresh token, issuerId={}, token={}", issuerId, cacheItem);
                 	refreshToken(issuerId,taotaoguVendorData);
                 	cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(getTokenFromCache(issuerId).toString(),
                 			TaotaoguTokenCacheItem.class);
@@ -569,6 +571,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		taotaoguVendorData.setToken(token);
 		issuer.setVendorData(StringHelper.toJsonString(taotaoguVendorData));
 		paymentCardProvider.updatePaymentCardIssuer(issuer);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Refresh token, key={}, issuer={}", key, issuer);
+		}
     }
     
     private Object getTokenFromCache(Long issuerId) {
@@ -582,6 +587,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
         if(value != null) {
             obj = StringHelper.fromJsonString(value.toString(), Object.class);    
         }
+        if(LOGGER.isDebugEnabled())
+        	LOGGER.debug("get token from cache, issuerId={}, tokens={}", issuerId, obj);
+        
         return obj;
     }
     

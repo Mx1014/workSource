@@ -684,6 +684,12 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			return dto;
 		}
     	PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerByToken(cmd.getToken());
+    	if(issuer == null){
+    		LOGGER.error("Token not found, user may be not login, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Token not found, user may be not login");
+    	}
+    	
     	String key = "taotaogu-token-" + issuer.getId();
     	Object cache = this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
 			
@@ -693,10 +699,11 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	        Object obj = redisTemplate.opsForValue().get(key);
             return obj;
         }).first();
+    	
     	if(cache == null){
-    		LOGGER.error("notifyPaidResult failed duing to token and aesKey is null.key={}",key);
+    		LOGGER.error("Token and aesKey is not found in cache, key={}, cmd={}", key, cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"notifyPaidResult failed.");
+					"Token and aeskey is not found");
     	}
     	Object o =  StringHelper.fromJsonString(cache.toString(), Object.class);
     	TaotaoguTokenCacheItem cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(o.toString(),TaotaoguTokenCacheItem.class);
