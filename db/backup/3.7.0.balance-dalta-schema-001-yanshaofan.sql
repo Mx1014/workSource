@@ -1,6 +1,6 @@
 -- 订单交易流水表
 CREATE TABLE `eh_stat_orders` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT,
+  `id` bigint(20) NOT NULL COMMENT,
   `community_id` bigint(20) DEFAULT 0,
   `namespace_id` bigint(20) DEFAULT 0,
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
@@ -15,11 +15,11 @@ CREATE TABLE `eh_stat_orders` (
   `order_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
 -- 结算交易流水表
 CREATE TABLE `eh_stat_transactions` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT,
+  `id` bigint(20) NOT NULL COMMENT,
   `namespace_id` bigint(20) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -39,17 +39,17 @@ CREATE TABLE `eh_stat_transactions` (
   `paid_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '支付类型 二维码支付 等。。 ',
   `fee_rate` DECIMAL DEFAULT NULL COMMENT '交易费率',
   `fee_amount` DECIMAL DEFAULT NULL COMMENT '交易总手续费',
-  `balance_amount` DECIMAL DEFAULT NULL COMMENT '结算金额',
+  `settlement_amount` DECIMAL DEFAULT NULL COMMENT '结算金额',
   `paid_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '支付状态',
   `paid_time` DATETIME DEFAULT NULL,
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
 -- 结算退款流水表
 CREATE TABLE `eh_stat_refunds` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT,
+  `id` bigint(20) NOT NULL COMMENT,
   `community_id` bigint(20) DEFAULT 0,
   `namespace_id` bigint(20) DEFAULT 0,
   `refund_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -70,11 +70,11 @@ CREATE TABLE `eh_stat_refunds` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
 CREATE TABLE `eh_stat_settlements` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -96,11 +96,11 @@ CREATE TABLE `eh_stat_settlements` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
 CREATE TABLE `eh_stat_settlements` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -122,11 +122,11 @@ CREATE TABLE `eh_stat_settlements` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
 -- 结算統計結果表
 CREATE TABLE `eh_stat_service_settlement_results` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -144,11 +144,11 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
 -- 同步任务日志跟踪表
 CREATE TABLE `eh_sync_task_logs` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL,
   `task_type` VARCHAR(64) DEFAULT NULL COMMENT '任务类型  1同步订单 2同步交易 3交易数据处理',
   `request_params` VARCHAR(1024) DEFAULT NULL COMMENT '请求参数',
   `response_datas` text COMMENT '响应结果数据',
@@ -159,5 +159,5 @@ CREATE TABLE `eh_sync_task_logs` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 

@@ -16,9 +16,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.statistics.transaction.ExecuteTaskCommand;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
 import com.everhomes.rest.statistics.transaction.StatTransactionSettlementDTO;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
 
 /**
  * <ul>
@@ -29,13 +29,26 @@ import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
 @RestController
 @RequestMapping("/stat/transaction")
 public class StatTransactionController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StatTransactionController.class);
-    
+	
     @Autowired
     private ConfigurationProvider configurationProvider;
     
     @Autowired
     private OrganizationService organizationService;
+    
+    /**
+     * <b>URL: /stat/transaction/executeTask</b>
+     * <p>執行任務</p>
+     */
+    @RequestMapping("executeTask")
+    @RestReturn(value=String.class)
+    public RestResponse executeTask(@Valid ExecuteTaskCommand cmd) {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /stat/transaction/listStatServiceSettlementAmounts</b>
