@@ -1952,35 +1952,34 @@ public class RentalServiceImpl implements RentalService {
 						refundCmd.setRefundAmount(bill.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio()/100)));
 						refundCmd.setRefundMsg("预订单取消退款");
 						this.setSignatureParam(refundCmd);
-						PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
-						if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-							//退款成功保存退款单信息，修改bill状态
-							RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd,RentalRefundOrder.class);
-							rentalRefundOrder.setOrderNo(billMap.getOnlinePayBillId());
-							rentalRefundOrder.setRefoundOrderNo(refoundOrderNo);
-							rentalRefundOrder.setRentalBillId(bill.getId()); 
-							rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-							rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
-							rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-							rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
-							if(billMap.getVendorType().equals(VendorType.WEI_XIN.getCode())){
+						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd,RentalRefundOrder.class);
+						rentalRefundOrder.setOrderNo(billMap.getOnlinePayBillId());
+						rentalRefundOrder.setRefoundOrderNo(refoundOrderNo);
+						rentalRefundOrder.setRentalBillId(bill.getId()); 
+						rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
+						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+						//微信直接退款，支付宝置为退款中 
+						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getCode())){
+							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+							if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+								//退款成功保存退款单信息，修改bill状态
 								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
-								
+								bill.setStatus(SiteBillStatus.REFUNDED.getCode());
 							}
 							else{
-								rentalRefundOrder.setUrl(refundResponse.getResponse());
-								//如果有一个支付宝的订单，那bill的状态也是退款中
-								rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
-								bill.setStatus(SiteBillStatus.REFUNDING.getCode());
-							}
-							this.rentalProvider.createRentalRefundOrder(rentalRefundOrder);
+								LOGGER.error("bill id=["+bill.getId()+"] refound error param is "+refundCmd.toString());
+								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+										RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+												"bill  refound error"); 
+							}	
 						}
 						else{
-							LOGGER.error("bill id=["+bill.getId()+"] refound error param is "+refundCmd.toString());
-							throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-									RentalServiceErrorCode.ERROR_REFOUND_ERROR,
-											"bill  refound error"); 
+							rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
+							bill.setStatus(SiteBillStatus.REFUNDING.getCode());
 						}
+						this.rentalProvider.createRentalRefundOrder(rentalRefundOrder);
 					}
 				}
 				else{

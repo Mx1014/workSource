@@ -9,6 +9,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.RefundCallbackCommand;
 import com.everhomes.util.RuntimeErrorException;
 
 @Service
@@ -48,6 +49,12 @@ public class OrderServiceImpl implements OrderService{
 		}
 		LOGGER.debug("orderTypeCode="+code);
 		return String.valueOf(code);
+	}
+
+	@Override
+	public void refundCallback(RefundCallbackCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
