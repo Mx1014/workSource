@@ -840,7 +840,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			StatusLine status = rsp.getStatusLine();
 			rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
 			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("login info :rspText={}",rspText);   
+				LOGGER.debug("login info :rspText={}, param={}", rspText, json);   
 			int a = rspText.indexOf("msg=");
 			int b = rspText.indexOf("&sign=");
 			String r1 = null; //结果字符串
@@ -855,7 +855,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			}
 			result = (Map<String,Object>) StringHelper.fromJsonString(r1, Map.class);
 		}catch(Exception e){
-			LOGGER.error("the login request of taotaogu failed rspText={},json={}.",rspText,json,e);
+			LOGGER.error("the login request of taotaogu failed rspText={},json={}", rspText, json, e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
 					"the login request of taotaogu failed.");
 		}
