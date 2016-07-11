@@ -4,7 +4,7 @@
 
     <groupId>com.everhomes</groupId>
     <artifactId>ehcore-api</artifactId>
-    <version>3.7.0-SNAPSHOT</version>
+	<version>${ehapp.version}</version>
     <packaging>jar</packaging>
 
     <name>ehcore-api</name>
@@ -21,9 +21,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <jooq.version>3.4.1</jooq.version>
-        <java.source.version>1.8</java.source.version>
-        <java.target.version>1.8</java.target.version>
+		<jooq.version>${jooq.version}</jooq.version>
+		<java.source.version>${java.source.version}</java.source.version>
+		<java.target.version>${java.target.version}</java.target.version>
      	<maven.test.skip>true</maven.test.skip>
     </properties>
 
@@ -31,22 +31,22 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
-			<version>4.0.8.RELEASE</version>
+			<version>${spring-websocket.version}</version>
 		</dependency>
 		<dependency>
         <groupId>org.elasticsearch</groupId>
         <artifactId>elasticsearch</artifactId>
-        <version>1.4.5</version>
+        <version>${elasticsearch.version}</version>
       </dependency>
 	  <dependency>
         <groupId>net.greghaines</groupId>
         <artifactId>jesque</artifactId>
-        <version>2.0.2</version>
+        <version>${jesque.version}</version>
       </dependency>
        <dependency>
             <groupId>com.notnoop.apns</groupId>
             <artifactId>apns</artifactId>
-            <version>1.0.0.Beta6</version>
+            <version>${notnoop-apns.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
@@ -56,110 +56,110 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.9</version>
+            <version>${commons-codec.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.2.2</version>
+            <version>${commons-fileupload.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+			<version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.3</version>
+			<version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+			<version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+			<version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehrest</artifactId>
-            <version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
         </dependency>
          <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehcore-persist</artifactId>
-            <version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehplatform</artifactId>
-            <version>0.0.8-SNAPSHOT</version>
+			<version>${ehplatform.version}</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehplatform-persist</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+			<version>${ehplatform-persist.version}</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehutil</artifactId>
-            <version>0.0.7-SNAPSHOT</version>
+			<version>${ehutil.version}</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehutil-common</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${ehutil-common.version}</version>
         </dependency>
           <dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>3.12</version>
+			<version>${poi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.12</version>
+			<version>${poi-ooxml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-excelant</artifactId>
-			<version>3.12</version>
+			<version>${poi-excelant.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml-schemas</artifactId>
-			<version>3.12</version>
+			<version>${poi-ooxml-schemas.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-scratchpad</artifactId>
-			<version>3.12</version>
+			<version>${poi-scratchpad.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.hsr</groupId>
 			<artifactId>geohash</artifactId>
-			<version>1.0.13</version>
+			<version>${geohash.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
-			<version>3.2.0</version>
+			<version>${zxing-core.version}</version>
 		</dependency>
 
 		<dependency>
 		    <groupId>net.sourceforge.pinyin4j</groupId>
 		    <artifactId>pinyin4j</artifactId>
-		    <version>2.5.0</version>
+		    <version>${pinyin4j.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
-			<version>2.2.1</version>
+			<version>${quartz.version}</version>
 		</dependency>
 
     </dependencies>
@@ -168,7 +168,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>

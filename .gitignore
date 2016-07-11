@@ -33,3 +33,16 @@ ehtest-integration/src/test/config/ehcore.properties
 
 /ehcore/src/test/java/com/everhomes/generate
 
+ehborder/pom.xml
+ehcore/pom.xml
+ehcore-persist/pom.xml
+ehnextgen-api/pom.xml
+ehnextgen-forum/pom.xml
+ehnextgen-messaging/pom.xml
+ehrest/pom.xml
+ehrest-respios/pom.xml
+ehrest-response/pom.xml
+ehtest-integration/pom.xml
+oauth2-client/pom.xml
+pom.properties
+

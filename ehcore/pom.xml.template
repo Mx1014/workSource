@@ -4,7 +4,7 @@
 
 	<groupId>com.everhomes</groupId>
 	<artifactId>ehcore</artifactId>
-	<version>3.7.0-SNAPSHOT</version>
+	<version>${ehapp.version}</version>
 	<packaging>war</packaging>
 
 	<name>ehcore</name>
@@ -22,10 +22,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<start-class>com.everhomes.core.CoreServerApp</start-class>
 
-		<jooq.version>3.4.1</jooq.version>
-		<tomcat.version>8.0.8</tomcat.version>
-		<java.source.version>1.8</java.source.version>
-		<java.target.version>1.8</java.target.version>
+		<jooq.version>${jooq.version}</jooq.version>
+		<tomcat.version>${tomcat.version}</tomcat.version>
+		<java.source.version>${java.source.version}</java.source.version>
+		<java.target.version>${java.target.version}</java.target.version>
 
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
@@ -33,7 +33,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.1.9.RELEASE</version>
+		<version>${spring-boot-starter-parent.version}</version>
 	</parent>
 
 	<dependencies>
@@ -69,13 +69,13 @@
 	   <dependency>
 		    <groupId>org.springframework.data</groupId>
 		    <artifactId>spring-data-redis</artifactId>
-		    <version>1.3.1.RELEASE</version>
+		    <version>${spring-data-redis.version}</version>
 		</dependency>
 		
 		<dependency>
         <groupId>org.elasticsearch</groupId>
         <artifactId>elasticsearch</artifactId>
-        <version>1.4.5</version>
+        <version>${elasticsearch.version}</version>
       </dependency>
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
@@ -93,12 +93,12 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.30</version>
+			<version>${mysql-connector-java.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
-			<version>2.2.2</version>
+			<version>${cglib-nodep.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jooq</groupId>
@@ -118,32 +118,32 @@
 		<dependency>
 			<groupId>commons-dbcp</groupId>
 			<artifactId>commons-dbcp</artifactId>
-			<version>1.4</version>
+			<version>${commons-dbcp.version}</version>
 		</dependency>
       <dependency>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcprov-jdk14</artifactId>
-          <version>1.47</version>
+          <version>${bcprov-jdk14.version}</version>
       </dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.9</version>
+			<version>${commons-codec.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
-			<version>1.2.2</version>
+			<version>${commons-fileupload.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
+			<version>${commons-io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.3</version>
+			<version>${commons-lang.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jolokia</groupId>
@@ -152,54 +152,54 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.3</version>
+			<version>${gson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-spatial</artifactId>
-			<version>3.1.0</version>
+			<version>${lucene-spatial.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>2.3.3</version>
+			<version>${jackson-annotations.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.3.3</version>
+			<version>${jackson-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.3.3</version>
+			<version>${jackson-databind.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.7</version>
+			<version>${slf4j-api.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-ext</artifactId>
-            <version>1.7.12</version>
+            <version>${slf4j-ext.version}</version>
         </dependency>
 		<dependency>
         <groupId>net.greghaines</groupId>
         <artifactId>jesque</artifactId>
-        <version>2.0.2</version>
+        <version>${jesque.version}</version>
       </dependency>
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
 			<artifactId>jaxws-rt</artifactId>
-			<version>2.1.4</version>
+			<version>${jaxws-rt.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -210,85 +210,85 @@
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehforum</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehmessaging</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehrest</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehcore-api</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehcore-persist</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>${ehapp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehplatform</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>${ehplatform.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehplatform-persist</artifactId>
-			<version>0.0.4-SNAPSHOT</version>
+			<version>${ehplatform-persist.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehutil</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>${ehutil.version}</version>
 		</dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehutil-common</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${ehutil-common.version}</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehcodegen</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${ehcodegen.version}</version>
         </dependency>
 		<dependency>
 			<groupId>xmlbeans</groupId>
 			<artifactId>xbean</artifactId>
-			<version>2.2.0</version>
+			<version>${xbean.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>xmlbeans</groupId>
 			<artifactId>xbean_xpath</artifactId>
-			<version>2.0.0</version>
+			<version>${xbean_xpath.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
-			<version>1.6</version>
+			<version>${dom4j.version}</version>
 		</dependency>
 
 		<dependency>
 		    <groupId>net.sourceforge.pinyin4j</groupId>
 		    <artifactId>pinyin4j</artifactId>
-		    <version>2.5.0</version>
+		    <version>${pinyin4j.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
-			<version>1.4.5</version>
+			<version>${javax-mail.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
-			<version>2.2.1</version>
+			<version>${quartz.version}</version>
 		</dependency>
 		<!--<dependency>
 			<groupId>org.quartz-scheduler</groupId>
@@ -302,7 +302,7 @@
 			<plugins>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.2</version>
+					<version>${maven-compiler-plugin.version}</version>
 					<configuration>
 						<source>${java.source.version}</source>
 						<target>${java.target.version}</target>
@@ -311,7 +311,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.7</version>
+					<version>${maven-antrun-plugin.version}</version>
 					<executions>
 						<execution>
 							<phase>process-resources</phase>
@@ -374,7 +374,7 @@
 	            <plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>properties-maven-plugin</artifactId>
-					<version>1.0-alpha-1</version>
+					<version>${properties-maven-plugin.version}</version>
 					<executions>
 						<execution>
 							<phase>initialize</phase>

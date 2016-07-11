@@ -4,7 +4,7 @@
  
     <groupId>com.everhomes</groupId>
     <artifactId>ehrest-respios</artifactId>
-    <version>3.7.0-SNAPSHOT</version>
+	<version>${ehapp.version}</version>
 	<packaging>pom</packaging>
 
     <name>ehrest-respios</name>
@@ -66,7 +66,7 @@
         <plugins>
             <plugin> 
                 <artifactId>maven-compiler-plugin</artifactId> 
-                <version>2.3.2</version> 
+				<version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>
@@ -75,7 +75,7 @@
             <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
+				<version>${maven-assembly-plugin.version}</version>
 				<configuration>
 					<appendAssemblyId>false</appendAssemblyId>
 					<descriptors>

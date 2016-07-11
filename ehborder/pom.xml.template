@@ -4,7 +4,7 @@
 
     <groupId>com.everhomes</groupId>
     <artifactId>ehborder</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${ehapp.version}</version>
 
     <name>ehborder</name>
     <url>http://www.everhomes.com</url>
@@ -13,8 +13,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>com.everhomes.border.BorderServerApp</start-class>
 
-        <java.version>1.8</java.version>
-        <tomcat.version>8.0.8</tomcat.version>
+        <java.version>${java.version}</java.version>
+        <tomcat.version>${tomcat.version}</tomcat.version>
 
      	<maven.test.skip>true</maven.test.skip>
     </properties>
@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.1.9.RELEASE</version>
+        <version>${spring-boot-starter-parent.version}</version>
     </parent>
 
     <distributionManagement>
@@ -54,40 +54,40 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>${slf4j-api.version}</version>
         </dependency>
          <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.3</version>
+            <version>${gson.version}</version>
         </dependency>
         
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehrest</artifactId>
-            <version>3.4.0-SNAPSHOT</version>
+            <version>${ehapp.version}</version>
         </dependency>
         
 			<dependency>
 			    <groupId>com.everhomes</groupId>
 			    <artifactId>ehrest-response</artifactId>
-			    <version>3.4.0-SNAPSHOT</version>
+			    <version>${ehapp.version}</version>
 			</dependency>
 
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehutil</artifactId>
-            <version>0.0.7-SNAPSHOT</version>
+            <version>${ehutil.version}</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehutil-common</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${ehutil-common.version}</version>
         </dependency>
     </dependencies>
 
@@ -96,7 +96,7 @@
 	        <plugins>
 	            <plugin>
 	                <artifactId>maven-compiler-plugin</artifactId>
-	                <version>3.2</version>
+	                <version>${maven-compiler-plugin.version}</version>
 	                <configuration>
 	                    <source>${java.source.version}</source>
 	                    <target>${java.target.version}</target>
@@ -105,7 +105,7 @@
 	            <plugin>
 	                <groupId>org.apache.maven.plugins</groupId>
 	                <artifactId>maven-antrun-plugin</artifactId>
-	                <version>1.7</version>
+	                <version>${maven-antrun-plugin.version}</version>
 	                <executions>
 	                    <execution>
 	                    <phase>process-resources</phase>
@@ -135,7 +135,7 @@
 	            <plugin>
 	                 <groupId>org.codehaus.mojo</groupId>
 	                 <artifactId>properties-maven-plugin</artifactId>
-	                 <version>1.0-alpha-1</version>
+	                 <version>${properties-maven-plugin.version}</version>
 	                 <executions>
 	                     <execution>
 	                         <phase>initialize</phase>
