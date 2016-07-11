@@ -44,6 +44,8 @@
 // item type NSString*
 @property(nonatomic, strong) NSMutableArray* sceneTypeList;
 
+@property(nonatomic, copy) NSNumber* applyPolicy;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

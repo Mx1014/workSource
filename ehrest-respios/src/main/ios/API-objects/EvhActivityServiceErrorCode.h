@@ -10,3 +10,4 @@
 #define EvhActivityServiceErrorCode_ERROR_INVALID_CONTACT_FAMILY 10004
 #define EvhActivityServiceErrorCode_ERROR_INVALID_USER 10005
 #define EvhActivityServiceErrorCode_ERROR_INVALID_ACTIVITY_ROSTER 10006
+#define EvhActivityServiceErrorCode_ERROR_CHECKIN_BEFORE 10007

@@ -58,7 +58,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;

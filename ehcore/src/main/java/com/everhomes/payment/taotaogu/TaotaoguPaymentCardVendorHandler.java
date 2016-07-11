@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -132,7 +133,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 					cardInfo.setCardId(card.getId());
 					List list = (List) queryAccountResultMap.get("Row");
 					for(int i=0;i<list.size();i++){
-						Map map = (Map) list.get(i);
+						Map<String,Object> map = (Map<String,Object>) list.get(i);
 						if("fund".equals(((String)map.get("SubAcctType")).trim())){
 							cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
 							break;
@@ -230,77 +231,97 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		String vendorData = issuer.getVendorData();
 		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
 		String brandCode = taotaoguVendorData.getBranchCode();
+		Long pageAnchor = cmd.getPageAnchor()==null?1L:cmd.getPageAnchor();
+		Integer pageSize = cmd.getPageSize()==null?10:cmd.getPageSize();
 		//203 充值类型
-		Map<String, Object> rechargeTransactionResultMap = queryTransaction(taotaoguVendorData, brandCode, card.getCardNo(), "203", cmd.getPageAnchor(), cmd.getPageSize());
+		Map<String, Object> rechargeTransactionResultMap = queryTransaction(taotaoguVendorData, brandCode, card.getCardNo(), "203", String.valueOf(pageAnchor), String.valueOf(pageSize));
 		//101 消费类型
-		Map<String, Object> consumeTransactionResultMap = queryTransaction(taotaoguVendorData, brandCode, card.getCardNo(), "101", cmd.getPageAnchor(), cmd.getPageSize());
+		Map<String, Object> consumeTransactionResultMap = queryTransaction(taotaoguVendorData, brandCode, card.getCardNo(), "101", String.valueOf(pageAnchor), String.valueOf(pageSize));
 
-		List<CardTransactionOfMonth> resultList = new ArrayList<>();
+		List<CardTransactionOfMonth> resultList = null;
 		if(rechargeTransactionResultMap != null && consumeTransactionResultMap != null){
 			
 			String count = rechargeTransactionResultMap.get("Count").toString();
 			List<Map<String,Object>> rechargeList = (List<Map<String, Object>>) rechargeTransactionResultMap.get("Row");
 			List<Map<String,Object>> consumeList = (List<Map<String, Object>>) consumeTransactionResultMap.get("Row");
 			rechargeList.addAll(consumeList);
-			outer:
-			for(Map<String,Object> m:rechargeList){
-				
+			List<CardTransactionFromVendorDTO> list = convertData(rechargeList);
+			//取充值和消费两种数据各pageSize条，排序之后，在取pageSize条;
+			list = list.subList(0, pageSize>list.size()?list.size():pageSize);
+			resultList = resolveCardTransaction(list);
+		}
+//		//按时间排序
+//		for( CardTransactionOfMonth cardTransactionOfMonth:resultList) {
+//			Collections.sort(cardTransactionOfMonth.getRequests());
+//		}
+//		Collections.sort(resultList);
+		return resultList;
+	}
+	//解析list，并排序
+	private List<CardTransactionFromVendorDTO> convertData(List<Map<String,Object>> source){
+		List<CardTransactionFromVendorDTO> list = 
+				source.stream().map(r -> {
+					CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
+					dto.setVendorResult(TaotaoguVendorConstant.TAOTAOGU_APP_CARD_TRANSACTION_STATUS_JSON);
+					dto.setMerchant((String)r.get("MerchId"));
+					BigDecimal amount = null;
+					
+					String transactionType = (String)r.get("TransType");
+					if("101".equals(transactionType)){
+						dto.setTransactionType(CardTransactionTypeStatus.CONSUME.getCode());
+						amount = new BigDecimal(r.get("ChdrPdpAmt").toString());
+						dto.setAmount(amount);
+					}
+					if("203".equals(transactionType)){
+						dto.setTransactionType(CardTransactionTypeStatus.RECHARGE.getCode());
+						amount = new BigDecimal(r.get("TransAmt").toString());
+						dto.setAmount(amount);
+					}
+					String status = (String)r.get("ProcStatus");
+					dto.setStatus(status);
+					String recvTime = (String)r.get("RecvTime");
+					dto.setTransactionTime(strToLong(recvTime));
+					return dto;
+				}).collect(Collectors.toList());
+				Collections.sort(list);
+				return list;
+	}
+	private List<CardTransactionOfMonth> resolveCardTransaction(List<CardTransactionFromVendorDTO> source){
+		List<CardTransactionOfMonth> resultList = new ArrayList<>();
+		outer:
+			for(CardTransactionFromVendorDTO d:source){
 				BigDecimal consumeAmount = new BigDecimal(0);
 				BigDecimal rechargeAmount = new BigDecimal(0);
-				
-				CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
-				dto.setVendorResult(TaotaoguVendorConstant.TAOTAOGU_APP_CARD_TRANSACTION_STATUS_JSON);
-				dto.setMerchant((String)m.get("MerchId"));
-				BigDecimal amount = null;
-				
-				String transactionType = (String)m.get("TransType");
-				if("101".equals(transactionType)){
-					dto.setTransactionType(CardTransactionTypeStatus.CONSUME.getCode());
-					amount = new BigDecimal(m.get("ChdrPdpAmt").toString());
-					dto.setAmount(amount);
-					String status = (String)m.get("ProcStatus");
-					dto.setStatus(status);
+				String transactionType = d.getTransactionType();
+				if(CardTransactionTypeStatus.CONSUME.getCode().equals(transactionType)){
+					String status = d.getStatus();
 					if("01".equals(status))
-						consumeAmount = consumeAmount.add(amount);
-				}else if("203".equals(transactionType)){
-					dto.setTransactionType(CardTransactionTypeStatus.RECHARGE.getCode());
-					amount = new BigDecimal(m.get("TransAmt").toString());
-					dto.setAmount(amount);
-					String status = (String)m.get("ProcStatus");
-					dto.setStatus(status);
+						consumeAmount = consumeAmount.add(d.getAmount());
+				}else if(CardTransactionTypeStatus.RECHARGE.getCode().equals(transactionType)){
+					String status = d.getStatus();
 					if("01".equals(status))
-						rechargeAmount = rechargeAmount.add(amount);
+						rechargeAmount = rechargeAmount.add(d.getAmount());
 				}else
 					continue outer;
-				
-				
-				String recvTime = (String)m.get("RecvTime");
-				dto.setTransactionTime(strToLong(recvTime));
-				
+				//在结果列表里面查找，如果有当前月份，则加进去，没有，就表示是新月份的数据
 				for(CardTransactionOfMonth ctm:resultList){
-					if(ctm.getDate().equals(strToDate(recvTime))){
+					if(ctm.getDate().equals(longToDate(d.getTransactionTime()))){
 						List<CardTransactionFromVendorDTO> requests = ctm.getRequests();
 						ctm.setConsumeAmount(ctm.getConsumeAmount().add(consumeAmount));
 						ctm.setRechargeAmount(ctm.getRechargeAmount().add(rechargeAmount));
-						requests.add(dto);
+						requests.add(d);
 						continue outer;
 					}
 				}
 				CardTransactionOfMonth  cardTransactionOfMonth = new CardTransactionOfMonth();
 				List<CardTransactionFromVendorDTO> cardTransactionList = new ArrayList<>();
-				cardTransactionList.add(dto);
+				cardTransactionList.add(d);
 				cardTransactionOfMonth.setRequests(cardTransactionList);
-				cardTransactionOfMonth.setDate(strToDate(recvTime));
+				cardTransactionOfMonth.setDate(longToDate(d.getTransactionTime()));
 				cardTransactionOfMonth.setConsumeAmount(consumeAmount);
 				cardTransactionOfMonth.setRechargeAmount(rechargeAmount);
 				resultList.add(cardTransactionOfMonth);
 			}
-		}
-		//按时间排序
-		for( CardTransactionOfMonth cardTransactionOfMonth:resultList) {
-			Collections.sort(cardTransactionOfMonth.getRequests());
-		}
-		Collections.sort(resultList);
 		return resultList;
 	}
 	//制卡
@@ -343,6 +364,11 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			param.put("BranchCode", brandCode);
 			param.put("CardId", cardId);
 			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, TaotaoguVendorConstant.PIN3_CRT));
+			if(cert == null){
+				LOGGER.error("taotaogu.pin3.crt is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.pin3.crt is null.");
+			}
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			
 			byte[] oldpsd;
@@ -389,7 +415,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		}
 	
 	private Map<String,Object> queryTransaction(TaotaoguVendorData taotaoguVendorData, String brandCode, String cardId
-			,String transType,Long pageAnchor,Integer pageSize){
+			,String transType,String pageAnchor,String pageSize){
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("BranchCode", brandCode);
 		param.put("CardId", cardId);
@@ -399,8 +425,8 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		param.put("StartDate", "");
 		param.put("Enddate", "");
 		param.put("TransType", transType);
-		param.put("PageNumber", pageAnchor==null?"1":String.valueOf(pageAnchor));
-		param.put("PageSize", pageSize==null?"10":String.valueOf(pageSize));
+		param.put("PageNumber", pageAnchor);
+		param.put("PageSize", pageSize);
 		Map<String, Object> result = post(createRequestParam(taotaoguVendorData, QUERY_TRANSACTION_TYPE, param));
 		return result;
 	}
@@ -426,14 +452,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return d.getTime();
 	}
 	
-	private Long strToDate(String date){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		Date d = null;
-		try {
-			d = sdf.parse(date);
-		} catch (ParseException e) {
-			return null;
-		}
+	private Long longToDate(Long date){
+		Date d = new Date(date);
+		
 		Calendar c = Calendar.getInstance();
 		c.setTime(d);
 		c.set(Calendar.DAY_OF_MONTH, 1);
@@ -682,6 +703,11 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			byte[] data = StringHelper.toJsonString(requestParam).getBytes();
 			try {
 				Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.KEY_STORE, TaotaoguVendorConstant.KEY_STORE));
+				if(cert == null){
+					LOGGER.error("taotaogu.keystore is null.");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"taotaogu.keystore is null.");
+				}
 				InputStream in = new ByteArrayInputStream(cert.getData());
 				String pass = cert.getCertPass();
 				String[] passArr = pass.split(",");
@@ -772,8 +798,18 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.SERVER_CER, TaotaoguVendorConstant.SERVER_CER));
+			if(serverCer == null){
+				LOGGER.error("taotaogu.server.cer is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.server.cer is null.");
+			}
 			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
 			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.CLIENT_PFX, TaotaoguVendorConstant.CLIENT_PFX));
+			if(clientPfx == null){
+				LOGGER.error("taotaogu.server.cer is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"taotaogu.server.cer is null.");
+			}
 			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
 			
 			String msg = json.toString();

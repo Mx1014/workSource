@@ -300,4 +300,33 @@ public class HttpClientServiceImpl implements HttpClientService {
     public <T extends RestResponseBase>  T postFile(String commandRelativeUri, Object cmd, File file, Class<T> responseClz){
     	return postFile(commandRelativeUri, cmd, responseClz, file);
     }
+
+	@Override
+	public <T extends RestResponseBase> T postFile(String commandRelativeUri,
+			Object cmd, File file, Class<T> responseClz, UserContext context) {
+		return postFile(commandRelativeUri, cmd, responseClz ,context, file);
+	}
+	
+	private <T extends RestResponseBase>  T postFile(String commandRelativeUri, Object cmd, Class<T> responseClz, UserContext context, File... files){
+    	try {
+	    	if(commandRelativeUri == null || commandRelativeUri.trim().length() == 0) {
+	            throw new IllegalArgumentException("The command relative uri may not be empty");
+	        }
+	    	
+	        String uri = composeFullUri(commandRelativeUri);
+	        
+	        Map<String, String> params = new HashMap<String, String>();
+	        params.put("token", context.getLoginToken());
+	        StringHelper.toStringMap(null, cmd, params);
+	        List<Object> list = new ArrayList<>();
+	        list.add(Consts.UTF_8);
+	        list.addAll(Arrays.asList(files));
+			String response = HttpUtils.postFile1(uri, params, 30, httpClientContext, list.toArray());
+			
+			return gson.fromJson(response, responseClz);
+		} catch (IOException e) {
+			return SimpleConvertHelper.convert(new RestResponseBase("HTTP", HttpStatus.SC_BAD_REQUEST, e.getMessage()),
+	                responseClz);
+		}
+	}
 }

@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.rest.group.GroupMemberMuteNotificationFlag}</li>
  * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
+ * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
  * </ul>
  */
 public class GroupDTO {
@@ -67,6 +68,8 @@ public class GroupDTO {
     private List<Long> memberForumPrivileges;
     
     private Timestamp updateTime;
+    
+    private String discriminator;
     
     public String getCreatorName() {
 		return creatorName;
@@ -285,6 +288,14 @@ public class GroupDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getDiscriminator() {
+        return discriminator;
+    }
+
+    public void setDiscriminator(String discriminator) {
+        this.discriminator = discriminator;
     }
 
     @Override

@@ -11,6 +11,7 @@ public class OpPromotionAssignedScopeDTO {
     private Long     scopeId;
     private Long     id;
     private Long     promotionId;
+    private String name;
 
     
 
@@ -58,6 +59,18 @@ public class OpPromotionAssignedScopeDTO {
 
     public void setPromotionId(Long promotionId) {
         this.promotionId = promotionId;
+    }
+
+
+
+    public String getName() {
+        return name;
+    }
+
+
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 

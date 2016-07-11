@@ -8,9 +8,9 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
     VALUES (108, 'taotaogu.client.pfx', 'taotaogu.client.pfx', 'the client.pfx for taotaogu(chuneng)', 0, NULL);
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-    VALUES (109, 'taotaogu.card.url', 'http://test.ippit.cn:30821/iccard/service', 'the card url for taotaogu(chuneng)', 0, NULL);
+    VALUES (109, 'taotaogu.card.url', 'http://218.17.117.196:30504/iccard/service', 'the card url for taotaogu(chuneng)', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-    VALUES (110, 'taotaogu.order.url', 'http://test.ippit.cn:8010/orderform', 'the order url for taotaogu(chuneng)', 0, NULL);
+    VALUES (110, 'taotaogu.order.url', 'http://netpay.ippit.cn/orderform', 'the order url for taotaogu(chuneng)', 0, NULL);
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
     VALUES (198, 'paymentCard', '10000', 'zh_CN', '服务器通讯失败，请检查网络连接并重试！');
@@ -27,8 +27,7 @@ INSERT INTO `eh_payment_card_issuer_communities` (`id`, `owner_type`, `owner_id`
     VALUES (100001, 'community', '240111044331051500', 100001, '2016-06-14 17:06:44');
 
 INSERT INTO `eh_payment_card_issuers` (`id`, `name`, `description`, `pay_url`, `alipay_recharge_account`, `weixin_recharge_account`, `vendor_name`, `vendor_data`, `create_time`, `status`) 
-    VALUES (100001, 'chuneng', 'chuneng', '', '', '', 'TAOTAOGU', '{"branchCode":"10002900","appName":"ICCard","version":"V0.01","dstId":"00000000","cardPatternid":"887093","chnlType":"WEB","chnlId":"12345679","merchId":"862900000000001","termnlId":"00011071","initPassword":"111111"}', '2016-06-14 17:07:20', '1');
-
+    VALUES (100001, 'chuneng', 'chuneng', '', '', '', 'TAOTAOGU', '{"branchCode":"10685840","appName":"ICCard","version":"V0.01","dstId":"00000000","cardPatternid":"331","chnlType":"WEB","chnlId":"00000008","merchId":"865840000000052","termnlId":"00521000","initPassword":"111111"}', '2016-06-14 17:07:20', '1');
 
 
 

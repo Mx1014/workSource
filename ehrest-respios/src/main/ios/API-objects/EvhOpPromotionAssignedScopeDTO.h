@@ -19,6 +19,8 @@
 
 @property(nonatomic, copy) NSNumber* promotionId;
 
+@property(nonatomic, copy) NSString* name;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

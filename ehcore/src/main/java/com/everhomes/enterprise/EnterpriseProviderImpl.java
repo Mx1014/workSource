@@ -25,7 +25,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.forum.Attachment;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;

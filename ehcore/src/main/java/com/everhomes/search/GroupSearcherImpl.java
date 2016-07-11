@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.group.GroupPrivacy;

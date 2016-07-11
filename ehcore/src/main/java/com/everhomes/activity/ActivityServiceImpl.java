@@ -111,6 +111,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -447,10 +448,25 @@ public class ActivityServiceImpl implements ActivityService {
         }
         
         ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        if(acroster == null) {
+        	LOGGER.error("handle activityRoster error ,the activityRoster does not exsit.activityId=" + cmd.getActivityId()
+        			+ ", userId = " + user.getId());
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+        }
+        
+        if(acroster.getConfirmFlag() == null) {
+        	acroster.setConfirmFlag(0L);
+        }
         
         dbProvider.execute(status->{
-        	if(activity.getConfirmFlag() == null || activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() 
-        			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
+        	LOGGER.info("activity ConfirmFlag = " + activity.getConfirmFlag() + ", acroster ConfirmFlag = " + acroster.getConfirmFlag());
+        	LOGGER.info("activity.getConfirmFlag() == null is " + (activity.getConfirmFlag() == null) 
+        			+ "activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode())
+        			+ "activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode())
+        			+ "acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()" + (acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()));
+        	if(activity.getConfirmFlag() == null || ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.UN_CONFIRMED 
+        			|| (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
         		
         		ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
 //                Post p = createPost(user.getId(),post,null,"");
@@ -458,11 +474,13 @@ public class ActivityServiceImpl implements ActivityService {
 //                p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
 //                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CHECKIN), UserContext.current().getUser().getLocale(), ""));
                 Long familyId = getFamilyId();
+                //字段错了 签到应记录到checkin字段中 modified by xiongying 20160708
                 if (familyId != null)
-                    activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
-                activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
+                    activity.setCheckinFamilyCount(activity.getCheckinFamilyCount() + 1);
+                activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
                         + (roster.getAdultCount() + roster.getChildCount()));
-                roster.setCheckinFlag((byte)1);
+                
+//                roster.setCheckinFlag((byte)1);
 //                forumProvider.createPost(p);
                 LOGGER.debug("roster={}", roster);
         	}
@@ -477,6 +495,10 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setProcessStatus(getStatus(activity).getCode());
+        
+        //dto checkin名字不用 要手动转 modified by xiongying 20160708
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
 //        //是否需要确认，要确认则确认后才能签到
 //        if(activity.getConfirmFlag()==null) {
 //        	dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
@@ -577,7 +599,7 @@ public class ActivityServiceImpl implements ActivityService {
             d.setId(r.getId());
             if (currentUser != null) {
                 d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
-                d.setUserName(currentUser.getNickName());
+                d.setUserName(populateUserName(currentUser, activity.getPostId()));
                 
                 List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
                 
@@ -605,6 +627,41 @@ public class ActivityServiceImpl implements ActivityService {
             response.setCreatorFlag(1);
         }
         return response;
+    }
+    
+    private String populateUserName(User user, long postId) {
+    	
+    	Post post = this.forumProvider.findPostById(postId);
+        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+        Long regionId = post.getVisibleRegionId();
+        
+        if(regionType != null && regionId != null) {
+            String creatorNickName = user.getNickName();
+            if(creatorNickName == null) {
+                creatorNickName = "";
+            }
+            switch(regionType) {
+            case COMMUNITY:
+                Community community = communityProvider.findCommunityById(regionId);
+                if(community != null)
+                	creatorNickName = creatorNickName + "@" + community.getName();
+                break;
+            case REGION:
+                Organization organization = organizationProvider.findOrganizationById(regionId);
+                if(organization !=null)
+                	creatorNickName = creatorNickName + "@" + organization.getName();
+                break;
+            default:
+                LOGGER.error("Unsupported visible region type, userId=" + user.getId() 
+                    + ", regionType=" + regionType + ", postId=" + post.getId());
+            }
+            return creatorNickName;
+        } else {
+            LOGGER.error("Region type or id is null, userId=" + user.getId() + ", postId=" + post.getId());
+        }
+        
+        return "";
+        
     }
 
     private Integer convertToInt(Long val) {
@@ -1448,7 +1505,7 @@ public class ActivityServiceImpl implements ActivityService {
         	if(profile != null) {
         		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
         	}
-        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime);
+        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime, condition);
 	    	if(newActivities != null && newActivities.size() > 0) {
 	    		activities.addAll(newActivities);
 	    	}
