@@ -122,5 +122,19 @@
       "status": "2",
       "operator_uid": "0"
     }
+  ],
+  "eh_forums" : [
+  	{
+      "id": "1",
+      "namespace_id": 0,
+      "app_id": 2,
+      "owner_type": "",
+      "owner_id": "0",
+      "name": "社区论坛",
+      "post_count": 0,
+      "modify_seq": "0",
+      "update_time": "2014-07-30 09:15:12",
+      "create_time": "2014-07-30 09:15:12"
+    }
   ]
 }
