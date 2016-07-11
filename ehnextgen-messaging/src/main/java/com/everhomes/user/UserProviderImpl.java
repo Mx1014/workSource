@@ -1,0 +1,1193 @@
+// @formatter:off
+package com.everhomes.user;
+
+import static com.everhomes.server.schema.Tables.EH_USERS;
+import static com.everhomes.server.schema.Tables.EH_USER_COMMUNITIES;
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import com.everhomes.aclink.AclinkUser;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.cache.CacheProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhUserCommunitiesDao;
+import com.everhomes.server.schema.tables.daos.EhUserGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
+import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
+import com.everhomes.server.schema.tables.daos.EhUserInvitationsDao;
+import com.everhomes.server.schema.tables.daos.EhUserLikesDao;
+import com.everhomes.server.schema.tables.daos.EhUsersDao;
+import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
+import com.everhomes.server.schema.tables.pojos.EhUserGroups;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
+import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
+import com.everhomes.server.schema.tables.pojos.EhUserLikes;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
+import com.everhomes.server.schema.tables.records.EhUsersRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import com.everhomes.util.MapReduceCallback;
+
+import static com.everhomes.server.schema.Tables.*;
+
+/**
+ * 
+ * Provide data services (cache-enabled) for user management service
+ * 
+ * <b>Multiple login per user support</b>
+ * <p>
+ *  It is based on deviceIdentifier that is given, login will be tied to deviceIdentifier(uniquely identifies the physical device),
+ *  however for browser based login, its deviceIdentifier will be null, we will only accept maximum of one login, which means, if
+ *  you log on into another browser, it will kick off a previous one
+ *
+ * <p>
+ * <b>Schemas</b>
+ *
+ * <pre>
+ * Redis schema
+ *  seq (HashMap)
+ *      "usr" -> next user account name
+ * 
+ * </pre>
+ * 
+ * <p>
+ * 
+ * @author Kelven Yang
+ *
+ */
+@Component
+public class UserProviderImpl implements UserProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserProviderImpl.class);
+   
+    private static final int IDENTIFIER_CLAIMING_TIMEOUT_MINUTES = 10;
+    
+    @Autowired
+    private DbProvider dbProvider;
+    
+    @Autowired
+    private ShardingProvider shardingProvider;
+    
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private CacheProvider cacheProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private EnterpriseContactProvider ecProvider;
+    
+    public UserProviderImpl() {
+    }
+    
+    @Override
+    public void createUser(User user) {
+        long id = this.shardingProvider.allocShardableContentId(EhUsers.class).second();
+        user.setId(id);
+        if(user.getAccountName() == null) {
+            long accountSeq = this.sequenceProvider.getNextSequence("usr");
+            accountSeq += 1000000;
+            user.setAccountName(String.valueOf(accountSeq));
+        }
+        if(user.getUuid() == null)
+            user.setUuid(UUID.randomUUID().toString());
+        user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
+        EhUsersDao dao = new EhUsersDao(context.configuration());
+        dao.insert(user);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
+    }
+    
+    @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
+            @CacheEvict(value="User-Acount", key="#user.accountName")})
+    @Override
+    public void updateUser(User user) {
+        assert(user.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
+        EhUsersDao dao = new EhUsersDao(context.configuration());
+        dao.update(user);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
+    }
+    
+    @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
+            @CacheEvict(value="User-Account", key="#user.accountName"),
+            @CacheEvict(value="UserIdentifier-List", key="#user.id")})
+    @Override
+    public void deleteUser(User user) {
+        // TODO delete all user references
+        
+        // delete the record itself
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId()));
+        EhUsersDao dao = new EhUsersDao(context.configuration());
+        dao.deleteById(user.getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
+    }
+    
+    @Override
+    public void deleteUser(long id) {
+        UserProvider self = PlatformContext.getComponent(UserProvider.class);
+        User user = self.findUserById(id);
+        
+        if(user != null)
+            self.deleteUser(user);
+    }
+    
+    @Cacheable(value = "User-Id", key="#id", unless="#result == null")
+    @Override
+    public User findUserById(final long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
+        EhUsersDao dao = new EhUsersDao(context.configuration());
+        EhUsers user = dao.findById(id);
+        return ConvertHelper.convert(user, User.class);
+    }
+    
+    @Override
+    @Cacheable(value = "User-Acount", key="#accountName", unless="#result == null")
+    public User findUserByAccountName(final String accountName) {
+        final User result[] = new User[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (DSLContext context, Object reducingContext) -> {
+            EhUsersRecord record = (EhUsersRecord)context.select()
+                .from(EH_USERS)
+                .where(EH_USERS.ACCOUNT_NAME.equal(accountName))
+                .fetchOne();
+            
+            if(record != null) {
+                result[0] = ConvertHelper.convert(record, User.class);
+                return false;
+            }
+            
+            return true;
+        });
+        return result[0];
+    }
+    
+    @Override
+    public List<User> queryUsers(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        
+        List<User> userList = new ArrayList<User>();
+        
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUsers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_USERS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_USERS.ID.asc());
+            query.addLimit(count - userList.size());
+            
+            query.fetch().map((r) -> {
+                userList.add(ConvertHelper.convert(r, User.class));
+                return null;
+            });
+           
+            if(userList.size() >= count) {
+                locator.setAnchor(userList.get(userList.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if(userList.size() > 0) {
+            locator.setAnchor(userList.get(userList.size() - 1).getId());
+        }
+        
+        return userList;
+    }
+    
+    @Cacheable(value = "UserIdentifier-List", key="#userId", unless="#result.size() == 0")
+    @Override
+    public List<UserIdentifier> listUserIdentifiersOfUser(long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
+        List<UserIdentifier> identifiers = context.select().from(EH_USER_IDENTIFIERS).where(EH_USER_IDENTIFIERS.OWNER_UID.eq(userId))
+            .fetch().map((Record record) -> {
+                   return ConvertHelper.convert(record, UserIdentifier.class);
+            });
+        return identifiers;
+    }
+    
+    @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
+    @Override
+    public void createIdentifier(UserIdentifier userIdentifier) {
+        assert(userIdentifier.getOwnerUid() != null);
+        
+        // identifier record will be saved in the same shard as its owner users
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserIdentifiers.class));
+        
+        userIdentifier.setId(id);
+        Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+        userIdentifier.setCreateTime(ts);
+        
+        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        dao.insert(userIdentifier);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
+    }
+    
+    @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken"),
+            @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+    @Override
+    public void updateIdentifier(UserIdentifier userIdentifier) {
+        assert(userIdentifier.getId() != null);
+        assert(userIdentifier.getOwnerUid() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
+        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        dao.update(userIdentifier);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
+    }
+
+    @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken"),
+            @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+    @Override
+    public void deleteIdentifier(UserIdentifier userIdentifier) {
+        assert(userIdentifier.getId() != null);
+        assert(userIdentifier.getOwnerUid() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
+        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        dao.delete(userIdentifier);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserIdentifiers.class, userIdentifier.getId());
+    }
+    
+    @Override
+    public void deleteIdentifier(long id) {
+        UserProvider self = PlatformContext.getComponent(UserProvider.class);
+        
+        UserIdentifier userIdentifier = self.findIdentifierById(id);
+        if(userIdentifier != null) {
+            self.deleteIdentifier(userIdentifier);
+        }
+    }
+    
+    @Cacheable(value = "UserIdentifier-Id", key="#id", unless="#result == null")
+    @Override
+    public UserIdentifier findIdentifierById(final long id) {
+        final UserIdentifier[] result = new UserIdentifier[1];
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+            EhUserIdentifiers userIdentifier = dao.findById(id);
+            if(userIdentifier != null) {
+                result[0] = ConvertHelper.convert(userIdentifier, UserIdentifier.class);
+                return false;
+            }
+            return true;
+        });
+
+        return result[0];
+    }
+       
+    @Cacheable(value = "UserIdentifier-Claiming", key="#identifierToken", unless="#result.size() == 0")
+    @Override
+    public List<UserIdentifier> findClaimingIdentifierByToken(String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMING.getCode())
+                    .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
+                .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+            
+            return true;
+        });
+            
+        return result;
+    }
+    
+    @Override
+    public List<UserIdentifier> findClaimedIdentifiersByToken(String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                .fetch().map((r) -> {
+                    result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                    return null;
+                });
+            
+            return true;
+        });
+        
+        
+        
+        return result;
+    }
+    
+    @Override
+    public UserIdentifier findClaimedIdentifierByToken(String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                .fetch().map((r) -> {
+                    result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                    return null;
+                });
+            
+            return true;
+        });
+        
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                .fetch().map((r) -> {
+                    result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                    return null;
+                });
+            
+            return true;
+        });
+        
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+        
+        return null;
+    }
+    
+    @Cacheable(value = "UserIdentifier-OwnerAndType", key="{#ownerUid, #identifierType}", unless="#result == null")
+    @Override
+    public UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerUid, byte identifierType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerUid));
+        Record record = context.select().from(EH_USER_IDENTIFIERS)
+            .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(ownerUid))
+            .and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(identifierType))
+            .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+            .fetchAny();
+        return ConvertHelper.convert(record, UserIdentifier.class);
+    }
+    
+	@Caching(evict = { @CacheEvict(value = "UserGroup-Listing", key = "{#userGroup.ownerUid, #userGroup.groupDiscriminator}"),
+			@CacheEvict(value = "UserGroupByOwnerAndGroup", key = "{#userGroup.ownerUid, #userGroup.groupId}") })
+    public void createUserGroup(UserGroup userGroup) {
+        assert(userGroup.getOwnerUid() != null);
+        assert(userGroup.getGroupId() != null);
+
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserGroups.class));
+        userGroup.setId(id);
+        userGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userGroup.getOwnerUid()));
+        EhUserGroupsDao dao = new EhUserGroupsDao(context.configuration());
+        dao.insert(userGroup);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserGroups.class, null);
+    }
+    
+	@Caching(evict = { @CacheEvict(value = "UserGroup-Listing", key = "{#userGroup.ownerUid, #userGroup.groupDiscriminator}"),
+			@CacheEvict(value = "UserGroupByOwnerAndGroup", key = "{#userGroup.ownerUid, #userGroup.groupId}") })
+    public void updateUserGroup(UserGroup userGroup) {
+        assert(userGroup.getId() != null);
+        assert(userGroup.getOwnerUid() != null);
+        assert(userGroup.getGroupId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userGroup.getOwnerUid()));
+        EhUserGroupsDao dao = new EhUserGroupsDao(context.configuration());
+        dao.update(userGroup);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserGroups.class, userGroup.getId());
+    }
+    
+	@Caching(evict = { @CacheEvict(value = "UserGroup-Listing", key = "{#userGroup.ownerUid, #userGroup.groupDiscriminator}"),
+			@CacheEvict(value = "UserGroupByOwnerAndGroup", key = "{#userGroup.ownerUid, #userGroup.groupId}")})
+    public void deleteUserGroup(UserGroup userGroup) {
+        assert(userGroup.getId() != null);
+        assert(userGroup.getOwnerUid() != null);
+        assert(userGroup.getGroupId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userGroup.getOwnerUid()));
+        EhUserGroupsDao dao = new EhUserGroupsDao(context.configuration());
+        dao.delete(userGroup);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserGroups.class, userGroup.getId());
+    }
+
+	public void deleteUserGroup(long ownerId, long groupId) {
+		UserProvider self = PlatformContext.getComponent(UserProvider.class);
+		UserGroup userGroup = self.findUserGroupByOwnerAndGroup(ownerId, groupId);
+		if(userGroup != null) {
+			self.deleteUserGroup(userGroup);
+		}
+	}
+
+	@Cacheable(value = "UserGroupByOwnerAndGroup", key = "{#ownerId, #groupId}", unless = "#result == null")
+	public UserGroup findUserGroupByOwnerAndGroup(long ownerId, long groupId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerId));
+		
+		Record r = context.select().from(Tables.EH_USER_GROUPS)
+				.where(Tables.EH_USER_GROUPS.OWNER_UID.eq(ownerId))
+				.and(Tables.EH_USER_GROUPS.GROUP_ID.eq(groupId)).fetchOne();
+		
+		return ConvertHelper.convert(r, UserGroup.class);
+	}
+    @Cacheable(value="UserGroup-Listing", key = "{#uid, #groupDiscriminator}")
+    public List<UserGroup> listUserGroups(long uid, String groupDiscriminator) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        
+        if(groupDiscriminator != null) {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(groupDiscriminator))
+                .fetch().map((r)-> {
+                   return ConvertHelper.convert(r, UserGroup.class); 
+                });
+        } else {
+            return context.select().from(Tables.EH_USER_GROUPS)
+            .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+            .fetch().map((r)-> {
+               return ConvertHelper.convert(r, UserGroup.class); 
+            });
+        }
+    }
+
+    @Override
+    @Caching(evict = { 
+            @CacheEvict(value="UserLike", key="{#userLike.ownerUid, #userLike.targetType, #userLike.targetId}"),
+            @CacheEvict(value="UserLike-Listing", key="{#userLike.ownerUid, #userLike.targetType}")})
+    public void createUserLike(UserLike userLike) {
+        assert(userLike.getOwnerUid() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userLike.getOwnerUid()));
+        
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserLikes.class));
+        userLike.setId(id);
+        userLike.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        EhUserLikesDao dao = new EhUserLikesDao(context.configuration());
+        dao.insert(userLike);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserLikes.class, null);
+    }
+
+    @Caching(evict = { @CacheEvict(value="UserLikeById", key="#userLike.id"), 
+            @CacheEvict(value="UserLike", key="{#userLike.ownerUid, #userLike.targetType, #userLike.targetId}"),
+            @CacheEvict(value="UserLike-Listing", key="{#userLike.ownerUid, #userLike.targetType}")})
+    @Override
+    public void updateUserLike(UserLike userLike) {
+        assert(userLike.getOwnerUid() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userLike.getOwnerUid()));
+        EhUserLikesDao dao = new EhUserLikesDao(context.configuration());
+        dao.update(userLike);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLikes.class, userLike.getId());
+    }
+
+    @Caching(evict = { @CacheEvict(value="UserLikeById", key="#userLike.id"), 
+            @CacheEvict(value="UserLike", key="{#userLike.ownerUid, #userLike.targetType, #userLike.targetId}"),
+            @CacheEvict(value="UserLike-Listing", key="{#userLike.ownerUid, #userLike.targetType}")})
+    @Override
+    public void deleteUserLike(UserLike userLike) {
+        assert(userLike.getOwnerUid() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userLike.getOwnerUid()));
+        EhUserLikesDao dao = new EhUserLikesDao(context.configuration());
+        dao.delete(userLike);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLikes.class, userLike.getId());
+    }
+
+    @Override
+    public void deleteUserLikeById(long id) {
+        UserProvider self = PlatformContext.getComponent(UserProvider.class);
+        UserLike userLike = self.findUserLikeById(id);
+        if(userLike != null)
+            self.deleteUserLike(userLike);
+    }
+
+    @Cacheable(value = "UserLikeById", key="#id")
+    @Override
+    public UserLike findUserLikeById(long id) {
+        final UserLike[] result = new UserLike[1];
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            EhUserLikesDao dao = new EhUserLikesDao(context.configuration());
+            EhUserLikes userLike = dao.findById(id);
+            if(userLike != null) {
+                result[0] = ConvertHelper.convert(userLike, UserLike.class);
+                return false;
+            }
+            return true;
+        });
+
+        return result[0];
+    }
+
+    @Cacheable(value = "UserLike", key="{#uid,  #targetType, #targetId}")
+    @Override
+    public UserLike findUserLike(long uid, String targetType, long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        
+        return ConvertHelper.convert(context.select().from(Tables.EH_USER_LIKES)
+            .where(Tables.EH_USER_LIKES.OWNER_UID.eq(uid))
+            .and(Tables.EH_USER_LIKES.TARGET_TYPE.eq(targetType))
+            .and(Tables.EH_USER_LIKES.TARGET_ID.eq(targetId))
+            .fetchOne(), UserLike.class);
+    }
+
+    @Cacheable(value = "UserLike-Listing", key="{#uid,  #targetType}")
+    @Override
+    public List<UserLike> listUserLikes(long uid, String targetType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+
+        SelectQuery<EhUserLikesRecord> query = context.selectQuery(Tables.EH_USER_LIKES);
+        query.addConditions(Tables.EH_USER_LIKES.OWNER_UID.eq(uid));
+        if(targetType != null)
+            query.addConditions(Tables.EH_USER_LIKES.TARGET_TYPE.eq(targetType));
+        
+        return query.fetch().map((r)-> { return ConvertHelper.convert(r, UserLike.class); } );
+    }
+
+    @Override
+    public UserIdentifier findIdentifierByVerifyCode(String code,String identifyToken) {
+        final UserIdentifier[] result = new UserIdentifier[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            Record record = context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.VERIFICATION_CODE.eq(code))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                .and(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifyToken))
+                .fetchOne();
+            
+            if(record != null) {
+                result[0] = ConvertHelper.convert(record, UserIdentifier.class);
+                return false;
+            }
+            return true;
+        });
+        UserIdentifier userIdentifier=result[0];
+        if(userIdentifier!=null){
+            if(DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > getIdentifierClaimingTimeoutMs()) {
+                //if out of expire time,throw exception
+                LOGGER.error("invalid user claim status");
+                return null;
+            }
+        }
+        return userIdentifier;
+    }
+
+
+    @Override
+    public UserInvitationsDTO findUserInvitationByCode(String invitationCode) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class));
+        UserInvitationsDTO[] dto=new UserInvitationsDTO[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            EhUserInvitationsDao dao=new EhUserInvitationsDao(cxt.configuration());
+            List<EhUserInvitations> invitation = dao.fetchByInviteCode(invitationCode);
+            if(!CollectionUtils.isEmpty(invitation)){
+                dto[0]=ConvertHelper.convert(invitation.get(0), UserInvitationsDTO.class);
+                return false;
+            }
+            return true;
+        });
+      return dto[0];
+    }
+
+    @Override
+    public void createInvitation(UserInvitation invitations) {
+        Long id=sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserInvitations.class));
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class,invitations.getOwnerUid()));
+        invitations.setId(id);
+        EhUserInvitationsDao dao=new EhUserInvitationsDao(cxt.configuration());
+        dao.insert(invitations);
+    }
+
+    @Override
+    public void createUserInvitationRoster(UserInvitationRoster roster,Long uid) {
+        Long id=sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserInvitationRoster.class));
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class,uid));
+        roster.setId(id);
+        EhUserInvitationRosterDao dao=new EhUserInvitationRosterDao(cxt.configuration());
+        dao.insert(roster);
+    }
+
+    @Override
+    public void updateInvitation(UserInvitation invitations) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class,invitations.getOwnerUid()));
+        EhUserInvitationsDao dao=new EhUserInvitationsDao(cxt.configuration());
+        dao.update(invitations);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserInvitations.class, invitations.getId());
+    }
+
+    private long getIdentifierClaimingTimeoutMs() {
+        return this.configurationProvider.getIntValue("user.claim.timeout", IDENTIFIER_CLAIMING_TIMEOUT_MINUTES)*60000;
+    }
+    
+    @Override
+    @Scheduled(initialDelay = 1000, fixedRate = 60000)
+    public void cleanupZombies() {
+
+        // TODO we probably need to reset cache as well
+        Timestamp cutoffTime = new Timestamp(DateHelper.currentGMTTime().getTime() - getIdentifierClaimingTimeoutMs());
+        dbProvider.mapReduce(AccessSpec.readWriteWith(EhUsers.class), null, (DSLContext context, Object reducingContext) -> {
+            context.delete(Tables.EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMING.getCode())
+                            .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
+                    .and(EH_USER_IDENTIFIERS.CREATE_TIME.lt(cutoffTime)).execute();
+
+            context.delete(Tables.EH_USERS)
+                    .where(EH_USERS.STATUS.eq(UserStatus.INACTIVE.getCode()))
+                    .and(EH_USERS.CREATE_TIME.lt(cutoffTime)).execute();
+            return true;
+        });
+    }
+
+    @Override
+    public User findUserByUuid(String uuid) {
+        User[] result = new User[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            EhUsersRecord record = (EhUsersRecord)context.select()
+                    .from(EH_USERS)
+                    .where(EH_USERS.UUID.equal(uuid))
+                    .fetchOne();
+                
+                if(record != null) {
+                    result[0] = ConvertHelper.convert(record, User.class);
+                    return false;
+                }
+                
+                return true;
+        });
+        return result[0];
+    }
+
+	@Override
+	public List<InvitationRoster> listInvitationRostor(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        
+        List<InvitationRoster> result = new ArrayList<InvitationRoster>();
+        
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUsers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            query.addConditions(Tables.EH_USERS.INVITOR_UID.isNotNull());
+            query.addConditions(Tables.EH_USERS.INVITOR_UID.ne((long) 0));
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_USERS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_USERS.ID.asc());
+            query.addLimit(count - result.size());
+            
+            query.fetch().map((r) -> {
+            	User u = ConvertHelper.convert(r, User.class);
+            	InvitationRoster roster = new InvitationRoster();
+            	roster.setUid(u.getId());
+            	roster.setUserNickName(u.getNickName());
+            	roster.setRegTime(u.getCreateTime());
+            	roster.setInviteType(u.getInviteType());
+            	roster.setInviterId(u.getInvitorUid());
+                result.add(roster);
+                return null;
+            });
+           
+            if(result.size() >= count) {
+                locator.setAnchor(result.get(result.size() - 1).getUid());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if(result.size() > 0) {
+            locator.setAnchor(result.get(result.size() - 1).getUid());
+        }
+        
+        return result;
+	}
+	
+	public List<User> listUserByKeyword(String keyword) {
+		List<User> list = new ArrayList<User>();
+		if(keyword == null)
+			return null;
+		
+		String str = "%"+keyword+"%";
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            context.select().from(Tables.EH_USERS)
+            .where(Tables.EH_USERS.NICK_NAME.like(str))
+            .fetch().map(r -> {
+            	list.add(ConvertHelper.convert(r,User.class));
+            	return null;
+            });
+			return true;
+        });
+		return list;
+	}
+	
+	@Override
+	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
+			CrossShardListingLocator locator, int pageSize) {
+		
+		List<User> list = new ArrayList<User>();
+		
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+			Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
+			if(!StringUtils.isEmpty(keyword)){
+				 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
+				 cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
+				 cond = cond.and(cond1);
+			}
+			 
+			if(locator.getAnchor() != null ) {
+				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+		    }
+            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+            .limit(pageSize)
+            .fetch().map(r -> {
+            	User user = ConvertHelper.convert(r,User.class);
+            	user.setId(r.getValue(Tables.EH_USERS.ID));
+            	user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            	user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+            	user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+            	user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+            	user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+            	list.add(user);
+            	return null;
+            });
+			return true;
+        });
+		
+		if(list.size() == pageSize) {
+		    locator.setAnchor(list.get(pageSize-1).getCreateTime().getTime());
+		} else {
+		    locator.setAnchor(null);
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * added by Janson
+	 */
+	@Override
+    public List<AclinkUser> searchDoorUsers(Integer namespaceId, Long organizationId, 
+            Long buildingId, String buildingName, Byte isAuth, String keyword,
+            CrossShardListingLocator locator, int pageSize) {
+        
+        List<AclinkUser> list = new ArrayList<AclinkUser>();
+        Map<Long, Long> isExists = new HashMap<Long, Long>();
+        List<Long> ids = new ArrayList<Long>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, new MapReduceCallback<DSLContext, Object> () {
+
+            @Override
+            public boolean map(DSLContext context, Object obj) {
+                Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
+                if(!StringUtils.isEmpty(keyword)){
+                     Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
+                     cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
+                     cond = cond.and(cond1);
+                }
+                
+                if(organizationId != null) {
+                    cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+                }
+                
+                if(buildingId != null) {
+                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
+                }
+                
+                if(buildingName != null && !buildingName.isEmpty()) {
+                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.like("%" + buildingName + "%"));
+                }
+                
+                if(isAuth != null) {
+                    if(isAuth > 0) {
+                        cond = cond.and(EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+                    } else {
+                        cond = cond.and(EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()));
+                    }
+                }
+                 
+                if(locator.getAnchor() != null ) {
+                    cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+                }
+                
+                context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
+                .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
+                .join(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())))
+                        .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
+                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())))
+                        .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2)
+                .fetch().map(r -> {
+                    if(list.size() >= pageSize) {
+                        return null;
+                    }
+                    
+                    AclinkUser user = ConvertHelper.convert(r, AclinkUser.class);
+                    user.setId(r.getValue(Tables.EH_USERS.ID));
+                    
+                    ids.add(user.getId());
+                    
+                    if(isExists.containsKey(user.getId())) {
+                        return null;
+                    }
+                    isExists.put(user.getId(), 1l);
+                    
+                    user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                    user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+                    user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                    user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+                    user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+                    user.setAddressId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+                    user.setCompanyId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
+                    user.setBuildingId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID));
+                    user.setBuildingName(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME));
+                    
+                    list.add(user);
+                    return null;
+                });
+                return true;
+            }
+            
+        });
+        
+        if(list.size() >= pageSize || ids.size() >= pageSize) {
+            locator.setAnchor(list.get(list.size()-1).getCreateTime().getTime());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return list;
+    }
+
+	@Override
+	public User findUserByNamespace(Integer namespaceId, String namespaceUserToken) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return ConvertHelper.convert(context.select().from(Tables.EH_USERS)
+				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).fetchOne(),
+				User.class);
+	}
+	
+	@Override
+    public void createUserCommunity(UserCommunity userCommunity) {
+        assert(userCommunity.getOwnerUid() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userCommunity.getOwnerUid()));
+        
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserCommunities.class));
+        userCommunity.setId(id);
+        userCommunity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        EhUserCommunitiesDao dao = new EhUserCommunitiesDao(context.configuration());
+        dao.insert(userCommunity);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserCommunities.class, null);
+    }
+	
+    @Cacheable(value = "UserCommunity-OwnerAndCommunity", key="{#ownerUid, #communityId}", unless="#result == null")
+    @Override
+    public UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerUid));
+        Record record = context.select().from(EH_USER_COMMUNITIES)
+            .where(EH_USER_COMMUNITIES.OWNER_UID.eq(ownerUid))
+            .and(EH_USER_COMMUNITIES.COMMUNITY_ID.eq(communityId))
+            .fetchAny();
+        return ConvertHelper.convert(record, UserCommunity.class);
+    }
+    
+    @Override
+    public List<User> findUserByNamespaceId(Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+//      List<User> users = context.select().from(Tables.EH_USERS)
+//              .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+//              .and(Tables.EH_USERS.ID.gt(locator.getAnchor()))
+//              .limit(pageSize).fetch().map(r -> {
+//                  return ConvertHelper.convert(r,User.class);
+//              });
+        
+        // 把排序方式改为按时间倒序排列 by lqs 20160118
+        SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+        query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+        if(locator.getAnchor() != null && locator.getAnchor().longValue() > 0) {
+            query.addConditions(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+        }
+        query.addOrderBy(Tables.EH_USERS.CREATE_TIME.desc());
+        query.addLimit(pageSize);
+        
+        List<User> users = query.fetch().map((EhUsersRecord record) -> {
+            return ConvertHelper.convert(record, User.class);
+        });
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query user by namespace, sql=" + query.getSQL());
+            LOGGER.debug("Query user by namespace, bindValues=" + query.getBindValues());
+        }
+        
+        if(null == users)
+            users = new ArrayList<User>();
+        
+        locator.setAnchor(null);
+        
+        if(users.size() >= pageSize) {
+//          locator.setAnchor(users.get(users.size() - 1).getId());
+            locator.setAnchor(users.get(users.size() - 1).getCreateTime().getTime());
+        }
+        
+        return users;
+    }
+    
+    @Override
+    public List<User> listUserByKeywords(String keyword) {
+		List<User> list = new ArrayList<User>();
+		if(keyword == null)
+			return null;
+		
+		String str = "%"+keyword+"%";
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            context.select().from(Tables.EH_USERS)
+            .leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+            .where(Tables.EH_USERS.NICK_NAME.like(str))
+            .or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword))
+            .fetch().map(r -> {
+            	User user = ConvertHelper.convert(r,User.class);
+            	user.setId(r.getValue(Tables.EH_USERS.ID));
+            	user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            	list.add(user);
+            	return null;
+            });
+			return true;
+        });
+		return list;
+	}
+
+	@Override
+	public int countUserByNamespaceId(Integer namespaceId, Boolean isAuth) {
+		
+		final Integer[] count = new Integer[1];
+		if(isAuth == null) {
+			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
+	                (DSLContext context, Object reducingContext)-> {
+	                    count[0] = context.selectCount().from(Tables.EH_USERS)
+	                    		.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+	                            .fetchOneInto(Integer.class);
+	                    return true;
+	                });
+		} else {
+			if(isAuth == true) {
+				List<Long> userIds = ecProvider.queryUserIds();
+				
+				this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
+		                (DSLContext context, Object reducingContext)-> {
+		                    count[0] = context.selectCount().from(Tables.EH_USERS)
+		                    		.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+		                    		.and(Tables.EH_USERS.ID.in(userIds))
+		                            .fetchOneInto(Integer.class);
+		                    return true;
+		                });
+			} else {
+				count[0] = countUserByNamespaceId(namespaceId, null) - countUserByNamespaceId(namespaceId, true);
+			}
+		}
+		
+		return count[0];
+	}
+	
+	@Override
+	public List<User> listUserByIds(Integer namespaceId, List<Long> userIds){
+		List<User> list = new ArrayList<User>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+			context.select().from(Tables.EH_USERS)
+    		.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+    		.and(Tables.EH_USERS.ID.in(userIds))
+            .fetch().map(r -> {
+            		User user = ConvertHelper.convert(r,User.class);
+            		user.setId(r.getValue(Tables.EH_USERS.ID));
+            		user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            		list.add(user);
+            	return null;
+            });
+			return true;
+        });
+		
+		return list;
+	}
+	
+
+	@Override
+	public List<User> listUserByNickNameOrIdentifier(String keyword) {
+		List<User> list = new ArrayList<User>();
+		if(keyword == null)
+			return null;
+		
+		String str = "%"+keyword+"%";
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            context.select().from(Tables.EH_USERS)
+            .leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+            .where(Tables.EH_USERS.NICK_NAME.like(str))
+            .or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword))
+            .fetch().map(r -> {
+            	User user = ConvertHelper.convert(r,User.class);
+            	user.setId(r.getValue(Tables.EH_USERS.ID));
+            	user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            	user.setAccountName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+            	user.setAddress(r.getValue(Tables.EH_USERS.ADDRESS));
+            	user.setAddressId(r.getValue(Tables.EH_USERS.ADDRESS_ID));
+            	user.setAvatar(r.getValue(Tables.EH_USERS.AVATAR));
+            	user.setBirthday(r.getValue(Tables.EH_USERS.BIRTHDAY));
+            	user.setCommunityId(r.getValue(Tables.EH_USERS.COMMUNITY_ID));
+            	user.setCompany(r.getValue(Tables.EH_USERS.COMPANY));
+            	user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+            	user.setDeleteTime(r.getValue(Tables.EH_USERS.DELETE_TIME));
+            	user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+            	user.setHomeTown(r.getValue(Tables.EH_USERS.HOME_TOWN));
+            	user.setHomeTownPath(r.getValue(Tables.EH_USERS.HOME_TOWN_PATH));
+            	user.setInviteType(r.getValue(Tables.EH_USERS.INVITE_TYPE));
+            	user.setInvitorUid(r.getValue(Tables.EH_USERS.INVITOR_UID));
+            	user.setLastLoginIp(r.getValue(Tables.EH_USERS.LAST_LOGIN_IP));
+            	user.setLastLoginTime(r.getValue(Tables.EH_USERS.LAST_LOGIN_TIME));
+            	user.setLevel(r.getValue(Tables.EH_USERS.LEVEL));
+            	user.setLocale(r.getValue(Tables.EH_USERS.LOCALE));
+            	user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
+            	user.setNamespaceUserToken(r.getValue(Tables.EH_USERS.NAMESPACE_USER_TOKEN));
+            	user.setOccupation(r.getValue(Tables.EH_USERS.OCCUPATION));
+            	user.setOriginalAvatar(r.getValue(Tables.EH_USERS.ORIGINAL_AVATAR));
+            	user.setPoints(r.getValue(Tables.EH_USERS.POINTS));
+            	user.setRegChannelId(r.getValue(Tables.EH_USERS.REG_CHANNEL_ID));
+            	user.setRegCityId(r.getValue(Tables.EH_USERS.REG_CITY_ID));
+            	user.setRegIp(r.getValue(Tables.EH_USERS.REG_IP));
+            	user.setSchool(r.getValue(Tables.EH_USERS.SCHOOL));
+            	user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+            	user.setStatusLine(r.getValue(Tables.EH_USERS.STATUS_LINE));
+            	user.setUuid(r.getValue(Tables.EH_USERS.UUID));
+            	list.add(user);
+            	return null;
+            });
+			return true;
+        });
+		return list;
+	}
+
+	@Override
+	public List<UserIdentifier> listUserIdentifierByIdentifier(String identifier) {
+		List<UserIdentifier> identifiers = new ArrayList<UserIdentifier>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+			 context.select().from(Tables.EH_USER_IDENTIFIERS)
+	            .where(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifier))
+	            .fetch().map(r -> {
+	            	identifiers.add(ConvertHelper.convert(r, UserIdentifier.class));
+	            	return null;
+	            });
+			return true;
+		});
+		return identifiers;
+	}
+}

@@ -1,0 +1,120 @@
+// @formatter:off
+package com.everhomes.community;
+
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.GetBuildingCommand;
+import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.community.GetCommunityByUuidCommand;
+import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.community.ListCommunitesByStatusCommand;
+import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
+import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityManagerDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
+import com.everhomes.rest.community.admin.CreateCommunityCommand;
+import com.everhomes.rest.community.admin.CreateCommunityResponse;
+import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.ImportCommunityCommand;
+import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
+import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
+import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
+import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UserCommunityDTO;
+import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
+import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
+import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+
+
+public interface CommunityService {
+    ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd);
+    
+    void approveCommuniy(ApproveCommunityAdminCommand cmd);
+
+    void updateCommunity(UpdateCommunityAdminCommand cmd);
+
+    void rejectCommunity(RejectCommunityAdminCommand cmd);
+
+    List<CommunityDTO> getCommunitiesByNameAndCityId(GetCommunitiesByNameAndCityIdCommand cmd);
+
+    List<CommunityDTO> getCommunitiesByIds(GetCommunitiesByIdsCommand cmd);
+
+    void updateCommunityRequestStatus(UpdateCommunityRequestStatusCommand cmd);
+
+    List<CommunityDTO> getNearbyCommunityById(GetNearbyCommunitiesByIdCommand cmd);
+
+    CommunityDTO getCommunityById(GetCommunityByIdCommand cmd);
+
+    CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd);
+
+	ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
+			ListComunitiesByKeywordAdminCommand cmd);
+	
+	ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd);
+	BuildingDTO getBuilding(GetBuildingCommand cmd);
+	
+	BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd);
+	void deleteBuilding(DeleteBuildingAdminCommand cmd);
+	
+	Boolean verifyBuildingName(VerifyBuildingNameAdminCommand cmd);
+	
+	List<CommunityManagerDTO> getCommunityManagers(ListCommunityManagersAdminCommand cmd);
+	
+	List<UserCommunityDTO> getUserCommunities(ListUserCommunitiesCommand cmd);
+	
+	void approveBuilding(VerifyBuildingAdminCommand cmd);
+	
+	void rejectBuilding(VerifyBuildingAdminCommand cmd);
+	
+	ListBuildingsByStatusCommandResponse listBuildingsByStatus(listBuildingsByStatusCommand cmd);
+	
+	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
+	
+	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
+	
+	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
+	
+	CommunityUserAddressDTO qryCommunityUserAddressByUserId(QryCommunityUserAddressByUserIdCommand cmd);
+	
+	CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
+	
+	CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd);
+	
+	CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd);
+	
+	CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd);
+	
+	CommunityUserAddressResponse listUserByNotJoinedCommunity(ListCommunityUsersCommand cmd);
+	
+	List<CommunityDTO> listUnassignedCommunitiesByNamespaceId();
+
+	CreateCommunityResponse createCommunity(CreateCommunityCommand cmd);
+
+	void importCommunity(ImportCommunityCommand cmd, MultipartFile[] files);
+
+	ListCommunityByNamespaceIdResponse listCommunityByNamespaceId(ListCommunityByNamespaceIdCommand cmd);
+}

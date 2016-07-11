@@ -1,0 +1,85 @@
+package com.everhomes.user;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Set;
+
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.user.UserFavoriteDTO;
+
+public interface UserActivityProvider {
+    List<User> listUsers(List<Long> uids);
+
+    List<UserContact> listContactByUid(Long uid, ListingLocator locator, int count);
+
+    List<UserContact> listContacts(Long uid);
+
+    List<UserInvitation> listInvitationByUid(Long uid, CrossShardListingLocator locator, int count);
+
+    List<UserInvitationRoster> listInvitationRoster(Set<Long> invitationIds);
+
+    void addContacts(List<UserContact> contacts,Long uid);
+
+    void updateContact(List<UserContact> contacts,Long uid);
+
+    void addInstalledApp(List<UserInstalledApp> insApps,Long uid);
+
+    void addBehavior(UserBehavior behavior,Long uid);
+
+    void addActivity(UserActivity activity,Long uid);
+
+    void addLocation(UserLocation location,Long uid);
+    
+    List<UserLocation> findLocation(Long uid);
+
+    List<UserContact> listRetainUserContactByUid(Long uid);
+
+    List<UserIdentifier> listUserIdentifiers(List<String> indentifierTokens);
+
+    void addUserProfile(UserProfile userProfile);
+
+    List<UserProfile> findProfileByUid(Long uid);
+
+    void updateUserProfile(UserProfile userProfile);
+
+    void deleteProfile(UserProfile userProfile);
+
+    UserProfile findUserProfileBySpecialKey(Long uid, String key);
+
+    void updateUserProfile(Long uid, String key, String... content);
+    
+    void updateUserCurrentEntityProfile(Long uid, String key, Long entityId, Long timestemp, Integer namespaceId);
+
+    void addFeedback(Feedback feedback,Long uid);
+
+    List<UserFavoriteDTO> findFavorite(Long uid);
+    
+    List<UserFavoriteDTO> findFavorite(Long uid, String targetType, Long targetId);
+    
+    List<UserFavoriteDTO> findFavorite(Long uid, String targetType, CrossShardListingLocator locator, int count);
+
+    void addUserFavorite(UserFavorite userFavorite);
+
+    void addPostedTopic(Long ownerUid, String targetType, Long postId);
+
+    List<UserPost> listPostedTopics(Long uid);
+    List<UserPost> listPostedTopics(Long uid, String targetType, CrossShardListingLocator locator, int count);
+    void updateProfileIfNotExist(Long uid, String key, Integer val);
+    
+    void deleteFavorite(Long uid,Long targetId,String type);
+
+    void addUserServiceAddress(UserServiceAddress serviceAddress);
+
+    List<UserServiceAddress> findUserRelateServiceAddresses(long uid);
+    
+    void addUserShop(Long uid);
+    
+    void deleteShop(Long uid);
+
+    void deleteUserServieAddress(Long addressId,Long uid);
+
+    int deletePostedTopic(Long ownerId, Long postId);
+    
+    void updateViewedActivityProfileIfNotExist(Long uid, String key, Long lastViewedTime, List<Long> ids);
+}

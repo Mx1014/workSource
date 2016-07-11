@@ -1,0 +1,501 @@
+// @formatter:off
+package com.everhomes.controller;
+
+import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.oauth2.CommonRestResponse;
+import com.everhomes.rest.user.DeviceIdentifierType;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.WebTokenGenerator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+/**
+ * Interceptor that checks REST API signatures
+ * 
+ * @author Kelven Yang
+ *
+ */
+public class WebRequestInterceptor implements HandlerInterceptor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebRequestInterceptor.class);
+
+	private static final String ATTR_KEY_START_TICK = "EvhStartTick";
+	private static final String ZUOLIN_APP_KEY = "zuolin.appKey";
+	private static final String SIGN_APP_KEY = "sign.appKey";
+	private static final String APP_KEY_NAME = "appKey";
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private UserProvider userProvider;
+
+	@Autowired
+	private AppProvider appProvider;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
+
+	public WebRequestInterceptor() {
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request,
+			HttpServletResponse response, Object handler, Exception ex)
+					throws Exception {
+
+		String requestInfo = getRequestInfo(request, false);
+
+		cleanupUserContext();
+
+		MDC.remove("seq");
+
+		Long startTick = (Long)request.getAttribute(ATTR_KEY_START_TICK);
+		if(startTick != null) {
+			long requestExecutionMs = System.currentTimeMillis() - startTick.longValue();
+			if(requestExecutionMs > 1000)
+				LOGGER.warn("Complete request {} in {} ms", requestInfo,
+						System.currentTimeMillis() - startTick.longValue());
+			else
+				LOGGER.debug("Complete request {} in {} ms", requestInfo,
+						System.currentTimeMillis() - startTick.longValue());
+		} else {
+			LOGGER.debug("Complete request: {}",  requestInfo);
+		}
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response,
+			Object handler, ModelAndView modelAndView) throws Exception {
+	}
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+			Object handler) throws Exception {
+		WebRequestSequence.current().setupRequestSequence();
+		MDC.put("seq", WebRequestSequence.current().getRequestSequence());
+		MDC.put("uri", request.getRequestURI());
+		MDC.put("ip", InetAddress.getLocalHost().getHostAddress());
+
+		request.setAttribute(ATTR_KEY_START_TICK, System.currentTimeMillis());
+
+//		LOGGER.debug("preHandle-begin");
+//		Map<String,String[]> map = request.getParameterMap();
+//		if(map!=null&&!map.isEmpty()){
+//			for(String key:map.keySet()){
+//				LOGGER.debug("preHandle-parameter."+key+"="+map.get(key)[0]);
+//			}
+//		}else
+//			LOGGER.debug("preHandle-parameter is null");
+
+		try {
+			Map<String, String> userAgents = getUserAgent(request);
+			setupNamespaceIdContext(userAgents);
+			if(isProtected(handler)) {
+				LoginToken token = getLoginToken(request);
+				if(!isValid(token)) {
+					if(this.isInnerSignLogon(request)){
+						token = this.innerSignLogon(request,response);
+						setupUserContext(token);                    
+						MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+						return true;
+					}else if(this.checkRequestSignature(request)) {
+						setupUserContextForApp(UserContext.current().getCallerApp());
+						//TODO Added by Janson
+						if(null != UserContext.current().getUser()) {
+							MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));    
+						}
+						return true;
+					}
+					//Update by Janson, when the request is using apiKey, we generate a 403 response to app.
+					String appKey = request.getParameter(APP_KEY_NAME); 
+					if(null != appKey && (!appKey.isEmpty())) {
+						LOGGER.info("appKey=" + appKey + " is Forbidden");
+						throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+								UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
+					}
+					// authentication failed ,the httpcode should set 401
+					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+							UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");                
+				} else {
+					setupUserContext(token);                    
+					MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+				}
+
+			} else {
+				LoginToken token = getLoginToken(request);
+				if(token != null && isValid(token)) {
+					setupUserContext(token);                    
+					MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+				} else {
+					setupAnnonymousUserContext();
+					MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+				}
+			}
+			return true;
+		} finally {
+			if(LOGGER.isDebugEnabled()) {
+
+				StringBuffer sb = new StringBuffer();
+				sb.append("{");
+
+				Enumeration<String> headers = request.getHeaderNames();
+				int i = 0;
+				while(headers.hasMoreElements()) {
+					String header = headers.nextElement();
+
+					if(i > 0)
+						sb.append(", ");
+					sb.append(header + ": " + request.getHeader(header));
+					i++;
+				}
+				sb.append("}");
+
+				LOGGER.debug("Pre handling request: {}, headers: {}", getRequestInfo(request, true), sb.toString());
+			}
+		}
+	}
+
+	private boolean isValid(LoginToken token) {
+		if(token == null) {
+			User user = UserContext.current().getUser();
+			Long userId = -1L;
+			if(user != null) {
+				userId = user.getId();
+			}
+			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+			return false;
+		}
+
+		return this.userService.isValidLoginToken(token);
+	}
+
+	private boolean isProtected(Object handler) {
+		if(handler instanceof HandlerMethod) {
+			HandlerMethod handlerMethod = (HandlerMethod)handler;
+			RequireAuthentication authentication = handlerMethod.getMethod().getAnnotation(RequireAuthentication.class);
+			if(authentication == null)
+				authentication = handlerMethod.getMethod().getDeclaringClass().getAnnotation(RequireAuthentication.class);
+			if(authentication != null)
+				return authentication.value();
+		}
+
+		return false;
+	}
+
+	private LoginToken getLoginToken(HttpServletRequest request) {
+		Map<String, String[]> paramMap = request.getParameterMap();
+		String loginTokenString = null;
+		for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+			String value = StringUtils.join(entry.getValue(), ",");
+			if(LOGGER.isTraceEnabled())
+				LOGGER.trace("HttpRequest param " + entry.getKey() + ": " + value);
+			if(entry.getKey().equals("token"))
+				loginTokenString = value;
+		}
+
+		if(loginTokenString == null) {
+			if(request.getCookies() != null) {
+				List<Cookie> matchedCookies = new ArrayList<>();
+
+				for(Cookie cookie : request.getCookies()) {
+					if(LOGGER.isTraceEnabled())
+						LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
+
+					if(cookie.getName().equals("token")) {
+						matchedCookies.add(cookie);
+					}
+				}
+
+				if(matchedCookies.size() > 0)
+					loginTokenString = matchedCookies.get(matchedCookies.size() - 1).getValue();
+			}
+		}
+
+		if(loginTokenString != null)
+			try{
+				return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
+			} catch (Exception e) {
+				LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
+				return null;
+			}
+
+		return null;
+	}
+
+	private Map<String, String> getUserAgent(HttpServletRequest request) {
+		Map<String, String> map = new HashMap<String, String>();
+		String userAgent = request.getHeader("User-Agent");
+		if(userAgent == null || userAgent.isEmpty())
+			userAgent = request.getHeader("user-agent");
+		if(userAgent != null && userAgent.trim().length() > 0) {
+			String[] segments = userAgent.trim().split(" ");
+			for(String segment : segments) {
+				if(segment != null && segment.trim().length() > 0) {
+					String[] values = segment.split("/");
+					if(values.length == 2) {
+						map.put(values[0].trim(), values[1].trim());
+					}
+				}
+			}
+		}
+
+		return map;
+	}
+
+	private boolean checkRequestSignature(HttpServletRequest request) {
+		Map<String, String[]> paramMap = request.getParameterMap();
+		if(paramMap.get(APP_KEY_NAME) == null)
+			return false;
+
+		if(paramMap.get("signature") == null)
+			return false;
+
+		String appKey = getParamValue(paramMap, APP_KEY_NAME);
+		App app = this.appProvider.findAppByKey(appKey);
+		if(app == null) {
+			LOGGER.warn("Invalid app key: " + appKey);
+			return false;
+		}
+
+		UserContext.current().setCallerApp(app);
+
+		Map<String, String> mapForSignature = new HashMap<String, String>();
+		for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+			if(!entry.getKey().equals("signature")) {
+				mapForSignature.put(entry.getKey(), StringUtils.join(entry.getValue(), ','));
+			}
+		}
+		return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), getParamValue(paramMap, "signature"));
+	}
+
+	private static String getParamValue(Map<String, String[]> paramMap, String paramName) {
+		String[] values = paramMap.get(paramName);
+		if(values != null)
+			return StringUtils.join(values, ',');
+		return null;
+	}
+
+	private void setupNamespaceIdContext(Map<String, String> userAgents) {
+		UserContext context = UserContext.current();
+		context.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+
+		if(userAgents.containsKey("ns")) {
+			String ns = userAgents.get("ns");
+			Integer namespaceId = Integer.valueOf(ns);
+			context.setNamespaceId(namespaceId);
+		}
+
+
+
+	}
+
+	private void setupUserContext(LoginToken loginToken) {
+		UserLogin login = this.userService.findLoginByToken(loginToken);
+		UserContext context = UserContext.current();
+		context.setLogin(login);
+
+		User user = this.userProvider.findUserById(login.getUserId());
+		context.setUser(user);
+	}
+
+	private void setupAnnonymousUserContext() {
+		UserContext context = UserContext.current();
+
+		context.setLogin(User.ANNONYMOUS_LOGIN);
+
+		User user = new User();
+		user.setId(User.ANNONYMOUS_UID);
+		context.setUser(user);
+	}
+
+	private void setupUserContextForApp(App app) {
+		if(app.getAppKey().equalsIgnoreCase(AppConstants.APPKEY_BORDER)) {
+			User user = this.userProvider.findUserById(User.ROOT_UID);
+			UserContext.current().setUser(user);
+		}
+	}
+
+	private void cleanupUserContext() {
+		UserContext.clear();
+	}
+
+	private static String getRequestInfo(HttpServletRequest request, boolean requestDetails) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(request.getMethod()).append(" ");
+		sb.append(request.getRequestURI());
+		if(requestDetails) {
+			Enumeration<String> e = request.getParameterNames();
+			sb.append("{");
+			int i = 0;
+			while(e.hasMoreElements()) {
+				String name = e.nextElement();
+				String val = request.getParameter(name);
+
+				if(val != null && !val.isEmpty()) {
+					if(i > 0)
+						sb.append(", ");
+					sb.append(name).append(": ").append(val);
+
+					i++;
+				}
+			}
+			sb.append("}");
+		}
+
+		return sb.toString();
+	}
+
+	private boolean isInnerSignLogon(HttpServletRequest request) {
+		Map<String, String[]> paramMap = request.getParameterMap();
+		String signAppKey = getParamValue(paramMap, "appKey");
+		String osignAppKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
+		return signAppKey==null?false:signAppKey.equals(osignAppKey);
+	}
+
+	private LoginToken innerSignLogon(HttpServletRequest request,HttpServletResponse response) {
+		Map<String, String[]> paramMap = request.getParameterMap();
+		String appKey = getParamValue(paramMap, "appKey");
+		String signature = getParamValue(paramMap, "signature");
+		String id = getParamValue(paramMap, "id");
+		String name = getParamValue(paramMap, "name");
+		String randomNum = getParamValue(paramMap, "randomNum");
+		String timeStamp = getParamValue(paramMap, "timeStamp");
+		if(StringUtils.isEmpty(appKey)||StringUtils.isEmpty(signature)||
+				StringUtils.isEmpty(id)||StringUtils.isEmpty(name)||
+				StringUtils.isEmpty(randomNum)||StringUtils.isEmpty(timeStamp)){
+			LOGGER.error("invalid parameter.appKey="+appKey+",signature="+signature+",id="+id+",name="+name+",randomNum="+randomNum+",timeStamp="+timeStamp);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameter.appKey or signature or id or name or randomNum or timeStamp is null.");
+		}
+
+		User user = UserContext.current().getUser();
+		if(user==null||user.getId()==User.ANNONYMOUS_UID){
+			UserInfo userInfo = this.getBizUserInfo(signature,appKey,id,name,String.valueOf(randomNum),String.valueOf(timeStamp));
+			String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
+			String pusherIdentify = null;
+			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
+			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
+			setCookieInResponse("token", tokenString, request, response);
+			return logintoken;
+		}
+		return null;
+	}
+
+	private UserInfo getBizUserInfo(String zlSignature,String zlAppKey,String id,String name,String randomNum,String timeStamp) {
+		try{
+			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
+			String getUserInfoUri = homeUrl+"/evh/openapi/getUserInfoById";
+			String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
+			App app = appProvider.findAppByKey(appKey);
+			if(app==null){
+				LOGGER.error("app nou found.appKey="+appKey);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app not found");
+			}
+
+			Map<String,String> params = new HashMap<String, String>();
+			params.put("appKey", appKey);
+			params.put("zlAppKey", zlAppKey);
+			params.put("zlSignature", zlSignature);
+			params.put("id", id);
+			params.put("name", name);
+			params.put("randomNum", randomNum);
+			params.put("timeStamp", timeStamp);
+			String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+
+			String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&name=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
+					getUserInfoUri,
+					URLEncoder.encode(zlSignature,"UTF-8"),zlAppKey,
+					id,URLEncoder.encode(name,"UTF-8"),
+					randomNum,timeStamp,
+					appKey,URLEncoder.encode(signature,"UTF-8"));
+			Clients ci = new Clients();
+			String responseString = ci.restCall("GET", param, null, null, null);
+			Gson gson = new Gson();
+			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
+			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
+			if(userInfo==null){
+				LOGGER.error("userInfo don't get.appKey="+appKey+",signature="+signature+",zlAppKey="+zlAppKey+",zlSignature="+zlSignature+",id="+id+",name="+name+",randomNum="+randomNum+",timeStamp="+timeStamp);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"userInfo don't get.");
+			}
+			return userInfo;
+		}
+		catch(Exception e){
+			LOGGER.error("getUserInfo method error.e="+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"getUserInfo method error.");
+		}
+	}
+
+	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
+			HttpServletResponse response) {
+
+		Cookie cookie = findCookieInRequest(name, request);
+		if(cookie == null)
+			cookie = new Cookie(name, value);
+		else
+			cookie.setValue(value);
+		cookie.setPath("/");
+		if(value == null || value.isEmpty())
+			cookie.setMaxAge(0);
+
+		response.addCookie(cookie);
+	}
+
+	private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
+		List<Cookie> matchedCookies = new ArrayList<>();
+
+		Cookie[] cookies = request.getCookies();
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
+				if(cookie.getName().equals(name)) {
+					LOGGER.debug("Found matched cookie with name {} at value: {}, path: {}, version: {}", name,
+							cookie.getValue(), cookie.getPath(), cookie.getVersion());
+					matchedCookies.add(cookie);
+				}
+			}
+		}
+
+		if(matchedCookies.size() > 0)
+			return matchedCookies.get(matchedCookies.size() - 1);
+		return null;
+	}
+}

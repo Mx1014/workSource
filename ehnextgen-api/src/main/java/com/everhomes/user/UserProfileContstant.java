@@ -1,0 +1,25 @@
+package com.everhomes.user;
+
+public interface UserProfileContstant {
+    public static final String RecommendName = "recommendation";
+    public static final String RecommendBannerName = "recommendBanner";
+    public static final String LaunchPadName = "launchPadName";
+    
+    /** 发过帖的总数 */
+    public static final String POSTED_TOPIC_COUNT = "postedTopicCount";
+    public static final String FAVOTITE_TOPIC_COUNT = "favoriteTopicCount";
+    public static final String FAVOTITE_BIZ_COUNT="favoriteBizCount";
+    
+    /** 是否申请过开店*/
+    public static final String IS_APPLIED_SHOP="isAppliedShop";
+    
+    /**
+     * 优惠券数
+     */
+    public static final String RECEIVED_COUPON_COUNT = "receivedCouponCount";
+    
+    /**
+     * 查看过的新的活动
+     */
+    public static final String VIEWED_ACTIVITY_NEW = "viewedActivityNew";
+}

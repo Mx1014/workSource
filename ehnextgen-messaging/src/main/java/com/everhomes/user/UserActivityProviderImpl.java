@@ -1,0 +1,641 @@
+package com.everhomes.user;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.UserFavoriteDTO;
+import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
+import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
+import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
+import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
+import com.everhomes.server.schema.tables.daos.EhUserFavoritesDao;
+import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
+import com.everhomes.server.schema.tables.daos.EhUserInstalledAppsDao;
+import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
+import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
+import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
+import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
+import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
+import com.everhomes.server.schema.tables.pojos.EhUserContacts;
+import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.pojos.EhUserInstalledApps;
+import com.everhomes.server.schema.tables.pojos.EhUserPosts;
+import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
+import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
+import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
+import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
+@Component
+public class UserActivityProviderImpl implements UserActivityProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserActivityProviderImpl.class);
+    
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+    @Override
+    public List<User> listUsers(List<Long> uids) {
+        List<User> users = new ArrayList<User>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj) -> {
+            List<User> ret = context.select().from(Tables.EH_USERS).where(Tables.EH_USERS.ID.in(uids)).fetch().stream()
+                    .map(r -> ConvertHelper.convert(r, User.class)).collect(Collectors.toList());
+            users.addAll(ret);
+            return true;
+        });
+        return users;
+    }
+
+    @Override
+    public List<UserContact> listContactByUid(Long uid, ListingLocator locator, int count) {
+        if (locator.getAnchor() == null) {
+            locator.setAnchor(0L);
+        }
+        List<UserContact> contacts = new ArrayList<UserContact>();
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        cxt.select().from(Tables.EH_USER_CONTACTS).where(Tables.EH_USER_CONTACTS.UID.eq(uid))
+                .and(Tables.EH_USER_CONTACTS.CONTACT_ID.ne(0L)).and(Tables.EH_USER_CONTACTS.ID.gt(locator.getAnchor()))
+                .limit(count + 1).fetch().forEach(contact -> {
+                    UserContact c = ConvertHelper.convert(contact, UserContact.class);
+                    contacts.add(c);
+                });
+        if (contacts.size() > 0) {
+            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+        }
+        return contacts;
+    }
+
+    @Override
+    public List<UserContact> listContacts(Long uid) {
+        List<UserContact> contacts = new ArrayList<UserContact>();
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        cxt.select().from(Tables.EH_USER_CONTACTS).where(Tables.EH_USER_CONTACTS.UID.eq(uid)).fetch()
+                .forEach(contact -> {
+                    UserContact c = ConvertHelper.convert(contact, UserContact.class);
+                    contacts.add(c);
+                });
+        return contacts;
+    }
+
+    @Override
+    public List<UserInvitation> listInvitationByUid(Long uid, CrossShardListingLocator locator, int count) {
+        return listInvitationsByConditions(locator, count, Tables.EH_USER_INVITATIONS.OWNER_UID.eq(uid),
+                Tables.EH_USER_INVITATIONS.STATUS.ne(InvitationStatus.inactive.getCode()));
+    }
+
+    @Override
+    public List<UserInvitationRoster> listInvitationRoster(Set<Long> invitationIds) {
+
+        List<UserInvitationRoster> invitations = new ArrayList<UserInvitationRoster>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, object) -> {
+            EhUserInvitationRosterDao rosterDao = new EhUserInvitationRosterDao(context.configuration());
+            rosterDao.fetchByInviteId(invitationIds.toArray(new Long[invitationIds.size()])).forEach(roster -> {
+                invitations.add(ConvertHelper.convert(roster, UserInvitationRoster.class));
+            });
+            return true;
+        });
+        return invitations;
+    }
+
+    @Override
+    public void addContacts(List<UserContact> contacts, Long uid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhUserContactsDao dao = new EhUserContactsDao(context.configuration());
+        dao.insert(contacts.toArray(new EhUserContacts[contacts.size()]));
+    }
+
+    @CacheEvict(allEntries = true, value = "listContactByUid")
+    @Override
+    public void updateContact(List<UserContact> contacts, Long uid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhUserContactsDao dao = new EhUserContactsDao(context.configuration());
+        dao.update(contacts.toArray(new EhUserContacts[contacts.size()]));
+    }
+
+    @Override
+    public void addInstalledApp(List<UserInstalledApp> insApps, Long uid) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhUserInstalledAppsDao dao = new EhUserInstalledAppsDao(cxt.configuration());
+        dao.insert(insApps.toArray(new EhUserInstalledApps[insApps.size()]));
+    }
+
+    @Override
+    public void addBehavior(UserBehavior behavior, Long uid) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhUserBehaviorsDao dao = new EhUserBehaviorsDao(cxt.configuration());
+        dao.insert(behavior);
+    }
+
+    @Override
+    public void addActivity(UserActivity activity, Long uid) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhUserActivitiesDao dao = new EhUserActivitiesDao(cxt.configuration());
+        dao.insert(activity);
+    }
+
+    @Override
+    public void addLocation(UserLocation location, Long uid) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhUserLocationsDao dao = new EhUserLocationsDao(cxt.configuration());
+        dao.insert(location);
+
+    }
+    
+    @Override
+    public List<UserLocation> findLocation(Long uid) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        return cxt.select().from(Tables.EH_USER_LOCATIONS).where(Tables.EH_USER_LOCATIONS.UID.eq(uid))
+        .orderBy(Tables.EH_USER_LOCATIONS.CREATE_TIME.desc()).fetch().stream().map(r ->
+            ConvertHelper.convert(r, UserLocation.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserContact> listRetainUserContactByUid(Long uid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        Map<Long, UserContact> cache = new HashMap<Long, UserContact>();
+        EhUserContactsDao dao = new EhUserContactsDao(context.configuration());
+        dao.fetchByContactId(uid).forEach(item -> {
+            cache.put(item.getUid(), ConvertHelper.convert(item, UserContact.class));
+        });
+        List<UserIdentifier> identifiers = listUserIndetifiersByUid(new ArrayList<Long>(cache.keySet()));
+        identifiers.forEach(item -> {
+            if (item.getIdentifierType().equals(IdentifierType.MOBILE.getCode())) {
+                cache.get(item.getOwnerUid()).setContactPhone(item.getIdentifierToken());
+                try{
+                    cache.get(item.getOwnerUid()).setContactName(cache.get(item.getOwnerUid()).getContactName()); 
+                }catch(Exception e){
+                    
+                }
+                
+            }
+        });
+        return new ArrayList<UserContact>(cache.values());
+    }
+
+    @Override
+    public List<UserIdentifier> listUserIdentifiers(List<String> indentifierTokens) {
+        List<UserIdentifier> userIdentifiers = new ArrayList<UserIdentifier>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUserIdentifiers.class), null, (context, object) -> {
+            EhUserIdentifiersDao identifierDao = new EhUserIdentifiersDao(context.configuration());
+            identifierDao.fetchByIdentifierToken(indentifierTokens.toArray(new String[indentifierTokens.size()]))
+                    .forEach(identifier -> {
+                        userIdentifiers.add(ConvertHelper.convert(identifier, UserIdentifier.class));
+                    });
+            return true;
+        });
+        return userIdentifiers;
+    }
+
+    private List<UserIdentifier> listUserIndetifiersByUid(List<Long> uids) {
+        List<UserIdentifier> userIdentifiers = new ArrayList<UserIdentifier>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, object) -> {
+            EhUserIdentifiersDao identifierDao = new EhUserIdentifiersDao(context.configuration());
+            identifierDao.fetchByOwnerUid(uids.toArray(new Long[uids.size()])).forEach(identifier -> {
+                userIdentifiers.add(ConvertHelper.convert(identifier, UserIdentifier.class));
+            });
+            return true;
+        });
+        return userIdentifiers;
+    }
+
+    @Override
+    public void addUserProfile(UserProfile userProfile) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserProfiles.class));
+        userProfile.setId(id);
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userProfile.getOwnerId()));
+        EhUserProfilesDao dao = new EhUserProfilesDao(cxt.configuration());
+        dao.insert(userProfile);
+
+    }
+
+    @Override
+    public List<UserProfile> findProfileByUid(Long uid) {
+        List<UserProfile> result = new ArrayList<UserProfile>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+        result.addAll(dao.fetchByOwnerId(uid).stream().map(r -> ConvertHelper.convert(r, UserProfile.class))
+                .collect(Collectors.toList()));
+        return result;
+    }
+
+    @Override
+    public void updateUserProfile(UserProfile userProfile) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userProfile.getOwnerId()));
+        EhUserProfilesDao dao = new EhUserProfilesDao(cxt.configuration());
+        dao.update(userProfile);
+    }
+
+    @Override
+    public void deleteProfile(UserProfile userProfile) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userProfile.getOwnerId()));
+        EhUserProfilesDao dao = new EhUserProfilesDao(cxt.configuration());
+        dao.delete(userProfile);
+    }
+
+    public List<UserInvitation> listInvitationsByConditions(CrossShardListingLocator locator, int count,
+            Condition... conditons) {
+        List<UserInvitation> userInvitations = new ArrayList<UserInvitation>();
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhUserInvitationsRecord> query = context.selectQuery(Tables.EH_USER_INVITATIONS);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_USER_INVITATIONS.ID.gt(locator.getAnchor()));
+            if (conditons != null) {
+                query.addConditions(conditons);
+            }
+            query.addLimit(count - userInvitations.size());
+
+            query.fetch().map((r) -> {
+                userInvitations.add(ConvertHelper.convert(r, UserInvitation.class));
+                return null;
+            });
+
+            if (userInvitations.size() >= count) {
+                locator.setAnchor(userInvitations.get(userInvitations.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if (userInvitations.size() > 0) {
+            locator.setAnchor(userInvitations.get(userInvitations.size() - 1).getId());
+        }
+
+        return userInvitations;
+    }
+
+    @Override
+    public UserProfile findUserProfileBySpecialKey(Long uid, String key) {
+        UserProfile profie = null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+
+        Record result = context.select().from(Tables.EH_USER_PROFILES).where(Tables.EH_USER_PROFILES.OWNER_ID.eq(uid))
+                .and(Tables.EH_USER_PROFILES.ITEM_NAME.eq(key)).fetchAny();
+        if (result != null)
+            profie = ConvertHelper.convert(result, UserProfile.class);
+        return profie;
+    }
+
+    @Override
+    public void updateUserProfile(Long uid, String key, String... content) {
+        UserProfile profile = findUserProfileBySpecialKey(uid, key);
+        if (profile == null) {
+            profile = new UserProfile();
+            profile.setAppId(17L);
+            profile.setItemName(key);
+            profile.setItemKind((byte) 1);
+            profile.setItemValue(StringUtils.join(content, ","));
+            profile.setOwnerId(uid);
+            addUserProfile(profile);
+            return;
+        }
+        profile.setItemValue(StringUtils.join(content, ","));
+        updateUserProfile(profile);
+    }
+    
+    @Override
+    public void updateUserCurrentEntityProfile(Long uid, String key, Long entityId, Long timestemp, Integer namespaceId) {
+        UserProfile profile = findUserProfileBySpecialKey(uid, key);
+        if (profile == null) {
+            profile = new UserProfile();
+            profile.setAppId(17L);
+            profile.setItemName(key);
+            profile.setItemKind((byte) 1);
+            profile.setItemValue(String.valueOf(entityId));
+            profile.setIntegralTag1(timestemp);
+            profile.setIntegralTag2((long)namespaceId);
+            profile.setOwnerId(uid);
+            addUserProfile(profile);
+        } else {
+            profile.setItemValue(String.valueOf(entityId));
+            profile.setIntegralTag1(timestemp);
+            updateUserProfile(profile);
+        }
+    }
+
+    @Override
+    public void addFeedback(Feedback feedback, Long uid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        EhFeedbacksDao dao = new EhFeedbacksDao(context.configuration());
+        dao.insert(feedback);
+    }
+
+    @Override
+    public List<UserFavoriteDTO> findFavorite(Long uid) {
+        //TODO
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        return context.select().from(Tables.EH_USER_FAVORITES).where(Tables.EH_USER_FAVORITES.OWNER_UID.eq(uid))
+                .orderBy(Tables.EH_USER_FAVORITES.CREATE_TIME.desc()).fetch().stream().map(r -> ConvertHelper.convert(r, UserFavoriteDTO.class))
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<UserFavoriteDTO> findFavorite(Long uid, String targetType, Long targetId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        return context.select().from(Tables.EH_USER_FAVORITES).where(Tables.EH_USER_FAVORITES.OWNER_UID.eq(uid)
+            .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(targetType).and(Tables.EH_USER_FAVORITES.TARGET_ID.eq(targetId))))
+                .fetch().stream().map(r -> ConvertHelper.convert(r, UserFavoriteDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addUserFavorite(UserFavorite userFavorite) {
+    	Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserFavorites.class));
+    	userFavorite.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class,
+                userFavorite.getOwnerUid()));
+        EhUserFavoritesDao dao = new EhUserFavoritesDao(context.configuration());
+        dao.insert(userFavorite);
+        if (userFavorite.getTargetType() != null && userFavorite.getTargetType().equalsIgnoreCase("topic")) {
+            updateProfileIfNotExist(userFavorite.getOwnerUid(), UserProfileContstant.FAVOTITE_TOPIC_COUNT, 1);
+            return;
+        }
+        if (userFavorite.getTargetType() != null && userFavorite.getTargetType().equalsIgnoreCase("biz")) {
+            updateProfileIfNotExist(userFavorite.getOwnerUid(), UserProfileContstant.FAVOTITE_BIZ_COUNT, 1);
+        }
+
+    }
+
+    @Override
+    public void updateProfileIfNotExist(Long uid, String key, Integer val) {
+        UserProfile userProfile = null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        Record result = context.select().from(Tables.EH_USER_PROFILES).where(Tables.EH_USER_PROFILES.OWNER_ID.eq(uid))
+                .and(Tables.EH_USER_PROFILES.ITEM_NAME.eq(key)).fetchAny();
+        if (result != null) {
+            userProfile = ConvertHelper.convert(result, UserProfile.class);
+        }
+
+        if (userProfile == null) {
+            long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserProfiles.class));
+            userProfile = new UserProfile();
+            userProfile.setOwnerId(uid);
+            userProfile.setItemName(key);
+            userProfile.setItemKind((byte) 1);
+            userProfile.setItemValue(val + "");
+            userProfile.setId(id);
+            EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+            dao.insert(userProfile);
+            return;
+        }
+        EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+        userProfile.setItemValue(convert(userProfile, val) + "");
+        dao.update(userProfile);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserProfiles.class, userProfile.getId());
+
+    }
+
+    private int convert(UserProfile userProfile, int val) {
+        int value = NumberUtils.toInt(userProfile.getItemValue(), 0);
+        return value + val;
+    }
+
+    @Override
+    public void addPostedTopic(Long ownerId, String targetType, Long postId) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserPosts.class));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Get user posted post table sequence, ownerId=" + ownerId + ", postId=" + postId + ", sequence=" + id);
+        }
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerId));
+        EhUserPostsDao dao = new EhUserPostsDao(context.configuration());
+        UserPost post = new UserPost();
+        post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        post.setId(id);
+        post.setOwnerUid(ownerId);
+        post.setTargetType(targetType);
+        post.setTargetId(postId);
+        dao.insert(post);
+
+    }
+    
+    @Override
+    public int deletePostedTopic(Long ownerId, Long postId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerId));
+        DeleteQuery<EhUserPostsRecord> query = context.deleteQuery(Tables.EH_USER_POSTS);
+        query.addConditions(Tables.EH_USER_POSTS.OWNER_UID.eq(ownerId));
+        query.addConditions(Tables.EH_USER_POSTS.TARGET_ID.eq(postId));
+        return query.execute();
+    }
+
+    @Override
+    public List<UserPost> listPostedTopics(Long uid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        List<UserPost> posts = new ArrayList<UserPost>();
+        EhUserPostsDao dao = new EhUserPostsDao(context.configuration());
+        posts.addAll(dao.fetchByOwnerUid(uid).stream().map(r -> ConvertHelper.convert(r, UserPost.class))
+                .collect(Collectors.toList()));
+        return posts;
+    }
+
+    @Override
+    public void deleteFavorite(Long uid, Long targetId, String type) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        UserFavorite favorite = new UserFavorite();
+        favorite.setTargetId(targetId);
+        favorite.setTargetType(type);
+        favorite.setOwnerUid(uid);
+        //user sql delete
+        context.delete(Tables.EH_USER_FAVORITES).where(Tables.EH_USER_FAVORITES.OWNER_UID.eq(uid))
+                .and(Tables.EH_USER_FAVORITES.TARGET_ID.eq(targetId))
+                .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(type)).execute();
+        if (favorite.getTargetType() != null && (favorite.getTargetType().equalsIgnoreCase(UserFavoriteTargetType.TOPIC.getCode()) 
+        		|| favorite.getTargetType().equalsIgnoreCase(UserFavoriteTargetType.ACTIVITY.getCode()))) {
+            updateProfileIfNotExist(favorite.getOwnerUid(), UserProfileContstant.FAVOTITE_TOPIC_COUNT, -1);
+            return;
+        }
+        if (favorite.getTargetType() != null && favorite.getTargetType().equalsIgnoreCase(UserFavoriteTargetType.BIZ.getCode())) {
+            updateProfileIfNotExist(favorite.getOwnerUid(), UserProfileContstant.FAVOTITE_BIZ_COUNT, -1);
+        }
+
+    }
+
+    @Override
+    public void addUserServiceAddress(UserServiceAddress serviceAddress) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(UserServiceAddress.class));
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, serviceAddress.getOwnerUid()));
+        EhUserServiceAddressesDao dao = new EhUserServiceAddressesDao(context.configuration());
+        serviceAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        serviceAddress.setId(id);
+        dao.insert(serviceAddress);
+    }
+    
+    @Override
+    public void deleteUserServieAddress(Long addressId,Long uid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        EhUserServiceAddressesDao dao = new EhUserServiceAddressesDao(context.configuration());
+        List<EhUserServiceAddresses> list =  dao.fetchByAddressId(addressId);
+        dao.delete(list);
+        
+    }
+    
+    @Override
+    public List<UserServiceAddress> findUserRelateServiceAddresses(long uid){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        EhUserServiceAddressesDao dao = new EhUserServiceAddressesDao(context.configuration());
+        return dao.fetchByOwnerUid(uid).stream().map(r -> {
+            return ConvertHelper.convert(r, UserServiceAddress.class);
+            }).collect(Collectors.toList());
+    }
+
+	@Override
+	public void addUserShop(Long uid) {
+		updateShop(uid, UserProfileContstant.IS_APPLIED_SHOP, 1);
+		
+	}
+
+	@Override
+	public void deleteShop(Long uid) {
+		updateShop(uid, UserProfileContstant.IS_APPLIED_SHOP, 0);
+		
+	}
+	
+	private void updateShop(Long uid, String key, Integer val) {
+        UserProfile userProfile = null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        Record result = context.select().from(Tables.EH_USER_PROFILES).where(Tables.EH_USER_PROFILES.OWNER_ID.eq(uid))
+                .and(Tables.EH_USER_PROFILES.ITEM_NAME.eq(key)).fetchAny();
+        if (result != null) {
+            userProfile = ConvertHelper.convert(result, UserProfile.class);
+        }
+
+        if (userProfile == null) {
+            long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserProfiles.class));
+            userProfile = new UserProfile();
+            userProfile.setOwnerId(uid);
+            userProfile.setItemName(key);
+            userProfile.setItemKind((byte) 1);
+            userProfile.setItemValue(val + "");
+            userProfile.setId(id);
+            EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+            dao.insert(userProfile);
+            return;
+        }
+        EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+        userProfile.setItemValue(val + "");
+        dao.update(userProfile);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserProfiles.class, userProfile.getId());
+
+    }
+
+	@Override
+	public List<UserFavoriteDTO> findFavorite(Long uid, String targetType,
+			CrossShardListingLocator locator, int count) {
+		
+		if (locator.getAnchor() == null) {
+            locator.setAnchor(0L);
+        }
+		
+        List<UserFavoriteDTO> favorites = new ArrayList<UserFavoriteDTO>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        context.select().from(Tables.EH_USER_FAVORITES).where(Tables.EH_USER_FAVORITES.OWNER_UID.eq(uid))
+                .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(targetType)).and(Tables.EH_USER_FAVORITES.ID.ge(locator.getAnchor()))
+                .limit(count).fetch().forEach(fav -> {
+                	UserFavoriteDTO f = ConvertHelper.convert(fav, UserFavoriteDTO.class);
+                	favorites.add(f);
+                });
+        
+        return favorites;
+        
+	}
+
+	@Override
+	public List<UserPost> listPostedTopics(Long uid, String targetType, 
+			CrossShardListingLocator locator, int count) {
+		
+		if (locator.getAnchor() == null) {
+            locator.setAnchor(0L);
+        }
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        List<UserPost> posts = new ArrayList<UserPost>();
+        
+        context.select().from(Tables.EH_USER_POSTS).where(Tables.EH_USER_POSTS.OWNER_UID.eq(uid))
+        .and(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType)).and(Tables.EH_USER_POSTS.ID.ge(locator.getAnchor()))
+        .limit(count).fetch().forEach(p -> {
+        	UserPost post = ConvertHelper.convert(p, UserPost.class);
+        	posts.add(post);
+        });
+        
+        return posts;
+	}
+
+	@Override
+	public void updateViewedActivityProfileIfNotExist(Long uid, String key,
+			Long lastViewedTime, List<Long> ids) {
+		
+		UserProfile userProfile = null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+        Record result = context.select().from(Tables.EH_USER_PROFILES).where(Tables.EH_USER_PROFILES.OWNER_ID.eq(uid))
+                .and(Tables.EH_USER_PROFILES.ITEM_NAME.eq(key)).fetchAny();
+        if (result != null) {
+            userProfile = ConvertHelper.convert(result, UserProfile.class);
+        }
+
+        if (userProfile == null) {
+            long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserProfiles.class));
+            userProfile = new UserProfile();
+            userProfile.setOwnerId(uid);
+            userProfile.setItemName(key);
+            userProfile.setItemKind((byte) 1);
+            userProfile.setItemValue(lastViewedTime + "");
+            userProfile.setStringTag1(ids.toString());
+            userProfile.setId(id);
+            EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+            dao.insert(userProfile);
+        }
+        EhUserProfilesDao dao = new EhUserProfilesDao(context.configuration());
+        userProfile.setItemValue(lastViewedTime + "");
+        userProfile.setStringTag1(ids.toString());
+        dao.update(userProfile);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserProfiles.class, userProfile.getId());
+		
+	}
+
+
+}

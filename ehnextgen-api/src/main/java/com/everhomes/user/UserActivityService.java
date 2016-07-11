@@ -1,0 +1,87 @@
+package com.everhomes.user;
+
+import java.util.List;
+
+
+
+
+
+
+
+
+
+
+import javax.validation.Valid;
+
+import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.user.AddUserFavoriteCommand;
+import com.everhomes.rest.user.CancelUserFavoriteCommand;
+import com.everhomes.rest.user.CommunityStatusResponse;
+import com.everhomes.rest.user.ContactDTO;
+import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.InvitationCommandResponse;
+import com.everhomes.rest.user.ListPostResponse;
+import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
+import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
+import com.everhomes.rest.user.ListSignupActivitiesCommand;
+import com.everhomes.rest.user.ListTreasureResponse;
+import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
+import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.SyncActivityCommand;
+import com.everhomes.rest.user.SyncBehaviorCommand;
+import com.everhomes.rest.user.SyncInsAppsCommand;
+import com.everhomes.rest.user.SyncLocationCommand;
+import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.util.Tuple;
+
+public interface UserActivityService {
+    CommunityStatusResponse listCurrentCommunityStatus();
+
+    void updateLocation(SyncLocationCommand cmd);
+
+    void updateActivity(SyncActivityCommand cmd);
+
+    void updateUserBehavoir(SyncBehaviorCommand cmd);
+
+    void syncInstalledApps(SyncInsAppsCommand installApps);
+
+    void updateContacts(SyncUserContactCommand cmd);
+
+    InvitationCommandResponse listInvitedUsers(Long anchor);
+
+    Tuple<Long, List<ContactDTO>> listUserContacts(Long anchor);
+
+    List<UserContact> listUserRetainIdentifiers(String identifer);
+
+    void updateFeedback(FeedbackCommand cmd);
+    
+    void cancelFavorite(CancelUserFavoriteCommand cmd);
+
+    void addUserFavorite(AddUserFavoriteCommand cmd);
+
+    ListPostResponse listPostedTopics(ListPostedTopicByOwnerIdCommand cmd);
+    
+    ListPostResponse listFavoriteTopics(ListUserFavoriteTopicCommand cmd);
+    
+    ListTreasureResponse getUserTreasure();
+    
+    List<UserServiceAddressDTO> getUserRelateServiceAddress();
+    
+    void addUserShop(Long userId);
+    
+    void cancelShop(Long userId);
+
+    List<UserServiceAddressDTO> getUserServiceAddress(GetUserServiceAddressCommand cmd);
+    void receiveCoupon(Long userId);
+    void invalidCoupon(Long userId);
+
+	void updateUserProfile(Long userId, String name, String value);
+	
+	ListActivitiesReponse listActivityFavorite(ListUserFavoriteActivityCommand cmd);
+	ListActivitiesReponse listPostedActivities(ListPostedActivityByOwnerIdCommand cmd);
+	ListActivitiesReponse listSignupActivities(ListSignupActivitiesCommand cmd);
+}

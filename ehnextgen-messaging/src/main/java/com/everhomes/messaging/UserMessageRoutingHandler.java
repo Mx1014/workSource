@@ -1,0 +1,253 @@
+// @formatter:off
+package com.everhomes.messaging;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.border.BorderConnection;
+import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.msgbox.Message;
+import com.everhomes.msgbox.MessageBoxProvider;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.rest.rpc.client.RealtimeMessageIndicationPdu;
+import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
+import com.everhomes.rest.rpc.server.ClientForwardPdu;
+import com.everhomes.rest.user.UserLoginStatus;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserService;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.Name;
+import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.user.User;
+
+/**
+ * 
+ * Routing handler to dispatch messages targeting individual users
+ * 
+ * @author Kelven Yang
+ *
+ */
+@Component
+@Name("user")
+public class UserMessageRoutingHandler implements MessageRoutingHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private MessageBoxProvider messageBoxProvider;
+    
+    @Autowired
+    private BorderConnectionProvider borderConnectionProvider;
+    
+    @Autowired
+    private PusherService pusherService;
+    
+    @Override
+    public boolean allowToRoute(UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
+            MessageDTO message) {
+        
+        // TODO perform blacklist or filtering in the future
+        return true;
+    }
+
+    @Override
+    public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
+            MessageDTO message, int deliveryOption) {
+        long uid = Long.parseLong(dstChannelToken);
+
+        List<UserLogin> logins = this.userService.listUserLogins(uid);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Routing message, appId=" + appId + ", senderId" + senderLogin.getUserId() + ", dstChannelType=" + dstChannelType 
+                + ", dstChannelToken=" + dstChannelToken + ", receiverId= " + uid + ", senderLogin=" + senderLogin);
+            for(UserLogin receiverLogin : logins) {
+                LOGGER.debug("Routing message, appId=" + appId + ", senderId" + senderLogin.getUserId() + ", receiverLogin=" + receiverLogin);
+            }
+        }
+        
+        // reflect back message to sender
+        if((deliveryOption & MessagingConstants.MSG_FLAG_REFLECT_BACK.getCode()) != 0) {
+            logins.stream().filter((UserLogin login) -> {
+                if ((login.getStatus() == UserLoginStatus.LOGGED_IN) && login.getUserId() == senderLogin.getUserId() && login.getLoginId() == senderLogin.getLoginId()) {
+                    return true;
+                    }
+                return context.checkAndAdd(login.getUserId());
+            }).forEach((UserLogin login) -> {
+                routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, message, deliveryOption);
+            });
+        }
+
+        MessageDTO shadowClone = message;
+
+        if((deliveryOption & MessagingConstants.MSG_FLAG_REFLECT_BACK.getCode()) != 0) {
+            try {
+                shadowClone = (MessageDTO) message.clone();
+                shadowClone.setSenderTag(null);
+            } catch (CloneNotSupportedException e) {
+                LOGGER.error("Unexpected exception", e);
+            }
+        }
+        
+        final MessageDTO shadowCloneFinal = shadowClone;
+        logins.parallelStream().filter((UserLogin login) -> {
+//            if (login.getNamespaceId() != senderLogin.getNamespaceId()) {
+//                LOGGER.warn(String.format("Namespace %d of target login does not match namespace %d of sender",
+//                        login.getNamespaceId(), senderLogin.getNamespaceId()));
+//                return false;
+//            }
+
+            if (login.getUserId() == senderLogin.getUserId() && login.getLoginId() == senderLogin.getLoginId()) {
+                LOGGER.info("Drop message that will be routed to the current sender, userId=" + login.getUserId() 
+                    + ", loginId=" + login.getLoginId());
+                return false;
+            }
+            
+            // 系统用户不接收消息，故即使系统用户有其它的login也不能路由过去，以免消息并发的时候产生过多无用消息影响性能 by lqs 20160129
+            // 用户ID小于某值的用户为系统用户，这样判断简单点、以免影响性能
+            if(login.getUserId() < User.MAX_SYSTEM_USER_ID) {
+                LOGGER.info("Drop message that will be routed to system user, userId=" + login.getUserId() 
+                    + ", loginId=" + login.getLoginId());
+                return false;
+            }
+
+            return true;
+        }).forEach((UserLogin login) -> {
+            routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, shadowCloneFinal, deliveryOption);
+        });
+    }
+    
+    private void routeMessageTo(UserLogin senderLogin, long appId, UserLogin dstLogin, String destChannelType, String dstChannelToken,
+        MessageDTO message, int deliveryOption) {
+
+        if((deliveryOption & MessagingConstants.MSG_FLAG_STORED.getCode()) != 0) {
+            routeStoredMessage(senderLogin, appId, dstLogin, destChannelType, dstChannelToken, message, deliveryOption);
+        } else {
+            routeRealtimeMessage(senderLogin, appId, dstLogin, destChannelType, dstChannelToken, message, deliveryOption);
+        }
+    }
+    
+    private void routeStoredMessage(UserLogin senderLogin, long appId, 
+        UserLogin destLogin, String destChannelType, String destChannelToken,
+        MessageDTO message, int deliveryOption) {
+    
+        MessageChannel mainChannel = message.getChannels().get(0);
+        
+        // stored message should be stored first
+        Message msg = new Message();
+        //update by Janson.
+        //msg.setNamespaceId(senderLogin.getNamespaceId());
+        msg.setNamespaceId(destLogin.getNamespaceId());
+        msg.setAppId(appId);
+        msg.setSenderUid(senderLogin.getUserId());
+        msg.setContextType(message.getContextType());
+        msg.setContextToken(message.getContextToken());
+        msg.setChannelType(mainChannel.getChannelType());
+        msg.setChannelToken(mainChannel.getChannelToken());
+        msg.setContent(message.getBody());
+        msg.setSenderTag(message.getSenderTag());
+        msg.setMetaAppId(message.getMetaAppId());
+        msg.setMeta(message.getMeta());
+        
+        if(message.getBodyType() != null && !message.getBodyType().isEmpty()) {
+            if(null == message.getMeta()) {
+                message.setMeta(new HashMap<String, String>());
+                }
+            message.getMeta().put("bodyType", message.getBodyType());    
+            }
+
+        long msgId = this.messageBoxProvider.createMessage(msg);
+        
+        String boxKey = getMessageBoxKey(destLogin, destLogin.getNamespaceId(), appId);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Routing message(storage), appId=" + appId + ", senderId" + senderLogin.getUserId() + ", dstChannelType=" + destChannelType 
+                + ", dstChannelToken=" + destChannelToken + ", msgChannelType=" + msg.getChannelType() + ", msgChannelToken=" + msg.getChannelToken() 
+                + ", boxKey= " + boxKey + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+        }
+        this.messageBoxProvider.putMessage(boxKey, msgId);
+
+        boolean onlineDelivered = false;
+        //If not push only, send it by border server
+        if((MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode() != deliveryOption) && (destLogin.getLoginBorderId() != null)) {
+            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId().intValue());
+            if(borderConnection != null) {
+                StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
+                ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
+                try {
+                    borderConnection.sendMessage(null, forwardPdu);
+                    onlineDelivered = true;
+                } catch(IOException e) {
+                    LOGGER.warn("Failed to deliver message to border", e);
+                }
+            }
+        }
+        
+        if(!onlineDelivered && (deliveryOption & MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode()) != 0) {
+            this.pusherService.pushMessage(senderLogin, destLogin, msgId, msg);
+        }
+    }
+    
+    private void routeRealtimeMessage(UserLogin senderLogin, long appId, 
+        UserLogin destLogin, String destChannelType, String destChannelToken,
+        MessageDTO message, int deliveryOption) {
+
+        MessageChannel mainChannel = message.getChannels().get(0);
+        
+        // push notification is not available in realtime message
+        if(destLogin.getLoginBorderId() != null) {
+            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId().intValue());
+            if(borderConnection != null) {
+                RealtimeMessageIndicationPdu clientPdu = new RealtimeMessageIndicationPdu();
+                clientPdu.setAppId(appId);
+                clientPdu.setChannelType(mainChannel.getChannelType());
+                clientPdu.setChannelToken(mainChannel.getChannelToken());
+                clientPdu.setSenderUid(senderLogin.getUserId());
+                clientPdu.setContextType(message.getContextType());
+                clientPdu.setContextToken(message.getContextToken());
+                clientPdu.setContent(message.getBody());
+                clientPdu.setSenderTag(message.getSenderTag());
+                clientPdu.setMetaAppId(message.getMetaAppId());
+                clientPdu.setMetaMap(message.getMeta());
+                clientPdu.setCreateTime(DateHelper.currentGMTTime().getTime());
+                
+                ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
+                try {
+                    borderConnection.sendMessage(null, forwardPdu);
+                } catch(IOException e) {
+                    LOGGER.warn("Failed to deliver message to border", e);
+                }
+            }
+        }
+    }
+    
+    private static ClientForwardPdu buildForwardPdu(UserLogin destLogin, long forwardedPduAppId, Object forwardedPdu) {
+        PduFrame clientPduFrame = new PduFrame();
+        clientPduFrame.setAppId(forwardedPduAppId);
+        clientPduFrame.setPayload(forwardedPdu);
+
+        ClientForwardPdu forwardPdu = new ClientForwardPdu();
+        forwardPdu.setLoginToken(WebTokenGenerator.getInstance().toWebToken(destLogin.getLoginToken()));
+        forwardPdu.setClientFrame(clientPduFrame);
+
+        return forwardPdu;
+    }
+    
+    public static String getMessageBoxKey(UserLogin dstLogin, int namespaceId, long appId) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("mbx-");
+        sb.append(dstLogin.getUserId());
+        sb.append("-").append(namespaceId);
+        sb.append("-").append(appId);
+        sb.append("-").append(dstLogin.getLoginId());
+        return sb.toString();
+    }
+}

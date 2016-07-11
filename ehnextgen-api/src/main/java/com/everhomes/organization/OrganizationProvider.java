@@ -1,0 +1,201 @@
+// @formatter:off
+package com.everhomes.organization;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.jooq.Condition;
+
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.CommunityPmBill;
+import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+
+public interface OrganizationProvider {
+	void createOrganization(Organization organization);
+    void updateOrganization(Organization organization);
+    void deleteOrganization(Organization organization);
+    void deleteOrganizationById(Long id);
+    Organization findOrganizationById(Long id);
+    /**
+     * 获取指定小区对应的政府机构。
+     * 每个政府机构管辖着一定量的小区，如物业、业委管一个小区，居委和公安管理一个片区里的小区；
+     * @param communityId 小区ID
+     * @return 小区列表
+     */
+    List<Organization> findOrganizationByCommunityId(Long communityId);
+    List<Organization> findOrganizationByPath(String path);
+    List<Organization> listOrganizations(String organizationType,String name, Integer pageOffset,Integer pageSize);
+    
+    void createOrganizationMember(OrganizationMember organizationMember);
+    void updateOrganizationMember(OrganizationMember organizationMember);
+    void deleteOrganizationMemberById(Long id);
+    OrganizationMember findOrganizationMemberById(Long id);
+    List<OrganizationMember> listOrganizationMembers(Long organizationId, Long memberUid, Long offset,Integer pageSize);
+    List<OrganizationMember> listOrganizationMembers(Long memberUid);
+    
+    
+    void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
+    void updateOrganizationCommunity(OrganizationCommunity organizationCommunity);
+    void deleteOrganizationCommunity(OrganizationCommunity organizationCommunity);
+    void deleteOrganizationCommunityById(Long id);
+    OrganizationCommunity findOrganizationCommunityById(Long id);
+    OrganizationCommunity findOrganizationCommunityByOrgIdAndCmmtyId(Long orgId,Long cmmtyId);
+    
+    //组织-小区 的查询逻辑
+    List<OrganizationCommunity> listOrganizationCommunities(Long organizationId, Integer pageOffset,Integer pageSize);
+    List<OrganizationCommunity> listOrganizationCommunities(Long organizationId);
+    OrganizationCommunity   findOrganizationProperty(Long communityId);
+    OrganizationCommunity   findOrganizationPropertyCommunity(Long organizationId);
+    List<OrganizationCommunity> listOrganizationByCommunityId(Long communityId);
+    
+    int countOrganizations(String type, String name);
+    int countOrganizationMembers(Long organizationId, Long memberUid);
+    int countOrganizationCommunitys(Long organizationId);
+	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
+	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
+	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
+	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
+	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
+	void createOrganizationTask(OrganizationTask task);
+	OrganizationTask findOrganizationTaskById(Long taskId);
+	Organization findOrganizationByCommunityIdAndOrgType(Long communityId,String organizationType);
+	List<OrganizationBillingTransactions> listOrganizationBillingTransactions(Condition condition, long offset, int pageSize);
+	List<CommunityPmOwner> listOrganizationOwnerByAddressIdAndOrgId(Long addressId, Long organizationId);
+	OrganizationBillingAccount findOrganizationBillingAccount(Long organizationId);
+	void createOrganizationBillingAccount(OrganizationBillingAccount oAccount);
+	void createOrganizationBillingTransaction(OrganizationBillingTransactions orgTx);
+	void updateOrganizationBillingAccount(OrganizationBillingAccount oAccount);
+	List<Organization> listOrganizationByCondition(Condition condition);
+	List<CommunityPmOwner> listOrgOwnerByOrgIdAndAddressId(Long organizationId, Long addressId);
+	CommunityPmBill findOranizationBillById(Long id);
+	List<OrganizationBillingTransactionDTO> listOrgBillTxByOrgId(Long orgId, int resultCode, Timestamp startTime, Timestamp endTime, String address, long offset, int i);
+	List<OrganizationOwners> listOrganizationOwnersByOrgIdAndAddressId(Long organizationId, Long addressId);
+	CommunityAddressMapping findOrganizationAddressMappingByOrgIdAndAddress(Long organizationId, String address);
+	void deleteOrganizationBillById(Long id);
+	void updateOrganizationBill(CommunityPmBill communBill);
+	List<CommunityPmBill> listOrganizationBillsByAddressId(Long addreddId,long offset, int pageSize);
+	OrganizationCommunity findOrganizationCommunityByOrgId(Long orgId);
+	void updateOrganizationTask(OrganizationTask task);
+	void deleteOrganizationMember(OrganizationMember organizationMember);
+	List<OrganizationTask> listOrganizationTasksByOrgIdAndType(Long organizationId, String topicType, Byte taskType, int pageSize, long offset);
+	OrganizationTask findOrgTaskByOrgIdAndEntityId(Long orgId, Long topicId);
+	Organization findOrganizationByName(String name);
+	List<OrganizationMember> listOrganizationMembersByOrgId(Long orgId);
+	void createOrganizationOrder(OrganizationOrder order);
+	List<OrganizationOrder> listOrgOrdersByBillIdAndStatus(Long billId,Byte status);
+	OrganizationOrder findOrganizationOrderById(Long orderId);
+	void updateOrganizationOrder(OrganizationOrder order);
+	List<OrganizationOrder> listOrgOrdersByStatus(Byte code);
+	CommunityAddressMapping findOrganizationAddressMappingByAddressId(Long addressId);
+	List<Organization> listOrganizationByName(String orgName, String orgType);
+	
+	
+	void addPmBuilding(OrganizationAssignedScopes pmBuilding);
+	void deletePmBuildingById(Long id);
+	void deletePmBuildingByOrganizationId(Long organizationId);
+	List<OrganizationAssignedScopes> findPmBuildingId(Long orgId);
+	List<OrganizationAssignedScopes> findUnassignedBuildingId(Long orgId);
+	List<Organization> listPmManagements(ListingLocator locator, int count, Long orgId, Long communityId);
+	
+	List<OrganizationTask> listOrganizationTasksByOperatorUid(Long operatorUid, String taskType, int pageSize, long offset);
+	
+	int countDepartments(String superiorPath);
+	List<Organization> listDepartments(String superiorPath, Integer pageOffset,Integer pageSize);
+	
+	List<OrganizationMember> listParentOrganizationMembers(String superiorPath, List<String> groupTypes,CrossShardListingLocator locator,Integer pageSize);
+	
+	boolean updateOrganizationMemberByIds(List<Long> ids, Organization org);
+	
+	List<Organization> listOrganizationByGroupTypes(String superiorPath, List<String> groupTypes);
+	
+	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes);
+	
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize);
+	
+	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
+	
+	/**
+	 * Create enterprise details
+	 * @param organizationDetail
+	 */
+	void createOrganizationDetail(OrganizationDetail organizationDetail);
+	
+	/**
+	 * Update enterprise details
+	 * @param organizationDetail
+	 */
+	void updateOrganizationDetail(OrganizationDetail organizationDetail);
+	
+	/**
+	 * Query enterprise information by organizationId
+	 * @param organizationId
+	 * @return
+	 */
+	OrganizationDetail findOrganizationDetailByOrganizationId(Long organizationId);
+	
+	void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
+	void updateOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
+	void deleteOrganizationCommunityRequestById(OrganizationCommunityRequest organizationCommunityRequest);
+	OrganizationCommunityRequest getOrganizationCommunityRequestById(Long id);
+	List<OrganizationCommunityRequest> queryOrganizationCommunityRequestByCommunityId(ListingLocator locator, Long comunityId
+            , int count, ListingQueryBuilderCallback queryBuilderCallback);
+	OrganizationCommunityRequest findOrganizationCommunityRequestByOrganizationId(Long communityId, Long organizationId);
+	List<OrganizationCommunityRequest> queryOrganizationCommunityRequests(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback);
+	OrganizationAddress findOrganizationAddressByAddressId(Long addressId);
+	void updateOrganizationAddress(OrganizationAddress oa);
+	public void deleteOrganizationAddressById(Long id);
+	void deleteOrganizationAddress(OrganizationAddress address);
+	List<OrganizationAddress> findOrganizationAddressByOrganizationId(
+			Long organizationId);
+	void deleteOrganizationAddressByOrganizationId(long organizationId);
+	void deleteOrganizationAttachmentsByOrganizationId(long organizationId);
+	Boolean isExistInOrganizationAddresses(long organizationId,
+			long addressId);
+	Organization findOrganizationByAddressId(long addressId);
+	List<OrganizationAttachment> listOrganizationAttachments(long organizationId);
+	void createOrganizationAddress(OrganizationAddress address);
+	void createOrganizationAttachment(OrganizationAttachment attachment);
+	OrganizationCommunityRequest getOrganizationCommunityRequestByOrganizationId(Long organizationId);
+	List<OrganizationAddress> listOrganizationAddressByBuildingId(Long buildingId, Integer pageSize, CrossShardListingLocator locator);
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize);
+	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
+	List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName);
+	Organization getOrganizationByGoupId(Long groupId);
+
+	
+	List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(Long orgId, String memberGroup);
+
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status);
+	
+	List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,List<Long> organizationIds,Long targetId, String taskType, Byte taskStatus, Byte visibleRegionType, Long visibleRegionId, int pageSize);
+	
+	List<OrganizationTaskTarget> listOrganizationTaskTargetsByOwner(String ownerType, Long ownerId, String taskType);
+
+	List<OrganizationMember> listOrganizationMembersByUId(Long uId);
+	
+	List<OrganizationMember> listOrganizationMembersTargetIdExist();
+	
+	void createOrganizationOwner(OrganizationOwners owner);
+	
+	OrganizationOwners getOrganizationOwnerByTokenOraddressId(String contactToken, Long addressId);
+	
+	void deleteOrganizationOwnerById(Long id);
+	
+	void updateOrganizationOwner(OrganizationOwners organizationOwner);
+	
+	List<OrganizationOwners> listOrganizationOwnerByCommunityId(Long communityId, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback);
+	
+	List<OrganizationOwners> findOrganizationOwnerByTokenOrNamespaceId(String contactToken, Integer namespaceId);
+	
+	Organization findOrganizationByGroupId(Long groupId);
+    List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
+	
+}

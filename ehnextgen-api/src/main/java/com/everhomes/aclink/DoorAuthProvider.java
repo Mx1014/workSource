@@ -1,0 +1,41 @@
+package com.everhomes.aclink;
+
+import java.util.List;
+
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
+
+public interface DoorAuthProvider {
+
+    Long createDoorAuth(DoorAuth obj);
+
+    void updateDoorAuth(DoorAuth obj);
+
+    void deleteDoorAuth(DoorAuth obj);
+
+    DoorAuth getDoorAuthById(Long id);
+
+    DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId);
+
+    DoorAuth queryValidDoorAuthForever(Long doorId, Long userId);
+
+    List<DoorAuth> queryDoorAuth(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count);
+
+    List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count);
+
+    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, int count);
+
+    DoorAuth getLinglingDoorAuthByUuid(String uuid);
+
+    DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte rightOpen, Byte rightVisitor, Byte rightRemote);
+
+    List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status,
+            int count);
+
+    List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count);
+
+}

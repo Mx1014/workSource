@@ -1,0 +1,2617 @@
+// @formatter:off
+package com.everhomes.user;
+
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.PortalRoleResolver;
+import com.everhomes.acl.Role;
+import com.everhomes.address.AddressService;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.border.Border;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusMessageDispatcher;
+import com.everhomes.bus.LocalBusMessageHandler;
+import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseContactService;
+import com.everhomes.enterprise.EnterpriseProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.FamilyService;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.UserMessageRoutingHandler;
+import com.everhomes.msgbox.MessageBoxProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.point.PointType;
+import com.everhomes.point.UserPointService;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.family.FamilyMemberFullDTO;
+import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
+import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.forum.ForumNotificationTemplateCode;
+import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagePopupFlag;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.point.AddUserPointCommand;
+import com.everhomes.rest.point.GetUserTreasureCommand;
+import com.everhomes.rest.point.GetUserTreasureResponse;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.GetBizSignatureCommand;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SetUserAccountInfoCommand;
+import com.everhomes.rest.user.SetUserInfoCommand;
+import com.everhomes.rest.user.SignupCommand;
+import com.everhomes.rest.user.SynThridUserCommand;
+import com.everhomes.rest.user.UserCurrentEntity;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserLoginStatus;
+import com.everhomes.rest.user.UserNotificationTemplateCode;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
+import com.everhomes.rest.user.VerifyAndLogonCommand;
+import com.everhomes.rest.user.admin.InvitatedUsers;
+import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
+import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
+import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
+import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
+import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
+import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
+import com.everhomes.rest.user.admin.SendUserTestMailCommand;
+import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
+import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
+import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RandomGenerator;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
+import com.mysql.jdbc.log.Log;
+
+/**
+ * 
+ * Implement business logic for user management
+ * 
+ * @author Kelven Yang
+ *
+ */
+@Component
+public class UserServiceImpl implements UserService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static final String SIGN_APP_KEY = "sign.appKey";
+	private static final String EXPIRE_TIME="invitation.expiretime";
+	private static final String YZX_VCODE_TEMPLATE_ID = "yzx.vcode.templateid";
+	private static final String MW_VCODE_TEMPLATE_CONTENT = "mw.vcode.template.content";
+	private static final String VCODE_SEND_TYPE = "sms.handler.type";
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private BigCollectionProvider bigCollectionProvider;
+
+	@Autowired
+	private UserProvider userProvider;
+
+	@Autowired
+	private SmsProvider smsProvider;
+
+	@Autowired
+	private CategoryProvider categoryProvider;
+
+	@Autowired
+	private SmsProvider smmProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
+
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+
+	@Autowired
+	private AclProvider aclProvider;
+
+	@Autowired
+	private RegionProvider regionProvider;
+
+	@Autowired
+	private ContentServerService contentServerService;
+
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private FamilyService familyService;
+
+	@Autowired
+	private FamilyProvider familyProvider;
+
+	@Autowired
+	private AddressService addressService;
+
+	@Autowired
+	private MessageBoxProvider messageBoxProvider;
+
+	@Autowired
+	private UserPointService userPointService;
+
+	@Autowired
+	private EnterpriseContactService enterpriseContactService;
+
+	@Autowired
+	private AppProvider appProvider;
+
+	@Autowired
+	private UserActivityProvider userActivityProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
+	@Autowired 
+	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+	private NamespaceResourceProvider namespaceResourceProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
+	
+	@Autowired
+	private MessagingService messagingService;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+
+	@Autowired
+    private LocalBus localBus;
+
+	private static final String DEVICE_KEY = "device_login";
+
+	@PostConstruct
+	public void setup() {
+        localBus.subscribe("border.close", LocalBusMessageDispatcher.getDispatcher(this));
+    }
+	
+	@Override
+	public SignupToken signup(SignupCommand cmd, HttpServletRequest request) {
+		final IdentifierType identifierType = IdentifierType.fromString(cmd.getType());
+		if(identifierType == null) {
+			LOGGER.error("Invalid or unsupported identifier type, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid or unsupported identifier type");
+		}
+
+		final String identifierToken = cmd.getToken();
+		// 客户端有的时候会传一个非手机号的token过来，此时打印日志以便定位，不改变原来的流程
+		if(identifierToken == null || identifierToken.length() > 20) {
+			LOGGER.warn("Identifier token is invalid, cmd=" + cmd);
+		}
+
+		boolean overrideExisting = false;
+		if(cmd.getIfExistsThenOverride() != null && cmd.getIfExistsThenOverride().intValue() != 0) {
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info("The ifExistsThenOverride flag is true, cmd=" + cmd);
+			}
+			overrideExisting = true;
+		}
+
+		// UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(identifierToken);
+		Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+		UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+		if(existingClaimedIdentifier != null && !overrideExisting) {
+			LOGGER.error("User identifier token has already been claimed, cmd=" + cmd + ", identifierId=" + existingClaimedIdentifier.getId() 
+					+ ", ownerUid=" + existingClaimedIdentifier.getOwnerUid() + ", identifierType=" + existingClaimedIdentifier.getIdentifierType() 
+					+ ", identifierToken=" + existingClaimedIdentifier.getIdentifierToken());
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFIER_ALREADY_CLAIMED, 
+					"User identifier token has already been claimed");
+		}
+
+		String ip = request.getHeader("x-forwarded-for");
+
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("Proxy-Client-IP"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("WL-Proxy-Client-IP"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("HTTP_CLIENT_IP"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getRemoteAddr(); 
+		} 
+
+		String regIp = ip;
+
+		UserIdentifier identifier = this.dbProvider.execute((TransactionStatus status) -> {
+			User user = new User();
+			user.setStatus(UserStatus.INACTIVE.getCode());
+			user.setRegIp(regIp);
+			user.setRegChannelId(cmd.getChannel_id());
+			user.setNamespaceId(cmd.getNamespaceId());
+			userProvider.createUser(user);
+
+			UserIdentifier newIdentifier = new UserIdentifier();
+			newIdentifier.setOwnerUid(user.getId());
+			newIdentifier.setIdentifierType(identifierType.getCode());
+			newIdentifier.setIdentifierToken(identifierToken);
+			newIdentifier.setNamespaceId(namespaceId);
+
+			String verificationCode = RandomGenerator.getRandomDigitalString(6);
+			newIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+			newIdentifier.setVerificationCode(verificationCode);
+			newIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.createIdentifier(newIdentifier);
+
+			LOGGER.info("Send verfication code: " + verificationCode + " for new user: " + identifierToken);
+			//            String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
+			//            smsProvider.sendSms(identifierToken, verificationCode,templateId);
+			sendVerificationCodeSms(newIdentifier.getNamespaceId(), identifierToken, verificationCode);
+			return newIdentifier;
+		});
+
+		SignupToken signupToken = new SignupToken(identifier.getOwnerUid(), identifierType, identifierToken);
+		if(StringUtils.isEmpty(signupToken.getIdentifierToken())) {
+			LOGGER.error("Signup token should not be empty, signupToken" + signupToken + ", cmd=" + cmd);
+		} else {
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("User signup succeed, signupToken" + signupToken + ", cmd=" + cmd);
+			}
+		}
+
+		return signupToken;
+	}
+	private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
+	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+	    
+//		String smsType = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "");
+//		if(smsType.equalsIgnoreCase("YZX")){
+//			String templateId = configurationProvider.getValue(namespaceId, YZX_VCODE_TEMPLATE_ID, "");
+//			smsProvider.sendSms(number, verificationCode,templateId);
+//		}else if(smsType.equalsIgnoreCase("MW")){
+//			String templateContent = configurationProvider.getValue(namespaceId, MW_VCODE_TEMPLATE_CONTENT, "");
+//			String txt = convert(templateContent,new HashMap<String, String>() {
+//				private static final long serialVersionUID = 1L;
+//				{
+//					put("vcode", verificationCode);
+//				}
+//			}, "");
+//			smsProvider.sendSms(number, txt,null);
+//		}
+	}
+	private String convert(String template, Map<String, String> variables, String defaultVal) {
+		String pattern = "\\$\\{(.*?)\\}";
+		Pattern match = Pattern.compile(pattern);
+		Matcher m = match.matcher(template);
+		while (m.find()) {
+			String name = m.group(1);
+			template = template.replace(String.format("${%s}", name), getValue(variables, name, ""));
+		}
+		return template;
+	}
+
+	private String getValue(Map<String, String> map, String key, String defaultVal) {
+		if (!map.containsKey(key)) {
+			return defaultVal;
+		}
+		return map.get(key);
+	}
+	@Override
+	public UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken) {
+		assert(signupToken != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(User.class, signupToken.getUserId()));
+		Record record = context.select().from(EH_USER_IDENTIFIERS)
+				.where(EH_USER_IDENTIFIERS.OWNER_UID.eq(signupToken.getUserId()))
+				.and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(signupToken.getIdentifierType().getCode()))
+				.and(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(signupToken.getIdentifierToken()))
+				.and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+				.fetchOne();
+		if(LOGGER.isDebugEnabled()) {
+			String sql = context.select().from(EH_USER_IDENTIFIERS)
+					.where(EH_USER_IDENTIFIERS.OWNER_UID.eq(signupToken.getUserId()))
+					.and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(signupToken.getIdentifierType().getCode()))
+					.and(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(signupToken.getIdentifierToken())).getSQL();
+			LOGGER.debug("Find identifier by token, recordIsNull=" + (record == null) + ", signupToken=" + signupToken + ", sql=" + sql);
+		}
+
+		return ConvertHelper.convert(record, UserIdentifier.class);
+	}
+
+	@Override
+	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken) {
+		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
+		if(identifier == null) {
+			LOGGER.error("User identifier not found in db, signupToken=" + signupToken);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+		}
+
+		if(identifier.getClaimStatus() == IdentifierClaimStatus.CLAIMING.getCode() ||
+				identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()) {
+			Timestamp ts = identifier.getNotifyTime();
+			if(ts == null || isVerificationExpired(ts)) {
+				String verificationCode = RandomGenerator.getRandomDigitalString(6);
+				identifier.setVerificationCode(verificationCode);
+
+				LOGGER.debug("Send notification code " + verificationCode + " to " + identifier.getIdentifierToken());
+				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
+				//                smmProvider.sendSms( identifier.getIdentifierToken(), verificationCode, templateId);
+				sendVerificationCodeSms(namespaceId, identifier.getIdentifierToken(), verificationCode);
+			} else {
+
+				// TODO
+				LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
+				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
+				//                smmProvider.sendSms( identifier.getIdentifierToken(), identifier.getVerificationCode(),templateId);
+				sendVerificationCodeSms(namespaceId, identifier.getIdentifierToken(), identifier.getVerificationCode());
+			}
+
+			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			this.userProvider.updateIdentifier(identifier);
+		} else {
+			LOGGER.error("Token status is not claiming or verifying, signupToken=" + signupToken + ", identifierId=" + identifier.getId() 
+					+ ", ownerUid=" + identifier.getOwnerUid() + ", identifierType=" + identifier.getIdentifierType() 
+					+ ", identifierToken=" + identifier.getIdentifierToken() + ", identifierStatus=" + identifier.getClaimStatus());
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+		}
+	}
+
+	@Override
+	public UserLogin verifyAndLogon(VerifyAndLogonCommand cmd) {
+		SignupToken signupToken = WebTokenGenerator.getInstance().fromWebToken(cmd.getSignupToken(), SignupToken.class);
+		if(signupToken == null) {
+			cmd.setInitialPassword("");
+			LOGGER.error("Signup token is empty, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+					UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+		}
+		if(StringUtils.isEmpty(cmd.getInitialPassword())){
+			LOGGER.error("password cannot be empty, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "password cannot be empty");
+		}
+
+		String verificationCode = cmd.getVerificationCode();
+		String deviceIdentifier = cmd.getDeviceIdentifier();
+		int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+
+		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
+		if(identifier == null) {
+			LOGGER.error("User identifier not found in db, signupToken=" + signupToken + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+		}
+		
+		// make it idempotent in case client disconnects before it has received the successful return
+		if((identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode() ||
+				identifier.getClaimStatus() == IdentifierClaimStatus.CLAIMED.getCode())
+				&& identifier.getVerificationCode() != null 
+				&& identifier.getVerificationCode().equals(verificationCode)) {
+
+			UserLogin rLogin = this.dbProvider.execute((TransactionStatus status)-> {
+				if(identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()) {
+					UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifier.getIdentifierToken());
+					if(existingClaimedIdentifier != null) {
+						existingClaimedIdentifier.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
+						this.userProvider.updateIdentifier(existingClaimedIdentifier);
+					}
+
+					identifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+					this.userProvider.updateIdentifier(identifier);
+				}
+
+				User user = this.userProvider.findUserById(identifier.getOwnerUid());
+				user.setStatus(UserStatus.ACTIVE.getCode());
+				user.setNickName(cmd.getNickName());
+				user.setGender(UserGender.UNDISCLOSURED.getCode());
+				
+				String salt=EncryptionUtils.createRandomSalt();
+				user.setSalt(salt);
+				try {
+					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",cmd.getInitialPassword(),salt)));
+				} catch (Exception e) {
+					LOGGER.error("encode password failed");
+					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+				}
+				//update user invitation code
+				if(StringUtils.isNotEmpty(cmd.getInvitationCode())){
+					createInvitationRecord(cmd.getInvitationCode(),identifier,user);
+				}
+				this.userProvider.updateUser(user);
+
+				UserLogin login = createLogin(namespaceId, user, deviceIdentifier, cmd.getPusherIdentify());
+				login.setStatus(UserLoginStatus.LOGGED_IN);
+				
+				return login;
+			});
+			
+			// 刷新企业通讯录
+	        organizationService.processUserForMember(identifier);
+	        
+			return rLogin;
+		}
+
+        
+
+		LOGGER.error("Invalid verification code or identifier status, signupToken=" + signupToken + ", cmd=" + cmd 
+				+ ", identifierId=" + identifier.getId()  + ", ownerUid=" + identifier.getOwnerUid() 
+				+ ", identifierType=" + identifier.getIdentifierType() + ", identifierToken=" + identifier.getIdentifierToken() 
+				+ ", identifierStatus=" + identifier.getClaimStatus() + ", verificationCode=" + identifier.getVerificationCode());
+		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+	}
+
+	@Override
+	public UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd) {
+		List<UserIdentifier> identifiers = this.userProvider.findClaimingIdentifierByToken(cmd.getUserIdentifier());
+		if(identifiers.size() == 0) {
+			cmd.setInitialPassword("");
+			LOGGER.error("Unable to locate the account by specified identifier, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, 
+					"Unable to locate the account by specified identifier");
+		}
+		if(StringUtils.isEmpty(cmd.getInitialPassword())) {
+			LOGGER.error("password cannot be empty, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "password cannot be empty");
+		}
+
+        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+		for(UserIdentifier identifier: identifiers) {
+			// make it idempotent in case client disconnects before it has received the successful return
+			// therefore, we also check status of CLAIMED in addition to VERIFYING
+			if((identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode() ||
+					identifier.getClaimStatus() == IdentifierClaimStatus.CLAIMED.getCode())
+					&& identifier.getVerificationCode() != null 
+					&& identifier.getVerificationCode().equals(cmd.getVerificationCode())) {
+
+				return this.dbProvider.execute((TransactionStatus status)-> {
+					if(identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()) {
+
+						UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getUserIdentifier());
+						if(existingClaimedIdentifier != null) {
+							existingClaimedIdentifier.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
+							this.userProvider.updateIdentifier(existingClaimedIdentifier);
+						}
+
+						identifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+						this.userProvider.updateIdentifier(identifier);
+					}
+
+					User user = this.userProvider.findUserById(identifier.getOwnerUid());
+					user.setStatus(UserStatus.ACTIVE.getCode());
+					user.setNickName(cmd.getNickName());
+					String salt=EncryptionUtils.createRandomSalt();
+					user.setSalt(salt);
+					try {
+						user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",cmd.getInitialPassword(),salt)));
+					} catch (Exception e) {
+						cmd.setInitialPassword("");
+						LOGGER.error("Unable to create password hash, cmd=" + cmd, e);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Unable to create password hash");
+					}
+					//verify invitation code
+					if(StringUtils.isNotEmpty(cmd.getInvitationCode())){
+						createInvitationRecord(cmd.getInvitationCode(), identifier,user);
+					}
+					this.userProvider.updateUser(user);
+
+					UserLogin login = createLogin(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(), user
+					        , cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+					login.setStatus(UserLoginStatus.LOGGED_IN);
+					return login;
+				});
+			}
+		}
+
+		StringBuilder strBuilder = new StringBuilder();
+		boolean isFirst = true;
+		for(UserIdentifier identifier: identifiers) {
+			if(!isFirst) {
+				strBuilder.append(", ");
+			}
+			strBuilder.append("{identifierId=" + identifier.getId()  + ", ownerUid=" + identifier.getOwnerUid() 
+					+ ", identifierType=" + identifier.getIdentifierType() + ", identifierToken=" + identifier.getIdentifierToken() 
+					+ ", identifierStatus=" + identifier.getClaimStatus() + ", verificationCode=" + identifier.getVerificationCode() + "}");
+			isFirst = false;
+		}
+		LOGGER.error("Invalid verification code or claim status, cmd=" + cmd + ", identifiersInDb=[" + strBuilder.toString() + "]");
+		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+	}
+
+	private void createInvitationRecord(String invitationCode, UserIdentifier identifier, User user) {
+		UserInvitationsDTO invitation = userProvider.findUserInvitationByCode(invitationCode);
+		if(invitation==null){
+			LOGGER.error("invalid invitation code.{}",invitationCode);
+			return;
+		}
+		if(invitation.getExpiration().getTime()<DateHelper.currentGMTTime().getTime()){
+			LOGGER.error("invalid invitation code,out of time.{}",invitationCode);
+			return;
+		}
+		if(invitation.getMaxInviteCount()!=0&&invitation.getCurrentInviteCount()>invitation.getMaxInviteCount()){
+			LOGGER.error("invalid invitation code,out of max invitie count.{}",invitationCode);
+			return;
+		}
+		UserInvitationRoster roster=new UserInvitationRoster();
+		//generate id ?how
+		roster.setContact(identifier.getIdentifierToken());
+		roster.setInviteId(invitation.getId());
+		roster.setName(user.getAccountName());//how to set name
+		userProvider.createUserInvitationRoster(roster,identifier.getOwnerUid());
+		//update invitation
+		Integer invitationCount = invitation.getCurrentInviteCount();
+		invitation.setCurrentInviteCount(invitationCount==null?0:invitationCount.intValue()+1);
+		userProvider.updateInvitation(ConvertHelper.convert(invitation,UserInvitation.class));
+		user.setInvitorUid(invitation.getOwnerUid());
+		user.setInviteType(invitation.getInviteType());
+		//update user info?
+		AddUserPointCommand pointCmd=new AddUserPointCommand(user.getId(), PointType.INVITED_USER.name(), userPointService.getItemPoint(PointType.INVITED_USER), invitation.getOwnerUid());  
+		userPointService.addPoint(pointCmd);
+	}
+
+	@Override
+	public User logonDryrun(String userIdentifierToken, String password) {
+		User user = null;
+
+		user = this.userProvider.findUserByAccountName(userIdentifierToken);
+		if(user == null) {
+			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, userIdentifierToken);
+			if(identifier != null) {
+				user = this.userProvider.findUserById(identifier.getOwnerUid());
+			}
+		}
+
+		if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash()))
+			return null;
+
+		assert(user != null);
+		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+			return null;
+
+		return user;
+	}
+
+	@Override
+	public UserLogin logon(int namespaceId, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify) {
+		User user = null;
+		user = this.userProvider.findUserByAccountName(userIdentifierToken);
+		if(user == null) {
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
+			if(userIdentifier == null) {
+				LOGGER.warn("Unable to find identifier record of " + userIdentifierToken);
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
+			} else {
+				user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
+				if(user == null) {
+					LOGGER.error("Unable to find owner user of identifier record: " + userIdentifierToken);
+					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+				}
+			}
+		}
+
+		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
+
+		if(!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
+			LOGGER.error("Password does not match for " + userIdentifierToken);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+		}
+
+		if(deviceIdentifier != null && deviceIdentifier.isEmpty())
+			deviceIdentifier = null;
+
+		UserLogin login = createLogin(namespaceId, user, deviceIdentifier, pusherIdentify);
+		login.setStatus(UserLoginStatus.LOGGED_IN);
+		//add user point
+		AddUserPointCommand cmd = new AddUserPointCommand();
+		cmd.setOperatorUid(user.getId());
+		cmd.setUid(user.getId());
+		cmd.setPointType(PointType.APP_OPENED.name());
+		cmd.setPoint(userPointService.getItemPoint(PointType.APP_OPENED));
+		userPointService.addPoint(cmd);
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("User logon succeed, userIdentifierToken=" + userIdentifierToken + ", userLogin=" + login);
+		}
+		return login;
+	}
+
+	@Override
+	public UserLogin logonByToken(LoginToken loginToken) {
+		assert(loginToken != null);
+		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
+		UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
+		if(login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
+			login.setStatus(UserLoginStatus.LOGGED_IN);
+			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			accessor.putMapValueObject(String.valueOf(loginToken.getLoginId()), login);
+
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info("User login succeed, loginToken=" + loginToken + ", userLogin=" + login);
+			}
+
+			return login;
+		}
+
+		LOGGER.error("Invalid token or token has expired, userKey=" + userKey + ", loginToken=" + loginToken + ", userLogin=" + login);
+		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN, 
+				"Invalid token or token has expired");
+	}
+
+	/**
+	 * Get all logins by deviceId
+	 * Added by Janson
+	 * @param deviceIdentifier
+	 * @return
+	 * 
+	 */
+	private List<UserLogin> listLoginByDevice(String deviceIdentifier) {
+		String deviceKey = NameMapper.getCacheKey(DEVICE_KEY, deviceIdentifier, null);
+		List<UserLogin> logins = new ArrayList<>();
+
+		// get "index" accessor
+		String hkeyIndex = "0";
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(deviceKey, hkeyIndex);
+	    // 取出的值由于历史BUG导致有可能是String、有可能是Integer，如果是Integer则会报错，需要统一转换一下 by lqs 20160114
+		//String maxId = accessor.getMapValueObject(hkeyIndex);
+        Object maxId = accessor.getMapValueObject(hkeyIndex);
+        if(maxId != null) {
+            for(int i = 1; i <= Integer.parseInt(maxId.toString()); i++) {
+				String hkeyLogin = String.valueOf(i);
+				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(deviceKey, hkeyLogin);
+				UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
+				if(login != null && login.getStatus() == UserLoginStatus.LOGGED_IN) {
+					logins.add(login);
+				}
+			}
+		}
+		return logins;
+	}
+
+	private void kickoffLoginByDevice(UserLogin newLogin) {
+		if(newLogin.getDeviceIdentifier() == null || newLogin.getDeviceIdentifier().isEmpty()) {
+			return;
+		}
+
+		List<UserLogin> logins = listLoginByDevice(newLogin.getDeviceIdentifier());
+		for(UserLogin login : logins) {
+			//For some reason ???
+			if(login != newLogin) {
+				//kickoff the login
+				login.setStatus(UserLoginStatus.LOGGED_OFF);
+				saveLogin(login);
+			}
+		}
+
+		//Save newLogin to deviceMap
+		String deviceKey = NameMapper.getCacheKey(DEVICE_KEY, newLogin.getDeviceIdentifier(), null);
+		String hkeyIndex = "0";
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(deviceKey, hkeyIndex);
+		Object maxId = accessor.getMapValueObject(hkeyIndex);
+		if(maxId == null) {
+			maxId = "1";
+		} else {
+			maxId = Integer.toString(Integer.parseInt(maxId.toString()) + 1);
+		}
+		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(deviceKey, maxId);
+		accessorLogin.putMapValueObject(maxId.toString(), newLogin);
+		accessor.putMapValueObject(hkeyIndex, Integer.valueOf(maxId.toString()));
+	}
+
+	private UserLogin createLogin(int namespaceId, User user, String deviceIdentifier, String pusherIdentify) {
+		Boolean isNew = false;
+
+		String userKey = NameMapper.getCacheKey("user", user.getId(), null);
+
+		// get "index" accessor
+		String hkeyIndex = "0";
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+		Object o = accessor.getMapValueObject(hkeyIndex);
+		Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
+		UserLogin foundLogin = null;
+		int nextLoginId = 1;
+
+		if(maxLoginId != null) {
+			for(int i = 1; i <= maxLoginId.intValue(); i++) {
+				String hkeyLogin = String.valueOf(i);
+				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+				UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
+				if(login != null) {
+					if(login.getNamespaceId() == namespaceId) {
+						if(login.getDeviceIdentifier() == null && deviceIdentifier == null) {
+							// toggle status so that we can have a new loginIntanceNumber, this
+							// will cause the previous one to be kicked out
+							login.setStatus(UserLoginStatus.LOGGED_OFF);
+							foundLogin = login;
+							if(LOGGER.isInfoEnabled()) {
+								LOGGER.info("User is kickoff for logined in another place, userId=" + user.getId() 
+										+ ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
+							}
+							break;
+						} else if(login.getDeviceIdentifier() != null && deviceIdentifier != null) {
+							if(login.getDeviceIdentifier().equals(deviceIdentifier)) {
+								foundLogin = login;
+								break;
+							}
+						}
+					}
+
+					if(login.getLoginId() >= nextLoginId)
+						nextLoginId = login.getLoginId() + 1;
+				}
+			}
+		}
+
+		if(foundLogin == null) {
+			foundLogin = new UserLogin(namespaceId, user.getId(), nextLoginId, deviceIdentifier, pusherIdentify);
+			accessor.putMapValueObject(hkeyIndex, nextLoginId);
+
+			isNew = true;
+		}
+
+		foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
+		foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+		foundLogin.setPusherIdentify(pusherIdentify);
+		String hkeyLogin = String.valueOf(nextLoginId);
+		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
+
+		if(isNew) {
+			//Kickoff other login in this devices
+			kickoffLoginByDevice(foundLogin);
+		}
+
+		return foundLogin;
+	}
+	
+	private void unregisterLoginConnection(int borderId, long userId, int loginId) {
+        LOGGER.debug("unregisterLoginConnection due to border down, borderId: {}, userId: {}, loginId: {}", borderId, userId, loginId);
+        
+        String userKey = NameMapper.getCacheKey("user", userId, null);
+        String hkeyLogin = String.valueOf(loginId);
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+        UserLogin login = accessor.getMapValueObject(hkeyLogin);
+        if(login != null) {
+            login.setLoginBorderId(null);
+            login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+
+            LOGGER.debug("Unregister login connection for login: {}", login.toString());
+            accessor.putMapValueObject(hkeyLogin, login);
+        } 
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @LocalBusMessageHandler("border.close")
+    private LocalBusSubscriber.Action onBorderClose(Object sender, String subject, Object args, String subscriptionPath) {
+        LOGGER.debug("Process border down event, borderId: {}");
+    
+        Border border = (Border)args;
+        
+        String key = String.valueOf(border.getId());
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor("border", key);
+        
+        Map entries = accessor.getTemplate().opsForHash().entries(key);
+        for(Object hKey: entries.keySet()) {
+            if(hKey != null) {
+                String[] tokens = hKey.toString().split("\\.");
+                
+                long userId = Long.parseLong(tokens[0]);
+                int loginId = Integer.parseInt(tokens[1]);
+                
+                unregisterLoginConnection(border.getId(), userId, loginId);
+            }
+        }
+        accessor.getTemplate().delete(key);
+        return LocalBusSubscriber.Action.none;
+    }
+    
+    private void registerBorderTracker(int borderId, long userId, int loginId) {
+        LOGGER.debug("Register border tracker, borderId: {}, userId: {}, loginId {}", borderId, userId, loginId);
+        
+        String key = String.valueOf(borderId);
+        String hKey = String.valueOf(userId) +  String.valueOf(loginId);
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor("border", key);
+        
+        accessor.putMapValueObject(hKey, "");
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void unregisterBorderTracker(int borderId, long userId, int loginId) {
+        LOGGER.debug("Unregister border tracker, borderId: {}, userId: {}, loginId {}", borderId, userId, loginId);
+        
+        String key = String.valueOf(borderId);
+        String hKey = String.valueOf(userId) +  String.valueOf(loginId);
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor("border", key);
+        
+        accessor.getTemplate().opsForHash().delete(key, hKey);
+    }
+
+	public UserLogin registerLoginConnection(LoginToken loginToken, int borderId) {
+		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+
+		String hkeyLogin = String.valueOf(loginToken.getLoginId());
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		UserLogin login = accessor.getMapValueObject(hkeyLogin);
+		if(login != null) {
+			login.setLoginBorderId(borderId);
+			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			accessor.putMapValueObject(hkeyLogin, login);
+			
+			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
+		} else {
+			LOGGER.warn("Unable to find UserLogin in big map, borderId=" + borderId 
+					+ ", loginToken=" + StringHelper.toJsonString(loginToken));
+		}
+
+		return login;
+	}
+
+	public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId) {
+		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+		String hkeyLogin = String.valueOf(loginToken.getLoginId());
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		UserLogin login = accessor.getMapValueObject(hkeyLogin);
+		if(login != null) {
+			login.setLoginBorderId(null);
+			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			accessor.putMapValueObject(hkeyLogin, login);
+			
+			unregisterBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
+		} else {
+			LOGGER.warn("Unable to find UserLogin in big map, borderId=" + borderId 
+					+ ", loginToken=" + StringHelper.toJsonString(loginToken));
+		}
+
+		return login;
+	}    
+
+	public void saveLogin(UserLogin login) {
+		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
+		String hkeyLogin = String.valueOf(login.getLoginId());
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		accessor.putMapValueObject(hkeyLogin, login);
+	}
+
+	@Override
+	public List<UserLogin> listUserLogins(long uid) {
+		List<UserLogin> logins = new ArrayList<>();
+		String userKey = NameMapper.getCacheKey("user", uid, null);
+
+		// get "index" accessor
+		String hkeyIndex = "0";
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
+		if(maxLoginId != null) {
+			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
+				String hkeyLogin = String.valueOf(i);
+				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+				UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
+				if(login != null) {
+					logins.add(login);
+				}
+			}
+		}
+		return logins;
+	}
+
+	@Override
+	public UserLogin findLoginByToken(LoginToken loginToken) {
+		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+		String hkeyLogin = String.valueOf(loginToken.getLoginId());
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		return accessor.getMapValueObject(hkeyLogin);
+	}
+
+	@Override
+	public void logoff(UserLogin login) {
+		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
+		String hkeyLogin = String.valueOf(login.getLoginId());
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		login.setStatus(UserLoginStatus.LOGGED_OFF);
+		accessor.putMapValueObject(hkeyLogin, login);
+		
+		//TODO delete deviceId?
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("User is logoff, userLogin=" + login);
+		}
+	}
+
+	@Override
+	public boolean isValidLoginToken(LoginToken loginToken) {
+		assert(loginToken != null);
+		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
+		UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
+		if(login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
+			return true;
+		} else {
+			LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
+			return false;
+		}
+	}
+
+	private static boolean isVerificationExpired(Timestamp ts) {
+		// TODO hard-code expiration time to 10 minutes
+		return DateHelper.currentGMTTime().getTime() - ts.getTime() > 10*60000;
+	}
+	
+	private Long getDateDifference(Timestamp compareValue) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		String strCompare = format.format(compareValue);
+		String strNow = format.format(now);
+		long day = 0L;
+		
+		try {
+			Date dateNow = format .parse(strNow);
+			Date dateCompare = format .parse(strCompare);
+			day = (dateNow.getTime()-dateCompare.getTime())/(24*60*60*1000);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return day;
+	}
+
+	@Override
+	public UserInfo getUserInfo() {
+		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
+		assert(user != null);
+
+		UserInfo info = ConvertHelper.convert(user, UserInfo.class);
+		// 把用户头像的处理独立到一个方法中 by lqs 20151211
+		populateUserAvatar(info, user.getAvatar());
+//		info.setAvatarUri(user.getAvatar());
+//		try{
+//			String url = contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
+//			info.setAvatarUrl(url);
+//		}catch(Exception e){
+//			LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + user.getAvatar());
+//		}
+
+		if(user.getCreateTime() != null) {
+			Long days = getDateDifference(user.getCreateTime());
+			Map<String, Object> map = new HashMap<String, Object>();
+            map.put("days", days);
+            String scope = UserNotificationTemplateCode.SCOPE;
+            int code = UserNotificationTemplateCode.USER_REGISTER_DAYS;
+            
+            String notifyText = localeTemplateService.getLocaleTemplateString(user.getNamespaceId(),scope, code, user.getLocale(), map, "");
+            info.setRegisterDaysDesc(notifyText);
+			
+		}
+		if(user.getCommunityId()!=null){
+			Community community = communityProvider.findCommunityById(user.getCommunityId());
+			if(community != null){
+				info.setRegionId(community.getCityId());
+				Region region = regionProvider.findRegionById(community.getCityId());
+				if(region != null){
+					info.setRegionName(region.getName());
+					info.setRegionPath(region.getPath());
+				}
+				info.setCommunityName(community.getName());
+				info.setCommunityType(community.getCommunityType());
+			}
+		}
+		if(user.getBirthday() != null) {
+			info.setBirthday(new SimpleDateFormat("yyyy-MM-dd").format(user.getBirthday()));
+		}
+
+		if(user.getHomeTown() != null) {
+			Category category = this.categoryProvider.findCategoryById(user.getHomeTown());
+			if(category != null)
+				info.setHometownName(category.getName());
+		}
+		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
+		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
+				.map((r) -> { return r.getIdentifierToken(); })
+				.collect(Collectors.toList());
+		info.setPhones(phones);
+
+		List<String> emails = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL; })
+				.map((r) -> { return r.getIdentifierToken(); })
+				.collect(Collectors.toList());
+		info.setEmails(emails);
+
+		// 用户当前选择的实体（可能有小区、家庭、机构）
+		List<UserCurrentEntity> entityList = listUserCurrentEntity(user.getId());
+		if(entityList.size() > 0) {
+			info.setEntityList(entityList);
+		}
+
+		GetUserTreasureCommand cmd = new GetUserTreasureCommand();
+		cmd.setUid(user.getId());
+		GetUserTreasureResponse treasure = userPointService.getUserTreasure(cmd);
+		if(treasure != null){
+			BeanUtils.copyProperties(treasure, info);
+		}
+		return info;
+	}
+
+	@Override
+	public void setUserInfo(SetUserInfoCommand cmd) {
+		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
+
+		user.setAvatar(cmd.getAvatarUri());
+		String birthdayString = cmd.getBirthday();
+		if(StringUtils.isNotEmpty(birthdayString)) {
+			try {
+				SimpleDateFormat fromat = new SimpleDateFormat("yyyy-MM-dd");
+				user.setBirthday(new java.sql.Date(fromat.parse(birthdayString).getTime()));
+			} catch (Exception e) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"Invalid birthday paramter");
+			}
+		}
+
+		user.setCompany(cmd.getCompany());
+		user.setSchool(cmd.getSchool());
+		user.setHomeTown(cmd.getHomeTown());
+		user.setStatusLine(cmd.getStatusLine());
+		user.setNickName(cmd.getNickName());
+		user.setGender(cmd.getGender());
+		user.setOccupation(cmd.getOccupation());
+
+		this.userProvider.updateUser(user);
+	}
+
+	@Override
+	public void setUserAccountInfo(SetUserAccountInfoCommand cmd) {
+		if(cmd.getAccountName() == null || cmd.getAccountName().isEmpty() ||
+				cmd.getPassword() == null || cmd.getPassword().isEmpty())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"accountName and password can not be empty");
+
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SETUP_ACCOUNT_NAME.getCode()).enter(()->{
+			User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
+			User userOther = this.userProvider.findUserByAccountName(cmd.getAccountName());
+			if(userOther != null && userOther.getId() != user.getId())
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NAME_ALREADY_EXISTS,
+						"accountName is already used by others");
+
+			user.setAccountName(cmd.getAccountName());
+			String salt=EncryptionUtils.createRandomSalt();
+			user.setSalt(salt);
+			user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",cmd.getPassword(),salt)));
+			this.userProvider.updateUser(user);
+
+			return null;
+		});
+	}
+
+	@Override
+	public CommunityDTO setUserCurrentCommunity(long communityId) {
+		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
+		user.setCommunityId(communityId);
+		this.userProvider.updateUser(user);
+
+		updateUserCurrentCommunityToProfile(user.getId(), communityId, user.getNamespaceId());
+
+		Community community = this.communityProvider.findCommunityById(communityId);
+		if(community != null) {
+			return ConvertHelper.convert(community, CommunityDTO.class);
+		} else {
+			return null;
+		}
+	}
+    
+	/**
+	 * 当用户从不同版的APP登录进来时，若之前没有选中的园区，则默认设置一个
+	 * @return 选中的园区ID
+	 */
+	@Override
+    public Long setDefaultCommunity(Long userId, Integer namespaceId) {
+		//不能从UserContext获取，应该由外面传入 by sfyan 20160601
+//      User user = UserContext.current().getUser();
+        Long communityId = 0L;
+        
+        try {
+            List<UserCurrentEntity> entityList = listUserCurrentEntity(userId);
+            if(!containPartnerCommunity(namespaceId, entityList)) {
+                List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+                if(resources != null && resources.size() == 1) {
+                    communityId = resources.get(0).getResourceId();
+                    updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
+                    if(LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Set default community, userId=" + userId + ", communityId=" + communityId 
+                            + ", namespaceId=" + namespaceId);
+                    }
+                } else {
+                    if(LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Community not found, ignore to set default community, userId=" + userId  
+                            + ", namespaceId=" + namespaceId);
+                    }
+                }
+            }
+        } catch(Exception e) {
+            LOGGER.error("Failed to set default community, userId=" + userId + ", namespaceId=" + namespaceId);
+        }
+        
+        return communityId;
+    }
+    
+    private boolean containPartnerCommunity(Integer namespaceId, List<UserCurrentEntity> entityList) {
+        if(entityList == null || entityList.size() == 0) {
+            return false;
+        }
+        
+        boolean isFound = false;
+        for(UserCurrentEntity entity : entityList) {
+            UserCurrentEntityType type = UserCurrentEntityType.fromCode(entity.getEntityType());
+            if(namespaceId.equals(entity.getNamespaceId()) 
+                && (type == UserCurrentEntityType.COMMUNITY_COMMERCIAL || type == UserCurrentEntityType.COMMUNITY 
+                || type == UserCurrentEntityType.COMMUNITY_RESIDENTIAL)) {
+                isFound = true;
+                break;
+            }
+        }
+        
+        return isFound;
+    }
+
+	@Override
+	public void updateUserCurrentCommunityToProfile(Long userId, Long communityId, Integer namespaceId) {
+		Community community = this.communityProvider.findCommunityById(communityId);
+		if(community != null) {
+			String key = UserCurrentEntityType.COMMUNITY_RESIDENTIAL.getUserProfileKey();
+			if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+				key = UserCurrentEntityType.COMMUNITY_COMMERCIAL.getUserProfileKey();
+			}
+			long timestemp = DateHelper.currentGMTTime().getTime();
+			userActivityProvider.updateUserCurrentEntityProfile(userId, key, communityId, timestemp, namespaceId);
+		}
+	}
+
+	@Override
+	public List<UserIdentifierDTO> listUserIdentifiers() {
+		long uid = UserContext.current().getUser().getId();
+		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(uid);
+
+		return identifiers.stream().map((r) -> { return ConvertHelper.convert(r, UserIdentifierDTO.class); })
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void deleteUserIdentifier(long identifierId) {
+		User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
+		long uid = user.getId();
+
+		UserIdentifier identifier = this.userProvider.findIdentifierById(identifierId);
+		if(identifier == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Could not find the identifier");
+
+		if(identifier.getOwnerUid() != uid)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+					"Access denied");
+
+		if(user.getPasswordHash() == null || user.getPasswordHash().isEmpty())
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_ACCOUNT_PASSWORD_NOT_SET,
+					"Account password has not been properly setup yet");
+
+		this.userProvider.deleteIdentifier(identifier);
+	}
+
+	@Override
+	public void resendVerficationCode(UserIdentifier userIdentifier) {
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		userIdentifier.setVerificationCode(verificationCode);
+		this.userProvider.updateIdentifier(userIdentifier);
+
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
+		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
+		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
+		sendVerificationCodeSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(),verificationCode);
+		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		this.userProvider.updateIdentifier(userIdentifier);
+	}
+
+	@Override
+	public UserInvitationsDTO createInvatation(CreateInvitationCommand cmd) {
+		// validate
+		assert cmd.getInviteType()!=null;
+		assert StringUtils.isNotEmpty(cmd.getTargetEntityType());
+		User user = UserContext.current().getUser();
+		List<UserIdentifier> indentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+		if(CollectionUtils.isEmpty(indentifiers)){
+			LOGGER.error("cannot find user");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
+		}
+		ClaimedAddressInfo address=null;
+		try{
+			ClaimAddressCommand claimCmd=new ClaimAddressCommand();
+			claimCmd.setApartmentName(cmd.getAptNumber());
+			claimCmd.setBuildingName(cmd.getBuildingNum());
+			claimCmd.setCommunityId(cmd.getCommunityId());
+			address = addressService.claimAddress(claimCmd);
+		}catch(Exception e){
+			//TODO
+			//skip all exception
+
+		}
+
+		//get enum type
+		InvitationType inviteTye = InvitationType.fromCode(cmd.getInviteType());
+		EntityType entityType=EntityType.fromCode(cmd.getTargetEntityType());
+
+		UserInvitation invitations = new UserInvitation();
+		invitations.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		// current count
+		invitations.setCurrentInviteCount(0);
+
+		invitations.setOwnerUid(user.getId());
+		if(address!=null){
+			invitations.setMaxInviteCount(1);
+		}else{
+			invitations.setMaxInviteCount(0);
+		}
+		invitations.setCurrentInviteCount(0);
+		invitations.setInviteType(inviteTye.getCode());
+		invitations.setTargetEntityId(cmd.getTargetEntityId());
+		invitations.setTargetEntityType(entityType.getCode());
+		invitations.setStatus(InvitationStatus.active.getCode());
+		int maxTryCount = 2; 
+		int tryCountPerTime = 3; 
+		for(int index=0;index<maxTryCount;index++){
+			for(int rindex=0;rindex<tryCountPerTime;rindex++){
+				try{
+					tryGenerateInvitation(indentifiers.get(0).getIdentifierToken(),invitations);
+					//send notify
+					sendNotify(user.getId(),"");
+					return ConvertHelper.convert(invitations, UserInvitationsDTO.class);
+				}catch(Exception e){
+					LOGGER.error("create invitation code failed,retry",e);
+				}
+				try{
+					//sleep for while
+					Thread.sleep(200);
+				}catch(Exception e){
+
+				}
+			}
+		}
+		LOGGER.error("cannot create invitation code");
+		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVITATION_CODE, "invitation code create failed");
+	}
+
+	private void sendNotify(Long uid,String message){
+		//TODO
+	}
+
+	private void tryGenerateInvitation(String indentifier,UserInvitation invitations){
+		long expirationTime=configurationProvider.getLongValue(EXPIRE_TIME, 4320);
+		String inviteCode=EncryptionUtils.genInviteCodeByIdentifier(indentifier);
+		invitations.setExpiration(new Timestamp(DateHelper.currentGMTTime().getTime() + 60 * 1000 * expirationTime));
+		invitations.setInviteCode(inviteCode);
+		this.userProvider.createInvitation(invitations);
+	}
+
+	@Override
+	public void assumePortalRole(AssumePortalRoleCommand cmd) {
+		if(cmd.getRoleId() == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter, roleId could not be empty");
+
+		Role role = this.aclProvider.getRoleById(cmd.getRoleId().longValue());
+		if(role == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter, roleId should be a valid one");
+
+		PortalRoleResolver resolver = PlatformContext.getComponent(PortalRoleResolver.PORTAL_ROLE_RESOLVER_PREFIX + role.getAppId());
+		if(resolver == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find portal role resolver");
+
+		resolver.assumePortalRole(cmd.getRoleId());
+
+		// if there is no exception, save it into the login
+		UserLogin login = UserContext.current().getLogin();
+		login.setPortalRole(cmd.getRoleId());
+		this.saveLogin(login);
+	}
+
+	@Override
+	public long getNextStoreSequence(UserLogin login, int namespaceId, long appId) {
+		String msgBoxKey = UserMessageRoutingHandler.getMessageBoxKey(login, namespaceId, appId);
+		return this.messageBoxProvider.allocBoxSequence(msgBoxKey);
+	}
+
+	@Override
+	public User findUserByIndentifier(Integer namespaceId, String indentifierToken) {
+		UserIdentifier userIndentifier = userProvider.findClaimedIdentifierByToken(namespaceId, indentifierToken);
+		if(userIndentifier==null){
+			return null;
+		}
+		return userProvider.findUserById(userIndentifier.getOwnerUid());
+	}
+
+	@Override
+	public UserInfo getUserInfo(Long uid) {
+		if(uid==null){
+			LOGGER.error("invalid uid,cannot null");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "uid cannot be null");
+		}
+		User user=UserContext.current().getUser();
+		if(user.getId().longValue()==uid.longValue()){
+			return getUserInfo();
+		}
+		User queryUser=userProvider.findUserById(uid);
+		if(queryUser==null){
+			LOGGER.error("cannot find user any information.uid={}",uid);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user information");
+		}
+		List<FamilyDTO> currentUserFamilies=familyProvider.getUserFamiliesByUserId(user.getId());
+		List<FamilyDTO> queryUserFamilies=familyProvider.getUserFamiliesByUserId(queryUser.getId());
+		if(CollectionUtils.isEmpty(currentUserFamilies)){
+			LOGGER.error("cannot find any family information");
+			return null;
+		}
+		LOGGER.info("Find current user family {},query user family {}",currentUserFamilies,queryUserFamilies);
+		//if have same family ,the result >0
+		List<Long> queryUserFamilyIds = queryUserFamilies.stream().map(r -> {
+			Long id = r.getId();
+			return id;
+		}).collect(Collectors.toList());
+		List<FamilyDTO> currUserFamilies = new ArrayList<FamilyDTO>();
+		for(FamilyDTO family:currentUserFamilies){
+
+			if(queryUserFamilyIds.contains(family.getId()))
+				currUserFamilies.add(family);
+		}
+		//        currentUserFamilies.retainAll(queryUserFamilies);
+		if(CollectionUtils.isEmpty(currUserFamilies)){
+			LOGGER.error("cannot find user information ,because the current user and to lookup user in diff family.current_uid={},uid={}",user.getId(),uid);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PERMISSION, "permission denied");
+		}
+		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
+		// 把用户头像的处理独立到一个方法中 by lqs 20151211
+		populateUserAvatar(info, queryUser.getAvatar());
+//		info.setAvatarUri(queryUser.getAvatar());
+//		try{
+//			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
+//			info.setAvatarUrl(url);
+//		}catch(Exception e){
+//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatarUri());
+//		}
+		if(queryUser.getCommunityId()!=null){
+			Community community = communityProvider.findCommunityById(queryUser.getCommunityId());
+			if(community!=null){
+				info.setRegionId(community.getCityId());
+				Region region = regionProvider.findRegionById(community.getCityId());
+				if(region!=null){
+					info.setRegionName(region.getName());
+					info.setRegionPath(region.getPath());
+				}
+				info.setCommunityName(community.getName());
+			}
+		}
+
+		if(queryUser.getBirthday() != null) {
+			info.setBirthday(new SimpleDateFormat("yyyy-MM-dd").format(queryUser.getBirthday()));
+		}
+		if(queryUser.getHomeTown() != null) {
+			Category category = this.categoryProvider.findCategoryById(queryUser.getHomeTown());
+			if(category != null)
+				info.setHometownName(category.getName());
+		}
+		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(queryUser.getId());
+		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
+				.map((r) -> { return r.getIdentifierToken(); })
+				.collect(Collectors.toList());
+		info.setPhones(phones);
+		List<String> emails = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL; })
+				.map((r) -> { return r.getIdentifierToken(); })
+				.collect(Collectors.toList());
+		info.setEmails(emails);
+
+		// 用户当前选择的实体（可能有小区、家庭、机构）
+		List<UserCurrentEntity> entityList = listUserCurrentEntity(user.getId());
+		if(entityList.size() > 0) {
+			info.setEntityList(entityList);
+		}
+
+		return info;
+	}
+
+	private UserInfo getUserBasicInfoByQueryUser(User queryUser, boolean hideMobile) {
+		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
+		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(queryUser.getId());
+		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
+				.map((r) -> {
+					if(hideMobile) {
+						String token=r.getIdentifierToken();
+						String prefix=token.substring(0, 3);
+						String end=token.substring(token.length()-4, token.length());
+						//replace phone number with ****
+						return String.format("%s%s%s", prefix,"****",end);      
+					} else {
+						return r.getIdentifierToken();
+					}
+
+				})
+				.collect(Collectors.toList());
+		info.setPhones(phones);
+
+		List<String> emails = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL; })
+				.map((r) -> { return r.getIdentifierToken(); })
+				.collect(Collectors.toList());
+		info.setEmails(emails);
+		if(queryUser.getBirthday() != null)
+			info.setBirthday(new SimpleDateFormat("yyyy-MM-dd").format(queryUser.getBirthday()));
+		if(queryUser.getCommunityId()!=null){
+			Community community = communityProvider.findCommunityById(queryUser.getCommunityId());
+			if(community!=null){
+				info.setRegionId(community.getCityId());
+				Region region = regionProvider.findRegionById(community.getCityId());
+				if(region!=null){
+					info.setRegionName(region.getName());
+					info.setRegionPath(region.getPath());
+				}
+				info.setCommunityName(community.getName());
+			}
+		}
+        // 把用户头像的处理独立到一个方法中 by lqs 20151211
+        populateUserAvatar(info, queryUser.getAvatar());
+//		info.setAvatarUri(queryUser.getAvatar());
+//		try{
+//			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
+//			info.setAvatarUrl(url);
+//		}catch(Exception e){
+//			LOGGER.info("getUserBasicInfo error: " + e.getMessage());
+//		}
+		return info;
+	}
+	
+	private void populateUserAvatar(UserInfo user, String avatarUri) {
+	    if(avatarUri == null || avatarUri.trim().length() == 0) {
+	        avatarUri = getUserAvatarUriByGender(user.getId(), user.getNamespaceId(), user.getGender());
+	    }
+        user.setAvatarUri(avatarUri);
+	    try{
+            String url=contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId());
+            user.setAvatarUrl(url);
+        }catch(Exception e){
+            LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri);
+        }
+	}
+	@Override
+	public String getUserAvatarUriByGender(Long userId, Integer namespaceId, Byte gener) {
+	    UserGender userGender = UserGender.fromCode(gener);
+	    if(userGender == null) {
+	        userGender = UserGender.UNDISCLOSURED;
+	    }
+	    
+	    String avatarUri = null;
+	    switch(userGender) {
+	    case MALE:
+	        avatarUri = configurationProvider.getValue(namespaceId, "user.avatar.male.url", "");
+	        break;
+	    case FEMALE:
+	        avatarUri = configurationProvider.getValue(namespaceId, "user.avatar.female.url", "");
+	        break;
+	    default:
+            avatarUri = configurationProvider.getValue(namespaceId, "user.avatar.undisclosured.url", "");
+	        break;
+	    }
+	    
+	    if(LOGGER.isDebugEnabled()) {
+	        LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId 
+	            + ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
+	    }
+	    
+	    return avatarUri;
+	}
+
+	private UserInfo getUserBasicInfo(Long uid, boolean hideMobile) {
+		assert(uid != null);
+		User user=UserContext.current().getUser();
+		if(user.getId().longValue() == uid.longValue()){
+			return getUserInfo();
+		}
+
+		User queryUser = userProvider.findUserById(uid);
+		if(queryUser == null){
+			return null;
+		}
+
+		return getUserBasicInfoByQueryUser(queryUser, hideMobile);
+	}
+
+	@Override
+	public UserInfo getUserBasicByUuid(String uuid) {
+		User queryUser = userProvider.findUserByUuid(uuid);
+		if(queryUser == null){
+			return null;
+		}
+		return getUserBasicInfoByQueryUser(queryUser, false);
+	}
+
+	@Override
+	public UserInfo getUserSnapshotInfo(Long uid) {
+		return getUserBasicInfo(uid, true);
+	}
+
+	@Override
+	public UserInfo getUserSnapshotInfoWithPhone(Long uid) {
+		return getUserBasicInfo(uid, false);
+	}
+
+	@Override
+	public List<ListUsersWithAddrResponse> listUsersWithAddr(ListUsersWithAddrCommand cmd) {
+
+
+		ListAllFamilyMembersAdminCommand familycmd = new ListAllFamilyMembersAdminCommand();
+		familycmd.setPageOffset(cmd.getPageOffset());
+		familycmd.setPageSize(cmd.getPageSize());
+		ListAllFamilyMembersCommandResponse response = familyService.listAllFamilyMembers(familycmd);
+		List<ListUsersWithAddrResponse> results = new ArrayList<ListUsersWithAddrResponse>();
+
+		if(response != null){
+
+			response.getRequests().forEach(r ->{
+				ListUsersWithAddrResponse usersWithAddr = new ListUsersWithAddrResponse();
+				usersWithAddr.setFamilyName(r.getFamilyName());
+				usersWithAddr.setCommunityName(r.getCommunityName());
+				usersWithAddr.setApartmentName(r.getApartmentName());
+				usersWithAddr.setAreaName(r.getAreaName());
+				usersWithAddr.setBuildingName(r.getBuildingName());
+				usersWithAddr.setCityName(r.getCityName());
+				usersWithAddr.setCellPhone(r.getCellPhone());
+				usersWithAddr.setAddressStatus(r.getAddressStatus());
+				usersWithAddr.setApartmentStatus(r.getMembershipStatus());
+				usersWithAddr.setNickName(r.getMemberNickName());
+				usersWithAddr.setCellPhoneNumberLocation(r.getCellPhone());
+				usersWithAddr.setCreateTime(r.getCreateTime());
+				usersWithAddr.setId(r.getId());
+
+				results.add(usersWithAddr);
+			});
+
+
+		}
+
+		return results;
+	}
+	@Override
+	public UsersWithAddrResponse searchUsersWithAddr(
+			SearchUsersWithAddrCommand cmd) {
+
+		ListAllFamilyMembersAdminCommand familycmd = new ListAllFamilyMembersAdminCommand();
+		familycmd.setPageOffset(cmd.getPageOffset());
+		familycmd.setPageSize(cmd.getPageSize());
+		ListAllFamilyMembersCommandResponse response = familyService.listAllFamilyMembers(familycmd);
+		List<FamilyMemberFullDTO> familyResults = response.getRequests();
+
+		String nickName = cmd.getNickName();
+		String cellPhone = cmd.getCellPhone();
+		List<ListUsersWithAddrResponse> results = new ArrayList<ListUsersWithAddrResponse>();
+
+		if(response != null){
+			for(FamilyMemberFullDTO member : familyResults){
+				if((nickName == null || "".equals(nickName) || nickName == member.getMemberNickName() || nickName.equals(member.getMemberNickName())) &&
+						(cellPhone == null || "".equals(cellPhone) ||cellPhone == member.getCellPhone() || cellPhone.equals(member.getCellPhone()))){
+					ListUsersWithAddrResponse usersWithAddr = new ListUsersWithAddrResponse();
+					usersWithAddr.setFamilyName(member.getFamilyName());
+					usersWithAddr.setCommunityName(member.getCommunityName());
+					usersWithAddr.setApartmentName(member.getApartmentName());
+					usersWithAddr.setAreaName(member.getAreaName());
+					usersWithAddr.setBuildingName(member.getBuildingName());
+					usersWithAddr.setCityName(member.getCityName());
+					usersWithAddr.setCellPhone(member.getCellPhone());
+					usersWithAddr.setAddressStatus(member.getAddressStatus());
+					usersWithAddr.setApartmentStatus(member.getMembershipStatus());
+					usersWithAddr.setNickName(member.getMemberNickName());
+					usersWithAddr.setCellPhoneNumberLocation(member.getCellPhone());
+					usersWithAddr.setCreateTime(member.getCreateTime());
+					usersWithAddr.setId(member.getId());
+
+					results.add(usersWithAddr);
+				}
+			}
+
+		}
+
+		UsersWithAddrResponse users = new UsersWithAddrResponse();
+		users.setUsers(results);
+		users.setNextPageOffset(response.getNextPageOffset());
+		return users;
+	}
+	@Override
+	public ListInvitatedUserResponse listInvitatedUser(
+			ListInvitatedUserCommand cmd) {
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+		locator.setAnchor(cmd.getAnchor()==null?0L:cmd.getAnchor());
+		if(cmd.getPageSize()==null){
+			int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+			cmd.setPageSize(value);
+		}
+		List<InvitatedUsers> result = new ArrayList<InvitatedUsers>();
+		List<InvitationRoster> invitationRoster = userProvider.listInvitationRostor(locator, cmd.getPageSize(), null);
+
+		invitationRoster.forEach(r ->{
+			InvitatedUsers invitatedUsers = new InvitatedUsers();
+			invitatedUsers.setUserNickName(r.getUserNickName());
+			invitatedUsers.setInviteType(r.getInviteType());
+			invitatedUsers.setRegisterTime(r.getRegTime());
+
+			List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getUid());
+			if(userIdentifiers != null && userIdentifiers.size() != 0)
+				invitatedUsers.setUserCellPhone(userIdentifiers.get(0).getIdentifierToken());
+
+			List<UserIdentifier> inviterIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getInviterId());
+			if(inviterIdentifiers != null && inviterIdentifiers.size() != 0)
+				invitatedUsers.setInviterCellPhone(inviterIdentifiers.get(0).getIdentifierToken());
+			User inviter = this.userProvider.findUserById(r.getInviterId());
+			if(inviter != null)
+				invitatedUsers.setInviter(inviter.getNickName());
+
+			result.add(invitatedUsers);
+
+		});
+		ListInvitatedUserResponse response = new ListInvitatedUserResponse();
+		response.setInvitatedUsers(result);
+		if(result.size()<cmd.getPageSize()){
+			response.setNextPageAnchor(null);
+		}else{
+			response.setNextPageAnchor(locator.getAnchor());
+		}
+		return response;
+	}
+	@Override
+	public ListInvitatedUserResponse searchInvitatedUser(
+			SearchInvitatedUserCommand cmd) {
+
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor()==null?0L:cmd.getPageAnchor());
+		if(cmd.getPageSize()==null){
+			int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+			cmd.setPageSize(value);
+		}
+		List<InvitatedUsers> result = new ArrayList<InvitatedUsers>();
+		List<InvitationRoster> invitationRoster = userProvider.listInvitationRostor(locator, cmd.getPageSize(), null);
+		String userPhone = cmd.getUserPhone();
+		String inviterPhone = cmd.getInviterPhone();
+
+		invitationRoster.forEach(r ->{
+			InvitatedUsers invitatedUsers = new InvitatedUsers();
+
+			List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getUid());
+			if(userIdentifiers != null && userIdentifiers.size() != 0)
+				invitatedUsers.setUserCellPhone(userIdentifiers.get(0).getIdentifierToken());
+
+			List<UserIdentifier> inviterIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getInviterId());
+			if(inviterIdentifiers != null && inviterIdentifiers.size() != 0)
+				invitatedUsers.setInviterCellPhone(inviterIdentifiers.get(0).getIdentifierToken());
+			User inviter = this.userProvider.findUserById(r.getInviterId());
+			if(inviter != null)
+				invitatedUsers.setInviter(inviter.getNickName());
+
+			if((userPhone == null || "".equals(userPhone) || userPhone == invitatedUsers.getUserCellPhone() || userPhone.equals(invitatedUsers.getUserCellPhone()))
+					&& (inviterPhone == null || "".equals(inviterPhone) || inviterPhone == invitatedUsers.getInviterCellPhone() ||inviterPhone.equals(invitatedUsers.getInviterCellPhone()))){
+				invitatedUsers.setUserNickName(r.getUserNickName());
+				invitatedUsers.setInviteType(r.getInviteType());
+				invitatedUsers.setRegisterTime(r.getRegTime());
+				invitatedUsers.setUserId(r.getUid());
+				invitatedUsers.setInviterId(r.getInviterId());
+
+				result.add(invitatedUsers);
+			}
+
+		});
+		ListInvitatedUserResponse response = new ListInvitatedUserResponse();
+		response.setInvitatedUsers(result);
+		if(result.size()<cmd.getPageSize()){
+			response.setNextPageAnchor(null);
+		}else{
+			response.setNextPageAnchor(locator.getAnchor());
+		}
+		return response;
+	}
+	@Override
+	public GetSignatureCommandResponse getSignature() {
+		User user = UserContext.current().getUser();
+		return this.produceSignature(user);
+	}
+
+	private GetSignatureCommandResponse produceSignature(User user) {
+		Long userId = user.getId();
+		String name = user.getNickName();
+		String appKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
+		Long timeStamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("id", userId+"");
+		map.put("name", name);
+		map.put("appKey", appKey+"");
+		map.put("timeStamp", timeStamp+"");
+		map.put("randomNum", randomNum+"");
+		long s = System.currentTimeMillis();
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		long e = System.currentTimeMillis();
+		LOGGER.debug("getBizSignature-elapse2="+(e-s));
+		GetSignatureCommandResponse result = new GetSignatureCommandResponse();
+		result.setId(userId);
+		result.setName(name);
+		result.setAppKey(appKey);
+		result.setTimeStamp(timeStamp);
+		result.setRandomNum(randomNum);
+		result.setSignature(signature);
+		return result;
+	}
+
+	@Override
+	public List<UserCurrentEntity> listUserCurrentEntity(Long userId) {
+		List<UserCurrentEntity> entityList = new ArrayList<UserCurrentEntity>();
+
+		for(UserCurrentEntityType type : UserCurrentEntityType.values()) {
+			UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, type.getUserProfileKey());
+			if(profile != null) {
+				UserCurrentEntity entity = new UserCurrentEntity();
+				entity.setEntityType(type.getCode());
+				entity.setEntityId(profile.getItemValue());
+				entity.setTimestamp(profile.getIntegralTag1());
+				Long namespaceId = profile.getIntegralTag2();
+				if(namespaceId != null) {
+				    entity.setNamespaceId((int)namespaceId.longValue());
+				} else {
+				    entity.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+				}
+
+				entityList.add(entity);
+
+				String entityId = entity.getEntityId();
+				if(entityId != null && entityId.length() > 0) {
+					try {
+						Long id = Long.parseLong(entityId);
+						switch(type) {
+						case COMMUNITY_COMMERCIAL:
+						case COMMUNITY_RESIDENTIAL:
+							Community community = communityProvider.findCommunityById(id);
+							if(community != null) {
+								entity.setEntityName(community.getName());
+							} else {
+								LOGGER.error("Community not found, userId=" + userId + ", communityId=" + id + ", type=" + type);
+							}
+							break;
+						case FAMILY:
+							FamilyDTO family = familyProvider.getFamilyById(id);
+							if(family != null) {
+								entity.setEntityName(family.getName());
+							} else {
+								LOGGER.error("Family not found, userId=" + userId + ", familyId=" + id + ", type=" + type);
+							}
+							break;
+						case ORGANIZATION:
+							Organization organization = organizationProvider.findOrganizationById(id);
+							if(organization != null) {
+								entity.setEntityName(organization.getName());
+								if(organization.getDirectlyEnterpriseId() != null && organization.getDirectlyEnterpriseId() != 0) {
+									entity.setDirectlyEnterpriseId(organization.getDirectlyEnterpriseId());
+								} else {
+									entity.setDirectlyEnterpriseId(organization.getId());
+								}
+									
+							} else {
+								LOGGER.error("Organization not found, userId=" + userId + ", organizationId=" + id + ", type=" + type);
+							}
+							break;
+						case ENTERPRISE:
+							Enterprise enterprise = enterpriseProvider.findEnterpriseById(id);
+							if(enterprise != null) {
+								entity.setEntityName(enterprise.getName());
+							} else {
+								LOGGER.error("Enterprise not found, userId=" + userId + ", enterpriseId=" + id + ", type=" + type);
+							}
+							break;
+						}
+					} catch (Exception e) {
+						LOGGER.error("Invalid entity id, userId=" + userId + ", entity=" + entity);
+					}
+				}
+			}
+		}
+
+		return entityList;
+	}
+	@Override
+	public UserLogin synThridUser(SynThridUserCommand cmd) {
+		User user = this.checkThirdUserIsExist(cmd.getNamespaceId(), cmd.getNamespaceUserToken(), false);
+		if(user == null){
+			user = new User();
+			user.setNickName(cmd.getUserName()==null?cmd.getNamespaceUserToken():cmd.getUserName());
+			user.setStatus(UserStatus.ACTIVE.getCode());
+			user.setPoints(0);
+			user.setLevel((byte)1);
+			user.setGender((byte)1);
+			user.setNamespaceId(cmd.getNamespaceId());
+			user.setNamespaceUserToken(cmd.getNamespaceUserToken());;
+			userProvider.createUser(user);
+		}
+
+		//UserLogin login = createLogin(Namespace.DEFAULT_NAMESPACE, user, cmd.getSiteUri());
+		UserLogin login = createLogin(cmd.getNamespaceId(), user, cmd.getDeviceIdentifier()==null?"":cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+		login.setStatus(UserLoginStatus.LOGGED_IN);
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("synThridUser-UserLogin="+StringHelper.toJsonString(login));
+		}
+
+		return login;
+	}
+
+	private User checkThirdUserIsExist(Integer namespaceId, String namespaceUserToken, boolean isThrowExcep) {
+		User user = this.userProvider.findUserByNamespace(namespaceId, namespaceUserToken);
+		if(user != null){
+			LOGGER.error("user is exist.could not add.id="+user.getId()+", namespaceId=" + namespaceId
+			    + ", namespaceUserToken=" + namespaceUserToken);
+			if(isThrowExcep){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"user is exist,could not add.");
+			}
+		}
+		return user;
+	}
+
+	private void checkIsNull(SynThridUserCommand cmd) {
+		if(cmd.getRandomNum() == null || cmd.getRandomNum().equals("")){
+			LOGGER.error("randomNum not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"randomNum not be null");
+		}
+		if(cmd.getTimestamp() == null || cmd.getTimestamp().equals("")){
+			LOGGER.error("timestamp not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"timestamp not be null");
+		}
+		if(cmd.getNamespaceUserToken() == null || cmd.getNamespaceUserToken().equals("")){
+			LOGGER.error("siteUserToken not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"siteUserToken not be null");
+		}
+		if(cmd.getNamespaceId() == null){
+			LOGGER.error("Namespace is null, namespaceId=" + cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Namespace is null");
+		}
+	}
+	
+	@Override
+	public GetSignatureCommandResponse getThirdSignature(GetBizSignatureCommand cmd) {
+		if(cmd.getNamespaceId() == null){
+			LOGGER.error("Namespace is null, namespaceId=" + cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Namespace is null");
+		}
+		if(cmd.getNamespaceUserToken() == null || cmd.getNamespaceUserToken().equals("")){
+			LOGGER.error("Namespace user token is null, token=" + cmd.getNamespaceUserToken());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"siteUserToken not be null");
+		}
+
+		User user = this.checkThirdUserIsExist(cmd.getNamespaceId(),cmd.getNamespaceUserToken(),true);
+		return this.produceSignature(user);
+	}
+	
+	@Override
+	public UserInfo getUserInfoById(GetUserInfoByIdCommand cmd) {
+		this.checkIsNull(cmd);
+		this.checkSign(cmd);
+		User queryUser = userProvider.findUserById(cmd.getId());
+		if(queryUser == null){
+			return null;
+		}
+		return getUserBasicInfoByQueryUser(queryUser, false);
+	}
+	
+	private void checkSign(GetUserInfoByIdCommand cmd) {
+		String appKey = cmd.getZlAppKey();
+		App app = appProvider.findAppByKey(appKey);
+		if(app==null){
+			LOGGER.error("app not found.appKey="+appKey);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"app not found.");
+		}
+		String signature = cmd.getZlSignature();
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey", appKey);
+		map.put("id", cmd.getId()+"");
+		map.put("name", cmd.getName());
+		map.put("randomNum", cmd.getRandomNum()+"");
+		map.put("timeStamp", cmd.getTimeStamp()+"");
+		String nsignature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		if(!nsignature.equals(signature)){
+			LOGGER.error("check signature fail.nsign="+nsignature+",sign="+signature);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"check signature fail.");
+		}
+	}
+	private void checkIsNull(GetUserInfoByIdCommand cmd) {
+		if(StringUtils.isBlank(cmd.getZlSignature())||StringUtils.isBlank(cmd.getZlAppKey())){
+			LOGGER.error("zlSignature or zlAppKey is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"zlSignature or zlAppKey is null.");
+		}
+		if(cmd.getId()==null||StringUtils.isBlank(cmd.getName())){
+			LOGGER.error("id or name is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id or name is null.");
+		}
+		if(cmd.getRandomNum()==null||cmd.getTimeStamp()==null){
+			LOGGER.error("randomNum or timeStamp is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"randomNum or timeStamp is null.");
+		}
+	}
+	/**
+	 * 短信验证码测试接口，只有超级管理员可以调该接口来测试
+	 */
+	@Override
+	public void sendUserTestSms(SendUserTestSmsCommand cmd) {
+	    Integer namespaceId = cmd.getNamespaceId(); 
+	    String phoneNumber = cmd.getPhoneNumber();
+	    if(phoneNumber == null || phoneNumber.trim().length() == 0) {
+	        LOGGER.error("Phone number should not be empty, namespaceId=" + namespaceId + ", phoneNumber=" + phoneNumber);
+	        return;
+	    }
+	    
+	    namespaceId = (namespaceId == null) ? Namespace.DEFAULT_NAMESPACE : namespaceId;
+	    String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
+	    if("true".equalsIgnoreCase(value)) {
+	        String verificationCode = RandomGenerator.getRandomDigitalString(6);
+	        sendVerificationCodeSms(namespaceId, phoneNumber, verificationCode);
+	    }
+	}
+	
+	/**
+	 * 发邮件测试接口，只有超级管理员可以调该接口来测试
+	 */
+	@Override
+	public void sendUserTestMail(SendUserTestMailCommand cmd) {
+	    User user = UserContext.current().getUser();
+	    String from = cmd.getFrom();
+	    String to = cmd.getTo();
+	    String subject = cmd.getSubject();
+	    String body = cmd.getBody();
+	    String attachmet1 = cmd.getAttachment1();
+	    String attachmet2 = cmd.getAttachment2();
+	    List<String> attachmentList = new ArrayList<String>();
+	    if(attachmet1 != null && attachmet1.trim().length() > 0) {
+	        attachmentList.add(attachmet1);
+	    }
+	    if(attachmet2 != null && attachmet2.trim().length() > 0) {
+	        attachmentList.add(attachmet2);
+	    }
+	    
+	    String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+
+        handler.sendMail(user.getNamespaceId(), from, to, subject, body, attachmentList);
+	}
+	
+	@Override
+	public RichLinkDTO sendUserRichLinkMessage(SendUserTestRichLinkMessageCommand cmd) {
+	    RichLinkDTO linkDto = ConvertHelper.convert(cmd, RichLinkDTO.class);
+	    if(linkDto.getCoverUrl() == null && cmd.getCoverUri() != null) {
+	        String url = contentServerService.parserUri(cmd.getCoverUri(), EntityType.USER.getCode(), User.SYSTEM_UID);
+	        if(url != null) {
+	            linkDto.setCoverUrl(url);
+	        }
+	    }
+	    
+	    String targetPhone = cmd.getTargetPhone();
+	    if(targetPhone == null || targetPhone.trim().length() == 0) {
+            LOGGER.error("User not found for the phone, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "User not found for the phone");
+	    }
+	    
+	    Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getTargetNamespaceId());
+	    UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, targetPhone);
+	    if(userIdentifier == null) {
+            LOGGER.error("User not found for the phone(identifier), cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "User not found for the phone");
+	    }
+	    
+	    String targetUserId = String.valueOf(userIdentifier.getOwnerUid());
+	    MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), targetUserId));
+        messageDto.setBodyType(MessageBodyType.RICH_LINK.getCode());
+        messageDto.setBody(StringHelper.toJsonString(linkDto));
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        Map<String, String> meta = messageDto.getMeta();
+        if(meta == null) {
+            meta = new HashMap<String, String>();
+        }
+        meta.put(MessageMetaConstant.POPUP_FLAG, String.valueOf(MessagePopupFlag.POPUP.getCode()));
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+            targetUserId, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+        
+	    return linkDto;
+	}
+	
+	@Override
+	public UserLogin innerLogin(Integer namespaceId, Long userId,String deviceIdentifier, String pusherIdentify){
+		User user = userProvider.findUserById(userId);
+		if(user == null){
+			LOGGER.error("user not found.userId="+userId);
+			return null;
+		}
+		UserLogin login = createLogin(namespaceId, user, deviceIdentifier, pusherIdentify);
+		login.setStatus(UserLoginStatus.LOGGED_IN);
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("innerLogin-UserLogin="+StringHelper.toJsonString(login));
+		}
+		return login;
+	}
+	@Override
+	public List<UserInfo> listUserByKeyword(String keyword) {
+		List<UserInfo> userInfos = new ArrayList<UserInfo>();
+		List<User> users = userProvider.listUserByNickNameOrIdentifier(keyword);
+		if(users!=null&&!users.isEmpty()){
+			for(User user : users){
+				userInfos.add(getUserBasicInfoByQueryUser(user,false));
+			}
+		}
+		return userInfos;
+	}
+	@Override
+	public List<User> listUserByIdentifier(String identifier) {
+		List<User> users = new ArrayList<User>();
+		List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifierByIdentifier(identifier);
+		if(userIdentifiers!=null&&!userIdentifiers.isEmpty()){
+			for(UserIdentifier r : userIdentifiers){
+				User user = userProvider.findUserById(r.getOwnerUid());
+				if(user!=null)
+					users.add(user);
+			}
+		}
+		return users;
+	}
+	@Override
+	public List<UserInfo> listUserInfoByIdentifier(String identifier) {
+		List<UserInfo> userInfos = new ArrayList<UserInfo>();
+		List<User> users = listUserByIdentifier(identifier);
+		if(users!=null&&!users.isEmpty()){
+			for(User r : users){
+				userInfos.add(getUserBasicInfoByQueryUser(r,false));
+			}
+		}
+		return userInfos;
+	}
+	
+	@Override
+	public List<SceneDTO> listUserRelatedScenes() {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.current().getUser().getId();
+        
+	    List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+	    
+	    // 处于家庭对应的场景
+	    // 列出用户有效家庭 mod by xiongying 20160523
+	    List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
+        toFamilySceneDTO(namespaceId, userId, sceneList, familyList);
+	    
+	    // 处于某个公司对应的场景
+	    OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+	    List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+	    //toOrganizationSceneDTO(sceneList, enterpriseList);
+	    for(OrganizationDTO orgDto : organizationList) {
+	        String orgType = orgDto.getOrganizationType();
+	        // 在园区通用版和左邻小区版合并后，改为按域空间判断，0域空间不只列物业公司场景 by lqs 20160517
+	        //if(isCmntyScene) { // 小区版只列物业公司的场景，园区版则列所有公司的场景  by lqs 20160510
+//	        if(OrganizationType.isGovAgencyOrganization(orgType)) {
+//	            SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, SceneType.PM_ADMIN);
+//	            if(sceneDto != null) {
+//	                sceneList.add(sceneDto);
+//	            }
+//	        } else {
+//	            if(LOGGER.isDebugEnabled()) {
+//	                LOGGER.debug("Ignore the organization for it is not govagency type, userId=" + userId 
+//	                    + ", organizationId=" + orgDto.getId() + ", orgType=" + orgType);
+//	            }
+//	        } else {
+//                SceneType sceneType = SceneType.PARK_PM_ADMIN;
+//                if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+//                    if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
+//                        sceneType = SceneType.PARK_ENTERPRISE;
+//                    } else {
+//                        sceneType = SceneType.PARK_ENTERPRISE_NOAUTH;
+//                    }
+//                }
+//                SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+//                if(sceneDto != null) {
+//                    sceneList.add(sceneDto);
+//                }
+//	        }
+	        SceneType sceneType = SceneType.PM_ADMIN;
+            if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+                if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
+                    sceneType = SceneType.ENTERPRISE;
+                } else {
+                    sceneType = SceneType.ENTERPRISE_NOAUTH;
+                }
+            } 
+            SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+            if(sceneDto != null) {
+                sceneList.add(sceneDto);
+            }
+        }
+	    
+	    // 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+	    if(sceneList.size() == 0) {
+	        SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+	        if(communityScene != null) {
+	            sceneList.add(communityScene);
+	        }
+	    }
+	    
+	    return sceneList;
+	}
+	
+	private SceneDTO getCurrentCommunityScene(Integer namespaceId, Long userId) {
+	    SceneDTO communityScene = null;
+	    
+	    UserCurrentEntityType[] entityTypes = new UserCurrentEntityType[]{
+            UserCurrentEntityType.COMMUNITY_RESIDENTIAL, 
+            UserCurrentEntityType.COMMUNITY_COMMERCIAL, 
+            UserCurrentEntityType.COMMUNITY};
+        for(UserCurrentEntityType entityType : entityTypes) {
+            UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, entityType.getUserProfileKey());
+            if(profile != null && profile.getIntegralTag2() != null && profile.getIntegralTag2().intValue() == namespaceId.intValue()) {
+                Long communityId = null;
+                try {
+                    communityId = Long.parseLong(profile.getItemValue());
+                } catch (Exception e) {
+                    LOGGER.error("Failed to parse community id in user profile, profile={}", profile, e);
+                }
+                
+                if(communityId != null) {
+                    Community community = communityProvider.findCommunityById(communityId);
+                    if(community != null) {
+                        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+
+                        SceneType sceneType = SceneType.DEFAULT;
+                        CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+                        if(communityType == CommunityType.COMMERCIAL) {
+                            sceneType = SceneType.PARK_TOURIST;
+                        }
+
+                        communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+                    }
+                }
+                break;
+            }
+        }
+        
+        return communityScene;
+	}
+	
+	@Override
+	public void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList) {
+	    SceneDTO sceneDto = null;
+	    if(familyDtoList != null && familyDtoList.size() > 0) {
+    	    for(FamilyDTO familyDto : familyDtoList) {
+    	        sceneDto = toFamilySceneDTO(namespaceId, userId, familyDto);
+    	        if(sceneDto != null) {
+    	            sceneList.add(sceneDto);
+    	        }
+    	    }
+	    } else {
+	        if(LOGGER.isWarnEnabled()) {
+	            LOGGER.warn("No family is found for the scene, namespaceId=" + namespaceId + ", userId=" + userId);
+	        }
+	    }
+	}
+	
+	@Override
+	public SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto) {
+	    SceneDTO sceneDto = new SceneDTO();
+	    
+	    // 增加场景类型到sceneDTO中，使得客户端不需要使用EntityType来作场景 by lqs 20160510
+	    sceneDto.setSceneType(SceneType.FAMILY.getCode());
+	    
+        sceneDto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
+        StringBuffer fullName = new StringBuffer();
+        StringBuffer aliasName = new StringBuffer();
+        
+        if(!StringUtils.isEmpty(familyDto.getCityName())){
+        	fullName.append(familyDto.getCityName());
+        }
+        if(!StringUtils.isEmpty(familyDto.getAreaName())){
+        	fullName.append(familyDto.getAreaName());
+        }
+        if(!StringUtils.isEmpty(familyDto.getCommunityName())){
+            fullName.append(familyDto.getCommunityName());
+            aliasName.append(familyDto.getCommunityName());
+        }
+        if(!StringUtils.isEmpty(familyDto.getName())){
+        	fullName.append(familyDto.getName());
+        	aliasName.append(familyDto.getName());
+        }
+        sceneDto.setName(fullName.toString());
+        sceneDto.setAliasName(aliasName.toString());
+        sceneDto.setAvatar(familyDto.getAvatarUri());
+        sceneDto.setAvatarUrl(familyDto.getAvatarUrl());
+        
+        String entityContent = StringHelper.toJsonString(familyDto);
+        sceneDto.setEntityContent(entityContent);
+        
+        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, familyDto, SceneType.FAMILY);
+        String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+        sceneDto.setSceneToken(sceneToken);
+
+        return sceneDto;
+	}
+	
+	@Override
+	public SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType) {
+	    SceneTokenDTO sceneTokenDto = new SceneTokenDTO();
+        sceneTokenDto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
+        sceneTokenDto.setScene(sceneType.getCode());
+        sceneTokenDto.setEntityId(familyDto.getId());
+        sceneTokenDto.setNamespaceId(namespaceId);
+        sceneTokenDto.setUserId(userId);
+	    
+	    return sceneTokenDto;
+	}
+	
+	@Override
+	public void toOrganizationSceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, 
+	    List<OrganizationDTO> organizationDtoList, SceneType sceneType) {
+        SceneDTO sceneDto = null;
+        if(organizationDtoList != null && organizationDtoList.size() > 0) {
+            for(OrganizationDTO orgDto : organizationDtoList) {
+                sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+                if(sceneDto != null) {
+                    sceneList.add(sceneDto);
+                }
+            }
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("No family is found for the scene, namespaceId=" + namespaceId + ", userId=" + userId);
+            }
+        }
+    }
+    
+	@Override
+    public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
+        SceneDTO sceneDto = new SceneDTO();
+        
+        // 增加场景类型到sceneDTO中，使得客户端不需要使用EntityType来作场景 by lqs 20160510
+        sceneDto.setSceneType(sceneType.getCode());
+        
+        sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
+        sceneDto.setName(organizationDto.getName());
+        // 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
+        String aliasName = organizationDto.getName();
+        //if(sceneType.getCode().contains("park") && organizationDto.getCommunityName() != null) {
+        //    aliasName = organizationDto.getCommunityName();
+        //}
+        // 在园区通用版与左邻小区版合并后，只要不是物业公司，则优先显示小区/园区名称 by lqs 20160517
+        String orgType = organizationDto.getOrganizationType();
+        if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+            aliasName = organizationDto.getCommunityName();
+        }
+        sceneDto.setAliasName(aliasName);
+        sceneDto.setAvatar(organizationDto.getAvatarUri());
+        sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
+        
+        String entityContent = StringHelper.toJsonString(organizationDto);
+        sceneDto.setEntityContent(entityContent);
+        
+        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, organizationDto, sceneType);
+        String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+        sceneDto.setSceneToken(sceneToken);
+
+        return sceneDto;
+    }
+	
+//	private SceneType getOrganizationSceneType(Integer namespaceId, Long userId, OrganizationDTO organizationDto) {
+//	    boolean isCmntyScene = isCommunityScene(userId, namespaceId);
+//	    if(isCmntyScene) {
+//	        OrganizationType orgType = OrganizationType.fromCode(organizationDto.getOrganizationType());
+//	        if(orgType == OrganizationType.PM) {
+//	            
+//	        }
+//	    }
+//	}
+    
+	@Override
+    public SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
+        SceneTokenDTO sceneTokenDto = new SceneTokenDTO();
+        sceneTokenDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
+        sceneTokenDto.setScene(sceneType.getCode());
+        sceneTokenDto.setEntityId(organizationDto.getId());
+        sceneTokenDto.setNamespaceId(namespaceId);
+        sceneTokenDto.setUserId(userId);
+        
+        return sceneTokenDto;
+    }
+	
+	public GetUserRelatedAddressResponse getUserRelatedAddresses(GetUserRelatedAddressCommand cmd) {
+	    User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    
+	    checkSceneToken(userId, cmd.getSceneToken());
+	    	    
+	    GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
+	    List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+	    response.setFamilyList(familyList);
+	    
+	    OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+	    List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+	    
+	    // 把园区场景也支持之后，普通公司的地址也需要显示出来，故不过进行物业公司的过滤 by lqs 20160513
+//	    List<OrganizationDTO> organizations = new ArrayList<OrganizationDTO>();
+//	    for(OrganizationDTO orgDto : organizationList) {
+//	        String orgType = orgDto.getOrganizationType();
+//	        if(OrganizationType.isGovAgencyOrganization(orgType)) {
+//	        	organizations.add(orgDto);
+//	        } else {
+//	            if(LOGGER.isDebugEnabled()) {
+//	                LOGGER.debug("Ignore the organization for it is not govagency type, userId=" + userId 
+//	                    + ", organizationId=" + orgDto.getId() + ", orgType=" + orgType);
+//	            }
+//	        }
+//        }
+	    
+	    response.setOrganizationList(organizationList);
+	    
+	    return response;
+	}
+	
+	@Override
+	public SceneTokenDTO checkSceneToken(Long userId, String sceneToken) {
+	    SceneTokenDTO sceneTokenDto = null;
+	    
+	    try {
+	        sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(sceneToken, SceneTokenDTO.class);
+	        
+	        if(LOGGER.isDebugEnabled()) {
+	            LOGGER.debug("Parse scene token, userId={}, sceneToken={}", userId, sceneTokenDto);
+	        }
+	    } catch(Exception e) {
+	        LOGGER.error("Invalid scene token, userId=" + userId + ", sceneToken=" + sceneToken, e);
+	        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+                "Invalid scene token");
+	    }
+	    
+	    if(sceneTokenDto == null) {
+	        LOGGER.error("Scene token is null, userId=" + userId + ", sceneToken=" + sceneToken);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+                "Invalid scene token");
+	    }
+	    
+	    SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
+	    if(sceneType == null) {
+	        LOGGER.error("Scene type is null, userId=" + userId + ", sceneToken=" + sceneToken + ", sceneTokenDto=" + sceneTokenDto);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+                "Invalid scene token");
+	    }
+	    
+	    UserCurrentEntityType userEntityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
+        if(userEntityType == null) {
+            LOGGER.error("User entity type is null, userId=" + userId + ", sceneToken=" + sceneToken + ", sceneTokenDto=" + sceneTokenDto);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+                "Invalid scene token");
+        }
+	    
+	    return sceneTokenDto;
+	}
+	
+	@Override
+	public List<SceneDTO> setCurrentCommunityForScene(SetCurrentCommunityForSceneCommand cmd) {
+	    User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        
+        Long communityId = cmd.getCommunityId();
+        if(communityId == null) {
+            LOGGER.error("Community id may not be null, userId={}, namespaceId={}, cmd={}", userId, namespaceId, cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Community id may not be null");
+        }
+        
+        Community community = communityProvider.findCommunityById(communityId);
+        if(community == null) {
+            LOGGER.error("Community not found, userId={}, namespaceId={}, cmd={}", userId, namespaceId, cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Community not found");
+        }
+        
+        // 为了避免用户每次都需要选择一个小区，需要调用原来的设置小区流程 by lqs 20160416
+        setUserCurrentCommunity(cmd.getCommunityId());
+        
+        // 把下面代码移到listUserRelatedScenes()里做为通用流程，即列场景时按统一条件列小区场景 by lqs 20160416 
+//        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+//        List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+//        SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO);
+//	    sceneList.add(communityScene);
+	    
+	    return listUserRelatedScenes();
+	}
+	
+    @Override
+    public SceneDTO toCommunitySceneDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
+        StringBuffer fullName = new StringBuffer();
+        StringBuffer aliasName = new StringBuffer();
+        
+        if(!StringUtils.isEmpty(community.getCityName())){
+            fullName.append(community.getCityName());
+        }
+        if(!StringUtils.isEmpty(community.getAreaName())){
+            fullName.append(community.getAreaName());
+        }
+        if(!StringUtils.isEmpty(community.getName())){
+            fullName.append(community.getName());
+            aliasName.append(community.getName());
+        }
+        
+        SceneDTO sceneDto = new SceneDTO();
+        sceneDto.setSceneType(sceneType.getCode());
+        sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+        sceneDto.setName(fullName.toString());
+        sceneDto.setAliasName(aliasName.toString());
+        
+        String entityContent = StringHelper.toJsonString(community);
+        sceneDto.setEntityContent(entityContent);
+        
+        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, community, sceneType);
+        String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+        sceneDto.setSceneToken(sceneToken);
+
+        return sceneDto;
+    }	
+    
+    @Override
+    public SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
+        SceneTokenDTO sceneTokenDto = new SceneTokenDTO();
+        sceneTokenDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+        sceneTokenDto.setScene(sceneType.getCode());
+        sceneTokenDto.setEntityId(community.getId());
+        sceneTokenDto.setNamespaceId(namespaceId);
+        sceneTokenDto.setUserId(userId);
+        
+        return sceneTokenDto;
+    }   
+
+    /**
+     * 判断是否是小区版场景（相对于园区版）
+     * @param userId 用户ID
+     * @param namespaceId 用户所在的域空间ID
+     * @return 如果是小区
+     */
+    private boolean isCommunityScene(Long userId, Integer namespaceId) {
+        if(namespaceId == null) {
+            return false;
+        } else {
+            NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
+            if(namespaceDetail != null) {
+                NamespaceCommunityType communityType = NamespaceCommunityType.fromCode(namespaceDetail.getResourceType());
+                if(communityType != null) {
+                    switch(communityType) {
+                    case COMMUNITY_RESIDENTIAL:
+                    case COMMUNITY_MIX:
+                        return true;
+                    case COMMUNITY_COMMERCIAL:
+                        return false;
+                    }
+                }
+            }
+            
+            // 在没有配置时，默认使用域空间ID来判断
+            return (Namespace.DEFAULT_NAMESPACE == namespaceId.intValue());
+        }
+    }
+}

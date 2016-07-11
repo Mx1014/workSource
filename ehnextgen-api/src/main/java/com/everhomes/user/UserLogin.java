@@ -1,0 +1,164 @@
+// @formatter:off
+package com.everhomes.user;
+
+import java.io.Serializable;
+import java.util.Random;
+
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginStatus;
+import com.everhomes.util.StringHelper;
+
+/**
+ * Represents user login session, compared with other data structure like UserIdentifier or User, it is persisted in
+ * memory data store(Redis backed big collection), since device disconnects are the normal in mobile network, a memory
+ * data store will help reduce the impact of presence information changes.
+ * 
+ * A user login session is a long-lasting session until explicit logout is issued. Which means, temporary disconnects
+ * from client will not be considered as of being logged out, this will ensure that device push notification messages can
+ * be correctly issued
+ * 
+ * @author Kelven Yang
+ *
+ */
+public class UserLogin implements Serializable {
+    private static final long serialVersionUID = 7244772864801329872L;
+
+    private long userId;
+    private int loginId;
+    private String deviceIdentifier;
+    private int namespaceId;
+    
+    private UserLoginStatus status;
+    private Integer loginBorderId;
+    private int loginInstanceNumber;
+    private long lastAccessTick;
+    
+    private Long portalRole;
+    
+    //For iOS pusher, added by Janson
+    private String pusherIdentify;
+    
+    public UserLogin() {
+    }
+    
+    public UserLogin(int namespaceId, long userId, int loginId, String identifier, String pusherIdentify) {
+        this.namespaceId = namespaceId;
+        this.userId = userId;
+        this.loginId = loginId;
+        this.deviceIdentifier = identifier;
+        loginInstanceNumber = new Random().nextInt();
+        lastAccessTick = System.currentTimeMillis();
+        status = UserLoginStatus.LOGGED_OFF;
+        this.pusherIdentify = pusherIdentify;
+    }
+    
+    public int getNamespaceId() {
+        return this.namespaceId;
+    }
+    
+    public void setNamespaceId(int namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    
+    public Integer getLoginBorderId() {
+        return this.loginBorderId;
+    }
+    
+    public void setLoginBorderId(Integer loginBorderId) {
+        this.loginBorderId = loginBorderId;
+    }
+    
+    public long getUserId() {
+        return this.userId;
+    }
+    
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+    
+    public int getLoginId() {
+        return this.loginId;
+    }
+    
+    public void setLoginId(int loginId) {
+        this.loginId = loginId;
+    }
+    
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+    
+    public void setDeviceIdentifier(String identifier) {
+        this.deviceIdentifier = identifier;
+    }
+    
+    public int getLoginInstanceNumber() {
+        return loginInstanceNumber;
+    }
+    
+    public void setLoginInstanceNumber(int loginInstanceNumber) {
+        this.loginInstanceNumber = loginInstanceNumber;
+    }
+    
+    public long getLastAccessTick() {
+        return lastAccessTick;
+    }
+    
+    public void setLastAccessTick(long lastAccessTick) {
+        this.lastAccessTick = lastAccessTick;
+    }
+    
+    public UserLoginStatus getStatus() {
+        return this.status;
+    }
+    
+    public void setStatus(UserLoginStatus status) {
+        this.status = status;
+        
+        if(status == UserLoginStatus.LOGGED_OFF) {
+            this.loginInstanceNumber++;
+        }
+    }
+    
+    public Long getPortalRole() {
+        return portalRole;
+    }
+
+    public void setPortalRole(Long portalRole) {
+        this.portalRole = portalRole;
+    }
+
+    public LoginToken getLoginToken() {
+        LoginToken token = new LoginToken(this.userId, this.loginId, this.loginInstanceNumber);
+        return token;
+    }
+    
+    public UserLoginDTO toDto() {
+        UserLoginDTO dto = new UserLoginDTO();
+        dto.setDeviceIdentifier(this.deviceIdentifier);
+        dto.setLastAccessTick(this.lastAccessTick);
+        dto.setLoginBorderId(this.loginBorderId);
+        dto.setLoginId(this.loginId);
+        dto.setLoginInstanceNumber(this.loginInstanceNumber);
+        dto.setNamespaceId(this.namespaceId);
+        dto.setPortalRole(this.portalRole);
+        dto.setStatus(this.status != null ? this.status.getCode(): null);
+        dto.setUserId(this.userId);
+        dto.setPusherIdentify(this.getPusherIdentify());
+        return dto;
+    }
+    
+    public String getPusherIdentify() {
+        return pusherIdentify;
+    }
+
+    public void setPusherIdentify(String pusherIdentify) {
+        this.pusherIdentify = pusherIdentify;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

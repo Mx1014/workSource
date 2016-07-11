@@ -1,0 +1,116 @@
+package com.everhomes.pusher;
+
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.PushMessageResolver;
+import com.everhomes.msgbox.Message;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.OpenMsgSessionActionData;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.messaging.DeviceMessage;
+import com.everhomes.rest.messaging.DeviceMessageType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessagingLocalStringCode;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
+
+@Component(PushMessageResolver.PUSH_MESSAGE_RESOLVER_DEFAULT)
+public class DefaultPushMessageResolver implements PushMessageResolver {
+
+    @Autowired
+    MessagingService messagingService;
+   
+    @Autowired
+    private LocaleStringService localeStringService;
+    
+    @Override
+    public DeviceMessage resolvMessage(UserLogin senderLogin, UserLogin destLogin, Message msg) {
+        DeviceMessage deviceMessage = new DeviceMessage();
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        if(null != UserContext.current().getUser()) {
+            locale = UserContext.current().getUser().getLocale(); 
+        }
+        deviceMessage.setAlert(this.localeStringService.getLocalizedString(
+                MessagingLocalStringCode.SCOPE,
+                String.valueOf(MessagingLocalStringCode.NEW_MESSAGE_ALERT),
+                locale,
+                "You have a message"));
+                
+        deviceMessage.setAlertType(DeviceMessageType.SIMPLE.getCode());
+        deviceMessage.setTitle("左邻App");
+        
+        deviceMessage.setBadge(new Integer((int)messagingService.getMessageCountInLoginMessageBox(destLogin)));
+        
+        deviceMessage.setAppId(msg.getAppId());
+        deviceMessage.setAudio("doorRing.caf");
+        
+        String bodyType = msg.getMeta().get("bodyType");
+        if(null == bodyType) {
+            return deviceMessage;
+            }
+        
+        deviceMessage.getExtra().putAll(msg.getMeta());
+        
+        if(msg.getMeta().containsKey("actionType")) {
+            deviceMessage.setAction(msg.getMeta().get("actionType"));
+        } else if(msg.getAppId() == AppConstants.APPID_MESSAGING) {
+            deviceMessage.setAction(Byte.toString((ActionType.OPEN_MSG_SESSION.getCode())));
+            OpenMsgSessionActionData actionData = new OpenMsgSessionActionData();
+            actionData.setSenderUid(senderLogin.getUserId());
+            actionData.setDstChannel(msg.getChannelType());
+            actionData.setDstChannelId(Long.parseLong(msg.getChannelToken()));
+            actionData.setSrcChannel(msg.getContextType());
+            actionData.setSrcChannelId((null == msg.getContextToken() ? null : Long.parseLong(msg.getContextToken())));
+            deviceMessage.getExtra().put("actionData", actionData.toString());
+        }
+//        if(deviceMessage.getExtra().containsKey("jumpType")) {
+//            deviceMessage.setAlertType(DeviceMessageType.Jump.getCode());
+//            }
+        
+        MessageBodyType metaType;
+        if(msg.getMetaAppId() != null) {
+            metaType = MessageBodyType.fromCode(bodyType);
+            switch(metaType) {
+            case TEXT:
+                if(null != msg.getContent()) {
+                    deviceMessage.setAlert(msg.getContent());    
+                    }
+                break;
+            case AUDIO:
+                deviceMessage.setAlert(this.localeStringService.getLocalizedString(
+                        MessagingLocalStringCode.SCOPE,
+                        String.valueOf(MessagingLocalStringCode.NEW_MESSAGE_AUDIO_ALERT),
+                        locale,
+                        "You have a audio message."));
+                break;
+            case IMAGE:
+                deviceMessage.setAlert(this.localeStringService.getLocalizedString(
+                        MessagingLocalStringCode.SCOPE,
+                        String.valueOf(MessagingLocalStringCode.NEW_MESSAGE_IMAGE_ALERT),
+                        locale,
+                        "You have a image message."));
+                break;
+            case VIDEO:
+                deviceMessage.setAlert(this.localeStringService.getLocalizedString(
+                        MessagingLocalStringCode.SCOPE,
+                        String.valueOf(MessagingLocalStringCode.NEW_MESSAGE_IMAGE_ALERT),
+                        locale,
+                        "You have a video message."));
+                break;
+            case LINK:
+                deviceMessage.setAlert(msg.getContent());
+                break;
+            default:
+                break;
+                }
+            }
+        
+        return deviceMessage;
+    }
+
+}

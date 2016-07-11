@@ -1,0 +1,61 @@
+// @formatter:off
+package com.everhomes.configuration;
+
+public interface ConfigConstants {
+    public static final String HOME_URL = "home.url";
+    
+    public static final String BIZ_APPKEY = "biz.appKey";
+    public static final String PAY_APPKEY = "pay.appKey";
+    public static final String USER_SCORE_URL = "user.score.url";
+    public static final String USER_ORDER_URL = "user.order.url";
+    public static final String APPLY_SHOP_URL = "apply.shop.url";
+    public static final String MANAGE_SHOP_URL = "manage.shop.url";
+    public static final String POST_SHARE_URL = "post.share.url";
+    public static final String ACTIVITY_SHARE_URL = "activity.share.url";
+    public static final String USER_COUPON_URL = "user.coupon.url";
+    public static final String APP_AGREEMENTS_URL = "app.agreements.url";
+    public static final String PREFIX_URL = "prefix.url";
+ 
+    public static final String PARKING_CARD_VALID_DAYS = "parking.card.valid.days";
+    
+    public static final String VIDEOCONF_MULTIACCOUNT_MINIMUM_NUM = "videoconf.multipleaccount.minimumnumber";
+    
+    public static final String VIDEOCONF_SOURCEACCOUNT_RADIO_WARNING_LINE = "videoconf.sourceaccount.radio.warningline";
+    public static final String VIDEOCONF_SOURCEACCOUNT_OCCUPANCY_WARNING_LINE = "videoconf.sourceaccount.occupancy.warningline";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25VIDEO = "videoconf.account.warningline.25video.radio";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25PHONE = "videoconf.account.warningline.25phone.radio";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100VIDEO = "videoconf.account.warningline.100video.radio";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100PHONE = "videoconf.account.warningline.100phone.radio";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25VIDEO = "videoconf.account.warningline.25video.only.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25PHONE = "videoconf.account.warningline.25phone.support.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100VIDEO = "videoconf.account.warningline.100video.only.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100PHONE = "videoconf.account.warningline.100phone.support.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50VIDEO = "videoconf.account.warningline.50video.only.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50PHONE = "videoconf.account.warningline.50phone.support.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_6VIDEO = "videoconf.account.warningline.6video.only.occupancy";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50VIDEO = "videoconf.account.warningline.50video.radio";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50PHONE = "videoconf.account.warningline.50phone.radio";
+    public static final String VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_6VIDEO = "videoconf.account.warningline.6video.radio";
+    
+    public static final String VIDEOCONF_ACCOUNT_TRIAL_ACCOUNTS = "videoconf.account.trial.accounts";
+    public static final String VIDEOCONF_ACCOUNT_TRIAL_MONTHS = "videoconf.account.trial.months";
+    public static final String VIDEOCONF_ACCOUNT_PREFERENTIAL_LIMIT = "videoconf.account.preferential.limit";
+    public static final String VIDEOCONF_ACCOUNT_PREFERENTIAL_SUBTRACT = "videoconf.account.preferential.subtract";
+    public static final String VIDEOCONF_ACCOUNT_PREFERENTIAL_STATUS = "videoconf.account.preferential.status";
+    public static final String VIDEOCONF_SECRET_KEY = "videoconf.secret.key";
+    
+    public static final String PARKING_PREFERENTIAL_STARTTIME = "parking.preferential.starttime";
+    public static final String PARKING_PREFERENTIAL_ENDTIME = "parking.preferential.endtime";
+    public static final String PARKING_PREFERENTIAL_RANGE = "parking.preferential.range";
+    
+    public static final String VIDEOCONF_APPURL_IOS = "videoconf.appurl.ios";
+    public static final String VIDEOCONF_APPURL_ANDRIOD = "videoconf.appurl.andriod";
+    public static final String VIDEOCONF_TEL_PRICE = "videoconf.tel.price";
+
+
+    public static final String HOT_USERS = "hotusers"; 
+    public static final String ACTIVITY_POSTER_DEFAULT_URL = "activity.poster.default.url"; 
+    
+    public static final String ACTIVITY_LIST_NUM = "activity.list.num"; 
+     
+}
