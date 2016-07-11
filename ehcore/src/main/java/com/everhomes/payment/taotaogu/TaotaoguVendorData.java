@@ -15,6 +15,7 @@ public class TaotaoguVendorData {
 	private String merchId;
 	private String termnlId;
 	private String initPassword;
+	private String token;
 	
 	public String getBranchCode() {
 		return branchCode;
@@ -81,4 +82,10 @@ public class TaotaoguVendorData {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getToken() {
+		return token;
+	}
+	public void setToken(String token) {
+		this.token = token;
+	}
 }
