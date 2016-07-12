@@ -72,6 +72,6 @@ INSERT INTO `eh_groups` (`id`, `uuid`, `namespace_id`, `name`, `display_name`, `
 UPDATE eh_organizations SET group_id = 1001301 WHERE id = 1001027;
 
   
- --
+ --by wuhan 20160712
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (2044, 999989, '0', '0', '0', '/home', 'Bizs', '园区入驻', '园区入驻', 'cs://1/image/aW1hZ2UvTVRvMU56ZGlOems0TW1Oak5XRXhaVFJpTm1Rek9UbGxaamd4TUdWbU5UazFNdw', '1', '1', '28', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');    
