@@ -1,7 +1,6 @@
 package com.everhomes.payment.taotaogu;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -22,7 +21,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -104,43 +102,40 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		List<CardInfoDTO> result = new ArrayList<CardInfoDTO>();
 		List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
 		for(PaymentCard card:cardList){
-			PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(card.getIssuerId());
-			String vendorData = issuer.getVendorData();
-
-			TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+			TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(card.getIssuerId());
 			String brandCode = taotaoguVendorData.getBranchCode();
 			CardInfoDTO cardInfo = new CardInfoDTO();
-
-				Map<String, Object> cardQuertParam = new HashMap<String, Object>();
-				cardQuertParam.put("BranchCode", brandCode);
-				cardQuertParam.put("CardId", card.getCardNo());
-				Map<String, Object> queryCardResultMap = queryCard(taotaoguVendorData, brandCode, card.getCardNo());
-				Map<String, Object> queryAccountResultMap = queryAccount(taotaoguVendorData, brandCode, card.getCardNo());
+			Map<String, Object> cardQuertParam = new HashMap<String, Object>();
+			cardQuertParam.put("BranchCode", brandCode);
+			cardQuertParam.put("CardId", card.getCardNo());
 			
-				if(queryCardResultMap != null){
-					cardInfo.setCardId(card.getId());
-					cardInfo.setCardNo((String)queryCardResultMap.get("CardId"));
-					cardInfo.setCardType((String)queryCardResultMap.get("CardSubClass"));
-					String effDate = (String)queryCardResultMap.get("EffDate");
-					String expirDate = (String)queryCardResultMap.get("ExpirDate");
-					cardInfo.setActivedTime(strTotimestamp(effDate));
-					cardInfo.setExpiredTime(strTotimestamp(expirDate));
-					String cardStatus = (String)queryCardResultMap.get("CardStatus");
-					cardInfo.setStatus(cardStatus);
-					cardInfo.setMobile(card.getMobile());
-					cardInfo.setVendorCardData(card.getVendorCardData());
-				}
-				if(queryAccountResultMap != null){
-					cardInfo.setCardId(card.getId());
-					List list = (List) queryAccountResultMap.get("Row");
-					for(int i=0;i<list.size();i++){
-						Map<String,Object> map = (Map<String,Object>) list.get(i);
-						if("fund".equals(((String)map.get("SubAcctType")).trim())){
-							cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
-							break;
-						}
+			Map<String, Object> queryCardResultMap = queryCard(taotaoguVendorData, brandCode, card.getCardNo());
+			Map<String, Object> queryAccountResultMap = queryAccount(taotaoguVendorData, brandCode, card.getCardNo());
+			if(queryCardResultMap != null){
+				cardInfo.setCardId(card.getId());
+				cardInfo.setCardNo((String)queryCardResultMap.get("CardId"));
+				cardInfo.setCardType((String)queryCardResultMap.get("CardSubClass"));
+				String effDate = (String)queryCardResultMap.get("EffDate");
+				String expirDate = (String)queryCardResultMap.get("ExpirDate");
+				cardInfo.setActivedTime(strTotimestamp(effDate));
+				cardInfo.setExpiredTime(strTotimestamp(expirDate));
+				String cardStatus = (String)queryCardResultMap.get("CardStatus");
+				cardInfo.setStatus(cardStatus);
+				cardInfo.setMobile(card.getMobile());
+				cardInfo.setVendorCardData(card.getVendorCardData());
+			}
+			if(queryAccountResultMap != null){
+				cardInfo.setCardId(card.getId());
+				List list = (List) queryAccountResultMap.get("Row");
+				for(int i=0;i<list.size();i++){
+					Map<String,Object> map = (Map<String,Object>) list.get(i);
+					if("fund".equals(((String)map.get("SubAcctType")).trim())){
+						cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
+						break;
 					}
 				}
+			}
+				
 			result.add(cardInfo);
 		}
 		return result;
@@ -190,9 +185,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return cardInfoDTO;
 	}
 	public void setCardPassword(SetCardPasswordCommand cmd,PaymentCard paymentCard){
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(paymentCard.getIssuerId());
-		String vendorData = issuer.getVendorData();
-		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+		TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(paymentCard.getIssuerId());
 		String brandCode = taotaoguVendorData.getBranchCode();
 		
 		changePassword(taotaoguVendorData, brandCode, paymentCard.getCardNo(), cmd.getOldPassword(),cmd.getNewPassword());
@@ -204,9 +197,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 
 	@Override
 	public void resetCardPassword(ResetCardPasswordCommand cmd, PaymentCard paymentCard) {
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(paymentCard.getIssuerId());
-		String vendorData = issuer.getVendorData();
-		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+		TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(paymentCard.getIssuerId());
 		String brandCode = taotaoguVendorData.getBranchCode();
 
 		Map<String, Object> resetPasswordResultMap = resetPassword(taotaoguVendorData, brandCode, paymentCard.getCardNo());
@@ -217,9 +208,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	}
 	@Override
 	public List<CardTransactionOfMonth> listCardTransactions(ListCardTransactionsCommand cmd,PaymentCard card){
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(card.getIssuerId());
-		String vendorData = issuer.getVendorData();
-		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+		TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(card.getIssuerId());
 		String brandCode = taotaoguVendorData.getBranchCode();
 		Long pageAnchor = cmd.getPageAnchor()==null?1L:cmd.getPageAnchor();
 		Integer pageSize = cmd.getPageSize()==null?10:cmd.getPageSize();
@@ -355,9 +344,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			param.put("CardId", cardId);
 			Cert cert = certProvider.findCertByName(configProvider.getValue(TaotaoguVendorConstant.PIN3_CRT, TaotaoguVendorConstant.PIN3_CRT));
 			if(cert == null){
-				LOGGER.error("taotaogu.pin3.crt is null.");
+				LOGGER.error("taotaogu.pin3.crt not found");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"taotaogu.pin3.crt is null.");
+						"taotaogu.pin3.crt not found");
 			}
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			
@@ -368,9 +357,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				byte[] newpsd = CertCoder.encryptByPublicKey(newPassword.getBytes(), in);
 				param.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			} catch (Exception e) {
-				LOGGER.error("the encryptByPublicKey password failed cardId={},oldPassword={},newPassword={}.", cardId, oldPassword, newPassword, e);
+				LOGGER.error("Encrypt paymentCard password failed, cardId={}, oldPassword={}, newPassword={}.", cardId, oldPassword, newPassword, e);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"the apply card request of taotaogu failed.");
+						"Encrypt paymentCard password failed");
 			}
 			param.put("Remark", "");
 			Map<String,Object> result = post(createRequestParam(taotaoguVendorData, CHANGE_PASSWORD_TYPE, param));
@@ -456,9 +445,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 
 	@Override
 	public String getCardPaidQrCodeByVendor(PaymentCard paymentCard) {
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(paymentCard.getIssuerId());
-		String vendorData = issuer.getVendorData();
-		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+		TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(paymentCard.getIssuerId());
 		String result = null;
 		TaotaoguTokenCacheItem cacheItem = getToken(paymentCard.getIssuerId(),taotaoguVendorData);
 		String aesKey = cacheItem.getAesKey();
@@ -477,9 +464,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				if("00".equals(returnCode)){
 					result = (String) codeMap.get("token");
 				}else{
-					LOGGER.error("the getCardPaidQrCode request of taotaogu failed codeMap={},token={},aesKey={}.",codeMap,token,aesKey);
+					LOGGER.error("PaymentCard getCardPaidQrCode failed, codeMap={},token={},aesKey={}.",codeMap,token,aesKey);
 					throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
-							"the getCardPaidQrCode request of taotaogu failed .");
+							"PaymentCard getCardPaidQrCode failed");
 				}
 			}
 		}
@@ -554,21 +541,24 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
       
         Map map = login(taotaoguVendorData);
-        TaotaoguTokenCacheItem cacheItem = new TaotaoguTokenCacheItem();
-        cacheItem.setCreateTime(new Date());
-        cacheItem.setExpireTime(20 * 60 * 60 * 1000);
-        cacheItem.setAesKey((String) map.get("aes_key"));
-        String token = (String) map.get("token");
-        cacheItem.setToken((String) map.get("token"));
-        redisTemplate.opsForValue().set(key,StringHelper.toJsonString(cacheItem));
-        redisTemplate.expire(key, 20, TimeUnit.HOURS);
-        
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(issuerId);
-		taotaoguVendorData.setToken(token);
-		issuer.setVendorData(StringHelper.toJsonString(taotaoguVendorData));
-		paymentCardProvider.updatePaymentCardIssuer(issuer);
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Refresh token, key={}, issuer={}", key, issuer);
+        String returnCode = (String) map.get("return_code");
+		if("00".equals(returnCode)){
+			TaotaoguTokenCacheItem cacheItem = new TaotaoguTokenCacheItem();
+	        cacheItem.setCreateTime(new Date());
+	        cacheItem.setExpireTime(20 * 60 * 60 * 1000);
+	        cacheItem.setAesKey((String) map.get("aes_key"));
+	        String token = (String) map.get("token");
+	        cacheItem.setToken((String) map.get("token"));
+	        redisTemplate.opsForValue().set(key,StringHelper.toJsonString(cacheItem));
+	        redisTemplate.expire(key, 20, TimeUnit.HOURS);
+	        
+			PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(issuerId);
+			taotaoguVendorData.setToken(token);
+			issuer.setVendorData(StringHelper.toJsonString(taotaoguVendorData));
+			paymentCardProvider.updatePaymentCardIssuer(issuer);
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Refresh token, key={}, issuer={}", key, issuer);
+			}
 		}
     }
     
@@ -595,9 +585,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	
 	@Override
 	public void rechargeCard(PaymentCardRechargeOrder order, PaymentCard card) {
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(card.getIssuerId());
-		String vendorData = issuer.getVendorData();
-		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+		TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(card.getIssuerId());
 		String brandCode = taotaoguVendorData.getBranchCode();
 		TaotaoguResponseEntiy rechargeCardResult = rechargeCard(taotaoguVendorData, brandCode, card.getCardNo(), order.getAmount());
 			if(rechargeCardResult.isSuccess()){
@@ -721,7 +709,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		} catch (Exception e) {
 			LOGGER.error("verify sign of taotaogu failed, taotaoguVendorData={}, msgType={}, param={}, requestParam={}.",
 					taotaoguVendorData, msgType, StringHelper.toJsonString(param), StringHelper.toJsonString(requestParam));
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"verify sign of taotaogu failed.");
 		}
 		requestParam.put("Sign",ByteTools.BytesToHexStr(sign));	
@@ -729,6 +717,10 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	}
 	//卡信息，http请求方法，返回解析responseEntity之后的结果
 	private Map<String,Object> post(String msg){
+		return postForTaotaoguResponseEntiy(msg).getData();
+	}
+	//卡信息接口，直接返回淘淘谷responseEntity信息
+	private TaotaoguResponseEntiy postForTaotaoguResponseEntiy(String msg){
 		String cardUrl = configProvider.getValue("taotaogu.card.url", "");
 		HttpPost request = new HttpPost(cardUrl);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
@@ -738,74 +730,35 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 			rsp = httpClient.execute(request);
 		}catch(Exception e){
-			LOGGER.error("post(String msg) http request exception.",e);
+			LOGGER.error("PaymentCard request exception.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"post(String msg) http request exception.");
+					"PaymentCard request exception.");
 		}
+		
 		StatusLine status = rsp.getStatusLine();
 		if(status.getStatusCode() == 200){
 			String rspText;
 			try {
 				rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
 			} catch (Exception e) {
-				LOGGER.error("http response resolve exception.",e);
+				LOGGER.error("PaymentCard get entity from response exception.",e);
 				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"http response resolve exception.");
+						"PaymentCard get entity from response exception.");
 			}
 			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("Method post(String msg) Response of taotaogu info :rspText={}", rspText);
+				LOGGER.debug("PaymentCard response of taotaogu info :rspText={}", rspText);
 			TaotaoguResponseEntiy resp = (TaotaoguResponseEntiy) StringHelper.fromJsonString(rspText, TaotaoguResponseEntiy.class);
 			if(!resp.isSuccess()) {
-				LOGGER.error("Method post(String msg) card request of taotaogu failed, msg={}, result={}.",msg,rspText);
+				LOGGER.error("PaymentCard respCode is not '00', result={}.", rspText);
 				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"card request of taotaogu failed.");
-			}
-			return resp.getData();
-		}else{
-			LOGGER.error("post(String msg) http request of taotaogu status is not 200,msg={}, status={}.", msg, status);
-			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"post(String msg) http request of taotaogu status is not 200.");
-		}
-	}
-	//卡信息接口，直接返回淘淘谷responseEntity信息
-	private TaotaoguResponseEntiy postForTaotaoguResponseEntiy(String msg){
-		String cardUrl = configProvider.getValue("taotaogu.card.url", "");
-		HttpPost request = new HttpPost(cardUrl);
-		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-		HttpResponse rsp = null;
-		try{
-			request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
-			rsp = httpClient.execute(request);
-		}catch(Exception e){
-			LOGGER.error("post(String msg) http request exception.",e);
-			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"post(String msg) http request exception.");
-		}
-		StatusLine status = rsp.getStatusLine();
-		if(status.getStatusCode() == 200){
-			String rspText;
-			try {
-				rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
-			} catch (Exception e) {
-				LOGGER.error("http response resolve exception.",e);
-				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"http response resolve exception.");
-			}
-			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("postForTaotaoguResponseEntiy Response of taotaogu info :rspText={}", rspText);
-			TaotaoguResponseEntiy resp = (TaotaoguResponseEntiy) StringHelper.fromJsonString(rspText, TaotaoguResponseEntiy.class);
-			if(!resp.isSuccess()) {
-				LOGGER.error("card request of taotaogu failed,msg={}, result={}.", msg, rspText);
-				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"card request of taotaogu failed.");
+						"PaymentCard request failed");
 			}
 			return resp;
 		}else{
-			LOGGER.error("card request of taotaogu http status is {},msg={}, status={}.",status.getStatusCode(),msg,status);
+			LOGGER.error("PaymentCard response status is not 200, status, rspText={}.", status, rsp.getEntity());
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"card request of taotaogu http status is not 200.");
-		}	
-			
+					"PaymentCard response status is not 200.");
+		}
 	}
 	//订单登录方法，因为参数，和返回结果解析和其他普通订单方法不一样，所以单独写一个方法，获取token和aesKey
 	private Map<String,Object> login(TaotaoguVendorData taotaoguVendorData){
@@ -861,9 +814,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			}
 			result = (Map<String,Object>) StringHelper.fromJsonString(r1, Map.class);
 		}catch(Exception e){
-			LOGGER.error("the login request of taotaogu failed rspText={},json={}", rspText, json, e);
+			LOGGER.error("PaymentCard login request of taotaogu failed rspText={}, param={}", rspText, json, e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"the login request of taotaogu failed.");
+					"PaymentCard login request of taotaogu failed.");
 		}
 		return result;
 	}
@@ -885,23 +838,23 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			
 			StatusLine status = rsp.getStatusLine();
 			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("the request info method={},token={},aesKey={},param={},rspText={},status={}.",
-						method,token,aesKey,json,rspText,status);
+				LOGGER.debug("PaymentCard request info method={}, token={}, aesKey={}, param={}, rspText={}, status={}",
+						method, token, aesKey, json, rspText, status);
 			if(status.getStatusCode() == 200){
 				rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
 				result = resolveOrderResult(rspText, aesKey);
 				return result;
 			}else{
-				LOGGER.error("the http request of taotaogu status is not 200 method={},token={},aesKey={},param={},rspText={}.",
+				LOGGER.error("PaymentCard request of taotaogu status is not 200 method={},token={},aesKey={},param={},rspText={}.",
 						method,token,aesKey,json,rspText);
 				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-						"the http request of taotaogu status is not 200.");
+						"PaymentCard request of taotaogu status is not 200.");
 			}
 		}catch(Exception e){
-			LOGGER.error("the http request exception method={},token={},aesKey={},param={},rspText={}.",
+			LOGGER.error("PaymentCard request exception method={},token={},aesKey={},param={},rspText={}.",
 					method,token,aesKey,json,rspText,e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"the http request exception.");
+					"PaymentCard request exception.");
 		}
 	}
 	//订单接口，解析返回结果
@@ -925,11 +878,23 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				result = (Map<String,Object>) StringHelper.fromJsonString(data1, Map.class);
 			}
 		}catch(Exception e){
-			LOGGER.error("resolve order response failed rspText={},aesKey={}.",
-					rspText, aesKey, e);
+			LOGGER.error("PaymentCard parse rspText failed, aesKey={}, rspText={}",
+					aesKey, rspText, e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"resolve order response failed.");
+					"PaymentCard parse rspText failed.");
 		}
 		return result;
+	}
+	
+	private TaotaoguVendorData checkPaymentCardIssuer(Long issuerId){
+		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(issuerId);
+		if(issuer == null){
+			LOGGER.error("PaymentCard issuer not found, issuerId={}", issuerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"PaymentCard issuer not found");
+		}
+		String vendorData = issuer.getVendorData();
+		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+		return taotaoguVendorData;
 	}
 }
