@@ -542,7 +542,8 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
       
         Map map = login(taotaoguVendorData);
         String returnCode = (String) map.get("return_code");
-		if("00".equals(returnCode)){
+        //淘淘谷登录 返回值中没有return_code
+		if(returnCode == null){
 			TaotaoguTokenCacheItem cacheItem = new TaotaoguTokenCacheItem();
 	        cacheItem.setCreateTime(new Date());
 	        cacheItem.setExpireTime(20 * 60 * 60 * 1000);
@@ -588,12 +589,13 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		TaotaoguVendorData taotaoguVendorData = checkPaymentCardIssuer(card.getIssuerId());
 		String brandCode = taotaoguVendorData.getBranchCode();
 		TaotaoguResponseEntiy rechargeCardResult = rechargeCard(taotaoguVendorData, brandCode, card.getCardNo(), order.getAmount());
-			if(rechargeCardResult.isSuccess()){
-				order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
-				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-				paymentCardProvider.updatePaymentCardRechargeOrder(order);
-				return;
-			}else if("A0".equals(rechargeCardResult.getRespCode())){
+//			if(rechargeCardResult.isSuccess()){
+//				order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+//				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+//				paymentCardProvider.updatePaymentCardRechargeOrder(order);
+//				return;
+//			}
+			if("00".equals(rechargeCardResult.getRespCode())){
 				boolean flag = true;
 				int i = 1;
 				while(flag&&i<=10){
