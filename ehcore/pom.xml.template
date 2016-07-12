@@ -290,15 +290,13 @@
 			<artifactId>quartz</artifactId>
 			<version>${quartz.version}</version>
 		</dependency>
-<<<<<<< HEAD:ehcore/pom.xml.template
-=======
 		
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.4</version>
+			<version>${fastjson.version}</version>
 		</dependency>
->>>>>>> news1.0:ehcore/pom.xml
+
 		<!--<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz-jobs</artifactId>
