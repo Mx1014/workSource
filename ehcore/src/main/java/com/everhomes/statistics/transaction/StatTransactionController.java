@@ -77,4 +77,18 @@ public class StatTransactionController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /stat/transaction/exportStatServiceSettlementAmounts</b>
+     * <p>导出结算数据</p>
+     */
+    @RequestMapping("exportStatServiceSettlementAmounts")
+    @RestReturn(value=String.class)
+    public RestResponse exportStatServiceSettlementAmounts(@Valid ListStatServiceSettlementAmountsCommand cmd) {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }
