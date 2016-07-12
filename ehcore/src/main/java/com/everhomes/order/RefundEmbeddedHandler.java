@@ -16,9 +16,9 @@ public interface RefundEmbeddedHandler {
 	 * 支付成功
 	 */
 	void paySuccess(RefundCallbackCommand cmd);
-	/**
-	 * 支付失败
-	 */
-	void payFail(RefundCallbackCommand cmd);
+//	/**
+//	 * 支付失败
+//	 */
+//	void payFail(RefundCallbackCommand cmd);
 
 }

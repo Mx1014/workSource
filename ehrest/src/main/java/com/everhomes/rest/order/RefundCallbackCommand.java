@@ -23,8 +23,8 @@ import com.everhomes.util.StringHelper;
 public class RefundCallbackCommand {
 	private	String	appKey	;
 	private	String	signature	;
-	private	long	timestamp	;
-	private	int	nonce	;
+	private	Long	timestamp	;
+	private	Integer	nonce	;
 	private	String	crypto	;
 	private	String	refundOrderNo	;
 	private	String	onlinePayStyleNo	;
@@ -48,19 +48,19 @@ public class RefundCallbackCommand {
 		this.signature = signature;
 	}
 
-	public long getTimestamp() {
+	public Long getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(Long timestamp) {
 		this.timestamp = timestamp;
 	}
 
-	public int getNonce() {
+	public Integer getNonce() {
 		return nonce;
 	}
 
-	public void setNonce(int nonce) {
+	public void setNonce(Integer nonce) {
 		this.nonce = nonce;
 	}
 

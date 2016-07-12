@@ -1694,4 +1694,21 @@ public class RentalProviderImpl implements RentalProvider {
 			return null;
 		return result;
 	}
+
+	@Override
+	public RentalRefundOrder getRentalRefundOrderByRefoundNo(
+			String refundOrderNo) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_REFUND_ORDERS); 
+		Condition condition = Tables.EH_RENTAL_REFUND_ORDERS.REFUND_ORDER_NO.eq(Long.valueOf(refundOrderNo)); 
+		step.where(condition);
+		RentalRefundOrder result = step
+				.orderBy(Tables.EH_RENTAL_REFUND_ORDERS.ID.desc()).fetchOne().map((r) -> {
+					return ConvertHelper.convert(r, RentalRefundOrder.class);
+				});
+		return result;
+		
+	}
 }
