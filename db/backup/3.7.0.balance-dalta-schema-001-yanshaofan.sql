@@ -98,32 +98,6 @@ CREATE TABLE `eh_stat_settlements` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
 
--- 结算支付退款详情表
-CREATE TABLE `eh_stat_settlements` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` bigint(20) DEFAULT 0,
-  `community_id` bigint(20) DEFAULT 0,
-  `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
-  `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
-  `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
-  `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
-  `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
-  `order_amount` DECIMAL DEFAULT NULL COMMENT '订单总金额',
-  `paid_amount` DECIMAL DEFAULT NULL COMMENT '交易总金额',
-  `fee_rate` DECIMAL DEFAULT NULL COMMENT '交易费率',
-  `fee_amount` DECIMAL DEFAULT NULL COMMENT '交易总手续费',
-  `settlement_amount` DECIMAL DEFAULT NULL COMMENT '交易总结算金额，交易总金额-交易总手续费',
-  `paid_count` bigint(20) DEFAULT 0 COMMENT '交易总笔数',
-  `refund_amount` DECIMAL DEFAULT NULL COMMENT '退款总金额',
-  `refund_fee_rate` DECIMAL DEFAULT NULL COMMENT '退款费率',
-  `refund_fee_amount` DECIMAL DEFAULT NULL COMMENT '退款总手续费',
-  `refund_settlement_amount` DECIMAL DEFAULT NULL COMMENT '退款总结算金额，退款总金额-退款总手续费',
-  `refund_count` bigint(20) DEFAULT 0 COMMENT '退款总笔数',
-  `update_date` datetime DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
-
 -- 结算統計結果表
 CREATE TABLE `eh_stat_service_settlement_results` (
   `id` bigint(20) NOT NULL,
