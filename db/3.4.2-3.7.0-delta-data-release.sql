@@ -284,6 +284,8 @@ UPDATE `eh_launch_pad_items` SET `scene_type` = 0 WHERE `namespace_id` = 999999;
 
 -- 给没有圈的公司加上group by sfyan 20160712
 -- 执行 select * from `eh_groups` where `id` in (SELECT (`id` + 5000) from `eh_organizations` where `group_id` is null and `group_type` = 'ENTERPRISE'); 检测一下是否有数据，没有则可以执行，有及时跟我沟通
-INSERT INTO `eh_groups` (`id`, `uuid`,`namespace_id`,`name`,`display_name`,`creator_uid`,`private_flag`,`join_policy`,`discriminator`,`status`,`member_count`,`share_count`,`post_flag`,`visible_region_type`,`visible_region_id`,`create_time`)
-SELECT (`id` + 5000), concat('4be17342-9113-11e5-adde-00163e' , (`id` + 5000)), `namespace_id`, `name`,`name`,1,0,0,'enterprise',1,0,0,0,0,0,now() FROM `eh_organizations` WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
-UPDATE `eh_organizations` SET `group_id` = (`id` + 5000) WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
+-- 需要保证执行成功的先后顺序
+INSERT INTO `eh_groups` (`id`, `uuid`,`namespace_id`,`name`,`display_name`,`creator_uid`,`private_flag`,`join_policy`,`discriminator`,`status`,`member_count`,`share_count`,`post_flag`,`visible_region_type`,`visible_region_id`,`update_time`,`create_time`)
+SELECT (`id` + 5000), concat('4be17342-9113-11e5-adde-00163e' , (`id` + 5000)), `namespace_id`, `name`,`name`,1,0,0,'enterprise',1,0,0,0,0,0,now(),now() FROM `eh_organizations` WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
+
+UPDATE `eh_organizations` SET `group_id` = (`id` + 5000),`update_time` = now() WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
