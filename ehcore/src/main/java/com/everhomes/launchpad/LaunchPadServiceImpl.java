@@ -781,7 +781,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 if(null != request){
                 	itemDTO.setActionData(parserJson(token, userId, communityId, r, request));
                 }
-                itemDTO.setScaleType(ScaleType.TAILOR.getCode());
+                if(null == itemDTO.getScaleType()){
+                	itemDTO.setScaleType(ScaleType.TAILOR.getCode());
+                }
+                
                 if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
                 	
                 	
