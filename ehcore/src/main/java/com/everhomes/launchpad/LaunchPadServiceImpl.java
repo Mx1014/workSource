@@ -871,7 +871,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			//            if(jsonObject != null)
 			//                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 		}catch(Exception e){
-			LOGGER.error("Parser json is error,communityId=" + communityId, e);
+			//增加异常日志信息 by sfyan 20160712
+			LOGGER.error("Parser json is error {} ,communityId = {}, itemId = {}, actionData = {}", e , communityId, launchPadItem.getId() ,launchPadItem.getActionData());
 		}
 
 		return jsonObject.toJSONString();

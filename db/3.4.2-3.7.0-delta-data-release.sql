@@ -273,3 +273,24 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 科技园去掉滚动广告  by sfyan 20160712
 update eh_launch_pad_layouts set layout_json='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' where id = 11;  
 update eh_launch_pad_layouts set layout_json='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' where id = 111; 
+
+-- 科技园去掉一卡通菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 1000000 , 0);
+
+-- 增加裁剪配置
+UPDATE `eh_launch_pad_items` SET `scene_type` = 1;
+UPDATE `eh_launch_pad_items` SET `scene_type` = 0 WHERE `namespace_id` = 999999;
+
+-- 给没有圈的公司加上group by sfyan 20160712
+-- 执行 select * from `eh_groups` where `id` in (SELECT (`id` + 5000) from `eh_organizations` where `group_id` is null and `group_type` = 'ENTERPRISE'); 检测一下是否有数据，没有则可以执行，有及时跟我沟通
+-- 需要保证执行成功的先后顺序
+INSERT INTO `eh_groups` (`id`, `uuid`,`namespace_id`,`name`,`display_name`,`creator_uid`,`private_flag`,`join_policy`,`discriminator`,`status`,`member_count`,`share_count`,`post_flag`,`visible_region_type`,`visible_region_id`,`update_time`,`create_time`)
+SELECT (`id` + 5000), concat('4be17342-9113-11e5-adde-00163e' , (`id` + 5000)), `namespace_id`, `name`,`name`,1,0,0,'enterprise',1,0,0,0,0,0,now(),now() FROM `eh_organizations` WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
+
+UPDATE `eh_organizations` SET `group_id` = (`id` + 5000),`update_time` = now() WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
+
+-- 签到增加提示 by sfyan 20160712
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'activity', '10008', 'zh_CN', '您尚未报名此活动！赶紧去报名吧~');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'activity', '10009', 'zh_CN', '您已签到！');
