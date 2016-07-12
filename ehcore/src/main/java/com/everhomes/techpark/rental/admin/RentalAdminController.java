@@ -18,19 +18,24 @@ import com.everhomes.rest.techpark.rental.BatchCompleteBillCommandResponse;
 import com.everhomes.rest.techpark.rental.BatchIncompleteBillCommand;
 import com.everhomes.rest.techpark.rental.CompleteBillCommand;
 import com.everhomes.rest.techpark.rental.DeleteItemAdminCommand;
+import com.everhomes.rest.techpark.rental.GetItemListAdminCommand;
+import com.everhomes.rest.techpark.rental.GetItemListCommandResponse;
 import com.everhomes.rest.techpark.rental.IncompleteBillCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.RentalBillDTO;
 import com.everhomes.rest.techpark.rental.UpdateItemAdminCommand;
-import com.everhomes.rest.techpark.rental.GetItemListAdminCommand;
-import com.everhomes.rest.techpark.rental.GetItemListCommandResponse;
 import com.everhomes.rest.techpark.rental.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
+import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
+import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListResponse;
+import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
+import com.everhomes.rest.techpark.rental.admin.GetRentalBillCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
 import com.everhomes.rest.techpark.rental.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteDiscountAdminCommand;
@@ -387,6 +392,56 @@ public class RentalAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 
+	
+	/**
+	 * <b>URL: /rental/admin/getRefundOrderList</b>
+	 * <p>
+	 * 查询退款-根据时间段，渠道，图标，退款状态（暂时没用）查询
+	 * </p>
+	 */
+
+	@RequestMapping("getRefundOrderList")
+	@RestReturn(value = RefundOrderDTO.class)
+	public RestResponse getRefundOrderList(@Valid GetRefundOrderListCommand cmd) {
+		GetRefundOrderListResponse resp = rentalService.getRefundOrderList(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /rental/admin/getRentalBill</b>
+	 * <p>
+	 * 查询单个订单
+	 * </p>
+	 */
+	@RequestMapping("getRentalBill")
+	@RestReturn(value = RentalBillDTO.class)
+	public RestResponse getRentalBill(@Valid GetRentalBillCommand cmd) {
+		RentalBillDTO dto = rentalService.getRentalBill(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	
+	/**
+	 * <b>URL: /rental/admin/getRefundUrl</b>
+	 * <p>
+	 * 拿到退款URL
+	 * </p>
+	 */
+	@RequestMapping("getRefundUrl")
+	@RestReturn(value = String.class)
+	public RestResponse getRefundUrl(@Valid GetRefundUrlCommand cmd) {
+		String resp = rentalService.getRefundUrl(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

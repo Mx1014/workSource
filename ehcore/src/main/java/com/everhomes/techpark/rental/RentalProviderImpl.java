@@ -30,6 +30,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.rental.DateLength;
@@ -837,10 +838,10 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
-		if (null != startTime)
+		if (null != endTime)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.START_TIME
 					.lessThan(new Timestamp(endTime)));
-		if (null != endTime)
+		if (null !=  startTime)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.END_TIME
 					.greaterThan(new Timestamp(startTime)));
 		 
@@ -1621,6 +1622,14 @@ public class RentalProviderImpl implements RentalProvider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalRefundOrders.class,rentalRefundOrder.getId());
 	}
+	@Override
+	public RentalRefundOrder getRentalRefundOrderById(Long rentalRefundOrderId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalRefundOrdersDao dao = new EhRentalRefundOrdersDao(context.configuration());
+		EhRentalRefundOrders order = dao.findById(rentalRefundOrderId);
+		return ConvertHelper.convert(order, RentalRefundOrder.class);
+	}
 	
 	@Override
 	public void deleteRentalRefundOrder(Long rentalRefundOrderId) {
@@ -1641,5 +1650,48 @@ public class RentalProviderImpl implements RentalProvider {
 		dao.update(rentalRefundOrder); 
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalRefundOrders.class,rentalRefundOrder.getId());
+	}
+
+	@Override
+	public List<RentalRefundOrder> getRefundOrderList(Long launchPadItemId,
+			CrossShardListingLocator locator, Byte status, String styleNo,
+			int pageSize, Long startTime, Long endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_REFUND_ORDERS); 
+		Condition condition = Tables.EH_RENTAL_REFUND_ORDERS.ID.greaterOrEqual(0L); 
+		if (StringUtils.isNotEmpty(styleNo))
+			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.ONLINE_PAY_STYLE_NO
+					.equal(styleNo));
+		if(null!=launchPadItemId)
+			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.LAUNCH_PAD_ITEM_ID 
+					.equal(launchPadItemId)); 
+		if (null != endTime)
+			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.CREATE_TIME
+					.lessThan(new Timestamp(endTime)));
+		if (null != startTime)
+			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.CREATE_TIME
+					.greaterThan(new Timestamp(startTime)));
+		 
+		if (null != status)
+			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.STATUS
+					.equal(status));    
+		if(null!=locator && locator.getAnchor() != null)
+			condition=condition.and(Tables.EH_RENTAL_REFUND_ORDERS.ID.lt(locator.getAnchor()));
+								
+		step.limit(pageSize);
+		step.where(condition);
+		List<RentalRefundOrder> result = step
+				.orderBy(Tables.EH_RENTAL_REFUND_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalRefundOrder.class);
+				});
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query rental refund orders, sql=" + step.getSQL());
+            LOGGER.debug("Query rental refund orders, bindValues=" + step.getBindValues());
+        }
+		if(result==null || result.size()==0)
+			return null;
+		return result;
 	}
 }

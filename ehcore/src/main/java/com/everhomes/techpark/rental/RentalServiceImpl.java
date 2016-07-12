@@ -155,10 +155,15 @@ import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AttachmentConfigDTO;
 import com.everhomes.rest.techpark.rental.admin.AttachmentType;
 import com.everhomes.rest.techpark.rental.admin.DiscountType;
+import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
+import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListResponse;
+import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
+import com.everhomes.rest.techpark.rental.admin.GetRentalBillCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
 import com.everhomes.rest.techpark.rental.admin.SiteOwnerDTO;
 import com.everhomes.rest.techpark.rental.admin.TimeIntervalDTO;
 import com.everhomes.rest.techpark.rental.admin.UpdateDefaultRuleAdminCommand;
@@ -1943,10 +1948,7 @@ public class RentalServiceImpl implements RentalService {
 								.currentGMTTime().getTime());
 						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
 						refundCmd.setOrderNo(String.valueOf(billMap.getOnlinePayBillId()));
-						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getCode()))
-							refundCmd.setOnlinePayStyleNo("wechat");
-						else if(billMap.getVendorType().equals(VendorType.ZHI_FU_BAO.getCode()))
-							refundCmd.setOnlinePayStyleNo("alipay");
+						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo()); 
 						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALREFUND.getPycode());
 						//已付金额乘以退款比例除以100
 						refundCmd.setRefundAmount(bill.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio()/100)));
@@ -1954,14 +1956,16 @@ public class RentalServiceImpl implements RentalService {
 						this.setSignatureParam(refundCmd);
 						RentalRefundOrder rentalRefundOrder = ConvertHelper.convert(refundCmd,RentalRefundOrder.class);
 						rentalRefundOrder.setOrderNo(billMap.getOnlinePayBillId());
-						rentalRefundOrder.setRefoundOrderNo(refoundOrderNo);
+						rentalRefundOrder.setRefundOrderNo(refoundOrderNo);
 						rentalRefundOrder.setRentalBillId(bill.getId()); 
 						rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
 						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
+						rentalRefundOrder.setLaunchPadItemId(bill.getLaunchPadItemId());
+						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
 						//微信直接退款，支付宝置为退款中 
-						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getCode())){
+						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getVendorType())){
 							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
 							if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 								//退款成功保存退款单信息，修改bill状态
@@ -1992,7 +1996,8 @@ public class RentalServiceImpl implements RentalService {
 			});
 		}
 	}
-	/***給支付相關的參數簽名*/
+	
+	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());
 		
@@ -3131,9 +3136,9 @@ public class RentalServiceImpl implements RentalService {
 	private String VendorTypeToString(String vendorType) {
 		if (StringUtils.isEmpty(vendorType))
 			return "";
-		if(vendorType.equals(VendorType.WEI_XIN.getCode()))
+		if(vendorType.equals(VendorType.WEI_XIN.getVendorType()))
 			return "微信支付";
-		if(vendorType.equals(VendorType.ZHI_FU_BAO.getCode()))
+		if(vendorType.equals(VendorType.ZHI_FU_BAO.getVendorType()))
 			return "支付宝支付";
 		return "";
 		
@@ -3513,5 +3518,126 @@ public class RentalServiceImpl implements RentalService {
 		this.rentalProvider.updateRentalSite(rs);
 	}
 
+	@Override
+	public GetRefundOrderListResponse getRefundOrderList(
+			GetRefundOrderListCommand cmd) {
+		// TODO Auto-generated method stub
+		GetRefundOrderListResponse response = new GetRefundOrderListResponse();
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE); 
+		Integer pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize()); 
+//		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<RentalRefundOrder> orders = rentalProvider.getRefundOrderList(cmd.getLaunchPadItemId(),  
+				  locator, cmd.getStatus(), VendorType.fromCode(cmd.getVendorType()).getStyleNo(), pageSize+1, cmd.getStartTime(), cmd.getEndTime()); 
+		if(orders==null ||orders.size()==0)
+			return response;
+		if(orders != null && orders.size() > pageSize) {
+			orders.remove(orders.size() - 1);
+			response.setNextPageAnchor( orders.get(orders.size() -1).getId()); 
+		}
+		response.setRefundOrders(new ArrayList<RefundOrderDTO>());
+		orders.forEach((order)->{
+			RefundOrderDTO dto =ConvertHelper.convert(order, RefundOrderDTO.class);
+			dto.setVendorType(VendorType.fromStyleNo(order.getOnlinePayStyleNo()).getVendorType());
+			User applyer = this.userProvider.findUserById(order.getCreatorUid());
+			if(null != applyer){
+				dto.setApplyUserName(applyer.getNickName());
+				
+				UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+				if(null == userIdentifier){
+					LOGGER.debug("userIdentifier is null...userId = " + order.getCreatorUid());
+				}else{
+					dto.setApplyUserContact(userIdentifier.getIdentifierToken());
+				}
+				 
+			}
+			else{
+				LOGGER.error("user not found userId = " + order.getCreatorUid());
+			}
+			dto.setApplyTime(order.getCreateTime().getTime());
+			response.getRefundOrders().add(dto);
+		});
+		
+		return response;
+	}
+
+	@Override
+	public RentalBillDTO getRentalBill(GetRentalBillCommand cmd) {
+		if(null==cmd.getBillId() )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : bill id is null");
+		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getBillId());
+		if(null==bill)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : bill id can not find bill");
+			
+		RentalBillDTO dto = new RentalBillDTO();
+		mappingRentalBillDTO(dto, bill);
+		dto.setSiteItems(new ArrayList<SiteItemDTO>());
+		List<RentalItemsBill> rentalSiteItems = rentalProvider
+				.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+		if(null!=rentalSiteItems)
+			for (RentalItemsBill rib : rentalSiteItems) {
+				SiteItemDTO siDTO = new SiteItemDTO();
+				siDTO.setCounts(rib.getRentalCount());
+				RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
+				if(rsItem != null) {
+    				siDTO.setItemName(rsItem.getName());
+    				siDTO.setItemPrice(rib.getTotalMoney());
+    				dto.getSiteItems().add(siDTO);
+				} else {
+				    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+				}
+			}
+		return dto;
+	}
+
+	@Override
+	public String getRefundUrl(GetRefundUrlCommand cmd) { 
+		if(null==cmd.getRefundId() )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : refund order  id is null"); 
+		RentalRefundOrder refundOrder = this.rentalProvider.getRentalRefundOrderById(cmd.getRefundId());
+		if(null==refundOrder)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : refund order id  can not find refund order ");
+		if(refundOrder.getOnlinePayStyleNo().equals(VendorType.WEI_XIN.getStyleNo()))
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 
+					RentalServiceErrorCode.ERROR_REFOUND_ERROR, "refund order is wechat  ");
+		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+		String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+		String appKey = configurationProvider.getValue("pay.appKey", "b86ddb3b-ac77-4a65-ae03-7e8482a3db70");
+		refundCmd.setAppKey(appKey);
+		Long timestamp = System.currentTimeMillis();
+		refundCmd.setTimestamp(timestamp);
+		Integer randomNum = (int) (Math.random()*1000);
+		refundCmd.setNonce(randomNum);
+		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
+				.currentGMTTime().getTime());
+		refundCmd.setRefundOrderNo(String.valueOf(refundOrder.getRefundOrderNo()) );
+		refundCmd.setOrderNo(String.valueOf(refundOrder.getOrderNo()));
+		refundCmd.setOnlinePayStyleNo(refundOrder.getOnlinePayStyleNo()); 
+		refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALREFUND.getPycode());
+		//已付金额乘以退款比例除以100
+		refundCmd.setRefundAmount( refundOrder.getAmount());
+		refundCmd.setRefundMsg("预订单取消退款");
+		this.setSignatureParam(refundCmd);
+		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+			return refundResponse.getResponse();
+		}
+		else{
+			LOGGER.error("refund order no =["+refundOrder.getRefundOrderNo()+"] refound error param is "+refundCmd.toString());
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+							"bill  refound error"); 
+		}	
+		 
+	}
+	
  
 }
