@@ -539,8 +539,9 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
         String key = getTokenKey(issuerId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-      
-        Map map = login(taotaoguVendorData);
+        
+        Long chnlSn = System.currentTimeMillis();
+        Map map = login(taotaoguVendorData,chnlSn);
         String returnCode = (String) map.get("return_code");
         //淘淘谷登录 返回值中没有return_code
 		if(returnCode == null){
@@ -555,6 +556,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	        
 			PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(issuerId);
 			taotaoguVendorData.setToken(token);
+			taotaoguVendorData.setChnlSn(chnlSn);
 			issuer.setVendorData(StringHelper.toJsonString(taotaoguVendorData));
 			paymentCardProvider.updatePaymentCardIssuer(issuer);
 			if(LOGGER.isDebugEnabled()) {
@@ -663,15 +665,19 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 			return result;
 		}
 	//创建登录参数
-	private JSONObject createLoginParam(TaotaoguVendorData taotaoguVendorData){
+	private JSONObject createLoginParam(TaotaoguVendorData taotaoguVendorData, Long chnlSn){
 		JSONObject json = new JSONObject();
 		String chnl_type = taotaoguVendorData.getChnlType();
 		String chnl_id = taotaoguVendorData.getChnlId();
 		String merch_id = taotaoguVendorData.getMerchId();
 		String termnl_id = taotaoguVendorData.getTermnlId();
+		Long cacheChnlSn = taotaoguVendorData.getChnlSn();
+		//保证渠道流水唯一，防止多台服务器，时间不一致，导致渠道流水比以前的值小
+		if(cacheChnlSn != null && cacheChnlSn > chnlSn)
+			chnlSn = cacheChnlSn + 100;
 		json.put("chnl_type", chnl_type);
 		json.put("chnl_id", chnl_id);
-		json.put("chnl_sn", System.currentTimeMillis());
+		json.put("chnl_sn", chnlSn);
 		json.put("merch_id", merch_id);
 		json.put("termnl_id", termnl_id);
 		return json;
@@ -763,10 +769,10 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		}
 	}
 	//订单登录方法，因为参数，和返回结果解析和其他普通订单方法不一样，所以单独写一个方法，获取token和aesKey
-	private Map<String,Object> login(TaotaoguVendorData taotaoguVendorData){
+	private Map<String,Object> login(TaotaoguVendorData taotaoguVendorData, Long chnlSn){
 		Map<String,Object> result = null;
 		String rspText = null;
-		JSONObject json = createLoginParam(taotaoguVendorData);
+		JSONObject json = createLoginParam(taotaoguVendorData, chnlSn);
 		
 		String orderUrl = configProvider.getValue("taotaogu.order.url", "");
 		HttpPost request = new HttpPost(orderUrl+"/iips2/order/login");
