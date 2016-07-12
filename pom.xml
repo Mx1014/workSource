@@ -9,8 +9,12 @@
     <modules>
         <module>ehrest</module>
         <module>ehcore-persist</module>
-        <module>ehcore</module>
+        <module>ehrest-response</module>
+        <module>ehnextgen-api</module>
+        <module>ehnextgen-messaging</module>
+        <module>ehnextgen-forum</module>
         <module>ehborder</module>
+        <module>ehcore</module>
     </modules>
 </project>
 

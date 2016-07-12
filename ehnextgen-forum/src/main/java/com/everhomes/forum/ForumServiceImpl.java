@@ -2932,24 +2932,27 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private Condition notEqPostCategoryCondition(List<Long> unCategorys) {
-    	if(null == unCategorys || 0 == unCategorys.size()){
-       	 	unCategorys = new ArrayList<Long>();
-        }
-        
-        Condition condition = null;
-        // contentCategoryId为0表示全部查，此时也不需要给category条件
-        for (Long categoryId : unCategorys) {
-        	Category contentCatogry = this.categoryProvider.findCategoryById(categoryId);
-            if(contentCatogry != null) {
-                if(null == condition){
-                	condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(contentCatogry.getPath() + "%");
-                }else{
-                	condition = condition.or(Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(contentCatogry.getPath() + "%"));
-                }
-                	 
-            }
-		}
-        return condition;
+    	return null;
+    	
+//    	if(null == unCategorys || 0 == unCategorys.size()){
+//       	 	unCategorys = new ArrayList<Long>();
+//        }
+//        
+//        Condition condition = null;
+//        // contentCategoryId为0表示全部查，此时也不需要给category条件
+//        for (Long categoryId : unCategorys) {
+//        	Category contentCatogry = this.categoryProvider.findCategoryById(categoryId);
+//            if(contentCatogry != null) {
+//                if(null == condition){
+//                	condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(contentCatogry.getPath() + "%");
+//                }else{
+//    				//此处应该用and, add by tangtong，20160712
+//                	condition = condition.or(Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(contentCatogry.getPath() + "%"));
+//                }
+//                	 
+//            }
+//		}
+//        return condition;
     }
     
     private Condition buildPostCategoryCondition(List<Long> categorys, Long actionCategoryId) {
