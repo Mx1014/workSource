@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = -844747434;
+	private static final long serialVersionUID = 171223110;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_launch_pad_items</code>
@@ -101,6 +101,14 @@ public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.
 
 	private EhUserLaunchPadItems(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.Long> getIdentity() {
+		return com.everhomes.server.schema.Keys.IDENTITY_EH_USER_LAUNCH_PAD_ITEMS;
 	}
 
 	/**
