@@ -3615,9 +3615,7 @@ public class RentalServiceImpl implements RentalService {
 		Long timestamp = System.currentTimeMillis();
 		refundCmd.setTimestamp(timestamp);
 		Integer randomNum = (int) (Math.random()*1000);
-		refundCmd.setNonce(randomNum);
-		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
-				.currentGMTTime().getTime());
+		refundCmd.setNonce(randomNum); 
 		refundCmd.setRefundOrderNo(String.valueOf(refundOrder.getRefundOrderNo()) );
 		refundCmd.setOrderNo(String.valueOf(refundOrder.getOrderNo()));
 		refundCmd.setOnlinePayStyleNo(refundOrder.getOnlinePayStyleNo()); 
