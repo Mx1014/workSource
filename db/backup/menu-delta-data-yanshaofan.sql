@@ -893,3 +893,25 @@ VALUES (11200,'新闻管理',10000,null,'news_management',0,2,'/10000/11200','pa
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),220,11200,'新闻管理',1,1,'新闻管理  全部权限',16);
+
+
+#
+#20160712
+#
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (558,0,'工位 招租管理','招租管理 全部功能',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (559,0,'工位 入住申请','招租管理 全部功能',null);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (43300,'工位预订',40000,null,null,1,2,'/40000/43300','park',435);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (43310,'招租管理',43300,null,'station_booking_rent_manage',0,2,'/40000/43300/43310','park',436);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (43320,'入住申请',43300,null,'station_booking_enter_apply',0,2,'/40000/43300/43320','park',437);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),558,43310,'招租管理',1,1,'招租管理 全部权限',341);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),559,43320,'入住申请',1,1,'入住申请 全部权限',342);
