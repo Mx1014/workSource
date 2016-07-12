@@ -51,10 +51,27 @@ public class OrderServiceImpl implements OrderService{
 		return String.valueOf(code);
 	}
 
+	private RefundEmbeddedHandler getRefundHandler(String orderType) {
+		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
+	}
 	@Override
 	public void refundCallback(RefundCallbackCommand cmd) {
 		// TODO Auto-generated method stub
-		
+		if(StringUtils.isEmpty(cmd.getOrderNo())||StringUtils.isEmpty(cmd.getRefundOrderNo())){
+			LOGGER.error("Invalid parameter,orderNo or refundOrderNo is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter,orderNo or refundOrderNo is null");
+		}
+		if(StringUtils.isEmpty(cmd.getOrderType())||StringUtils.isEmpty(cmd.getOnlinePayStyleNo())){
+			LOGGER.error("Invalid parameter,orderType or onlinePayStyleNo is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter,orderType or onlinePayStyleNo is null");
+		}
+		RefundEmbeddedHandler handler = this.getRefundHandler(cmd.getOrderType());
+		LOGGER.debug("OrderEmbeddedHandler="+handler.getClass().getName());
+	 
+		handler.paySuccess(cmd);
+		 
 	}
 
 }
