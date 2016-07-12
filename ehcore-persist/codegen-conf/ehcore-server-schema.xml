@@ -87,6 +87,8 @@
 		eh_payment_card_issuers | eh_payment_card_issuer_communities | eh_payment_cards | eh_payment_card_recharge_orders | eh_payment_card_transactions |
 		eh_quality_inspection_logs |
 		eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags | eh_app_urls |
+		eh_wifi_settings |
+		eh_news | eh_news_attachments | eh_news_comment |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

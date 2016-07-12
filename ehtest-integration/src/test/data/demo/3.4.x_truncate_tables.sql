@@ -217,5 +217,8 @@ TRUNCATE TABLE `eh_web_menus`;
 TRUNCATE TABLE `eh_wifi_settings`;
 TRUNCATE TABLE `eh_yellow_page_attachments`;
 TRUNCATE TABLE `eh_yellow_pages`;
+TRUNCATE TABLE `eh_news`;
+TRUNCATE TABLE `eh_news_attachments`;
+TRUNCATE TABLE `eh_news_comment`;
 
 SET foreign_key_checks = 1;
