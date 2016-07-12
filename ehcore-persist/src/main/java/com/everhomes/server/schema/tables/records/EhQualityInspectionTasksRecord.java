@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = -550262723;
+	private static final long serialVersionUID = -499149611;
 
 	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_tasks.id</code>. id
@@ -436,15 +436,15 @@ public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecor
 	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_tasks.manual_flag</code>. 0: auto 1:manual
 	 */
-	public void setManualFlag(java.lang.Byte value) {
+	public void setManualFlag(java.lang.Long value) {
 		setValue(30, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_quality_inspection_tasks.manual_flag</code>. 0: auto 1:manual
 	 */
-	public java.lang.Byte getManualFlag() {
-		return (java.lang.Byte) getValue(30);
+	public java.lang.Long getManualFlag() {
+		return (java.lang.Long) getValue(30);
 	}
 
 	// -------------------------------------------------------------------------
@@ -473,7 +473,7 @@ public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecor
 	/**
 	 * Create a detached, initialised EhQualityInspectionTasksRecord
 	 */
-	public EhQualityInspectionTasksRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long standardId, java.lang.String taskNumber, java.lang.String taskName, java.lang.Byte taskType, java.lang.Long parentId, java.lang.Long childCount, java.lang.Long executiveGroupId, java.sql.Timestamp executiveStartTime, java.sql.Timestamp executiveExpireTime, java.sql.Timestamp executiveTime, java.lang.String executorType, java.lang.Long executorId, java.lang.String operatorType, java.lang.Long operatorId, java.sql.Timestamp processExpireTime, java.lang.Byte processResult, java.sql.Timestamp processTime, java.lang.Byte status, java.lang.Byte result, java.lang.String reviewerType, java.lang.Long reviewerId, java.lang.Byte reviewResult, java.sql.Timestamp reviewTime, java.sql.Timestamp createTime, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long createUid, java.lang.Byte manualFlag) {
+	public EhQualityInspectionTasksRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long standardId, java.lang.String taskNumber, java.lang.String taskName, java.lang.Byte taskType, java.lang.Long parentId, java.lang.Long childCount, java.lang.Long executiveGroupId, java.sql.Timestamp executiveStartTime, java.sql.Timestamp executiveExpireTime, java.sql.Timestamp executiveTime, java.lang.String executorType, java.lang.Long executorId, java.lang.String operatorType, java.lang.Long operatorId, java.sql.Timestamp processExpireTime, java.lang.Byte processResult, java.sql.Timestamp processTime, java.lang.Byte status, java.lang.Byte result, java.lang.String reviewerType, java.lang.Long reviewerId, java.lang.Byte reviewResult, java.sql.Timestamp reviewTime, java.sql.Timestamp createTime, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long createUid, java.lang.Long manualFlag) {
 		super(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS);
 
 		setValue(0, id);

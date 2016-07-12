@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 44670304;
+	private static final long serialVersionUID = 2129733320;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -43,7 +43,7 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 	private java.lang.Long     categoryId;
 	private java.lang.String   categoryPath;
 	private java.lang.Long     createUid;
-	private java.lang.Byte     manualFlag;
+	private java.lang.Long     manualFlag;
 
 	public EhQualityInspectionTasks() {}
 
@@ -78,7 +78,7 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		java.lang.Long     categoryId,
 		java.lang.String   categoryPath,
 		java.lang.Long     createUid,
-		java.lang.Byte     manualFlag
+		java.lang.Long     manualFlag
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -353,11 +353,11 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.createUid = createUid;
 	}
 
-	public java.lang.Byte getManualFlag() {
+	public java.lang.Long getManualFlag() {
 		return this.manualFlag;
 	}
 
-	public void setManualFlag(java.lang.Byte manualFlag) {
+	public void setManualFlag(java.lang.Long manualFlag) {
 		this.manualFlag = manualFlag;
 	}
 }
