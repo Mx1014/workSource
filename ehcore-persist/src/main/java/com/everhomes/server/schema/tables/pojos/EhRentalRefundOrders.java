@@ -11,40 +11,46 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRefundOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1250652694;
+	private static final long serialVersionUID = -1773116150;
 
-	private java.lang.Long     id;
-	private java.lang.Long     rentalBillId;
-	private java.lang.Long     refoundOrderNo;
-	private java.lang.Long     orderNo;
-	private java.lang.String   onlinePayStyleNo;
-	private java.lang.String   url;
-	private java.lang.Byte     status;
-	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
-	private java.lang.Long     operatorUid;
-	private java.sql.Timestamp operateTime;
+	private java.lang.Long       id;
+	private java.lang.Long       rentalBillId;
+	private java.lang.Long       refundOrderNo;
+	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       orderNo;
+	private java.lang.String     onlinePayStyleNo;
+	private java.math.BigDecimal amount;
+	private java.lang.String     url;
+	private java.lang.Byte       status;
+	private java.lang.Long       creatorUid;
+	private java.sql.Timestamp   createTime;
+	private java.lang.Long       operatorUid;
+	private java.sql.Timestamp   operateTime;
 
 	public EhRentalRefundOrders() {}
 
 	public EhRentalRefundOrders(
-		java.lang.Long     id,
-		java.lang.Long     rentalBillId,
-		java.lang.Long     refoundOrderNo,
-		java.lang.Long     orderNo,
-		java.lang.String   onlinePayStyleNo,
-		java.lang.String   url,
-		java.lang.Byte     status,
-		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.lang.Long       id,
+		java.lang.Long       rentalBillId,
+		java.lang.Long       refundOrderNo,
+		java.lang.Long       launchPadItemId,
+		java.lang.Long       orderNo,
+		java.lang.String     onlinePayStyleNo,
+		java.math.BigDecimal amount,
+		java.lang.String     url,
+		java.lang.Byte       status,
+		java.lang.Long       creatorUid,
+		java.sql.Timestamp   createTime,
+		java.lang.Long       operatorUid,
+		java.sql.Timestamp   operateTime
 	) {
 		this.id = id;
 		this.rentalBillId = rentalBillId;
-		this.refoundOrderNo = refoundOrderNo;
+		this.refundOrderNo = refundOrderNo;
+		this.launchPadItemId = launchPadItemId;
 		this.orderNo = orderNo;
 		this.onlinePayStyleNo = onlinePayStyleNo;
+		this.amount = amount;
 		this.url = url;
 		this.status = status;
 		this.creatorUid = creatorUid;
@@ -69,12 +75,20 @@ public class EhRentalRefundOrders implements java.io.Serializable {
 		this.rentalBillId = rentalBillId;
 	}
 
-	public java.lang.Long getRefoundOrderNo() {
-		return this.refoundOrderNo;
+	public java.lang.Long getRefundOrderNo() {
+		return this.refundOrderNo;
 	}
 
-	public void setRefoundOrderNo(java.lang.Long refoundOrderNo) {
-		this.refoundOrderNo = refoundOrderNo;
+	public void setRefundOrderNo(java.lang.Long refundOrderNo) {
+		this.refundOrderNo = refundOrderNo;
+	}
+
+	public java.lang.Long getLaunchPadItemId() {
+		return this.launchPadItemId;
+	}
+
+	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
 	}
 
 	public java.lang.Long getOrderNo() {
@@ -91,6 +105,14 @@ public class EhRentalRefundOrders implements java.io.Serializable {
 
 	public void setOnlinePayStyleNo(java.lang.String onlinePayStyleNo) {
 		this.onlinePayStyleNo = onlinePayStyleNo;
+	}
+
+	public java.math.BigDecimal getAmount() {
+		return this.amount;
+	}
+
+	public void setAmount(java.math.BigDecimal amount) {
+		this.amount = amount;
 	}
 
 	public java.lang.String getUrl() {

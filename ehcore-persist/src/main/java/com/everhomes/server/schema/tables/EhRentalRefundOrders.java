@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRefundOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord> {
 
-	private static final long serialVersionUID = -1279501126;
+	private static final long serialVersionUID = 1889291607;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_refund_orders</code>
@@ -29,7 +29,7 @@ public class EhRentalRefundOrders extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_rental_refund_orders.id</code>. id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_refund_orders.rental_bill_id</code>. 订单id
@@ -37,9 +37,14 @@ public class EhRentalRefundOrders extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> RENTAL_BILL_ID = createField("rental_bill_id", org.jooq.impl.SQLDataType.BIGINT, this, "订单id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_refund_orders.refound_order_no</code>. 退款的refoundOrderNo-服务端退款时候生成
+	 * The column <code>ehcore.eh_rental_refund_orders.refund_order_no</code>. 退款的refoundOrderNo-服务端退款时候生成
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> REFOUND_ORDER_NO = createField("refound_order_no", org.jooq.impl.SQLDataType.BIGINT, this, "退款的refoundOrderNo-服务端退款时候生成");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> REFUND_ORDER_NO = createField("refund_order_no", org.jooq.impl.SQLDataType.BIGINT, this, "退款的refoundOrderNo-服务端退款时候生成");
+
+	/**
+	 * The column <code>ehcore.eh_rental_refund_orders.launch_pad_item_id</code>. 广场图标id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_refund_orders.order_no</code>. 支付的orderno-下单时候生成
@@ -49,7 +54,12 @@ public class EhRentalRefundOrders extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_rental_refund_orders.online_pay_style_no</code>. 支付方式,alipay-支付宝,wechat-微信
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.String> ONLINE_PAY_STYLE_NO = createField("online_pay_style_no", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "支付方式,alipay-支付宝,wechat-微信");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.String> ONLINE_PAY_STYLE_NO = createField("online_pay_style_no", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "支付方式,alipay-支付宝,wechat-微信");
+
+	/**
+	 * The column <code>ehcore.eh_rental_refund_orders.amount</code>. 退款金额
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.math.BigDecimal> AMOUNT = createField("amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "退款金额");
 
 	/**
 	 * The column <code>ehcore.eh_rental_refund_orders.url</code>. 支付宝的退款链接

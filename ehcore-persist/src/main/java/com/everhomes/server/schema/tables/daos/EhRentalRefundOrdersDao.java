@@ -55,10 +55,17 @@ public class EhRentalRefundOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
-	 * Fetch records that have <code>refound_order_no IN (values)</code>
+	 * Fetch records that have <code>refund_order_no IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders> fetchByRefoundOrderNo(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS.REFOUND_ORDER_NO, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders> fetchByRefundOrderNo(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS.REFUND_ORDER_NO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>launch_pad_item_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders> fetchByLaunchPadItemId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS.LAUNCH_PAD_ITEM_ID, values);
 	}
 
 	/**
@@ -73,6 +80,13 @@ public class EhRentalRefundOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders> fetchByOnlinePayStyleNo(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS.ONLINE_PAY_STYLE_NO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders> fetchByAmount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS.AMOUNT, values);
 	}
 
 	/**

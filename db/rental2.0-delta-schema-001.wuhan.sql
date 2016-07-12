@@ -395,17 +395,20 @@ CREATE TABLE `eh_rental_bill_paybill_map` (
 DROP TABLE IF EXISTS eh_rental_refund_orders;
 
 CREATE TABLE `eh_rental_refund_orders` (
-`id` BIGINT(20) NOT NULL  COMMENT 'id',
-`rental_bill_id` BIGINT(20) NULL  COMMENT '订单id',
-`refound_order_no` BIGINT(20) NULL  COMMENT '退款的refoundOrderNo-服务端退款时候生成',
-`order_no` BIGINT(20) NULL  COMMENT '支付的orderno-下单时候生成',
-`online_pay_style_no` VARCHAR(32) NULL  COMMENT '支付方式,alipay-支付宝,wechat-微信',
-`url` VARCHAR(1024) NULL  COMMENT '支付宝的退款链接',
-`status` TINYINT(4) NULL  COMMENT '退款的状态，和订单状态保持一致',
-`creator_uid` BIGINT(20) NULL  COMMENT '',
-`create_time` DATETIME NULL  COMMENT '',
-`operator_uid` BIGINT(20) NULL  COMMENT '',
-`operate_time` DATETIME NULL  COMMENT '',
+`id` BIGINT(20)  COMMENT 'id',
+`rental_bill_id` BIGINT(20)   COMMENT '订单id',
+`refund_order_no` BIGINT(20)   COMMENT '退款的refoundOrderNo-服务端退款时候生成',
+`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`order_no` BIGINT(20)   COMMENT '支付的orderno-下单时候生成',
+`online_pay_style_no` VARCHAR(20)   COMMENT '支付方式,alipay-支付宝,wechat-微信',
+`amount` DECIMAL(10,2)  COMMENT '退款金额',
+`url` VARCHAR(1024)   COMMENT '支付宝的退款链接',
+`status` TINYINT(4)   COMMENT '退款的状态，和订单状态保持一致',
+`creator_uid` BIGINT(20)   COMMENT '',
+`create_time` DATETIME   COMMENT '',
+`operator_uid` BIGINT(20)   COMMENT '',
+`operate_time` DATETIME   COMMENT '',
+
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
