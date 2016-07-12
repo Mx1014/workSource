@@ -34,8 +34,8 @@
         [jsonObject setObject: self.theNewsToken forKey: @"newsToken"];
     if(self.title)
         [jsonObject setObject: self.title forKey: @"title"];
-    if(self.releaseTime)
-        [jsonObject setObject: self.releaseTime forKey: @"releaseTime"];
+    if(self.publishTime)
+        [jsonObject setObject: self.publishTime forKey: @"publishTime"];
     if(self.author)
         [jsonObject setObject: self.author forKey: @"author"];
     if(self.sourceDesc)
@@ -65,9 +65,9 @@
         if(self.title && [self.title isEqual:[NSNull null]])
             self.title = nil;
 
-        self.releaseTime = [jsonObject objectForKey: @"releaseTime"];
-        if(self.releaseTime && [self.releaseTime isEqual:[NSNull null]])
-            self.releaseTime = nil;
+        self.publishTime = [jsonObject objectForKey: @"publishTime"];
+        if(self.publishTime && [self.publishTime isEqual:[NSNull null]])
+            self.publishTime = nil;
 
         self.author = [jsonObject objectForKey: @"author"];
         if(self.author && [self.author isEqual:[NSNull null]])

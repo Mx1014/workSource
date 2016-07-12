@@ -25,6 +25,8 @@
 
 @property(nonatomic, copy) NSString* author;
 
+@property(nonatomic, copy) NSNumber* publishTime;
+
 @property(nonatomic, copy) NSString* sourceDesc;
 
 @property(nonatomic, copy) NSString* sourceUrl;

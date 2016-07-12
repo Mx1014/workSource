@@ -44,6 +44,8 @@
         [jsonObject setObject: self.content forKey: @"content"];
     if(self.author)
         [jsonObject setObject: self.author forKey: @"author"];
+    if(self.publishTime)
+        [jsonObject setObject: self.publishTime forKey: @"publishTime"];
     if(self.sourceDesc)
         [jsonObject setObject: self.sourceDesc forKey: @"sourceDesc"];
     if(self.sourceUrl)
@@ -80,6 +82,10 @@
         self.author = [jsonObject objectForKey: @"author"];
         if(self.author && [self.author isEqual:[NSNull null]])
             self.author = nil;
+
+        self.publishTime = [jsonObject objectForKey: @"publishTime"];
+        if(self.publishTime && [self.publishTime isEqual:[NSNull null]])
+            self.publishTime = nil;
 
         self.sourceDesc = [jsonObject objectForKey: @"sourceDesc"];
         if(self.sourceDesc && [self.sourceDesc isEqual:[NSNull null]])

@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-09 10:43:10
+// generated at 2016-07-12 18:01:58
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -113,6 +113,7 @@ public interface ApiConstants {
     public static final String ADMIN_CODEGEN_URL = "/admin/codegen";
     public static final String ADMIN_COMMUNITY_APPROVEBUILDING_URL = "/admin/community/approveBuilding";
     public static final String ADMIN_COMMUNITY_APPROVECOMMUNITY_URL = "/admin/community/approveCommunity";
+    public static final String ADMIN_COMMUNITY_CREATECOMMUNITY_URL = "/admin/community/createCommunity";
     public static final String ADMIN_COMMUNITY_DELETEBUILDING_URL = "/admin/community/deleteBuilding";
     public static final String ADMIN_COMMUNITY_GETCOMMUNITYBYID_URL = "/admin/community/getCommunityById";
     public static final String ADMIN_COMMUNITY_GETCOMMUNITYBYUUID_URL = "/admin/community/getCommunityByUuid";
@@ -120,10 +121,12 @@ public interface ApiConstants {
     public static final String ADMIN_COMMUNITY_GETNEARBYCOMMUNITIESBYID_URL = "/admin/community/getNearbyCommunitiesById";
     public static final String ADMIN_COMMUNITY_GETUSERCOMMUNITIES_URL = "/admin/community/getUserCommunities";
     public static final String ADMIN_COMMUNITY_IMPORTBUILDINGDATA_URL = "/admin/community/importBuildingData";
+    public static final String ADMIN_COMMUNITY_IMPORTCOMMUNITY_URL = "/admin/community/importCommunity";
     public static final String ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL = "/admin/community/listBuildingsByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL = "/admin/community/listCommunitiesByKeyword";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/listCommunityAuthUserAddress";
+    public static final String ADMIN_COMMUNITY_LISTCOMMUNITYBYNAMESPACEID_URL = "/admin/community/listCommunityByNamespaceId";
     public static final String ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL = "/admin/community/listOwnerBycommunityId";
     public static final String ADMIN_COMMUNITY_LISTUNASSIGNEDCOMMUNITIESBYNAMESPACEID_URL = "/admin/community/listUnassignedCommunitiesByNamespaceId";
     public static final String ADMIN_COMMUNITY_LISTUSERBYNOTJOINEDCOMMUNITY_URL = "/admin/community/listUserByNotJoinedCommunity";
@@ -539,6 +542,7 @@ public interface ApiConstants {
     public static final String NEWS_SEARCHNEWS_URL = "/news/searchNews";
     public static final String NEWS_SETNEWSLIKEFLAG_URL = "/news/setNewsLikeFlag";
     public static final String NEWS_SETNEWSTOPFLAG_URL = "/news/setNewsTopFlag";
+    public static final String NEWS_SYNCNEWS_URL = "/news/syncNews";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
     public static final String OAUTH2_OAUTH2LOGON_URL = "/oauth2/oauth2Logon";
@@ -873,6 +877,10 @@ public interface ApiConstants {
     public static final String UI_LAUNCHPAD_GETMOREITEMSBYSCENE_URL = "/ui/launchpad/getMoreItemsByScene";
     public static final String UI_LAUNCHPAD_REORDERLAUNCHPADITEMBYSCENE_URL = "/ui/launchpad/reorderLaunchPadItemByScene";
     public static final String UI_LAUNCHPAD_REORDERMOREITEMBYSCENE_URL = "/ui/launchpad/reorderMoreItemByScene";
+    public static final String UI_NEWS_ADDNEWSCOMMENTBYSCENE_URL = "/ui/news/addNewsCommentByScene";
+    public static final String UI_NEWS_DELETENEWSCOMMENTBYSCENE_URL = "/ui/news/deleteNewsCommentByScene";
+    public static final String UI_NEWS_LISTNEWSBYSCENE_URL = "/ui/news/listNewsByScene";
+    public static final String UI_NEWS_SETNEWSLIKEFLAGBYSCENE_URL = "/ui/news/setNewsLikeFlagByScene";
     public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";
     public static final String UI_ORG_GRABTASK_URL = "/ui/org/grabTask";
     public static final String UI_ORG_LISTGRABTASKTOPICS_URL = "/ui/org/listGrabTaskTopics";

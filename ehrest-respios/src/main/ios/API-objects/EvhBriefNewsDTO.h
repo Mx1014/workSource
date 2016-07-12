@@ -15,7 +15,7 @@
 
 @property(nonatomic, copy) NSString* title;
 
-@property(nonatomic, copy) NSNumber* releaseTime;
+@property(nonatomic, copy) NSNumber* publishTime;
 
 @property(nonatomic, copy) NSString* author;
 

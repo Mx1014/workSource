@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* Id;
+@property(nonatomic, copy) NSNumber* id;
 
 @property(nonatomic, copy) NSString* theNewsToken;
 
