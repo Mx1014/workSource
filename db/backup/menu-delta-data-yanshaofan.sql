@@ -897,6 +897,7 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),220,11200,'新闻
 
 #
 #20160712
+#根据具体情况去掉菜单 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES(47, 43300,'', 'EhNamespaces', 0 , 0);
 #
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
