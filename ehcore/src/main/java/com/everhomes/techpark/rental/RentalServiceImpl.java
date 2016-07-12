@@ -1930,9 +1930,7 @@ public class RentalServiceImpl implements RentalService {
 			this.dbProvider.execute((TransactionStatus status) -> {
 				//默认是已退款
 				bill.setStatus(SiteBillStatus.REFUNDED.getCode());
-				if (rs.getRefundFlag().equals(NormalFlag.NEED)){
-					//TODO:退款
-					
+				if (rs.getRefundFlag().equals(NormalFlag.NEED)){ 
 					List<RentalBillPaybillMap>  billmaps = this.rentalProvider.findRentalBillPaybillMapByBillId(bill.getId());
 					for(RentalBillPaybillMap billMap : billmaps){
 						//循环退款
