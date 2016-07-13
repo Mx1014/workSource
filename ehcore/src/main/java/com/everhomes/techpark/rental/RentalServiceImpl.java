@@ -3123,7 +3123,7 @@ public class RentalServiceImpl implements RentalService {
 		else
 			row.createCell(++i).setCellValue("0");
 		//支付方式
-		row.createCell(++i).setCellValue(VendorTypeToString(dto.getVendorType()));
+		row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
 		//订单状态
 		if(dto.getStatus() != null)
 			row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
@@ -3131,16 +3131,16 @@ public class RentalServiceImpl implements RentalService {
 			row.createCell(++i).setCellValue("");
 		 
 	}
-	private String VendorTypeToString(String vendorType) {
-		if (StringUtils.isEmpty(vendorType))
-			return "";
-		if(vendorType.equals(VendorType.WEI_XIN.getVendorType()))
-			return "微信支付";
-		if(vendorType.equals(VendorType.ZHI_FU_BAO.getVendorType()))
-			return "支付宝支付";
-		return "";
-		
-	}
+//	private String VendorTypeToString(String vendorType) {
+//		if (StringUtils.isEmpty(vendorType))
+//			return "";
+//		if(vendorType.equals(VendorType.WEI_XIN.getVendorType()))
+//			return "微信支付";
+//		if(vendorType.equals(VendorType.ZHI_FU_BAO.getVendorType()))
+//			return "支付宝支付";
+//		return "";
+//		
+//	}
 	private String statusToString(Byte status) {
 //		
 //		if(status.equals(SiteBillStatus.LOCKED.getCode()))

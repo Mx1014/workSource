@@ -357,7 +357,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		callBackCmd.setPayAmount(itemBillResponseSucess.getResponse().getAmount().toString());
 		callBackCmd.setPayStatus("success");
 		callBackCmd.setPayTime("2016-7-4 10:53:40"); 
-		callBackCmd.setVendorType(VendorType.WEI_XIN.getCode());
+		callBackCmd.setVendorType(VendorType.WEI_XIN.getVendorType());
 		RestResponse callBackResponse = httpClientService
 				.restGet(commandRelativeUri, callBackCmd,RestResponse.class, context);
 

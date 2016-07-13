@@ -8,24 +8,33 @@ package com.everhomes.rest.organization;
  *
  */
 public enum VendorType {
-	ZHI_FU_BAO("10001","wechat"),WEI_XIN("10002","alipay");
+	ZHI_FU_BAO("10001","alipay","支付宝支付"),WEI_XIN("10002","wechat","微信支付");
+	
 
 	private String code;
 	private String styleNo;
+	private String describe;
 
-	private VendorType(String code,String styleNo){
+	private VendorType(String code,String styleNo,String describe){
 		this.code = code;
-		this.styleNo=styleNo;
+		this.styleNo = styleNo;
+		this.describe = describe;
 	}
 
 	public String getVendorType() {
 		return code;
 	}
 
+	public String getCode() {
+		return code;
+	}
 	public String getStyleNo() {
 		return styleNo;
 	}
 
+	public String getDescribe() {
+		return describe;
+	}
 	public static VendorType fromCode(String code){
 		for(VendorType v :VendorType.values()){
 			if(v.getVendorType().equals(code))
