@@ -799,6 +799,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhRentalBills EH_RENTAL_BILLS = com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS;
 
 	/**
+	 * The table ehcore.eh_rental_sites_bill_numbers
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSitesBillNumbers EH_RENTAL_SITES_BILL_NUMBERS = com.everhomes.server.schema.tables.EhRentalSitesBillNumbers.EH_RENTAL_SITES_BILL_NUMBERS;
+
+	/**
 	 * The table ehcore.eh_rental_bill_attachments
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalBillAttachments EH_RENTAL_BILL_ATTACHMENTS = com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS;
@@ -809,9 +814,30 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhRentalBillPaybillMap EH_RENTAL_BILL_PAYBILL_MAP = com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP;
 
 	/**
+	 * The table ehcore.eh_rental_close_dates
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalCloseDates EH_RENTAL_CLOSE_DATES = com.everhomes.server.schema.tables.EhRentalCloseDates.EH_RENTAL_CLOSE_DATES;
+
+	/**
+	 * The table ehcore.eh_rental_config_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalConfigAttachments EH_RENTAL_CONFIG_ATTACHMENTS = com.everhomes.server.schema.tables.EhRentalConfigAttachments.EH_RENTAL_CONFIG_ATTACHMENTS;
+
+	/**
+	 * The table ehcore.eh_rental_default_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalDefaultRules EH_RENTAL_DEFAULT_RULES = com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES;
+
+	/**
 	 * The table ehcore.eh_rental_items_bills
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalItemsBills EH_RENTAL_ITEMS_BILLS = com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS;
+
+
+	/**
+	 * The table ehcore.eh_rental_refund_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalRefundOrders EH_RENTAL_REFUND_ORDERS = com.everhomes.server.schema.tables.EhRentalRefundOrders.EH_RENTAL_REFUND_ORDERS;
 
 	/**
 	 * The table ehcore.eh_rental_rules
@@ -834,9 +860,23 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhRentalSiteItems EH_RENTAL_SITE_ITEMS = com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS;
 
 	/**
+	 * The table ehcore.eh_rental_site_owners
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSiteOwners EH_RENTAL_SITE_OWNERS = com.everhomes.server.schema.tables.EhRentalSiteOwners.EH_RENTAL_SITE_OWNERS;
+	/**
+	 * The table ehcore.eh_rental_site_pics
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSitePics EH_RENTAL_SITE_PICS = com.everhomes.server.schema.tables.EhRentalSitePics.EH_RENTAL_SITE_PICS;
+
+	/**
 	 * The table ehcore.eh_rental_site_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalSiteRules EH_RENTAL_SITE_RULES = com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES;
+
+	/**
+	 * The table ehcore.eh_rental_time_interval
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalTimeInterval EH_RENTAL_TIME_INTERVAL = com.everhomes.server.schema.tables.EhRentalTimeInterval.EH_RENTAL_TIME_INTERVAL;
 
 	/**
 	 * The table ehcore.eh_repeat_settings

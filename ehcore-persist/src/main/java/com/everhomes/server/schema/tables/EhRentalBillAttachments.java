@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord> {
 
-	private static final long serialVersionUID = 1322800612;
+	private static final long serialVersionUID = 1514461572;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bill_attachments</code>
@@ -30,21 +30,6 @@ public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_rental_bill_attachments.id</code>. id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bill_attachments.owner_type</code>. owner type: community, organization
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type: community, organization");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bill_attachments.owner_id</code>. community id or organization id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "community id or organization id");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bill_attachments.site_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bill_attachments.rental_bill_id</code>.
@@ -85,6 +70,11 @@ public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_rental_bill_attachments.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bill_attachments.launch_pad_item_id</code>. 广场图标id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_bill_attachments</code> table reference

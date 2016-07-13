@@ -1,5 +1,5 @@
-// @formatter:off
-// generated at 2016-07-09 10:43:10
+// @formatter:off 
+// generated at 2016-07-13 17:07:19 
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -765,6 +765,41 @@ public interface ApiConstants {
     public static final String REGION_LISTCHILDREN_URL = "/region/listChildren";
     public static final String REGION_LISTDESCENDANTS_URL = "/region/listDescendants";
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
+    public static final String RENTAL_ADDRENTALBILL_URL = "/rental/addRentalBill";
+    public static final String RENTAL_ADDRENTALITEMBILL_URL = "/rental/addRentalItemBill";
+    public static final String RENTAL_ADMIN_ADDITEM_URL = "/rental/admin/addItem";
+    public static final String RENTAL_ADMIN_ADDRENTALSITERULES_URL = "/rental/admin/addRentalSiteRules";
+    public static final String RENTAL_ADMIN_ADDRESOURCE_URL = "/rental/admin/addResource";
+    public static final String RENTAL_ADMIN_BATCHCOMPLETEBILL_URL = "/rental/admin/batchCompleteBill";
+    public static final String RENTAL_ADMIN_BATCHINCOMPLETEBILL_URL = "/rental/admin/batchIncompleteBill";
+    public static final String RENTAL_ADMIN_COMPLETEBILL_URL = "/rental/admin/completeBill";
+    public static final String RENTAL_ADMIN_DELETEITEM_URL = "/rental/admin/deleteItem";
+    public static final String RENTAL_ADMIN_EXPORTRENTALBILLS_URL = "/rental/admin/exportRentalBills";
+    public static final String RENTAL_ADMIN_GETITEMLIST_URL = "/rental/admin/getItemList";
+    public static final String RENTAL_ADMIN_GETREFUNDORDERLIST_URL = "/rental/admin/getRefundOrderList";
+    public static final String RENTAL_ADMIN_GETREFUNDURL_URL = "/rental/admin/getRefundUrl";
+    public static final String RENTAL_ADMIN_GETRENTALBILL_URL = "/rental/admin/getRentalBill";
+    public static final String RENTAL_ADMIN_GETRESOURCELIST_URL = "/rental/admin/getResourceList";
+    public static final String RENTAL_ADMIN_INCOMPLETEBILL_URL = "/rental/admin/incompleteBill";
+    public static final String RENTAL_ADMIN_LISTRENTALBILLS_URL = "/rental/admin/listRentalBills";
+    public static final String RENTAL_ADMIN_QUERYDEFAULTRULE_URL = "/rental/admin/queryDefaultRule";
+    public static final String RENTAL_ADMIN_UPDATEDEFAULTRULE_URL = "/rental/admin/updateDefaultRule";
+    public static final String RENTAL_ADMIN_UPDATEITEM_URL = "/rental/admin/updateItem";
+    public static final String RENTAL_ADMIN_UPDATEITEMS_URL = "/rental/admin/updateItems";
+    public static final String RENTAL_ADMIN_UPDATERENTALSITEDISCOUNT_URL = "/rental/admin/updateRentalSiteDiscount";
+    public static final String RENTAL_ADMIN_UPDATERENTALSITERULES_URL = "/rental/admin/updateRentalSiteRules";
+    public static final String RENTAL_ADMIN_UPDATERESOURCE_URL = "/rental/admin/updateResource";
+    public static final String RENTAL_CANCELRENTALBILL_URL = "/rental/cancelRentalBill";
+    public static final String RENTAL_DELETERENTALBILL_URL = "/rental/deleteRentalBill";
+    public static final String RENTAL_EXPORTRENTALBILLS_URL = "/rental/exportRentalBills";
+    public static final String RENTAL_FINDAUTOASSIGNRENTALSITEDAYSTATUS_URL = "/rental/findAutoAssignRentalSiteDayStatus";
+    public static final String RENTAL_FINDAUTOASSIGNRENTALSITEWEEKSTATUS_URL = "/rental/findAutoAssignRentalSiteWeekStatus";
+    public static final String RENTAL_FINDRENTALSITEITEMSANDATTACHMENTS_URL = "/rental/findRentalSiteItemsAndAttachments";
+    public static final String RENTAL_FINDRENTALSITEWEEKSTATUS_URL = "/rental/findRentalSiteWeekStatus";
+    public static final String RENTAL_FINDRENTALSITES_URL = "/rental/findRentalSites";
+    public static final String RENTAL_FINDUSERRENTALBILLS_URL = "/rental/findUserRentalBills";
+    public static final String RENTAL_LISTRENTALBILLS_URL = "/rental/listRentalBills";
+    public static final String RENTAL_ONLINEPAYCALLBACK_URL = "/rental/onlinePayCallback";
     public static final String REPEAT_TESTEXPRESSIONANALYZE_URL = "/repeat/testExpressionAnalyze";
     public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
     public static final String TECHPARK_ENTRY_CREATELEASEPROMOTION_URL = "/techpark/entry/createLeasePromotion";

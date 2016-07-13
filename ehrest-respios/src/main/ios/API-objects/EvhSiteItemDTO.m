@@ -38,6 +38,16 @@
         [jsonObject setObject: self.itemPrice forKey: @"itemPrice"];
     if(self.counts)
         [jsonObject setObject: self.counts forKey: @"counts"];
+    if(self.imgUri)
+        [jsonObject setObject: self.imgUri forKey: @"imgUri"];
+    if(self.imgUrl)
+        [jsonObject setObject: self.imgUrl forKey: @"imgUrl"];
+    if(self.defaultOrder)
+        [jsonObject setObject: self.defaultOrder forKey: @"defaultOrder"];
+    if(self.itemType)
+        [jsonObject setObject: self.itemType forKey: @"itemType"];
+    if(self.soldCount)
+        [jsonObject setObject: self.soldCount forKey: @"soldCount"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -58,6 +68,26 @@
         self.counts = [jsonObject objectForKey: @"counts"];
         if(self.counts && [self.counts isEqual:[NSNull null]])
             self.counts = nil;
+
+        self.imgUri = [jsonObject objectForKey: @"imgUri"];
+        if(self.imgUri && [self.imgUri isEqual:[NSNull null]])
+            self.imgUri = nil;
+
+        self.imgUrl = [jsonObject objectForKey: @"imgUrl"];
+        if(self.imgUrl && [self.imgUrl isEqual:[NSNull null]])
+            self.imgUrl = nil;
+
+        self.defaultOrder = [jsonObject objectForKey: @"defaultOrder"];
+        if(self.defaultOrder && [self.defaultOrder isEqual:[NSNull null]])
+            self.defaultOrder = nil;
+
+        self.itemType = [jsonObject objectForKey: @"itemType"];
+        if(self.itemType && [self.itemType isEqual:[NSNull null]])
+            self.itemType = nil;
+
+        self.soldCount = [jsonObject objectForKey: @"soldCount"];
+        if(self.soldCount && [self.soldCount isEqual:[NSNull null]])
+            self.soldCount = nil;
 
         return self;
     }

@@ -10,7 +10,8 @@ typedef enum {
 
     EvhRentalType_HOUR = 0, 
     EvhRentalType_DAY = 2, 
-    EvhRentalType_HALFDAY = 1
+    EvhRentalType_HALFDAY = 1, 
+    EvhRentalType_THREETIMEADAY = 3
 
 } EvhRentalType;
 

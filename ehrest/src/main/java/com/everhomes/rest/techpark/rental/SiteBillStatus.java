@@ -11,25 +11,31 @@ package com.everhomes.rest.techpark.rental;
  * <li>TOPAYFINAL(6): 进入支付全款</li>
  * <li>COMPLETE(7): 完成预约</li>
  * <li>OVERTIME(8): 超时未完成</li>
+ * <li>REFUNDING(9): 退款中</li>
+ * <li>REFUNDED(10): 已退款</li>
  * </ul>
  */
 public enum SiteBillStatus {
    
 	
-	LOCKED((byte)0),
-	RESERVED((byte)1),
-	SUCCESS((byte)2),
-	PAYINGFINAL((byte)3),
-	FAIL((byte)4),
-	TOPAYRES((byte)5),
-	TOPAYFINAL((byte)6),
-	COMPLETE((byte)7),
-	OVERTIME((byte)8);
+	LOCKED((byte)0,"待付订金"),
+	RESERVED((byte)1,"已付定金"),
+	SUCCESS((byte)2,"已预约"),
+	PAYINGFINAL((byte)3,"待付款"),
+	FAIL((byte)4,"已取消"),
+//	TOPAYRES((byte)5),
+//	TOPAYFINAL((byte)6),
+	COMPLETE((byte)7,"已完成"),
+	OVERTIME((byte)8,"已过期"),
+	REFUNDING((byte)9,"退款中"),
+	REFUNDED((byte)10,"已退款");
 	
     
     private byte code;
-    private SiteBillStatus(byte code) {
+	private String describe;
+    private SiteBillStatus(byte code,String describe) {
         this.code = code;
+        this.describe = describe;
     }
     
     public byte getCode() {
@@ -45,4 +51,9 @@ public enum SiteBillStatus {
         
         return null;
     }
+
+	public String getDescribe() {
+		return describe;
+	}
+ 
 }

@@ -9,14 +9,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 订单DTO
  * <li>rentalBillId：订单id</li>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
  * <li>siteName：场所名称</li>
  * <li>buildingName：楼栋名称</li>
- * <li>address：位置</li>
- * <li>spec：用户设置座位数等</li>
- * <li>companyName：场所隶属的公司</li>
- * <li>contactName：负责人id</li>
+ * <li>address：地址</li>
+ * <li>spec：规格</li>
  * <li>contactPhonenum：电话号码</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li> 
@@ -26,24 +22,23 @@ import com.everhomes.util.StringHelper;
  * <li>cancelTime：取消时间</li> 
  * <li>payDeadLineTime：最后支付时间</li> 
  * <li>sitePrice：场所总价</li>
- * <li>totalPrice：全部总价</li>
+ * <li>totalPrice：全部总价包含物品</li>
  * <li>reservePrice：订金</li>
  * <li>paidPrice：已付金额</li>
  * <li>unPayPrice：未付金额</li>
- * <li>invoiceFlag：要不要发票，0 要 1 不要 参考{@link com.everhomes.rest.techpark.rental.InvoiceFlag}</li>  
  * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>  
  * <li>rentalCount：场所预定数量</li> 
+ * <li>useDetail：使用详情</li> 
+ * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
+ * <li>launchPadItemId：广场图标id</li> 
  * <li>siteItems：场所商品</li> 
  * <li>rentalSiteRules：场所时间段</li>
  * <li>billAttachments：订单附加信息</li>
+ * <li>toastFlag：0-无 1-有，弹出一个toast提示用户可能分配到半场</li>
  * </ul>
  */
 public class RentalBillDTO {
 	private Long rentalBillId;
-	private String ownerType;
-	private Long ownerId;
-	private Long communityId;
-	private String siteType;
 	private String siteName;
 	private String buildingName;
 	private String address;
@@ -69,7 +64,10 @@ public class RentalBillDTO {
 	private BigDecimal unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
-	private Double rentalCount;
+	private Double rentalCount; 
+	private java.lang.String     useDetail;
+	private java.lang.String     vendorType;
+	private java.lang.Long       launchPadItemId; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 
@@ -78,21 +76,15 @@ public class RentalBillDTO {
 	
 	@ItemType(BillAttachmentDTO.class)
 	private List<BillAttachmentDTO> billAttachments; 
-	
+
+	private Byte toastFlag;
 	
 	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
- 
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
+  
 
 	public String getBuildingName() {
 		return buildingName;
@@ -280,23 +272,7 @@ public class RentalBillDTO {
 	public void setUnPayPrice(BigDecimal unPayPrice) {
 		this.unPayPrice = unPayPrice;
 	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
+ 
 	public Double getRentalCount() {
 		return rentalCount;
 	}
@@ -336,14 +312,39 @@ public class RentalBillDTO {
 	public void setNotice(String notice) {
 		this.notice = notice;
 	}
+ 
+ 
 
-	public Long getCommunityId() {
-		return communityId;
+
+	public java.lang.String getUseDetail() {
+		return useDetail;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+
+	public void setUseDetail(java.lang.String useDetail) {
+		this.useDetail = useDetail;
 	}
+
+
+	public java.lang.String getVendorType() {
+		return vendorType;
+	}
+
+
+	public void setVendorType(java.lang.String vendorType) {
+		this.vendorType = vendorType;
+	}
+
+
+	public java.lang.Long getLaunchPadItemId() {
+		return launchPadItemId;
+	}
+
+
+	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
+	}
+
 
 	public String getUserPhone() {
 		return userPhone;
@@ -360,5 +361,17 @@ public class RentalBillDTO {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
+
+
+	public Byte getToastFlag() {
+		return toastFlag;
+	}
+
+
+	public void setToastFlag(Byte toastFlag) {
+		this.toastFlag = toastFlag;
+	}
+
+ 
  
 }

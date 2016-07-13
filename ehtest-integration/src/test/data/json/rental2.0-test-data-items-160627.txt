@@ -1,0 +1,114 @@
+{
+  "eh_rental_site_items": [
+		{
+		"id":1,
+		"rental_site_id":2,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":1,
+		"item_type":1
+		},
+		{
+		"id":2,
+		"rental_site_id":2,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":2,
+		"default_order":2,
+		"item_type":2
+		},
+		{
+		"id":3,
+		"rental_site_id":2,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":3,
+		"item_type":1
+		},
+		{
+		"id":4,
+		"rental_site_id":3,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":4,
+		"item_type":1
+		},
+		{
+		"id":5,
+		"rental_site_id":3,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":5,
+		"item_type":1
+		},
+		{
+		"id":6,
+		"rental_site_id":4,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":6,
+		"item_type":1
+		},
+		{
+		"id":7,
+		"rental_site_id":5,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":7,
+		"item_type":1
+		},
+		{
+		"id":8,
+		"rental_site_id":4,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":8,
+		"item_type":1
+		},
+		{
+		"id":9,
+		"rental_site_id":5,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":9,
+		"item_type":1
+		},
+		{
+		"id":10,
+		"rental_site_id":4,
+		"name":"shangpin",
+		"price":100.00,
+		"counts":100,
+		"default_order":10,
+		"item_type":1
+		}
+	]
+	,
+	
+"eh_rental_items_bills":[
+{
+"id":1,
+"rental_bill_id":1,
+"rental_site_item_id":1,
+"rental_count":20,
+"total_money":333.00,
+"launch_pad_item_id":2
+},
+{
+"id":2,
+"rental_bill_id":2,
+"rental_site_item_id":2,
+"rental_count":2,
+"total_money":333.00,
+"launch_pad_item_id":2
+}
+]
+}

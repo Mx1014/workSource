@@ -19,6 +19,16 @@
 
 @property(nonatomic, copy) NSNumber* counts;
 
+@property(nonatomic, copy) NSString* imgUri;
+
+@property(nonatomic, copy) NSString* imgUrl;
+
+@property(nonatomic, copy) NSNumber* defaultOrder;
+
+@property(nonatomic, copy) NSNumber* itemType;
+
+@property(nonatomic, copy) NSNumber* soldCount;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

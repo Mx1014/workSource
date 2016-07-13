@@ -11,16 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1176164983;
+	private static final long serialVersionUID = 2144808127;
 
 	private java.lang.Long       id;
-	private java.lang.String     ownerType;
-	private java.lang.Long       ownerId;
-	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
-	private java.lang.Integer    rentalStep;
 	private java.lang.Byte       rentalType;
 	private java.lang.Byte       amorpm;
+	private java.lang.Integer    rentalStep;
 	private java.sql.Timestamp   beginTime;
 	private java.sql.Timestamp   endTime;
 	private java.lang.Double     counts;
@@ -33,18 +30,24 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
 	private java.lang.Double     timeStep;
+	private java.math.BigDecimal originalPrice;
+	private java.lang.Byte       exclusiveFlag;
+	private java.lang.Byte       autoAssign;
+	private java.lang.Byte       multiUnit;
+	private java.lang.Byte       multiTimeInterval;
+	private java.lang.Long       launchPadItemId;
+	private java.lang.Integer    siteNumber;
+	private java.math.BigDecimal halfsitePrice;
+	private java.math.BigDecimal halfsiteOriginalPrice;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
 		java.lang.Long       id,
-		java.lang.String     ownerType,
-		java.lang.Long       ownerId,
-		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
-		java.lang.Integer    rentalStep,
 		java.lang.Byte       rentalType,
 		java.lang.Byte       amorpm,
+		java.lang.Integer    rentalStep,
 		java.sql.Timestamp   beginTime,
 		java.sql.Timestamp   endTime,
 		java.lang.Double     counts,
@@ -56,16 +59,22 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Double     timeStep
+		java.lang.Double     timeStep,
+		java.math.BigDecimal originalPrice,
+		java.lang.Byte       exclusiveFlag,
+		java.lang.Byte       autoAssign,
+		java.lang.Byte       multiUnit,
+		java.lang.Byte       multiTimeInterval,
+		java.lang.Long       launchPadItemId,
+		java.lang.Integer    siteNumber,
+		java.math.BigDecimal halfsitePrice,
+		java.math.BigDecimal halfsiteOriginalPrice
 	) {
 		this.id = id;
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
-		this.rentalStep = rentalStep;
 		this.rentalType = rentalType;
 		this.amorpm = amorpm;
+		this.rentalStep = rentalStep;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		this.counts = counts;
@@ -78,6 +87,15 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.timeStep = timeStep;
+		this.originalPrice = originalPrice;
+		this.exclusiveFlag = exclusiveFlag;
+		this.autoAssign = autoAssign;
+		this.multiUnit = multiUnit;
+		this.multiTimeInterval = multiTimeInterval;
+		this.launchPadItemId = launchPadItemId;
+		this.siteNumber = siteNumber;
+		this.halfsitePrice = halfsitePrice;
+		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 
 	public java.lang.Long getId() {
@@ -88,44 +106,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
-	}
-
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public java.lang.String getSiteType() {
-		return this.siteType;
-	}
-
-	public void setSiteType(java.lang.String siteType) {
-		this.siteType = siteType;
-	}
-
 	public java.lang.Long getRentalSiteId() {
 		return this.rentalSiteId;
 	}
 
 	public void setRentalSiteId(java.lang.Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
-	}
-
-	public java.lang.Integer getRentalStep() {
-		return this.rentalStep;
-	}
-
-	public void setRentalStep(java.lang.Integer rentalStep) {
-		this.rentalStep = rentalStep;
 	}
 
 	public java.lang.Byte getRentalType() {
@@ -142,6 +128,14 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setAmorpm(java.lang.Byte amorpm) {
 		this.amorpm = amorpm;
+	}
+
+	public java.lang.Integer getRentalStep() {
+		return this.rentalStep;
+	}
+
+	public void setRentalStep(java.lang.Integer rentalStep) {
+		this.rentalStep = rentalStep;
 	}
 
 	public java.sql.Timestamp getBeginTime() {
@@ -238,5 +232,77 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setTimeStep(java.lang.Double timeStep) {
 		this.timeStep = timeStep;
+	}
+
+	public java.math.BigDecimal getOriginalPrice() {
+		return this.originalPrice;
+	}
+
+	public void setOriginalPrice(java.math.BigDecimal originalPrice) {
+		this.originalPrice = originalPrice;
+	}
+
+	public java.lang.Byte getExclusiveFlag() {
+		return this.exclusiveFlag;
+	}
+
+	public void setExclusiveFlag(java.lang.Byte exclusiveFlag) {
+		this.exclusiveFlag = exclusiveFlag;
+	}
+
+	public java.lang.Byte getAutoAssign() {
+		return this.autoAssign;
+	}
+
+	public void setAutoAssign(java.lang.Byte autoAssign) {
+		this.autoAssign = autoAssign;
+	}
+
+	public java.lang.Byte getMultiUnit() {
+		return this.multiUnit;
+	}
+
+	public void setMultiUnit(java.lang.Byte multiUnit) {
+		this.multiUnit = multiUnit;
+	}
+
+	public java.lang.Byte getMultiTimeInterval() {
+		return this.multiTimeInterval;
+	}
+
+	public void setMultiTimeInterval(java.lang.Byte multiTimeInterval) {
+		this.multiTimeInterval = multiTimeInterval;
+	}
+
+	public java.lang.Long getLaunchPadItemId() {
+		return this.launchPadItemId;
+	}
+
+	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.lang.Integer getSiteNumber() {
+		return this.siteNumber;
+	}
+
+	public void setSiteNumber(java.lang.Integer siteNumber) {
+		this.siteNumber = siteNumber;
+	}
+
+	public java.math.BigDecimal getHalfsitePrice() {
+		return this.halfsitePrice;
+	}
+
+	public void setHalfsitePrice(java.math.BigDecimal halfsitePrice) {
+		this.halfsitePrice = halfsitePrice;
+	}
+
+	public java.math.BigDecimal getHalfsiteOriginalPrice() {
+		return this.halfsiteOriginalPrice;
+	}
+
+	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
+		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 }

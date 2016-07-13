@@ -67,16 +67,18 @@ public class CancelUnsuccessRentalBillAction implements Runnable {
 		// 如果还没成功付全款，则取消订单
 		//TODO：加锁
 		RentalBill rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
+		if(null==rentalBill)
+			return ;
 		if (!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) ) {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 			RentalSite site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalSiteId());
-			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
+//			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 			StringBuffer sb = new StringBuffer();
 			sb.append("您预定的："); 
 			sb.append(site.getSiteName());
 			sb.append("(时间:");
-			if (rule.getRentalType().equals(RentalType.HOUR)){
+			if (site.getRentalType().equals(RentalType.HOUR)){
 				SimpleDateFormat  datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				sb.append(datetimeSF.format(rentalBill.getStartTime()));
 			}else{

@@ -16,7 +16,9 @@ typedef enum {
     EvhSiteBillStatus_TOPAYRES = 5, 
     EvhSiteBillStatus_TOPAYFINAL = 6, 
     EvhSiteBillStatus_COMPLETE = 7, 
-    EvhSiteBillStatus_OVERTIME = 8
+    EvhSiteBillStatus_OVERTIME = 8, 
+    EvhSiteBillStatus_REFOUNDING = 9, 
+    EvhSiteBillStatus_REFOUNDED = 10
 
 } EvhSiteBillStatus;
 
