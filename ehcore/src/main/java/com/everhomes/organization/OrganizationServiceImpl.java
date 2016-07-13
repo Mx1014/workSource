@@ -581,6 +581,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setMember(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 			}
 		}
+		
+		dto.setAccountName(org.getContactor());
+		dto.setAccountPhone(org.getContact());
 		return dto;
 	}
 	
@@ -4797,6 +4800,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			roleCmd.setOrganizationId(cmd.getOrganizationId());
 			this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
 			
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
+			if(null == detail){
+				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_OBJECT_NOT_EXIST,
+						"organization detail is null.");
+			}
+			
+			detail.setContactor(cmd.getAccountName());
+			detail.setContact(cmd.getAccountPhone());
+			organizationProvider.updateOrganizationDetail(detail);
 			return null;
 		});
 	}
