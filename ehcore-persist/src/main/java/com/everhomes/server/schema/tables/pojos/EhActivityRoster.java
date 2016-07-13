@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster implements java.io.Serializable {
 
-	private static final long serialVersionUID = -794036983;
+	private static final long serialVersionUID = 2080562953;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -22,7 +22,7 @@ public class EhActivityRoster implements java.io.Serializable {
 	private java.lang.Integer  childCount;
 	private java.lang.Byte     checkinFlag;
 	private java.lang.Long     checkinUid;
-	private java.lang.Long     confirmFlag;
+	private java.lang.Byte     confirmFlag;
 	private java.lang.Long     confirmUid;
 	private java.lang.Long     confirmFamilyId;
 	private java.sql.Timestamp confirmTime;
@@ -42,7 +42,7 @@ public class EhActivityRoster implements java.io.Serializable {
 		java.lang.Integer  childCount,
 		java.lang.Byte     checkinFlag,
 		java.lang.Long     checkinUid,
-		java.lang.Long     confirmFlag,
+		java.lang.Byte     confirmFlag,
 		java.lang.Long     confirmUid,
 		java.lang.Long     confirmFamilyId,
 		java.sql.Timestamp confirmTime,
@@ -140,11 +140,11 @@ public class EhActivityRoster implements java.io.Serializable {
 		this.checkinUid = checkinUid;
 	}
 
-	public java.lang.Long getConfirmFlag() {
+	public java.lang.Byte getConfirmFlag() {
 		return this.confirmFlag;
 	}
 
-	public void setConfirmFlag(java.lang.Long confirmFlag) {
+	public void setConfirmFlag(java.lang.Byte confirmFlag) {
 		this.confirmFlag = confirmFlag;
 	}
 

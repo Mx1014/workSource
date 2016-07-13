@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> {
 
-	private static final long serialVersionUID = 423061194;
+	private static final long serialVersionUID = 407153360;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activity_roster</code>
@@ -72,9 +72,9 @@ public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> CHECKIN_UID = createField("checkin_uid", org.jooq.impl.SQLDataType.BIGINT, this, "id of checkin user");
 
 	/**
-	 * The column <code>ehcore.eh_activity_roster.confirm_flag</code>.
+	 * The column <code>ehcore.eh_activity_roster.confirm_flag</code>. 0: 未确认, 1: 确认
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> CONFIRM_FLAG = createField("confirm_flag", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> CONFIRM_FLAG = createField("confirm_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: 未确认, 1: 确认");
 
 	/**
 	 * The column <code>ehcore.eh_activity_roster.confirm_uid</code>.

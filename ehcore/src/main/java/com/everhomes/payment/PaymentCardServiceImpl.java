@@ -676,8 +676,21 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
+    	NotifyEntityDTO dto = new NotifyEntityDTO();
     	PaymentCardTransaction transaction = new PaymentCardTransaction();
-    	String key = "taotaogu-token-1";
+    	if(StringUtils.isBlank(cmd.getToken())){
+			dto.setMsg_sn("invalid parameter");
+			dto.setReturn_code("01");
+			return dto;
+		}
+    	PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerByToken(cmd.getToken());
+    	if(issuer == null){
+    		LOGGER.error("Token not found, user may be not login, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Token not found, user may be not login");
+    	}
+    	
+    	String key = "taotaogu-token-" + issuer.getId();
     	Object cache = this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
 			
 	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
@@ -686,10 +699,11 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	        Object obj = redisTemplate.opsForValue().get(key);
             return obj;
         }).first();
+    	
     	if(cache == null){
-    		LOGGER.error("notifyPaidResult failed duing to token and aesKey is null.key={}",key);
+    		LOGGER.error("Token and aesKey is not found in cache, key={}, cmd={}", key, cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"notifyPaidResult failed.");
+					"Token and aeskey is not found");
     	}
     	Object o =  StringHelper.fromJsonString(cache.toString(), Object.class);
     	TaotaoguTokenCacheItem cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(o.toString(),TaotaoguTokenCacheItem.class);
@@ -697,7 +711,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		String token = cacheItem.getToken();
     	Gson gson = new Gson();
 		String msg = null;
-		NotifyEntityDTO dto = new NotifyEntityDTO();
+		
 		try {
 			if(StringUtils.isBlank(cmd.getToken()) || StringUtils.isBlank(cmd.getSign()) ||
 					StringUtils.isBlank(cmd.getMsg()) || !cmd.getToken().equals(token)){

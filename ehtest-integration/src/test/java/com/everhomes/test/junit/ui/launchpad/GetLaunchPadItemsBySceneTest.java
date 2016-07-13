@@ -92,6 +92,14 @@ public class GetLaunchPadItemsBySceneTest extends BaseLoginAuthTestCase {
 					break;
 				}
 			}
+			
+			if(7L == dto.getId()){
+				if(0 != dto.getScaleType()){
+					flag = false;
+					break;
+				}
+			}
+			
 		}
         
         assertEquals(true, flag);

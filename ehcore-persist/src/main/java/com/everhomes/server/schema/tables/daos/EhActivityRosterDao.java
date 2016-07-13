@@ -113,7 +113,7 @@ public class EhActivityRosterDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	/**
 	 * Fetch records that have <code>confirm_flag IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByConfirmFlag(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByConfirmFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CONFIRM_FLAG, values);
 	}
 
