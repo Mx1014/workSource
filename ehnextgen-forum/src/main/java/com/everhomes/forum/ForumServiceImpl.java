@@ -99,6 +99,7 @@ import com.everhomes.rest.forum.LostAndFoundStatus;
 import com.everhomes.rest.forum.MessageType;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.OfficialFlag;
 import com.everhomes.rest.forum.OrganizationTopicMixType;
 import com.everhomes.rest.forum.PostAssignedFlag;
 import com.everhomes.rest.forum.PostDTO;
@@ -2333,6 +2334,13 @@ public class ForumServiceImpl implements ForumService {
         post.setPrivateFlag(privateFlag.getCode());
         
         post.setAssignedFlag(PostAssignedFlag.NONE.getCode());
+        
+        
+        //todo official
+//        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+//        if (officialFlag == OfficialFlag.YES) {
+//			post.setOfficialFlag(OfficialFlag.YES.getCode());
+//		}
         
         return post;
     }
