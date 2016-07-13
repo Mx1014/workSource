@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *<li>applyShopUrl:申请开店</li>
  *<li>isAppliedShop:是否已申请过开店</li>
  *<li>orderCount:待发货订单数量</li>
+ *<li>businessUrl:电商链接</li>
  *</ul>
  */
 public class ListTreasureResponse {
@@ -30,6 +31,7 @@ public class ListTreasureResponse {
     private String applyShopUrl;
     private Integer isAppliedShop;
     private Integer orderCount;
+    private String businessUrl;
 	
 	public String getMyOrderUrl() {
 		return myOrderUrl;
@@ -118,6 +120,14 @@ public class ListTreasureResponse {
 
 	public void setOrderCount(Integer orderCount) {
 		this.orderCount = orderCount;
+	}
+
+	public String getBusinessUrl() {
+		return businessUrl;
+	}
+
+	public void setBusinessUrl(String businessUrl) {
+		this.businessUrl = businessUrl;
 	}
 
 	@Override
