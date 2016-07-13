@@ -80,7 +80,7 @@ move /Y %temp_file% %property_file%
 :pom_gen
 REM Execute the command to generate pom and replace versions
 echo Start to generate the pom by template, and replace all the version variables...
-%JAVA_HOME%/bin/java -jar %project_dir%/tools/pom-sync-1.0.jar -R -e %project_dir%/pom.properties %project_dir%
+"%JAVA_HOME%/bin/java" -jar %project_dir%/tools/pom-sync-1.0.jar -R -e %project_dir%/pom.properties %project_dir%
 
 REM Recover the directory to the start
 cd /d %original_dir%
