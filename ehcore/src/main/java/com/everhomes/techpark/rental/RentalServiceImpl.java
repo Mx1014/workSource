@@ -441,7 +441,11 @@ public class RentalServiceImpl implements RentalService {
 		if(null!=closeDates){
 			response.setCloseDates(new ArrayList<Long>());
 			for(RentalCloseDate single:closeDates){
-				response.getCloseDates().add(single.getCloseDate().getTime());
+				try{
+					response.getCloseDates().add(single.getCloseDate().getTime());
+				}catch(java.lang.NullPointerException e){
+					LOGGER.error("why java null point close Date is : ["+single.getCloseDate()+"] response is : "+response.toString());
+				}
 			}
 		}
 		List<RentalConfigAttachment> attachments=this.rentalProvider.queryRentalConfigAttachmentByOwner(EhRentalDefaultRules.class.getSimpleName(),defaultRule.getId());
