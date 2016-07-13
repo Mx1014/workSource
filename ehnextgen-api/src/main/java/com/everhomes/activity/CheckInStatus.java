@@ -13,12 +13,16 @@ public enum CheckInStatus {
     }
 
     public static CheckInStatus fromCode(Byte code) {
+    	
+    	if(null == code){
+    		return null;
+    	}
         for (CheckInStatus flag : CheckInStatus.values()) {
             if (flag.code == code) {
                 return flag;
             }
         }
-        return UN_CHECKIN;
+        return null;
     }
 
 }

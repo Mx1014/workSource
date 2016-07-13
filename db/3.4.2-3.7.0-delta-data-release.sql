@@ -324,3 +324,41 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES('37','35','1048575.9','3152896','0','3.7.0','0','2016-07-13 15:48:32','0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES('11','35','3.7.0',NULL,'${homeurl}/web/download/apk/andriod-UFinePark-3-7-0.html','0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES('10','34','3.7.0','${homeurl}/web/download/apk/UFinePark-3.7.0.2016071202-release.apk','${homeurl}/web/download/apk/andriod-UFinePark-3-7-0.html','0');
+
+-- 储能去掉的子菜单  by sfyan 20160713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%51000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%52300/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%53000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%59000/%';
+
+-- 海岸去掉的子菜单  by sfyan 20160713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999993,0 from `eh_web_menus` where path like '%59000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999993,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 科技园去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',1000000,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 讯美去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999999,0 from `eh_web_menus` where path like '%43600/%';
+
+-- iBase去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999989,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 深业物业去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999992,0 from `eh_web_menus` where path like '%43600/%';
