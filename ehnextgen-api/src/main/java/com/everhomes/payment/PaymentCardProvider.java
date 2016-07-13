@@ -11,8 +11,10 @@ public interface PaymentCardProvider {
 	List<PaymentCardIssuer> listPaymentCardIssuer(Long ownerId,String ownerType);
 	
 	PaymentCardIssuer findPaymentCardIssuerById(Long issuerId);
-	
+	PaymentCardIssuer findPaymentCardIssuerByToken(String token);
 	void createPaymentCard(PaymentCard paymentCard);
+	
+	void updatePaymentCardIssuer(PaymentCardIssuer paymentCardIssuer);
 	
 	PaymentCard findPaymentCardById(Long cardId);
 	

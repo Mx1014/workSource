@@ -12,13 +12,13 @@ public enum CheckInStatus {
         return code;
     }
 
-    public static CheckInStatus fromCode(String code) {
+    public static CheckInStatus fromCode(Byte code) {
         for (CheckInStatus flag : CheckInStatus.values()) {
-            if (flag.name().equalsIgnoreCase(code)) {
+            if (flag.code == code) {
                 return flag;
             }
         }
-        return null;
+        return UN_CHECKIN;
     }
 
 }

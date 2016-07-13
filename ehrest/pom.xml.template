@@ -21,8 +21,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- override java compiler version to 1.7 since Andriod is also using the artifact -->
-		<java.source.version>${java.source.version}</java.source.version>
-		<java.target.version>${java.target.version}</java.target.version>
+		<java.source.version>1.7</java.source.version>
+		<java.target.version>1.7</java.target.version>
         
      	<maven.test.skip>true</maven.test.skip>
     </properties>
@@ -68,8 +68,8 @@
 	                <artifactId>maven-compiler-plugin</artifactId> 
 					<version>${maven-compiler-plugin.version}</version>
 	                <configuration>
-	                    <source>${java.source.version}</source>
-	                    <target>${java.target.version}</target>
+	                    <source>1.7</source>
+	                    <target>1.7</target>
 	                </configuration>
 	            </plugin>
 	            <plugin>

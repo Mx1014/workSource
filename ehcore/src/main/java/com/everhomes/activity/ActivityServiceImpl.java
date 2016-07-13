@@ -449,31 +449,48 @@ public class ActivityServiceImpl implements ActivityService {
         
         ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         if(acroster == null) {
-        	LOGGER.error("handle activityRoster error ,the activityRoster does not exsit.activityId=" + cmd.getActivityId()
-        			+ ", userId = " + user.getId());
+        	LOGGER.error("handle activityRoster error ,the activityRoster does not exsit.activityId={}, userId = {}",cmd.getActivityId()
+        			, user.getId());
         	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+                    ActivityServiceErrorCode.ERROR_CHECKIN_UN_CONFIRMED, "check in error id = {}, userId = {}", cmd.getActivityId(), user.getId());
         }
-        
+        // 签到增加异常消息 modify sfyan 20160712
         if(acroster.getConfirmFlag() == null) {
-        	acroster.setConfirmFlag(0L);
+        	acroster.setConfirmFlag(ConfirmStatus.UN_CONFIRMED.getCode());
         }
         
-        dbProvider.execute(status->{
-        	LOGGER.info("activity ConfirmFlag = " + activity.getConfirmFlag() + ", acroster ConfirmFlag = " + acroster.getConfirmFlag());
-        	LOGGER.info("activity.getConfirmFlag() == null is " + (activity.getConfirmFlag() == null) 
-        			+ "activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode())
-        			+ "activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode())
-        			+ "acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()" + (acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()));
+        LOGGER.info("activity ConfirmFlag = " + activity.getConfirmFlag() + ", acroster ConfirmFlag = " + acroster.getConfirmFlag());
+    	LOGGER.info("activity.getConfirmFlag() == null is " + (activity.getConfirmFlag() == null) 
+    			+ "activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode())
+    			+ "activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() is " + (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode())
+    			+ "acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()" + (acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue()));
+        
+    	if(ConfirmStatus.fromCode(acroster.getConfirmFlag()) != ConfirmStatus.CONFIRMED){
+    		LOGGER.error("check in error ,has not officially Join activities.activityId = {}, userId = {}, confirmFlag = {} ",cmd.getActivityId()
+        			, user.getId(), acroster.getConfirmFlag());
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_CHECKIN_UN_CONFIRMED, "check in error id = {}, userId = {}", cmd.getActivityId(), user.getId());
+    	}
+    	
+    	if(CheckInStatus.fromCode(acroster.getCheckinFlag()) == CheckInStatus.CHECKIN){
+    		LOGGER.error("check in error , already check in. activityId = {}, userId = {}, checkinFlag = {} ",cmd.getActivityId()
+        			, user.getId(), acroster.getCheckinFlag());
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_CHECKIN_ALREADY, "check in error id = {}, userId = {}", cmd.getActivityId(), user.getId());
+    	}
+    	
+    	dbProvider.execute(status->{
         	if(activity.getConfirmFlag() == null || ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.UN_CONFIRMED 
         			|| (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
         		
-        		ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
+        		Long familyId = getFamilyId();
+        		
+        		ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), familyId);
 //                Post p = createPost(user.getId(),post,null,"");
 ////                p.setContent(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
 //                p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
 //                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CHECKIN), UserContext.current().getUser().getLocale(), ""));
-                Long familyId = getFamilyId();
+                
                 //字段错了 签到应记录到checkin字段中 modified by xiongying 20160708
                 if (familyId != null)
                     activity.setCheckinFamilyCount(activity.getCheckinFamilyCount() + 1);
@@ -748,7 +765,7 @@ public class ActivityServiceImpl implements ActivityService {
             item.setConfirmUid(user.getId());
             item.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             item.setConfirmFamilyId(cmd.getConfirmFamilyId());
-            item.setConfirmFlag(Long.valueOf(ConfirmStatus.CONFIRMED.getCode()));
+            item.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
             activityProvider.updateRoster(item);
             return status;
         });
@@ -866,7 +883,7 @@ public class ActivityServiceImpl implements ActivityService {
         dbProvider.execute(status->{
             //need lock
             activityProvider.deleteRoster(roster);
-            if (roster.getConfirmFlag() == Long.valueOf(ConfirmStatus.CONFIRMED.getCode())) {
+            if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
                 int result = activity.getCheckinAttendeeCount() - total;
                 activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
                 if(roster.getConfirmFamilyId()!=null)
