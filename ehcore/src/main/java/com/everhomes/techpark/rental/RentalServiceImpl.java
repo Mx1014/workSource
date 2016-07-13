@@ -1432,9 +1432,7 @@ public class RentalServiceImpl implements RentalService {
 			status.add(SiteBillStatus.LOCKED.getCode());
 			status.add(SiteBillStatus.RESERVED.getCode());
 			status.add(SiteBillStatus.SUCCESS.getCode());
-			status.add(SiteBillStatus.PAYINGFINAL.getCode());
-			status.add(SiteBillStatus.TOPAYRES.getCode());
-			status.add(SiteBillStatus.TOPAYFINAL.getCode()); 
+			status.add(SiteBillStatus.PAYINGFINAL.getCode()); 
 		}
 		else if(cmd.getBillStatus().equals(BillQueryStatus.CANCELED.getCode())){
 			status.add(SiteBillStatus.FAIL.getCode()); 
@@ -2397,8 +2395,8 @@ public class RentalServiceImpl implements RentalService {
 		// 
 		OnlinePayCallbackCommandResponse response = new OnlinePayCallbackCommandResponse();
 		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
-			//TODO: 失败以后可能还是要做点什么
-			LOGGER.info(" ----------------- - - - PAY FAIL ");
+			 
+			LOGGER.info(" ----------------- - - - PAY FAIL command is "+cmd.toString());
 		}
 			
 		//success
@@ -2929,18 +2927,7 @@ public class RentalServiceImpl implements RentalService {
 		
 		return response;
 	}
-	
-//	private RentalBillCountDTO processRentalBillCountDTO(RentalSite site,
-//			Long beginDate, Long endDate) {
-//		RentalBillCountDTO dto = new RentalBillCountDTO();
-//		//TODO:
-//		List<RentalBill> bills  = null; 
-////		List<RentalBill> bills = this.rentalProvider.listRentalBills(site.getOwnerId(), site.getOwnerType(), site.getSiteType(), 
-////				site.getId(),beginDate,endDate);
-//		dto.setSiteName(site.getSiteName());
-//		processRentalBillCountDTO(dto, bills);
-//		return dto;
-//	} 
+	 
 
 	private void processRentalBillCountDTO(RentalBillCountDTO dto, List<RentalBill> bills ){
 		Integer sumCount =0;                    
@@ -3130,38 +3117,28 @@ public class RentalServiceImpl implements RentalService {
 		else
 			row.createCell(++i).setCellValue("");
 		 
-	}
-//	private String VendorTypeToString(String vendorType) {
-//		if (StringUtils.isEmpty(vendorType))
-//			return "";
-//		if(vendorType.equals(VendorType.WEI_XIN.getVendorType()))
-//			return "微信支付";
-//		if(vendorType.equals(VendorType.ZHI_FU_BAO.getVendorType()))
-//			return "支付宝支付";
-//		return "";
-//		
-//	}
+	} 
 	private String statusToString(Byte status) {
 //		
 //		if(status.equals(SiteBillStatus.LOCKED.getCode()))
 //			return "待付订金";
 //		if(status.equals(SiteBillStatus.RESERVED.getCode()))
 //			return "已付定金";
-		if(status.equals(SiteBillStatus.SUCCESS.getCode()))
-			return "已预约";
-		if(status.equals(SiteBillStatus.PAYINGFINAL.getCode()))
-			return "待付款";
-		if(status.equals(SiteBillStatus.FAIL.getCode()))
-			return "已取消";
-		if(status.equals(SiteBillStatus.COMPLETE.getCode()))
-			return "已完成";
-		if(status.equals(SiteBillStatus.OVERTIME.getCode()))
-			return "已过期";
-		if(status.equals(SiteBillStatus.REFUNDED.getCode()))
-			return "已退款";
-		if(status.equals(SiteBillStatus.REFUNDING.getCode()))
-			return "退款中";
-		return String.valueOf(status);
+//		if(status.equals(SiteBillStatus.SUCCESS.getCode()))
+//			return "已预约";
+//		if(status.equals(SiteBillStatus.PAYINGFINAL.getCode()))
+//			return "待付款";
+//		if(status.equals(SiteBillStatus.FAIL.getCode()))
+//			return "已取消";
+//		if(status.equals(SiteBillStatus.COMPLETE.getCode()))
+//			return "已完成";
+//		if(status.equals(SiteBillStatus.OVERTIME.getCode()))
+//			return "已过期";
+//		if(status.equals(SiteBillStatus.REFUNDED.getCode()))
+//			return "已退款";
+//		if(status.equals(SiteBillStatus.REFUNDING.getCode()))
+//			return "退款中";
+		return SiteBillStatus.fromCode(status).getDescribe();
 	}
 
 	@Override
@@ -3519,7 +3496,7 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public GetRefundOrderListResponse getRefundOrderList(
 			GetRefundOrderListCommand cmd) {
-		// TODO Auto-generated method stub
+ 
 		GetRefundOrderListResponse response = new GetRefundOrderListResponse();
 		if(cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE); 

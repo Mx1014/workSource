@@ -23,7 +23,7 @@ import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class RentalBillTest extends BaseLoginAuthTestCase {
+public class RentalRefundOrderTest extends BaseLoginAuthTestCase {
 
 	Integer namespaceId = 0;
 	String userIdentifier = "10001";
@@ -38,8 +38,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 	private int[] weekdays={0,1,2,3,4,5,6,7};
 	@Before
 	public void setUp() {
-		super.setUp();
-		 
+		super.setUp(); 
 	}
 
 	private void truncateRentalTable() {
@@ -314,7 +313,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 		super.tearDown();
 		logoff();
 	}
-
+	@Override
 	protected void initCustomData() {
 		String sourceInfoFilePath = "data/json/rental2.0-test-data-resource-160627.txt";
 		String filePath = dbProvider
@@ -330,6 +329,11 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 
 		sourceInfoFilePath = "data/json/rental2.0-test-data-bills-160704.txt";
+		filePath = dbProvider.getAbsolutePathFromClassPath(sourceInfoFilePath);
+		dbProvider.loadJsonFileToDatabase(filePath, false);
+
+
+		sourceInfoFilePath = "rental2.0-test-data-refund-orders-160713.txt";
 		filePath = dbProvider.getAbsolutePathFromClassPath(sourceInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 	}

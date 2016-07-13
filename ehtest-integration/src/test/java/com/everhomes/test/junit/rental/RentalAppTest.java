@@ -61,22 +61,9 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 	@Before
 	public void setUp() {
 		 super.setUp();
-		truncateRentalTable();
-		initSrouceData();
-
-		// 清除缓存
-		clearRedisCache();
-
-		// 同步索引
-		syncSequence();
-		initCustomData();
+	 
 	}
-
-    protected void initCustomData() {
-        String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
-        String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
-        dbProvider.loadJsonFileToDatabase(filePath, false);
-    }
+ 
 	
 	private void truncateRentalTable() {
 
@@ -582,7 +569,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		logoff();
 	}
 
-	protected void initSrouceData() {
+	protected void initCustomData() {
 		String sourceInfoFilePath = "data/json/rental2.0-test-data-resource-160627.txt";
 		String filePath = dbProvider
 				.getAbsolutePathFromClassPath(sourceInfoFilePath);
@@ -595,6 +582,9 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		sourceInfoFilePath = "data/json/rental2.0-test-data-items-160627.txt";
 		filePath = dbProvider.getAbsolutePathFromClassPath(sourceInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
+		String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
 	}
 
 }
