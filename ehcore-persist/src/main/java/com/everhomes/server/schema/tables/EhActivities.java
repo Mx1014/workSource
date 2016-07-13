@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = 1856280945;
+	private static final long serialVersionUID = 25777745;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activities</code>
@@ -210,6 +210,11 @@ public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_activities.media_url</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> MEDIA_URL = createField("media_url", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activities.official_flag</code>. whether it is an official activity, 0 not, 1 yes
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> OFFICIAL_FLAG = createField("official_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "whether it is an official activity, 0 not, 1 yes");
 
 	/**
 	 * Create a <code>ehcore.eh_activities</code> table reference

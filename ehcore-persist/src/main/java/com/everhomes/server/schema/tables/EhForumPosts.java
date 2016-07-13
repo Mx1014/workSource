@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -606551497;
+	private static final long serialVersionUID = 665941574;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -275,6 +275,11 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.end_time</code>. publish end time
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "publish end time");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.official_flag</code>. whether it is an official activity, 0 not, 1 yes
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> OFFICIAL_FLAG = createField("official_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "whether it is an official activity, 0 not, 1 yes");
 
 	/**
 	 * Create a <code>ehcore.eh_forum_posts</code> table reference

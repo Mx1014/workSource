@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = -390873335;
+	private static final long serialVersionUID = 753708721;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_tasks</code>
@@ -179,7 +179,7 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.manual_flag</code>. 0: auto 1:manual
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> MANUAL_FLAG = createField("manual_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: auto 1:manual");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> MANUAL_FLAG = createField("manual_flag", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "0: auto 1:manual");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_tasks</code> table reference
