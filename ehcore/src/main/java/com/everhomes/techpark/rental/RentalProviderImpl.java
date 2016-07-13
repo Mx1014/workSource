@@ -1362,14 +1362,14 @@ public class RentalProviderImpl implements RentalProvider {
 			Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTAL_TIME_INTERVAL);
-		Condition condition = Tables.EH_RENTAL_TIME_INTERVAL.OWNER_ID
+				Tables.EH_RENTAL_CLOSE_DATES);
+		Condition condition = Tables.EH_RENTAL_CLOSE_DATES.OWNER_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTAL_TIME_INTERVAL.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTAL_CLOSE_DATES.OWNER_TYPE
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalCloseDate> result = step
-				.orderBy(Tables.EH_RENTAL_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTAL_CLOSE_DATES.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalCloseDate.class);
 				});
 		if (null != result && result.size() > 0)
