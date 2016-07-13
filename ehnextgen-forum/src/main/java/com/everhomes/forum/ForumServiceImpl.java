@@ -1139,6 +1139,10 @@ public class ForumServiceImpl implements ForumService {
          Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
          if(null != cmd.getEmbeddedAppId()){
         	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
+        	 //如果是活动且查询官方活动，则加上官方活动条件
+        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())==OfficialFlag.YES) {
+				condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+        	 }
          }
          if(null != unCateGoryCondition){
         	 condition = condition.and(unCateGoryCondition);
@@ -2335,12 +2339,10 @@ public class ForumServiceImpl implements ForumService {
         
         post.setAssignedFlag(PostAssignedFlag.NONE.getCode());
         
-        
-        //todo official
-//        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
-//        if (officialFlag == OfficialFlag.YES) {
-//			post.setOfficialFlag(OfficialFlag.YES.getCode());
-//		}
+        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+        if (officialFlag == OfficialFlag.YES) {
+			post.setOfficialFlag(OfficialFlag.YES.getCode());
+		}
         
         return post;
     }
