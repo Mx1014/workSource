@@ -280,8 +280,8 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 1000000 , 0);
 
 -- 增加裁剪配置
-UPDATE `eh_launch_pad_items` SET `scene_type` = 1;
-UPDATE `eh_launch_pad_items` SET `scene_type` = 0 WHERE `namespace_id` = 999999;
+UPDATE `eh_launch_pad_items` SET `scale_type` = 1;
+UPDATE `eh_launch_pad_items` SET `scale_type` = 0 WHERE `namespace_id` = 999999;
 
 -- 给没有圈的公司加上group by sfyan 20160712
 -- 执行 select * from `eh_groups` where `id` in (SELECT (`id` + 5000) from `eh_organizations` where `group_id` is null and `group_type` = 'ENTERPRISE'); 检测一下是否有数据，没有则可以执行，有及时跟我沟通
