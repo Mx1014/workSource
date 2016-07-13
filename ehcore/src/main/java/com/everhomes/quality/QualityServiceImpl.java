@@ -1939,7 +1939,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
 		task.setCategoryPath(category.getPath());
-		task.setManualFlag((byte) 1);
+		task.setManualFlag(1L);
 		
 		
 		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());

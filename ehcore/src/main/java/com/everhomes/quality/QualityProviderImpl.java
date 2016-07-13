@@ -288,7 +288,7 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 		
 		if(manualFlag != null) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(manualFlag));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(manualFlag.toString())));
 		}
 
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
