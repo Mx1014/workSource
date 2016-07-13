@@ -16,6 +16,8 @@ public class TaotaoguVendorData {
 	private String termnlId;
 	private String initPassword;
 	private String token;
+	//渠道流水号,保证递增 且唯一
+	private Long chnlSn;
 	
 	public String getBranchCode() {
 		return branchCode;
@@ -87,5 +89,11 @@ public class TaotaoguVendorData {
 	}
 	public void setToken(String token) {
 		this.token = token;
+	}
+	public Long getChnlSn() {
+		return chnlSn;
+	}
+	public void setChnlSn(Long chnlSn) {
+		this.chnlSn = chnlSn;
 	}
 }
