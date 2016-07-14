@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteOwners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteOwnersRecord> {
 
-	private static final long serialVersionUID = -491110155;
+	private static final long serialVersionUID = -1219320912;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_owners</code>
@@ -29,7 +29,7 @@ public class EhRentalSiteOwners extends org.jooq.impl.TableImpl<com.everhomes.se
 	/**
 	 * The column <code>ehcore.eh_rental_site_owners.id</code>. id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteOwnersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteOwnersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_owners.owner_type</code>. owner type : community ; organization

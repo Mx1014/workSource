@@ -33,6 +33,8 @@ import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRentalBillCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
+import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
+import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
@@ -75,7 +77,24 @@ public class RentalAdminController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
+	/**
+	 * 
+	 * <b>URL: /rental/admin/getResourceTypeList<b>
+	 * <p>
+	 * 查询默认规则
+	 * </p>
+	 */
+	@RequestMapping("getResourceTypeList")
+	@RestReturn(GetResourceTypeListResponse.class)
+	public RestResponse getResourceTypeList(@Valid GetResourceTypeListCommand cmd) {
+		GetResourceTypeListResponse resp = this.rentalService.getResourceTypeList(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	
 	/**
 	 * 
 	 * <b>URL: /rental/admin/queryDefaultRule<b>

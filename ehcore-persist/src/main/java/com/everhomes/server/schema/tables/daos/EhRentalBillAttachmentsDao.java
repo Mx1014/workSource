@@ -104,9 +104,9 @@ public class EhRentalBillAttachmentsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>launch_pad_item_id IN (values)</code>
+	 * Fetch records that have <code>resource_type_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments> fetchByLaunchPadItemId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.LAUNCH_PAD_ITEM_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments> fetchByResourceTypeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.RESOURCE_TYPE_ID, values);
 	}
 }

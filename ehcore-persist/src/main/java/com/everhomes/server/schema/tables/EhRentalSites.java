@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = -1599371638;
+	private static final long serialVersionUID = -1762554710;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites</code>
@@ -202,9 +202,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> NEED_PAY = createField("need_pay", org.jooq.impl.SQLDataType.TINYINT, this, "是否需要支付 1是 0否");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.launch_pad_item_id</code>. 广场图标id
+	 * The column <code>ehcore.eh_rental_sites.resource_type_id</code>. 广场图标id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.cancel_time</code>. 至少提前取消时间

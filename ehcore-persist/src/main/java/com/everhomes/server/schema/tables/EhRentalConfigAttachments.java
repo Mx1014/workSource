@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalConfigAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalConfigAttachmentsRecord> {
 
-	private static final long serialVersionUID = 305424395;
+	private static final long serialVersionUID = -711150138;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_config_attachments</code>
@@ -29,7 +29,7 @@ public class EhRentalConfigAttachments extends org.jooq.impl.TableImpl<com.everh
 	/**
 	 * The column <code>ehcore.eh_rental_config_attachments.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalConfigAttachmentsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalConfigAttachmentsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_config_attachments.owner_id</code>.

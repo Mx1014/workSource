@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>查询订单
- * <li>launchPadItemId：广场图标id</li>  
+ * <li>resourceTypeId：广场图标id</li>  
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
 * <li>billStatus：订单状态 list 0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>   
@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public class FindRentalBillsCommand {
 	
-	private Long launchPadItemId;
+	private Long resourceTypeId;
 	private Long pageAnchor;
 		
 	private Integer pageSize;
@@ -58,15 +58,15 @@ public class FindRentalBillsCommand {
   
 
 
-	public Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
 
 
 
-	public void setLaunchPadItemId(Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
  

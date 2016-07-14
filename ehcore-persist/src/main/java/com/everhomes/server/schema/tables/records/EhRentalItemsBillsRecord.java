@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord> implements org.jooq.Record13<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Integer, java.math.BigDecimal, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte> {
 
-	private static final long serialVersionUID = -749861507;
+	private static final long serialVersionUID = -839241575;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_items_bills.id</code>. id
@@ -140,16 +140,16 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_items_bills.launch_pad_item_id</code>. 广场图标id
+	 * Setter for <code>ehcore.eh_rental_items_bills.resource_type_id</code>. 广场图标id
 	 */
-	public void setLaunchPadItemId(java.lang.Long value) {
+	public void setResourceTypeId(java.lang.Long value) {
 		setValue(9, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_items_bills.launch_pad_item_id</code>. 广场图标id
+	 * Getter for <code>ehcore.eh_rental_items_bills.resource_type_id</code>. 广场图标id
 	 */
-	public java.lang.Long getLaunchPadItemId() {
+	public java.lang.Long getResourceTypeId() {
 		return (java.lang.Long) getValue(9);
 	}
 
@@ -304,7 +304,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field10() {
-		return com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.LAUNCH_PAD_ITEM_ID;
+		return com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.RESOURCE_TYPE_ID;
 	}
 
 	/**
@@ -408,7 +408,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public java.lang.Long value10() {
-		return getLaunchPadItemId();
+		return getResourceTypeId();
 	}
 
 	/**
@@ -521,7 +521,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public EhRentalItemsBillsRecord value10(java.lang.Long value) {
-		setLaunchPadItemId(value);
+		setResourceTypeId(value);
 		return this;
 	}
 
@@ -574,7 +574,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	/**
 	 * Create a detached, initialised EhRentalItemsBillsRecord
 	 */
-	public EhRentalItemsBillsRecord(java.lang.Long id, java.lang.Long rentalBillId, java.lang.Long rentalSiteItemId, java.lang.Integer rentalCount, java.math.BigDecimal totalMoney, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long launchPadItemId, java.lang.String itemName, java.lang.String imgUri, java.lang.Byte itemType) {
+	public EhRentalItemsBillsRecord(java.lang.Long id, java.lang.Long rentalBillId, java.lang.Long rentalSiteItemId, java.lang.Integer rentalCount, java.math.BigDecimal totalMoney, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long resourceTypeId, java.lang.String itemName, java.lang.String imgUri, java.lang.Byte itemType) {
 		super(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS);
 
 		setValue(0, id);
@@ -586,7 +586,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 		setValue(6, createTime);
 		setValue(7, operatorUid);
 		setValue(8, operateTime);
-		setValue(9, launchPadItemId);
+		setValue(9, resourceTypeId);
 		setValue(10, itemName);
 		setValue(11, imgUri);
 		setValue(12, itemType);

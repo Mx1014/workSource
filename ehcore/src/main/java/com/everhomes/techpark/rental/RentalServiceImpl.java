@@ -161,6 +161,8 @@ import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRentalBillCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
+import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
+import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
@@ -385,13 +387,13 @@ public class RentalServiceImpl implements RentalService {
 	}
 	@Override
 	public QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd){
-		RentalDefaultRule defaultRule = this.rentalProvider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getLaunchPadItemId());
+		RentalDefaultRule defaultRule = this.rentalProvider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getResourceTypeId());
 		QueryDefaultRuleAdminResponse response = null;
 		if(null==defaultRule){
 			AddDefaultRuleAdminCommand addCmd = new AddDefaultRuleAdminCommand();
 	        addCmd.setOwnerType(cmd.getOwnerType());
 	        addCmd.setOwnerId(cmd.getOwnerId());
-	        addCmd.setLaunchPadItemId(cmd.getLaunchPadItemId());
+	        addCmd.setResourceTypeId(cmd.getResourceTypeId());
 	        addCmd.setExclusiveFlag(NormalFlag.NONEED.getCode());
 	        addCmd.setUnit(0.5);
 	        addCmd.setAutoAssign(NormalFlag.NEED.getCode());
@@ -460,7 +462,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd) { 
-		RentalDefaultRule defaultRule = this.rentalProvider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getLaunchPadItemId());
+		RentalDefaultRule defaultRule = this.rentalProvider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getResourceTypeId());
 		if(null==defaultRule){
 			throw RuntimeErrorException
 			.errorWith(RentalServiceErrorCode.SCOPE,
@@ -826,10 +828,10 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalSitesCommandResponse findRentalSites(
 			FindRentalSitesCommand cmd) {
-		if(null==cmd.getLaunchPadItemId()||null==cmd.getOwnerId()||null==cmd.getOwnerType())
+		if(null==cmd.getResourceTypeId()||null==cmd.getOwnerId()||null==cmd.getOwnerType())
 
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter LaunchPadItemId OwnerId OwnerType cant be null");
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter ResourceTypeId OwnerId OwnerType cant be null");
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
 
 		if(cmd.getAnchor() == null)
@@ -849,7 +851,7 @@ public class RentalServiceImpl implements RentalService {
 			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getLaunchPadItemId(), cmd.getKeyword(),
+				cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, pageSize,cmd.getStatus(),siteIds);
 		if(null==rentalSites)
 			return response;
@@ -1450,7 +1452,7 @@ public class RentalServiceImpl implements RentalService {
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalBill> billList = this.rentalProvider.listRentalBills(userId,
-				cmd.getLaunchPadItemId(), locator, pageSize + 1,
+				cmd.getResourceTypeId(), locator, pageSize + 1,
 				status);
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
@@ -1962,7 +1964,7 @@ public class RentalServiceImpl implements RentalService {
 						rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
 						rentalRefundOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
-						rentalRefundOrder.setLaunchPadItemId(bill.getLaunchPadItemId());
+						rentalRefundOrder.setResourceTypeId(bill.getResourceTypeId());
 						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
 						//微信直接退款，支付宝置为退款中 
 						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getVendorType())){
@@ -2346,7 +2348,7 @@ public class RentalServiceImpl implements RentalService {
 //		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalBill> bills = rentalProvider.listRentalBills(cmd.getLaunchPadItemId(), cmd.getOrganizationId(), 
+		List<RentalBill> bills = rentalProvider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), 
 				cmd.getRentalSiteId(), locator, cmd.getBillStatus(), cmd.getVendorType(), pageSize+1, cmd.getStartTime(), cmd.getEndTime(),
 				null, null); 
 		if(bills != null && bills.size() > pageSize) {
@@ -2972,7 +2974,7 @@ public class RentalServiceImpl implements RentalService {
 //			return response;
 
 		Integer pageSize = Integer.MAX_VALUE; 
-		List<RentalBill> bills = rentalProvider.listRentalBills(cmd.getLaunchPadItemId(), cmd.getOrganizationId(), 
+		List<RentalBill> bills = rentalProvider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), 
 				cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
 				null, null); 
 		if(null == bills){
@@ -3153,7 +3155,7 @@ public class RentalServiceImpl implements RentalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid organizationId parameter in the command");
-		if(null==cmd.getLaunchPadItemId())
+		if(null==cmd.getResourceTypeId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid launchPadItemId parameter in the command");
@@ -3175,7 +3177,7 @@ public class RentalServiceImpl implements RentalService {
 				siteIds.add(siteOwner.getRentalSiteId());
 			}   
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getLaunchPadItemId(), null,
+				cmd.getResourceTypeId(), null,
 				locator, pageSize,status,siteIds);
 		if(null==rentalSites)
 			return response;
@@ -3204,7 +3206,7 @@ public class RentalServiceImpl implements RentalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid organizationId parameter in the command");
-		if(null==cmd.getLaunchPadItemId())
+		if(null==cmd.getResourceTypeId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid launchPadItemId parameter in the command");
@@ -3510,7 +3512,7 @@ public class RentalServiceImpl implements RentalService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		 
-		List<RentalRefundOrder> orders = rentalProvider.getRefundOrderList(cmd.getLaunchPadItemId(),  
+		List<RentalRefundOrder> orders = rentalProvider.getRefundOrderList(cmd.getResourceTypeId(),  
 				  locator, cmd.getStatus(), VendorType.fromCode(cmd.getVendorType()).getStyleNo(), pageSize+1, cmd.getStartTime(), cmd.getEndTime()); 
 		if(orders==null ||orders.size()==0)
 			return response;
@@ -3614,6 +3616,13 @@ public class RentalServiceImpl implements RentalService {
 							"bill  refound error"); 
 		}	
 		 
+	}
+
+	@Override
+	public GetResourceTypeListResponse getResourceTypeList(
+			GetResourceTypeListCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
  

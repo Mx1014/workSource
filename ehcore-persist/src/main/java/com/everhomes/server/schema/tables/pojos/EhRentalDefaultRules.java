@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 311067817;
+	private static final long serialVersionUID = 412980011;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.lang.Long       rentalStartTime;
 	private java.lang.Long       rentalEndTime;
 	private java.lang.Long       payStartTime;
@@ -54,7 +54,7 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		java.lang.Long       id,
 		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.lang.Long       rentalStartTime,
 		java.lang.Long       rentalEndTime,
 		java.lang.Long       payStartTime,
@@ -89,7 +89,7 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.id = id;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.rentalStartTime = rentalStartTime;
 		this.rentalEndTime = rentalEndTime;
 		this.payStartTime = payStartTime;
@@ -146,12 +146,12 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.Long getRentalStartTime() {

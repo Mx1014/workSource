@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1108070283;
+	private static final long serialVersionUID = -1772069099;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bills</code>
@@ -162,9 +162,9 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> VENDOR_TYPE = createField("vendor_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "支付方式,10001-支付宝，10002-微信");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.launch_pad_item_id</code>. 广场图标id
+	 * The column <code>ehcore.eh_rental_bills.resource_type_id</code>. 广场图标id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.organization_id</code>. 所属公司的ID

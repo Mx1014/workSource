@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 47431083;
+	private static final long serialVersionUID = -1533603775;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalBillId;
@@ -22,7 +22,7 @@ public class EhRentalSitesBills implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.sql.Timestamp   beginTime;
 	private java.sql.Timestamp   endTime;
 	private java.math.BigDecimal price;
@@ -42,7 +42,7 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.sql.Timestamp   beginTime,
 		java.sql.Timestamp   endTime,
 		java.math.BigDecimal price,
@@ -59,7 +59,7 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		this.price = price;
@@ -140,12 +140,12 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.sql.Timestamp getBeginTime() {

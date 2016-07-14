@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRefundOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1773116150;
+	private static final long serialVersionUID = -33552446;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalBillId;
 	private java.lang.Long       refundOrderNo;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.lang.Long       orderNo;
 	private java.lang.String     onlinePayStyleNo;
 	private java.math.BigDecimal amount;
@@ -33,7 +33,7 @@ public class EhRentalRefundOrders implements java.io.Serializable {
 		java.lang.Long       id,
 		java.lang.Long       rentalBillId,
 		java.lang.Long       refundOrderNo,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.lang.Long       orderNo,
 		java.lang.String     onlinePayStyleNo,
 		java.math.BigDecimal amount,
@@ -47,7 +47,7 @@ public class EhRentalRefundOrders implements java.io.Serializable {
 		this.id = id;
 		this.rentalBillId = rentalBillId;
 		this.refundOrderNo = refundOrderNo;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.orderNo = orderNo;
 		this.onlinePayStyleNo = onlinePayStyleNo;
 		this.amount = amount;
@@ -83,12 +83,12 @@ public class EhRentalRefundOrders implements java.io.Serializable {
 		this.refundOrderNo = refundOrderNo;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.Long getOrderNo() {

@@ -20,7 +20,7 @@ public class RefundOrderDTO {
 	private java.lang.Long     id;
 	private java.lang.Long     rentalBillId;
 	private java.lang.Long       refundOrderNo;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.math.BigDecimal amount;
 	private java.lang.String     vendorType;
 	private java.lang.Byte     status;
@@ -59,12 +59,12 @@ public class RefundOrderDTO {
 		this.refundOrderNo = refundOrderNo;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.math.BigDecimal getAmount() {

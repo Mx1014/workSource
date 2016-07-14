@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillAttachments implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1920862198;
+	private static final long serialVersionUID = -1090587852;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalBillId;
@@ -22,7 +22,7 @@ public class EhRentalBillAttachments implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
-	private java.lang.Long     launchPadItemId;
+	private java.lang.Long     resourceTypeId;
 
 	public EhRentalBillAttachments() {}
 
@@ -36,7 +36,7 @@ public class EhRentalBillAttachments implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
-		java.lang.Long     launchPadItemId
+		java.lang.Long     resourceTypeId
 	) {
 		this.id = id;
 		this.rentalBillId = rentalBillId;
@@ -47,7 +47,7 @@ public class EhRentalBillAttachments implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.Long getId() {
@@ -122,11 +122,11 @@ public class EhRentalBillAttachments implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 }

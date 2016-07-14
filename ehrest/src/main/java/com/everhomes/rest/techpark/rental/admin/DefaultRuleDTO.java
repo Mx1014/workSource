@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所有者类型 参考
  * {@link com.everhomes.rest.techpark.rental.RentalOwnerType}</li>
  * <li>ownerId: 园区id</li>
- * <li>launchPadItemId: 图标id</li>
+ * <li>resourceTypeId: 图标id</li>
  * <li>exclusiveFlag: 是否是独占资源</li>
  * <li>unit: 1整租，0.5可半租</li>
  * <li>autoAssign: 是否需要自动分配资源</li>
@@ -46,7 +46,7 @@ public class DefaultRuleDTO {
 	@NotNull
 	private Long ownerId;
 	@NotNull
-	private Long launchPadItemId;
+	private Long resourceTypeId;
 	private Byte exclusiveFlag;
 	private Double unit;
 	private Byte autoAssign;
@@ -95,12 +95,12 @@ public class DefaultRuleDTO {
 		this.ownerId = ownerId;
 	}
 
-	public Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public Byte getExclusiveFlag() {

@@ -66,6 +66,8 @@ import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRentalBillCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
+import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
+import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.UpdateDefaultRuleAdminCommand;
@@ -176,5 +178,8 @@ public interface RentalService {
 	RentalBillDTO getRentalBill(GetRentalBillCommand cmd);
 
 	String getRefundUrl(GetRefundUrlCommand cmd);
+
+	GetResourceTypeListResponse getResourceTypeList(
+			GetResourceTypeListCommand cmd);
 
 }

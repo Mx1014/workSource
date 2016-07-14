@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2144808127;
+	private static final long serialVersionUID = -1944184051;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalSiteId;
@@ -35,7 +35,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
 	private java.lang.Byte       multiTimeInterval;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.lang.Integer    siteNumber;
 	private java.math.BigDecimal halfsitePrice;
 	private java.math.BigDecimal halfsiteOriginalPrice;
@@ -65,7 +65,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Byte       autoAssign,
 		java.lang.Byte       multiUnit,
 		java.lang.Byte       multiTimeInterval,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.lang.Integer    siteNumber,
 		java.math.BigDecimal halfsitePrice,
 		java.math.BigDecimal halfsiteOriginalPrice
@@ -92,7 +92,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.autoAssign = autoAssign;
 		this.multiUnit = multiUnit;
 		this.multiTimeInterval = multiTimeInterval;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.siteNumber = siteNumber;
 		this.halfsitePrice = halfsitePrice;
 		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
@@ -274,12 +274,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.multiTimeInterval = multiTimeInterval;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.Integer getSiteNumber() {

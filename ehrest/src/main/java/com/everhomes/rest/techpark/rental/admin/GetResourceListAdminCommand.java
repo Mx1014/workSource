@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
  * 列出资源列表参数(根据图标和园区)
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者类型</li>
- * <li>launchPadItemId: 图标id</li>
+ * <li>resourceTypeId: 图标id</li>
  * <li>organizationId: 所属公司id</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize:每页数量 </li>
@@ -17,7 +17,7 @@ public class GetResourceListAdminCommand {
 	private Long ownerId;
 	private String ownerType;
 	@NotNull
-	private Long launchPadItemId;
+	private Long resourceTypeId;
 	private Long organizationId;
 
     
@@ -42,12 +42,12 @@ public class GetResourceListAdminCommand {
 		this.ownerType = ownerType;
 	}
 
-	public Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public Long getOrganizationId() {

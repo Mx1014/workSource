@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalTimeInterval extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalTimeIntervalRecord> {
 
-	private static final long serialVersionUID = -806559632;
+	private static final long serialVersionUID = 100555861;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_time_interval</code>
@@ -29,7 +29,7 @@ public class EhRentalTimeInterval extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_rental_time_interval.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalTimeIntervalRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalTimeIntervalRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_time_interval.owner_id</code>.

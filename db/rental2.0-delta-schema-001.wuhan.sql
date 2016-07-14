@@ -8,7 +8,7 @@ CREATE TABLE `eh_rental_default_rules` (
 `id` BIGINT(20)    COMMENT 'id',
 `owner_type` VARCHAR(255)  COMMENT 'owner type : community ; organization',
 `owner_id` BIGINT(20)    COMMENT 'community id or organization id',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 `rental_start_time` BIGINT(20)    COMMENT '最多提前多少时间预定',
 `rental_end_time` BIGINT(20)    COMMENT '最少提前多少时间预定',
 `pay_start_time` BIGINT(20)    COMMENT '',
@@ -116,7 +116,7 @@ CREATE TABLE `eh_rental_sites` (
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 `cancel_flag` TINYINT(4)  COMMENT '是否允许取消 1是 0否',
 `need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 `cancel_time` BIGINT(20)    COMMENT '至少提前取消时间',
 `rental_start_time` BIGINT(20)    COMMENT '最多提前多少时间预定',
 `rental_end_time` BIGINT(20)    COMMENT '最少提前多少时间预定',
@@ -190,7 +190,7 @@ CREATE TABLE `eh_rental_site_rules` (
 `auto_assign` TINYINT(4)    COMMENT '是否动态分配 1是 0否',
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 `site_number` INT  COMMENT '场所号',
 `halfsite_price` DECIMAL(10,2)   COMMENT '半场折后价',
 `halfsite_original_price` DECIMAL(10,2)   COMMENT '半场原价（如果不为null则price为打折价）',
@@ -271,7 +271,7 @@ CREATE TABLE `eh_rental_bills` (
 `site_name` VARCHAR(255) NULL  COMMENT '名称',
 `use_time` VARCHAR(255) NULL  COMMENT '使用时间',
 `vendor_type` VARCHAR(255) NULL  COMMENT '支付方式,10001-支付宝，10002-微信',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 `organization_id` BIGINT(20)    COMMENT '所属公司的ID', 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
@@ -292,7 +292,7 @@ CREATE TABLE `eh_rental_sites_bills` (
 `create_time` DATETIME NULL  COMMENT '',
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id', 
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id', 
 `begin_time` DATETIME   COMMENT '开始时间 对于按时间定',
 `end_time` DATETIME   COMMENT '结束时间 对于按时间定',
 `price` DECIMAL(10,2)   COMMENT '折后价',
@@ -336,7 +336,7 @@ CREATE TABLE `eh_rental_items_bills` (
 `create_time` DATETIME NULL  COMMENT '',
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 
 `item_name` VARCHAR(128)   COMMENT '',
 `img_uri` VARCHAR(1024)   COMMENT '',
@@ -362,7 +362,7 @@ CREATE TABLE `eh_rental_bill_attachments` (
 `create_time` DATETIME NULL  COMMENT '',
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
@@ -398,7 +398,7 @@ CREATE TABLE `eh_rental_refund_orders` (
 `id` BIGINT(20)  COMMENT 'id',
 `rental_bill_id` BIGINT(20)   COMMENT '订单id',
 `refund_order_no` BIGINT(20)   COMMENT '退款的refoundOrderNo-服务端退款时候生成',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 `order_no` BIGINT(20)   COMMENT '支付的orderno-下单时候生成',
 `online_pay_style_no` VARCHAR(20)   COMMENT '支付方式,alipay-支付宝,wechat-微信',
 `amount` DECIMAL(10,2)  COMMENT '退款金额',
@@ -414,4 +414,21 @@ CREATE TABLE `eh_rental_refund_orders` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
+
+-- 
+-- 资源类型表
+-- 
+DROP TABLE IF EXISTS eh_rental_resource_types;
+
+CREATE TABLE `eh_rental_resource_types` (
+`id` BIGINT(20)    COMMENT 'id',
+`name` VARCHAR(50)   COMMENT '名称',
+`page_type` TINYINT(4)    COMMENT '预定展示0代表默认页面DefaultType, 1代表定制页面CustomType',
+`icon_uri` VARCHAR(1024)   COMMENT '工作日价格',
+`status` TINYINT(4)    COMMENT '状态：0关闭 2开启',
+`namespace_id` INT(11)  COMMENT '域空间',
+
+ PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
+;
 

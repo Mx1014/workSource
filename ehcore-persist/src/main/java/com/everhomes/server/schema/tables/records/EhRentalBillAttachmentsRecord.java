@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord> implements org.jooq.Record10<java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.lang.Long> {
 
-	private static final long serialVersionUID = -386588606;
+	private static final long serialVersionUID = 273608796;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bill_attachments.id</code>. id
@@ -42,14 +42,14 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bill_attachments.attachment_type</code>. 0:String 1:email 2:attachment file
+	 * Setter for <code>ehcore.eh_rental_bill_attachments.attachment_type</code>. 0:文本 1:车牌 2:显示内容 3：附件链接
 	 */
 	public void setAttachmentType(java.lang.Byte value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bill_attachments.attachment_type</code>. 0:String 1:email 2:attachment file
+	 * Getter for <code>ehcore.eh_rental_bill_attachments.attachment_type</code>. 0:文本 1:车牌 2:显示内容 3：附件链接
 	 */
 	public java.lang.Byte getAttachmentType() {
 		return (java.lang.Byte) getValue(2);
@@ -140,16 +140,16 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bill_attachments.launch_pad_item_id</code>. 广场图标id
+	 * Setter for <code>ehcore.eh_rental_bill_attachments.resource_type_id</code>. 广场图标id
 	 */
-	public void setLaunchPadItemId(java.lang.Long value) {
+	public void setResourceTypeId(java.lang.Long value) {
 		setValue(9, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bill_attachments.launch_pad_item_id</code>. 广场图标id
+	 * Getter for <code>ehcore.eh_rental_bill_attachments.resource_type_id</code>. 广场图标id
 	 */
-	public java.lang.Long getLaunchPadItemId() {
+	public java.lang.Long getResourceTypeId() {
 		return (java.lang.Long) getValue(9);
 	}
 
@@ -262,7 +262,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field10() {
-		return com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.LAUNCH_PAD_ITEM_ID;
+		return com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.RESOURCE_TYPE_ID;
 	}
 
 	/**
@@ -342,7 +342,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	 */
 	@Override
 	public java.lang.Long value10() {
-		return getLaunchPadItemId();
+		return getResourceTypeId();
 	}
 
 	/**
@@ -431,7 +431,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	 */
 	@Override
 	public EhRentalBillAttachmentsRecord value10(java.lang.Long value) {
-		setLaunchPadItemId(value);
+		setResourceTypeId(value);
 		return this;
 	}
 
@@ -457,7 +457,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	/**
 	 * Create a detached, initialised EhRentalBillAttachmentsRecord
 	 */
-	public EhRentalBillAttachmentsRecord(java.lang.Long id, java.lang.Long rentalBillId, java.lang.Byte attachmentType, java.lang.String content, java.lang.String filePath, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long launchPadItemId) {
+	public EhRentalBillAttachmentsRecord(java.lang.Long id, java.lang.Long rentalBillId, java.lang.Byte attachmentType, java.lang.String content, java.lang.String filePath, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long resourceTypeId) {
 		super(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS);
 
 		setValue(0, id);
@@ -469,6 +469,6 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 		setValue(6, createTime);
 		setValue(7, operatorUid);
 		setValue(8, operateTime);
-		setValue(9, launchPadItemId);
+		setValue(9, resourceTypeId);
 	}
 }

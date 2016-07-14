@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord> {
 
-	private static final long serialVersionUID = 131145453;
+	private static final long serialVersionUID = -1792778355;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_default_rules</code>
@@ -42,9 +42,9 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT, this, "community id or organization id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
+	 * The column <code>ehcore.eh_rental_default_rules.resource_type_id</code>. 广场图标id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.rental_start_time</code>. 最多提前多少时间预定

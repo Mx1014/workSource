@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1325872675;
+	private static final long serialVersionUID = -593347481;
 
 	private java.lang.Long       id;
 	private java.lang.String     billNumber;
@@ -40,7 +40,7 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.lang.String     siteName;
 	private java.lang.String     useTime;
 	private java.lang.String     vendorType;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.lang.Long       organizationId;
 
 	public EhRentalBills() {}
@@ -73,7 +73,7 @@ public class EhRentalBills implements java.io.Serializable {
 		java.lang.String     siteName,
 		java.lang.String     useTime,
 		java.lang.String     vendorType,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.lang.Long       organizationId
 	) {
 		this.id = id;
@@ -103,7 +103,7 @@ public class EhRentalBills implements java.io.Serializable {
 		this.siteName = siteName;
 		this.useTime = useTime;
 		this.vendorType = vendorType;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.organizationId = organizationId;
 	}
 
@@ -323,12 +323,12 @@ public class EhRentalBills implements java.io.Serializable {
 		this.vendorType = vendorType;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.Long getOrganizationId() {

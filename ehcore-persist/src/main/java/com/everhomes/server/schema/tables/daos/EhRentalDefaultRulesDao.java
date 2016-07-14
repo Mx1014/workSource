@@ -62,10 +62,10 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
-	 * Fetch records that have <code>launch_pad_item_id IN (values)</code>
+	 * Fetch records that have <code>resource_type_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByLaunchPadItemId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByResourceTypeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.RESOURCE_TYPE_ID, values);
 	}
 
 	/**

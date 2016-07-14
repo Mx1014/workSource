@@ -467,14 +467,14 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalBill> listRentalBills(Long userId,Long launchPadItemId,
+	public List<RentalBill> listRentalBills(Long userId,Long resourceTypeId,
 			ListingLocator locator, int count, List<Byte> status) {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
 		//TODO:
-		if(null!=launchPadItemId)
-			condition = condition.and(Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
-				.eq(launchPadItemId));
+		if(null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RESOURCE_TYPE_ID
+				.eq(resourceTypeId));
 //		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
 //				.eq(ownerType));
 //		if (StringUtils.isNotEmpty(siteType))
@@ -708,12 +708,12 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public int countRentalSites(Long  launchPadItemId,String keyword,List<Byte>  status,List<Long>  siteIds){
+	public int countRentalSites(Long  resourceTypeId,String keyword,List<Byte>  status,List<Long>  siteIds){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID
-				.equal(launchPadItemId);
+		Condition condition = Tables.EH_RENTAL_SITES.RESOURCE_TYPE_ID
+				.equal(resourceTypeId);
 		
 		if(null!= siteIds)
 			condition = condition.and(Tables.EH_RENTAL_SITES.ID
@@ -788,7 +788,7 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
 		//TODO:
-		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
+		Condition condition = Tables.EH_RENTAL_BILLS.RESOURCE_TYPE_ID
 				.equal(ownerId);
 //		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
 //				.equal(ownerType));
@@ -818,7 +818,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalBill> listRentalBills(Long launchPadItemId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
+	public List<RentalBill> listRentalBills(Long resourceTypeId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -832,9 +832,9 @@ public class RentalProviderImpl implements RentalProvider {
 		if (StringUtils.isNotEmpty(vendorType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.VENDOR_TYPE
 					.equal(vendorType));
-		if(null!=launchPadItemId)
-			condition = condition.and(Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID 
-					.equal(launchPadItemId));
+		if(null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RESOURCE_TYPE_ID 
+					.equal(resourceTypeId));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
@@ -874,14 +874,14 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalSite> findRentalSites(Long  launchPadItemId, String keyword, ListingLocator locator,
+	public List<RentalSite> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize,List<Byte>  status,List<Long>  siteIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
 		//TODO
-		Condition condition = Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID
-				.equal(launchPadItemId);
+		Condition condition = Tables.EH_RENTAL_SITES.RESOURCE_TYPE_ID
+				.equal(resourceTypeId);
 		if(null!=siteIds)
 			condition= condition.and( Tables.EH_RENTAL_SITES.ID.in(siteIds));
 //		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_TYPE
@@ -1085,7 +1085,7 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
 		//TODO：
-		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
+		Condition condition = Tables.EH_RENTAL_BILLS.RESOURCE_TYPE_ID
 				.equal(ownerId);
 //		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
 //				.equal(ownerType));
@@ -1317,7 +1317,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public RentalDefaultRule getRentalDefaultRule(String ownerType,
-			Long ownerId, Long launchPadItemId) {
+			Long ownerId, Long resourceTypeId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_DEFAULT_RULES);
@@ -1325,8 +1325,8 @@ public class RentalProviderImpl implements RentalProvider {
 				.equal(ownerId);
 		condition = condition.and(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_TYPE
 				.equal(ownerType));
-		condition = condition.and(Tables.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID
-				.equal(launchPadItemId));
+		condition = condition.and(Tables.EH_RENTAL_DEFAULT_RULES.RESOURCE_TYPE_ID
+				.equal(resourceTypeId));
 		step.where(condition);
 		List<RentalDefaultRule> result = step
 				.orderBy(Tables.EH_RENTAL_DEFAULT_RULES.ID.desc()).fetch().map((r) -> {
@@ -1653,7 +1653,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalRefundOrder> getRefundOrderList(Long launchPadItemId,
+	public List<RentalRefundOrder> getRefundOrderList(Long resourceTypeId,
 			CrossShardListingLocator locator, Byte status, String styleNo,
 			int pageSize, Long startTime, Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1663,9 +1663,9 @@ public class RentalProviderImpl implements RentalProvider {
 		if (StringUtils.isNotEmpty(styleNo))
 			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.ONLINE_PAY_STYLE_NO
 					.equal(styleNo));
-		if(null!=launchPadItemId)
-			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.LAUNCH_PAD_ITEM_ID 
-					.equal(launchPadItemId)); 
+		if(null!=resourceTypeId)
+			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.RESOURCE_TYPE_ID 
+					.equal(resourceTypeId)); 
 		if (null != endTime)
 			condition = condition.and(Tables.EH_RENTAL_REFUND_ORDERS.CREATE_TIME
 					.lessThan(new Timestamp(endTime)));

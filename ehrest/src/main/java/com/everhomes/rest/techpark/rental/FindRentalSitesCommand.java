@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * 查询场所
  * <li>ownerType：所有者类型：“community”</li>
  * <li>ownerId：所有者id</li>
- * <li>launchPadItemId: 广场图标id</li>
+ * <li>resourceTypeId: 广场图标id</li>
  * <li>keyword: 关键字</li>
  * <li>anchor: 锚点</li>
  * <li>pageSize: 每页个数</li>
@@ -19,7 +19,7 @@ import com.everhomes.util.StringHelper;
 public class FindRentalSitesCommand {
 	private String ownerType;
 	private Long ownerId; 
-	private Long launchPadItemId;
+	private Long resourceTypeId;
 	private String keyword;
 	private Long anchor;
 	private Integer pageSize;
@@ -60,11 +60,11 @@ public class FindRentalSitesCommand {
 	public void setStatus(List<Byte> status) {
 		this.status = status;
 	}
-	public Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public Long getResourceTypeId() {
+		return resourceTypeId;
 	}
-	public void setLaunchPadItemId(Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public Long getAnchor() {

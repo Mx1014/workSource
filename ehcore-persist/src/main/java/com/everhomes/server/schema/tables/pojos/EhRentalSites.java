@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = -853733149;
+	private static final long serialVersionUID = -788735491;
 
 	private java.lang.Long       id;
 	private java.lang.Long       parentId;
@@ -48,7 +48,7 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.lang.Byte       multiTimeInterval;
 	private java.lang.Byte       cancelFlag;
 	private java.lang.Byte       needPay;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.lang.Long       cancelTime;
 	private java.lang.Long       rentalStartTime;
 	private java.lang.Long       rentalEndTime;
@@ -98,7 +98,7 @@ public class EhRentalSites implements java.io.Serializable {
 		java.lang.Byte       multiTimeInterval,
 		java.lang.Byte       cancelFlag,
 		java.lang.Byte       needPay,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.lang.Long       cancelTime,
 		java.lang.Long       rentalStartTime,
 		java.lang.Long       rentalEndTime,
@@ -145,7 +145,7 @@ public class EhRentalSites implements java.io.Serializable {
 		this.multiTimeInterval = multiTimeInterval;
 		this.cancelFlag = cancelFlag;
 		this.needPay = needPay;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.cancelTime = cancelTime;
 		this.rentalStartTime = rentalStartTime;
 		this.rentalEndTime = rentalEndTime;
@@ -438,12 +438,12 @@ public class EhRentalSites implements java.io.Serializable {
 		this.needPay = needPay;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.Long getCancelTime() {

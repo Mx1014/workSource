@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord> {
 
-	private static final long serialVersionUID = 231466854;
+	private static final long serialVersionUID = -1254610250;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.id</code>. id
@@ -56,16 +56,16 @@ public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImp
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
+	 * Setter for <code>ehcore.eh_rental_default_rules.resource_type_id</code>. 广场图标id
 	 */
-	public void setLaunchPadItemId(java.lang.Long value) {
+	public void setResourceTypeId(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
+	 * Getter for <code>ehcore.eh_rental_default_rules.resource_type_id</code>. 广场图标id
 	 */
-	public java.lang.Long getLaunchPadItemId() {
+	public java.lang.Long getResourceTypeId() {
 		return (java.lang.Long) getValue(3);
 	}
 
@@ -515,13 +515,13 @@ public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImp
 	/**
 	 * Create a detached, initialised EhRentalDefaultRulesRecord
 	 */
-	public EhRentalDefaultRulesRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long launchPadItemId, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.String contactNum, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Byte rentalType, java.lang.Long cancelTime, java.lang.Long overtimeTime, java.lang.Byte exclusiveFlag, java.lang.Double unit, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Integer rentalStep, java.lang.Byte needPay, java.math.BigDecimal workdayPrice, java.math.BigDecimal weekendPrice, java.lang.Double siteCounts, java.sql.Date beginDate, java.sql.Date endDate, java.lang.String openWeekday, java.lang.Double timeStep) {
+	public EhRentalDefaultRulesRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long resourceTypeId, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.String contactNum, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Byte rentalType, java.lang.Long cancelTime, java.lang.Long overtimeTime, java.lang.Byte exclusiveFlag, java.lang.Double unit, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Integer rentalStep, java.lang.Byte needPay, java.math.BigDecimal workdayPrice, java.math.BigDecimal weekendPrice, java.lang.Double siteCounts, java.sql.Date beginDate, java.sql.Date endDate, java.lang.String openWeekday, java.lang.Double timeStep) {
 		super(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES);
 
 		setValue(0, id);
 		setValue(1, ownerType);
 		setValue(2, ownerId);
-		setValue(3, launchPadItemId);
+		setValue(3, resourceTypeId);
 		setValue(4, rentalStartTime);
 		setValue(5, rentalEndTime);
 		setValue(6, payStartTime);

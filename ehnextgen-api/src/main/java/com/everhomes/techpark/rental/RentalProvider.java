@@ -96,20 +96,20 @@ public interface RentalProvider {
 
 	RentalBillPaybillMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
-	List<RentalBill> listRentalBills(Long userId, Long launchPadItemId, ListingLocator locator,
+	List<RentalBill> listRentalBills(Long userId, Long resourceTypeId, ListingLocator locator,
 			int count, List<Byte> status);
 
-	int countRentalSites(Long  launchPadItemId,String keyword,List<Byte>  status,List<Long>  siteIds);
+	int countRentalSites(Long  resourceTypeId,String keyword,List<Byte>  status,List<Long>  siteIds);
 
 	int countRentalBills(Long ownerId, String ownerType, String siteType,
 			Long rentalSiteId, Byte billStatus, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId);
 
-	List<RentalBill> listRentalBills(Long launchPadItemId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
+	List<RentalBill> listRentalBills(Long resourceTypeId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId);
 
-	List<RentalSite> findRentalSites(Long  launchPadItemId, String keyword, ListingLocator locator,
+	List<RentalSite> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize,List<Byte>  status,List<Long>  siteIds);
 
 	RentalRule getRentalRule(Long ownerId, String ownerType, String siteType);
@@ -149,7 +149,7 @@ public interface RentalProvider {
 
 
 	RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId,
-			Long launchPadItemId);
+			Long resourceTypeId);
 
 
 	List<RentalTimeInterval> queryRentalTimeIntervalByOwner(String ownerType,
@@ -226,7 +226,7 @@ public interface RentalProvider {
 	void updateRentalRefundOrder(RentalRefundOrder rentalRefundOrder);
 
 
-	List<RentalRefundOrder> getRefundOrderList(Long launchPadItemId,
+	List<RentalRefundOrder> getRefundOrderList(Long resourceTypeId,
 			CrossShardListingLocator locator, Byte status, String styleNo,
 			int pageSize, Long startTime, Long endTime);
 

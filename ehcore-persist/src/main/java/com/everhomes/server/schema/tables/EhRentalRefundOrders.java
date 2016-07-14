@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRefundOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord> {
 
-	private static final long serialVersionUID = 1889291607;
+	private static final long serialVersionUID = -1694659913;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_refund_orders</code>
@@ -42,9 +42,9 @@ public class EhRentalRefundOrders extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> REFUND_ORDER_NO = createField("refund_order_no", org.jooq.impl.SQLDataType.BIGINT, this, "退款的refoundOrderNo-服务端退款时候生成");
 
 	/**
-	 * The column <code>ehcore.eh_rental_refund_orders.launch_pad_item_id</code>. 广场图标id
+	 * The column <code>ehcore.eh_rental_refund_orders.resource_type_id</code>. 广场图标id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_refund_orders.order_no</code>. 支付的orderno-下单时候生成

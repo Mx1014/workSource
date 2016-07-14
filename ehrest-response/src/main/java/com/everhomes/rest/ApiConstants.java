@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-14 10:57:38
+// generated at 2016-07-14 17:14:40
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -784,6 +784,7 @@ public interface ApiConstants {
     public static final String RENTAL_ADMIN_GETREFUNDURL_URL = "/rental/admin/getRefundUrl";
     public static final String RENTAL_ADMIN_GETRENTALBILL_URL = "/rental/admin/getRentalBill";
     public static final String RENTAL_ADMIN_GETRESOURCELIST_URL = "/rental/admin/getResourceList";
+    public static final String RENTAL_ADMIN_GETRESOURCETYPELIST_URL = "/rental/admin/getResourceTypeList";
     public static final String RENTAL_ADMIN_INCOMPLETEBILL_URL = "/rental/admin/incompleteBill";
     public static final String RENTAL_ADMIN_LISTRENTALBILLS_URL = "/rental/admin/listRentalBills";
     public static final String RENTAL_ADMIN_QUERYDEFAULTRULE_URL = "/rental/admin/queryDefaultRule";

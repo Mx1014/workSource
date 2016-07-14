@@ -781,6 +781,7 @@
 #define EVH_RENTAL_ADMIN_GETREFUNDURL_URL @"/rental/admin/getRefundUrl"
 #define EVH_RENTAL_ADMIN_GETRENTALBILL_URL @"/rental/admin/getRentalBill"
 #define EVH_RENTAL_ADMIN_GETRESOURCELIST_URL @"/rental/admin/getResourceList"
+#define EVH_RENTAL_ADMIN_GETRESOURCETYPELIST_URL @"/rental/admin/getResourceTypeList"
 #define EVH_RENTAL_ADMIN_INCOMPLETEBILL_URL @"/rental/admin/incompleteBill"
 #define EVH_RENTAL_ADMIN_LISTRENTALBILLS_URL @"/rental/admin/listRentalBills"
 #define EVH_RENTAL_ADMIN_QUERYDEFAULTRULE_URL @"/rental/admin/queryDefaultRule"

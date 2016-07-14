@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2104607547;
+	private static final long serialVersionUID = -1416073903;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalBillId;
@@ -22,7 +22,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       resourceTypeId;
 	private java.lang.String     itemName;
 	private java.lang.String     imgUri;
 	private java.lang.Byte       itemType;
@@ -39,7 +39,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Long       launchPadItemId,
+		java.lang.Long       resourceTypeId,
 		java.lang.String     itemName,
 		java.lang.String     imgUri,
 		java.lang.Byte       itemType
@@ -53,7 +53,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.launchPadItemId = launchPadItemId;
+		this.resourceTypeId = resourceTypeId;
 		this.itemName = itemName;
 		this.imgUri = imgUri;
 		this.itemType = itemType;
@@ -131,12 +131,12 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return this.resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public java.lang.String getItemName() {

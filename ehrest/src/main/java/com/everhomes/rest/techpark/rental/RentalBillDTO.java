@@ -30,7 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalCount：场所预定数量</li> 
  * <li>useDetail：使用详情</li> 
  * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
- * <li>launchPadItemId：广场图标id</li> 
+ * <li>resourceTypeId：广场图标id</li> 
  * <li>siteItems：场所商品</li> 
  * <li>rentalSiteRules：场所时间段</li>
  * <li>billAttachments：订单附加信息</li>
@@ -67,7 +67,7 @@ public class RentalBillDTO {
 	private Double rentalCount; 
 	private java.lang.String     useDetail;
 	private java.lang.String     vendorType;
-	private java.lang.Long       launchPadItemId; 
+	private java.lang.Long       resourceTypeId; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 
@@ -336,13 +336,13 @@ public class RentalBillDTO {
 	}
 
 
-	public java.lang.Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 

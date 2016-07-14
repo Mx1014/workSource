@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = 1886443492;
+	private static final long serialVersionUID = -1766361276;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.id</code>. id
@@ -504,16 +504,16 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_sites.launch_pad_item_id</code>. 广场图标id
+	 * Setter for <code>ehcore.eh_rental_sites.resource_type_id</code>. 广场图标id
 	 */
-	public void setLaunchPadItemId(java.lang.Long value) {
+	public void setResourceTypeId(java.lang.Long value) {
 		setValue(35, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_sites.launch_pad_item_id</code>. 广场图标id
+	 * Getter for <code>ehcore.eh_rental_sites.resource_type_id</code>. 广场图标id
 	 */
-	public java.lang.Long getLaunchPadItemId() {
+	public java.lang.Long getResourceTypeId() {
 		return (java.lang.Long) getValue(35);
 	}
 
@@ -683,7 +683,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalSitesRecord
 	 */
-	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String introduction, java.lang.String notice, java.lang.Long chargeUid, java.lang.String coverUri, java.lang.Byte discountType, java.math.BigDecimal fullPrice, java.math.BigDecimal cutPrice, java.lang.Double discountRatio, java.lang.Byte rentalType, java.lang.Double timeStep, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Byte needPay, java.lang.Long launchPadItemId, java.lang.Long cancelTime, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.Double longitude, java.lang.Double latitude, java.lang.Long organizationId, java.sql.Time dayBeginTime, java.sql.Time dayEndTime) {
+	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String introduction, java.lang.String notice, java.lang.Long chargeUid, java.lang.String coverUri, java.lang.Byte discountType, java.math.BigDecimal fullPrice, java.math.BigDecimal cutPrice, java.lang.Double discountRatio, java.lang.Byte rentalType, java.lang.Double timeStep, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Byte needPay, java.lang.Long resourceTypeId, java.lang.Long cancelTime, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.Double longitude, java.lang.Double latitude, java.lang.Long organizationId, java.sql.Time dayBeginTime, java.sql.Time dayEndTime) {
 		super(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES);
 
 		setValue(0, id);
@@ -721,7 +721,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(32, multiTimeInterval);
 		setValue(33, cancelFlag);
 		setValue(34, needPay);
-		setValue(35, launchPadItemId);
+		setValue(35, resourceTypeId);
 		setValue(36, cancelTime);
 		setValue(37, rentalStartTime);
 		setValue(38, rentalEndTime);

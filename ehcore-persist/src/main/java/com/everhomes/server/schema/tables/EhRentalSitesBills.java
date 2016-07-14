@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord> {
 
-	private static final long serialVersionUID = 353547283;
+	private static final long serialVersionUID = 1330821747;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites_bills</code>
@@ -72,9 +72,9 @@ public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites_bills.launch_pad_item_id</code>. 广场图标id
+	 * The column <code>ehcore.eh_rental_sites_bills.resource_type_id</code>. 广场图标id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites_bills.begin_time</code>. 开始时间 对于按时间定

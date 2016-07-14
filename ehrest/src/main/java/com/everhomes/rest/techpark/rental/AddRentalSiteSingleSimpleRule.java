@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>beginTime：开始时间(hour)</li>
  * <li>endTime：结束时间(hour)</li>
  * <li>rentalSiteId: 资源id</li>
- * <li>launchPadItemId: 图标id</li>
+ * <li>resourceTypeId: 图标id</li>
  * <li>exclusiveFlag: 是否是独占资源</li>
  * <li>unit: 1整租，0.5可半租</li>
  * <li>autoAssign: 是否需要自动分配资源</li>

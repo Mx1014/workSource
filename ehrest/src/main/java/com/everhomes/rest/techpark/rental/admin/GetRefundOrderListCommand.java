@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>查询订单 
- * <li>launchPadItemId：图标id</li> 
+ * <li>resourceTypeId：图标id</li> 
  * <li>startTime：开始时间</li> 
  * <li>endTime：结束时间</li> 
  * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetRefundOrderListCommand {  
-	private java.lang.Long       launchPadItemId; 
+	private java.lang.Long       resourceTypeId; 
 	private Long startTime; 
 	private Long endTime;
 	private java.lang.String     vendorType;
@@ -29,12 +29,12 @@ public class GetRefundOrderListCommand {
         return StringHelper.toJsonString(this);
     }
  
-	public java.lang.Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public java.lang.Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(java.lang.Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public Long getStartTime() {

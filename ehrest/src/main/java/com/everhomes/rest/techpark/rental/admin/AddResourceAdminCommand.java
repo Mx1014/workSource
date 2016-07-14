@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 列出资源列表返回值(根据图标和园区) 
- * <li>launchPadItemId: 图标id</li>
+ * <li>resourceTypeId: 图标id</li>
  * <li>organizationId: 所属公司id</li>
  * <li>siteName: 名称</li>
  * <li>spec: 规格</li>
@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
  */
 public class AddResourceAdminCommand { 
 	@NotNull
-	private Long launchPadItemId;
+	private Long resourceTypeId;
 	@NotNull
 	private Long organizationId;
 	@NotNull
@@ -59,12 +59,12 @@ public class AddResourceAdminCommand {
         return StringHelper.toJsonString(this);
     }
 
-	public Long getLaunchPadItemId() {
-		return launchPadItemId;
+	public Long getResourceTypeId() {
+		return resourceTypeId;
 	}
 
-	public void setLaunchPadItemId(Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
 	}
 
 	public Long getOrganizationId() {
