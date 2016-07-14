@@ -62,28 +62,28 @@ INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049105, 240111044331052505, '', 113.94470215, 22.53833867, 'ws100yup24b5');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(201, 240111044331052505);
+	VALUES(1001701, 240111044331052505);
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331052506, UUID(), 14971, '深圳市',  14972, '南山区', 'ibase-金谷创业园B栋', '金谷创业园B栋', '南山区西丽龙珠四路金谷创业园B栋5层', NULL, '项目位于金谷创业园内，是大沙河创新走廊重点项目已获得政府政策补贴，为“一街道一园区”重点项目，南侧紧邻北环大道及广深高速，北侧为龙珠大道，东侧为高发科技园，西侧隔龙珠四路与西丽车管所毗邻，150米近距龙井地铁站，可直达科技园、车公庙、大学城、华强北等区域。园区配套酒店、餐饮、长租公寓、咖啡厅等，绿化覆盖率高达38%。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 44, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999989);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049106, 240111044331052506, '', 113.94470215, 22.53833867, 'ws100yup24b5');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(202, 240111044331052506);
+	VALUES(1001701, 240111044331052506);
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331052507, UUID(), 14971, '深圳市',  14972, '南山区', 'ibase-威新软件园7号楼', '威新软件园7号楼', '广东省深圳市南山区高新南九道威新软件园7号楼1-2层', NULL, '位于国家重点支持的五大科技园区之一的深圳科技园南区，与英特尔、阿里巴巴、蚂蚁金服、伟创力、招商证券等知名企业为邻。威新中心提供1-200人团队的办公室，可根据企业需求定制空间与设施，拎包进驻，即租即用，中心内高速网络全面覆盖，配备全方位办公服务、视频会议室等。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 77, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999989);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049107, 240111044331052507, '', 113.94470215, 22.53833867, 'ws100yup24b5');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(203, 240111044331052507);
+	VALUES(1001701, 240111044331052507);
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331052508, UUID(), 14971, '深圳市',  14973, '福田区', 'ibase-竹盛花园三期裙楼', '竹盛花园三期裙楼', '广东省深圳市福田区竹子林三路竹盛花园三期裙楼201室', NULL, '项目位属大华侨城片区，园博园、华侨城loft工业园、锦绣中华、世界之窗、欢乐谷等自然人文资源相当丰富。成熟住宅片区，商业配套丰富，学校、银行、医院、餐饮、商业一应俱全，更有美食一条街。深南大道沿线，“深圳人才园”公交站无缝接驳，距竹子林地铁站仅1.4公里。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 39, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999989);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049108, 240111044331052508, '', 113.94470215, 22.53833867, 'ws100yup24b5');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(204, 240111044331052508);
+	VALUES(1001701, 240111044331052508);
            
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES(1002001, UUID(), 'ibase', '金地ibase', 1, 1, 1001701, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180701, 1, 999989); 
@@ -232,7 +232,7 @@ INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (10970, 999989, '0', '0', '0', '/home', 'Bizs', '创智联盟', '创智联盟', 'cs://1/image/aW1hZ2UvTVRvME1qaGhaRFZqTVRReE5HRmlPR0k0TlRBeE1ESTFOR1EyTnpjM056QmlOQQ', '1', '1', '33', '{\"type\":2,\"parentId\":100001}', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (10971, 999989, '0', '0', '0', '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRwa00yVmlOVFl6TmpRM01EQTFabU5pT1dKbU5Ua3lZalZoTVdVeU5qWm1NZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+    VALUES (10971, 999989, '0', '0', '0', '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRwa00yVmlOVFl6TmpRM01EQTFabU5pT1dKbU5Ua3lZalZoTVdVeU5qWm1NZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 
 -- 园区游客场景    
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
@@ -277,7 +277,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (109787, 999989, '0', '0', '0', '/home', 'Bizs', '创智联盟', '创智联盟', 'cs://1/image/aW1hZ2UvTVRvME1qaGhaRFZqTVRReE5HRmlPR0k0TlRBeE1ESTFOR1EyTnpjM056QmlOQQ', '1', '1', '33', '{\"type\":2,\"parentId\":100001}', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109788, 999989, '0', '0', '0', '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRwa00yVmlOVFl6TmpRM01EQTFabU5pT1dKbU5Ua3lZalZoTVdVeU5qWm1NZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+    VALUES (109788, 999989, '0', '0', '0', '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRwa00yVmlOVFl6TmpRM01EQTFabU5pT1dKbU5Ua3lZalZoTVdVeU5qWm1NZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
     
     
     
@@ -644,4 +644,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43500,'', 'EhNamespaces', 999989 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 48000,'', 'EhNamespaces', 999989 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 46100,'', 'EhNamespaces', 999989 , 0);
+
+
+
     
