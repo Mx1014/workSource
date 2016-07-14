@@ -260,13 +260,100 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbU1qTmpOVEkwWkdRek
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9XWTVPV00wWmpVNVlXSTFNREZqWlRReFpETmtORFZpTUROak16QXhOdw' where id in(1027,1025);
 update eh_banners set poster_path = '' where id in(10412,10413);
 
+-- 以上 正式环境已执行
 
--- 增加你已签到
+-- 增加你已签到  正式环境已执行
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('activity', '10007', 'zh_CN', '你已签到');
 
--- 深业 添加场地预约  by lqs 20160709
+-- 深业 添加场地预约  by lqs 20160709  正式环境已执行
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES(12831, 999992, '0', '0', '0', '/home', 'Bizs', 'site_reservation', '场地预约', 'cs://1/image/aW1hZ2UvTVRvM1pEa3dNak16TXpCaU9XVXlOak01WkdWbVpUazJOelkwTnpRd1pUSTJOQQ', 1, 1, '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES(12832, 999992, '0', '0', '0', '/home', 'Bizs', 'site_reservation', '场地预约', 'cs://1/image/aW1hZ2UvTVRvM1pEa3dNak16TXpCaU9XVXlOak01WkdWbVpUazJOelkwTnpRd1pUSTJOQQ', 1, 1, '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+
+-- 科技园去掉滚动广告  by sfyan 20160712 正式环境已执行
+update eh_launch_pad_layouts set layout_json='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' where id = 11;  
+update eh_launch_pad_layouts set layout_json='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' where id = 111; 
+
+-- 科技园去掉一卡通菜单 正式环境已执行
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 1000000 , 0);
+
+-- 增加裁剪配置
+UPDATE `eh_launch_pad_items` SET `scale_type` = 1;
+UPDATE `eh_launch_pad_items` SET `scale_type` = 0 WHERE `namespace_id` = 999999;
+
+-- 给没有圈的公司加上group by sfyan 20160712
+-- 执行 select * from `eh_groups` where `id` in (SELECT (`id` + 5000) from `eh_organizations` where `group_id` is null and `group_type` = 'ENTERPRISE'); 检测一下是否有数据，没有则可以执行，有及时跟我沟通
+-- 需要保证执行成功的先后顺序
+INSERT INTO `eh_groups` (`id`, `uuid`,`namespace_id`,`name`,`display_name`,`creator_uid`,`private_flag`,`join_policy`,`discriminator`,`status`,`member_count`,`share_count`,`post_flag`,`visible_region_type`,`visible_region_id`,`update_time`,`create_time`)
+SELECT (`id` + 5000), concat('4be17342-9113-11e5-adde-00163e' , (`id` + 5000)), `namespace_id`, `name`,`name`,1,0,0,'enterprise',1,0,0,0,0,0,now(),now() FROM `eh_organizations` WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
+
+UPDATE `eh_organizations` SET `group_id` = (`id` + 5000),`update_time` = now() WHERE `group_id` IS NULL AND `group_type` = 'ENTERPRISE';
+
+-- 签到增加提示 by sfyan 20160712
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'activity', '10008', 'zh_CN', '您尚未报名此活动！赶紧去报名吧~');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'activity', '10009', 'zh_CN', '您已签到！');
+
+-- 讯美去掉一卡通菜单  by sfyan 20160713  正式环境已执行
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 999999 , 0);
+
+-- iBase去掉一卡通菜单  by sfyan 20160713 正式环境已执行
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 999989 , 0);
+
+-- 深业物业去掉一卡通菜单 by sfyan 20160713  正式环境已执行
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 999992 , 0);
+
+-- 储能去掉的菜单  by sfyan 20160713 正式环境已执行
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 51000,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 52300,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 53000,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 59000,'', 'EhNamespaces', 999990 , 0);
+
+-- 海岸去掉的菜单  by sfyan 20160713 正式环境已执行
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 59000,'', 'EhNamespaces', 999993 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 999993 , 0);
+
+-- 储能去掉的子菜单  by sfyan 20160713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%51000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%52300/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%53000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%59000/%';
+
+-- 海岸去掉的子菜单  by sfyan 20160713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999993,0 from `eh_web_menus` where path like '%59000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999993,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 科技园去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',1000000,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 讯美去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999999,0 from `eh_web_menus` where path like '%43600/%';
+
+-- iBase去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999989,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 深业物业去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999992,0 from `eh_web_menus` where path like '%43600/%';
 

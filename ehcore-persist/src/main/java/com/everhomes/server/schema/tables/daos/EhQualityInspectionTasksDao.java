@@ -253,7 +253,7 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	/**
 	 * Fetch records that have <code>manual_flag IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByManualFlag(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByManualFlag(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG, values);
 	}
 }

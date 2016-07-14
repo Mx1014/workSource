@@ -781,9 +781,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 if(null != request){
                 	itemDTO.setActionData(parserJson(token, userId, communityId, r, request));
                 }
-                itemDTO.setScaleType(ScaleType.TAILOR.getCode());
+                if(null == itemDTO.getScaleType()){
+                	itemDTO.setScaleType(ScaleType.TAILOR.getCode());
+                }
+                
                 if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
-                	
                 	
                 	Business b = this.businessProvider.findBusinessById(r.getTargetId());
                 	if(b != null){
@@ -871,7 +873,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			//            if(jsonObject != null)
 			//                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 		}catch(Exception e){
-			LOGGER.error("Parser json is error,communityId=" + communityId, e);
+			//增加异常日志信息 by sfyan 20160712
+			LOGGER.error("Parser json is error {} ,communityId = {}, itemId = {}, actionData = {}", e , communityId, launchPadItem.getId() ,launchPadItem.getActionData());
 		}
 
 		return jsonObject.toJSONString();

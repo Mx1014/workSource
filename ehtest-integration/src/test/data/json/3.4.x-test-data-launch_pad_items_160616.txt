@@ -187,7 +187,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "1",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":0
     },
     {
       "id": "8",
@@ -214,7 +215,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "1",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":0
     },
     {
       "id": "9",
@@ -241,7 +243,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "1",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":0
     },
     {
       "id": "10",
@@ -268,7 +271,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "11",
@@ -295,7 +299,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "12",
@@ -322,7 +327,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "13",
@@ -349,7 +355,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "14",
@@ -376,7 +383,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "15",
@@ -403,7 +411,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "16",
@@ -430,7 +439,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "17",
@@ -457,7 +467,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "18",
@@ -484,7 +495,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "19",
@@ -511,7 +523,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "20",
@@ -538,7 +551,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "21",
@@ -565,7 +579,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "22",
@@ -592,7 +607,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "23",
@@ -619,7 +635,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "24",
@@ -646,7 +663,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "25",
@@ -673,7 +691,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "26",
@@ -700,7 +719,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "27",
@@ -727,7 +747,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "28",
@@ -754,7 +775,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "29",
@@ -781,7 +803,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "30",
@@ -808,7 +831,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "31",
@@ -835,7 +859,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "32",
@@ -862,7 +887,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "33",
@@ -889,7 +915,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "34",
@@ -916,7 +943,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "35",
@@ -943,7 +971,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "36",
@@ -970,7 +999,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "37",
@@ -997,7 +1027,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "38",
@@ -1024,7 +1055,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "39",
@@ -1051,7 +1083,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "40",
@@ -1078,7 +1111,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "41",
@@ -1105,7 +1139,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "42",
@@ -1132,7 +1167,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "43",
@@ -1159,7 +1195,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "44",
@@ -1186,7 +1223,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "0",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "45",
@@ -1213,7 +1251,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "1",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     },
     {
       "id": "46",
@@ -1240,7 +1279,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "1",
-      "scene_type": "park_tourist"
+      "scene_type": "park_tourist",
+      "scale_type":1
     },
     {
       "id": "47",
@@ -1267,7 +1307,8 @@
       "target_type": "",
       "target_id": 0,
       "delete_flag": "1",
-      "scene_type": "pm_admin"
+      "scene_type": "pm_admin",
+      "scale_type":1
     },
     {
       "id": "48",
@@ -1294,7 +1335,8 @@
       "target_type": "biz",
       "target_id": 1,
       "delete_flag": "1",
-      "scene_type": "default"
+      "scene_type": "default",
+      "scale_type":1
     }
   ]
 }

@@ -66,6 +66,7 @@ public class Keys {
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserBehaviorsRecord, java.lang.Long> IDENTITY_EH_USER_BEHAVIORS = Identities0.IDENTITY_EH_USER_BEHAVIORS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserContactsRecord, java.lang.Long> IDENTITY_EH_USER_CONTACTS = Identities0.IDENTITY_EH_USER_CONTACTS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserInstalledAppsRecord, java.lang.Long> IDENTITY_EH_USER_INSTALLED_APPS = Identities0.IDENTITY_EH_USER_INSTALLED_APPS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.Long> IDENTITY_EH_USER_LAUNCH_PAD_ITEMS = Identities0.IDENTITY_EH_USER_LAUNCH_PAD_ITEMS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLocationsRecord, java.lang.Long> IDENTITY_EH_USER_LOCATIONS = Identities0.IDENTITY_EH_USER_LOCATIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserScoresRecord, java.lang.Long> IDENTITY_EH_USER_SCORES = Identities0.IDENTITY_EH_USER_SCORES;
 
@@ -430,6 +431,7 @@ public class Keys {
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserBehaviorsRecord, java.lang.Long> IDENTITY_EH_USER_BEHAVIORS = createIdentity(com.everhomes.server.schema.tables.EhUserBehaviors.EH_USER_BEHAVIORS, com.everhomes.server.schema.tables.EhUserBehaviors.EH_USER_BEHAVIORS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserContactsRecord, java.lang.Long> IDENTITY_EH_USER_CONTACTS = createIdentity(com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS, com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserInstalledAppsRecord, java.lang.Long> IDENTITY_EH_USER_INSTALLED_APPS = createIdentity(com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS, com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.Long> IDENTITY_EH_USER_LAUNCH_PAD_ITEMS = createIdentity(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS, com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLocationsRecord, java.lang.Long> IDENTITY_EH_USER_LOCATIONS = createIdentity(com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS, com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserScoresRecord, java.lang.Long> IDENTITY_EH_USER_SCORES = createIdentity(com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES, com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES.ID);
 	}

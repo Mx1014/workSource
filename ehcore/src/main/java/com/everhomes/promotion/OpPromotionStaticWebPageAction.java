@@ -104,7 +104,7 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         messageDto.setBodyType(MessageBodyType.LINK.getCode());
         LinkBody linkBody = new LinkBody();
         linkBody.setActionUrl(data.getUrl());
-        linkBody.setContent(activityContext.getPromotion().getDescription());
+        linkBody.setContent(activityContext.getPromotion().getPushMessage());
         linkBody.setTitle(activityContext.getPromotion().getTitle());
         String url = contentServerService.parserUri(activityContext.getPromotion().getIconUri(), EntityType.USER.getCode(), userId);
         linkBody.setCoverUrl(url);

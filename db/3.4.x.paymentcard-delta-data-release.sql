@@ -24,10 +24,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
     VALUES (202, 'paymentCard', '10004', 'zh_CN', '二维码获取失败！');
 
 INSERT INTO `eh_payment_card_issuer_communities` (`id`, `owner_type`, `owner_id`, `issuer_id`, `create_time`) 
-    VALUES (100001, 'community', '240111044331051500', 100001, '2016-06-14 17:06:44');
+    VALUES (100001, 'community', '240111044331051500', 1, '2016-06-14 17:06:44');
 
 INSERT INTO `eh_payment_card_issuers` (`id`, `name`, `description`, `pay_url`, `alipay_recharge_account`, `weixin_recharge_account`, `vendor_name`, `vendor_data`, `create_time`, `status`) 
-    VALUES (100001, 'chuneng', 'chuneng', '', '', '', 'TAOTAOGU', '{"branchCode":"10685840","appName":"ICCard","version":"V0.01","dstId":"00000000","cardPatternid":"331","chnlType":"WEB","chnlId":"00000008","merchId":"865840000000052","termnlId":"00521000","initPassword":"111111"}', '2016-06-14 17:07:20', '1');
+    VALUES (1, 'chuneng', 'chuneng', '', '', '', 'TAOTAOGU', '{"branchCode":"10685840","appName":"ICCard","version":"V0.01","dstId":"00000000","cardPatternid":"331","chnlType":"WEB","chnlId":"00000008","merchId":"865840000000052","termnlId":"00521000","initPassword":"111111"}', '2016-06-14 17:07:20', '1');
 
 
 

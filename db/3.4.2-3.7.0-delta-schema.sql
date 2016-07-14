@@ -208,3 +208,10 @@ CREATE TABLE `eh_quality_inspection_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
+-- item表增加是否財經配置  by sfyan 20160711
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `scale_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: 不需要, 1: 需要';
+
+-- 修改活动确认字段类型  by sfyan 20160712
+ALTER TABLE `eh_activity_roster` MODIFY COLUMN `confirm_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: 未确认, 1: 确认';

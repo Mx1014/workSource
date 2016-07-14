@@ -71,15 +71,11 @@ VALUES(10655, 'EhOrganizations', 1001187, 'EhUsers', 190000  , 1001, 1, UTC_TIME
 INSERT INTO `eh_groups` (`id`, `uuid`, `namespace_id`, `name`, `display_name`, `avatar`, `description`, `creator_uid`, `private_flag`, `join_policy`, `discriminator`, `visibility_scope`, `visibility_scope_id`, `category_id`, `category_path`, `status`, `member_count`, `share_count`, `post_flag`, `tag`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `update_time`, `create_time`, `delete_time`, `visible_region_type`, `visible_region_id`) VALUES('1001301','4b6cebff-9113-1225-adde-00163e005fce','0','武汉大学','武汉大学',NULL,NULL,'1','1','1','enterprise',NULL,NULL,NULL,NULL,'1','2','0','0',NULL,NULL,NULL,NULL,'176531',NULL,NULL,NULL,NULL,NULL,NULL,'2015-12-15 15:51:35','2015-11-12 22:05:33',NULL,'0','240111044331048623');
 UPDATE eh_organizations SET group_id = 1001301 WHERE id = 1001027;
 
+  
+ --by wuhan 20160712
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (2044, 999989, '0', '0', '0', '/home', 'Bizs', '园区入驻', '园区入驻', 'cs://1/image/aW1hZ2UvTVRvMU56ZGlOems0TW1Oak5XRXhaVFJpTm1Rek9UbGxaamd4TUdWbU5UazFNdw', '1', '1', '28', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');    
+
  
--- add by wuhan 20160711
--- luanch pad item add office cubicle  icon_uri = yuan qu ru zhu
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`,
- `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
-  VALUES('2022','999989','0','0','0','/home','Bizs','工位申请','工位申请','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28','{"rentType":"office_cubicle"}',
-  '0','0','1','1','','10',NULL,NULL,NULL,'0','park_pm_admin');
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`,
- `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
-  VALUES('2023','999989','0','0','0','/home','Bizs','工位申请','工位申请','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28','{"rentType":"office_cubicle"}',
-  '0','0','1','1','','10',NULL,NULL,NULL,'0','park_tourist');
- 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (2045, 999989, '0', '0', '0', '/home', 'Bizs', '园区入驻', '园区入驻', 'cs://1/image/aW1hZ2UvTVRvMU56ZGlOems0TW1Oak5XRXhaVFJpTm1Rek9UbGxaamd4TUdWbU5UazFNdw', '1', '1', '28', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');        

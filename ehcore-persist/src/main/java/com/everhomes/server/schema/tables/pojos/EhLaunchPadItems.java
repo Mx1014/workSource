@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2060373623;
+	private static final long serialVersionUID = -1082243395;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -38,6 +38,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.Long    targetId;
 	private java.lang.Byte    deleteFlag;
 	private java.lang.String  sceneType;
+	private java.lang.Byte    scaleType;
 
 	public EhLaunchPadItems() {}
 
@@ -66,7 +67,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.String  targetType,
 		java.lang.Long    targetId,
 		java.lang.Byte    deleteFlag,
-		java.lang.String  sceneType
+		java.lang.String  sceneType,
+		java.lang.Byte    scaleType
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -93,6 +95,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.targetId = targetId;
 		this.deleteFlag = deleteFlag;
 		this.sceneType = sceneType;
+		this.scaleType = scaleType;
 	}
 
 	public java.lang.Long getId() {
@@ -293,5 +296,13 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setSceneType(java.lang.String sceneType) {
 		this.sceneType = sceneType;
+	}
+
+	public java.lang.Byte getScaleType() {
+		return this.scaleType;
+	}
+
+	public void setScaleType(java.lang.Byte scaleType) {
+		this.scaleType = scaleType;
 	}
 }
