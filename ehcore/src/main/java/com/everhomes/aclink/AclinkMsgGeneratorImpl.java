@@ -1,10 +1,13 @@
 package com.everhomes.aclink;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +19,8 @@ import com.everhomes.rest.aclink.DoorMessageType;
 
 @Component
 public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AclinkMsgGeneratorImpl.class);
+    
     @Autowired
     DoorCommandProvider doorCommandProvider;
     
@@ -93,7 +98,7 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
             return;
         }
         
-        Long aesUserKeyId = Long.getLong(cmd.getCmdBody());
+        Long aesUserKeyId = Long.valueOf(cmd.getCmdBody());
         if(aesUserKeyId == null) {
             return;
         }
@@ -177,7 +182,13 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
             genMessage(ctx, cmd);
         }
         
-        return ctx.getDoorMessages();
+        List<DoorMessage> results = ctx.getDoorMessages();
+        if(results.size() == 1) {
+            LOGGER.warn("some message loss because of something error!");
+            return new ArrayList<DoorMessage>();
+        }
+        
+        return results;
     }
     
     /**
