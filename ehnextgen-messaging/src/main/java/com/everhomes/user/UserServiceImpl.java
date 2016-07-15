@@ -42,6 +42,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageDispatcher;
 import com.everhomes.bus.LocalBusMessageHandler;
@@ -119,6 +120,7 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
@@ -274,7 +276,10 @@ public class UserServiceImpl implements UserService {
 	private PusherService pusherService;
 
 	@Autowired
-    private LocalBus localBus;
+   private LocalBus localBus;
+	
+	@Autowired
+	private BorderProvider borderProvider;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -2772,5 +2777,19 @@ public class UserServiceImpl implements UserService {
         }
         
         return msg.getContent();
+    }
+    
+    @Override
+    public BorderListResponse listBorders() {
+        BorderListResponse resp = new BorderListResponse();
+        List<String> strs = new ArrayList<String>();
+        List<Border> borders = this.borderProvider.listAllBorders();
+        for(Border border : borders) {
+            strs.add(String.format("%s:%d", border.getPublicAddress(), border.getPublicPort()));
+        }
+        
+        resp.setBorders(strs);
+        
+        return resp;
     }
 }
