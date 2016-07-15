@@ -241,6 +241,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(ownerId));
                 query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(ownerType));
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.ne(0l));
                 query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
                 return query;
             }
