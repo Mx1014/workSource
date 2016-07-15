@@ -236,6 +236,21 @@ public interface RentalProvider {
 
 	RentalRefundOrder getRentalRefundOrderByRefoundNo(String refundOrderNo);
 
+
+	RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId);
+
+
+	void createRentalResourceType(RentalResourceType rentalResourceType);
+
+
+	void deleteRentalResourceType(Long resoureceTypeId);
+
+
+	void updateRentalResourceType(RentalResourceType resourceType);
+
+
+	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator);
+
  
 
  

@@ -59,7 +59,10 @@ import com.everhomes.rest.techpark.rental.rentalBillRuleDTO;
 import com.everhomes.rest.techpark.rental.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
+import com.everhomes.rest.techpark.rental.admin.CloseResourceTypeCommand;
+import com.everhomes.rest.techpark.rental.admin.CreateResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.DefaultRuleDTO;
+import com.everhomes.rest.techpark.rental.admin.DeleteResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListResponse;
 import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
@@ -68,6 +71,7 @@ import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListResponse;
+import com.everhomes.rest.techpark.rental.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.UpdateDefaultRuleAdminCommand;
@@ -75,6 +79,7 @@ import com.everhomes.rest.techpark.rental.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateResourceAdminCommand;
+import com.everhomes.rest.techpark.rental.admin.UpdateResourceTypeCommand;
 
 public interface RentalService { 
 	void updateRentalRule(UpdateRentalRuleCommand cmd);
@@ -181,5 +186,15 @@ public interface RentalService {
 
 	GetResourceTypeListResponse getResourceTypeList(
 			GetResourceTypeListCommand cmd);
+
+	void createResourceType(CreateResourceTypeCommand cmd);
+
+	void deleteResourceType(DeleteResourceTypeCommand cmd);
+
+	void updateResourceType(UpdateResourceTypeCommand cmd);
+
+	void closeResourceType(CloseResourceTypeCommand cmd);
+
+	void openResourceType(OpenResourceTypeCommand cmd);
 
 }
