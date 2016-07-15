@@ -729,11 +729,12 @@ INSERT INTO `eh_organization_details` (`id`, `organization_id`, `contact`, `addr
 -- 去掉天数的引号、改为空格  by lqs 20160715
 update `eh_locale_templates` set `text`='我已加入ibase ${days} 天' where `scope`='user.notification' and `code`=2;
 
--- 按林园要求，屏蔽掉层级管理、管辖范围、OA管理、物业服务菜单 by lqs 20160715
+-- 按林园要求，屏蔽掉 层级管理、管辖范围、OA管理、物业服务、招租管理 菜单 by lqs 20160715
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 51000,'', 'EhNamespaces', 999989 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 53000,'', 'EhNamespaces', 999989 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 56000,'', 'EhNamespaces', 999989 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 58000,'', 'EhNamespaces', 999989 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43310,'', 'EhNamespaces', 999989 , 0);
 
 
