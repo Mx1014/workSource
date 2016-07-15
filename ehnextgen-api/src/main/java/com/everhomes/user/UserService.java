@@ -20,7 +20,9 @@ import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
 import com.everhomes.rest.user.SignupCommand;
@@ -29,6 +31,7 @@ import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserIdentifierDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserLoginResponse;
 import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
 import com.everhomes.rest.user.VerifyAndLogonCommand;
 import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
@@ -63,8 +66,8 @@ public interface UserService {
     void logoff(UserLogin login);
     boolean isValidLoginToken(LoginToken loginToken);
     
-    UserLogin registerLoginConnection(LoginToken loginToken, int borderId);
-    UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId);
+    UserLogin registerLoginConnection(LoginToken loginToken, int borderId, String borderSessionId);
+    UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId);
     void saveLogin(UserLogin login);
     List<UserLogin> listUserLogins(long uid);
     
@@ -123,5 +126,8 @@ public interface UserService {
 	List<SceneDTO> setCurrentCommunityForScene(SetCurrentCommunityForSceneCommand cmd);
 	SceneDTO toCommunitySceneDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType);
+    UserLoginResponse listLoginsByPhone(ListLoginByPhoneCommand cmd);
+    String sendMessageTest(SendMessageTestCommand cmd);
+    String pushMessageTest(SendMessageTestCommand cmd);
 
 }
