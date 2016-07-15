@@ -2,6 +2,22 @@ package com.everhomes.rest.user;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>userId: 用户ID</li>
+ * <li>loginId: 登录ID</li>
+ * <li>deviceIdentifier: 设备ID号</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>status: 状态 UserLoginStatus, 0: 登出， 1： 登入中</li>
+ * <li>loginBorderId: 当前 borderId </li>
+ * <li>lastAccessTick: 上次访问时间</li>
+ * <li>pusherIdentify: 推送标识</li>
+ * <li>isOnline: 是否在线 </li>
+ * <li>deviceType: Android/iOS/其它</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class UserLoginDTO {
     private long userId;
     private int loginId;
@@ -18,6 +34,11 @@ public class UserLoginDTO {
     private Long partnerId;
     
     private String pusherIdentify;
+    
+    private Byte isOnline;
+    private String deviceType;
+    private String borderStatus;
+    private String borderSessionId;
 
     public UserLoginDTO() {
     }
@@ -108,6 +129,40 @@ public class UserLoginDTO {
 
     public void setPusherIdentify(String pusherIdentify) {
         this.pusherIdentify = pusherIdentify;
+    }
+
+    public Byte getIsOnline() {
+        return isOnline;
+    }
+
+    public void setIsOnline(Byte isOnline) {
+        this.isOnline = isOnline;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    
+    public String getBorderStatus() {
+        return borderStatus;
+    }
+
+    public void setBorderStatus(String borderStatus) {
+        this.borderStatus = borderStatus;
+    }
+
+
+    public String getBorderSessionId() {
+        return borderSessionId;
+    }
+
+    public void setBorderSessionId(String borderSessionId) {
+        this.borderSessionId = borderSessionId;
     }
 
     @Override

@@ -291,4 +291,19 @@ public class BorderConnection extends AbstractWebSocketHandler {
             }
         }
     }
+    
+    public String getConnectionState() {
+        switch(this.state) {
+        case disconnected:
+            return "disconnected";
+        case connecting:
+            return "connecting";
+        case connected:
+            return "connected";
+        case connectFailed:
+            return "connectFailed";
+        default:
+           return "error";
+        }
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
@@ -19,6 +20,16 @@ import com.everhomes.controller.ServerWebSocketHandler;
 
 @Configuration
 public class WebSocketConfig implements WebSocketConfigurer {
+    @Bean
+    public ServletServerContainerFactoryBean createWebSocketContainer() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+        container.setMaxTextMessageBufferSize(16384);
+        container.setMaxBinaryMessageBufferSize(16384);
+        container.setAsyncSendTimeout(10000);
+        container.setMaxSessionIdleTimeout(60000);
+        return container;
+    }
+    
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(clientHandler(), "/client");

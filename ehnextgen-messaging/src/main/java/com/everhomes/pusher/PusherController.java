@@ -33,6 +33,8 @@ import com.everhomes.rest.device.RegistDeviceCommand;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
+import com.everhomes.rest.user.SendMessageTestCommand;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 
@@ -83,6 +85,9 @@ public class PusherController extends ControllerBase {
     
     @Autowired
     BorderProvider borderProvider;
+    
+    @Autowired
+    UserService userService;
 
     /**
      * <b>URL: /pusher/createCert</b>
@@ -157,10 +162,20 @@ public class PusherController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse pushMessage(@Valid PushMessageCommand cmd) {
         RestResponse response = new RestResponse();
-        NotifyMessage msg = new NotifyMessage();
-        msg.setDeviceId(cmd.getDeviceId());
-        msg.setMessage(cmd.getMessage());
-        pusherService.pushMessage(msg);
+        
+//        NotifyMessage msg = new NotifyMessage();
+//        msg.setDeviceId(cmd.getDeviceId());
+//        msg.setMessage(cmd.getMessage());
+//        pusherService.pushMessage(msg);
+        
+        //pusherService.pushServiceTest(cmd);
+        
+        SendMessageTestCommand cmd2 = new SendMessageTestCommand();
+        cmd2.setUserId(195870l);
+        cmd2.setLoginId(5);
+        cmd2.setNamespaceId(1000000);
+        userService.pushMessageTest(cmd2);
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
