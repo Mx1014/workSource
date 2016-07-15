@@ -18,7 +18,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:28",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -40,7 +40,7 @@
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源",
 "vendor_type":"10002",
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -61,7 +61,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -82,7 +82,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -103,7 +103,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -124,7 +124,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -145,7 +145,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -166,7 +166,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -187,7 +187,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -208,7 +208,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -229,7 +229,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -250,7 +250,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -271,7 +271,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -292,7 +292,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -313,7 +313,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -334,7 +334,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -355,7 +355,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -376,7 +376,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -397,7 +397,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -418,7 +418,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -439,7 +439,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -460,7 +460,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 },
 {
@@ -481,7 +481,7 @@
 "creator_uid":10001,
 "create_time":"2016\/7\/4 16:04:38",
 "site_name":"更改后的场所资源", 
-"launch_pad_item_id":510,
+"resource_type_id":510,
 "organization_id":1
 }
 ],

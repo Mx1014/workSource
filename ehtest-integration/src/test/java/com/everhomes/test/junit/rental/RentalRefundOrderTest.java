@@ -1,26 +1,18 @@
 package com.everhomes.test.junit.rental;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
-import org.jooq.DSLContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.everhomes.rest.techpark.rental.BillQueryStatus;
-import com.everhomes.rest.techpark.rental.CompleteBillCommand;
-import com.everhomes.rest.techpark.rental.FindRentalBillsCommand;
-import com.everhomes.rest.techpark.rental.FindUserRentalBillsRestResponse;
-import com.everhomes.rest.techpark.rental.ListRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.RentalOwnerType;
-import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
-import com.everhomes.rest.techpark.rental.SiteBillStatus;
-import com.everhomes.rest.techpark.rental.admin.AdminCompleteBillRestResponse;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhRentalBills;
+import com.everhomes.rest.techpark.rental.admin.AdminGetRefundOrderListRestResponse;
+import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class RentalRefundOrderTest extends BaseLoginAuthTestCase {
@@ -29,7 +21,7 @@ public class RentalRefundOrderTest extends BaseLoginAuthTestCase {
 	String userIdentifier = "10001";
 	String plainTexPassword = "123456";
 	
-	private Long launchPadItemId = 510L;
+	private Long resoureceTypeId = 510L;
 	private String ownerType = RentalOwnerType.COMMUNITY.getCode();
 	private Long ownerId = 419L;
 	private Long organizationId = 1L;
@@ -50,263 +42,97 @@ public class RentalRefundOrderTest extends BaseLoginAuthTestCase {
 	//查询接口放到一个test里，一面删数据加数据浪费时间
 	@Test
 	public void testFindAPI(){ 
-		testFindUserValiRentalBills();
-		testFindUserCancelRentalBills();
-		testFindUserFinishedRentalBills();
-		testListAllRentalBills();
-		testListOnePageRentalBills();
-		testCompleteFailBill();
-		testCompleteOvertimeBill();
-		testCompleteRefoundBill();
-		testCompleteSucessBill();
+		testGetRefundOrderList(); 
+		testGetWXRefundOrderList();
+		try {
+			testTimeRefundOrderList();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void testFindUserValiRentalBills() {
+	public void testGetRefundOrderList() {
 
 		// 登录时不传namepsace，默认为左邻域空间
 		logon(null, userIdentifier, plainTexPassword);
 
-		String commandRelativeUri = "/rental/findUserRentalBills";
+		String commandRelativeUri = "/rental/admin/getRefundOrderList";
 
-		FindRentalBillsCommand cmd = new FindRentalBillsCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
-		cmd.setBillStatus(BillQueryStatus.VALID.getCode());
+		GetRefundOrderListCommand cmd = new GetRefundOrderListCommand();
+		cmd.setResourceTypeId(resoureceTypeId);  
+
+		AdminGetRefundOrderListRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminGetRefundOrderListRestResponse.class,
+				context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response="
+				+ StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		// 总共6单
+		assertEquals(6, response.getResponse().getRefundOrders().size());
+		//时间倒序 第一单为5L
+		assertEquals(5L, response.getResponse().getRefundOrders().get(0).getId().longValue());
+//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
+	} 
+
+
+	public void testGetWXRefundOrderList() {
+
+		// 登录时不传namepsace，默认为左邻域空间
+		logon(null, userIdentifier, plainTexPassword);
+
+		String commandRelativeUri = "/rental/admin/getRefundOrderList";
+
+		GetRefundOrderListCommand cmd = new GetRefundOrderListCommand();
+		cmd.setResourceTypeId(resoureceTypeId);  
+		cmd.setVendorType("10002");
+		AdminGetRefundOrderListRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminGetRefundOrderListRestResponse.class,
+				context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response="
+				+ StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		// 微信支付 3单
+		assertEquals(3, response.getResponse().getRefundOrders().size());
+		//时间倒序 第一单为2L
+		assertEquals(2L, response.getResponse().getRefundOrders().get(0).getId().longValue());
+	} 
+
+
+	public void testTimeRefundOrderList() throws ParseException {
+
+		// 登录时不传namepsace，默认为左邻域空间
+		logon(null, userIdentifier, plainTexPassword);
+
+		String commandRelativeUri = "/rental/admin/getRefundOrderList";
 		
-
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		// 有效订单：3号已成功预约 和 4号待支付
-		assertEquals(2, response.getResponse().getRentalBills().size());
-//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
-	}
-	public void testFindUserCancelRentalBills() {
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/findUserRentalBills";
-
-		FindRentalBillsCommand cmd = new FindRentalBillsCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
-		cmd.setBillStatus(BillQueryStatus.CANCELED.getCode());
-		
-
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		// 取消订单：2号失败 和5号退款中 6号已退款
-		assertEquals(3, response.getResponse().getRentalBills().size());
-//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
-	}
-	public void testFindUserFinishedRentalBills() {
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/findUserRentalBills";
-
-		FindRentalBillsCommand cmd = new FindRentalBillsCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
-		cmd.setBillStatus(BillQueryStatus.FINISHED.getCode());
-		
-
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		// 完成订单：7号已完成 和8号到22号已过期,23和24号不是该用户
-		assertEquals(16, response.getResponse().getRentalBills().size());
-//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
-	}
- 
-
-	public void testListOnePageRentalBills() {
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/listRentalBills";
-
-		ListRentalBillsCommand cmd = new ListRentalBillsCommand();
-		cmd.setOrganizationId(organizationId);
-		cmd.setLaunchPadItemId(launchPadItemId);
-//		cmd.setBillStatus(BillQueryStatus.FINISHED.getCode());
-		cmd.setPageSize(10);
-
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		// 一页10个，24到15L，下一页anchor是15L
-		assertEquals(10, response.getResponse().getRentalBills().size());
-		assertEquals(15L, response.getResponse().getNextPageAnchor().longValue());
-//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
-	}
-
-	public void testListAllRentalBills() {
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/listRentalBills";
-
-		ListRentalBillsCommand cmd = new ListRentalBillsCommand();
-		cmd.setOrganizationId(organizationId);
-		cmd.setLaunchPadItemId(launchPadItemId);
-//		cmd.setBillStatus(BillQueryStatus.FINISHED.getCode());
-		cmd.setPageSize(40); 
-		FindUserRentalBillsRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, FindUserRentalBillsRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		// 一页10个，24到15L，下一页anchor是15L
-		assertEquals(23, response.getResponse().getRentalBills().size());
-//		assertEquals(15L, response.getResponse().getNextPageAnchor().longValue());
-//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
-	}
-
-	public void testCompleteSucessBill(){
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/admin/completeBill";
-
-		CompleteBillCommand cmd = new CompleteBillCommand();
-		cmd.setRentalBillId(3L); 
-		AdminCompleteBillRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		assertEquals(SiteBillStatus.COMPLETE.getCode(), response.getResponse().getStatus().byteValue());
-
-		DSLContext dslContext = dbProvider.getDslContext();
-		List<EhRentalBills> resultBill = new ArrayList<EhRentalBills>();
-		dslContext
-				.select()
-				.from(Tables.EH_RENTAL_BILLS)
-				.where(Tables.EH_RENTAL_BILLS.ID.eq( cmd.getRentalBillId()))
-				.fetch()
-				.map((r) -> {
-					resultBill.add(ConvertHelper.convert(r,
-							EhRentalBills.class));
-					return null;
-				});
-		assertEquals(SiteBillStatus.COMPLETE.getCode(), resultBill.get(0).getStatus().byteValue());
-	}
-
-	public void testCompleteOvertimeBill(){
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/admin/completeBill";
-
-		CompleteBillCommand cmd = new CompleteBillCommand();
-		cmd.setRentalBillId(22L); 
-		AdminCompleteBillRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-
-		assertEquals(SiteBillStatus.COMPLETE.getCode(), response.getResponse().getStatus().byteValue());
-		DSLContext dslContext = dbProvider.getDslContext();
-		List<EhRentalBills> resultBill = new ArrayList<EhRentalBills>();
-		dslContext
-				.select()
-				.from(Tables.EH_RENTAL_BILLS)
-				.where(Tables.EH_RENTAL_BILLS.ID.eq( cmd.getRentalBillId()))
-				.fetch()
-				.map((r) -> {
-					resultBill.add(ConvertHelper.convert(r,
-							EhRentalBills.class));
-					return null;
-				});
-		assertEquals(SiteBillStatus.COMPLETE.getCode(), resultBill.get(0).getStatus().byteValue());
-	}
-
-	public void testCompleteFailBill(){
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/admin/completeBill";
-
-		CompleteBillCommand cmd = new CompleteBillCommand();
-		cmd.setRentalBillId(4L); 
-		AdminCompleteBillRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				response.getErrorCode().equals(RentalServiceErrorCode.ERROR_NOT_SUCCESS));
- 
-	}
+		GetRefundOrderListCommand cmd = new GetRefundOrderListCommand();
+		cmd.setResourceTypeId(resoureceTypeId);  
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		java.util.Date date = df.parse("2016-7-18");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		long timestamp = cal.getTimeInMillis();
 	
-	public void testCompleteRefoundBill(){
-
-		// 登录时不传namepsace，默认为左邻域空间
-		logon(null, userIdentifier, plainTexPassword);
-
-		String commandRelativeUri = "/rental/admin/completeBill";
-
-		CompleteBillCommand cmd = new CompleteBillCommand();
-		cmd.setRentalBillId(5L); 
-		AdminCompleteBillRestResponse response = httpClientService.restGet(
-				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
+		cmd.setEndTime(timestamp);
+		AdminGetRefundOrderListRestResponse response = httpClientService.restGet(
+				commandRelativeUri, cmd, AdminGetRefundOrderListRestResponse.class,
 				context);
 
 		assertNotNull("The reponse of may not be null", response);
 		assertTrue("The user scenes should be get from server, response="
 				+ StringHelper.toJsonString(response),
-				response.getErrorCode().equals(RentalServiceErrorCode.ERROR_NOT_SUCCESS));
-		
-
-		cmd.setRentalBillId(6L); 
-		response = httpClientService.restGet(
-				commandRelativeUri, cmd, AdminCompleteBillRestResponse.class,
-				context);
-
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response="
-				+ StringHelper.toJsonString(response),
-				response.getErrorCode().equals(RentalServiceErrorCode.ERROR_NOT_SUCCESS));
- 
-	}
-	
+				httpClientService.isReponseSuccess(response));
+		// 18日之前是4单
+		assertEquals(4, response.getResponse().getRefundOrders().size());
+		//时间倒序 第一单为3L
+		assertEquals(3L, response.getResponse().getRefundOrders().get(0).getId().longValue());
+//		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
+	} 
 	
 	@After
 	public void tearDown() {
@@ -333,7 +159,11 @@ public class RentalRefundOrderTest extends BaseLoginAuthTestCase {
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 
 
-		sourceInfoFilePath = "rental2.0-test-data-refund-orders-160713.txt";
+        String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
+        
+		sourceInfoFilePath = "data/json/rental2.0-test-data-refund-orders-160713.txt";
 		filePath = dbProvider.getAbsolutePathFromClassPath(sourceInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 	}

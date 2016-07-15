@@ -87,7 +87,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		String commandRelativeUri = "/rental/findRentalSites";
 
 		FindRentalSitesCommand cmd = new FindRentalSitesCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
+		cmd.setResourceTypeId(launchPadItemId);
 		cmd.setOwnerType(ownerType);
 		cmd.setOwnerId(ownerId);
 

@@ -45,7 +45,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 	@Test
 	public void testMain(){ 
 		testAddResource();
-		testNullOrganizationIdorLaunchPadItemId();
+		testNullOrganizationIdorResourceTypeId();
 		testGetResourceList();
 		testUpdateResource();
 	}
@@ -59,7 +59,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 	}
 	 
      
-    public void testNullOrganizationIdorLaunchPadItemId() {
+    public void testNullOrganizationIdorResourceTypeId() {
     	//addResource
         // realm字段为null
 		Integer namespaceId = 0;
@@ -68,7 +68,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		// 登录时不传namepsace，默认为左邻域空间
 		logon(null, userIdentifier, plainTexPassword);
 		AddResourceAdminCommand cmd = new AddResourceAdminCommand();
-		cmd.setLaunchPadItemId(this.launchPadItemId);
+		cmd.setResourceTypeId(this.launchPadItemId);
 		String commandRelativeUri = "/rental/admin/addResource";
 		RestResponse response = httpClientService.restPost(commandRelativeUri,
 				cmd, RestResponse.class, context);
@@ -86,7 +86,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
         //getResoureceList
         commandRelativeUri = "/rental/admin/getResourceList";
         GetResourceListAdminCommand cmd2 = new GetResourceListAdminCommand();
-		cmd2.setLaunchPadItemId(this.launchPadItemId);
+		cmd2.setResourceTypeId(this.launchPadItemId);
 		AdminGetResourceListRestResponse response2 = httpClientService.restPost(commandRelativeUri,
 				cmd2, AdminGetResourceListRestResponse.class, context);
         assertNotNull(response2);
@@ -111,7 +111,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		dslContext.select()
 				.from(Tables.EH_RENTAL_SITES)
 				.where(Tables.EH_RENTAL_SITES.ORGANIZATION_ID.eq(this.organizationId))
-				.and(Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID.eq(this.launchPadItemId)) 
+				.and(Tables.EH_RENTAL_SITES.RESOURCE_TYPE_ID.eq(this.launchPadItemId)) 
 				.fetch()
 				.map((r) -> {
 					result1.add(ConvertHelper.convert(r,
@@ -196,7 +196,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		// 登录时不传namepsace，默认为左邻域空间
 		logon(null, userIdentifier, plainTexPassword);
 		AddResourceAdminCommand cmd = new AddResourceAdminCommand();
-		cmd.setLaunchPadItemId(this.launchPadItemId);
+		cmd.setResourceTypeId(this.launchPadItemId);
 		cmd.setOrganizationId(this.organizationId);
 		cmd.setOwners(new ArrayList<SiteOwnerDTO>());
 		SiteOwnerDTO ownerDTO=new SiteOwnerDTO();
@@ -237,8 +237,8 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 				.from(Tables.EH_RENTAL_SITES)
 				.where(Tables.EH_RENTAL_SITES.ORGANIZATION_ID.eq(cmd
 						.getOrganizationId()))
-				.and(Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID.eq(cmd
-						.getLaunchPadItemId())) 
+				.and(Tables.EH_RENTAL_SITES.RESOURCE_TYPE_ID.eq(cmd
+						.getResourceTypeId())) 
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
@@ -284,7 +284,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		logon(null, userIdentifier, plainTexPassword);
 		//不设置pagesize默认20
 		GetResourceListAdminCommand cmd = new GetResourceListAdminCommand();
-		cmd.setLaunchPadItemId(this.launchPadItemId);
+		cmd.setResourceTypeId(this.launchPadItemId);
 		cmd.setOrganizationId(this.organizationId);
 		cmd.setOwnerId(this.ownerId);
 		cmd.setOwnerType(this.ownerType);

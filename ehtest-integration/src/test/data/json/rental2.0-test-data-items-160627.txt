@@ -100,7 +100,7 @@
 "rental_site_item_id":1,
 "rental_count":20,
 "total_money":333.00,
-"launch_pad_item_id":2
+"resource_type_id":2
 },
 {
 "id":2,
@@ -108,7 +108,7 @@
 "rental_site_item_id":2,
 "rental_count":2,
 "total_money":333.00,
-"launch_pad_item_id":2
+"resource_type_id":2
 }
 ]
 }

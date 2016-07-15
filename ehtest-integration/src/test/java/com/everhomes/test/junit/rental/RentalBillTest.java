@@ -70,7 +70,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 		String commandRelativeUri = "/rental/findUserRentalBills";
 
 		FindRentalBillsCommand cmd = new FindRentalBillsCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
+		cmd.setResourceTypeId(launchPadItemId);
 		cmd.setBillStatus(BillQueryStatus.VALID.getCode());
 		
 
@@ -94,7 +94,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 		String commandRelativeUri = "/rental/findUserRentalBills";
 
 		FindRentalBillsCommand cmd = new FindRentalBillsCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
+		cmd.setResourceTypeId(launchPadItemId);
 		cmd.setBillStatus(BillQueryStatus.CANCELED.getCode());
 		
 
@@ -118,7 +118,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 		String commandRelativeUri = "/rental/findUserRentalBills";
 
 		FindRentalBillsCommand cmd = new FindRentalBillsCommand();
-		cmd.setLaunchPadItemId(launchPadItemId);
+		cmd.setResourceTypeId(launchPadItemId);
 		cmd.setBillStatus(BillQueryStatus.FINISHED.getCode());
 		
 
@@ -145,7 +145,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		ListRentalBillsCommand cmd = new ListRentalBillsCommand();
 		cmd.setOrganizationId(organizationId);
-		cmd.setLaunchPadItemId(launchPadItemId);
+		cmd.setResourceTypeId(launchPadItemId);
 //		cmd.setBillStatus(BillQueryStatus.FINISHED.getCode());
 		cmd.setPageSize(10);
 
@@ -172,7 +172,7 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 
 		ListRentalBillsCommand cmd = new ListRentalBillsCommand();
 		cmd.setOrganizationId(organizationId);
-		cmd.setLaunchPadItemId(launchPadItemId);
+		cmd.setResourceTypeId(launchPadItemId);
 //		cmd.setBillStatus(BillQueryStatus.FINISHED.getCode());
 		cmd.setPageSize(40); 
 		FindUserRentalBillsRestResponse response = httpClientService.restGet(
@@ -321,6 +321,10 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 				.getAbsolutePathFromClassPath(sourceInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 
+        String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
+        
 		sourceInfoFilePath = "data/json/rental2.0-test-data-addbill-rules-160630.txt";
 		filePath = dbProvider.getAbsolutePathFromClassPath(sourceInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);

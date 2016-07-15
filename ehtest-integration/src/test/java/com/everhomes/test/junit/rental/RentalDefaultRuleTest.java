@@ -61,7 +61,7 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 		// 登录时不传namepsace，默认为左邻域空间
 		logon(null, userIdentifier, plainTexPassword);
 		QueryDefaultRuleAdminCommand cmd = new QueryDefaultRuleAdminCommand();
-		cmd.setLaunchPadItemId(this.launchPadItemId);
+		cmd.setResourceTypeId(this.launchPadItemId);
 		cmd.setOwnerId(this.ownerId);
 		cmd.setOwnerType(this.ownerType);
 		String commandRelativeUri = "/rental/admin/queryDefaultRule";
@@ -82,8 +82,8 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 						.getOwnerType()))
 				.and(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_ID.eq(cmd
 						.getOwnerId()))
-				.and(Tables.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID.eq(cmd
-						.getLaunchPadItemId()))
+				.and(Tables.EH_RENTAL_DEFAULT_RULES.RESOURCE_TYPE_ID.eq(cmd
+						.getResourceTypeId()))
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
@@ -104,7 +104,7 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 		UpdateDefaultRuleAdminCommand cmd = new UpdateDefaultRuleAdminCommand();
 		cmd.setOwnerType(this.ownerType);
 		cmd.setOwnerId(this.ownerId);
-		cmd.setLaunchPadItemId(this.launchPadItemId);
+		cmd.setResourceTypeId(this.launchPadItemId);
 		cmd.setExclusiveFlag(NormalFlag.NONEED.getCode());
 		cmd.setUnit(0.5);
 		cmd.setAutoAssign(NormalFlag.NEED.getCode());
@@ -153,8 +153,8 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 						.getOwnerType()))
 				.and(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_ID.eq(cmd
 						.getOwnerId()))
-				.and(Tables.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID.eq(cmd
-						.getLaunchPadItemId()))
+				.and(Tables.EH_RENTAL_DEFAULT_RULES.RESOURCE_TYPE_ID.eq(cmd
+						.getResourceTypeId()))
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
