@@ -57,6 +57,12 @@ INSERT INTO `ehcore`.`eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pi
 INSERT INTO `ehcore`.`eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
     VALUES (14976, 14975, '朝阳区', 'ZHAOYANGQU', 'ZYQ', '/北京/北京市/朝阳区', '3', '3', NULL, '010', '2', '0', '999989');
             
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(180051, UUID(), 999989, 2, '', 0,'金地ibase社区论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(180052, UUID(), 999989, 2, '', 0,'金地ibase意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+
+
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331052505, UUID(), 14975, '北京市',  14976, '朝阳区', 'ibase-金地商置Ibase原点', '金地商置Ibase原点', '北京市朝阳区建国路91号金地中心B座18层', NULL, '北京金地中心位于大望路与国贸的CBD商圈，毗邻华贸中心和万达广场，属于北京甲A级写字楼。ibase商务中心是金地集团自营联合办公场所，位于金地中心B座18层。大气低调的装修风格以及完善的办公配套设施，专业的服务人员使您的办公简易化。67间办公室，224个工位可以满足不同需求的客户。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 1, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999989);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
@@ -243,12 +249,12 @@ INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version
 	VALUES (227, 999989, 'PmLayout', '{"versionCode":"2015120406","versionName":"3.0.0","displayName":"物业","layoutName":"PmLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015120406', '0', '2', '2015-06-27 14:04:57', 'park_tourist');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (10972, 999989, '0', '0', '0', '/home', 'Bizs', '工位预订', '工位预订', 'cs://1/image/aW1hZ2UvTVRvMU56ZGlOems0TW1Oak5XRXhaVFJpTm1Rek9UbGxaamd4TUdWbU5UazFNdw', '1', '1',  28, '{"rentType":"office_cubicle"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');    
+    VALUES (10972, 999989, '0', '0', '0', '/home', 'Bizs', '工位预订', '工位预订', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', '1', '1',  28, '{"rentType":"office_cubicle"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');    
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (10973, 999989, '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '会议室预约', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', '1', '1', '24', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');    
 INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (10974, 999989, 0, 0, 0, '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRvME5qazBPV00yTVRKa1pXVTVZV1ZpWlROa1lqTmpZek0yTWpjMU5EWmxZZw', 1, 1, 40, '{"isSupportQR":1,"isSupportSmart":0}', 0, 0, 1, 0, '', 0, NULL, NULL, NULL, '1', 'park_tourist');
+	VALUES (10974, 999989, 0, 0, 0, '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRvME5qazBPV00yTVRKa1pXVTVZV1ZpWlROa1lqTmpZek0yTWpjMU5EWmxZZw', 1, 1, 40, '{"isSupportQR":1,"isSupportSmart":0}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '1', 'park_tourist');
     
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (10975, 999989, 0, 0, 0, '/home','Bizs','PM','物业服务','cs://1/image/aW1hZ2UvTVRvMFlqbGxNR014TkdZd1pUQTNOV0V3TURBNU5URm1OakF5T0dWak1tTXhaZw',1,1,2, '{"itemLocation":"/home/Pm","layoutName":"PmLayout","title":"物业服务","entityTag":"PM"}', '0','0','1','0','','0',NULL,NULL,NULL, '1', 'park_tourist');    
@@ -719,3 +725,15 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 INSERT INTO `eh_organization_details` (`id`, `organization_id`, `contact`, `address`, `longitude`, `latitude`, `display_name`, `contactor`, `post_uri`, `avatar`) 
 	VALUES(10637, 1001701, '', '广东省深圳市南山区高新南九道威新软件园7号楼1-2层', 113.956081, 22.533245, '广东省深圳市南山区高新南九道威新软件园7号楼1-2层', '', '', '');
+
+-- 去掉天数的引号、改为空格  by lqs 20160715
+update `eh_locale_templates` set `text`='我已加入ibase ${days} 天' where `scope`='user.notification' and `code`=2;
+
+-- 按林园要求，屏蔽掉层级管理、管辖范围、OA管理、物业服务菜单 by lqs 20160715
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 51000,'', 'EhNamespaces', 999989 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 53000,'', 'EhNamespaces', 999989 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 56000,'', 'EhNamespaces', 999989 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 58000,'', 'EhNamespaces', 999989 , 0);
+
+
