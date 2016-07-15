@@ -813,8 +813,12 @@ public class QualityServiceImpl implements QualityService {
         	
 //        	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
 			
-			QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
-        	r.setCategoryName(getQualityCategoryNamePath(category.getPath()));
+		    // 由于现网存在着大量categoryId为0的任务，故不能直接抛异常，先暂时去掉校验 by lqs 20160715
+			//QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
+		    QualityInspectionCategories category = qualityProvider.findQualityInspectionCategoriesByCategoryId(r.getCategoryId());
+		    if(category != null) {
+		        r.setCategoryName(getQualityCategoryNamePath(category.getPath()));
+		    }
 			
         	if(executeUid != null) {
         		if(r.getExecutorId() != null && r.getExecutorId().equals(executeUid)) {
@@ -825,8 +829,9 @@ public class QualityServiceImpl implements QualityService {
         	}
         	
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
-        	
-        	dto.setCategoryDescription(category.getDescription());
+        	if(category != null) {
+        	    dto.setCategoryDescription(category.getDescription());
+        	}
         	QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
 			if(standard != null) {
 				dto.setStandardDescription(standard.getDescription());
