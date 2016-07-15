@@ -10,13 +10,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 列出资源列表返回值(根据图标和园区)
  * <li>nextPageAnchor: 分页，下一页锚点</li>
- * <li>refundOrders: 退款单列表</li> 
+ * <li>refundOrders: 退款单列表{@link com.everhomes.rest.techpark.rental.admin.RefundOrderDTO}</li> 
  * </ul>
  */
 public class GetRefundOrderListResponse {
 private Long nextPageAnchor;
 	
-	@ItemType(BuildingDTO.class)
+	@ItemType(RefundOrderDTO.class)
 	private List<RefundOrderDTO> refundOrders;
 	
 	@Override

@@ -154,6 +154,9 @@ import com.everhomes.rest.techpark.rental.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AttachmentConfigDTO;
 import com.everhomes.rest.techpark.rental.admin.AttachmentType;
+import com.everhomes.rest.techpark.rental.admin.CloseResourceTypeCommand;
+import com.everhomes.rest.techpark.rental.admin.CreateResourceTypeCommand;
+import com.everhomes.rest.techpark.rental.admin.DeleteResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.DiscountType;
 import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListResponse;
@@ -163,9 +166,12 @@ import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListResponse;
+import com.everhomes.rest.techpark.rental.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
+import com.everhomes.rest.techpark.rental.admin.ResourceTypeDTO;
+import com.everhomes.rest.techpark.rental.admin.ResourceTypeStatus;
 import com.everhomes.rest.techpark.rental.admin.SiteOwnerDTO;
 import com.everhomes.rest.techpark.rental.admin.TimeIntervalDTO;
 import com.everhomes.rest.techpark.rental.admin.UpdateDefaultRuleAdminCommand;
@@ -173,6 +179,7 @@ import com.everhomes.rest.techpark.rental.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateResourceAdminCommand;
+import com.everhomes.rest.techpark.rental.admin.UpdateResourceTypeCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.tables.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules;
@@ -3502,8 +3509,12 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public GetRefundOrderListResponse getRefundOrderList(
 			GetRefundOrderListCommand cmd) {
- 
+		
 		GetRefundOrderListResponse response = new GetRefundOrderListResponse();
+		if(null == cmd.getResourceTypeId() )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid resourceTypeId   parameter in the command");
 		if(cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(Long.MAX_VALUE); 
 		Integer pageSize = PaginationConfigHelper.getPageSize(
@@ -3511,9 +3522,11 @@ public class RentalServiceImpl implements RentalService {
 //		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		 
+		String vendorType = null;
+		if(null!=cmd.getVendorType())
+			vendorType = VendorType.fromCode(cmd.getVendorType()).getStyleNo();
 		List<RentalRefundOrder> orders = rentalProvider.getRefundOrderList(cmd.getResourceTypeId(),  
-				  locator, cmd.getStatus(), VendorType.fromCode(cmd.getVendorType()).getStyleNo(), pageSize+1, cmd.getStartTime(), cmd.getEndTime()); 
+				  locator, cmd.getStatus(), vendorType, pageSize+1, cmd.getStartTime(), cmd.getEndTime()); 
 		if(orders==null ||orders.size()==0)
 			return response;
 		if(orders != null && orders.size() > pageSize) {
@@ -3621,8 +3634,72 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public GetResourceTypeListResponse getResourceTypeList(
 			GetResourceTypeListCommand cmd) {
+		if(null == cmd.getNamespaceId() )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid namespaceId   parameter in the command");
+		GetResourceTypeListResponse response = new GetResourceTypeListResponse();
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE); 
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor()); 
+		
+		List<RentalResourceType> resourceTypes =  this.rentalProvider.findRentalResourceTypes(cmd.getNamespaceId(), locator);
+		if(null==resourceTypes)
+			return response;
+
+		Long nextPageAnchor = null;
+		if(resourceTypes != null && resourceTypes.size() > pageSize) {
+			resourceTypes.remove(resourceTypes.size() - 1);
+			nextPageAnchor = resourceTypes.get(resourceTypes.size() -1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setResourceTypes(new ArrayList<ResourceTypeDTO>());
+		resourceTypes.forEach((order)->{
+			ResourceTypeDTO dto =ConvertHelper.convert(order, ResourceTypeDTO.class);
+			dto.setIconUrl(this.contentServerService.parserUri(dto.getIconUri(),
+					EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+			response.getResourceTypes().add(dto);
+		});
+		return response;
+	}
+
+	@Override
+	public void createResourceType(CreateResourceTypeCommand cmd) {
+		cmd.setStatus(ResourceTypeStatus.DISABLE.getCode());
+		RentalResourceType rsType = ConvertHelper.convert(cmd, RentalResourceType.class);
+		this.rentalProvider.createRentalResourceType(rsType);
+		
+	}
+
+	@Override
+	public void deleteResourceType(DeleteResourceTypeCommand cmd) {
+		// TODO 图标也要删除
+		this.rentalProvider.deleteRentalResourceType(cmd.getId());
+		
+	}
+
+	@Override
+	public void updateResourceType(UpdateResourceTypeCommand cmd) {
+		//  更新type不更新status
+		RentalResourceType rsType = this.rentalProvider.getRentalResourceTypeById(cmd.getId());
+		rsType.setIconUri(cmd.getIconUri());
+		rsType.setName(cmd.getName());
+		rsType.setPageType(cmd.getPageType());
+		this.rentalProvider.updateRentalResourceType(rsType);
+	}
+
+	@Override
+	public void closeResourceType(CloseResourceTypeCommand cmd) {
 		// TODO Auto-generated method stub
-		return null;
+		
+	}
+
+	@Override
+	public void openResourceType(OpenResourceTypeCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 	
  

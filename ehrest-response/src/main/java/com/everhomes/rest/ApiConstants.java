@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-14 17:14:40
+// generated at 2016-07-15 15:21:36
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -776,8 +776,11 @@ public interface ApiConstants {
     public static final String RENTAL_ADMIN_ADDRESOURCE_URL = "/rental/admin/addResource";
     public static final String RENTAL_ADMIN_BATCHCOMPLETEBILL_URL = "/rental/admin/batchCompleteBill";
     public static final String RENTAL_ADMIN_BATCHINCOMPLETEBILL_URL = "/rental/admin/batchIncompleteBill";
+    public static final String RENTAL_ADMIN_CLOSERESOURCETYPE_URL = "/rental/admin/closeResourceType";
     public static final String RENTAL_ADMIN_COMPLETEBILL_URL = "/rental/admin/completeBill";
+    public static final String RENTAL_ADMIN_CREATERESOURCETYPE_URL = "/rental/admin/createResourceType";
     public static final String RENTAL_ADMIN_DELETEITEM_URL = "/rental/admin/deleteItem";
+    public static final String RENTAL_ADMIN_DELETERESOURCETYPE_URL = "/rental/admin/deleteResourceType";
     public static final String RENTAL_ADMIN_EXPORTRENTALBILLS_URL = "/rental/admin/exportRentalBills";
     public static final String RENTAL_ADMIN_GETITEMLIST_URL = "/rental/admin/getItemList";
     public static final String RENTAL_ADMIN_GETREFUNDORDERLIST_URL = "/rental/admin/getRefundOrderList";
@@ -787,6 +790,7 @@ public interface ApiConstants {
     public static final String RENTAL_ADMIN_GETRESOURCETYPELIST_URL = "/rental/admin/getResourceTypeList";
     public static final String RENTAL_ADMIN_INCOMPLETEBILL_URL = "/rental/admin/incompleteBill";
     public static final String RENTAL_ADMIN_LISTRENTALBILLS_URL = "/rental/admin/listRentalBills";
+    public static final String RENTAL_ADMIN_OPENRESOURCETYPE_URL = "/rental/admin/openResourceType";
     public static final String RENTAL_ADMIN_QUERYDEFAULTRULE_URL = "/rental/admin/queryDefaultRule";
     public static final String RENTAL_ADMIN_UPDATEDEFAULTRULE_URL = "/rental/admin/updateDefaultRule";
     public static final String RENTAL_ADMIN_UPDATEITEM_URL = "/rental/admin/updateItem";
@@ -794,6 +798,7 @@ public interface ApiConstants {
     public static final String RENTAL_ADMIN_UPDATERENTALSITEDISCOUNT_URL = "/rental/admin/updateRentalSiteDiscount";
     public static final String RENTAL_ADMIN_UPDATERENTALSITERULES_URL = "/rental/admin/updateRentalSiteRules";
     public static final String RENTAL_ADMIN_UPDATERESOURCE_URL = "/rental/admin/updateResource";
+    public static final String RENTAL_ADMIN_UPDATERESOURCETYPE_URL = "/rental/admin/updateResourceType";
     public static final String RENTAL_CANCELRENTALBILL_URL = "/rental/cancelRentalBill";
     public static final String RENTAL_DELETERENTALBILL_URL = "/rental/deleteRentalBill";
     public static final String RENTAL_EXPORTRENTALBILLS_URL = "/rental/exportRentalBills";

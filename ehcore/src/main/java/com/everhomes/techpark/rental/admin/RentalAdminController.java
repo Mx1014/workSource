@@ -27,6 +27,9 @@ import com.everhomes.rest.techpark.rental.RentalBillDTO;
 import com.everhomes.rest.techpark.rental.UpdateItemAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
+import com.everhomes.rest.techpark.rental.admin.CloseResourceTypeCommand;
+import com.everhomes.rest.techpark.rental.admin.CreateResourceTypeCommand;
+import com.everhomes.rest.techpark.rental.admin.DeleteResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
 import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListResponse;
 import com.everhomes.rest.techpark.rental.admin.GetRefundUrlCommand;
@@ -35,6 +38,7 @@ import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListResponse;
+import com.everhomes.rest.techpark.rental.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
@@ -43,6 +47,7 @@ import com.everhomes.rest.techpark.rental.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateResourceAdminCommand;
+import com.everhomes.rest.techpark.rental.admin.UpdateResourceTypeCommand;
 import com.everhomes.techpark.rental.RentalService;
 
 /**
@@ -81,7 +86,7 @@ public class RentalAdminController extends ControllerBase {
 	 * 
 	 * <b>URL: /rental/admin/getResourceTypeList<b>
 	 * <p>
-	 * 查询默认规则
+	 * 查询资源类型列表
 	 * </p>
 	 */
 	@RequestMapping("getResourceTypeList")
@@ -89,6 +94,91 @@ public class RentalAdminController extends ControllerBase {
 	public RestResponse getResourceTypeList(@Valid GetResourceTypeListCommand cmd) {
 		GetResourceTypeListResponse resp = this.rentalService.getResourceTypeList(cmd);
 		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/createResourceType<b>
+	 * <p>
+	 * 添加资源类型
+	 * </p>
+	 */
+	@RequestMapping("createResourceType")
+	@RestReturn(String.class)
+	public RestResponse createResourceType(@Valid CreateResourceTypeCommand cmd) {
+		this.rentalService.createResourceType(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/deleteResourceType<b>
+	 * <p>
+	 * 删除资源类型
+	 * </p>
+	 */
+	@RequestMapping("deleteResourceType")
+	@RestReturn(String.class)
+	public RestResponse deleteResourceType(@Valid DeleteResourceTypeCommand cmd) {
+		this.rentalService.deleteResourceType(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/closeResourceType<b>
+	 * <p>
+	 * 关闭资源类型
+	 * </p>
+	 */
+	@RequestMapping("closeResourceType")
+	@RestReturn(String.class)
+	public RestResponse closeResourceType(@Valid CloseResourceTypeCommand cmd) {
+		this.rentalService.closeResourceType(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/openResourceType<b>
+	 * <p>
+	 * 开启资源类型
+	 * </p>
+	 */
+	@RequestMapping("openResourceType")
+	@RestReturn(String.class)
+	public RestResponse openResourceType(@Valid OpenResourceTypeCommand cmd) {
+		this.rentalService.openResourceType(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateResourceType<b>
+	 * <p>
+	 * 修改资源类型
+	 * </p>
+	 */
+	@RequestMapping("updateResourceType")
+	@RestReturn(String.class)
+	public RestResponse updateResourceType(@Valid UpdateResourceTypeCommand cmd) {
+		this.rentalService.updateResourceType(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -421,7 +511,7 @@ public class RentalAdminController extends ControllerBase {
 	 */
 
 	@RequestMapping("getRefundOrderList")
-	@RestReturn(value = RefundOrderDTO.class)
+	@RestReturn(value = GetRefundOrderListResponse.class)
 	public RestResponse getRefundOrderList(@Valid GetRefundOrderListCommand cmd) {
 		GetRefundOrderListResponse resp = rentalService.getRefundOrderList(cmd);
 		RestResponse response = new RestResponse(resp);

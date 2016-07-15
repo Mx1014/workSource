@@ -4,20 +4,20 @@ package com.everhomes.rest.techpark.rental.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.techpark.rental.admin.RefundOrderDTO;
+import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListResponse;
 
 public class AdminGetRefundOrderListRestResponse extends RestResponseBase {
 
-    private RefundOrderDTO response;
+    private GetRefundOrderListResponse response;
 
     public AdminGetRefundOrderListRestResponse () {
     }
 
-    public RefundOrderDTO getResponse() {
+    public GetRefundOrderListResponse getResponse() {
         return response;
     }
 
-    public void setResponse(RefundOrderDTO response) {
+    public void setResponse(GetRefundOrderListResponse response) {
         this.response = response;
     }
 }

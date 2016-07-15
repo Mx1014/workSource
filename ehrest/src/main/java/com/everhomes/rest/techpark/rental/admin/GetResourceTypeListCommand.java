@@ -6,6 +6,8 @@ import com.everhomes.util.StringHelper;
  * 查询资源列表
  * <li>communityId: 园区id-暂时不做</li>
  * <li>namespaceId: 域空间</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize:每页数量 </li>
  * </ul>
  */
 public class GetResourceTypeListCommand {
@@ -13,6 +15,9 @@ public class GetResourceTypeListCommand {
 	private Integer namespaceId;
 	private Long communityId;
 
+	private Long pageAnchor;
+    
+	private Integer pageSize;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -29,6 +34,22 @@ public class GetResourceTypeListCommand {
 	}
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 	
 }

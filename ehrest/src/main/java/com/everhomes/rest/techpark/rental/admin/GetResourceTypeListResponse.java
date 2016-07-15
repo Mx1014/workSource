@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 列出资源列表返回值(根据图标和园区)
  * <li>nextPageAnchor: 分页，下一页锚点</li>
- * <li>resourceTypes: 资源类型列表</li> 
+ * <li>resourceTypes: 资源类型列表{@link com.everhomes.rest.techpark.rental.admin.ResourceTypeDTO}</li> 
  * </ul>
  */
 public class GetResourceTypeListResponse {

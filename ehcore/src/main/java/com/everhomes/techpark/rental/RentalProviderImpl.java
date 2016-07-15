@@ -43,6 +43,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalBillsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalDefaultRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRefundOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhRentalResourceTypesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteItemsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteRulesDao;
@@ -56,6 +57,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalConfigAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalRefundOrders;
+import com.everhomes.server.schema.tables.pojos.EhRentalResourceTypes;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteOwners;
@@ -74,6 +76,7 @@ import com.everhomes.server.schema.tables.records.EhRentalConfigAttachmentsRecor
 import com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalRefundOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhRentalResourceTypesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteOwnersRecord;
@@ -1682,7 +1685,7 @@ public class RentalProviderImpl implements RentalProvider {
 		step.limit(pageSize);
 		step.where(condition);
 		List<RentalRefundOrder> result = step
-				.orderBy(Tables.EH_RENTAL_REFUND_ORDERS.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTAL_REFUND_ORDERS.CREATE_TIME.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalRefundOrder.class);
 				});
 		
@@ -1711,4 +1714,76 @@ public class RentalProviderImpl implements RentalProvider {
 		return result;
 		
 	}
+
+	@Override
+	public RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalResourceTypesDao dao = new EhRentalResourceTypesDao(context.configuration());
+		EhRentalResourceTypes order = dao.findById(rentalResourceTypeId);
+		return ConvertHelper.convert(order, RentalResourceType.class);
+	}
+
+	@Override
+	public void createRentalResourceType(RentalResourceType rentalResourceType) {
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalResourceTypes.class));
+		rentalResourceType.setId(id); 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalResourceTypesRecord record = ConvertHelper.convert(rentalResourceType,
+				EhRentalResourceTypesRecord.class);
+		InsertQuery<EhRentalResourceTypesRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_RESOURCE_TYPES);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalResourceTypes.class, null);
+		 
+		 
+	}
+
+	
+	@Override
+	public void deleteRentalResourceType (Long resoureceTypeId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalResourceTypesDao dao = new EhRentalResourceTypesDao(context.configuration());
+		dao.deleteById(resoureceTypeId);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, RentalResourceType.class,resoureceTypeId);
+	}
+	
+
+	@Override
+	public void updateRentalResourceType(RentalResourceType resourceType) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalResourceTypesDao dao = new EhRentalResourceTypesDao(context.configuration());
+		dao.update(resourceType); 
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, RentalResourceType.class,resourceType.getId());
+	}
+	
+	
+
+	@Override
+	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_RESOURCE_TYPES);
+		if(null!=namespaceId){
+			Condition condition = Tables.EH_RENTAL_RESOURCE_TYPES.NAMESPACE_ID
+					.equal(namespaceId);
+			step.where(condition);
+		}
+		List<RentalResourceType> result = step
+				.orderBy(Tables.EH_RENTAL_RESOURCE_TYPES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalResourceType.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+
+	}
+	
 }

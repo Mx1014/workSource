@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 给资源增加单元格
  * <li>rentalSiteId: 资源id</li>  
- * <li>discountType: 状态，0启用 -1停用参考{@link com.everhomes.rest.techpark.rental.admin.DiscountType}</li> 
+ * <li>discountType: 状态，0不打折1满钱减钱优惠 2满天减钱 3 比例 参考{@link com.everhomes.rest.techpark.rental.admin.DiscountType}</li> 
  * <li>fullPrice: 满多少钱</li>
  * <li>fullPrice: 减多少钱</li> 
  * </ul>
