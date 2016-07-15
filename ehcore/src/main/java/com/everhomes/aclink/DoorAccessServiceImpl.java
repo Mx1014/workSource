@@ -1606,7 +1606,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         extra.setAuthLevel(0l);
         if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
-            extra.setAuthLevel(2l);
+            extra.setAuthLevel(1l);
         }
         
         extra.setAuthStorey(1l);
@@ -1617,7 +1617,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
-                extra.setAuthLevel(2l);    
+                extra.setAuthLevel(1l);    
             }            
             storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
