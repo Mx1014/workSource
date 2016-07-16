@@ -738,3 +738,23 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43310,'', 'EhNamespaces', 999989 , 0);
 
 
+-- 讯美更换banner和服务市场有底色的图片（规避图片被自动加上白底） by lqs 20160716
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRwalltUXhaV1ppWlRreU1UazBZall6TWpNMk1USTVOMkk1TnpZeU1tSmlNZw' where id=19;		-- banner1.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRveE0yTXpNR1l4TlRnNU1qY3hOakZoWlRJeFptRXdOR00zWWpjMk4yRmpOdw' where id=20;		-- banner2.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRwbFlUazRPVEZqWkRNMFpHVXdPV1l6T1dKbE5USTBPR1l4WldNeFpHSm1Zdw' where id=21;		-- banner3.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvd05qWTVOakF3TnpaaU5ESmpZbU0xT1dKak9EZG1aVEkyTkRneFptVm1PQQ' where id=22;		-- banner4.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvek5qYzJaVEl5WWpObE4ySTJNekJtT0RrM09UazJaV05qTW1FMVpUVmtZUQ' where id=23;		-- banner5.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRwalltUXhaV1ppWlRreU1UazBZall6TWpNMk1USTVOMkk1TnpZeU1tSmlNZw' where id=1007;		-- banner1.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRveE0yTXpNR1l4TlRnNU1qY3hOakZoWlRJeFptRXdOR00zWWpjMk4yRmpOdw' where id=1008;		-- banner2.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRwbFlUazRPVEZqWkRNMFpHVXdPV1l6T1dKbE5USTBPR1l4WldNeFpHSm1Zdw' where id=1009;		-- banner3.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvd05qWTVOakF3TnpaaU5ESmpZbU0xT1dKak9EZG1aVEkyTkRneFptVm1PQQ' where id=1010;		-- banner4.png
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvek5qYzJaVEl5WWpObE4ySTJNekJtT0RrM09UazJaV05qTW1FMVpUVmtZUQ' where id=1011;		-- banner5.png
+
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwak1qQXpOVFUwT1dFMk5XUTBZVGMwTTJabVpqQTVORGRsTnpobE1Ea3haZw' where id in (10085, 10324);		-- 产业服务体系
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRvNE1qSm1ZakpoWVRVeVpqbGlaRFF4TTJJek9UY3pOMlppTVRVMVkyWmpaUQ' where id in (10089, 10328);		-- 企业共享平台
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwaU5XSTJaRFJqTkdVeFltWmtZVFl6WWpBMk1HTXhZamRsWTJVd1ltWTBZZw' where id in (10090, 10329);		-- 便捷生活
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRvNU1HSXpabUpoTldReFpUbG1OR1ZtT1RFMk1qTXhOV1EzTkRKa09HWTVZUQ' where id in (10087, 10326);		-- 公共服务平台
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwbU1qZzFOV0prTmpNek5qaG1ZVGsyWldKa1pqazBORGhtWkRJMFlUQTVaQQ' where id in (10088, 10327);		-- 创客空间
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwbE1EUmhPR0ZqTURGa01tSmpZVEE0T1dFME5UZG1ZV1l3TlRRellqaG1NQQ' where id in (10086, 10325);		-- 政府资源
+update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwbE1EUmhPR0ZqTURGa01tSmpZVEE0T1dFME5UZG1ZV1l3TlRRellqaG1NQQ' where id in (10084, 10323);		-- 物业服务
+
