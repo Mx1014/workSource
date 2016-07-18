@@ -758,3 +758,10 @@ update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwbU1qZzFOV0
 update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwbE1EUmhPR0ZqTURGa01tSmpZVEE0T1dFME5UZG1ZV1l3TlRRellqaG1NQQ' where id in (10086, 10325);		-- 政府资源
 update `eh_launch_pad_items` set `icon_uri`='cs://1/image/aW1hZ2UvTVRwbE1EUmhPR0ZqTURGa01tSmpZVEE0T1dFME5UZG1ZV1l3TlRRellqaG1NQQ' where id in (10084, 10323);		-- 物业服务
 
+
+-- 视频会议独立app版本升级
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(41,15,'-0.1','1049600','0','1.1.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(42,16,'-0.1','1049600','0','1.1.0','0',UTC_TIMESTAMP());
+
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('13', '15', '1.1.0', 'http://meeting.zuolin.com/', 'http://meeting.zuolin.com/', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('14', '16', '1.1.0', 'http://meeting.zuolin.com/', 'http://meeting.zuolin.com/', '0');
