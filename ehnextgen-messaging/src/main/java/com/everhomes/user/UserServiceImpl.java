@@ -2721,7 +2721,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             
-            dto.setLastPush(0l);
+            dto.setLastPushPing(0l);
             if(dto.getDeviceType() == null) {
                 dto.setDeviceType("other");
             }
@@ -2742,7 +2742,7 @@ public class UserServiceImpl implements UserService {
             if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
                 Long last = deviceMap.get(dto.getDeviceIdentifier());
                 if(last != null) {
-                    dto.setLastPush(last);
+                    dto.setLastPushPing(last);
                 }
             }
         }

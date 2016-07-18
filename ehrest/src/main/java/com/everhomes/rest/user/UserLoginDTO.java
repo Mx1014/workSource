@@ -40,7 +40,7 @@ public class UserLoginDTO {
     private String borderStatus;
     private String borderSessionId;
     
-    private Long lastPush;
+    private Long lastPushPing;
 
     public UserLoginDTO() {
     }
@@ -167,12 +167,13 @@ public class UserLoginDTO {
         this.borderSessionId = borderSessionId;
     }
 
-    public Long getLastPush() {
-        return lastPush;
+
+    public Long getLastPushPing() {
+        return lastPushPing;
     }
 
-    public void setLastPush(Long lastPush) {
-        this.lastPush = lastPush;
+    public void setLastPushPing(Long lastPushPing) {
+        this.lastPushPing = lastPushPing;
     }
 
     @Override
