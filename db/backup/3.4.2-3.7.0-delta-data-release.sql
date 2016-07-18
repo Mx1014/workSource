@@ -105,6 +105,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 VALUES ('10342', '999999', '0', '0', '0', '/home/life', 'GaActions', '快递查询', '快递查询', 'cs://1/image/aW1hZ2UvTVRwaVl6ZGtPVFE0TURZd1pUZzRZekppTTJNMVl6QmlPVFprTWpWbFpHRXlNUQ', 1, 1, 14, '{"url":"http://m.kuaidi100.com"}', 0, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin');
 
 update eh_launch_pad_layouts set layout_json='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Metro","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21,"columnCount": 6}]}' where id = 21;
+update eh_launch_pad_layouts set layout_json='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Metro","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21,"columnCount": 6}]}' where id = 121;
  
 update eh_launch_pad_items set delete_flag = 1 where id in (901,902,903,904,905,908,909,910,911,912);
 
@@ -280,8 +281,8 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 1000000 , 0);
 
 -- 增加裁剪配置
-UPDATE `eh_launch_pad_items` SET `scene_type` = 1;
-UPDATE `eh_launch_pad_items` SET `scene_type` = 0 WHERE `namespace_id` = 999999;
+UPDATE `eh_launch_pad_items` SET `scale_type` = 1;
+UPDATE `eh_launch_pad_items` SET `scale_type` = 0 WHERE `namespace_id` = 999999;
 
 -- 给没有圈的公司加上group by sfyan 20160712
 -- 执行 select * from `eh_groups` where `id` in (SELECT (`id` + 5000) from `eh_organizations` where `group_id` is null and `group_type` = 'ENTERPRISE'); 检测一下是否有数据，没有则可以执行，有及时跟我沟通
@@ -319,3 +320,57 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 59000,'', 'EhNamespaces', 999993 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 999993 , 0);
 
+-- 储能去掉的子菜单  by sfyan 20160713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%51000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%52300/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%53000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999990,0 from `eh_web_menus` where path like '%59000/%';
+
+-- 海岸去掉的子菜单  by sfyan 20160713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999993,0 from `eh_web_menus` where path like '%59000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999993,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 科技园去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',1000000,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 讯美去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999999,0 from `eh_web_menus` where path like '%43600/%';
+
+-- iBase去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999989,0 from `eh_web_menus` where path like '%43600/%';
+
+-- 深业物业去掉的子菜单  by sfyan 20160713
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+select (@menu_scope_id := @menu_scope_id + 1),id,'','EhNamespaces',999992,0 from `eh_web_menus` where path like '%43600/%';
+
+
+-- 修改讯美图片（原来图片有白底） by lqs 20160715
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvME5HTmxObU5pT1RjMk56aG1NRGRoT0RCa056QmxNalF5WWpGaFlUVTRaQQ' WHERE `id`=10084 AND `namespace_id`=999999; -- 物业服务
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvME5HTmxObU5pT1RjMk56aG1NRGRoT0RCa056QmxNalF5WWpGaFlUVTRaQQ' WHERE `id`=10323 AND `namespace_id`=999999; -- 物业服务
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaE5EWXpZV05qWmpZME9UbGtaR1F4WVdFeFpUYzJPV1EyTTJVMFltUTROUQ' WHERE `id`=10085 AND `namespace_id`=999999; -- 产业服务体系
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaE5EWXpZV05qWmpZME9UbGtaR1F4WVdFeFpUYzJPV1EyTTJVMFltUTROUQ' WHERE `id`=10324 AND `namespace_id`=999999; -- 产业服务体系
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaU9EQmlaR1ExWkRGaVptRTBNR1JrTkRZeVpHSTFPVGt6WXpJeVl6UXhPUQ' WHERE `id`=10086 AND `namespace_id`=999999; -- 政府资源
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaU9EQmlaR1ExWkRGaVptRTBNR1JrTkRZeVpHSTFPVGt6WXpJeVl6UXhPUQ' WHERE `id`=10325 AND `namespace_id`=999999; -- 政府资源
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd09UUXhNekl6TldNeU5qUmlNR1UzWldaaFpUWmhZMk5tT0ROaFl6VmhZZw' WHERE `id`=10087 AND `namespace_id`=999999; -- 公共服务平台
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd09UUXhNekl6TldNeU5qUmlNR1UzWldaaFpUWmhZMk5tT0ROaFl6VmhZZw' WHERE `id`=10326 AND `namespace_id`=999999; -- 公共服务平台
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvM09UQXpNakpsTm1Rd05URTNObVJoWVRNMVltVTFNelEwTkRka1pHTTBNUQ' WHERE `id`=10088 AND `namespace_id`=999999; -- 创客空间
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvM09UQXpNakpsTm1Rd05URTNObVJoWVRNMVltVTFNelEwTkRka1pHTTBNUQ' WHERE `id`=10327 AND `namespace_id`=999999; -- 创客空间
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvell6VmlZbU14T0RabVpHRXlNVEpsWmpsa04yVmxObVV6T0dSaFlUWTVPQQ' WHERE `id`=10089 AND `namespace_id`=999999; -- 企业共享平台
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvell6VmlZbU14T0RabVpHRXlNVEpsWmpsa04yVmxObVV6T0dSaFlUWTVPQQ' WHERE `id`=10328 AND `namespace_id`=999999; -- 企业共享平台
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwbFpHTm1PV00wWmpFNFpHTTBNR1EwTVRjME1EZGtNamhsWldRNU5XUXhNUQ' WHERE `id`=10090 AND `namespace_id`=999999; -- 便捷生活
+UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwbFpHTm1PV00wWmpFNFpHTTBNR1EwTVRjME1EZGtNamhsWldRNU5XUXhNUQ' WHERE `id`=10329 AND `namespace_id`=999999; -- 便捷生活

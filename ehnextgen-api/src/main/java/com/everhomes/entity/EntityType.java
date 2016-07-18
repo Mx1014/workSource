@@ -11,6 +11,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhForums;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
@@ -32,6 +33,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
  * <li>ORGANIZATIONS: 机构</li>
  * <li>BUILDING: 楼栋</li>
  * <li>APPURLS: app 信息</li>
+ * <li>NEWS: 新闻</li>
  * </ul>
  */
 public enum EntityType {
@@ -50,7 +52,8 @@ public enum EntityType {
     ORGANIZATIONS(EhOrganizations.class.getSimpleName()),
     BUILDING(EhBuildings.class.getSimpleName()),
     NAMESPACE(EhNamespaces.class.getSimpleName()),
-    APPURLS(EhAppUrls.class.getSimpleName());
+    APPURLS(EhAppUrls.class.getSimpleName()),
+	NEWS(EhNews.class.getSimpleName());
     private String code;
     
     private EntityType(String code) {

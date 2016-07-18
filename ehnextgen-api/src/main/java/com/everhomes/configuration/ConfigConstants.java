@@ -54,6 +54,8 @@ public interface ConfigConstants {
 
 
     public static final String HOT_USERS = "hotusers"; 
+    
+    public static final String NEWS_CONTENT_URL = "news.content.url";
     public static final String ACTIVITY_POSTER_DEFAULT_URL = "activity.poster.default.url"; 
     
     public static final String ACTIVITY_LIST_NUM = "activity.list.num"; 

@@ -1,5 +1,7 @@
 package com.everhomes.rest.pusher;
 
+import com.everhomes.util.StringHelper;
+
 public class PushMessageCommand {
     private String deviceId;
     private String message;
@@ -17,5 +19,8 @@ public class PushMessageCommand {
         this.message = message;
     }
     
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

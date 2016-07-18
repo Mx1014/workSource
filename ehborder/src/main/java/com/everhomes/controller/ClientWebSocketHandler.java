@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PingMessage;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
@@ -82,21 +85,30 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        //LOGGER.info("Received client message. session= " + session.getId() + ", message: " + message.getPayload());
         updateSessionReceiveTick(session);
+        
+        if (message instanceof TextMessage) {
+            //LOGGER.info("Received client message. session= " + session.getId() + ", message: " + message.getPayload());
 
-        PduFrame frame = PduFrame.fromJson((String)message.getPayload());
-        if(frame == null) {
-            LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
-            return;
+            PduFrame frame = PduFrame.fromJson((String)message.getPayload());
+            if(frame == null) {
+                LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
+                return;
+            }
+            
+            if(frame.getName() == null || frame.getName().isEmpty()) {
+                LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
+                return;
+            }
+            
+            NamedHandlerDispatcher.invokeHandler(this, frame.getName(), session, frame);
         }
-        
-        if(frame.getName() == null || frame.getName().isEmpty()) {
-            LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
-            return;
+        else if (message instanceof PongMessage) {
+            handlePongMessage(session, (PongMessage) message);
         }
-        
-        NamedHandlerDispatcher.invokeHandler(this, frame.getName(), session, frame);
+        else {
+            throw new IllegalStateException("Unexpected WebSocket message type: " + message);
+        }
     }
     
     @Override
@@ -186,17 +198,45 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         return map;
     }
     
+//    @Scheduled(fixedDelay=5000)
+//    private void heartbeat() {
+//        this.sessionStatsMap.forEach((WebSocketSession session, SessionStats stats) -> {
+//            long currentTick = DateHelper.currentGMTTime().getTime();
+//            
+//            if(currentTick - stats.getLastSendTick() > heartbeatInterval) {
+//                HeartbeatPdu pdu = new HeartbeatPdu();
+//                pdu.setLastPeerReceiveTime(stats.getLastPeerReceiveTick());
+//                
+//                PduFrame frame = new PduFrame();
+//                frame.setPayload(pdu);
+//                TextMessage msg = new TextMessage(frame.toJson());
+//                try {
+//                    synchronized(session) {
+//                        session.sendMessage(msg);
+//                    }
+//                    updateSessionSendTick(session);
+//                } catch(IOException e) {
+//                    LOGGER.warn("Unable to send imessage to " + session.getRemoteAddress().toString(), e);
+//                }
+//            }
+//        });
+//    }
+    
     @Scheduled(fixedDelay=5000)
     private void heartbeat() {
+        
+        List<WebSocketSession> timeouts = new ArrayList<WebSocketSession>();
+        
         this.sessionStatsMap.forEach((WebSocketSession session, SessionStats stats) -> {
             long currentTick = DateHelper.currentGMTTime().getTime();
+            if(currentTick - stats.getLastPeerReceiveTick() > 2*heartbeatInterval) {
+                timeouts.add(session);
+                return;
+            }
+            
+            PingMessage msg = new PingMessage();
+            
             if(currentTick - stats.getLastSendTick() > heartbeatInterval) {
-                HeartbeatPdu pdu = new HeartbeatPdu();
-                pdu.setLastPeerReceiveTime(stats.getLastPeerReceiveTick());
-                
-                PduFrame frame = new PduFrame();
-                frame.setPayload(pdu);
-                TextMessage msg = new TextMessage(frame.toJson());
                 try {
                     synchronized(session) {
                         session.sendMessage(msg);
@@ -207,16 +247,41 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                 }
             }
         });
+        
+        for(WebSocketSession session : timeouts) {
+            unregisterSession(session);
+            this.sessionStatsMap.remove(session);
+            try {
+                session.close();
+            } catch (IOException e) {
+                LOGGER.warn("close session error", e);
+            }
+        }
     }
     
     @NamedHandler(value="", byClass=RegisterConnectionRequestPdu.class)
     private void handleRegisterConnectionRequestPdu(final WebSocketSession session, PduFrame frame) {
         final RegisterConnectionRequestPdu cmd = frame.getPayload(RegisterConnectionRequestPdu.class);
         
+        /* 
+         * 此处也可以不要，旧的session存在也没有关系，只要旧的session退出，不映像最新的session就没有问题。
+         * 并且 registerLogin 已经处理相关的信息。
+         */
+        
+        WebSocketSession oldSession = null;
+        synchronized(this) {
+            oldSession = this.tokenToSessionMap.get(cmd.getLoginToken());
+        }
+        if(oldSession != null && oldSession != session) {
+            LOGGER.info("tearDown old sesssion, id=" + session.getId());
+            tearDownSession(oldSession);
+        }
+        
         LOGGER.info("Handle register connection request, session=" + session.getId() + ", loginToken=" + cmd.getLoginToken());
         Map<String, String> params = new HashMap<>();
         params.put("borderId", String.valueOf(this.borderId));
         params.put("loginToken", cmd.getLoginToken());
+        params.put("borderSessionId", session.getId());
         
         httpRestCallProvider.restCall("/admin/registerLogin", params, new ListenableFutureCallback<ResponseEntity<String>> () {
             @Override
@@ -264,10 +329,10 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     
     @NamedHandler(value="", byClass=HeartbeatPdu.class)
     private void handleHeartbeatPdu(WebSocketSession session, PduFrame frame) {
-        HeartbeatPdu pdu = frame.getPayload(HeartbeatPdu.class);
-        //if(LOGGER.isDebugEnabled())
-        //    LOGGER.debug(String.format("Received heartbeat from client (%s), last receive tick on client is %d", 
-        //        session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
+//        HeartbeatPdu pdu = frame.getPayload(HeartbeatPdu.class);
+//        if(LOGGER.isDebugEnabled())
+//            LOGGER.debug(String.format("Received heartbeat from client (%s), last receive tick on client is %d", 
+//                session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
     }
     
     @NamedHandler(value="", byClass=AppIdStatusCommand.class)
@@ -344,6 +409,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
             Map<String, String> params = new HashMap<>();
             params.put("borderId", String.valueOf(this.borderId));
             params.put("loginToken", token);
+            params.put("borderSessionId", session.getId());
             
             httpRestCallProvider.restCall("/admin/unregisterLogin", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
@@ -369,5 +435,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         SessionStats stats = this.sessionStatsMap.get(session);
         if(stats != null)
             stats.updatePeerReceiveTick();
+    }
+    
+    private void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
+        LOGGER.info("Got pong message from " + session.getId());
     }
 }

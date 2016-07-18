@@ -17,7 +17,8 @@ public enum CoordinationLocks {
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
     CREATE_QUALITY_TASK("quality.task.create"),
-    PAYMENT_CARD("payment.card");
+    PAYMENT_CARD("payment.card"),
+	UPDATE_NEWS("news.update");
     
 
     private String code;

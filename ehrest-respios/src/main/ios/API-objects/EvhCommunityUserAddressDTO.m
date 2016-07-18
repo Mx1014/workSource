@@ -3,7 +3,7 @@
 //
 #import "EvhCommunityUserAddressDTO.h"
 #import "EvhOrganizationDetailDTO.h"
-#import "EvhAddressDTO.h"
+#import "EvhAddressAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhCommunityUserAddressDTO
@@ -63,7 +63,7 @@
     }
     if(self.addressDtos) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAddressDTO* item in self.addressDtos) {
+        for(EvhAddressAddressDTO* item in self.addressDtos) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -123,7 +123,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"addressDtos"];
             for(id itemJson in jsonArray) {
-                EvhAddressDTO* item = [EvhAddressDTO new];
+                EvhAddressAddressDTO* item = [EvhAddressAddressDTO new];
                 
                 [item fromJson: itemJson];
                 [self.addressDtos addObject: item];

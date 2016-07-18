@@ -39,6 +39,8 @@ public class UserLogin implements Serializable {
     //For iOS pusher, added by Janson
     private String pusherIdentify;
     
+    private String borderSessionId;
+    
     public UserLogin() {
     }
     
@@ -146,6 +148,8 @@ public class UserLogin implements Serializable {
         dto.setStatus(this.status != null ? this.status.getCode(): null);
         dto.setUserId(this.userId);
         dto.setPusherIdentify(this.getPusherIdentify());
+        dto.setBorderSessionId(this.borderSessionId);
+        
         return dto;
     }
     
@@ -155,6 +159,14 @@ public class UserLogin implements Serializable {
 
     public void setPusherIdentify(String pusherIdentify) {
         this.pusherIdentify = pusherIdentify;
+    }
+
+    public String getBorderSessionId() {
+        return borderSessionId;
+    }
+
+    public void setBorderSessionId(String borderSessionId) {
+        this.borderSessionId = borderSessionId;
     }
 
     @Override

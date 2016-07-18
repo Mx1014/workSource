@@ -1533,14 +1533,21 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //TODO 支持后台配置有效时间
         Long validTime = System.currentTimeMillis() + 1*1*60*60*1000;
-        int maxCount = 32;
+        int maxCount = 120;
             
         qr.setDoorGroupId(doorAccess.getId());
         auth.setKeyValidTime(validTime);
         
         try {
             if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
-                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
+                List<DoorAccess> childs = null;
+                
+                if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
+                    childs = doorAccessProvider.listAllDoorAccessLingling(doorAccess.getOwnerId(), doorAccess.getOwnerType(), maxCount);
+                } else {
+                    childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);    
+                }
+
                 List<Long> deviceIds = new ArrayList<Long>();
                 List<Aclink> aclinks = new ArrayList<Aclink>();
                 for(DoorAccess child : childs) {
@@ -1604,9 +1611,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         
-        extra.setAuthLevel(1l);
+        extra.setAuthLevel(0l);
         if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
-            extra.setAuthLevel(2l);
+            extra.setAuthLevel(1l);
         }
         
         extra.setAuthStorey(1l);
@@ -1617,7 +1624,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
-                extra.setAuthLevel(2l);    
+                extra.setAuthLevel(1l);    
             }            
             storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
@@ -1736,7 +1743,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         qr.setId(1008l);
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
-        extra.setAuthLevel(1l);
+        extra.setAuthLevel(0l);
         extra.setAuthStorey(8l);
         
         List<Long> storeyAuthList = new ArrayList<Long>();
