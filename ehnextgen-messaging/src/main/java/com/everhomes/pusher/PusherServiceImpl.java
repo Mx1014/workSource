@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
@@ -21,9 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
@@ -105,6 +110,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Autowired
     private BorderProvider borderProvider;
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     private String queueName = "iOS-pusher2";
 
@@ -279,7 +289,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
             }
         } else {
-            //Android or other hear
+            //Android or other here
             //copy the message to message box
             //messageBoxProvider.putMessage(messageBoxPrefix+destLogin.getDeviceIdentifier(), msgId);
             
@@ -321,84 +331,6 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             return messageBoxPrefix + ":" + namespaceId + ":" + deviceId;
         }
     }
-
-    @Override
-    public void pushMessage(NotifyMessage msg) {
-        if(null == msg.getDeviceId()) {
-            LOGGER.error("The deviceId is null");
-            return;
-        }
-        Device d = deviceProvider.findDeviceByDeviceId(msg.getDeviceId());
-        if(d == null) {
-            LOGGER.error("Cannot find such device: " + msg.getDeviceId());
-            return;
-        }
-        if(d.getPlatform().equals("iOS")) {
-            ApnsService tempService = this.getApnsService(certName);
-          if(tempService != null) {
-              String payload = APNS.newPayload().alertBody(msg.getMessage()).build();
-              //String token = "b135d649736eedd8dbf649a245a42856d400d13fbf96ecc0a2746fb670f09471";
-              tempService.push(msg.getDeviceId(), payload);
-    
-    
-    //          Map<String, Date> inactiveDevices = service.getInactiveDevices();
-    //          for (String deviceToken : inactiveDevices.keySet()) {
-    //              Date inactiveAsOf = inactiveDevices.get(deviceToken);
-    //              System.out.println(inactiveAsOf);
-    //          }
-      }
-        } else {
-            //Android hear
-
-              Message m = new Message();
-              m.setContent(msg.getMessage());
-              m.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-              m.setAppId(AppConstants.APPID_PUSH);
-              long msgId = messageBoxProvider.putMessage(messageBoxPrefix+msg.getDeviceId(), m);
-
-              PusherNotifyPdu pdu = new PusherNotifyPdu();
-              pdu.setPlatform(d.getPlatform());
-              pdu.setNotification(msg.getMessage());
-              pdu.setMessageType("UNICAST");
-              pdu.setMessageId(msgId);
-              pdu.setDeviceId(msg.getDeviceId());
-
-              long requestId = LocalSequenceGenerator.getNextSequence();
-              borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
-
-        }
-
-
-//        Message message;
-//        message.setAppId(appId);
-//        message.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-//        long msgId = messageBoxProvider.createMessage(message);
-//        message.setMessageSequence(msgId);
-//
-//        message.addMetaParam("aaa", "bbb");
-//        messageBoxProvider.putMessage(messageBoxKey, message);
-//
-//        String messageBoxKey = "borderid:1";
-//        messageBoxProvider.putMessage(messageBoxKey, msgId);
-//
-//        messageBoxProvider.putMessage("ab:1", msgId);
-//        MessageLocator l = new MessageLocator(messageBoxKey);
-//        messageBoxProvider.getPastToRecentMessages(arg0, arg1);
-//        messageBoxProvider.removeMessage(arg0, arg1);
-
-        long requestId = LocalSequenceGenerator.getNextSequence();
-        PusherNotifyPdu pdu = new PusherNotifyPdu();
-        pdu.setPlatform("android");
-        pdu.setNotification("hello");
-        pdu.setMessageType("BROADCAST");
-        pdu.setMessageId(1);
-
-        borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
-    }
-
-//    @Override
-//    public void pushMessages(List<NotifyMessage> messages) {
-//    }
     
     @Override
     public void createCert(Cert cert) {
@@ -523,5 +455,22 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
         
         return deviceMap;
+    }
+    
+    /**
+     * if not pushed in 10s, push it.
+     */
+    @Override
+    public void checkAndPush(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg) {
+        String key = getPushMessageKey(destLogin.getNamespaceId(), destLogin.getDeviceIdentifier()) + ":check";
+        
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object o = redisTemplate.getExpire(key);
+        redisTemplate.expire(key, 10, TimeUnit.SECONDS);
+        
+        if(o == null) {
+            pushMessage(senderLogin, destLogin, msgId, msg);
+        }
     }
 }
