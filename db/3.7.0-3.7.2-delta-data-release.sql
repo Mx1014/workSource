@@ -765,3 +765,5 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('13', '15', '1.1.0', 'http://meeting.zuolin.com/', 'http://meeting.zuolin.com/', '0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('14', '16', '1.1.0', 'http://meeting.zuolin.com/', 'http://meeting.zuolin.com/', '0');
+
+update eh_version_urls set download_url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.videoconf' where id = 13;
