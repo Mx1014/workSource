@@ -2707,17 +2707,21 @@ public class UserServiceImpl implements UserService {
             return new UserLoginResponse();
         }
         
+        Map<String, Long> deviceMap = new HashMap<String, Long>();
         List<UserLogin> logins = this.listUserLogins(user.getId());
         List<UserLoginDTO> dtos = logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList());
         
         for(UserLoginDTO dto : dtos) {
             if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
                 Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
+                deviceMap.put(device.getDeviceId(), 0l);
+                
                 if(device != null) {
                     dto.setDeviceType(device.getPlatform());
                 }
             }
             
+            dto.setLastPush(0l);
             if(dto.getDeviceType() == null) {
                 dto.setDeviceType("other");
             }
@@ -2730,6 +2734,16 @@ public class UserServiceImpl implements UserService {
                     }
             } else {
             dto.setIsOnline((byte)0);    
+            }
+        }
+        
+        deviceMap = pusherService.requestDevices(deviceMap);
+        for(UserLoginDTO dto : dtos) {
+            if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
+                Long last = deviceMap.get(dto.getDeviceIdentifier());
+                if(last != null) {
+                    dto.setLastPush(last);
+                }
             }
         }
         

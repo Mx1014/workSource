@@ -39,6 +39,8 @@ public class UserLoginDTO {
     private String deviceType;
     private String borderStatus;
     private String borderSessionId;
+    
+    private Long lastPush;
 
     public UserLoginDTO() {
     }
@@ -163,6 +165,14 @@ public class UserLoginDTO {
 
     public void setBorderSessionId(String borderSessionId) {
         this.borderSessionId = borderSessionId;
+    }
+
+    public Long getLastPush() {
+        return lastPush;
+    }
+
+    public void setLastPush(Long lastPush) {
+        this.lastPush = lastPush;
     }
 
     @Override
