@@ -230,6 +230,11 @@ public class BorderConnection extends AbstractWebSocketHandler {
 //                border.getId(), border.getPrivateAddress(), border.getPrivatePort(), pdu.getLastPeerReceiveTime()));
     }
     
+    @NamedHandler(value="", byClass=DeviceRequestPdu.class)
+    private void handleDeviceRequest(PduFrame frame) {
+        
+    }
+    
     private void heartbeat() {
         if(this.state == State.connected) {
             long currentTick = DateHelper.currentGMTTime().getTime();
