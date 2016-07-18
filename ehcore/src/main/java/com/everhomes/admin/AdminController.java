@@ -422,11 +422,6 @@ public class AdminController extends ControllerBase {
         //request.setBody("ping border");
         request.setBody(bigBody);
         BorderConnection connection = borderConnectionProvider.getBorderConnection(id);
-        try {
-            connection.sendMessage(requestId, request);
-        } catch (Exception e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "IO exception");
-        }
 
         String subject = LocalBusMessageClassRegistry.getMessageClassSubjectName(PingResponsePdu.class);
         localBusSubscriberBuilder.build(subject + "." + requestId, new LocalBusOneshotSubscriber() {
@@ -447,7 +442,12 @@ public class AdminController extends ControllerBase {
             }
         }).setTimeout(5000).create();
         
-        return deferredResult;
+        try {
+            connection.sendMessage(requestId, request);
+            return deferredResult;
+        } catch (Exception e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "IO exception");
+        }
     }
     
     @RequestMapping("addPersistServer")

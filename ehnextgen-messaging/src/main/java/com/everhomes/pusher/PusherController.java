@@ -168,13 +168,13 @@ public class PusherController extends ControllerBase {
 //        msg.setMessage(cmd.getMessage());
 //        pusherService.pushMessage(msg);
         
-        //pusherService.pushServiceTest(cmd);
+        pusherService.pushServiceTest(cmd);
         
-        SendMessageTestCommand cmd2 = new SendMessageTestCommand();
-        cmd2.setUserId(195870l);
-        cmd2.setLoginId(5);
-        cmd2.setNamespaceId(1000000);
-        userService.pushMessageTest(cmd2);
+//        SendMessageTestCommand cmd2 = new SendMessageTestCommand();
+//        cmd2.setUserId(195870l);
+//        cmd2.setLoginId(5);
+//        cmd2.setNamespaceId(1000000);
+//        userService.pushMessageTest(cmd2);
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

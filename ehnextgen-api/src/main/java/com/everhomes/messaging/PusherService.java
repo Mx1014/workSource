@@ -1,5 +1,7 @@
 package com.everhomes.messaging;
 
+import java.util.Map;
+
 import com.everhomes.cert.Cert;
 import com.everhomes.msgbox.Message;
 import com.everhomes.rest.messaging.DeviceMessages;
@@ -14,4 +16,5 @@ public interface PusherService {
     DeviceMessages getRecentMessages(RecentMessageCommand cmd);
     void createCert(Cert cert);
     void pushServiceTest(PushMessageCommand cmd);
+    Map<String, Long> requestDevices(Map<String, Long> deviceMap);
 }

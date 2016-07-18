@@ -2,8 +2,10 @@
 package com.everhomes.pusher;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -23,8 +25,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
@@ -53,6 +57,7 @@ import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
@@ -97,6 +102,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Autowired
     private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+    
+    @Autowired
+    private BorderProvider borderProvider;
     
     private String queueName = "iOS-pusher2";
 
@@ -454,48 +462,66 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 //        }
         
         //http://www.concretepage.com/java/jdk-8/java-8-completablefuture-example
-        List<Integer> list = Arrays.asList(10,20,30,40);
-
-        list.stream().map(data->CompletableFuture.supplyAsync(()->getNumber(data))).
-                map(compFuture->compFuture.thenApply(n->n*n)).map(t->t.join())
-                .forEach(s->System.out.println(s));
+//        List<Integer> list = Arrays.asList(10,20,30,40);
+//
+//        list.stream().map(data->CompletableFuture.supplyAsync(()->getNumber(data))).
+//                map(compFuture->compFuture.thenApply(n->n*n)).map(t->t.join())
+//                .forEach(s->System.out.println(s));
         
-        long requestId = LocalSequenceGenerator.getNextSequence();
-        PingRequestPdu request = new PingRequestPdu();
-        String bigBody = "";
-        for(int i = 0; i < 500; i++) {
-            bigBody += " ping border ";
-        }
-        //request.setBody("ping border");
-        request.setBody(bigBody);
-        BorderConnection connection = borderConnectionProvider.getBorderConnection(1);
-        try {
-            connection.sendMessage(requestId, request);
-        } catch (Exception e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "IO exception");
-        }
+//        List<String> list = Arrays.asList("A","B","C","D");
+//        list.stream().map(s->CompletableFuture.supplyAsync(()->s+s))
+//                .map(f->f.whenComplete((result,error)->System.out.println(result+" Error:"+error))).count();
         
-        CompletableFuture<Long> cf = new CompletableFuture<>();
-        String subject = LocalBusMessageClassRegistry.getMessageClassSubjectName(PingResponsePdu.class);
-        localBusSubscriberBuilder.build(subject + "." + requestId, new LocalBusOneshotSubscriber() {
-            @Override
-            public Action onLocalBusMessage(Object sender, String subject,
-                    Object pingResponse, String path) {
-                long time = System.currentTimeMillis() - ((PingResponsePdu)pingResponse).getStartTick();
-                cf.complete(time);
-                
-                return null;
-            }
-
-            @Override
-            public void onLocalBusListeningTimeout() {
-                cf.completeExceptionally(new Exception("timeout"));
-            }
-        }).setTimeout(5000).create();
+        Map<String, Long> deviceMap = new HashMap<String, Long>();
+        deviceMap.put("7e978fbb0d127671e30b4704414c7bdf272b06d066fccde8a2f309bcfa110393", 0l);
+        deviceMap.put("frompython_195870_xiaoxiao2", 0l);
+        deviceMap = requestDevices(deviceMap);
         
+        LOGGER.info("all device is: " + deviceMap);
     }
     
-    private static int getNumber(int a){
-        return a*a;
+//    private static int getNumber(int a){
+//        return a*a;
+//    }
+    
+    @Override
+    public Map<String, Long> requestDevices(Map<String, Long> deviceMap) {
+        List<String> devs = new ArrayList<String>();
+        deviceMap.forEach((dev, t) -> {
+            devs.add(dev);
+        });
+        
+        List<Border> borders = this.borderProvider.listAllBorders();
+        if(borders != null) {
+            borders.stream().map((b) -> {
+                BorderConnection connection = borderConnectionProvider.getBorderConnection(b.getId());
+                return connection;
+            }).map((conn) -> {
+                DeviceRequestPdu pdu = new DeviceRequestPdu();
+                pdu.setDevices(devs);
+                return conn.requestDevice(pdu);
+            }).map((t) -> {
+                try {
+                    return t.join();
+                } catch(Exception e) {
+                    LOGGER.warn("get request device error " + e.getMessage());
+                return null;    
+                }
+                
+            }).forEach((pdu) -> {
+                
+                if(pdu != null) {
+                    for(int i = 0; i < pdu.getDevices().size(); i++) {
+                        Long t = pdu.getLastValids().get(i);
+                        if(!t.equals(0l)) {
+                            deviceMap.put(pdu.getDevices().get(i), t);
+                        }
+                    }                    
+                }
+
+            });
+        }
+        
+        return deviceMap;
     }
 }
