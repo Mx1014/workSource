@@ -41,6 +41,7 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.codegen.CodeGenContext;
 import com.everhomes.codegen.GeneratorContext;
 import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
@@ -204,7 +205,7 @@ public class AdminController extends ControllerBase {
     }
     
     @RequestMapping("codegen")
-    @RestReturn(String.class)
+    @RestReturn(value=String.class, collection=true)
     public RestResponse codegen(@RequestParam(value="language", required=true) String language) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -280,7 +281,17 @@ public class AdminController extends ControllerBase {
             context.setContextParam("ApiConstantPackage", StringUtils.join(tokens, '.'));
             generator.generateApiConstants(apiMethods, context);
         }
-        return new RestResponse("OK");
+        
+        List<String> errorList = CodeGenContext.current().getErrorMessages();
+        CodeGenContext.clear();
+        if(errorList == null || errorList.size() == 0) {
+            return new RestResponse("OK");
+        } else {
+            RestResponse response = new RestResponse(errorList);
+            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
+            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+            return response;
+        }
     }
     
     private boolean shouldExclude(Class<?> clz) {
