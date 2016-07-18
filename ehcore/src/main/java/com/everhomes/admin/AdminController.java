@@ -566,7 +566,14 @@ public class AdminController extends ControllerBase {
         }
         
         List<Namespace> namespaces = this.nsProvider.listNamespaces();
-        return new RestResponse(namespaces.stream().map((r)-> { return ConvertHelper.convert(r, NamespaceDTO.class); }).collect(Collectors.toList()));
+        List<NamespaceDTO> dtos = namespaces.stream().map((r)-> { return ConvertHelper.convert(r, NamespaceDTO.class); }).collect(Collectors.toList());
+        if(dtos != null) {
+            NamespaceDTO dto = new NamespaceDTO();
+            dto.setId(0);
+            dto.setName("左邻默认");
+            dtos.add(dto);
+        }
+        return new RestResponse(dtos);
     }
     
     @RequestMapping("registerLogin")

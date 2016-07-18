@@ -2,9 +2,11 @@
 package com.everhomes.pusher;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,10 +23,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.bus.LocalBusMessageClassRegistry;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestReturn;
@@ -38,18 +46,22 @@ import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
+import com.everhomes.rest.rpc.server.PingRequestPdu;
+import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
@@ -82,6 +94,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Autowired
     JesqueClientFactory jesqueClientFactory;
+    
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
     
     private String queueName = "iOS-pusher2";
 
@@ -426,16 +441,61 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 //                .withAppleDestination(true)
 //                .build();
         
-        ApnsService service = getApnsService("namespace:1000000");
+//        ApnsService service = getApnsService("namespace:1000000");
+//        
+//        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
+//        String token = cmd.getDeviceId();
+//        service.push(token, payload);
+//        
+//        Map<String, Date> inactiveDevices = service.getInactiveDevices();
+//        for (String deviceToken : inactiveDevices.keySet()) {
+//            Date inactiveAsOf = inactiveDevices.get(deviceToken);
+//            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
+//        }
         
-        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
-        String token = cmd.getDeviceId();
-        service.push(token, payload);
+        //http://www.concretepage.com/java/jdk-8/java-8-completablefuture-example
+        List<Integer> list = Arrays.asList(10,20,30,40);
+
+        list.stream().map(data->CompletableFuture.supplyAsync(()->getNumber(data))).
+                map(compFuture->compFuture.thenApply(n->n*n)).map(t->t.join())
+                .forEach(s->System.out.println(s));
         
-        Map<String, Date> inactiveDevices = service.getInactiveDevices();
-        for (String deviceToken : inactiveDevices.keySet()) {
-            Date inactiveAsOf = inactiveDevices.get(deviceToken);
-            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
+        long requestId = LocalSequenceGenerator.getNextSequence();
+        PingRequestPdu request = new PingRequestPdu();
+        String bigBody = "";
+        for(int i = 0; i < 500; i++) {
+            bigBody += " ping border ";
         }
+        //request.setBody("ping border");
+        request.setBody(bigBody);
+        BorderConnection connection = borderConnectionProvider.getBorderConnection(1);
+        try {
+            connection.sendMessage(requestId, request);
+        } catch (Exception e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "IO exception");
+        }
+        
+        CompletableFuture<Long> cf = new CompletableFuture<>();
+        String subject = LocalBusMessageClassRegistry.getMessageClassSubjectName(PingResponsePdu.class);
+        localBusSubscriberBuilder.build(subject + "." + requestId, new LocalBusOneshotSubscriber() {
+            @Override
+            public Action onLocalBusMessage(Object sender, String subject,
+                    Object pingResponse, String path) {
+                long time = System.currentTimeMillis() - ((PingResponsePdu)pingResponse).getStartTick();
+                cf.complete(time);
+                
+                return null;
+            }
+
+            @Override
+            public void onLocalBusListeningTimeout() {
+                cf.completeExceptionally(new Exception("timeout"));
+            }
+        }).setTimeout(5000).create();
+        
+    }
+    
+    private static int getNumber(int a){
+        return a*a;
     }
 }

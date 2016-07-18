@@ -1,9 +1,11 @@
 package com.everhomes.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,7 @@ import com.everhomes.message.HandshakeMessage;
 import com.everhomes.rest.pusher.PusherMessageResp;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.util.SignatureHelper;
 
@@ -416,6 +419,28 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         
         //pduServer.getNotification();
         
+    }
+    
+    public DeviceRequestPdu getDeviceInfo(DeviceRequestPdu pdu) {
+        List<Long> valids = new ArrayList<Long>();
+        pdu.setLastValids(valids);
+        
+        for(String deviceId : pdu.getDevices()) {
+            WebSocketSession clientSession = device2sessionMap.get(deviceId);
+            valids.add(0l);
+            if (clientSession == null) {
+                continue;
+            }
+            
+            DeviceNode devNode = session2deviceMap.get(clientSession);
+            if(devNode == null || !devNode.Item().isValid()) {
+                continue;
+            }
+            
+            valids.set(valids.size()-1, devNode.Item().getLastPingTime());
+        }
+        
+        return pdu;
     }
     
     private static class DeviceNode {

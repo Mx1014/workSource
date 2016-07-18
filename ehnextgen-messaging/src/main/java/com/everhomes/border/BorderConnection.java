@@ -306,4 +306,9 @@ public class BorderConnection extends AbstractWebSocketHandler {
            return "error";
         }
     }
+    
+    //TODO promise
+    public void testPromise() {
+        
+    }
 }
