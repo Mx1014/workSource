@@ -2714,9 +2714,9 @@ public class UserServiceImpl implements UserService {
         for(UserLoginDTO dto : dtos) {
             if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
                 Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
-                deviceMap.put(device.getDeviceId(), 0l);
                 
                 if(device != null) {
+                    deviceMap.put(device.getDeviceId(), 0l);
                     dto.setDeviceType(device.getPlatform());
                 }
             }
