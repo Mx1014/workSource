@@ -127,7 +127,7 @@ CREATE TABLE `eh_rental_sites` (
 `organization_id` BIGINT(20)    COMMENT '所属公司的ID',
 `day_begin_time` TIME  COMMENT '对于按小时预定的每天开始时间',
 `day_end_time` TIME  COMMENT '对于按小时预定的每天结束时间',
-`communityId` BIGINT(20)    COMMENT '所属的社区ID（和可见范围的不一样）',
+`community_id` BIGINT(20)    COMMENT '所属的社区ID（和可见范围的不一样）',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
@@ -192,7 +192,7 @@ CREATE TABLE `eh_rental_site_rules` (
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 `resource_type_id` BIGINT(20)    COMMENT '广场图标id',
-`site_number` INT  COMMENT '场所号',
+`site_number` VARCHAR(100)  COMMENT '场所号',
 `halfsite_price` DECIMAL(10,2)   COMMENT '半场折后价',
 `halfsite_original_price` DECIMAL(10,2)   COMMENT '半场原价（如果不为null则price为打折价）',
  PRIMARY KEY (`id`)
