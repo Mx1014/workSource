@@ -170,6 +170,13 @@ public class ContentServerServiceImpl implements ContentServerService {
         if(StringUtils.isEmpty(uri)){
             return null;
         }
+        
+        // 如果uri本身已经是以http开头的完整链接，则不需要解释，直接返回（方便用一些测试链接）  by lqs 20160715
+        uri = uri.trim();
+        if(uri.startsWith("http")) {
+            return uri;
+        }
+        
         if (!uri.contains("cs://")) {
             return uri;
         }

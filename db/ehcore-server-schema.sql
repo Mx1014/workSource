@@ -98,9 +98,9 @@ CREATE TABLE `eh_acl_roles` (
 DROP TABLE IF EXISTS `eh_aclink_firmware`;
 CREATE TABLE `eh_aclink_firmware` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `major` INT NOT NULL DEFAULT '0',
-  `minor` INT NOT NULL DEFAULT '0',
-  `revision` INT NOT NULL DEFAULT '0',
+  `major` INTEGER NOT NULL DEFAULT 0,
+  `minor` INTEGER NOT NULL DEFAULT 0,
+  `revision` INTEGER NOT NULL DEFAULT 0,
   `checksum` BIGINT NOT NULL,
   `md5sum` VARCHAR(64),
   `download_url` VARCHAR(128),
@@ -119,7 +119,7 @@ CREATE TABLE `eh_aclink_firmware` (
 DROP TABLE IF EXISTS `eh_aclink_undo_key`;
 CREATE TABLE `eh_aclink_undo_key` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `key_id` INT NOT NULL COMMENT 'cancel a key, must notify all users for this key_id to update',
+  `key_id` INTEGER NOT NULL COMMENT 'cancel a key, must notify all users for this key_id to update',
   `door_id` BIGINT NOT NULL,
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: requesting, 2: confirm',
   `expire_time_ms` BIGINT NOT NULL,
@@ -223,7 +223,7 @@ CREATE TABLE `eh_activities` (
   `create_time` DATETIME,
   `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
   `guest` VARCHAR(2048),
-  
+  `media_url` VARCHAR(1024),
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
   KEY `i_eh_act_start_time_ms`(`start_time_ms`),
@@ -250,8 +250,8 @@ CREATE TABLE `eh_activity_roster`(
   `adult_count` INTEGER NOT NULL DEFAULT 0,
   `child_count` INTEGER NOT NULL DEFAULT 0,
   `checkin_flag` TINYINT NOT NULL DEFAULT 0,
-  `checkin_uid` BIGINT comment 'id of checkin user',
-  `confirm_flag` BIGINT NOT NULL DEFAULT 0,
+  `checkin_uid` BIGINT COMMENT 'id of checkin user',
+  `confirm_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未确认, 1: 确认',
   `confirm_uid` BIGINT,
   `confirm_family_id` BIGINT,
   `confirm_time` DATETIME,
@@ -277,14 +277,14 @@ CREATE TABLE `eh_address_messages` (
   `address_id` BIGINT NOT NULL,
   `sender_type` VARCHAR(32),
   `sender_token` VARCHAR(32),
-  `sender_login_id` int,
+  `sender_login_id` INTEGER,
   `sender_identify` VARCHAR(128),
   `body` VARCHAR(256),
   `meta` VARCHAR(512),
   `extra` VARCHAR(512),
   `sender_tag` VARCHAR(32),
   `body_type` VARCHAR(32),
-  `deliveryOption` INT NOT NULL,
+  `deliveryOption` INTEGER NOT NULL,
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
@@ -369,7 +369,7 @@ CREATE TABLE `eh_aes_server_key` (
 DROP TABLE IF EXISTS `eh_aes_user_key`;
 CREATE TABLE `eh_aes_user_key` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `key_id` INT NOT NULL COMMENT 'lazy load for aes_user_key',
+  `key_id` INTEGER NOT NULL COMMENT 'lazy load for aes_user_key',
   `key_type` TINYINT NOT NULL COMMENT '0: aclink normal key',
   `door_id` BIGINT NOT NULL,
   `user_id` BIGINT NOT NULL,
@@ -424,7 +424,19 @@ CREATE TABLE `eh_app_promotions` (
   KEY `i_app_promo_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_app_urls`;
 
+CREATE TABLE `eh_app_urls` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `name` VARCHAR(128) NOT NULL,
+  `os_type` TINYINT NOT NULL DEFAULT 0,
+  `download_url` VARCHAR(128),
+  `logo_url` VARCHAR(128),
+  `description` TEXT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 DROP TABLE IF EXISTS `eh_apps`;
 CREATE TABLE `eh_apps` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
@@ -433,7 +445,7 @@ CREATE TABLE `eh_apps` (
   `secret_key` VARCHAR(1024),
   `name` VARCHAR(128) NOT NULL,
   `description` VARCHAR(2048),
-  `status` tinyint NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
@@ -521,7 +533,7 @@ CREATE TABLE `eh_banner_orders` (
   `banner_id` BIGINT NOT NULL,
   `uid` BIGINT NOT NULL,
   `vendor_order_tag` VARCHAR(64),
-  `amount` DECIMAL,
+  `amount` DECIMAL(10,0),
   `description` TEXT,
   `purchase_time` DATETIME,
   `create_time` DATETIME,
@@ -569,7 +581,7 @@ CREATE TABLE `eh_banners` (
   `create_time` DATETIME,
   `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
   `scene_type` VARCHAR(64) DEFAULT 'default',
-  
+  `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert 3:customized',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -669,7 +681,7 @@ CREATE TABLE `eh_buildings` (
   `string_tag3` VARCHAR(128),
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_community_id_name`(`community_id`, `name`)
@@ -680,8 +692,8 @@ DROP TABLE IF EXISTS `eh_business_assigned_namespaces`;
 CREATE TABLE `eh_business_assigned_namespaces` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_id` BIGINT NOT NULL COMMENT 'owner business id',
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `visible_flag` TINYINT NOT NULL DEFAULT '1' COMMENT 'business can see in namespace or not.0-hide,1-visible',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `visible_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'business can see in namespace or not.0-hide,1-visible',
   `create_time` DATETIME NOT NULL,
   
   PRIMARY KEY (`id`),
@@ -802,9 +814,9 @@ CREATE TABLE `eh_categories`(
 --
 DROP TABLE IF EXISTS `eh_certs`;
 CREATE TABLE `eh_certs` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(32) NOT NULL,
-  `cert_type` INT NOT NULL,
+  `cert_type` INTEGER NOT NULL,
   `cert_pass` VARCHAR(128),
   `data` BLOB NOT NULL,
   
@@ -900,8 +912,8 @@ CREATE TABLE `eh_communities`(
   `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum',
   `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum',
   `update_time` DATETIME,
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `area_size` double COMMENT 'area size',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `area_size` DOUBLE COMMENT 'area size',
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
@@ -974,12 +986,12 @@ CREATE TABLE `eh_community_profiles` (
 DROP TABLE IF EXISTS `eh_conf_account_categories`;
 CREATE TABLE `eh_conf_account_categories` (
   `id` BIGINT NOT NULL COMMENT 'id',
-  `multiple_account_threshold` INTEGER NOT NULL DEFAULT '0' COMMENT 'the limit value of mutiple buy channel',
-  `conf_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话',
-  `min_period` INTEGER NOT NULL DEFAULT '1' COMMENT 'the minimum count of months',
+  `multiple_account_threshold` INTEGER NOT NULL DEFAULT 0 COMMENT 'the limit value of mutiple buy channel',
+  `conf_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话',
+  `min_period` INTEGER NOT NULL DEFAULT 1 COMMENT 'the minimum count of months',
   `single_account_price` DECIMAL(10,2),
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `display_flag` TINYINT NOT NULL DEFAULT '0' COMMENT 'display when online or offline, 0: all, 1: online, 2: offline',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'display when online or offline, 0: all, 1: online, 2: offline',
   `multiple_account_price` DECIMAL(10,2),
   
   PRIMARY KEY (`id`)
@@ -1007,7 +1019,7 @@ CREATE TABLE `eh_conf_account_histories` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
  
 DROP TABLE IF EXISTS `eh_conf_accounts`;
@@ -1032,7 +1044,7 @@ CREATE TABLE `eh_conf_accounts` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_conf_conferences`;
@@ -1058,10 +1070,10 @@ CREATE TABLE `eh_conf_conferences` (
   `create_time` DATETIME,
   `status` TINYINT COMMENT '0: close, 1: on progress, 2: failed',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `conference_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the conference id from 3rd conference provider',
+  `conference_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the conference id from 3rd conference provider',
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_conf_enterprises`;
@@ -1084,7 +1096,7 @@ CREATE TABLE `eh_conf_enterprises` (
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_enterprise_id`(`enterprise_id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
  
 DROP TABLE IF EXISTS `eh_conf_invoices`;
@@ -1108,7 +1120,7 @@ CREATE TABLE `eh_conf_invoices` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_conf_order_account_map`;
@@ -1119,10 +1131,10 @@ CREATE TABLE `eh_conf_order_account_map` (
   `conf_account_id` BIGINT NOT NULL DEFAULT 0,
   `assiged_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'whether the account has assiged to user, 0: none, 1: assigned',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `conf_account_namespace_id` INT NOT NULL DEFAULT 0,
+  `conf_account_namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_conf_orders`;
@@ -1145,11 +1157,11 @@ CREATE TABLE `eh_conf_orders` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `buyer_name` VARCHAR(128),
   `buyer_contact` VARCHAR(128),
-  `vendor_type` TINYINT NOT NULL DEFAULT '0' COMMENT 'vendor type 0: none, 1: Alipay, 2: Wechat',
+  `vendor_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'vendor type 0: none, 1: Alipay, 2: Wechat',
   `email` VARCHAR(128),
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_conf_reservations`;
@@ -1172,7 +1184,7 @@ CREATE TABLE `eh_conf_reservations` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_conf_source_accounts`;
@@ -1186,7 +1198,7 @@ CREATE TABLE `eh_conf_source_accounts` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_configurations`;
@@ -1212,9 +1224,9 @@ CREATE TABLE  `eh_content_server` (
   `name` VARCHAR(32),
   `description` VARCHAR(40),
   `private_address` VARCHAR(32),
-  `private_port` INT(11),
+  `private_port` INTEGER,
   `public_address` VARCHAR(32) NOT NULL,
-  `public_port` INT(11) NOT NULL,
+  `public_port` INTEGER NOT NULL,
   
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -1226,14 +1238,14 @@ CREATE TABLE  `eh_content_server` (
 --
 DROP TABLE IF EXISTS `eh_content_server_resources`;
 CREATE  TABLE  `eh_content_server_resources` (
-  `id` BIGINT NOT NULL COMMENT "the id of record",
-  `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL COMMENT 'the id of record',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
   `resource_id` TEXT NOT NULL,
   `resource_md5` VARCHAR(256) NOT NULL,
-  `resource_type` INT NOT NULL COMMENT 'current support audio,image and video',
-  `resource_size` INT NOT NULL,
-  `resource_name` VARCHAR(128) NOT NULL, 
-  `metadata` text,
+  `resource_type` INTEGER NOT NULL COMMENT 'current support audio,image and video',
+  `resource_size` INTEGER NOT NULL,
+  `resource_name` VARCHAR(128) NOT NULL,
+  `metadata` TEXT,
   
   PRIMARY  KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -1269,7 +1281,7 @@ CREATE TABLE `eh_cooperation_requests` (
   `applicant_email` VARCHAR(128) COMMENT 'the email address of applicant',
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -1280,11 +1292,11 @@ CREATE TABLE `eh_devices` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `device_id` VARCHAR(128) NOT NULL,
   `platform` VARCHAR(32) NOT NULL,
-  `product` VARCHAR(32) NULL,
-  `brand` VARCHAR(32) NULL,
-  `device_model` VARCHAR(32) NULL,
-  `system_version` VARCHAR(32) NULL,
-  `meta` VARCHAR(256) NULL,
+  `product` VARCHAR(32),
+  `brand` VARCHAR(32),
+  `device_model` VARCHAR(32),
+  `system_version` VARCHAR(32),
+  `meta` VARCHAR(256),
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`),
@@ -1321,8 +1333,8 @@ CREATE TABLE `eh_door_access` (
   `create_time` DATETIME,
   `status` TINYINT NOT NULL COMMENT '0:activing, 1: active',
 
-  `acking_secret_version` INT NOT NULL DEFAULT 1,
-  `expect_secret_key` INT NOT NULL DEFAULT 1,
+  `acking_secret_version` INTEGER NOT NULL DEFAULT 1,
+  `expect_secret_key` INTEGER NOT NULL DEFAULT 1,
   `groupId` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`),
@@ -1436,7 +1448,7 @@ CREATE TABLE `eh_enterprise_addresses` (
 DROP TABLE IF EXISTS `eh_enterprise_attachments`;
 CREATE TABLE `eh_enterprise_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `enterprise_id` BIGINT NOT NULL DEFAULT '0',
+  `enterprise_id` BIGINT NOT NULL DEFAULT 0,
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT NOT NULL,
@@ -1604,7 +1616,7 @@ DROP TABLE IF EXISTS `eh_enterprise_details`;
 CREATE TABLE `eh_enterprise_details` ( 
   `id` BIGINT NOT NULL COMMENT 'id of the record', 
   `enterprise_id` BIGINT NOT NULL COMMENT 'group id', 
-  `description` text COMMENT 'description', 
+  `description` TEXT COMMENT 'description',
   `contact` VARCHAR(128) COMMENT 'the phone number',
   `address` VARCHAR(256) COMMENT 'address str', 
   `longitude` DOUBLE,
@@ -1801,9 +1813,9 @@ CREATE TABLE `eh_events`(
 DROP TABLE IF EXISTS `eh_family_billing_accounts`;
 CREATE TABLE `eh_family_billing_accounts` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-  `account_number` VARCHAR(128) NOT NULL DEFAULT '0' COMMENT 'the account number which use to identify the unique account',
+  `account_number` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'the account number which use to identify the unique account',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address id',
-  `balance` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `balance` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
   `update_time` DATETIME,
   `create_time` DATETIME,
   
@@ -1827,12 +1839,12 @@ CREATE TABLE `eh_family_billing_transactions` (
   `target_account_id` BIGINT NOT NULL DEFAULT 0,
   `order_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: bills in eh_organization_bills',
   `order_id` BIGINT NOT NULL DEFAULT 0,
-  `charge_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
+  `charge_amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
   `description` TEXT COMMENT 'the description for the transaction',
   `vendor` VARCHAR(128) DEFAULT '' COMMENT 'which third-part pay vendor is used',
   `pay_account` VARCHAR(128) DEFAULT '' COMMENT 'the pay account from third-part pay vendor',
   `result_code_scope` VARCHAR(128) DEFAULT '' COMMENT 'the scope of result code, defined in zuolin',
-  `result_code_id` INT NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
+  `result_code_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
   `result_desc` VARCHAR(2048) DEFAULT '' COMMENT 'the description of the transaction',
   `operator_uid` BIGINT COMMENT 'the user is who paid the bill, including help others pay the bill',
   `paid_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: selfpay, 2: agent',
@@ -1879,7 +1891,7 @@ CREATE TABLE `eh_feedbacks` (
   `proof_resource_uri` VARCHAR(1024),
   
   PRIMARY KEY (`id`)
-) engine=innodb DEFAULT charset=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -2124,7 +2136,7 @@ CREATE TABLE `eh_group_op_requests` (
 --
 -- member of eh_groups sharding group
 --
-DROP TABLES IF EXISTS `eh_group_profiles`;
+DROP TABLE IF EXISTS `eh_group_profiles`;
 CREATE TABLE `eh_group_profiles` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `app_id` BIGINT,
@@ -2237,6 +2249,26 @@ CREATE TABLE `eh_groups` (
 --
 -- member of global sharding group
 --
+DROP TABLE IF EXISTS `eh_hot_tags`;
+CREATE TABLE `eh_hot_tags` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `service_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'service type, eg: activity',  
+  `name` VARCHAR(128) NOT NULL,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `create_uid` BIGINT,
+  `delete_time` DATETIME,
+  `delete_uid` BIGINT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
+-- member of global sharding group
+--
 DROP TABLE IF EXISTS `eh_launch_pad_items`;
 CREATE TABLE `eh_launch_pad_items` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
@@ -2257,14 +2289,15 @@ CREATE TABLE `eh_launch_pad_items` (
   `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
   `min_version` BIGINT NOT NULL DEFAULT 1 COMMENT 'the min version of the item, it will be not supported if current version is less than this',
   `display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'default display on the pad, 0: hide, 1:display',
-  `display_layout` VARCHAR(128) DEFAULT '1' COMMENT 'how many grids it takes at the layout, format: 2x3',
+  `display_layout` VARCHAR(128) DEFAULT 1 COMMENT 'how many grids it takes at the layout, format: 2x3',
   `bgcolor` INTEGER NOT NULL DEFAULT 0,
   `tag` VARCHAR(1024),
   `target_type` VARCHAR(32),
   `target_id` BIGINT COMMENT 'the entity id linked back to the orginal resource',
-  `delete_flag` TINYINT NOT NULL DEFAULT '1' COMMENT 'whether the item can be deleted from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'whether the item can be deleted from desk, 0: no, 1: yes',
   `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
-
+  `scale_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 不需要, 1: 需要',
+  
   PRIMARY KEY (`id`),
   KEY `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_name`),
   KEY `i_eh_scoped_cfg_order`(`default_order`)
@@ -2284,7 +2317,10 @@ CREATE TABLE `eh_launch_pad_layouts` (
   `min_version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the minmum version code which is compatible',  
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
   `create_time` DATETIME,
-  `scene_type` varchar(64) NOT NULL DEFAULT 'default',
+  `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
+  `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
+  `scope_id` BIGINT DEFAULT 0,
+  `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert 3:customized',
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -2296,7 +2332,7 @@ CREATE TABLE `eh_launch_pad_layouts` (
 DROP TABLE IF EXISTS `eh_lease_promotion_attachments`;
 CREATE TABLE `eh_lease_promotion_attachments` ( 
   `id` BIGINT NOT NULL COMMENT 'id of the record', 
-  `lease_id` BIGINT NOT NULL DEFAULT '0', 
+  `lease_id` BIGINT NOT NULL DEFAULT 0,
   `content_type` VARCHAR(32) COMMENT 'attachment object content type', 
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage', 
   `creator_uid` BIGINT NOT NULL, 
@@ -2315,12 +2351,12 @@ CREATE TABLE `eh_lease_promotions` (
   `poster_uri` VARCHAR(128),
   `subject` VARCHAR(512),
   `rent_areas` VARCHAR(100),
-  `description` text,
+  `description` TEXT,
   `create_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
-  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
-  `building_id` BIGINT NOT NULL DEFAULT '0',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `building_id` BIGINT NOT NULL DEFAULT 0,
   `rent_position` VARCHAR(128) COMMENT 'rent position',
   `contacts` VARCHAR(128),
   `contact_phone` VARCHAR(128),
@@ -2425,7 +2461,7 @@ CREATE TABLE `eh_messages` (
   `message_text` MEDIUMTEXT COMMENT 'message content',
   `meta_app_id` BIGINT COMMENT 'app that is in charge of message content and meta intepretation',
   `message_meta` MEDIUMTEXT COMMENT 'JSON encoded message meta info, in format of string to string map',
-  `encode_version` INT NOT NULL DEFAULT 1 COMMENT 'message meta encode version',
+  `encode_version` INTEGER NOT NULL DEFAULT 1 COMMENT 'message meta encode version',
   `sender_tag` VARCHAR(32) COMMENT 'sender generated tag',
   `create_time` DATETIME NOT NULL COMMENT 'message creation time',
   
@@ -2438,13 +2474,13 @@ CREATE TABLE `eh_messages` (
 DROP TABLE IF EXISTS `eh_namespace_details`;
 CREATE TABLE `eh_namespace_details` (
   `id` BIGINT NOT NULL,
-  `namespace_id` Integer NOT NULL DEFAULT 0,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `resource_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type of resource in the namespace, community_residential, community_commercial, community_mix',
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_namespace_id` (`namespace_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -2483,12 +2519,81 @@ CREATE TABLE `eh_nearby_community_map` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `community_id` BIGINT NOT NULL DEFAULT 0,
   `nearby_community_id` BIGINT NOT NULL DEFAULT 0,
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_community_relation`(`community_id`, `nearby_community_id`),
   KEY `u_eh_community_id`(`community_id`),
   KEY `u_eh_nearby_community_id`(`nearby_community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
+-- member of global partition
+--
+DROP TABLE IF EXISTS `eh_news`;
+CREATE TABLE `eh_news` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+  `owner_type` VARCHAR(32) COMMENT 'ORGANIZATION',
+  `owner_id` BIGINT DEFAULT 0 COMMENT 'organization_id',
+  `title` VARCHAR(1024) COMMENT 'title',
+  `author` VARCHAR(128) COMMENT 'author',
+  `cover_uri` VARCHAR(1024) COMMENT 'cover image uri',
+  `content_type` VARCHAR(32) COMMENT 'object content type: link url、rich text',
+  `content` LONGTEXT COMMENT 'content data, depends on value of content_type',
+  `content_abstract` TEXT COMMENT 'abstract of content data',
+  `source_desc` VARCHAR(128) COMMENT 'where the news comes from',
+  `source_url` VARCHAR(256) COMMENT 'the url of source',
+  `child_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'comment count',
+  `forward_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'forward count',
+  `like_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'like count',
+  `view_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'view count',
+  `publish_time` DATETIME COMMENT 'the time when the news was created, now equals to create_time',
+  `top_index` BIGINT NOT NULL DEFAULT 0 COMMENT 'if has this value, go to first, order from big to small',
+  `top_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'whether it is top',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'news creator uid',
+  `create_time` DATETIME COMMENT 'create time',
+  `deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter uid',
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
+-- member of global partition
+--
+DROP TABLE IF EXISTS `eh_news_attachments`;
+CREATE TABLE `eh_news_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g comment_id',
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT NOT NULL,
+  `create_time` DATETIME NOT NULL,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
+-- member of global partition
+--
+DROP TABLE IF EXISTS `eh_news_comment`;
+CREATE TABLE `eh_news_comment` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g news_id',
+  `content_type` VARCHAR(32) COMMENT 'object content type',
+  `content` TEXT COMMENT 'content data, depends on value of content_type',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'creator uid',
+  `create_time` DATETIME,
+  `deleter_uid` BIGINT COMMENT 'deleter uid',
+  `delete_time` DATETIME COMMENT 'delete time',
+  
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -2581,7 +2686,7 @@ DROP TABLE IF EXISTS `eh_op_promotion_assigned_scopes`;
 CREATE TABLE `eh_op_promotion_assigned_scopes`(
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `promotion_id` BIGINT NOT NULL COMMENT 'promotion id',
-  `scope_code` TINYINT NOT NULL DEFAULT '0' COMMENT '0: all, 1: community, 2: city',
+  `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city',
   `scope_id` BIGINT,
   
   PRIMARY KEY (`id`),
@@ -2668,9 +2773,9 @@ CREATE TABLE `eh_organization_address_mappings` (
 DROP TABLE IF EXISTS `eh_organization_addresses`;
 CREATE TABLE `eh_organization_addresses` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `organization_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_groups',
-  `address_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_addresses',
-  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_groups',
+  `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_addresses',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
   `creator_uid` BIGINT COMMENT 'record creator user id',
   `create_time` DATETIME,
   `operator_uid` BIGINT COMMENT 'redundant auditing info',
@@ -2679,7 +2784,7 @@ CREATE TABLE `eh_organization_addresses` (
   `proof_resource_uri` VARCHAR(1024),
   `approve_time` DATETIME COMMENT 'redundant auditing info',
   `update_time` DATETIME,
-  `building_id` BIGINT NOT NULL DEFAULT '0',
+  `building_id` BIGINT NOT NULL DEFAULT 0,
   `building_name` VARCHAR(128),
   
   PRIMARY KEY (`id`)
@@ -2700,7 +2805,7 @@ CREATE TABLE `eh_organization_assigned_scopes` (
 DROP TABLE IF EXISTS `eh_organization_attachments`;
 CREATE TABLE `eh_organization_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `organization_id` BIGINT NOT NULL DEFAULT '0',
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT NOT NULL,
@@ -2738,9 +2843,9 @@ CREATE TABLE `eh_organization_bill_items` (
 DROP TABLE IF EXISTS `eh_organization_billing_accounts`;
 CREATE TABLE `eh_organization_billing_accounts` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-  `account_number` VARCHAR(128) NOT NULL DEFAULT '0' COMMENT 'the account number which use to identify the unique account',
+  `account_number` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'the account number which use to identify the unique account',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization id',
-  `balance` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `balance` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
   `update_time` DATETIME,
   `create_time` DATETIME,
   
@@ -2764,12 +2869,12 @@ CREATE TABLE `eh_organization_billing_transactions` (
   `target_account_id` BIGINT NOT NULL DEFAULT 0,
   `order_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: orders in eh_organization_orders',
   `order_id` BIGINT NOT NULL DEFAULT 0,
-  `charge_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
+  `charge_amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
   `description` TEXT COMMENT 'the description for the transaction',
   `vendor` VARCHAR(128) DEFAULT '' COMMENT 'which third-part pay vendor is used',
   `pay_account` VARCHAR(128) DEFAULT '' COMMENT 'the pay account from third-part pay vendor',
   `result_code_scope` VARCHAR(128) DEFAULT '' COMMENT 'the scope of result code, defined in zuolin',
-  `result_code_id` INT NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
+  `result_code_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
   `result_desc` VARCHAR(2048) DEFAULT '' COMMENT 'the description of the transaction',
   `operator_uid` BIGINT COMMENT 'the user is who paid the bill, including help others pay the bill',
   `paid_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: selfpay, 2: agent',
@@ -2798,7 +2903,7 @@ CREATE TABLE `eh_organization_bills` (
   `due_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill for the current month',
   `owe_amount` DECIMAL(10,2) COMMENT 'the paid money amount of the paid bill',
   `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
-  `notify_count` INT COMMENT 'how many times of notification is sent for the bill',
+  `notify_count` INTEGER COMMENT 'how many times of notification is sent for the bill',
   `notify_time` DATETIME COMMENT 'the last time of notification for the bill',
   `create_time` DATETIME,
   
@@ -2823,10 +2928,10 @@ CREATE TABLE `eh_organization_communities` (
 DROP TABLE IF EXISTS `eh_organization_community_requests`;
 CREATE TABLE `eh_organization_community_requests` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_enterprise_communities',
+  `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_communities',
   `member_type` VARCHAR(32) NOT NULL COMMENT 'enterprise',
-  `member_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'enterprise_id etc',
-  `member_status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
+  `member_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise_id etc',
+  `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
   `creator_uid` BIGINT COMMENT 'record creator user id',
   `create_time` DATETIME,
   `operator_uid` BIGINT COMMENT 'redundant auditing info',
@@ -2885,7 +2990,7 @@ CREATE TABLE `eh_organization_details` (
   `geohash` VARCHAR(32),
   `display_name` VARCHAR(64),
   `contactor` VARCHAR(64),
-  `member_count` BIGINT DEFAULT '0',
+  `member_count` BIGINT DEFAULT 0,
   `checkin_date` DATETIME COMMENT 'checkin date',
   `avatar` VARCHAR(128),
   `post_uri` VARCHAR(128),
@@ -2980,24 +3085,26 @@ CREATE TABLE `eh_organization_owners` (
   `address` VARCHAR(128),
   `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
   `create_time` DATETIME,
-  `namespace_id` INT NOT NULL DEFAULT 0,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `community_id` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`),
-  FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
+  KEY `fk_eh_organization` (`organization_id`),
+  CONSTRAINT `eh_organization_owners_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_organization_role_map`;
 CREATE TABLE `eh_organization_role_map` (
-  `id` bigint(20) NOT NULL,
-  `owner_type` varchar(64),
-  `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `role_id` bigint(20) NOT NULL DEFAULT '0',
-  `private_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: public, 1: private',
-  `status` TINYINT NOT NULL DEFAULT '2' COMMENT '0: inactive, 2: active',
-  `create_time` datetime,
-  `role_name` varchar(128) COMMENT 'role name',
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `role_id` BIGINT NOT NULL DEFAULT 0,
+  `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active',
+  `create_time` DATETIME,
+  `role_name` VARCHAR(128) COMMENT 'role name',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -3010,7 +3117,7 @@ CREATE TABLE `eh_organization_task_targets`(
   `target_type` VARCHAR(64) NOT NULL COMMENT 'target object(user/group) type',
   `target_id` BIGINT COMMENT 'target object(user/group) id',
   `task_type` VARCHAR(64) NOT NULL,
-  `message_type` varchar(64) COMMENT 'PUSH COMMENT SMS ',
+  `message_type` VARCHAR(64) COMMENT 'PUSH COMMENT SMS ',
   
   PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
@@ -3119,7 +3226,7 @@ CREATE TABLE `eh_park_apply_card` (
   `company_name` VARCHAR(256) NOT NULL DEFAULT '',
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_park_charge`;
@@ -3131,7 +3238,7 @@ CREATE TABLE `eh_park_charge`(
   `card_type` VARCHAR(128),
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -3204,8 +3311,8 @@ CREATE TABLE `eh_parking_lots` (
 --
 DROP TABLE IF EXISTS `eh_parking_recharge_orders`;
 CREATE TABLE `eh_parking_recharge_orders` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',  
-  `order_no` BIGINT(20),
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `order_no` BIGINT,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
@@ -3274,12 +3381,130 @@ CREATE TABLE `eh_parking_vendors` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_payment_card_issuer_communities`;
+CREATE TABLE `eh_payment_card_issuer_communities` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `issuer_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of the card issuer',
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_payment_card_issuers`;
+CREATE TABLE `eh_payment_card_issuers` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'name',
+  `description` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'description',
+  `pay_url` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'pay_url',
+  `alipay_recharge_account` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'alipay_recharge_account',
+  `weixin_recharge_account` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'weixin_recharge_account',
+
+  `vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of vendors taotaogu',
+  `vendor_data` TEXT COMMENT 'the extra information of card for example make_no',
+  `create_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0 : inactive,1:active ',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_payment_card_recharge_orders`;
+CREATE TABLE `eh_payment_card_recharge_orders` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `order_no` BIGINT NOT NULL DEFAULT 0 COMMENT 'order no',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  
+  `user_id` BIGINT NOT NULL DEFAULT 0,  
+  `user_name` VARCHAR(64) COMMENT 'the name of user',
+  `mobile` VARCHAR(64) COMMENT 'the mobile of user',
+  `card_no` VARCHAR(256) NOT NULL COMMENT 'the number of card',
+  `card_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of the eh_payment_cards record',
+  `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of order',
+
+  `payer_uid` BIGINT NOT NULL DEFAULT 0,  
+  `payer_name` VARCHAR(64) COMMENT 'the name of user',
+  `paid_time` DATETIME COMMENT 'the pay time',
+  `pay_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'the status of the order, 0: inactive, 1: unpaid, 2: paid',
+
+  `recharge_time` DATETIME COMMENT 'recharge time',
+  `recharge_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: fail, 1: unrecharged 2: recharged 3:COMPLETE 4:REFUNDED',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `paid_type` VARCHAR(32) COMMENT 'the type of paid 10001:zhifubao 10002: weixin',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_payment_card_transactions`;
+CREATE TABLE `eh_payment_card_transactions` (   
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `payer_uid` BIGINT NOT NULL DEFAULT 0,
+  `user_name` VARCHAR(64) COMMENT 'the name of user',
+  `mobile` VARCHAR(64) COMMENT 'the mobile of user',
+  `item_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the name of item',       
+  `merchant_no` VARCHAR(256) COMMENT 'the merchant no',
+  `merchant_name` VARCHAR(256) COMMENT 'the merchant name',
+  `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid',
+  `transaction_no` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'transaction serial number',
+  `transaction_time` DATETIME COMMENT 'the pay time',
+  `card_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of the eh_payment_cards record',
+  `card_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the number of card',
+  
+  `token` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the token of card token to pay',
+  
+  `order_no` VARCHAR(512) COMMENT 'order no',
+  `consume_Type` TINYINT NOT NULL DEFAULT 1 COMMENT 'the type of merchant',
+
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: fail, 1: waitting 2: sucess',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of vendors taotaogu',
+  `vendor_result` TEXT COMMENT 'the extra information of transactions',
+
+  PRIMARY KEY (`id`)             
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_payment_cards`;   
+CREATE TABLE `eh_payment_cards` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `issuer_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of the card issuer',
+  `user_name` VARCHAR(64) COMMENT 'the name of user',
+  `mobile` VARCHAR(64) COMMENT 'the mobile of user',
+  `card_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the id of card ,according the third system',
+  `balance` DECIMAL(10,2) COMMENT 'the balance of card',
+  `password` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT 'the password of user',
+  `user_id` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `activate_time` DATETIME,
+  `expired_time` DATETIME,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0 : inactive,1:wating 2: active ',
+  `vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of vendors taotaogu',
+  `vendor_card_data` TEXT COMMENT 'the extra information of card for example make_no',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `eh_pmsy_communities`;
 CREATE TABLE `eh_pmsy_communities` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `community_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'community id',
-  `community_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the id of community according the third system, siyuan',  
+  `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
+  `community_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the id of community according the third system, siyuan',
   `contact` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'the contact of user fill in',
   `bill_tip` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the bill_tip of user fill in',
   
@@ -3289,8 +3514,8 @@ CREATE TABLE `eh_pmsy_communities` (
 
 DROP TABLE IF EXISTS `eh_pmsy_order_items`;
 CREATE TABLE `eh_pmsy_order_items` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
-  `order_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'eh_pmsy_orders id',  
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `order_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'eh_pmsy_orders id',
   `bill_id` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the id of bill according the third system, siyuan',
   `item_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of item according the third system, siyuan',
   `bill_amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the money of bill',
@@ -3306,7 +3531,7 @@ CREATE TABLE `eh_pmsy_order_items` (
 
 DROP TABLE IF EXISTS `eh_pmsy_orders`;
 CREATE TABLE `eh_pmsy_orders` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
@@ -3327,7 +3552,7 @@ CREATE TABLE `eh_pmsy_orders` (
 
 DROP TABLE IF EXISTS `eh_pmsy_payers`;
 CREATE TABLE `eh_pmsy_payers` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `user_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'the name of user fill in',  
   `user_contact` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'the contact of user fill in',
@@ -3456,7 +3681,7 @@ CREATE TABLE `eh_punch_day_logs` (
   `afternoon_arrive_time` TIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_exception_approvals`;
@@ -3476,7 +3701,7 @@ CREATE TABLE `eh_punch_exception_approvals` (
   `punch_times_per_day` TINYINT NOT NULL DEFAULT 2 COMMENT '2 or 4 times', 
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_exception_requests`;
@@ -3499,7 +3724,7 @@ CREATE TABLE `eh_punch_exception_requests` (
   `view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_geopoints`;
@@ -3517,7 +3742,7 @@ CREATE TABLE `eh_punch_geopoints` (
   `operate_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_logs`;
@@ -3533,7 +3758,7 @@ CREATE TABLE `eh_punch_logs` (
   `identification` VARCHAR(255) COMMENT 'unique identification for a phone',
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_rules`;
@@ -3555,7 +3780,7 @@ CREATE TABLE `eh_punch_rules` (
   `operate_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_workday`;
@@ -3570,7 +3795,7 @@ CREATE TABLE `eh_punch_workday` (
   `enterprise_id` BIGINT COMMENT 'compay id',
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_push_message_results`;
@@ -3582,7 +3807,7 @@ CREATE TABLE `eh_push_message_results` (
   `send_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_push_messages`;
@@ -3593,7 +3818,7 @@ CREATE TABLE `eh_push_messages` (
   `content` VARCHAR(4096) COMMENT 'content for message',
   `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'CITY, COMMUNITY, FAMILY, USER',
   `target_id` BIGINT NOT NULL DEFAULT 0,
-  `status` INT NOT NULL DEFAULT 0 COMMENT 'WAITING, RUNNING, FINISHED',
+  `status` INTEGER NOT NULL DEFAULT 0 COMMENT 'WAITING, RUNNING, FINISHED',
   `create_time` DATETIME,
   `start_time` DATETIME,
   `finish_time` DATETIME,
@@ -3603,7 +3828,7 @@ CREATE TABLE `eh_push_messages` (
   `push_count` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- member of global parition
@@ -3612,9 +3837,9 @@ CREATE TABLE `eh_push_messages` (
 DROP TABLE IF EXISTS `eh_qrcodes`;
 CREATE TABLE `eh_qrcodes` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `description` VARCHAR(1024) COMMENT '',
+  `description` VARCHAR(1024),
   `view_count` BIGINT NOT NULL DEFAULT 0,
-  `logo_uri` VARCHAR(1024) COMMENT '',
+  `logo_uri` VARCHAR(1024),
   `expire_time` DATETIME COMMENT 'it is permanent if there is no expired time, else it is temporary',
   `action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
   `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
@@ -3638,6 +3863,8 @@ CREATE TABLE `eh_quality_inspection_categories`(
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `create_time` DATETIME,
+  `score` DOUBLE NOT NULL DEFAULT 0,
+  `description` TEXT COMMENT 'content data',
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -3655,7 +3882,7 @@ CREATE TABLE `eh_quality_inspection_evaluation_factors` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_quality_inspection_evaluations`;
@@ -3670,7 +3897,22 @@ CREATE TABLE `eh_quality_inspection_evaluations` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_quality_inspection_logs`;
+CREATE TABLE `eh_quality_inspection_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'standard, etc',
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `process_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: insert, 2: update, 3: delete',
+  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record operator user id',
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_quality_inspection_standard_group_map`;
@@ -3683,7 +3925,7 @@ CREATE TABLE `eh_quality_inspection_standard_group_map` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_quality_inspection_standards`;
@@ -3705,7 +3947,7 @@ CREATE TABLE `eh_quality_inspection_standards` (
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_quality_inspection_task_attachments`;
@@ -3737,7 +3979,7 @@ CREATE TABLE `eh_quality_inspection_task_records` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_quality_inspection_tasks`;
@@ -3769,9 +4011,13 @@ CREATE TABLE `eh_quality_inspection_tasks` (
   `review_result` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: qualified, 2: unqualified', 
   `review_time` DATETIME,
   `create_time` DATETIME,
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_categories',
+  `category_path` VARCHAR(128) COMMENT 'refernece to the path of eh_categories',
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `manual_flag` BIGINT NOT NULL DEFAULT 0 COMMENT '0: auto 1:manual',
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_recharge_info`;
@@ -3795,7 +4041,7 @@ CREATE TABLE `eh_recharge_info`(
   `card_type` VARCHAR(128),
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -3807,14 +4053,14 @@ DROP TABLE IF EXISTS `eh_recommendation_configs`;
 CREATE TABLE `eh_recommendation_configs` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `appId` BIGINT,
-  `suggest_type` INTEGER NOT NULL DEFAULT '0',
-  `source_type` INTEGER NOT NULL DEFAULT '0',
-  `source_id` BIGINT NOT NULL DEFAULT '0',
-  `target_type` INTEGER NOT NULL DEFAULT '0',
-  `target_id` BIGINT NOT NULL DEFAULT '0',
-  `period_type` INTEGER NOT NULL DEFAULT '0',
-  `period_value` INTEGER NOT NULL DEFAULT '0',
-  `status` INTEGER NOT NULL DEFAULT '0',
+  `suggest_type` INTEGER NOT NULL DEFAULT 0,
+  `source_type` INTEGER NOT NULL DEFAULT 0,
+  `source_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` INTEGER NOT NULL DEFAULT 0,
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `period_type` INTEGER NOT NULL DEFAULT 0,
+  `period_value` INTEGER NOT NULL DEFAULT 0,
+  `status` INTEGER NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `start_time` DATETIME,
   `running_time` DATETIME,
@@ -3834,14 +4080,14 @@ DROP TABLE IF EXISTS `eh_recommendations`;
 CREATE TABLE `eh_recommendations` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `appId` BIGINT,
-  `suggest_type` INTEGER NOT NULL DEFAULT '0',
-  `user_id` BIGINT NOT NULL DEFAULT '0',
-  `source_type` INTEGER NOT NULL DEFAULT '0',
-  `source_id` BIGINT NOT NULL DEFAULT '0',
+  `suggest_type` INTEGER NOT NULL DEFAULT 0,
+  `user_id` BIGINT NOT NULL DEFAULT 0,
+  `source_type` INTEGER NOT NULL DEFAULT 0,
+  `source_id` BIGINT NOT NULL DEFAULT 0,
   `embedded_json` TEXT,
-  `max_count` INTEGER NOT NULL DEFAULT '0',
-  `score` double NOT NULL DEFAULT '0',
-  `status` INTEGER NOT NULL DEFAULT '0',
+  `max_count` INTEGER NOT NULL DEFAULT 0,
+  `score` DOUBLE NOT NULL DEFAULT 0,
+  `status` INTEGER NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `expire_time` DATETIME,
   
@@ -3868,7 +4114,7 @@ CREATE TABLE `eh_regions` (
   `tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
   `hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not hot, 1: hot',
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY(`id`),
   UNIQUE KEY `u_eh_region_name`(`namespace_id`, `parent_id`, `name`),
@@ -3936,8 +4182,8 @@ CREATE TABLE `eh_rental_bills`(
   `cancel_time` DATETIME,
   `paid_money` DECIMAL(10,2) COMMENT'already paid money',
   `status` TINYINT COMMENT'0:wait for reserve, 1:paid reserve, 2:paid all money reserve success, 3:wait for final payment, 4:unlock reserve fail',
-  `visible_flag` TINYINT DEFAULT '0' COMMENT '0:visible 1:unvisible',
-  `invoice_flag` TINYINT DEFAULT '1' COMMENT '0:want invocie 1 no need',
+  `visible_flag` TINYINT DEFAULT 0 COMMENT '0:visible 1:unvisible',
+  `invoice_flag` TINYINT DEFAULT 1 COMMENT '0:want invocie 1 no need',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -3945,7 +4191,7 @@ CREATE TABLE `eh_rental_bills`(
   `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_rental_items_bills`;
@@ -3954,8 +4200,8 @@ CREATE TABLE `eh_rental_items_bills`(
   `community_id` BIGINT NOT NULL COMMENT 'enterprise, community id', 
   `site_type` VARCHAR(128),
   `rental_bill_id` BIGINT,
-  `rental_site_item_id` BIGINT ,
-  `rental_count` INT,
+  `rental_site_item_id` BIGINT,
+  `rental_count` INTEGER,
   `total_money` DECIMAL(10,2),
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -3963,7 +4209,7 @@ CREATE TABLE `eh_rental_items_bills`(
   `operate_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_rental_rules`;
@@ -3975,7 +4221,7 @@ CREATE TABLE `eh_rental_rules` (
   `rental_end_time` BIGINT,
   `pay_start_time` BIGINT,
   `pay_end_time` BIGINT,
-  `payment_ratio` INT COMMENT 'payment ratio',
+  `payment_ratio` INTEGER COMMENT 'payment ratio',
   `refund_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: allow refund, 1: can not refund',
   `contact_num` VARCHAR(20) COMMENT 'phone number',
   `time_tag1` TIME,
@@ -4004,7 +4250,7 @@ CREATE TABLE `eh_rental_rules` (
   `overtime_time` BIGINT,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_rental_site_items`;
@@ -4013,7 +4259,7 @@ CREATE TABLE `eh_rental_site_items`(
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `name` VARCHAR(128),
   `price` DECIMAL(10,2), 
-  `counts` INT COMMENT 'item count',
+  `counts` INTEGER COMMENT 'item count',
   `status` TINYINT, 
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -4021,7 +4267,7 @@ CREATE TABLE `eh_rental_site_items`(
   `operate_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_rental_site_rules`;
@@ -4032,7 +4278,7 @@ CREATE TABLE `eh_rental_site_rules`(
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `rental_type` TINYINT COMMENT '0: as hour:min, 1: as half day, 2: as day',
   `amorpm` TINYINT COMMENT '0: am, 1: pm',
-  `rental_step` INT DEFAULT 1 COMMENT 'how many time_step must be rental every time',
+  `rental_step` INTEGER DEFAULT 1 COMMENT 'how many time_step must be rental every time',
   `begin_time` DATETIME,
   `end_time` DATETIME,
   `counts` DOUBLE COMMENT 'site count',
@@ -4048,7 +4294,7 @@ CREATE TABLE `eh_rental_site_rules`(
   `time_step` DOUBLE,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_rental_sites`;
@@ -4079,7 +4325,7 @@ CREATE TABLE `eh_rental_sites`(
   `notice` TEXT,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_rental_sites_bills`;
@@ -4098,7 +4344,7 @@ CREATE TABLE `eh_rental_sites_bills`(
   `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -4402,16 +4648,16 @@ CREATE TABLE `eh_stats_by_city` (
 DROP TABLE IF EXISTS `eh_suggestions`;
 CREATE TABLE `eh_suggestions` (
   `ID` BIGINT NOT NULL AUTO_INCREMENT,
-  `SUGGEST_TYPE` INTEGER NOT NULL DEFAULT '0',
-  `USER_ID` BIGINT NOT NULL DEFAULT '0',
-  `TARGET_TYPE` INTEGER NOT NULL DEFAULT '0',
-  `TARGET_ID` BIGINT NOT NULL DEFAULT '0',
+  `SUGGEST_TYPE` INTEGER NOT NULL DEFAULT 0,
+  `USER_ID` BIGINT NOT NULL DEFAULT 0,
+  `TARGET_TYPE` INTEGER NOT NULL DEFAULT 0,
+  `TARGET_ID` BIGINT NOT NULL DEFAULT 0,
   `REASON_JSON` VARCHAR(1024) DEFAULT '',
-  `MAX_COUNT` INTEGER NOT NULL DEFAULT '0',
-  `SCORE` DOUBLE NOT NULL DEFAULT '0',
-  `STATUS` INTEGER NOT NULL DEFAULT '0',
+  `MAX_COUNT` INTEGER NOT NULL DEFAULT 0,
+  `SCORE` DOUBLE NOT NULL DEFAULT 0,
+  `STATUS` INTEGER NOT NULL DEFAULT 0,
   `CREATE_TIME` DATETIME,
-  `EXPIRED_TIME` VARCHAR(64) NOT NULL DEFAULT '0',
+  `EXPIRED_TIME` VARCHAR(64) NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`ID`),
   KEY `fk_eh_suggestions_user_idx` (`USER_ID`),
@@ -4449,7 +4695,7 @@ CREATE TABLE `eh_thirdpart_users` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -4458,23 +4704,23 @@ CREATE TABLE `eh_thirdpart_users` (
 --
 DROP TABLE IF EXISTS `eh_user_activities`;
 CREATE TABLE `eh_user_activities` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `uid` BIGINT(20) NOT NULL DEFAULT '0',
-  `activity_type` TINYINT NOT NULL DEFAULT '0',
-  `app_version_code` BIGINT(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `uid` BIGINT NOT NULL DEFAULT 0,
+  `activity_type` TINYINT NOT NULL DEFAULT 0,
+  `app_version_code` BIGINT NOT NULL DEFAULT 0,
   `app_version_name` VARCHAR(128) DEFAULT '',
-  `channel_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `channel_id` BIGINT NOT NULL DEFAULT 0,
   `imei_number` VARCHAR(128) DEFAULT '',
   `device_type` VARCHAR(512) DEFAULT '',
   `os_info` VARCHAR(512) DEFAULT '',
-  `os_type` TINYINT NOT NULL DEFAULT '0',
-  `mkt_data_version` BIGINT(20) NOT NULL DEFAULT '0',
-  `report_config_version` BIGINT(20) NOT NULL DEFAULT '0',
+  `os_type` TINYINT NOT NULL DEFAULT 0,
+  `mkt_data_version` BIGINT NOT NULL DEFAULT 0,
+  `report_config_version` BIGINT NOT NULL DEFAULT 0,
   `internal_ip` VARCHAR(128) DEFAULT '',
   `external_ip` VARCHAR(128) DEFAULT '',
   `user_agent` VARCHAR(1024) DEFAULT '',
-  `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
-  `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+  `collect_time_ms` BIGINT NOT NULL DEFAULT 0,
+  `report_time_ms` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   
   PRIMARY KEY  (`id`)
@@ -4487,12 +4733,12 @@ CREATE TABLE `eh_user_activities` (
 --
 DROP TABLE IF EXISTS  `eh_user_behaviors`;
 CREATE TABLE `eh_user_behaviors`(
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `uid` BIGINT(20) NOT NULL DEFAULT '0',
-  `content_type` TINYINT NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `uid` BIGINT NOT NULL DEFAULT 0,
+  `content_type` TINYINT NOT NULL DEFAULT 0,
   `content` TEXT,
-  `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
-  `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+  `collect_time_ms` BIGINT NOT NULL DEFAULT 0,
+  `report_time_ms` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   
    PRIMARY KEY (`id`)
@@ -4542,9 +4788,9 @@ CREATE TABLE `eh_user_communities` (
 --
 DROP TABLE IF EXISTS  `eh_user_contacts`;
 CREATE TABLE `eh_user_contacts`(
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `uid` BIGINT(20) NOT NULL DEFAULT '0',
-  `contact_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `uid` BIGINT NOT NULL DEFAULT 0,
+  `contact_id` BIGINT NOT NULL DEFAULT 0,
   `contact_phone` VARCHAR(32) DEFAULT '',
   `contact_name` VARCHAR(128) DEFAULT '',
   `create_time` DATETIME,
@@ -4665,14 +4911,14 @@ CREATE TABLE `eh_user_identifiers` (
 --
 DROP TABLE IF EXISTS  `eh_user_installed_apps`;
 CREATE TABLE `eh_user_installed_apps`(
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `uid` BIGINT(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `uid` BIGINT NOT NULL DEFAULT 0,
   `app_name` VARCHAR(1024) DEFAULT '',
   `app_version` VARCHAR(128) DEFAULT '',
   `app_size` VARCHAR(128) DEFAULT '',
   `app_installed_time` VARCHAR(128) DEFAULT '',
-  `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
-  `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+  `collect_time_ms` BIGINT NOT NULL DEFAULT 0,
+  `report_time_ms` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   
   PRIMARY KEY  (`id`)
@@ -4687,7 +4933,8 @@ CREATE TABLE `eh_user_invitation_roster` (
   `contact` VARCHAR(64),
   
   PRIMARY KEY (`id`),
-  FOREIGN KEY `fk_eh_invite_roster_invite_id`(`invite_id`) REFERENCES `eh_user_invitations`(`id`) ON DELETE CASCADE
+  KEY `fk_eh_invite_roster_invite_id` (`invite_id`),
+  CONSTRAINT `eh_user_invitation_roster_ibfk_1` FOREIGN KEY (`invite_id`) REFERENCES `eh_user_invitations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -4717,6 +4964,24 @@ CREATE TABLE `eh_user_invitations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_user_launch_pad_items`;
+CREATE TABLE `eh_user_launch_pad_items`(
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `item_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community, organization',
+  `owner_id` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert 3:customized',
+  `display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'default display on the pad, 0: hide, 1:display',
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
+  `update_time` DATETIME,
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 --
 -- member of eh_user sharding group
 --
@@ -4742,14 +5007,14 @@ CREATE TABLE `eh_user_likes` (
 --
 DROP TABLE IF EXISTS `eh_user_locations`;
 CREATE TABLE `eh_user_locations`(
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `uid` BIGINT(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `uid` BIGINT NOT NULL DEFAULT 0,
   `longitude` DOUBLE,
   `latitude` DOUBLE,
   `geohash` VARCHAR(128) DEFAULT '',
   `create_time` DATETIME,
-  `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
-  `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0', 
+  `collect_time_ms` BIGINT NOT NULL DEFAULT 0,
+  `report_time_ms` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY  (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -4764,11 +5029,12 @@ DROP TABLE IF EXISTS `eh_user_posts`;
 CREATE TABLE `eh_user_posts` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
-  `post_id` BIGINT NOT NULL DEFAULT 0,
+  `target_id` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
+  `target_type` VARCHAR(32),
   
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_usr_post_id`(`owner_uid`, `post_id`)
+  UNIQUE KEY `u_eh_usr_post_id` (`owner_uid`,`target_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -4842,7 +5108,7 @@ CREATE TABLE `eh_user_service_addresses` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
-  `delete_time` DATETIME COMMENT '',
+  `delete_time` DATETIME,
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_usr_service_address_id`(`owner_uid`, `address_id`)
@@ -4923,7 +5189,7 @@ CREATE TABLE `eh_version_realm` (
   `realm` VARCHAR(128),
   `description` TEXT, 
   `create_time` DATETIME,
-  `namespace_id` int(11) NOT NULL DEFAULT '0', 
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY(`id`),
   UNIQUE KEY `u_eh_ver_realm` (`realm`,`namespace_id`),
@@ -4942,7 +5208,7 @@ CREATE TABLE `eh_version_upgrade_rules` (
   `target_version` VARCHAR(128),
   `force_upgrade` TINYINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY(`id`),
   KEY `fk_eh_ver_upgrade_realm` (`realm_id`),
@@ -4959,7 +5225,7 @@ CREATE TABLE `eh_version_urls` (
   `target_version` VARCHAR(128),
   `download_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk',
   `info_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
    
   PRIMARY KEY(`id`),
   UNIQUE KEY `u_eh_ver_url`(`realm_id`, `target_version`)
@@ -4975,7 +5241,7 @@ CREATE TABLE `eh_versioned_content` (
   `order` INTEGER NOT NULL DEFAULT 0,
   `content` TEXT,
   `create_time` DATETIME,
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`),
   KEY `fk_eh_ver_content_realm` (`realm_id`),
@@ -4991,10 +5257,10 @@ CREATE TABLE `eh_warning_contacts` (
   `contactor` VARCHAR(20),
   `mobile` VARCHAR(20),
   `email` VARCHAR(20),
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 
 -- the relationship between web menus and privileges
@@ -5008,7 +5274,7 @@ CREATE TABLE `eh_web_menu_privileges`(
   `show_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: Not related menu display, 1: Associated menu display', 
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active', 
   `discription` VARCHAR(128), 
-  `sort_num` INT COMMENT 'sort number',
+  `sort_num` INTEGER COMMENT 'sort number',
   
   PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -5020,8 +5286,8 @@ CREATE TABLE `eh_web_menu_privileges`(
 DROP TABLE IF EXISTS `eh_web_menu_scopes`; 
 CREATE TABLE `eh_web_menu_scopes`( 
   `id` BIGINT NOT NULL, 
-  `menu_id` BIGINT NULL,
-  `menu_name` VARCHAR(64) NULL,
+  `menu_id` BIGINT,
+  `menu_name` VARCHAR(64),
   `owner_type` VARCHAR(64) NOT NULL,
   `owner_id` BIGINT,
   `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: delete , 1: override, 2: revert',
@@ -5043,7 +5309,7 @@ CREATE TABLE `eh_web_menus`(
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active', 
   `path` VARCHAR(64), 
   `type` VARCHAR(64) NOT NULL DEFAULT 'zuolin' COMMENT 'zuolin, park', 
-  `sort_num` INT COMMENT 'sort number', 
+  `sort_num` INTEGER COMMENT 'sort number',
 
   PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
@@ -5051,7 +5317,7 @@ CREATE TABLE `eh_web_menus`(
 
 DROP TABLE IF EXISTS `eh_wifi_settings`;
 CREATE TABLE `eh_wifi_settings` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `ssid` VARCHAR(128) NOT NULL COMMENT 'the name of address resource',
@@ -5061,7 +5327,7 @@ CREATE TABLE `eh_wifi_settings` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0 : inactive, 1: active',
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -5070,14 +5336,14 @@ CREATE TABLE `eh_wifi_settings` (
 DROP TABLE IF EXISTS `eh_yellow_page_attachments`;
 CREATE TABLE `eh_yellow_page_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id reference to eh_yellow_pages',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id reference to eh_yellow_pages',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -5115,7 +5381,7 @@ CREATE TABLE `eh_yellow_pages` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 SET foreign_key_checks = 1;

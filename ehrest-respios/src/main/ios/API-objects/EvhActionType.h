@@ -52,7 +52,8 @@ typedef enum {
     EvhActionType_OFFLINE_WEBAPP = 44, 
     EvhActionType_SERVICE_HOT_LINE = 45, 
     EvhActionType_CONTACTS = 46, 
-    EvhActionType_WIFI = 47
+    EvhActionType_WIFI = 47, 
+    EvhActionType_NEWS = 48
 
 } EvhActionType;
 

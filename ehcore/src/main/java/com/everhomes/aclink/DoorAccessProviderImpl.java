@@ -230,4 +230,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         
         return das;
     }
+    
+    @Override
+    public List<DoorAccess> listAllDoorAccessLingling(Long ownerId, Byte ownerType, int count) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<DoorAccess> das = queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(ownerType));
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.ne(0l));
+                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(das == null || das.size() == 0) {
+            return null;
+        }
+        
+        return das;        
+    }
 }

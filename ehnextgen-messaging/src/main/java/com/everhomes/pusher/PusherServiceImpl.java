@@ -42,6 +42,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.DeviceMessages;
+import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
@@ -53,7 +54,9 @@ import com.google.gson.Gson;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
 import com.notnoop.apns.ApnsServiceBuilder;
+import com.notnoop.apns.EnhancedApnsNotification;
 import com.notnoop.apns.PayloadBuilder;
+import com.notnoop.exceptions.NetworkIOException;
 
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
@@ -99,12 +102,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     }
     
     @Override
-    public ApnsService getApnsService(String partner) {
-//        String partner = certName;
-//        if(null != inPartner && !inPartner.isEmpty()) {
-//            partner = inPartner;
-//        }
-        
+    public ApnsService getApnsService(String partner) {       
         ApnsService service = this.certMaps.get(partner);
         if(service == null) {
             // init hear
@@ -112,7 +110,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             if(cert != null) {
                 ByteArrayInputStream bis = new ByteArrayInputStream(cert.getData());
                 //.withCert("/home/janson/projects/pys/apns/apns_develop.p12", "123456")
-                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass());
+                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5);
                 if(certName.indexOf("develop") >= 0) {
                     builder = builder.withSandboxDestination();
                 } else {
@@ -121,12 +119,34 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 service = builder.build();
                 ApnsService tmp = this.certMaps.putIfAbsent(partner, service);
                 if(tmp != null) {
+                    try{
+                        service.stop();
+                    } catch (Exception e) {
+                    LOGGER.warn("stop apns server error");    
+                    }
+                    
                     service = tmp;
                 }
             }
         }
         
         return service;
+    }
+    
+    @Override
+    public void stopApnsServiceByName(String partner) {
+        ApnsService server = null;
+        if(partner.startsWith(this.namespacePrefix)) {
+            server = this.certMaps.remove(partner);
+        } else if(partner.equals(this.certName)) {
+            server = this.certMaps.remove(this.certName);
+        }
+        
+        LOGGER.info("restarting apns service=" + partner );
+        
+        if(server != null) {
+            server.stop();    
+            }
     }
     
     //https://developer.apple.com/library/
@@ -212,9 +232,24 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 //                        .localizedKey("GAME_PLAY_REQUEST_FORMAT")
 //                        .localizedArguments("Jenna", "Frank")
 //                        .actionKey("Play").build();
-                final Job job = new Job(PusherAction.class.getName(),
-                        new Object[]{ payload, identify, partner });
-                jesqueClientFactory.getClientPool().enqueue(queueName, job);
+                if(msgId != 0) {
+                    final Job job = new Job(PusherAction.class.getName(),
+                            new Object[]{ payload, identify, partner });
+                    jesqueClientFactory.getClientPool().enqueue(queueName, job);    
+                } else {
+                    int now =  (int)(new Date().getTime()/1000);
+                    
+                    EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                                now + 60 * 60 /* Expire in one hour */,
+                                identify /* Device Token */,
+                                payload);
+                    ApnsService tempService = getApnsService(partner);
+                    if(tempService != null) {
+                        tempService.push(notification);    
+                    }
+                    
+                }
+                
             
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId 
@@ -350,11 +385,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             }
         
         this.certProvider.createCert(cert);
-        if(cert.getName().startsWith(this.namespacePrefix)) {
-            this.certMaps.remove(cert.getName());
-        } else if(cert.getName().equals(this.certName)) {
-            this.certMaps.remove(this.certName);    
-        }
+        
+        this.stopApnsServiceByName(cert.getName());
     }
 
     @Override
@@ -384,5 +416,26 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
 
         return deviceMsgs;
+    }
+    
+    @Override
+    public void pushServiceTest(PushMessageCommand cmd) {
+//        ApnsService service =
+//                APNS.newService()
+//                .withCert("/tmp/apns_appstore.p12", "zuolin")
+//                .withAppleDestination(true)
+//                .build();
+        
+        ApnsService service = getApnsService("namespace:1000000");
+        
+        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
+        String token = cmd.getDeviceId();
+        service.push(token, payload);
+        
+        Map<String, Date> inactiveDevices = service.getInactiveDevices();
+        for (String deviceToken : inactiveDevices.keySet()) {
+            Date inactiveAsOf = inactiveDevices.get(deviceToken);
+            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
+        }
     }
 }

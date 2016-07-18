@@ -1,5 +1,6 @@
 package com.everhomes.pusher;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.everhomes.messaging.ApnsServiceFactory;
 import com.notnoop.apns.ApnsService;
 import com.notnoop.apns.EnhancedApnsNotification;
+import com.notnoop.exceptions.NetworkIOException;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -40,9 +42,14 @@ public class PusherAction implements Runnable {
                     now + 60 * 60 /* Expire in one hour */,
                     identify /* Device Token */,
                     payload);
-        tempService.push(notification);
+        try {
+            tempService.push(notification);   
+        } catch (NetworkIOException e) {
+            apnsServiceFactory.stopApnsServiceByName(this.partner);
+        }
+        
      
-        LOGGER.error("action: pushing to: " + identify);
+//        LOGGER.info("action: pushing to: " + identify);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Pushing message(ios msg flush), namespaceId=" + partner + ", deviceId=" + identify);
         }

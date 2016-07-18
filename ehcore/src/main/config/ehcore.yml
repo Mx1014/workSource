@@ -111,6 +111,7 @@ elastic:
     nodes:
         hosts: elasticsearch
         ports: 9300
+        httpports: 9200
         
 #
 # for API code generation

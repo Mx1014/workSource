@@ -22,11 +22,14 @@ public enum ConfirmStatus {
     }
 
     public static ConfirmStatus fromCode(Byte code) {
+    	if(null == code){
+    		return null;
+    	}
         for (ConfirmStatus flag : ConfirmStatus.values()) {
-            if (flag.code == code) {
+            if (flag.code == code.byteValue()) {
                 return flag;
             }
         }
-        return UN_CONFIRMED;
+        return null;
     }
 }
