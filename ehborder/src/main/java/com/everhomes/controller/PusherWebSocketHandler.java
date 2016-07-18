@@ -26,6 +26,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -354,17 +355,8 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         return false;
     }
     
-    private String getRestUri(String relativeUri) {
-        StringBuffer sb = new StringBuffer(this.coreServiceUri);
-        if(!this.coreServiceUri.endsWith("/"))
-            sb.append("/");
-        
-        if(relativeUri.startsWith("/"))
-            sb.append(relativeUri.substring(1));
-        else
-            sb.append(relativeUri);
-        
-        return sb.toString();
+    protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
+        heartbeat(session);
     }
     
     public void notify(WebSocketSession serverSession, PusherNotifyPdu pduServer) {
