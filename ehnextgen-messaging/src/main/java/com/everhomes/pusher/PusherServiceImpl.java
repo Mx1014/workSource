@@ -466,8 +466,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Object o = redisTemplate.getExpire(key);
-        redisTemplate.expire(key, 10, TimeUnit.SECONDS);
+        Object o = redisTemplate.opsForValue().get(key);
+        redisTemplate.opsForValue().set(key, 1l, 10, TimeUnit.SECONDS);
         
         if(o == null) {
             pushMessage(senderLogin, destLogin, msgId, msg);
