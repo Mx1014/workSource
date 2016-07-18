@@ -18,11 +18,7 @@ import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommandResponse;
 import com.everhomes.rest.techpark.rental.CancelRentalBillCommand;
-import com.everhomes.rest.techpark.rental.DeleteItemAdminCommand;
 import com.everhomes.rest.techpark.rental.DeleteRentalBillCommand;
-import com.everhomes.rest.techpark.rental.DeleteRentalSiteRulesCommand;
-import com.everhomes.rest.techpark.rental.DisableRentalSiteCommand;
-import com.everhomes.rest.techpark.rental.EnableRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusCommand;
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusResponse;
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusCommand;
@@ -31,8 +27,8 @@ import com.everhomes.rest.techpark.rental.FindRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsResponse;
-import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommand;
-import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommandResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteMonthStatusCommand;
+import com.everhomes.rest.techpark.rental.FindRentalSiteMonthStatusCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSitesCommand;
@@ -190,6 +186,24 @@ public class RentalController extends ControllerBase {
 	public RestResponse findRentalSiteWeekStatus(@Valid FindRentalSiteWeekStatusCommand cmd) {
 		FindRentalSiteWeekStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findRentalSiteWeekStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /rental/findRentalSiteMonthStatus</b>
+	 * <p>
+	 * 查询某服务预约某周的状态
+	 * </p>
+	 */
+
+	@RequestMapping("findRentalSiteMonthStatus")
+	@RestReturn(value = FindRentalSiteMonthStatusCommandResponse.class)	
+	public RestResponse findRentalSiteMonthStatus(@Valid FindRentalSiteMonthStatusCommand cmd) {
+		FindRentalSiteMonthStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findRentalSiteMonthStatus(cmd);
 		RestResponse response = new RestResponse(
 				findRentalSiteDayStatusCommandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

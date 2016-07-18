@@ -105,6 +105,8 @@ import com.everhomes.rest.techpark.rental.FindRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteMonthStatusCommand;
+import com.everhomes.rest.techpark.rental.FindRentalSiteMonthStatusCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
@@ -3700,6 +3702,13 @@ public class RentalServiceImpl implements RentalService {
 	public void openResourceType(OpenResourceTypeCommand cmd) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
+			FindRentalSiteMonthStatusCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
  

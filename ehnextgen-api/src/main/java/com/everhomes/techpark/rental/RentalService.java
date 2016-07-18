@@ -30,6 +30,8 @@ import com.everhomes.rest.techpark.rental.FindRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteMonthStatusCommand;
+import com.everhomes.rest.techpark.rental.FindRentalSiteMonthStatusCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteRulesCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
@@ -196,5 +198,8 @@ public interface RentalService {
 	void closeResourceType(CloseResourceTypeCommand cmd);
 
 	void openResourceType(OpenResourceTypeCommand cmd);
+
+	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
+			FindRentalSiteMonthStatusCommand cmd);
 
 }

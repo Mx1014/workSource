@@ -34,6 +34,7 @@ import com.everhomes.util.StringHelper;
  * <li>workdayPrice: 工作日价格</li>
  * <li>weekendPrice: 周末价格</li>
  * <li>siteCounts: 可预约个数</li>
+ * <li>siteNumbers: 用户填写的可预约个数个场所编号</li>
  * <li>cancelTime: 至少提前取消时间</li>
  * <li>refundFlag: 是否允许退款</li>
  * <li>refundRatio: 退款比例</li>
@@ -70,6 +71,8 @@ public class UpdateDefaultRuleAdminCommand {
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
+	@ItemType(String.class)
+	private List<String> siteNumbers;
 	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -273,6 +276,12 @@ public class UpdateDefaultRuleAdminCommand {
 
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
+	}
+	public List<String> getSiteNumbers() {
+		return siteNumbers;
+	}
+	public void setSiteNumbers(List<String> siteNumbers) {
+		this.siteNumbers = siteNumbers;
 	}
 
 }

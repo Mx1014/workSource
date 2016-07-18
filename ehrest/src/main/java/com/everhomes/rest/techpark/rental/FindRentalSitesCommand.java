@@ -7,8 +7,9 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 查询场所
- * <li>ownerType：所有者类型：“community”</li>
- * <li>ownerId：所有者id</li>
+ * <li>ownerType：可见范围类型：“community”</li>
+ * <li>ownerId：可见范围的id</li>
+ * <li>communityId：所属园区id</li>
  * <li>resourceTypeId: 广场图标id</li>
  * <li>keyword: 关键字</li>
  * <li>anchor: 锚点</li>
@@ -19,6 +20,7 @@ import com.everhomes.util.StringHelper;
 public class FindRentalSitesCommand {
 	private String ownerType;
 	private Long ownerId; 
+	private Long communityId; 
 	private Long resourceTypeId;
 	private String keyword;
 	private Long anchor;
@@ -73,5 +75,13 @@ public class FindRentalSitesCommand {
 
 	public void setAnchor(Long anchor) {
 		this.anchor = anchor;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	} 
 }
