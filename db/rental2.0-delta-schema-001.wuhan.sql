@@ -127,6 +127,7 @@ CREATE TABLE `eh_rental_sites` (
 `organization_id` BIGINT(20)    COMMENT '所属公司的ID',
 `day_begin_time` TIME  COMMENT '对于按小时预定的每天开始时间',
 `day_end_time` TIME  COMMENT '对于按小时预定的每天结束时间',
+`communityId` BIGINT(20)    COMMENT '所属的社区ID（和可见范围的不一样）',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
