@@ -2711,10 +2711,14 @@ public class UserServiceImpl implements UserService {
         List<UserLoginDTO> dtos = logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList());
         
         for(UserLoginDTO dto : dtos) {
-            Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
-            if(device != null) {
-                dto.setDeviceType(device.getPlatform());
-            } else {
+            if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
+                Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
+                if(device != null) {
+                    dto.setDeviceType(device.getPlatform());
+                }
+            }
+            
+            if(dto.getDeviceType() == null) {
                 dto.setDeviceType("other");
             }
             
@@ -2723,8 +2727,7 @@ public class UserServiceImpl implements UserService {
                 BorderConnection conn = borderConnectionProvider.getBorderConnection(dto.getLoginBorderId());
                 if(conn != null) {
                     dto.setBorderStatus(conn.getConnectionState());
-                }
-                
+                    }
             } else {
             dto.setIsOnline((byte)0);    
             }
