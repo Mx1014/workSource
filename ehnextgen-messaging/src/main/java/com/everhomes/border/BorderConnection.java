@@ -171,10 +171,10 @@ public class BorderConnection extends AbstractWebSocketHandler {
         }
         
         //TODO why error ?
-//        NamedHandlerDispatcher.invokeHandler(this, frame.getName(), frame);
-        if(frame.getName().equals("heartbeat")) {
-            this.handleHeartbeatPdu(frame);
-        }
+        NamedHandlerDispatcher.invokeHandler(this, frame.getName(), frame);
+//        if(frame.getName().equals("heartbeat")) {
+//            this.handleHeartbeatPdu(frame);
+//        }
 
         if(frame.getRequestId() != null) {
             // do local bus publish in case it is a RPC response
