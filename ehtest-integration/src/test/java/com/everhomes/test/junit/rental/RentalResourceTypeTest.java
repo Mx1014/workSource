@@ -81,7 +81,7 @@ public class RentalResourceTypeTest extends BaseLoginAuthTestCase {
 					return null;
 				});
 		assertEquals(1, resultBill.size());
-		
+		testGetResourceTypeList();
 	}
 	//查询接口放到一个test里，一面删数据加数据浪费时间
 //	@Test
@@ -107,8 +107,10 @@ public class RentalResourceTypeTest extends BaseLoginAuthTestCase {
 		assertTrue("The user scenes should be get from server, response="
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
-//		// 总共6单
-//		assertEquals(6, response.getResponse().getRefundOrders().size());
+//		// 总共1个
+		assertEquals(1, response.getResponse().getResourceTypes().size());
+		assertEquals("资源的预约", response.getResponse().getResourceTypes().get(0).getName());
+		assertEquals((byte)0, response.getResponse().getResourceTypes().get(0).getStatus().byteValue());
 //		//时间倒序 第一单为5L
 //		assertEquals(5L, response.getResponse().getRefundOrders().get(0).getId().longValue());
 ////		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
