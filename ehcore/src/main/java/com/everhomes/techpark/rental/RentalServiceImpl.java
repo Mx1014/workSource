@@ -1900,8 +1900,8 @@ public class RentalServiceImpl implements RentalService {
 	public void createRSR(RentalSiteRule rsr,AddRentalSiteSingleSimpleRule cmd){
 		if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			//自动分配sitenumber
-			for(int siteNumber = 1;siteNumber<=cmd.getSiteCounts();siteNumber++){
-				rsr.setSiteNumber(siteNumber);
+			for(int num =0;num<=cmd.getSiteCounts();num++){
+				rsr.setSiteNumber(cmd.getSiteNumbers().get(num));
 				rentalProvider.createRentalSiteRule(rsr);
 			}
 		}else{

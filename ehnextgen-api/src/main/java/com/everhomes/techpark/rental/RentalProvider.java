@@ -184,7 +184,7 @@ public interface RentalProvider {
 
 
 	List<RentalSiteRule> findRentalSiteRuleByDate(Long rentalSiteId,
-			Integer siteNumber, Timestamp beginTime, Timestamp endTime,
+			String siteNumber, Timestamp beginTime, Timestamp endTime,
 			List<Byte> ampmList,String rentalDate) throws ParseException;
 
 

@@ -212,7 +212,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalSiteRule> findRentalSiteRuleByDate(Long rentalSiteId,
-			Integer siteNumber, Timestamp beginTime, Timestamp endTime,
+			String siteNumber, Timestamp beginTime, Timestamp endTime,
 			List<Byte> ampmList, String rentalDate) throws ParseException {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(

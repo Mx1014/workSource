@@ -42,7 +42,7 @@ public class AddResourceAdminCommand {
 	private Double longitude;
 	@NotNull
 	private Double latitude;
-	private String communityId;
+	private Long communityId;
 	private String contactPhonenum;
 	@NotNull
 	private Long chargeUid;
@@ -173,11 +173,11 @@ public class AddResourceAdminCommand {
 		this.status = status;
 	}
 
-	public String getCommunityId() {
+	public Long getCommunityId() {
 		return communityId;
 	}
 
-	public void setCommunityId(String communityId) {
+	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
 
