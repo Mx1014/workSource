@@ -2339,11 +2339,6 @@ public class ForumServiceImpl implements ForumService {
         
         post.setAssignedFlag(PostAssignedFlag.NONE.getCode());
         
-        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
-        if (officialFlag == OfficialFlag.YES) {
-			post.setOfficialFlag(OfficialFlag.YES.getCode());
-		}
-        
         return post;
     }
     

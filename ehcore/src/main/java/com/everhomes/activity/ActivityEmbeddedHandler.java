@@ -90,6 +90,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
 			cmd.setOfficialFlag(null);
+			post.setOfficialFlag(null);
+		}else {
+			post.setOfficialFlag(cmd.getOfficialFlag());
 		}
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));

@@ -51,6 +51,7 @@ import com.everhomes.rest.group.ListMemberInStatusCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.QuiteAndTransferPrivilegeCommand;
 import com.everhomes.rest.group.RejectAdminRoleCommand;
 import com.everhomes.rest.group.RejectJoinGroupInvitation;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -697,4 +698,18 @@ public class GroupController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }    
+    
+    /**
+     * <b>URL: /group/quiteAndTransferPrivilege</b>
+     * <p>退出并转移权限</p>
+     */
+    @RequestMapping("quiteAndTransferPrivilege")
+    @RestReturn(value=String.class)
+    public RestResponse quiteAndTransferPrivilege(QuiteAndTransferPrivilegeCommand cmd){
+//    	groupService.quiteAndTransferPrivilege(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
