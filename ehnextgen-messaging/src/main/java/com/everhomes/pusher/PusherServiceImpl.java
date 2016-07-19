@@ -2,11 +2,16 @@
 package com.everhomes.pusher;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
@@ -17,14 +22,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
+import com.everhomes.bus.LocalBusMessageClassRegistry;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestReturn;
@@ -38,18 +55,23 @@ import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
+import com.everhomes.rest.rpc.server.PingRequestPdu;
+import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
@@ -82,6 +104,17 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Autowired
     JesqueClientFactory jesqueClientFactory;
+    
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+    
+    @Autowired
+    private BorderProvider borderProvider;
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     private String queueName = "iOS-pusher2";
 
@@ -256,7 +289,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
             }
         } else {
-            //Android or other hear
+            //Android or other here
             //copy the message to message box
             //messageBoxProvider.putMessage(messageBoxPrefix+destLogin.getDeviceIdentifier(), msgId);
             
@@ -298,84 +331,6 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             return messageBoxPrefix + ":" + namespaceId + ":" + deviceId;
         }
     }
-
-    @Override
-    public void pushMessage(NotifyMessage msg) {
-        if(null == msg.getDeviceId()) {
-            LOGGER.error("The deviceId is null");
-            return;
-        }
-        Device d = deviceProvider.findDeviceByDeviceId(msg.getDeviceId());
-        if(d == null) {
-            LOGGER.error("Cannot find such device: " + msg.getDeviceId());
-            return;
-        }
-        if(d.getPlatform().equals("iOS")) {
-            ApnsService tempService = this.getApnsService(certName);
-          if(tempService != null) {
-              String payload = APNS.newPayload().alertBody(msg.getMessage()).build();
-              //String token = "b135d649736eedd8dbf649a245a42856d400d13fbf96ecc0a2746fb670f09471";
-              tempService.push(msg.getDeviceId(), payload);
-    
-    
-    //          Map<String, Date> inactiveDevices = service.getInactiveDevices();
-    //          for (String deviceToken : inactiveDevices.keySet()) {
-    //              Date inactiveAsOf = inactiveDevices.get(deviceToken);
-    //              System.out.println(inactiveAsOf);
-    //          }
-      }
-        } else {
-            //Android hear
-
-              Message m = new Message();
-              m.setContent(msg.getMessage());
-              m.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-              m.setAppId(AppConstants.APPID_PUSH);
-              long msgId = messageBoxProvider.putMessage(messageBoxPrefix+msg.getDeviceId(), m);
-
-              PusherNotifyPdu pdu = new PusherNotifyPdu();
-              pdu.setPlatform(d.getPlatform());
-              pdu.setNotification(msg.getMessage());
-              pdu.setMessageType("UNICAST");
-              pdu.setMessageId(msgId);
-              pdu.setDeviceId(msg.getDeviceId());
-
-              long requestId = LocalSequenceGenerator.getNextSequence();
-              borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
-
-        }
-
-
-//        Message message;
-//        message.setAppId(appId);
-//        message.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-//        long msgId = messageBoxProvider.createMessage(message);
-//        message.setMessageSequence(msgId);
-//
-//        message.addMetaParam("aaa", "bbb");
-//        messageBoxProvider.putMessage(messageBoxKey, message);
-//
-//        String messageBoxKey = "borderid:1";
-//        messageBoxProvider.putMessage(messageBoxKey, msgId);
-//
-//        messageBoxProvider.putMessage("ab:1", msgId);
-//        MessageLocator l = new MessageLocator(messageBoxKey);
-//        messageBoxProvider.getPastToRecentMessages(arg0, arg1);
-//        messageBoxProvider.removeMessage(arg0, arg1);
-
-        long requestId = LocalSequenceGenerator.getNextSequence();
-        PusherNotifyPdu pdu = new PusherNotifyPdu();
-        pdu.setPlatform("android");
-        pdu.setNotification("hello");
-        pdu.setMessageType("BROADCAST");
-        pdu.setMessageId(1);
-
-        borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
-    }
-
-//    @Override
-//    public void pushMessages(List<NotifyMessage> messages) {
-//    }
     
     @Override
     public void createCert(Cert cert) {
@@ -426,16 +381,96 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 //                .withAppleDestination(true)
 //                .build();
         
-        ApnsService service = getApnsService("namespace:1000000");
+//        ApnsService service = getApnsService("namespace:1000000");
+//        
+//        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
+//        String token = cmd.getDeviceId();
+//        service.push(token, payload);
+//        
+//        Map<String, Date> inactiveDevices = service.getInactiveDevices();
+//        for (String deviceToken : inactiveDevices.keySet()) {
+//            Date inactiveAsOf = inactiveDevices.get(deviceToken);
+//            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
+//        }
         
-        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
-        String token = cmd.getDeviceId();
-        service.push(token, payload);
+        //http://www.concretepage.com/java/jdk-8/java-8-completablefuture-example
+//        List<Integer> list = Arrays.asList(10,20,30,40);
+//
+//        list.stream().map(data->CompletableFuture.supplyAsync(()->getNumber(data))).
+//                map(compFuture->compFuture.thenApply(n->n*n)).map(t->t.join())
+//                .forEach(s->System.out.println(s));
         
-        Map<String, Date> inactiveDevices = service.getInactiveDevices();
-        for (String deviceToken : inactiveDevices.keySet()) {
-            Date inactiveAsOf = inactiveDevices.get(deviceToken);
-            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
+//        List<String> list = Arrays.asList("A","B","C","D");
+//        list.stream().map(s->CompletableFuture.supplyAsync(()->s+s))
+//                .map(f->f.whenComplete((result,error)->System.out.println(result+" Error:"+error))).count();
+        
+        Map<String, Long> deviceMap = new HashMap<String, Long>();
+        deviceMap.put("7e978fbb0d127671e30b4704414c7bdf272b06d066fccde8a2f309bcfa110393", 0l);
+        deviceMap.put("frompython_195870_xiaoxiao2", 0l);
+        deviceMap = requestDevices(deviceMap);
+        
+        LOGGER.info("all device is: " + deviceMap);
+    }
+    
+//    private static int getNumber(int a){
+//        return a*a;
+//    }
+    
+    @Override
+    public Map<String, Long> requestDevices(Map<String, Long> deviceMap) {
+        List<String> devs = new ArrayList<String>();
+        deviceMap.forEach((dev, t) -> {
+            devs.add(dev);
+        });
+        
+        List<Border> borders = this.borderProvider.listAllBorders();
+        if(borders != null) {
+            borders.stream().map((b) -> {
+                BorderConnection connection = borderConnectionProvider.getBorderConnection(b.getId());
+                return connection;
+            }).map((conn) -> {
+                DeviceRequestPdu pdu = new DeviceRequestPdu();
+                pdu.setDevices(devs);
+                return conn.requestDevice(pdu);
+            }).map((t) -> {
+                try {
+                    return t.join();
+                } catch(Exception e) {
+                    LOGGER.warn("get request device error " + e.getMessage());
+                return null;    
+                }
+                
+            }).forEach((pdu) -> {
+                
+                if(pdu != null) {
+                    for(int i = 0; i < pdu.getDevices().size(); i++) {
+                        Long t = pdu.getLastValids().get(i);
+                        if(!t.equals(0l)) {
+                            deviceMap.put(pdu.getDevices().get(i), t);
+                        }
+                    }                    
+                }
+
+            });
+        }
+        
+        return deviceMap;
+    }
+    
+    /**
+     * if not pushed in 10s, push it.
+     */
+    @Override
+    public void checkAndPush(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg) {
+        String key = getPushMessageKey(destLogin.getNamespaceId(), destLogin.getDeviceIdentifier()) + ":check";
+        
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object o = redisTemplate.opsForValue().get(key);
+        redisTemplate.opsForValue().set(key, 1l, 10, TimeUnit.SECONDS);
+        
+        if(o == null) {
+            pushMessage(senderLogin, destLogin, msgId, msg);
         }
     }
 }
