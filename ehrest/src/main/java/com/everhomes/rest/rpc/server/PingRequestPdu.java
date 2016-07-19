@@ -2,6 +2,7 @@
 package com.everhomes.rest.rpc.server;
 
 import com.everhomes.util.Name;
+import com.everhomes.util.StringHelper;
 
 /**
  * Ping request message
@@ -28,5 +29,9 @@ public class PingRequestPdu {
     
     public void setBody(String body) {
         this.body = body;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

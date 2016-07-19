@@ -64,7 +64,8 @@ public enum VersionRealmType {
     ANDROID_CHUNENG("Android_Chuneng"), 
     IOS_CHUNENG("iOS_Chuneng"),
     ANDROID_IBASE("Android_Ibase"), 
-    IOS_IBASE("iOS_Ibase");
+    IOS_IBASE("iOS_Ibase"),
+    BIZ("biz");
     
     private String code;
     private VersionRealmType(String code) {

@@ -20,6 +20,7 @@ import com.everhomes.rest.rpc.HeartbeatPdu;
 import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
@@ -124,6 +125,25 @@ public class ServerWebSocketHandler implements WebSocketHandler {
     private void handleAclinkRemotePdu(WebSocketSession session, PduFrame frame) {
         AclinkRemotePdu pdu = frame.getPayload(AclinkRemotePdu.class);
         aclinkWebSocketHandler.aclinkRemote(session, pdu);
+    }
+    
+    @NamedHandler(byClass=DeviceRequestPdu.class)
+    private void handleDeviceRequestPdu(WebSocketSession session, PduFrame frame) {
+        DeviceRequestPdu pdu = frame.getPayload(DeviceRequestPdu.class);
+        pdu = this.pusherWebSocketHandler.getDeviceInfo(pdu);
+        
+        PduFrame responseFrame = new PduFrame(); 
+        responseFrame.setPayload(pdu);
+        responseFrame.setRequestId(frame.getRequestId());
+        TextMessage msg = new TextMessage(responseFrame.toJson());
+        try {
+            synchronized(session) {
+                session.sendMessage(msg);
+            }
+            updateSessionSendTick(session);
+        } catch(IOException e) {
+            LOGGER.warn("Unable to send inter-server message to " + session.getRemoteAddress().toString(), e);
+        }
     }
 
     @Override
