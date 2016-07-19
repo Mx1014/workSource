@@ -6,10 +6,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-<<<<<<< HEAD
-=======
-import java.util.Collections;
->>>>>>> news1.0
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
