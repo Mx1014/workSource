@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.forum;
+package com.everhomes.rest.organization;
 
 /**
  * <ul>帖子是否为官方帖

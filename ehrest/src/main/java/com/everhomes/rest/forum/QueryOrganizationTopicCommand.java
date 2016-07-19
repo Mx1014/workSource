@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>excludeCategories: 不查询的内容类型 {@link com.everhomes.rest.category.CategoryConstants}</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
- * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.forum.OfficialFlag}</li>
+ * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
