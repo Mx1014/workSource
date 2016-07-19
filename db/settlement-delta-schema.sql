@@ -1,7 +1,7 @@
 -- 订单交易流水表
 CREATE TABLE `eh_stat_orders` (
   `id` bigint(20) NOT NULL,
-  `community_id` bigint(20) DEFAULT 0,
+  `community_id` int(11) DEFAULT 0,
   `namespace_id` bigint(20) DEFAULT 0,
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
@@ -21,7 +21,7 @@ CREATE TABLE `eh_stat_orders` (
 CREATE TABLE `eh_stat_transactions` (
   `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
-  `community_id` bigint(20) DEFAULT 0,
+  `community_id` int(11) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
@@ -50,7 +50,7 @@ CREATE TABLE `eh_stat_transactions` (
 -- 结算退款流水表
 CREATE TABLE `eh_stat_refunds` (
   `id` bigint(20) NOT NULL,
-  `community_id` bigint(20) DEFAULT 0,
+  `community_id` int(11) DEFAULT 0,
   `namespace_id` bigint(20) DEFAULT 0,
   `refund_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
@@ -76,7 +76,7 @@ CREATE TABLE `eh_stat_refunds` (
 CREATE TABLE `eh_stat_settlements` (
   `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
-  `community_id` bigint(20) DEFAULT 0,
+  `community_id` int(11) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
@@ -102,7 +102,7 @@ CREATE TABLE `eh_stat_settlements` (
 CREATE TABLE `eh_stat_service_settlement_results` (
   `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
-  `community_id` bigint(20) DEFAULT 0,
+  `community_id` int(11) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
