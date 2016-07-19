@@ -1614,11 +1614,11 @@ public class RentalServiceImpl implements RentalService {
 //				
 //			}
 
-			ruleDto.setSiteNumber(String.valueOf(rsr.getSiteNumber())+"号");
-			if(rsb.getRentalCount()<1)
-				ruleDto.setSiteNumber(ruleDto.getSiteNumber()+"（半场）");
-			dto.getRentalSiteRules().add(ruleDto);
-			
+//			ruleDto.setSiteNumber(String.valueOf(rsr.getSiteNumber())+"号");
+//			if(rsb.getRentalCount()<1)
+//				ruleDto.setSiteNumber(ruleDto.getSiteNumber()+"（半场）");
+//			dto.getRentalSiteRules().add(ruleDto);
+			ruleDto.setSiteNumber(rsr.getSiteNumber());
 			if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
 				useDetailSB.append("使用时间:");
 				useDetailSB.append("从");
@@ -1692,6 +1692,11 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
+			if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())&&
+					!cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size())))
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
+			
 			//设置默认规则，删除所有的单元格
 			Integer deleteCount = rentalProvider.deleteRentalSiteRules(
 					cmd.getRentalSiteId(), null, null);
@@ -1900,6 +1905,7 @@ public class RentalServiceImpl implements RentalService {
 		if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			//自动分配sitenumber
 			for(int num =0;num<=cmd.getSiteCounts();num++){
+				rsr.setCounts(1.0);
 				rsr.setSiteNumber(cmd.getSiteNumbers().get(num));
 				rentalProvider.createRentalSiteRule(rsr);
 			}
@@ -1934,10 +1940,8 @@ public class RentalServiceImpl implements RentalService {
 			//当成功预约之后要判断是否过了取消时间
 			LOGGER.error("cancel over time");
 			throw RuntimeErrorException
-					.errorWith(
-							RentalServiceErrorCode.SCOPE,
-							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,
-									"cancel bill over time");
+					.errorWith(RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,"cancel bill over time");
 		}else{
 			this.dbProvider.execute((TransactionStatus status) -> {
 				//默认是已退款
