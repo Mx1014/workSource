@@ -3,6 +3,7 @@ package com.everhomes.rest.rpc.server;
 
 import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.util.Name;
+import com.everhomes.util.StringHelper;
 
 @Name("client.forward")
 public class ClientForwardPdu {
@@ -30,5 +31,9 @@ public class ClientForwardPdu {
     
     public String getEncodedFrame() {
         return this.frame;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
