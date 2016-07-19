@@ -1,6 +1,6 @@
 -- 订单交易流水表
 CREATE TABLE `eh_stat_orders` (
-  `id` bigint(20) NOT NULL COMMENT,
+  `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
   `namespace_id` bigint(20) DEFAULT 0,
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
@@ -15,11 +15,11 @@ CREATE TABLE `eh_stat_orders` (
   `order_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算交易流水表
 CREATE TABLE `eh_stat_transactions` (
-  `id` bigint(20) NOT NULL COMMENT,
+  `id` bigint(20) NOT NULL,
   `namespace_id` bigint(20) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
   `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -45,11 +45,11 @@ CREATE TABLE `eh_stat_transactions` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算退款流水表
 CREATE TABLE `eh_stat_refunds` (
-  `id` bigint(20) NOT NULL COMMENT,
+  `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
   `namespace_id` bigint(20) DEFAULT 0,
   `refund_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
@@ -60,7 +60,7 @@ CREATE TABLE `eh_stat_refunds` (
   `payer_uid` bigint(20) NOT NULL COMMENT '支付用户编号',
   `refund_no` varchar(100) DEFAULT NULL COMMENT '平台退款流水号',
   `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
-  `vendor_refund_no` varchar(100) DEFAULT NULL '第三方退款流水号',
+  `vendor_refund_no` varchar(100) DEFAULT NULL COMMENT'第三方退款流水号',
   `order_amount` DECIMAL DEFAULT NULL COMMENT '订单金额',
   `refund_amount` DECIMAL DEFAULT NULL COMMENT '退款金额',
   `fee_rate` DECIMAL DEFAULT NULL COMMENT '交易费率',
@@ -70,7 +70,7 @@ CREATE TABLE `eh_stat_refunds` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
 CREATE TABLE `eh_stat_settlements` (
@@ -96,7 +96,7 @@ CREATE TABLE `eh_stat_settlements` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算統計結果表
 CREATE TABLE `eh_stat_service_settlement_results` (
@@ -118,7 +118,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 同步任务日志跟踪表
 CREATE TABLE `eh_sync_task_logs` (
@@ -133,5 +133,5 @@ CREATE TABLE `eh_sync_task_logs` (
   `update_date` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
