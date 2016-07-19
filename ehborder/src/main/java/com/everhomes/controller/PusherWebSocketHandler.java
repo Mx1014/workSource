@@ -1,9 +1,11 @@
 package com.everhomes.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +26,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -32,6 +35,7 @@ import com.everhomes.message.HandshakeMessage;
 import com.everhomes.rest.pusher.PusherMessageResp;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.util.SignatureHelper;
 
@@ -351,17 +355,8 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         return false;
     }
     
-    private String getRestUri(String relativeUri) {
-        StringBuffer sb = new StringBuffer(this.coreServiceUri);
-        if(!this.coreServiceUri.endsWith("/"))
-            sb.append("/");
-        
-        if(relativeUri.startsWith("/"))
-            sb.append(relativeUri.substring(1));
-        else
-            sb.append(relativeUri);
-        
-        return sb.toString();
+    protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
+        heartbeat(session);
     }
     
     public void notify(WebSocketSession serverSession, PusherNotifyPdu pduServer) {
@@ -416,6 +411,28 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         
         //pduServer.getNotification();
         
+    }
+    
+    public DeviceRequestPdu getDeviceInfo(DeviceRequestPdu pdu) {
+        List<Long> valids = new ArrayList<Long>();
+        pdu.setLastValids(valids);
+        
+        for(String deviceId : pdu.getDevices()) {
+            WebSocketSession clientSession = device2sessionMap.get(deviceId);
+            valids.add(0l);
+            if (clientSession == null) {
+                continue;
+            }
+            
+            DeviceNode devNode = session2deviceMap.get(clientSession);
+            if(devNode == null || !devNode.Item().isValid()) {
+                continue;
+            }
+            
+            valids.set(valids.size()-1, devNode.Item().getLastPingTime());
+        }
+        
+        return pdu;
     }
     
     private static class DeviceNode {

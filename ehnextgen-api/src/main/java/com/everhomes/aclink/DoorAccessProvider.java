@@ -28,4 +28,6 @@ public interface DoorAccessProvider {
 
     List<DoorAccess> listDoorAccessByGroupId(Long groupId, int count);
 
+    List<DoorAccess> listAllDoorAccessLingling(Long ownerId, Byte ownerType, int count);
+
 }

@@ -1,6 +1,7 @@
 package com.everhomes.rest.pusher;
 
 import com.everhomes.util.Name;
+import com.everhomes.util.StringHelper;
 
 @Name("NOTIFY")
 public class PusherMessageResp {
@@ -20,5 +21,8 @@ public class PusherMessageResp {
         this.content = content;
     }
     
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

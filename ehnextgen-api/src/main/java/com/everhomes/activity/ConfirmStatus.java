@@ -26,7 +26,7 @@ public enum ConfirmStatus {
     		return null;
     	}
         for (ConfirmStatus flag : ConfirmStatus.values()) {
-            if (flag.code == code) {
+            if (flag.code == code.byteValue()) {
                 return flag;
             }
         }

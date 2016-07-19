@@ -18,7 +18,7 @@ public enum CheckInStatus {
     		return null;
     	}
         for (CheckInStatus flag : CheckInStatus.values()) {
-            if (flag.code == code) {
+            if (flag.code == code.byteValue()) {
                 return flag;
             }
         }

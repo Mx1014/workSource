@@ -40,6 +40,9 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
+import com.everhomes.border.BorderConnection;
+import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageDispatcher;
 import com.everhomes.bus.LocalBusMessageHandler;
@@ -55,6 +58,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.device.Device;
+import com.everhomes.device.DeviceProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseContactService;
 import com.everhomes.enterprise.EnterpriseProvider;
@@ -65,7 +70,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.PusherService;
 import com.everhomes.messaging.UserMessageRoutingHandler;
+import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
@@ -113,6 +120,7 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
@@ -120,8 +128,10 @@ import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
 import com.everhomes.rest.user.SignupCommand;
@@ -132,6 +142,8 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserIdentifierDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginResponse;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -253,9 +265,21 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private DeviceProvider deviceProvider;
+	
+	@Autowired
+	private BorderConnectionProvider borderConnectionProvider;
+	
+	@Autowired
+	private PusherService pusherService;
 
 	@Autowired
-    private LocalBus localBus;
+   private LocalBus localBus;
+	
+	@Autowired
+	private BorderProvider borderProvider;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -706,6 +730,9 @@ public class UserServiceImpl implements UserService {
 		cmd.setPointType(PointType.APP_OPENED.name());
 		cmd.setPoint(userPointService.getItemPoint(PointType.APP_OPENED));
 		userPointService.addPoint(cmd);
+		
+		//added by Janson, mark as disconnected
+		unregisterLoginConnection(login);
 
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("User logon succeed, userIdentifierToken=" + userIdentifierToken + ", userLogin=" + login);
@@ -924,37 +951,59 @@ public class UserServiceImpl implements UserService {
         accessor.getTemplate().opsForHash().delete(key, hKey);
     }
 
-	public UserLogin registerLoginConnection(LoginToken loginToken, int borderId) {
+	public UserLogin registerLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
 		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 
 		String hkeyLogin = String.valueOf(loginToken.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		UserLogin login = accessor.getMapValueObject(hkeyLogin);
 		if(login != null) {
+		    //Save loginBorderId here
 			login.setLoginBorderId(borderId);
+			login.setBorderSessionId(borderSessionId);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 			accessor.putMapValueObject(hkeyLogin, login);
 			
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 		} else {
 			LOGGER.warn("Unable to find UserLogin in big map, borderId=" + borderId 
-					+ ", loginToken=" + StringHelper.toJsonString(loginToken));
+					+ ", loginToken=" + StringHelper.toJsonString(loginToken) + ", borderSessionId=" + borderSessionId);
 		}
 
 		return login;
 	}
 
-	public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId) {
+	public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
 		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 		String hkeyLogin = String.valueOf(loginToken.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		UserLogin login = accessor.getMapValueObject(hkeyLogin);
 		if(login != null) {
-			login.setLoginBorderId(null);
-			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
-			accessor.putMapValueObject(hkeyLogin, login);
-			
-			unregisterBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
+		    boolean canRemove = false;
+		    if( login.getLoginBorderId() == null || login.getBorderSessionId() == null ) {
+		        canRemove = true;
+		    }
+		    
+		    //如果 login.getLoginBorderId() 与 login.getBorderSessionId() 都不为空，则判断登录的信息有任何不相等，则此 borderId 的会话已经无效
+		    if(!canRemove && !(login.getLoginBorderId().equals(borderId) && login.getBorderSessionId().equals(borderSessionId))) {
+		        canRemove = false;
+		    } else {
+		        canRemove = true;
+		    }
+		    
+		    if(canRemove) {
+	            login.setLoginBorderId(null);
+	            login.setBorderSessionId(null);
+	            login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+	            accessor.putMapValueObject(hkeyLogin, login);
+	            
+	            unregisterBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());		        
+		    } else {
+		        //TODO 需要广播丢失的 session 信息到所有的 border service 么。
+		        LOGGER.info("The session is expired, borderId=" + borderId + " borderSessionId=" + borderSessionId
+		                + ", oldBorderId=" + login.getLoginBorderId() + ", oldSessionId=" + login.getBorderSessionId());
+		    }
+
 		} else {
 			LOGGER.warn("Unable to find UserLogin in big map, borderId=" + borderId 
 					+ ", loginToken=" + StringHelper.toJsonString(loginToken));
@@ -962,6 +1011,25 @@ public class UserServiceImpl implements UserService {
 
 		return login;
 	}    
+	
+	   public UserLogin unregisterLoginConnection(UserLogin userLogin) {
+	        String userKey = NameMapper.getCacheKey("user", userLogin.getUserId(), null);
+	        String hkeyLogin = String.valueOf(userLogin.getLoginId());
+	        Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+	        UserLogin login = accessor.getMapValueObject(hkeyLogin);
+	        if(login != null) {
+	            login.setLoginBorderId(null);
+	            login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+	            accessor.putMapValueObject(hkeyLogin, login);
+	            
+	            if(userLogin.getLoginBorderId() != null) {
+	                unregisterBorderTracker(userLogin.getLoginBorderId(), userLogin.getUserId(), userLogin.getLoginId());    
+	            }
+	            
+	        }
+
+	        return login;
+	    }    
 
 	public void saveLogin(UserLogin login) {
 		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
@@ -2613,5 +2681,132 @@ public class UserServiceImpl implements UserService {
             // 在没有配置时，默认使用域空间ID来判断
             return (Namespace.DEFAULT_NAMESPACE == namespaceId.intValue());
         }
+    }
+    
+    /**
+     * 用户实时状态信息
+     */
+    @Override
+    public UserLoginResponse listLoginsByPhone(ListLoginByPhoneCommand cmd) {
+        User user = null;
+        try {
+            if(cmd.getPhone() != null && cmd.getPhone().length() < 9) {
+                Long id = Long.valueOf(cmd.getPhone());
+                user = this.userProvider.findUserById(id);
+            }    
+        } catch(Exception ex) {
+         LOGGER.info("try userId not found");   
+        }
+        
+        if(user == null) {
+            user = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getPhone());    
+        }
+        
+        if(user == null) {
+            //throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "User not found!");
+            return new UserLoginResponse();
+        }
+        
+        Map<String, Long> deviceMap = new HashMap<String, Long>();
+        List<UserLogin> logins = this.listUserLogins(user.getId());
+        List<UserLoginDTO> dtos = logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList());
+        
+        for(UserLoginDTO dto : dtos) {
+            if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
+                Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
+                
+                if(device != null) {
+                    deviceMap.put(device.getDeviceId(), 0l);
+                    dto.setDeviceType(device.getPlatform());
+                }
+            }
+            
+            dto.setLastPushPing(0l);
+            if(dto.getDeviceType() == null) {
+                dto.setDeviceType("other");
+            }
+            
+            if(dto.getLoginBorderId() != null) {
+                dto.setIsOnline((byte)1);
+                BorderConnection conn = borderConnectionProvider.getBorderConnection(dto.getLoginBorderId());
+                if(conn != null) {
+                    dto.setBorderStatus(conn.getConnectionState());
+                    }
+            } else {
+            dto.setIsOnline((byte)0);    
+            }
+        }
+        
+        deviceMap = pusherService.requestDevices(deviceMap);
+        for(UserLoginDTO dto : dtos) {
+            if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
+                Long last = deviceMap.get(dto.getDeviceIdentifier());
+                if(last != null) {
+                    dto.setLastPushPing(last);
+                }
+            }
+        }
+        
+        UserLoginResponse resp = new UserLoginResponse();
+        resp.setLogins(dtos);
+        
+        return resp;
+    }
+    
+    @Override
+    public String sendMessageTest(SendMessageTestCommand cmd) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), cmd.getUserId().toString()), 
+                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody("test message " + Double.valueOf(Math.random()));
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                cmd.getUserId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+        
+        return messageDto.getBody();
+    }
+    
+    @Override
+    public String pushMessageTest(SendMessageTestCommand cmd) {
+        Message msg = new Message();
+        msg.setAppId(AppConstants.APPID_MESSAGING);
+        msg.setSenderUid(User.SYSTEM_UID);
+        msg.setChannelToken(cmd.getUserId().toString());
+        msg.setChannelType(MessageChannelType.USER.toString());
+        msg.setContent("test push " + Double.valueOf(Math.random()));
+        msg.setMetaAppId(AppConstants.APPID_MESSAGING);
+        msg.setCreateTime(System.currentTimeMillis());
+        msg.setNamespaceId(cmd.getNamespaceId());
+        
+        Map<String, String> meta = new HashMap<String, String>();
+        meta.put("bodyType", "TEXT");
+        msg.setMeta(meta);
+        
+        List<UserLogin> logins = this.listUserLogins(cmd.getUserId());
+        for(UserLogin login : logins) {
+            if(cmd.getLoginId().equals(login.getLoginId())) {
+                this.pusherService.pushMessage(User.SYSTEM_USER_LOGIN, login, 0, msg);
+            }
+        }
+        
+        return msg.getContent();
+    }
+    
+    @Override
+    public BorderListResponse listBorders() {
+        BorderListResponse resp = new BorderListResponse();
+        List<String> strs = new ArrayList<String>();
+        List<Border> borders = this.borderProvider.listAllBorders();
+        for(Border border : borders) {
+            strs.add(String.format("%s:%d", border.getPublicAddress(), border.getPublicPort()));
+        }
+        
+        resp.setBorders(strs);
+        
+        return resp;
     }
 }

@@ -3,6 +3,9 @@ package com.everhomes.border;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.cert.Cert;
@@ -20,6 +23,7 @@ public class CertProviderImpl implements CertProvider {
     @Autowired
     private DbProvider dbProvider;
     
+    @Caching(evict={@CacheEvict(value="Device", key="#cert.name")})
     @Override
     public void createCert(Cert cert) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -29,9 +33,9 @@ public class CertProviderImpl implements CertProvider {
         if(query.execute() > 0) {
             cert.setId(query.getReturnedRecord().getId());
         }
-        
     }
     
+    @Caching(evict={@CacheEvict(value="Device", key="#cert.name")})
     @Override
     public void deleteCert(Cert cert) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -40,7 +44,7 @@ public class CertProviderImpl implements CertProvider {
     }
 
     @Override
-    //@Cacheable(value="Device", key="#name")
+    @Cacheable(value = "Device", key="#name", unless="#result == null")
     public Cert findCertByName(String name) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhCertsDao dao = new EhCertsDao(context.configuration());

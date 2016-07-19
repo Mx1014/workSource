@@ -41,6 +41,7 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.codegen.CodeGenContext;
 import com.everhomes.codegen.GeneratorContext;
 import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
@@ -65,16 +66,23 @@ import com.everhomes.rest.persist.server.AddPersistServerCommand;
 import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.RegisterLoginCommand;
+import com.everhomes.rest.user.SendMessageTestCommand;
+import com.everhomes.rest.user.SendMessageTestResponse;
 import com.everhomes.rest.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginResponse;
 import com.everhomes.rest.admin.DecodeWebTokenCommand;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.sequence.SequenceService;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.sharding.Server;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -153,6 +161,9 @@ public class AdminController extends ControllerBase {
 
     @Value("${objc.response.base}")
     private String restResponseBase;    
+
+    @Autowired
+    private UserProvider userProvider;
     
     @RequireAuthentication(false)
     @RequestMapping("sample")
@@ -194,7 +205,7 @@ public class AdminController extends ControllerBase {
     }
     
     @RequestMapping("codegen")
-    @RestReturn(String.class)
+    @RestReturn(value=String.class, collection=true)
     public RestResponse codegen(@RequestParam(value="language", required=true) String language) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -270,7 +281,17 @@ public class AdminController extends ControllerBase {
             context.setContextParam("ApiConstantPackage", StringUtils.join(tokens, '.'));
             generator.generateApiConstants(apiMethods, context);
         }
-        return new RestResponse("OK");
+        
+        List<String> errorList = CodeGenContext.current().getErrorMessages();
+        CodeGenContext.clear();
+        if(errorList == null || errorList.size() == 0) {
+            return new RestResponse("OK");
+        } else {
+            RestResponse response = new RestResponse(errorList);
+            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
+            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+            return response;
+        }
     }
     
     private boolean shouldExclude(Class<?> clz) {
@@ -401,11 +422,6 @@ public class AdminController extends ControllerBase {
         //request.setBody("ping border");
         request.setBody(bigBody);
         BorderConnection connection = borderConnectionProvider.getBorderConnection(id);
-        try {
-            connection.sendMessage(requestId, request);
-        } catch (Exception e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "IO exception");
-        }
 
         String subject = LocalBusMessageClassRegistry.getMessageClassSubjectName(PingResponsePdu.class);
         localBusSubscriberBuilder.build(subject + "." + requestId, new LocalBusOneshotSubscriber() {
@@ -426,7 +442,12 @@ public class AdminController extends ControllerBase {
             }
         }).setTimeout(5000).create();
         
-        return deferredResult;
+        try {
+            connection.sendMessage(requestId, request);
+            return deferredResult;
+        } catch (Exception e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "IO exception");
+        }
     }
     
     @RequestMapping("addPersistServer")
@@ -545,14 +566,21 @@ public class AdminController extends ControllerBase {
         }
         
         List<Namespace> namespaces = this.nsProvider.listNamespaces();
-        return new RestResponse(namespaces.stream().map((r)-> { return ConvertHelper.convert(r, NamespaceDTO.class); }).collect(Collectors.toList()));
+        List<NamespaceDTO> dtos = namespaces.stream().map((r)-> { return ConvertHelper.convert(r, NamespaceDTO.class); }).collect(Collectors.toList());
+        if(dtos != null) {
+            NamespaceDTO dto = new NamespaceDTO();
+            dto.setId(0);
+            dto.setName("左邻默认");
+            dtos.add(dto);
+        }
+        return new RestResponse(dtos);
     }
     
     @RequestMapping("registerLogin")
     @RestReturn(value=UserLoginDTO.class)
-    public RestResponse registerLogin(
-        @RequestParam(value="borderId", required=true) int borderId, 
-        @RequestParam(value="loginToken", required=true) String loginToken) {
+    public RestResponse registerLogin(@Valid RegisterLoginCommand cmd) {
+        int borderId = cmd.getBorderId();
+        String loginToken = cmd.getLoginToken();
 
         if(UserContext.current().getCallerApp() == null || UserContext.current().getCallerApp().getId().longValue() != App.APPID_EXTENSION)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
@@ -562,7 +590,7 @@ public class AdminController extends ControllerBase {
         if(token == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
         
-        UserLogin login = this.userService.registerLoginConnection(token, borderId);
+        UserLogin login = this.userService.registerLoginConnection(token, borderId, cmd.getBorderSessionId());
         if(login == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid login token");
             
@@ -571,9 +599,9 @@ public class AdminController extends ControllerBase {
     
     @RequestMapping("unregisterLogin")
     @RestReturn(value=UserLoginDTO.class)
-    public RestResponse unregisterLogin(
-        @RequestParam(value="borderId", required=true) int borderId, 
-        @RequestParam(value="loginToken", required=true) String loginToken) {
+    public RestResponse unregisterLogin(@Valid RegisterLoginCommand cmd) {
+        int borderId = cmd.getBorderId();
+        String loginToken = cmd.getLoginToken();
     
         if(UserContext.current().getCallerApp() == null || UserContext.current().getCallerApp().getId().longValue() != App.APPID_EXTENSION)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
@@ -583,7 +611,7 @@ public class AdminController extends ControllerBase {
         if(token == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
         
-        UserLogin login = this.userService.unregisterLoginConnection(token, borderId);
+        UserLogin login = this.userService.unregisterLoginConnection(token, borderId, cmd.getBorderSessionId());
         if(login == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid login token");
             
@@ -602,6 +630,20 @@ public class AdminController extends ControllerBase {
         }
         List<UserLogin> logins = this.userService.listUserLogins(uid);
         return new RestResponse(logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList()));
+    }
+    
+    @RequestMapping("listLoginByPhone")
+    @RestReturn(value=UserLoginResponse.class)
+    public RestResponse listLoginByPhone(ListLoginByPhoneCommand cmd) {
+    
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+            UserContext.current().getUser().getId(), Privilege.Visible, null)) {
+        
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+        
+
+        return new RestResponse(this.userService.listLoginsByPhone(cmd));
     }
     
     @RequestMapping("createApp")
@@ -723,6 +765,35 @@ public class AdminController extends ControllerBase {
         
         String url = com.everhomes.contentserver.Generator.decodeUrl(path);
         RestResponse response = new RestResponse(url);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 在线消息测试
+     * @return
+     */
+    @RequestMapping("messageTest")
+    @RestReturn(SendMessageTestResponse.class)
+    public RestResponse sendMessageTest(@Valid SendMessageTestCommand cmd) {
+        SendMessageTestResponse msgResp = new SendMessageTestResponse();
+        msgResp.setText(userService.sendMessageTest(cmd));
+        RestResponse response = new RestResponse(msgResp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    @RequestMapping("pushTest")
+    @RestReturn(SendMessageTestResponse.class)
+    public RestResponse pushMessageTest(@Valid SendMessageTestCommand cmd) {
+        SendMessageTestResponse msgResp = new SendMessageTestResponse();
+        msgResp.setText(userService.pushMessageTest(cmd));
+        RestResponse response = new RestResponse(msgResp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

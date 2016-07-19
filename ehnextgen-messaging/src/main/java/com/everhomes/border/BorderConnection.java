@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.websocket.ContainerProvider;
@@ -27,9 +28,16 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.rpc.HeartbeatPdu;
 import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
+import com.everhomes.rest.rpc.server.PingRequestPdu;
+import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Name;
 import com.everhomes.util.NamedHandler;
@@ -58,6 +66,9 @@ public class BorderConnection extends AbstractWebSocketHandler {
     private TaskScheduler taskScheduler;
     
     private Border border;
+    
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
     
     private WebSocketSession wsSession;
     private List<PduFrame> outputQueue = new ArrayList<>();
@@ -159,7 +170,11 @@ public class BorderConnection extends AbstractWebSocketHandler {
             return;
         }
         
+        //TODO why error ?
         NamedHandlerDispatcher.invokeHandler(this, frame.getName(), frame);
+//        if(frame.getName().equals("heartbeat")) {
+//            this.handleHeartbeatPdu(frame);
+//        }
 
         if(frame.getRequestId() != null) {
             // do local bus publish in case it is a RPC response
@@ -217,6 +232,11 @@ public class BorderConnection extends AbstractWebSocketHandler {
 //        if(LOGGER.isDebugEnabled())
 //            LOGGER.debug(String.format("Received heartbeat from border %d(%s:%d), last receive tick on border is %d", 
 //                border.getId(), border.getPrivateAddress(), border.getPrivatePort(), pdu.getLastPeerReceiveTime()));
+    }
+    
+    @NamedHandler(value="", byClass=DeviceRequestPdu.class)
+    private void handleDeviceRequest(PduFrame frame) {
+        
     }
     
     private void heartbeat() {
@@ -290,5 +310,51 @@ public class BorderConnection extends AbstractWebSocketHandler {
                 }
             }
         }
+    }
+    
+    public String getConnectionState() {
+        switch(this.state) {
+        case disconnected:
+            return "disconnected";
+        case connecting:
+            return "connecting";
+        case connected:
+            return "connected";
+        case connectFailed:
+            return "connectFailed";
+        default:
+           return "error";
+        }
+    }
+    
+    //TODO better for promise
+    public CompletableFuture<DeviceRequestPdu> requestDevice(DeviceRequestPdu request) {
+        long requestId = LocalSequenceGenerator.getNextSequence();
+        CompletableFuture<DeviceRequestPdu> cf = new CompletableFuture<>();
+        
+        String subject = LocalBusMessageClassRegistry.getMessageClassSubjectName(DeviceRequestPdu.class);
+        localBusSubscriberBuilder.build(subject + "." + requestId, new LocalBusOneshotSubscriber() {
+            @Override
+            public Action onLocalBusMessage(Object sender, String subject,
+                    Object resp, String path) {
+                DeviceRequestPdu pdu = (DeviceRequestPdu)resp;
+                
+                cf.complete(pdu);
+                return null;
+            }
+
+            @Override
+            public void onLocalBusListeningTimeout() {
+                cf.completeExceptionally(new Exception("timeout"));
+            }
+        }).setTimeout(5000).create();
+        
+        try {
+            this.sendMessage(requestId, request);
+        } catch (Exception ex) {
+            cf.completeExceptionally(ex);
+        }
+        
+        return cf;
     }
 }

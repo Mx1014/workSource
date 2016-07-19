@@ -20,8 +20,12 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
+import com.everhomes.rest.rpc.server.ClientForwardPdu;
+import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
@@ -280,6 +284,10 @@ public class CoreServerBootstrapBean implements ApplicationListener<ApplicationE
             // still have to resgister class in other jar manually here
             messageClassRegistry.registerNameAnnotatedClass(PingRequestPdu.class);
             messageClassRegistry.registerNameAnnotatedClass(PingResponsePdu.class);
+            messageClassRegistry.registerNameAnnotatedClass(DeviceRequestPdu.class);
+            messageClassRegistry.registerNameAnnotatedClass(AclinkRemotePdu.class);
+            messageClassRegistry.registerNameAnnotatedClass(ClientForwardPdu.class);
+            messageClassRegistry.registerNameAnnotatedClass(PusherNotifyPdu.class);
             
             setup();
         }
