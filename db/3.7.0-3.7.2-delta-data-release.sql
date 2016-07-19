@@ -767,3 +767,21 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('14', '16', '1.1.0', 'http://meeting.zuolin.com/', 'http://meeting.zuolin.com/', '0');
 
 update eh_version_urls set download_url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.videoconf' where id = 13;
+
+-- 左邻域下新增企业
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1002039, UUID(), '嘉里大通物流深圳分公司', '嘉里大通物流深圳分公司', 1, 0, 0, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180738, 1, 0); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(180738, UUID(), 0, 2, 'EhGroups', 1002039,'嘉里大通物流深圳分公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+	
+INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `group_id`,  `region_scope`,  `region_scope_id`,  `member_role`,  `member_status`,  `create_time`)
+	VALUES (318198, 223119, 'enterprise', 1001735, 0, 0, 7, 3, UTC_TIMESTAMP());		
+	
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`,`level`, `status`, `group_type`, `group_id`, `namespace_id`)
+	VALUES(1001735, 0, 'ENTERPRISE', '嘉里大通物流深圳分公司', 0, NULL, '/1001735', 1, 2, 'ENTERPRISE', 1002039, 0); 	
+INSERT INTO `eh_organization_members` (`id`,  `organization_id`,  `target_type`,  `target_id`,  `member_group`,  `contact_name`,  `contact_type`,  `contact_token`,  `contact_description`,  `status`)
+	VALUES (2103484, 1001735, 'USER', 223119, 'manager', '王枫多', 0, '13713946797', NULL, 3);	
+INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `target_type`,  `target_id`,  `role_id`,  `creator_uid`,  `create_time`)
+	VALUES (10852, 'EhOrganizations', 1001735, 'EhUsers', 223119, 1005, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
+    VALUES(1110137,240111044331051380, 'organization', 1001735, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
