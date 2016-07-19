@@ -645,3 +645,14 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 48000,'', 'EhNamespaces', 999989 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 46100,'', 'EhNamespaces', 999989 , 0);
     
+    
+-- 测试视频会议app的升级    
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
+    VALUES(45,15,'2097151.9','2098176','0','2.1.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
+    VALUES(46,16,'2097151.9','2098176','0','2.1.0','0',UTC_TIMESTAMP());
+
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES ('15', '15', '2.1.0', 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.videoconf', 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.videoconf', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES ('16', '16', '2.1.0', 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.videoconf', 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.videoconf', '0');
