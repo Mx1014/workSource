@@ -191,8 +191,12 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
             }
         }
         
-        if(!onlineDelivered && (deliveryOption & MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode()) != 0) {
-            this.pusherService.pushMessage(senderLogin, destLogin, msgId, msg);
+        if((deliveryOption & MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode()) != 0) {
+            if(onlineDelivered) {
+                this.pusherService.checkAndPush(senderLogin, destLogin, msgId, msg);
+            } else {
+                this.pusherService.pushMessage(senderLogin, destLogin, msgId, msg);
+            }
         }
     }
     
