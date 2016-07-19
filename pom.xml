@@ -8,7 +8,7 @@
 
     <modules>
         <module>ehrest</module>
-        <module>ehcore-persist</module>
+      <!--  <module>ehcore-persist</module> -->
         <module>ehcore</module>
         <module>ehborder</module>
     </modules>
