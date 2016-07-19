@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>address: 地址</li>
  * <li>longitude: 地址经度</li>
  * <li>latitude: 地址纬度</li>
+ * <li>communityId: 所属园区Id</li>
  * <li>contactPhonenum: 咨询电话</li>
  * <li>chargeUid: 负责人id</li>
  * <li>introduction: 详情</li>
@@ -37,6 +38,7 @@ public class UpdateResourceAdminCommand {
 	private Double longitude;
 	@NotNull
 	private Double latitude;
+	private String communityId;
 	private String contactPhonenum;
 	@NotNull
 	private Long chargeUid;
@@ -161,6 +163,16 @@ public class UpdateResourceAdminCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+
+	public String getCommunityId() {
+		return communityId;
+	}
+
+
+	public void setCommunityId(String communityId) {
+		this.communityId = communityId;
 	}
 
 }

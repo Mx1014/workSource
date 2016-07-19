@@ -3257,6 +3257,7 @@ public class RentalServiceImpl implements RentalService {
 			rentalsite.setAddress(cmd.getAddress());
 			rentalsite.setLatitude(cmd.getLatitude());
 			rentalsite.setLongitude(cmd.getLongitude());
+			rentalsite.setCommunityId(cmd.getCommunityId());
 			rentalsite.setContactPhonenum(cmd.getContactPhonenum());
 			rentalsite.setIntroduction(cmd.getIntroduction());
 			rentalsite.setChargeUid(cmd.getChargeUid());
