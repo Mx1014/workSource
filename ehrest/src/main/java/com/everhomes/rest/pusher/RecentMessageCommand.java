@@ -1,5 +1,7 @@
 package com.everhomes.rest.pusher;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>deviceId:设备ID</li>
@@ -41,5 +43,8 @@ public class RecentMessageCommand {
         this.namespaceId = namespaceId;
     }
     
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

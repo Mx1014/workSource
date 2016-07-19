@@ -55,6 +55,7 @@ import com.everhomes.rest.user.AppIdStatusCommand;
 import com.everhomes.rest.user.AppIdStatusResponse;
 import com.everhomes.rest.user.AppServiceAccessCommand;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.DeleteUserIdentifierCommand;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
@@ -1006,4 +1007,13 @@ public class UserController extends ControllerBase {
 		LOGGER.debug("getBizSignature-elapse="+(e-s));
 		return response;
 	}
+	
+	   @RequestMapping("listBorders")
+	    @RestReturn(BorderListResponse.class)
+	    public RestResponse listBorders(){
+	        RestResponse response =  new RestResponse(userService.listBorders());
+	        response.setErrorCode(ErrorCodes.SUCCESS);
+	        response.setErrorDescription("OK");
+	        return response;
+	    }
 }

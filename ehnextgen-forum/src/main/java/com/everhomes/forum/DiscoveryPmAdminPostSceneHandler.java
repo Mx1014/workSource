@@ -313,11 +313,76 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
             String avatarUri = null;
             Integer namespaceId = sceneTokenDto.getNamespaceId();
 
-            long group1Id = menuId++;
+
             List<TopicScopeDTO> tmpSentScopeList = new ArrayList<TopicScopeDTO>();
+            TopicScopeDTO sentScopeDto = null;
+
+            //将小区移到上面，update by tt，160714
+            long group2Id = menuId++;
+            long allId =menuId++;
+            // 公司管理的单个小区
+            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
+            for(CommunityDTO community : communities) {
+                sentScopeDto = new TopicScopeDTO();
+                sentScopeDto.setId(menuId++);
+                sentScopeDto.setParentId(group2Id);
+                sentScopeDto.setName(community.getName());
+                sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                sentScopeDto.setForumId(community.getDefaultForumId());
+                sentScopeDto.setSceneToken(sceneToken);
+                sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+                avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+                sentScopeDto.setAvatar(avatarUri);
+                sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+                sentScopeDto.setVisibleRegionId(community.getId());
+                tmpSentScopeList.add(sentScopeDto);
+            }
+            
+            if(tmpSentScopeList.size() > 0) {
+                // 所管理的小区
+                sentScopeDto = new TopicScopeDTO();
+                sentScopeDto.setId(group2Id);
+                sentScopeDto.setParentId(0L);
+                code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+                sentScopeDto.setName(menuName);
+                sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+                sentScopeList.add(sentScopeDto);
+                
+                //如果大于一个小区，就加上全部
+                if (tmpSentScopeList.size() > 1) {
+                	sentScopeDto = new TopicScopeDTO();
+                    sentScopeDto.setId(allId);
+                    sentScopeDto.setParentId(group2Id);
+                    code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
+                    menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+                    sentScopeDto.setName(menuName);
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    sentScopeDto.setForumId(tmpSentScopeList.get(0).getForumId());
+                    sentScopeDto.setSceneToken(sceneToken);
+                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+                    avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+                    sentScopeDto.setAvatar(avatarUri);
+                    sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                    sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+                    sentScopeDto.setVisibleRegionId(organization.getId());
+                    sentScopeList.add(sentScopeDto);
+				}
+                
+                // 公司管理的各个小区
+                sentScopeList.addAll(tmpSentScopeList);
+            } else {
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("No community group topic sent scope for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
+                }
+            }
+            
+            
+            long group1Id = menuId++;
             
             // 本公司
-            TopicScopeDTO sentScopeDto = null;
+            tmpSentScopeList.clear();
             Group groupDto = null;
             if(organization.getGroupId() != null) {
                 groupDto = groupProvider.findGroupById(organization.getGroupId());
@@ -388,45 +453,6 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
             }
             
 
-            long group2Id = menuId++;
-            // 公司管理的单个小区
-            tmpSentScopeList.clear();
-            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
-            for(CommunityDTO community : communities) {
-                sentScopeDto = new TopicScopeDTO();
-                sentScopeDto.setId(menuId++);
-                sentScopeDto.setParentId(group2Id);
-                sentScopeDto.setName(community.getName());
-                sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
-                sentScopeDto.setForumId(community.getDefaultForumId());
-                sentScopeDto.setSceneToken(sceneToken);
-                sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
-                avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
-                sentScopeDto.setAvatar(avatarUri);
-                sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-                sentScopeDto.setVisibleRegionId(community.getId());
-                tmpSentScopeList.add(sentScopeDto);
-            }
-            
-            if(tmpSentScopeList.size() > 0) {
-                // 所管理的小区
-                sentScopeDto = new TopicScopeDTO();
-                sentScopeDto.setId(group2Id);
-                sentScopeDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
-                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-                sentScopeDto.setName(menuName);
-                sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
-                sentScopeList.add(sentScopeDto);
-                
-                // 公司管理的各个小区
-                sentScopeList.addAll(tmpSentScopeList);
-            } else {
-                if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("No community group topic sent scope for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
-                }
-            }
         } else {
             LOGGER.error("Organization not in active state, sceneToken={}, orgStatue", sceneTokenDto, orgStatus);
         }
