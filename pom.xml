@@ -12,7 +12,7 @@
         <module>ehrest-response</module>
         <module>ehnextgen-api</module>
         <module>ehnextgen-messaging</module>
-        <module>ehnextgen-forum</module> s
+        <module>ehnextgen-forum</module>
         <module>ehborder</module>
         <module>ehcore</module>
     </modules>
