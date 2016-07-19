@@ -5,8 +5,9 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  * 列出资源列表参数(根据图标和园区)
- * <li>ownerId: 所属者id</li>
- * <li>ownerType: 所属者类型</li>
+ * <li>ownerId: 可见id</li>
+ * <li>ownerType: 可见范围类型</li>
+ * <li>communityId: 所属园区id</li>
  * <li>resourceTypeId: 图标id</li>
  * <li>organizationId: 所属公司id</li>
  * <li>pageAnchor: 锚点</li>
@@ -16,6 +17,8 @@ import javax.validation.constraints.NotNull;
 public class GetResourceListAdminCommand {
 	private Long ownerId;
 	private String ownerType;
+
+	private Long communityId;
 	@NotNull
 	private Long resourceTypeId;
 	private Long organizationId;
@@ -72,6 +75,14 @@ public class GetResourceListAdminCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 }

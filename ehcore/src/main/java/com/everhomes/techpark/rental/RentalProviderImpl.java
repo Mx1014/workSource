@@ -878,7 +878,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalSite> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
-			Integer pageSize,List<Byte>  status,List<Long>  siteIds) {
+			Integer pageSize,List<Byte>  status,List<Long>  siteIds,Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
@@ -902,9 +902,11 @@ public class RentalProviderImpl implements RentalProvider {
 
         if(locator.getAnchor() != null)
         	condition=condition.and(Tables.EH_RENTAL_SITES.ID.lt(locator.getAnchor()));
+
+        if(communityId  != null)
+        	condition=condition.and(Tables.EH_RENTAL_SITES.COMMUNITY_ID.eq(communityId));
 		if(null!= status)
-			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-					.in(status));
+			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS.in(status));
 		step.where(condition);
 
 		List<RentalSite> result = step

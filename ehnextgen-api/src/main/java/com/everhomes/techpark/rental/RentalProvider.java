@@ -110,7 +110,7 @@ public interface RentalProvider {
 			Byte invoiceFlag,Long userId);
 
 	List<RentalSite> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
-			Integer pageSize,List<Byte>  status,List<Long>  siteIds);
+			Integer pageSize,List<Byte>  status,List<Long>  siteIds,Long communityId);
 
 	RentalRule getRentalRule(Long ownerId, String ownerType, String siteType);
 

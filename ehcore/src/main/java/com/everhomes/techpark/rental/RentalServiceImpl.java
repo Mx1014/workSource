@@ -859,9 +859,8 @@ public class RentalServiceImpl implements RentalService {
 				siteIds.add(siteOwner.getRentalSiteId());
 			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getResourceTypeId(), cmd.getKeyword(),
-				locator, pageSize,cmd.getStatus(),siteIds);
+		List<RentalSite> rentalSites = rentalProvider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
+				locator, pageSize,cmd.getStatus(),siteIds,cmd.getCommunityId());
 		if(null==rentalSites)
 			return response;
 
@@ -2450,10 +2449,53 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
+	public FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
+			FindRentalSiteMonthStatusCommand cmd) {
+		RentalSite rs = this.rentalProvider.getRentalSiteById(cmd.getSiteId());
+		FindRentalSiteMonthStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteMonthStatusCommandResponse.class);
+		response.setRentalSiteId(rs.getId());
+		List<RentalSitePic> pics = this.rentalProvider.findRentalSitePicsByOwnerTypeAndId(EhRentalSites.class.getSimpleName(), rs.getId());
+		if(null!=pics){
+			response.setSitePics(new ArrayList<>());
+			for(RentalSitePic pic:pics){
+				RentalSitePicDTO picDTO=ConvertHelper.convert(pic, RentalSitePicDTO.class);
+				picDTO.setUrl(this.contentServerService.parserUri(pic.getUri(), 
+						EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				response.getSitePics().add(picDTO);
+			}
+		}
+		response.setAnchorTime(0L);
+
+
+		List<RentalConfigAttachment> attachments=this.rentalProvider.queryRentalConfigAttachmentByOwner(EhRentalSites.class.getSimpleName(),rs.getId());
+		if(null!=attachments){
+			response.setAttachments(new ArrayList<com.everhomes.rest.techpark.rental.admin.AttachmentConfigDTO>());
+			for(RentalConfigAttachment single:attachments){
+				response.getAttachments().add(ConvertHelper.convert(single, com.everhomes.rest.techpark.rental.admin.AttachmentConfigDTO .class));
+			}
+		}
+		// 查rules
+		
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		start.setTime(new Date(cmd.getRuleDate()));
+		end.setTime(new Date(cmd.getRuleDate()));
+		//start 这个月第一天
+		start.set(Calendar.DAY_OF_MONTH,1);
+		//end 下个月的第一天
+		end.add(Calendar.MONTH, end.get(Calendar.MONTH)+1);
+		end.set(Calendar.DAY_OF_MONTH,1);
+//		end.add(Calendar.DAY_OF_YEAR, 7);
+		response.setSiteDays(new ArrayList<RentalSiteDayRulesDTO>());
+		
+		proccessDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs,  response.getAnchorTime());
+		return response;
+	}
+	
+	@Override
 	public FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(
 			FindRentalSiteWeekStatusCommand cmd) {
 		 
-		java.util.Date reserveTime = new java.util.Date(); 
 		
 		RentalSite rs = this.rentalProvider.getRentalSiteById(cmd.getSiteId());
 		FindRentalSiteWeekStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteWeekStatusCommandResponse.class);
@@ -2480,10 +2522,6 @@ public class RentalServiceImpl implements RentalService {
 		}
 		// 查rules
 		
-		java.util.Date nowTime = new java.util.Date();
-//		response.setContactNum(rs.getContactPhonenum());
-		Timestamp beginTime = new Timestamp(nowTime.getTime()
-				+ rs.getRentalStartTime());
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getRuleDate()));
@@ -2494,13 +2532,27 @@ public class RentalServiceImpl implements RentalService {
 				start.getActualMinimum(Calendar.DAY_OF_WEEK));
 		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<RentalSiteDayRulesDTO>());
+		
+		proccessDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs,   response.getAnchorTime());
+		return response;
+	}
+
+	public void proccessDayRuleDTOs(Calendar start ,Calendar end , List<RentalSiteDayRulesDTO> dtos,Long siteId ,
+			RentalSite rs, Long anchorTime ){
+
+		java.util.Date reserveTime = new java.util.Date(); 
+//		java.util.Date nowTime = new java.util.Date();
+//		response.setContactNum(rs.getContactPhonenum());
+		Timestamp beginTime = new Timestamp(reserveTime.getTime()
+				+ rs.getRentalStartTime());
+		
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
-			response.getSiteDays().add(dayDto);
+			dtos.add(dayDto);
 			dayDto.setSiteRules(new ArrayList<RentalSiteRulesDTO>());
 			dayDto.setRentalDate(start.getTimeInMillis());
 			List<RentalSiteRule> rentalSiteRules = rentalProvider
-					.findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(start.getTimeInMillis())),
+					.findRentalSiteRules(siteId, dateSF.format(new java.util.Date(start.getTimeInMillis())),
 							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
@@ -2511,13 +2563,13 @@ public class RentalServiceImpl implements RentalService {
 						dto.setTimeStep(rsr.getTimeStep());
 						dto.setBeginTime(rsr.getBeginTime().getTime());
 						dto.setEndTime(rsr.getEndTime().getTime());
-						if(response.getAnchorTime().equals(0L)){
-							response.setAnchorTime(dto.getBeginTime());
+						if(anchorTime.equals(0L)){
+							anchorTime = dto.getBeginTime();
 						}else{
 							try {
-								if(timeSF.parse(timeSF.format(new java.util.Date(response.getAnchorTime()))).after(
+								if(timeSF.parse(timeSF.format(new java.util.Date(anchorTime))).after(
 										timeSF.parse(timeSF.format(new java.util.Date(dto.getBeginTime()))))){
-									response.setAnchorTime(dto.getBeginTime());
+									anchorTime = dto.getBeginTime();
 								}
 							} catch (Exception e) {
 								LOGGER.error("anchorTime error  dto = "+ dto );
@@ -2571,9 +2623,7 @@ public class RentalServiceImpl implements RentalService {
 				}
 			}
 		}
-		return response;
 	}
-
 	@Override
 	public FindAutoAssignRentalSiteWeekStatusResponse findAutoAssignRentalSiteWeekStatus(
 			FindAutoAssignRentalSiteWeekStatusCommand cmd) {
@@ -3187,7 +3237,7 @@ public class RentalServiceImpl implements RentalService {
 			}   
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getResourceTypeId(), null,
-				locator, pageSize,status,siteIds);
+				locator, pageSize,status,siteIds,cmd.getCommunityId());
 		if(null==rentalSites)
 			return response;
 
@@ -3705,12 +3755,6 @@ public class RentalServiceImpl implements RentalService {
 		
 	}
 
-	@Override
-	public FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
-			FindRentalSiteMonthStatusCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
  
 }
