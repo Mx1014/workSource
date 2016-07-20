@@ -58,6 +58,7 @@
         eh_enterprise_contact_group_members | eh_enterprise_community_members |
         eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday |
         eh_punch_exception_approvals | eh_punch_day_logs |  
+         eh_rental_rules | eh_rental_sites | eh_rental_site_items | eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills | eh_rental_bill_paybill_map |
 		    eh_park_charge | eh_recharge_info| eh_park_apply_card |  
         eh_enterprise_contact_group_members | eh_enterprise_community_map | eh_building_attachments | eh_buildings |
         eh_enterprise_attachments | eh_organization_assigned_scopes | eh_user_communities |

@@ -6,18 +6,8 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.util.StringHelper;
 
-
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
-/**
- * <ul> 
- * <li>rentalBills：订单列表</li>
- * <li>nextPageAnchor：下页锚点</li>
- * </ul>
- */
 public class ListRentalBillsCommandResponse {
-
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
     @ItemType(RentalBillDTO.class)
 	private List<RentalBillDTO> rentalBills; 
 	@Override
@@ -32,10 +22,10 @@ public class ListRentalBillsCommandResponse {
 	public void setRentalBills(List<RentalBillDTO> rentalBills) {
 		this.rentalBills = rentalBills;
 	}
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
 	}
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	} 
 }

@@ -4,11 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-/**
- * <ul> 
- * <li>bills：订单列表</li> 
- * </ul>
- */
+
 public class BatchCompleteBillCommandResponse {
     @ItemType(RentalBillDTO.class)
 	private List<RentalBillDTO> bills;

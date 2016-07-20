@@ -62,12 +62,12 @@ public class CancelLockedRentalBillAction implements Runnable {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 			RentalSite site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalSiteId());
-//			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
+			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 			StringBuffer sb = new StringBuffer();
 			sb.append("您预定的："); 
 			sb.append(site.getSiteName());
 			sb.append("(时间:");
-			if (site.getRentalType().equals(RentalType.HOUR)){
+			if (rule.getRentalType().equals(RentalType.HOUR)){
 				SimpleDateFormat  datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				sb.append(datetimeSF.format(rentalBill.getStartTime()));
 			}else{

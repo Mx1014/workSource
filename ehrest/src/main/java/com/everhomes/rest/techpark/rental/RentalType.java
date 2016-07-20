@@ -11,7 +11,7 @@ import com.everhomes.rest.techpark.punch.PunchStatus;
  */
 public enum RentalType {
    
-    HOUR((byte)0),DAY((byte)2),HALFDAY((byte)1),THREETIMEADAY((byte)3);
+    HOUR((byte)0),DAY((byte)2),HALFDAY((byte)1);
     
     private byte code;
     private RentalType(byte code) {

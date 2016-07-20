@@ -7,13 +7,11 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 场所
- * <li>rentalSites：场所列表{@link com.everhomes.rest.techpark.rental.RentalSiteDTO}</li>
- * <li>nextPageAnchor：下页的anchor</li>
+ * <li>rentalSites：场所列表</li>
  * </ul>
  */
 public class FindRentalSitesCommandResponse {
-
-    private Long nextPageAnchor;
+	private Integer nextPageOffset;
     @ItemType(RentalSiteDTO.class)
 	private List<RentalSiteDTO> rentalSites;
 	
@@ -29,14 +27,13 @@ public class FindRentalSitesCommandResponse {
 	public void setRentalSites(List<RentalSiteDTO> rentalSites) {
 		this.rentalSites = rentalSites;
 	}
- 
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
  
 }

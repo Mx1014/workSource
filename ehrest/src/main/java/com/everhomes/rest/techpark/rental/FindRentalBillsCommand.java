@@ -1,25 +1,28 @@
 package com.everhomes.rest.techpark.rental;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>查询订单
- * <li>resourceTypeId：广场图标id</li>  
+ * <li>enterpriseCommunityId：场所id</li>
+ * <li>siteType：场所类型</li> 
+ * <li>rentalSiteId：场所ID</li> 
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
-* <li>billStatus：订单状态 list 0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>   
+* <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>   
  * </ul>
  */
 public class FindRentalBillsCommand {
+
+
+	private String ownerType;
+	private Long ownerId;
+	private Long communityId;
+	private String siteType;  
 	
-	private Long resourceTypeId;
 	private Long pageAnchor;
-		
-	private Integer pageSize;
 	
+	private Integer pageSize;
 	private Byte billStatus;
 	@Override
     public String toString() {
@@ -29,7 +32,17 @@ public class FindRentalBillsCommand {
     } 
 
 	 
-  
+ 
+
+	public String getSiteType() {
+		return siteType;
+	}
+
+	public void setSiteType(String siteType) {
+		this.siteType = siteType;
+	}
+
+
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -53,24 +66,6 @@ public class FindRentalBillsCommand {
 		this.pageSize = pageSize;
 	}
 
- 
-
-  
-
-
-	public Long getResourceTypeId() {
-		return resourceTypeId;
-	}
-
-
-
-
-	public void setResourceTypeId(Long resourceTypeId) {
-		this.resourceTypeId = resourceTypeId;
-	}
-
- 
-
 
 
 	public Byte getBillStatus() {
@@ -79,9 +74,50 @@ public class FindRentalBillsCommand {
 
 
 
-
 	public void setBillStatus(Byte billStatus) {
 		this.billStatus = billStatus;
+	}
+
+
+
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+
+
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 

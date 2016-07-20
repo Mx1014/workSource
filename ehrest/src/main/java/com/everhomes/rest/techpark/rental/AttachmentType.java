@@ -1,33 +1,33 @@
 package com.everhomes.rest.techpark.rental;
 
+import com.everhomes.rest.techpark.punch.PunchStatus;
 /**
  * <ul>
- * <li>TEXT_REMARK: 文本备注</li>
- * <li>LICENSE_NUMBER: 车牌</li>
- * <li>SHOW_CONTENT: 显示内容</li>
- * <li>ATTACHMENT: 附件</li>
+ * <li>STRING(0): </li>
+ * <li>EMAIL(1): </li>
+ * <li>FILE(2): </li>
  * </ul>
  */
 public enum AttachmentType {
-	TEXT_REMARK((byte)0), LICENSE_NUMBER((byte)1), SHOW_CONTENT((byte)2), ATTACHMENT((byte)3);
-	private Byte code;
-
-	private AttachmentType(Byte code) {
-		this.code = code;
-	}
-
-	public Byte getCode() {
-		return code;
-	}
-
-	public static AttachmentType fromCode(Byte code) {
-		if (code != null) {
-			for (AttachmentType a : AttachmentType.values()) {
-				if (code.equals(a.code)) {
-					return a;
-				}
-			}
-		}
-		return null;
-	}
+   
+	STRING((byte)0),EMAIL((byte)1),FILE((byte)2);
+    
+    private byte code;
+    private AttachmentType(byte code) {
+        this.code = code;
+    }
+    
+    public byte getCode() {
+        return this.code;
+    }
+    
+    public static AttachmentType fromCode(byte code) {
+        for(AttachmentType t : AttachmentType.values()) {
+            if (t.code == code) {
+                return t;
+            }
+        }
+        
+        return null;
+    }
 }
