@@ -41,7 +41,6 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.codegen.CodeGenContext;
 import com.everhomes.codegen.GeneratorContext;
 import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
@@ -284,16 +283,17 @@ public class AdminController extends ControllerBase {
             generator.generateApiConstants(apiMethods, context);
         }
         
-        List<String> errorList = CodeGenContext.current().getErrorMessages();
-        CodeGenContext.clear();
-        if(errorList == null || errorList.size() == 0) {
-            return new RestResponse("OK");
-        } else {
-            RestResponse response = new RestResponse(errorList);
-            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
-            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-            return response;
-        }
+//        List<String> errorList = CodeGenContext.current().getErrorMessages();
+//        CodeGenContext.clear();
+//        if(errorList == null || errorList.size() == 0) {
+//            return new RestResponse("OK");
+//        } else {
+//            RestResponse response = new RestResponse(errorList);
+//            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
+//            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+//            return response;
+//        }
+        return new RestResponse("OK");
     }
     
     private boolean shouldExclude(Class<?> clz) {
