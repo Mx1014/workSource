@@ -9,10 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.techpark.rental.RentalOwnerType;
-import com.everhomes.rest.techpark.rental.admin.AdminGetResourceTypeListRestResponse;
-import com.everhomes.rest.techpark.rental.admin.CreateResourceTypeCommand;
-import com.everhomes.rest.techpark.rental.admin.GetResourceTypeListCommand;
+import com.everhomes.rest.rentalv2.RentalOwnerType;
+import com.everhomes.rest.rentalv2.admin.AdminGetResourceTypeListRestResponse;
+import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
+import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhRentalResourceTypes;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;

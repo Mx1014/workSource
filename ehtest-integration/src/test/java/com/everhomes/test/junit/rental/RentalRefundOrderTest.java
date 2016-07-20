@@ -9,9 +9,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.everhomes.rest.techpark.rental.RentalOwnerType;
-import com.everhomes.rest.techpark.rental.admin.AdminGetRefundOrderListRestResponse;
-import com.everhomes.rest.techpark.rental.admin.GetRefundOrderListCommand;
+import com.everhomes.rest.rentalv2.RentalOwnerType;
+import com.everhomes.rest.rentalv2.admin.AdminGetRefundOrderListRestResponse;
+import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
