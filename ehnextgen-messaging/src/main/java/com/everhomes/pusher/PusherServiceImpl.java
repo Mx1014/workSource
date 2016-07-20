@@ -143,7 +143,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             if(cert != null) {
                 ByteArrayInputStream bis = new ByteArrayInputStream(cert.getData());
                 //.withCert("/home/janson/projects/pys/apns/apns_develop.p12", "123456")
-                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5);
+                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5).asQueued();
                 if(certName.indexOf("develop") >= 0) {
                     builder = builder.withSandboxDestination();
                 } else {
@@ -265,11 +265,15 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 //                        .localizedKey("GAME_PLAY_REQUEST_FORMAT")
 //                        .localizedArguments("Jenna", "Frank")
 //                        .actionKey("Play").build();
-                if(msgId != 0) {
-                    final Job job = new Job(PusherAction.class.getName(),
-                            new Object[]{ payload, identify, partner });
-                    jesqueClientFactory.getClientPool().enqueue(queueName, job);    
-                } else {
+                
+//                if(msgId != 0) {
+//                    final Job job = new Job(PusherAction.class.getName(),
+//                            new Object[]{ payload, identify, partner });
+//                    jesqueClientFactory.getClientPool().enqueue(queueName, job);    
+//                } else {
+                
+                //use queue to notify
+                
                     int now =  (int)(new Date().getTime()/1000);
                     
                     EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
@@ -278,8 +282,13 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                                 payload);
                     ApnsService tempService = getApnsService(partner);
                     if(tempService != null) {
-                        tempService.push(notification);    
-                    }
+                        try {
+                            tempService.push(notification);   
+                        } catch (NetworkIOException e) {
+                            LOGGER.warn("apns error and stop it", e);
+                            stopApnsServiceByName(partner);
+                        }
+//                    }
                     
                 }
                 
@@ -467,7 +476,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         Object o = redisTemplate.opsForValue().get(key);
-        redisTemplate.opsForValue().set(key, 1l, 10, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key, "1", 10, TimeUnit.SECONDS);
         
         if(o == null) {
             pushMessage(senderLogin, destLogin, msgId, msg);
