@@ -6,7 +6,7 @@ package com.everhomes.rest.group;
  * </ul>
  *
  */
-public class QuiteAndTransferPrivilegeCommand {
+public class QuitAndTransferPrivilegeCommand {
     private Long groupId;
 
     public Long getGroupId() {
