@@ -104,10 +104,10 @@ public class MessagingServiceImpl implements MessagingService {
             }
         }
         
-        //Fix for anchor. if there are no messages, set back anchor to null
-        if(dtoMessages.size() == 0) {
-            response.setNextPageAnchor(null);
-        }
+        //TODO Fix for anchor. if there are no messages, set back anchor to null
+//        if(dtoMessages.size() == 0) {
+//            response.setNextPageAnchor(null);
+//        }
         
         response.setMessages(dtoMessages);
         return response;
