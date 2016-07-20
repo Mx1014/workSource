@@ -840,7 +840,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		//TODO
 		Condition condition = Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE_ID
 				.equal(resourceTypeId);
-		if(null!=siteIds)
+		if(null!=siteIds&&siteIds.size()!=0)
 			condition= condition.and( Tables.EH_RENTALV2_RESOURCES.ID.in(siteIds));
 //		condition = condition.and(Tables.EH_RENTALV2_RESOURCES.OWNER_TYPE
 //				.equal(ownerType));
@@ -860,7 +860,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
         if(communityId  != null)
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
-		if(null!= status)
+		if(null!= status&&status.size()!=0)
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
 		step.where(condition);
 

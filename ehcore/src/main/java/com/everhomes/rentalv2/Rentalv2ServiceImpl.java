@@ -433,10 +433,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			response = ConvertHelper.convert(addCmd, QueryDefaultRuleAdminResponse.class);
 			return response;
-		}
-		else{
-			response = ConvertHelper.convert(defaultRule, QueryDefaultRuleAdminResponse.class);
-		}
+		} 
+		response = ConvertHelper.convert(defaultRule, QueryDefaultRuleAdminResponse.class);
+		response.setBeginDate(defaultRule.getBeginDate().getTime());
+		response.setEndDate(defaultRule.getEndDate().getTime());
+		response.setOpenWeekday(new ArrayList<Integer>());
+    	int openWeekInt = Integer.valueOf(defaultRule.getOpenWeekday());
+        for(int i=1;i<8;i++){
+        	if(openWeekInt%10 == 1)
+        		response.getOpenWeekday().add(i);
+        	openWeekInt = openWeekInt/10;
+        }
+		 
 		List<RentalTimeInterval> timeIntervals = this.rentalProvider.queryRentalTimeIntervalByOwner(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
 		if(null!=timeIntervals){
 			response.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
@@ -475,20 +483,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalDefaultRule newDefaultRule = ConvertHelper.convert(cmd, RentalDefaultRule.class); 
-			if(null==defaultRule.getCancelFlag())
-				defaultRule.setCancelFlag(NormalFlag.NEED.getCode());
-			if(null==cmd.getOpenWeekday()){
-				defaultRule.setOpenWeekday("0000000");
-			}else{
+			if(null==newDefaultRule.getCancelFlag())
+				newDefaultRule.setCancelFlag(NormalFlag.NEED.getCode());
+			String openWorkday = "0000000";
+			if(null!=cmd.getOpenWeekday()) {
 				int openWorkdayInt=0;
+				//list的数字:1234567代表从星期天到星期六,经过-1作为10的次方放到7位字符串内
 				for(Integer weekdayInteger : cmd.getOpenWeekday())
-					openWorkdayInt+=10^weekdayInteger;
-				String openWorkday=String.valueOf(openWorkdayInt);
-				for( ;openWorkday.length()<=7; ){
+					openWorkdayInt+=Math.pow(10,weekdayInteger-1);
+				openWorkday = String.valueOf(openWorkdayInt);
+				for( ;openWorkday.length()<7; ){
 					openWorkday ="0"+openWorkday;
 				}
 			}
-			
+			newDefaultRule.setOpenWeekday(openWorkday);
+			newDefaultRule.setBeginDate(new Date(cmd.getBeginDate()));
+			newDefaultRule.setEndDate(new Date(cmd.getEndDate()));
 			newDefaultRule.setId(defaultRule.getId());
 			this.rentalProvider.updateRentalDefaultRule(newDefaultRule);
 			this.rentalProvider.deleteTimeIntervalsByOwnerId(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
@@ -1678,7 +1688,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 	}
 
-//	@Override
 //	public GetRentalTypeRuleCommandResponse getRentalTypeRule(
 //			GetRentalTypeRuleCommand cmd) {
 //		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
@@ -1691,14 +1700,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		response.setPayRatio(rentalRule.getPaymentRatio());
 //		return response;
 //	}
-
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd) {
+		
 		this.dbProvider.execute((TransactionStatus status) -> {
-			if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())&&
-					!cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size())))
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
 			
 			//设置默认规则，删除所有的单元格
 			Integer deleteCount = rentalProvider.deleteRentalSiteRules(
@@ -1713,6 +1718,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				cmd.setMultiUnit(NormalFlag.NONEED.getCode());
 				cmd.setSiteCounts(1.0);
 			}
+			if(null == cmd.getAutoAssign())
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
+			if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())&&
+					!cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size())))
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
+			
 			rs.setAutoAssign(cmd.getAutoAssign());
 			rs.setMultiUnit(cmd.getMultiUnit());
 			rs.setNeedPay(cmd.getNeedPay());
@@ -1758,7 +1771,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					signleCmd.setWeekendPrice(weekendPrice); 
 					signleCmd.setWorkdayPrice(workdayPrice);
 					addRentalSiteSingleSimpleRule(signleCmd);
+					
 				}
+				if(endTime>24.0||beginTime<0.0)
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
 			} else {
 				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 				signleCmd.setWeekendPrice(weekendPrice); 
