@@ -466,8 +466,11 @@ public class QualityServiceImpl implements QualityService {
         	if(org != null) {
         		dto.setGroupName(org.getName());
         	}
-        	QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
-        	dto.setCategoryName(category.getName());
+//        	QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
+        	QualityInspectionCategories category = qualityProvider.findQualityInspectionCategoriesByCategoryId(r.getCategoryId());
+		    if(category != null) {
+		    	dto.setCategoryName(category.getName());
+		    }
         	return dto;
         }).collect(Collectors.toList());
         

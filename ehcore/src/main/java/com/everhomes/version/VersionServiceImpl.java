@@ -99,15 +99,7 @@ public class VersionServiceImpl implements VersionService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid realm parameter in the command");
 
-        if(cmd.getCurrentVersion() == null) {
         	
-        	WithoutCurrentVersionRequestCommand command = new WithoutCurrentVersionRequestCommand();
-        	command.setRealm(cmd.getRealm());
-        	command.setLocale(cmd.getLocale());
-        	VersionUrlResponse resp = getVersionUrlsWithoutCurrentVersion(command);
-        	return resp;
-        }
-
         VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getRealm());
         if(realm == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -117,9 +109,14 @@ public class VersionServiceImpl implements VersionService {
         }
         Version version = ConvertHelper.convert(cmd.getCurrentVersion(), Version.class);
         VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(cmd.getRealm(), version.toString());
-        if(versionUrl == null)
-            throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_VERSION_URL_SET, 
-                    "No version URLs has been setup yet");
+        if(versionUrl == null) {
+        	//找不到版本，返回最新版本 modified by xiongying 20160730
+        	WithoutCurrentVersionRequestCommand command = new WithoutCurrentVersionRequestCommand();
+        	command.setRealm(cmd.getRealm());
+        	command.setLocale(cmd.getLocale());
+        	VersionUrlResponse resp = getVersionUrlsWithoutCurrentVersion(command);
+        	return resp;
+        }
         
         VersionUrlResponse response = new VersionUrlResponse();
         Map<String, String> params = new HashMap<String, String>();

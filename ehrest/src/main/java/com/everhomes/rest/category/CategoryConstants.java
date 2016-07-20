@@ -25,6 +25,7 @@ import java.util.List;
  * <li>CATEGORY_ID_QUALITY_INSPECTION(6): 品质核查根类型</li>
  * <li>CATEGORY_ID_BUSINESS_AROUND(3001): 周边商铺</li>
  * <li>CATEGORY_ID_BUSINESS_NEXTDOOR(3002): 邻家小店</li>
+ * <li>CATEGORY_ID_EQUIPMENT_TYPE(7): 设备类型父类型</li>
  * </ul>
  */
 public interface CategoryConstants {
@@ -88,6 +89,9 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_BUSINESS_AROUND = 3001L;
     /**邻家小店 **/
     public static final long CATEGORY_ID_BUSINESS_NEXTDOOR = 3002L;
+    
+   /** 设备巡检设备类型**/
+    public static final long CATEGORY_ID_EQUIPMENT_TYPE = 7L;
     
     
     /** 政府机构相关的类型 */
