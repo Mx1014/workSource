@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
@@ -25,7 +24,7 @@ import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusRestR
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusCommand;
 import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusRestResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsCommand;
-import com.everhomes.rest.techpark.rental.FindRentalSiteItemsRestResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsRestResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusRestResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSitesCommand;
@@ -264,13 +263,13 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(responseBill2),
 				httpClientService.isReponseSuccess(responseBill2));
 		
-		commandRelativeUri = "/rental/findRentalSiteItems";
+		commandRelativeUri = "/rental/findRentalSiteItemsAndAttachments";
 		FindRentalSiteItemsAndAttachmentsCommand itemCmd = new FindRentalSiteItemsAndAttachmentsCommand();
 		itemCmd.setRentalSiteId(hourSitenumberSiteId);
 		itemCmd.setRentalSiteRuleIds(new ArrayList<Long>());
 		itemCmd.getRentalSiteRuleIds().add(dto.getRuleId());
-		FindRentalSiteItemsRestResponse itemResponse = httpClientService
-				.restGet(commandRelativeUri, itemCmd,FindRentalSiteItemsRestResponse.class, context);
+		FindRentalSiteItemsAndAttachmentsRestResponse itemResponse = httpClientService
+				.restGet(commandRelativeUri, itemCmd,FindRentalSiteItemsAndAttachmentsRestResponse.class, context);
 
 
 		assertNotNull("The reponse of may not be null", response);

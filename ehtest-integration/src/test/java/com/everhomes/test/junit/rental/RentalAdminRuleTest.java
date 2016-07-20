@@ -124,6 +124,9 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		cmd.setWorkdayPrice(new BigDecimal(100));
 		cmd.setWeekendPrice(new BigDecimal(200));
 		cmd.setSiteCounts(10.0);
+		cmd.setSiteNumbers(new ArrayList<>());
+		for(int i =1;i<=10;i++)
+			cmd.getSiteNumbers().add(i+"号的资源");
 		cmd.setCancelTime(0L);
 		cmd.setRefundFlag(NormalFlag.NEED.getCode());
 		cmd.setRefundRatio(30);

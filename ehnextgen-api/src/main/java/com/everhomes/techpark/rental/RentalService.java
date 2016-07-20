@@ -86,7 +86,7 @@ import com.everhomes.rest.techpark.rental.admin.UpdateResourceTypeCommand;
 public interface RentalService { 
 	void updateRentalRule(UpdateRentalRuleCommand cmd);
 
-	Long addRentalSite(AddRentalSiteCommand cmd);
+//	Long addRentalSite(AddRentalSiteCommand cmd);
 
 	void addItem(AddItemAdminCommand cmd);
  

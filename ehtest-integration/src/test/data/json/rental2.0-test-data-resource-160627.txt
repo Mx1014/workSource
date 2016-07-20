@@ -28,7 +28,8 @@
 "refund_ratio":30,
 "longitude":115.5654,
 "latitude":22.5655,
-"organization_id":1
+"organization_id":1,
+"community_id":322
 }
 ,
 {
@@ -58,7 +59,8 @@
 "refund_ratio":30,
 "longitude":115.5654,
 "latitude":22.5655,
-"organization_id":1
+"organization_id":1,
+"community_id":322
 }
 ,
 {
@@ -88,7 +90,8 @@
 "refund_ratio":30,
 "longitude":115.5654,
 "latitude":22.5655,
-"organization_id":1
+"organization_id":1,
+"community_id":321
 }
 ,
 {
@@ -118,7 +121,8 @@
 "refund_ratio":30,
 "longitude":115.5654,
 "latitude":22.5655,
-"organization_id":1
+"organization_id":1,
+"community_id":321
 }
   ] ,
 "eh_rental_site_owners":[

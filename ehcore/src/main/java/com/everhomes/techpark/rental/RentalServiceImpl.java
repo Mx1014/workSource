@@ -571,36 +571,39 @@ public class RentalServiceImpl implements RentalService {
 		}
 	}
 
-	@Override
-	public Long addRentalSite(AddRentalSiteCommand cmd) {
-		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
-		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
-		rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-				.getTime()));
-		rentalsite.setCreatorUid( UserContext.current().getUser().getId());
-		Long siteId = rentalProvider.createRentalSite(rentalsite);
-		if (null != cmd.getSiteItems()
-				&& !StringUtils.isEmpty(cmd.getSiteItems())) {
-			JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-					.getSiteItems());
-			JSONArray itemValue = (JSONArray) jsonObject.get("siteItems");
-			Gson gson = new Gson();
-			List<SiteItemDTO> siteItemDTOs = gson.fromJson(
-					itemValue.toString(), new TypeToken<List<SiteItemDTO>>() {
-					}.getType());
-			if(null!=siteItemDTOs)
-				for (SiteItemDTO siteItemDTO : siteItemDTOs) {
-					RentalSiteItem siteItem =  ConvertHelper.convert(siteItemDTO,RentalSiteItem.class );
-					siteItem.setName(siteItemDTO.getItemName());
-					siteItem.setPrice(siteItemDTO.getItemPrice());
-					rentalProvider.createRentalSiteItem(siteItem);
-				}
-		}
-		return siteId;
-	}
+//	@Override
+//	public Long addRentalSite(AddRentalSiteCommand cmd) {
+//		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
+//		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
+//		rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+//				.getTime()));
+//		rentalsite.setCreatorUid( UserContext.current().getUser().getId());
+//		Long siteId = rentalProvider.createRentalSite(rentalsite);
+//		if (null != cmd.getSiteItems()
+//				&& !StringUtils.isEmpty(cmd.getSiteItems())) {
+//			JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+//					.getSiteItems());
+//			JSONArray itemValue = (JSONArray) jsonObject.get("siteItems");
+//			Gson gson = new Gson();
+//			List<SiteItemDTO> siteItemDTOs = gson.fromJson(
+//					itemValue.toString(), new TypeToken<List<SiteItemDTO>>() {
+//					}.getType());
+//			if(null!=siteItemDTOs)
+//				for (SiteItemDTO siteItemDTO : siteItemDTOs) {
+//					RentalSiteItem siteItem =  ConvertHelper.convert(siteItemDTO,RentalSiteItem.class );
+//					siteItem.setName(siteItemDTO.getItemName());
+//					siteItem.setPrice(siteItemDTO.getItemPrice());
+//					rentalProvider.createRentalSiteItem(siteItem);
+//				}
+//		}
+//		return siteId;
+//	}
 
 	@Override
 	public void addItem(AddItemAdminCommand cmd) {
+		if(null== cmd.getItemType())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item type can not be null"); 
 		RentalSiteItem siteItem = ConvertHelper.convert(cmd,RentalSiteItem.class );
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
@@ -1904,7 +1907,7 @@ public class RentalServiceImpl implements RentalService {
 	public void createRSR(RentalSiteRule rsr,AddRentalSiteSingleSimpleRule cmd){
 		if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			//自动分配sitenumber
-			for(int num =0;num<=cmd.getSiteCounts();num++){
+			for(int num =0;num<cmd.getSiteCounts();num++){
 				rsr.setCounts(1.0);
 				rsr.setSiteNumber(cmd.getSiteNumbers().get(num));
 				rentalProvider.createRentalSiteRule(rsr);
@@ -1932,8 +1935,13 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
 		java.util.Date cancelTime = new java.util.Date();
+		if(null == cmd.getRentalBillId())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of BillId error");
 		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
-		
+		if(null == bill)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of BillId error");
 		RentalSite rs = this.rentalProvider.getRentalSiteById(bill.getRentalSiteId());		
 		if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())&&cancelTime.after(new java.util.Date(bill.getStartTime().getTime()
 				- rs.getCancelTime()))) {
@@ -3269,6 +3277,10 @@ public class RentalServiceImpl implements RentalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid organizationId parameter in the command");
+		if(null==cmd.getCommunityId())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid getCommunityId parameter in the command");
 		if(null==cmd.getResourceTypeId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
