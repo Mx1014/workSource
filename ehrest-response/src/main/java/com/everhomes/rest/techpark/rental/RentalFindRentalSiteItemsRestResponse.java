@@ -4,20 +4,20 @@ package com.everhomes.rest.techpark.rental;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.techpark.rental.FindRentalSiteItemsAndAttachmentsResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteItemsCommandResponse;
 
 public class RentalFindRentalSiteItemsRestResponse extends RestResponseBase {
 
-    private FindRentalSiteItemsAndAttachmentsResponse response;
+    private FindRentalSiteItemsCommandResponse response;
 
     public RentalFindRentalSiteItemsRestResponse () {
     }
 
-    public FindRentalSiteItemsAndAttachmentsResponse getResponse() {
+    public FindRentalSiteItemsCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(FindRentalSiteItemsAndAttachmentsResponse response) {
+    public void setResponse(FindRentalSiteItemsCommandResponse response) {
         this.response = response;
     }
 }

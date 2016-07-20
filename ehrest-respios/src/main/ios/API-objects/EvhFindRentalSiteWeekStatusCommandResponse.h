@@ -4,9 +4,6 @@
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhRentalSiteDayRulesDTO.h"
-#import "EvhRentalSitePicDTO.h"
-#import "EvhAttachmentConfigDTO.h"
-#import "EvhSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSiteWeekStatusCommandResponse
@@ -17,55 +14,26 @@
 
 @property(nonatomic, copy) NSNumber* rentalSiteId;
 
+@property(nonatomic, copy) NSString* ownerType;
+
+@property(nonatomic, copy) NSNumber* ownerId;
+
+@property(nonatomic, copy) NSString* ownerName;
+
+@property(nonatomic, copy) NSString* siteType;
+
+@property(nonatomic, copy) NSString* contactNum;
+
 @property(nonatomic, copy) NSString* siteName;
 
 @property(nonatomic, copy) NSString* introduction;
 
-@property(nonatomic, copy) NSString* address;
-
-@property(nonatomic, copy) NSNumber* longitude;
-
-@property(nonatomic, copy) NSNumber* latitude;
-
-@property(nonatomic, copy) NSString* contactPhonenum;
-
-@property(nonatomic, copy) NSNumber* discountType;
-
-@property(nonatomic, copy) NSNumber* fullPrice;
-
-@property(nonatomic, copy) NSNumber* cutPrice;
-
-@property(nonatomic, copy) NSNumber* discountRatio;
-
-@property(nonatomic, copy) NSNumber* rentalType;
-
-@property(nonatomic, copy) NSNumber* rentalStep;
-
-@property(nonatomic, copy) NSNumber* exclusiveFlag;
-
-@property(nonatomic, copy) NSNumber* autoAssign;
-
-@property(nonatomic, copy) NSNumber* multiUnit;
-
-@property(nonatomic, copy) NSNumber* multiTimeInterval;
-
-@property(nonatomic, copy) NSNumber* cancelFlag;
-
-@property(nonatomic, copy) NSNumber* needPay;
+@property(nonatomic, copy) NSString* notice;
 
 @property(nonatomic, copy) NSNumber* anchorTime;
 
 // item type EvhRentalSiteDayRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteDays;
-
-// item type EvhRentalSitePicDTO*
-@property(nonatomic, strong) NSMutableArray* sitePics;
-
-// item type EvhAttachmentConfigDTO*
-@property(nonatomic, strong) NSMutableArray* attachments;
-
-// item type EvhSiteItemDTO*
-@property(nonatomic, strong) NSMutableArray* siteItems;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

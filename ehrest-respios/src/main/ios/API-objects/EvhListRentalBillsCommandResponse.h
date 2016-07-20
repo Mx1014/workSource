@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageAnchor;
+@property(nonatomic, copy) NSNumber* nextPageOffset;
 
 // item type EvhRentalBillDTO*
 @property(nonatomic, strong) NSMutableArray* rentalBills;

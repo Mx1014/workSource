@@ -29,20 +29,6 @@
 
 @property(nonatomic, copy) NSNumber* price;
 
-@property(nonatomic, copy) NSNumber* originalPrice;
-
-@property(nonatomic, copy) NSNumber* halfsitePrice;
-
-@property(nonatomic, copy) NSNumber* halfsiteOriginalPrice;
-
-@property(nonatomic, copy) NSNumber* exclusiveFlag;
-
-@property(nonatomic, copy) NSNumber* autoAssign;
-
-@property(nonatomic, copy) NSNumber* multiUnit;
-
-@property(nonatomic, copy) NSNumber* multiTimeInterval;
-
 @property(nonatomic, copy) NSNumber* rentalStep;
 
 @property(nonatomic, copy) NSNumber* timeStep;
@@ -50,8 +36,6 @@
 @property(nonatomic, copy) NSNumber* ruleDate;
 
 @property(nonatomic, copy) NSNumber* status;
-
-@property(nonatomic, copy) NSString* siteNumber;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

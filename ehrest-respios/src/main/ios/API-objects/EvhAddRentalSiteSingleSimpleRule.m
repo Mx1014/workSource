@@ -2,8 +2,6 @@
 // EvhAddRentalSiteSingleSimpleRule.m
 //
 #import "EvhAddRentalSiteSingleSimpleRule.h"
-#import "EvhAttachmentConfigDTO.h"
-#import "EvhTimeIntervalDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddRentalSiteSingleSimpleRule
@@ -25,10 +23,7 @@
 {
     self = [super init];
     if(self) {
-        _attachments = [NSMutableArray new];
-        _timeIntervals = [NSMutableArray new];
-        _openWeekday = [NSMutableArray new];
-        _closeDates = [NSMutableArray new];
+        _choosen = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -36,155 +31,80 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.beginTime)
-        [jsonObject setObject: self.beginTime forKey: @"beginTime"];
-    if(self.endTime)
-        [jsonObject setObject: self.endTime forKey: @"endTime"];
+    if(self.ownerType)
+        [jsonObject setObject: self.ownerType forKey: @"ownerType"];
+    if(self.ownerId)
+        [jsonObject setObject: self.ownerId forKey: @"ownerId"];
+    if(self.siteType)
+        [jsonObject setObject: self.siteType forKey: @"siteType"];
     if(self.rentalSiteId)
         [jsonObject setObject: self.rentalSiteId forKey: @"rentalSiteId"];
-    if(self.exclusiveFlag)
-        [jsonObject setObject: self.exclusiveFlag forKey: @"exclusiveFlag"];
-    if(self.unit)
-        [jsonObject setObject: self.unit forKey: @"unit"];
-    if(self.autoAssign)
-        [jsonObject setObject: self.autoAssign forKey: @"autoAssign"];
-    if(self.multiUnit)
-        [jsonObject setObject: self.multiUnit forKey: @"multiUnit"];
-    if(self.needPay)
-        [jsonObject setObject: self.needPay forKey: @"needPay"];
-    if(self.multiTimeInterval)
-        [jsonObject setObject: self.multiTimeInterval forKey: @"multiTimeInterval"];
-    if(self.attachments) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentConfigDTO* item in self.attachments) {
-            NSMutableDictionary* dic = [NSMutableDictionary new];
-            [item toJson:dic];
-            [jsonArray addObject:dic];
-        }
-        [jsonObject setObject: jsonArray forKey: @"attachments"];
-    }
     if(self.rentalType)
         [jsonObject setObject: self.rentalType forKey: @"rentalType"];
-    if(self.rentalEndTime)
-        [jsonObject setObject: self.rentalEndTime forKey: @"rentalEndTime"];
-    if(self.rentalStartTime)
-        [jsonObject setObject: self.rentalStartTime forKey: @"rentalStartTime"];
-    if(self.timeStep)
-        [jsonObject setObject: self.timeStep forKey: @"timeStep"];
-    if(self.timeIntervals) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhTimeIntervalDTO* item in self.timeIntervals) {
-            NSMutableDictionary* dic = [NSMutableDictionary new];
-            [item toJson:dic];
-            [jsonArray addObject:dic];
-        }
-        [jsonObject setObject: jsonArray forKey: @"timeIntervals"];
-    }
     if(self.beginDate)
         [jsonObject setObject: self.beginDate forKey: @"beginDate"];
     if(self.endDate)
         [jsonObject setObject: self.endDate forKey: @"endDate"];
-    if(self.openWeekday) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(NSNumber* item in self.openWeekday) {
-            [jsonArray addObject:item];
-        }
-        [jsonObject setObject: jsonArray forKey: @"openWeekday"];
-    }
-    if(self.closeDates) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(NSNumber* item in self.closeDates) {
-            [jsonArray addObject:item];
-        }
-        [jsonObject setObject: jsonArray forKey: @"closeDates"];
-    }
+    if(self.timeStep)
+        [jsonObject setObject: self.timeStep forKey: @"timeStep"];
+    if(self.rentalStep)
+        [jsonObject setObject: self.rentalStep forKey: @"rentalStep"];
+    if(self.beginTime)
+        [jsonObject setObject: self.beginTime forKey: @"beginTime"];
+    if(self.endTime)
+        [jsonObject setObject: self.endTime forKey: @"endTime"];
+    if(self.counts)
+        [jsonObject setObject: self.counts forKey: @"counts"];
+    if(self.unit)
+        [jsonObject setObject: self.unit forKey: @"unit"];
     if(self.workdayPrice)
         [jsonObject setObject: self.workdayPrice forKey: @"workdayPrice"];
     if(self.weekendPrice)
         [jsonObject setObject: self.weekendPrice forKey: @"weekendPrice"];
-    if(self.siteCounts)
-        [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
-    if(self.cancelTime)
-        [jsonObject setObject: self.cancelTime forKey: @"cancelTime"];
-    if(self.refundFlag)
-        [jsonObject setObject: self.refundFlag forKey: @"refundFlag"];
-    if(self.refundRatio)
-        [jsonObject setObject: self.refundRatio forKey: @"refundRatio"];
+    if(self.workdayAMPrice)
+        [jsonObject setObject: self.workdayAMPrice forKey: @"workdayAMPrice"];
+    if(self.weekendAMPrice)
+        [jsonObject setObject: self.weekendAMPrice forKey: @"weekendAMPrice"];
+    if(self.workdayPMPrice)
+        [jsonObject setObject: self.workdayPMPrice forKey: @"workdayPMPrice"];
+    if(self.weekendPMPrice)
+        [jsonObject setObject: self.weekendPMPrice forKey: @"weekendPMPrice"];
+    if(self.loopType)
+        [jsonObject setObject: self.loopType forKey: @"loopType"];
+    if(self.status)
+        [jsonObject setObject: self.status forKey: @"status"];
+    if(self.choosen) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSNumber* item in self.choosen) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"choosen"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.beginTime = [jsonObject objectForKey: @"beginTime"];
-        if(self.beginTime && [self.beginTime isEqual:[NSNull null]])
-            self.beginTime = nil;
+        self.ownerType = [jsonObject objectForKey: @"ownerType"];
+        if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
+            self.ownerType = nil;
 
-        self.endTime = [jsonObject objectForKey: @"endTime"];
-        if(self.endTime && [self.endTime isEqual:[NSNull null]])
-            self.endTime = nil;
+        self.ownerId = [jsonObject objectForKey: @"ownerId"];
+        if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
+            self.ownerId = nil;
+
+        self.siteType = [jsonObject objectForKey: @"siteType"];
+        if(self.siteType && [self.siteType isEqual:[NSNull null]])
+            self.siteType = nil;
 
         self.rentalSiteId = [jsonObject objectForKey: @"rentalSiteId"];
         if(self.rentalSiteId && [self.rentalSiteId isEqual:[NSNull null]])
             self.rentalSiteId = nil;
 
-        self.exclusiveFlag = [jsonObject objectForKey: @"exclusiveFlag"];
-        if(self.exclusiveFlag && [self.exclusiveFlag isEqual:[NSNull null]])
-            self.exclusiveFlag = nil;
-
-        self.unit = [jsonObject objectForKey: @"unit"];
-        if(self.unit && [self.unit isEqual:[NSNull null]])
-            self.unit = nil;
-
-        self.autoAssign = [jsonObject objectForKey: @"autoAssign"];
-        if(self.autoAssign && [self.autoAssign isEqual:[NSNull null]])
-            self.autoAssign = nil;
-
-        self.multiUnit = [jsonObject objectForKey: @"multiUnit"];
-        if(self.multiUnit && [self.multiUnit isEqual:[NSNull null]])
-            self.multiUnit = nil;
-
-        self.needPay = [jsonObject objectForKey: @"needPay"];
-        if(self.needPay && [self.needPay isEqual:[NSNull null]])
-            self.needPay = nil;
-
-        self.multiTimeInterval = [jsonObject objectForKey: @"multiTimeInterval"];
-        if(self.multiTimeInterval && [self.multiTimeInterval isEqual:[NSNull null]])
-            self.multiTimeInterval = nil;
-
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
-            for(id itemJson in jsonArray) {
-                EvhAttachmentConfigDTO* item = [EvhAttachmentConfigDTO new];
-                
-                [item fromJson: itemJson];
-                [self.attachments addObject: item];
-            }
-        }
         self.rentalType = [jsonObject objectForKey: @"rentalType"];
         if(self.rentalType && [self.rentalType isEqual:[NSNull null]])
             self.rentalType = nil;
 
-        self.rentalEndTime = [jsonObject objectForKey: @"rentalEndTime"];
-        if(self.rentalEndTime && [self.rentalEndTime isEqual:[NSNull null]])
-            self.rentalEndTime = nil;
-
-        self.rentalStartTime = [jsonObject objectForKey: @"rentalStartTime"];
-        if(self.rentalStartTime && [self.rentalStartTime isEqual:[NSNull null]])
-            self.rentalStartTime = nil;
-
-        self.timeStep = [jsonObject objectForKey: @"timeStep"];
-        if(self.timeStep && [self.timeStep isEqual:[NSNull null]])
-            self.timeStep = nil;
-
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"timeIntervals"];
-            for(id itemJson in jsonArray) {
-                EvhTimeIntervalDTO* item = [EvhTimeIntervalDTO new];
-                
-                [item fromJson: itemJson];
-                [self.timeIntervals addObject: item];
-            }
-        }
         self.beginDate = [jsonObject objectForKey: @"beginDate"];
         if(self.beginDate && [self.beginDate isEqual:[NSNull null]])
             self.beginDate = nil;
@@ -193,18 +113,30 @@
         if(self.endDate && [self.endDate isEqual:[NSNull null]])
             self.endDate = nil;
 
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"openWeekday"];
-            for(id itemJson in jsonArray) {
-                [self.openWeekday addObject: itemJson];
-            }
-        }
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"closeDates"];
-            for(id itemJson in jsonArray) {
-                [self.closeDates addObject: itemJson];
-            }
-        }
+        self.timeStep = [jsonObject objectForKey: @"timeStep"];
+        if(self.timeStep && [self.timeStep isEqual:[NSNull null]])
+            self.timeStep = nil;
+
+        self.rentalStep = [jsonObject objectForKey: @"rentalStep"];
+        if(self.rentalStep && [self.rentalStep isEqual:[NSNull null]])
+            self.rentalStep = nil;
+
+        self.beginTime = [jsonObject objectForKey: @"beginTime"];
+        if(self.beginTime && [self.beginTime isEqual:[NSNull null]])
+            self.beginTime = nil;
+
+        self.endTime = [jsonObject objectForKey: @"endTime"];
+        if(self.endTime && [self.endTime isEqual:[NSNull null]])
+            self.endTime = nil;
+
+        self.counts = [jsonObject objectForKey: @"counts"];
+        if(self.counts && [self.counts isEqual:[NSNull null]])
+            self.counts = nil;
+
+        self.unit = [jsonObject objectForKey: @"unit"];
+        if(self.unit && [self.unit isEqual:[NSNull null]])
+            self.unit = nil;
+
         self.workdayPrice = [jsonObject objectForKey: @"workdayPrice"];
         if(self.workdayPrice && [self.workdayPrice isEqual:[NSNull null]])
             self.workdayPrice = nil;
@@ -213,22 +145,36 @@
         if(self.weekendPrice && [self.weekendPrice isEqual:[NSNull null]])
             self.weekendPrice = nil;
 
-        self.siteCounts = [jsonObject objectForKey: @"siteCounts"];
-        if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
-            self.siteCounts = nil;
+        self.workdayAMPrice = [jsonObject objectForKey: @"workdayAMPrice"];
+        if(self.workdayAMPrice && [self.workdayAMPrice isEqual:[NSNull null]])
+            self.workdayAMPrice = nil;
 
-        self.cancelTime = [jsonObject objectForKey: @"cancelTime"];
-        if(self.cancelTime && [self.cancelTime isEqual:[NSNull null]])
-            self.cancelTime = nil;
+        self.weekendAMPrice = [jsonObject objectForKey: @"weekendAMPrice"];
+        if(self.weekendAMPrice && [self.weekendAMPrice isEqual:[NSNull null]])
+            self.weekendAMPrice = nil;
 
-        self.refundFlag = [jsonObject objectForKey: @"refundFlag"];
-        if(self.refundFlag && [self.refundFlag isEqual:[NSNull null]])
-            self.refundFlag = nil;
+        self.workdayPMPrice = [jsonObject objectForKey: @"workdayPMPrice"];
+        if(self.workdayPMPrice && [self.workdayPMPrice isEqual:[NSNull null]])
+            self.workdayPMPrice = nil;
 
-        self.refundRatio = [jsonObject objectForKey: @"refundRatio"];
-        if(self.refundRatio && [self.refundRatio isEqual:[NSNull null]])
-            self.refundRatio = nil;
+        self.weekendPMPrice = [jsonObject objectForKey: @"weekendPMPrice"];
+        if(self.weekendPMPrice && [self.weekendPMPrice isEqual:[NSNull null]])
+            self.weekendPMPrice = nil;
 
+        self.loopType = [jsonObject objectForKey: @"loopType"];
+        if(self.loopType && [self.loopType isEqual:[NSNull null]])
+            self.loopType = nil;
+
+        self.status = [jsonObject objectForKey: @"status"];
+        if(self.status && [self.status isEqual:[NSNull null]])
+            self.status = nil;
+
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"choosen"];
+            for(id itemJson in jsonArray) {
+                [self.choosen addObject: itemJson];
+            }
+        }
         return self;
     }
     

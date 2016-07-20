@@ -48,20 +48,6 @@
         [jsonObject setObject: self.unit forKey: @"unit"];
     if(self.price)
         [jsonObject setObject: self.price forKey: @"price"];
-    if(self.originalPrice)
-        [jsonObject setObject: self.originalPrice forKey: @"originalPrice"];
-    if(self.halfsitePrice)
-        [jsonObject setObject: self.halfsitePrice forKey: @"halfsitePrice"];
-    if(self.halfsiteOriginalPrice)
-        [jsonObject setObject: self.halfsiteOriginalPrice forKey: @"halfsiteOriginalPrice"];
-    if(self.exclusiveFlag)
-        [jsonObject setObject: self.exclusiveFlag forKey: @"exclusiveFlag"];
-    if(self.autoAssign)
-        [jsonObject setObject: self.autoAssign forKey: @"autoAssign"];
-    if(self.multiUnit)
-        [jsonObject setObject: self.multiUnit forKey: @"multiUnit"];
-    if(self.multiTimeInterval)
-        [jsonObject setObject: self.multiTimeInterval forKey: @"multiTimeInterval"];
     if(self.rentalStep)
         [jsonObject setObject: self.rentalStep forKey: @"rentalStep"];
     if(self.timeStep)
@@ -70,8 +56,6 @@
         [jsonObject setObject: self.ruleDate forKey: @"ruleDate"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
-    if(self.siteNumber)
-        [jsonObject setObject: self.siteNumber forKey: @"siteNumber"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -113,34 +97,6 @@
         if(self.price && [self.price isEqual:[NSNull null]])
             self.price = nil;
 
-        self.originalPrice = [jsonObject objectForKey: @"originalPrice"];
-        if(self.originalPrice && [self.originalPrice isEqual:[NSNull null]])
-            self.originalPrice = nil;
-
-        self.halfsitePrice = [jsonObject objectForKey: @"halfsitePrice"];
-        if(self.halfsitePrice && [self.halfsitePrice isEqual:[NSNull null]])
-            self.halfsitePrice = nil;
-
-        self.halfsiteOriginalPrice = [jsonObject objectForKey: @"halfsiteOriginalPrice"];
-        if(self.halfsiteOriginalPrice && [self.halfsiteOriginalPrice isEqual:[NSNull null]])
-            self.halfsiteOriginalPrice = nil;
-
-        self.exclusiveFlag = [jsonObject objectForKey: @"exclusiveFlag"];
-        if(self.exclusiveFlag && [self.exclusiveFlag isEqual:[NSNull null]])
-            self.exclusiveFlag = nil;
-
-        self.autoAssign = [jsonObject objectForKey: @"autoAssign"];
-        if(self.autoAssign && [self.autoAssign isEqual:[NSNull null]])
-            self.autoAssign = nil;
-
-        self.multiUnit = [jsonObject objectForKey: @"multiUnit"];
-        if(self.multiUnit && [self.multiUnit isEqual:[NSNull null]])
-            self.multiUnit = nil;
-
-        self.multiTimeInterval = [jsonObject objectForKey: @"multiTimeInterval"];
-        if(self.multiTimeInterval && [self.multiTimeInterval isEqual:[NSNull null]])
-            self.multiTimeInterval = nil;
-
         self.rentalStep = [jsonObject objectForKey: @"rentalStep"];
         if(self.rentalStep && [self.rentalStep isEqual:[NSNull null]])
             self.rentalStep = nil;
@@ -156,10 +112,6 @@
         self.status = [jsonObject objectForKey: @"status"];
         if(self.status && [self.status isEqual:[NSNull null]])
             self.status = nil;
-
-        self.siteNumber = [jsonObject objectForKey: @"siteNumber"];
-        if(self.siteNumber && [self.siteNumber isEqual:[NSNull null]])
-            self.siteNumber = nil;
 
         return self;
     }
