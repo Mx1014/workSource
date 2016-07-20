@@ -226,6 +226,7 @@ public class AdminController extends ControllerBase {
         context.setSourceFileExtention(this.sourceFileExtention);
         context.setRestResponseBase(restResponseBase);
         context.setContextParam("dest.dir.java", StringHelper.interpolate(this.destinationJavaDir));
+        LOGGER.info("Set destination of generating java, path={}", this.destinationJavaDir);
         
         if(language.equalsIgnoreCase("objc")) {
             ObjectiveCGenerator generator = new ObjectiveCGenerator();
@@ -234,6 +235,7 @@ public class AdminController extends ControllerBase {
             // generate REST POJO objects
             jars.stream().forEach((jar)-> {
                 try {
+                    LOGGER.info("Load classes in jar, jarPath={}", jar);
                     Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(StringHelper.interpolate(jar));
                     
                     for(Class<?> clz: classes) {
