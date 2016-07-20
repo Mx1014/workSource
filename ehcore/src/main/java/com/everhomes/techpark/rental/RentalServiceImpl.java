@@ -1241,6 +1241,9 @@ public class RentalServiceImpl implements RentalService {
 	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 	//					rentalBill.getEndTime().getTime() + rs.getOvertimeTime());
 	//		}
+
+			//使用详情
+			StringBuffer useDetailSB = new StringBuffer();
 			// 循环存site订单
 			for (rentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
@@ -1270,14 +1273,49 @@ public class RentalServiceImpl implements RentalService {
 				rsb.setCreatorUid(userId);
 	
 				rentalProvider.createRentalSiteBill(rsb);
-
+				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
+					useDetailSB.append("使用时间:");
+					useDetailSB.append("从");
+					useDetailSB.append(datetimeSF.format(rsr.getBeginTime()));
+					useDetailSB.append("到");
+					useDetailSB.append(datetimeSF.format(rsr.getEndTime()));
+				}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
+					useDetailSB.append("使用时间:");
+					useDetailSB.append(dateSF.format(rsr.getSiteRentalDate()));
+				}else {
+					useDetailSB.append("使用时间:");
+					useDetailSB.append(dateSF.format(rsr.getSiteRentalDate()));
+					if(rsr.getAmorpm().equals(AmorpmFlag.AM))
+						useDetailSB.append("早上");
+					if(rsr.getAmorpm().equals(AmorpmFlag.PM))
+						useDetailSB.append("下午");
+					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT))
+						useDetailSB.append("晚上");
+				}
+				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
+				//独占资源 只有时间				 
+				}
+				else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+					//不需要资源编号
+					useDetailSB.append(";预约数量:");
+					useDetailSB.append(rsb.getRentalCount());
+				}
+				else {
+					//不需要资源编号
+					useDetailSB.append(";资源编号:");
+					useDetailSB.append(rsr.getSiteNumber());
+//					useDetailSB.append("号");
+				}
+				useDetailSB.append("\n");
 //				if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 //					Integer loopCnt = 0; 
 ////					assignSiteNumber(rsb,rsr,billDTO,loopCnt);
 //				}
 			}
 			//验证site订单是否超过了site数量，如果有，抛异常，回滚操作
-			this.valiRentalBill(0.0, cmd.getRules());
+//			this.valiRentalBill(0.0, cmd.getRules());
+			rentalBill.setUseDetail(useDetailSB.toString());
+			this.rentalProvider.updateRentalBill(rentalBill);
 			mappingRentalBillDTO(billDTO, rentalBill);
 			return billDTO;
 		});
@@ -1520,16 +1558,17 @@ public class RentalServiceImpl implements RentalService {
 			LOGGER.debug("user is null...userId = " + bill.getRentalUid());
 			dto.setUserName("用户不在系统中");
 			}
-		dto.setSiteName(rs.getSiteName());
-		dto.setBuildingName(rs.getBuildingName());
-		dto.setAddress(rs.getAddress());
-		dto.setContactPhonenum(rs.getContactPhonenum());
+		dto.setSiteName(bill.getSiteName());
+//		dto.setBuildingName(bill.getBuildingName());
+		dto.setAddress(bill.getAddress());
+		//TODO :写入bill表
+		//TODO :dto.setContactPhonenum(bill.getContactPhonenum());
 		
-		dto.setSpec(rs.getSpec());
-		dto.setCompanyName(rs.getOwnCompanyName());
-		dto.setContactName(rs.getContactName()); 
-		dto.setNotice(rs.getNotice());
-		dto.setIntroduction(rs.getIntroduction());
+		dto.setSpec(bill.getSpec());
+//		dto.setCompanyName(rs.getOwnCompanyName());
+//		dto.setContactName(bill.getContactName()); 
+//		dto.setNotice(bill.getNotice());
+//		dto.setIntroduction(bill.getIntroduction());
 		dto.setRentalBillId(bill.getId()); 
 		dto.setRentalCount(bill.getRentalCount());
 		if (null == bill.getStartTime()) {
@@ -1570,29 +1609,27 @@ public class RentalServiceImpl implements RentalService {
 		List<RentalBillPaybillMap> billPaybillMaps = this.rentalProvider.findRentalBillPaybillMapByBillId(bill.getId()) ;
 		if(null!=billPaybillMaps && billPaybillMaps.size()>0)
 			dto.setVendorType(billPaybillMaps.get(0).getVendorType());
-		//使用详情
-		StringBuffer useDetailSB = new StringBuffer();
 		// 订单的rules
 		List<RentalSitesBill> rsbs = rentalProvider
 				.findRentalSitesBillByBillId(bill.getId());
-		for (RentalSitesBill rsb : rsbs) {
-			RentalSiteRule rsr = rentalProvider.findRentalSiteRulesByRuleId(rsb.getRentalSiteRuleId());
-			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
-			ruleDto.setId(rsr.getId());
-			ruleDto.setRentalSiteId(rsr.getRentalSiteId());
-			ruleDto.setRentalType(rsr.getRentalType());
-			ruleDto.setRentalStep(rsr.getRentalStep()); 
-			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) {
-				ruleDto.setTimeStep(rsr.getTimeStep());
-				ruleDto.setBeginTime(rsr.getBeginTime().getTime());
-				ruleDto.setEndTime(rsr.getEndTime().getTime());
-			} else if (ruleDto.getRentalType().equals(
-					RentalType.HALFDAY.getCode())) {
-				ruleDto.setAmorpm(rsr.getAmorpm());
-			}
-			ruleDto.setUnit(rsr.getUnit());
-			ruleDto.setPrice(rsr.getPrice());
-			ruleDto.setRuleDate(rsr.getSiteRentalDate().getTime());
+//		for (RentalSitesBill rsb : rsbs) {
+//			RentalSiteRule rsr = rentalProvider.findRentalSiteRulesByRuleId(rsb.getRentalSiteRuleId());
+//			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
+//			ruleDto.setId(rsb.getId());
+//			ruleDto.setRentalSiteId(rsr.getRentalSiteId());
+//			ruleDto.setRentalType(rsb.getRentalType());
+//			ruleDto.setRentalStep(rsr.getRentalStep()); 
+//			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) {
+//				ruleDto.setTimeStep(rsr.getTimeStep());
+//				ruleDto.setBeginTime(rsr.getBeginTime().getTime());
+//				ruleDto.setEndTime(rsr.getEndTime().getTime());
+//			} else if (ruleDto.getRentalType().equals(
+//					RentalType.HALFDAY.getCode())) {
+//				ruleDto.setAmorpm(rsr.getAmorpm());
+//			}
+//			ruleDto.setUnit(rsr.getUnit());
+//			ruleDto.setPrice(rsr.getPrice());
+//			ruleDto.setRuleDate(rsr.getSiteRentalDate().getTime());
 //			if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 //
 //				List<RentalSitesBillNumber> siteNumbers = this.rentalProvider.findSitesBillNumbersByBillId(rsr.getId()); 
@@ -1621,47 +1658,14 @@ public class RentalServiceImpl implements RentalService {
 //			if(rsb.getRentalCount()<1)
 //				ruleDto.setSiteNumber(ruleDto.getSiteNumber()+"（半场）");
 //			dto.getRentalSiteRules().add(ruleDto);
-			ruleDto.setSiteNumber(rsr.getSiteNumber());
-			if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
-				useDetailSB.append("使用时间:");
-				useDetailSB.append("从");
-				useDetailSB.append(datetimeSF.format(rsr.getBeginTime()));
-				useDetailSB.append("到");
-				useDetailSB.append(datetimeSF.format(rsr.getEndTime()));
-			}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
-				useDetailSB.append("使用时间:");
-				useDetailSB.append(dateSF.format(rsr.getSiteRentalDate()));
-			}else {
-				useDetailSB.append("使用时间:");
-				useDetailSB.append(dateSF.format(rsr.getSiteRentalDate()));
-				if(rsr.getAmorpm().equals(AmorpmFlag.AM))
-					useDetailSB.append("早上");
-				if(rsr.getAmorpm().equals(AmorpmFlag.PM))
-					useDetailSB.append("下午");
-				if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT))
-					useDetailSB.append("晚上");
-			}
-			if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
-			//独占资源 只有时间				 
-			}
-			else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
-				//不需要资源编号
-				useDetailSB.append(";预约数量:");
-				useDetailSB.append(rsb.getRentalCount());
-			}
-			else {
-				//不需要资源编号
-				useDetailSB.append(";资源编号:");
-				useDetailSB.append(ruleDto.getSiteNumber());
-//				useDetailSB.append("号");
-			}
-			useDetailSB.append("\n");
-		}
+//			ruleDto.setSiteNumber(rsr.getSiteNumber());
+//			
+//		}
 		
 		
 		
 		
-		dto.setUseDetail(useDetailSB.toString());
+		dto.setUseDetail(bill.getUseDetail());
 				
 				
 		// 订单的附件attachments
