@@ -33,6 +33,10 @@
 
 @property(nonatomic, copy) NSNumber* orderCount;
 
+@property(nonatomic, copy) NSString* businessUrl;
+
+@property(nonatomic, copy) NSString* businessRealm;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 
