@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.pushmessage.PushMessageProvider;
 import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalProvider;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -24,15 +24,15 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class IncompleteUnsuccessRentalBillAction implements Runnable {
+public class IncompleteUnsuccessRentalOrderAction implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(IncompleteUnsuccessRentalBillAction.class);
+			.getLogger(IncompleteUnsuccessRentalOrderAction.class);
 	
 	
 	private   Long  rentalBillId;
 	@Autowired
-	private RentalProvider rentalProvider;
+	private Rentalv2Provider rentalProvider;
 
      
     
@@ -40,7 +40,7 @@ public class IncompleteUnsuccessRentalBillAction implements Runnable {
 	@Autowired
 	private MessagingService messagingService;
 	
-	public IncompleteUnsuccessRentalBillAction(final String id) { 
+	public IncompleteUnsuccessRentalOrderAction(final String id) { 
 		this.rentalBillId =  Long.valueOf(id) ;
 		
 	}

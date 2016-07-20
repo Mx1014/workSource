@@ -197,14 +197,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class RentalServiceImpl implements RentalService {
+public class Rentalv2ServiceImpl implements Rentalv2Service {
 	final String downloadDir ="\\download\\";
 
 	// N分钟后取消
 	private Long cancelTime = 5 * 60 * 1000L;
 	
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(RentalServiceImpl.class);
+			.getLogger(Rentalv2ServiceImpl.class);
 	SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -234,7 +234,7 @@ public class RentalServiceImpl implements RentalService {
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	@Autowired
-	RentalProvider rentalProvider;
+	Rentalv2Provider rentalProvider;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -1219,7 +1219,7 @@ public class RentalServiceImpl implements RentalService {
 					SiteBillStatus.PAYINGFINAL.getCode())) {
 				// 20分钟后，取消未成功的订单
 				final Job job1 = new Job(
-						CancelUnsuccessRentalBillAction.class.getName(),
+						CancelUnsuccessRentalOrderAction.class.getName(),
 						new Object[] { String.valueOf(rentalBill.getId()) });
 	
 				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
@@ -3059,7 +3059,7 @@ public class RentalServiceImpl implements RentalService {
 			dtos.add(dto);
 		}
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())

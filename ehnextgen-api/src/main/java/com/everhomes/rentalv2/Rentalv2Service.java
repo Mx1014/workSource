@@ -83,7 +83,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 
-public interface RentalService { 
+public interface Rentalv2Service { 
 //	void updateRentalRule(UpdateRentalRuleCommand cmd);
 
 //	Long addRentalSite(AddRentalSiteCommand cmd);

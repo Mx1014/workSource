@@ -85,8 +85,8 @@ import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 
 @Component
-public class RentalProviderImpl implements RentalProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RentalProviderImpl.class);
+public class Rentalv2ProviderImpl implements Rentalv2Provider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2ProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;

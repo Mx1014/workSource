@@ -8,7 +8,7 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 
-public interface RentalProvider {
+public interface Rentalv2Provider {
  
  
 

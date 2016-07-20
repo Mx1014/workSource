@@ -8,7 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.RefundEmbeddedHandler;
 import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalProvider;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rentalv2.RentalRefundOrder;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.RefundCallbackCommand;
@@ -18,7 +18,7 @@ import com.everhomes.rest.rentalv2.SiteBillStatus;
 public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 
 	@Autowired
-	private RentalProvider rentalProvider;
+	private Rentalv2Provider rentalProvider;
 
 	@Autowired
 	private DbProvider dbProvider;

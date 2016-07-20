@@ -54,7 +54,7 @@ import com.everhomes.quality.QualityService;
 import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.RentalResourceOrder;
 import com.everhomes.rentalv2.RentalItem;
-import com.everhomes.rentalv2.RentalServiceImpl;
+import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.app.AppConstants;
@@ -593,7 +593,7 @@ public class QualityServiceImpl implements QualityService {
         	return dto;
         }).collect(Collectors.toList());
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())
@@ -1696,7 +1696,7 @@ public class QualityServiceImpl implements QualityService {
         
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, null);
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())

@@ -13,7 +13,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.rentalv2.RentalService;
+import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.rentalv2.AddRentalBillCommand;
 import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
@@ -51,12 +51,12 @@ import com.everhomes.techpark.punch.PunchController;
 @RestDoc(value = "rental controller", site = "ehcore")
 @RestController
 @RequestMapping("/rental")
-public class RentalController extends ControllerBase {
+public class Rentalv2Controller extends ControllerBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PunchController.class);
 
 	@Autowired
-	private RentalService rentalService;
+	private Rentalv2Service rentalService;
 //	/**
 //	 * <b>URL: /rental/getRentalSiteType</b>
 //	 * <p>

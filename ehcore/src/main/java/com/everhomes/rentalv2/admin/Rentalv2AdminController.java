@@ -11,7 +11,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.rentalv2.RentalService;
+import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.rentalv2.AddItemAdminCommand;
 import com.everhomes.rest.rentalv2.BatchCompleteBillCommand;
@@ -61,10 +61,10 @@ import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 @RestDoc(value = "rental admin controller", site = "ehcore")
 @RestController
 @RequestMapping("/rental/admin")
-public class RentalAdminController extends ControllerBase {
+public class Rentalv2AdminController extends ControllerBase {
 
 	@Autowired
-	private RentalService rentalService;
+	private Rentalv2Service rentalService;
 	
 //	/**
 //	 * 

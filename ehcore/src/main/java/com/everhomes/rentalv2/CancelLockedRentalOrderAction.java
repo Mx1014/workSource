@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalProvider;
+import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -26,20 +26,20 @@ import com.everhomes.user.UserContext;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CancelLockedRentalBillAction implements Runnable {
+public class CancelLockedRentalOrderAction implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(CancelLockedRentalBillAction.class);
+			.getLogger(CancelLockedRentalOrderAction.class);
 	private   Long  rentalBillId;
 	@Autowired
-	private RentalProvider rentalProvider;
+	private Rentalv2Provider rentalProvider;
 
 
 	@Autowired
 	private MessagingService messagingService;
     
 
-	public CancelLockedRentalBillAction(final String id) { 
+	public CancelLockedRentalOrderAction(final String id) { 
 		this.rentalBillId =  Long.valueOf(id) ;
 		
 	}
