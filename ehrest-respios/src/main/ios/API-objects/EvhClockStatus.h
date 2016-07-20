@@ -1,0 +1,19 @@
+//
+// EvhClockStatus.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhClockStatus
+//
+typedef enum {
+
+    EvhClockStatus_AFTERNOONARRIVE = 3, 
+    EvhClockStatus_NOONLEAVE = 2, 
+    EvhClockStatus_LEAVE = 1, 
+    EvhClockStatus_ARRIVE = 0
+
+} EvhClockStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

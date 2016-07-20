@@ -1,0 +1,9 @@
+//
+// EvhVendorType.h
+//
+
+#define EvhVendorType_ZHI_FU_BAO @"10001"
+#define EvhVendorType_WEI_XIN @"10002"
+
+///////////////////////////////////////////////////////////////////////////////
+

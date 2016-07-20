@@ -1,0 +1,9 @@
+//
+// EvhPaidTypeStatus.h
+//
+
+#define EvhPaidTypeStatus_ALIPAY @"10001"
+#define EvhPaidTypeStatus_WECHATPAY @"10002"
+
+///////////////////////////////////////////////////////////////////////////////
+

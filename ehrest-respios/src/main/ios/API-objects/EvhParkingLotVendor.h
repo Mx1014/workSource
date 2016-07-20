@@ -1,0 +1,9 @@
+//
+// EvhParkingLotVendor.h
+//
+
+#define EvhParkingLotVendor_BOSIGAO @"BOSIGAO"
+#define EvhParkingLotVendor_ETCP @"ETCP"
+
+///////////////////////////////////////////////////////////////////////////////
+

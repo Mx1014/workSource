@@ -1,0 +1,9 @@
+//
+// EvhLinkContentType.h
+//
+
+#define EvhLinkContentType_FORWARD @"forward"
+#define EvhLinkContentType_CREATE @"create"
+
+///////////////////////////////////////////////////////////////////////////////
+

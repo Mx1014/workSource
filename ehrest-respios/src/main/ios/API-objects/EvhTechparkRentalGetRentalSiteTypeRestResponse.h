@@ -2,14 +2,14 @@
 // EvhTechparkRentalGetRentalSiteTypeRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhGetRentalSiteTypeResponse.h"
+#import "EvhRentalGetRentalSiteTypeResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalGetRentalSiteTypeRestResponse
 //
 @interface EvhTechparkRentalGetRentalSiteTypeRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhGetRentalSiteTypeResponse* response;
+@property(nonatomic, strong) EvhRentalGetRentalSiteTypeResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

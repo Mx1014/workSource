@@ -1,0 +1,18 @@
+//
+// EvhWebMenuScopeApplyPolicy.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhWebMenuScopeApplyPolicy
+//
+typedef enum {
+
+    EvhWebMenuScopeApplyPolicy_DELETE = 0, 
+    EvhWebMenuScopeApplyPolicy_OVERRIDE = 1, 
+    EvhWebMenuScopeApplyPolicy_REVERT = 2
+
+} EvhWebMenuScopeApplyPolicy;
+
+///////////////////////////////////////////////////////////////////////////////
+
