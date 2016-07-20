@@ -212,6 +212,18 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         //assert(messageResolver != null)
         DeviceMessage devMessage = messageResolver.resolvMessage(senderLogin, destLogin, msg);
         
+        String platform = d.getPlatform();
+        if(platform == null || !(platform.equals("iOS") || platform.equals("android"))) {
+            //platform != iOS && platform != "android", auto detect by deviceId
+            if(d.getDeviceId() != null) {
+                if(d.getDeviceId().indexOf(":") >= 0) {
+                    platform = "android";
+                } else if(d.getDeviceId().length() >= 60) {
+                    platform = "iOS";
+                }
+            }
+        }
+        
         if(d.getPlatform().equals("iOS")) {
                 PayloadBuilder payloadBuilder = APNS.newPayload();
                 if(devMessage.getAlert().length() > 20) {
@@ -284,6 +296,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     if(tempService != null) {
                         try {
                             tempService.push(notification);   
+                            
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    }
                         } catch (NetworkIOException e) {
                             LOGGER.warn("apns error and stop it", e);
                             stopApnsServiceByName(partner);
@@ -292,11 +309,6 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     
                 }
                 
-            
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId 
-                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-            }
         } else {
             //Android or other here
             //copy the message to message box
