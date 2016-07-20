@@ -1,9 +1,0 @@
-//
-// EvhWebMenuType.h
-//
-
-#define EvhWebMenuType_ZUOLIN @"zuolin"
-#define EvhWebMenuType_PARK @"park"
-
-///////////////////////////////////////////////////////////////////////////////
-

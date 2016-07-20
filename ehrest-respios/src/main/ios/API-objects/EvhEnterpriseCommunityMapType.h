@@ -1,8 +1,0 @@
-//
-// EvhEnterpriseCommunityMapType.h
-//
-
-#define EvhEnterpriseCommunityMapType_Enterprise @"enterprise"
-
-///////////////////////////////////////////////////////////////////////////////
-
