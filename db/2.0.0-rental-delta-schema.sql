@@ -270,10 +270,14 @@ CREATE TABLE `eh_rental_bills` (
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
 `site_name` VARCHAR(255) NULL  COMMENT '名称',
-`use_time` VARCHAR(255) NULL  COMMENT '使用时间',
+`use_detail` VARCHAR(255) NULL  COMMENT '使用时间',
 `vendor_type` VARCHAR(255) NULL  COMMENT '支付方式,10001-支付宝，10002-微信',
 `resource_type_id` BIGINT(20)    COMMENT '广场图标id',
 `organization_id` BIGINT(20)    COMMENT '所属公司的ID', 
+`spec` VARCHAR(255)   COMMENT '规格',
+`address` VARCHAR(192)   COMMENT '地址',
+`longitude` DOUBLE  COMMENT '地址经度',
+`latitude` DOUBLE  COMMENT '地址纬度',
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
