@@ -1947,8 +1947,8 @@ public class QualityServiceImpl implements QualityService {
 		
 		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
 		task.setCategoryPath(category.getPath());
+		//fix bug ： byte to long old:task.setManualFlag((byte) 1);
 		task.setManualFlag(1L);
-		
 		
 		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
 		task.setExecutorId(user.getId());
