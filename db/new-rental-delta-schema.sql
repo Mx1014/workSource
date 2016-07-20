@@ -300,13 +300,14 @@ CREATE TABLE `eh_rentalv2_resource_orders` (
 `create_time` DATETIME NULL  COMMENT '',
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
-`resource_type_id` BIGINT(20)    COMMENT '广场图标id', 
-`begin_time` DATETIME   COMMENT '开始时间 对于按时间定',
-`end_time` DATETIME   COMMENT '结束时间 对于按时间定',
+`resource_type_id` BIGINT(20)    COMMENT '广场图标id',  
 `price` DECIMAL(10,2)   COMMENT '折后价',
-`resource_rental_date` DATE   COMMENT 'which day',
+`resource_rental_date` DATE   COMMENT 'which day', 
+`rental_type` TINYINT(4)   COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
 `amorpm` TINYINT(4)   COMMENT '0:am 1:pm 2:night',
 `rental_step` INT(11)   COMMENT 'how many time_step must be rental every time',
+`begin_time` DATETIME   COMMENT '开始时间 对于按时间定',
+`end_time` DATETIME   COMMENT '结束时间 对于按时间定',  
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
