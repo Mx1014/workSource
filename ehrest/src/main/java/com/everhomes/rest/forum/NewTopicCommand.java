@@ -42,6 +42,7 @@ import com.everhomes.util.StringHelper;
  * <li>startTime:开始时间</li>
  * <li>endTime:结束时间</li>
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
+ * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -91,8 +92,17 @@ public class NewTopicCommand {
     
     private Long endTime;
     
+    private Byte officialFlag;
     
-    public NewTopicCommand() {
+    public Byte getOfficialFlag() {
+		return officialFlag;
+	}
+
+	public void setOfficialFlag(Byte officialFlag) {
+		this.officialFlag = officialFlag;
+	}
+
+	public NewTopicCommand() {
     }
     
     public Long getForumId() {

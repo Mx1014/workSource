@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.tools.ant.taskdefs.condition.And;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -24,11 +25,13 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupOpRequestStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.sequence.SequenceProvider;
@@ -819,5 +822,21 @@ public class GroupProviderImpl implements GroupProvider {
     	return groupMembers.get(0);
     }
 
-
+    @Override
+    public GroupMember findGroupMemberTopOne(Long groupId){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
+        
+    	try{
+	    	return context.select().from(EH_GROUP_MEMBERS)
+	    			.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
+		    		.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+		    		.and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()))
+		    		.orderBy(EH_GROUP_MEMBERS.ID.asc())
+		    		.limit(1)
+		    		.fetchOne()
+		    		.map(r->ConvertHelper.convert(r, GroupMember.class));
+    	}catch(NullPointerException e){
+    		return null;
+    	}
+    }
 }

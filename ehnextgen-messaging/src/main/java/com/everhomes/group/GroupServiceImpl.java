@@ -111,6 +111,7 @@ import com.everhomes.rest.group.ListMemberInStatusCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
 import com.everhomes.rest.group.RejectAdminRoleCommand;
 import com.everhomes.rest.group.RejectJoinGroupInvitation;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -3831,4 +3832,93 @@ public class GroupServiceImpl implements GroupService {
         
         return resp;
     }
+
+	@Override
+	public void quitAndTransferPrivilege(QuitAndTransferPrivilegeCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		Long groupId = cmd.getGroupId();
+		GroupMember gm = checkQuitAndTransferPrivilegeParameters(userId, groupId);
+		
+		//检查如果当前群只有创建者一个人了，则退出并转移权限时直接解散该群
+		if (checkIfOnlyOneGroupMember(userId, groupId)) {
+			deleteGroupByCreator(groupId);
+		}else{
+			dbProvider.execute(t->{
+				//从本群中退出
+				quitFromGroup(userId, gm);
+				//转移权限
+				GroupMember newCreator = transferPrivilege(userId, groupId);
+				//发邮件
+				sendNotificationToNewCreator(newCreator, user.getLocale());
+				
+				return null;
+			});
+		}
+	}
+
+	private void sendNotificationToNewCreator(GroupMember newCreator, String locale) {
+		Group group = groupProvider.findGroupById(newCreator.getGroupId());
+		String nickname = newCreator.getMemberNickName();
+		if (StringUtils.isEmpty(nickname)) {
+			User user = userProvider.findUserById(newCreator.getMemberId());
+			nickname = user.getNickName();
+		}
+		
+		sendNotificationToCreator(newCreator.getMemberId(), nickname, group, locale);
+	}
+
+	private boolean checkIfOnlyOneGroupMember(Long userId, Long groupId) {
+		ListingLocator locator = new ListingLocator(groupId);
+		List<GroupMember> list = groupProvider.queryGroupMembers(locator, 2, (loc, query)->{
+									 Condition c1 = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode());
+									 Condition c2 = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+						             query.addConditions(c1, c2);
+						             return query;
+								 });
+		if (list != null && list.size() == 1) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	private GroupMember transferPrivilege(Long userId, Long groupId) {
+		GroupMember gm = groupProvider.findGroupMemberTopOne(groupId);
+		gm.setMemberRole(RoleConstants.ResourceCreator);
+		groupProvider.updateGroupMember(gm);
+		return gm;
+	}
+
+	private void quitFromGroup(Long userId, GroupMember gm) {
+		//把memberStatus设置为inactive即可
+		gm.setMemberStatus(GroupMemberStatus.INACTIVE.getCode());
+		groupProvider.updateGroupMember(gm);
+	}
+
+	private GroupMember checkQuitAndTransferPrivilegeParameters(Long userId, Long groupId) {
+		//1.groupId不能为空
+		if (groupId == null) {
+			LOGGER.error("Invalid parameters, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, userId = "+userId+", groupId"+groupId);
+		}
+		//2.userId是这个group的成员
+		GroupMember gm = groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), userId);
+		if (gm == null) {
+			LOGGER.error("group member not found, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, 
+					GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "group member not found, userId = "+userId+", groupId"+groupId);
+		}
+		
+		//3.userId是这个group的创建者
+		if (gm.getMemberRole().longValue() != RoleConstants.ResourceCreator) {
+			LOGGER.error("group member is not the creator, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, 
+					GroupServiceErrorCode.ERROR_GROUP_MEMBER_IS_NOT_CREATOR, "group member is not the creator, userId = "+userId+", groupId"+groupId);
+		}
+		
+		return gm;
+	}
+    
 }
