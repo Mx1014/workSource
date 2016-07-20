@@ -710,10 +710,21 @@ public class UserActivityServiceImpl implements UserActivityService {
         bizFindOrderCountByUserId(user.getId(), rsp);
         
         rsp.setBusinessUrl(getBusinessUrl());
+        rsp.setBusinessRealm(getBusinessRealm());
         return rsp;
     }
     
-    private String getBusinessUrl() {
+    private String getBusinessRealm() {
+    	String businessRealm = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_REALM, "");
+        if(businessRealm.length() == 0) {
+            LOGGER.error("Invalid business url path, businessRealm=" + businessRealm);
+            return null;
+        } else {
+            return businessRealm;
+        }
+	}
+
+	private String getBusinessUrl() {
     	String businessUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_URL, "");
         if(businessUrl.length() == 0) {
             LOGGER.error("Invalid business url path, businessUrl=" + businessUrl);

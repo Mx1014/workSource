@@ -2937,7 +2937,8 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private Condition notEqPostCategoryCondition(List<Long> unCategorys) {
-    	return null;
+    	//所有查帖子的地方排除掉官方活动，但不排除个人活动，add by tt, 160720
+    	return Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.notEqual(OfficialFlag.YES.getCode());
     	
 //    	if(null == unCategorys || 0 == unCategorys.size()){
 //       	 	unCategorys = new ArrayList<Long>();
