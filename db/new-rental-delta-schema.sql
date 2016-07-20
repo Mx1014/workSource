@@ -281,6 +281,8 @@ CREATE TABLE `eh_rentalv2_orders` (
 `contact_phonenum` VARCHAR(20)   COMMENT '咨询电话',
 `introduction` TEXT   COMMENT '详情',
 `notice` TEXT   COMMENT '',
+`community_id` BIGINT(20)    COMMENT '资源所属园区的ID',
+`namespace_id` INT(11)  COMMENT '域空间',
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
