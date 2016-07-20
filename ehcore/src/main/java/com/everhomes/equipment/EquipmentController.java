@@ -1,0 +1,561 @@
+package com.everhomes.equipment;
+
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
+import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
+import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
+import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
+import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
+import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
+import com.everhomes.rest.equipment.SearchEquipmentsResponse;
+import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
+import com.everhomes.rest.equipment.EquipmentStandardsDTO;
+import com.everhomes.rest.equipment.EquipmentsDTO;
+import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
+import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
+import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
+import com.everhomes.rest.equipment.SearchEquipmentsCommand;
+import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
+
+@RestDoc(value = "Equipment Controller", site = "core")
+@RestController
+@RequestMapping("/equipment")
+public class EquipmentController extends ControllerBase {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentController.class);
+	@Autowired
+	private EquipmentService equipmentService;
+	
+	/**
+	 * <b>URL: /equipment/creatEquipmentStandard</b>
+	 * <p>创建设备巡检标准</p>
+	 */
+	@RequestMapping("creatEquipmentStandard")
+	@RestReturn(value = EquipmentStandardsDTO.class)
+	public RestResponse creatEquipmentStandard(CreatEquipmentStandardCommand cmd) {
+		
+		EquipmentStandardsDTO standard = equipmentService.creatEquipmentStandard(cmd);
+		
+		RestResponse response = new RestResponse(standard);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/updateEquipmentStandard</b>
+	 * <p>修改设备巡检标准</p>
+	 */
+	@RequestMapping("updateEquipmentStandard")
+	@RestReturn(value = EquipmentStandardsDTO.class)
+	public RestResponse updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
+		
+		EquipmentStandardsDTO standard = equipmentService.updateEquipmentStandard(cmd);
+		
+		RestResponse response = new RestResponse(standard);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/findEquipmentStandard</b>
+	 * <p>根据id查询巡检标准</p>
+	 */
+	@RequestMapping("findEquipmentStandard")
+	@RestReturn(value = EquipmentStandardsDTO.class)
+	public RestResponse findEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
+		
+		EquipmentStandardsDTO standard = equipmentService.findEquipmentStandard(cmd.getStandardId());
+		
+		RestResponse response = new RestResponse(standard);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/deleteEquipmentStandard</b>
+	 * <p>删除设备巡检标准</p>
+	 */
+	@RequestMapping("deleteEquipmentStandard")
+	@RestReturn(value = String.class)
+	public RestResponse deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
+		
+		equipmentService.deleteEquipmentStandard(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/searchEquipmentStandards</b>
+	 * <p>查看设备巡检标准</p>
+	 */
+	@RequestMapping("searchEquipmentStandards")
+	@RestReturn(value = SearchEquipmentStandardsResponse.class)
+	public RestResponse searchEquipmentStandards(SearchEquipmentStandardsCommand cmd) {
+		
+		SearchEquipmentStandardsResponse standards = equipmentService.searchEquipmentStandards(cmd);
+		
+		RestResponse response = new RestResponse(standards);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/exportEquipmentStandards</b>
+	 * <p>导出设备巡检标准</p>
+	 */
+	@RequestMapping("exportEquipmentStandards")
+	public HttpServletResponse exportEquipmentStandards(@Valid SearchEquipmentStandardsCommand cmd,HttpServletResponse response) {
+		
+		HttpServletResponse commandResponse = equipmentService.exportEquipmentStandards(cmd, response);
+		
+		return commandResponse;
+	}
+	
+	/**
+     * <b>URL: /equipment/importEquipmentStandards</b>
+     * <p>导入设备巡检标准</p>
+     */
+    @RequestMapping("importEquipmentStandards")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importEquipmentStandards(@RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.equipmentService.importEquipmentStandards(files[0], userId);
+        RestResponse response = new RestResponse(importDataResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+	 * <b>URL: /equipment/searchEquipmentStandardRelations</b>
+	 * <p>查看设备-标准关联</p>
+	 */
+	@RequestMapping("searchEquipmentStandardRelations")
+	@RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
+	public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
+		
+		SearchEquipmentStandardRelationsResponse relations = equipmentService.searchEquipmentStandardRelations(cmd);
+		
+		RestResponse response = new RestResponse(relations);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/reviewEquipmentStandardRelations</b>
+	 * <p>审批设备-标准关联</p>
+	 */
+	@RequestMapping("reviewEquipmentStandardRelations")
+	@RestReturn(value = String.class)
+	public RestResponse reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd) {
+		
+		equipmentService.reviewEquipmentStandardRelations(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/deleteEquipmentStandardRelations</b>
+	 * <p>删除失效的设备-标准关联</p>
+	 */
+	@RequestMapping("deleteEquipmentStandardRelations")
+	@RestReturn(value = String.class)
+	public RestResponse deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd) {
+		
+		equipmentService.deleteEquipmentStandardRelations(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+//	/**
+//	 * <b>URL: /equipment/creatEquipments</b>
+//	 * <p>创建设备</p>
+//	 */
+//	@RequestMapping("creatEquipments")
+//	@RestReturn(value = EquipmentsDTO.class)
+//	public RestResponse creatEquipments(CreatEquipmentsCommand cmd) {
+//		
+//		EquipmentsDTO equipment = equipmentService.creatEquipments(cmd);
+//		
+//		RestResponse response = new RestResponse(equipment);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+	/**
+	 * <b>URL: /equipment/updateEquipments</b>
+	 * <p>创建或修改设备</p>
+	 */
+	@RequestMapping("updateEquipments")
+	@RestReturn(value = EquipmentsDTO.class)
+	public RestResponse updateEquipments(UpdateEquipmentsCommand cmd) {
+		
+		EquipmentsDTO equipment = equipmentService.updateEquipments(cmd);
+		
+		RestResponse response = new RestResponse(equipment);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/deleteEquipments</b>
+	 * <p>删除设备</p>
+	 */
+	@RequestMapping("deleteEquipments")
+	@RestReturn(value = String.class)
+	public RestResponse deleteEquipments(DeleteEquipmentsCommand cmd) {
+		
+		equipmentService.deleteEquipments(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/searchEquipments</b>
+	 * <p>查看设备列表</p>
+	 */
+	@RequestMapping("searchEquipments")
+	@RestReturn(value = SearchEquipmentsResponse.class)
+	public RestResponse searchEquipments(SearchEquipmentsCommand cmd) {
+		
+		SearchEquipmentsResponse equipments = equipmentService.searchEquipments(cmd);
+		
+		RestResponse response = new RestResponse(equipments);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listEquipmentsCategories</b>
+	 * <p>查看设备类型</p>
+	 */
+	@RequestMapping("listEquipmentsCategories")
+	@RestReturn(value = CategoryDTO.class, collection = true)
+	public RestResponse listEquipmentsCategories() {
+		
+		List<CategoryDTO> categories = equipmentService.listEquipmentsCategories();
+		
+		RestResponse response = new RestResponse(categories);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/exportEquipments</b>
+	 * <p>导出设备列表</p>
+	 */
+	@RequestMapping("exportEquipments")
+	public HttpServletResponse exportEquipments(@Valid SearchEquipmentsCommand cmd,HttpServletResponse response) {
+		
+		HttpServletResponse commandResponse = equipmentService.exportEquipments(cmd, response);
+		
+		return commandResponse;
+	}
+	
+	/**
+     * <b>URL: /equipment/importEquipments</b>
+     * <p>导入设备列表</p>
+     */
+    @RequestMapping("importEquipments")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importEquipments(@RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.equipmentService.importEquipments(files[0], userId);
+        RestResponse response = new RestResponse(importDataResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+//    /**
+//	 * <b>URL: /equipment/creatEquipmentAccessories</b>
+//	 * <p>创建备品备件</p>
+//	 */
+//	@RequestMapping("creatEquipmentAccessories")
+//	@RestReturn(value = EquipmentAccessoriesDTO.class)
+//	public RestResponse creatEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd) {
+//		
+//		EquipmentAccessoriesDTO accessories = equipmentService.creatEquipmentAccessories(cmd);
+//		
+//		RestResponse response = new RestResponse(accessories);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
+	/**
+	 * <b>URL: /equipment/updateEquipmentAccessories</b>
+	 * <p>创建或修改备品备件</p>
+	 */
+	@RequestMapping("updateEquipmentAccessories")
+	@RestReturn(value = EquipmentAccessoriesDTO.class)
+	public RestResponse updateEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd) {
+		
+		EquipmentAccessoriesDTO accessories = equipmentService.updateEquipmentAccessories(cmd);
+		
+		RestResponse response = new RestResponse(accessories);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/deleteEquipmentAccessories</b>
+	 * <p>删除备品备件</p>
+	 */
+	@RequestMapping("deleteEquipmentAccessories")
+	@RestReturn(value = String.class)
+	public RestResponse deleteEquipmentAccessories(DeleteEquipmentAccessoriesCommand cmd) {
+		
+		equipmentService.deleteEquipmentAccessories(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/searchEquipmentAccessories</b>
+	 * <p>查看备品备件</p>
+	 */
+	@RequestMapping("searchEquipmentAccessories")
+	@RestReturn(value = SearchEquipmentAccessoriesResponse.class)
+	public RestResponse searchEquipmentAccessories(SearchEquipmentAccessoriesCommand cmd) {
+		
+		SearchEquipmentAccessoriesResponse accessories = equipmentService.searchEquipmentAccessories(cmd);
+		
+		RestResponse response = new RestResponse(accessories);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/exportEquipmentAccessories</b>
+	 * <p>导出备品备件表</p>
+	 */
+	@RequestMapping("exportEquipmentAccessories")
+	public HttpServletResponse exportEquipmentAccessories(@Valid SearchEquipmentAccessoriesCommand cmd,HttpServletResponse response) {
+		
+		HttpServletResponse commandResponse = equipmentService.exportEquipmentAccessories(cmd, response);
+		
+		return commandResponse;
+	}
+	
+	/**
+     * <b>URL: /equipment/importEquipmentAccessories</b>
+     * <p>导入备品备件表</p>
+     */
+    @RequestMapping("importEquipmentAccessories")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importEquipmentAccessories(@RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.equipmentService.importEquipmentAccessories(files[0], userId);
+        RestResponse response = new RestResponse(importDataResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+	 * <b>URL: /equipment/exportEquipmentTasks</b>
+	 * <p>导出任务</p>
+	 */
+	@RequestMapping("exportEquipmentTasks")
+	public HttpServletResponse exportEquipmentTasks(@Valid SearchEquipmentTasksCommand cmd,HttpServletResponse response) {
+		
+		HttpServletResponse commandResponse = equipmentService.exportEquipmentTasks(cmd, response);
+		
+		return commandResponse;
+	}
+	
+	/**
+	 * <b>URL: /equipment/searchEquipmentTasks</b>
+	 * <p>查看任务列表-后台</p>
+	 */
+	@RequestMapping("searchEquipmentTasks")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse searchEquipmentTasks(SearchEquipmentTasksCommand cmd) {
+		
+		ListEquipmentTasksResponse tasks = equipmentService.searchEquipmentTasks(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listEquipmentTasks</b>
+	 * <p>查看任务列表-app</p>
+	 */
+	@RequestMapping("listEquipmentTasks")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listEquipmentTasks(ListEquipmentTasksCommand cmd) {
+		
+		ListEquipmentTasksResponse tasks = equipmentService.listEquipmentTasks(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/reportEquipmentTask</b>
+	 * <p>任务上报</p>
+	 */
+	@RequestMapping("reportEquipmentTask")
+	@RestReturn(value = EquipmentTaskDTO.class)
+	public RestResponse reportEquipmentTask(ReportEquipmentTaskCommand cmd) {
+		
+		EquipmentTaskDTO dto = equipmentService.reportEquipmentTask(cmd);
+		
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/reviewEquipmentTask</b>
+	 * <p>任务审阅</p>
+	 */
+	@RequestMapping("reviewEquipmentTask")
+	@RestReturn(value = String.class)
+	public RestResponse reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
+		
+		equipmentService.reviewEquipmentTask(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/createEquipmentTaskByStandard</b>
+	 * <p>根据标准创建任务</p>
+	 */
+	@RequestMapping("createEquipmentTaskByStandard")
+	@RestReturn(value = String.class)
+	public RestResponse createEquipmentTaskByStandard(DeleteEquipmentStandardCommand cmd) {
+		
+		equipmentService.createEquipmentTaskByStandard(cmd.getStandardId());
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listLogsByTaskId</b>
+	 * <p>查看任务的操作记录</p>
+	 */
+	@RequestMapping("listLogsByTaskId")
+	@RestReturn(value = ListLogsByTaskIdResponse.class)
+	public RestResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd) {
+		
+		ListLogsByTaskIdResponse records = equipmentService.listLogsByTaskId(cmd);
+		
+		RestResponse response = new RestResponse(records);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/verifyEquipmentLocation</b>
+	 * <p>扫一扫验证二维码和经纬度</p>
+	 */
+	@RequestMapping("verifyEquipmentLocation")
+	@RestReturn(value = String.class)
+	public RestResponse verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd) {
+		
+		equipmentService.verifyEquipmentLocation(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+}
