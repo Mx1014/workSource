@@ -2,14 +2,14 @@
 // EvhTechparkRentalAddRentalBillRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhRentalBillDTO.h"
+#import "EvhRentalRentalBillDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalAddRentalBillRestResponse
 //
 @interface EvhTechparkRentalAddRentalBillRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhRentalBillDTO* response;
+@property(nonatomic, strong) EvhRentalRentalBillDTO* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
