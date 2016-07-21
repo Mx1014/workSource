@@ -12,6 +12,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.ui.activity.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListOfficialActivitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListOfficialActivitiesBySceneReponse;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="ActivityUi controller", site="activityui")
@@ -42,8 +44,8 @@ public class ActivityUiController extends ControllerBase {
      * <p>列出官方活动</p>
      */
     @RequestMapping("listOfficialActivitiesByScene")
-    @RestReturn(value=ListActivitiesReponse.class)
-    public RestResponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd){
+    @RestReturn(value=ListOfficialActivitiesBySceneReponse.class)
+    public RestResponse listOfficialActivitiesByScene(ListOfficialActivitiesBySceneCommand cmd){
     	com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand.class);
         ListActivitiesReponse rsp = activityService.listOfficialActivitiesByScene(command);
         RestResponse response = new RestResponse(rsp);
