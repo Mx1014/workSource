@@ -863,6 +863,7 @@
 #define EVH_TECHPARK_RENTAL_UPDATERENTALSITE_URL @"/techpark/rental/updateRentalSite"
 #define EVH_TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL @"/techpark/rental/verifyServiceRentalBill"
 #define EVH_UI_ACTIVITY_LISTNEARBYACTIVITIESBYSCENE_URL @"/ui/activity/listNearbyActivitiesByScene"
+#define EVH_UI_ACTIVITY_LISTOFFICIALACTIVITIESBYSCENE_URL @"/ui/activity/listOfficialActivitiesByScene"
 #define EVH_UI_BANNER_GETBANNERSBYSCENE_URL @"/ui/banner/getBannersByScene"
 #define EVH_UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL @"/ui/community/listCommunitiesByScene"
 #define EVH_UI_FORUM_GETTOPICQUERYFILTERS_URL @"/ui/forum/getTopicQueryFilters"

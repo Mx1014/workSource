@@ -1,20 +1,20 @@
 //
-// EvhListBuildingsByStatusCommandResponse.m
+// EvhListOfficialActivitiesBySceneReponse.m
 //
-#import "EvhListBuildingsByStatusCommandResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhListOfficialActivitiesBySceneReponse.h"
+#import "EvhActivityDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhListOfficialActivitiesBySceneReponse
 //
 
-@implementation EvhListBuildingsByStatusCommandResponse
+@implementation EvhListOfficialActivitiesBySceneReponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListBuildingsByStatusCommandResponse* obj = [EvhListBuildingsByStatusCommandResponse new];
+        EvhListOfficialActivitiesBySceneReponse* obj = [EvhListOfficialActivitiesBySceneReponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _buildings = [NSMutableArray new];
+        _activities = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -34,14 +34,14 @@
 {
     if(self.nextPageAnchor)
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
-    if(self.buildings) {
+    if(self.activities) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhBuildingDTO* item in self.buildings) {
+        for(EvhActivityDTO* item in self.activities) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"buildings"];
+        [jsonObject setObject: jsonArray forKey: @"activities"];
     }
 }
 
@@ -53,12 +53,12 @@
             self.nextPageAnchor = nil;
 
         {
-            NSArray* jsonArray = [jsonObject objectForKey: @"buildings"];
+            NSArray* jsonArray = [jsonObject objectForKey: @"activities"];
             for(id itemJson in jsonArray) {
-                EvhBuildingDTO* item = [EvhBuildingDTO new];
+                EvhActivityDTO* item = [EvhActivityDTO new];
                 
                 [item fromJson: itemJson];
-                [self.buildings addObject: item];
+                [self.activities addObject: item];
             }
         }
         return self;

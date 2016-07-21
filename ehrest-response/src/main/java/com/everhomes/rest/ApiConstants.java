@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-20 16:25:07
+// generated at 2016-07-21 12:29:22
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -866,6 +866,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
     public static final String UI_ACTIVITY_LISTNEARBYACTIVITIESBYSCENE_URL = "/ui/activity/listNearbyActivitiesByScene";
+    public static final String UI_ACTIVITY_LISTOFFICIALACTIVITIESBYSCENE_URL = "/ui/activity/listOfficialActivitiesByScene";
     public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
     public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
     public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
