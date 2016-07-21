@@ -1882,6 +1882,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getSiteCounts()==null?1:cmd.getSiteCounts());
 					rsr.setUnit(cmd.getUnit());
+					rsr.setRentalResourceId(cmd.getRentalSiteId());
 					rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start
 							.getTime())));
 					rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
@@ -2365,7 +2366,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Long timestamp = System.currentTimeMillis();
 		Integer randomNum = (int) (Math.random()*1000);
 		App app = appProvider.findAppByKey(appKey);
-		
+		if(app==null){
+			LOGGER.error("app not found.key="+appKey);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"app not found.");
+		}
 		Map<String,String> map = new HashMap<String, String>();
 		map.put("appKey",appKey);
 		map.put("timestamp",timestamp+"");
