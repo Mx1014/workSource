@@ -18,9 +18,10 @@ import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhRentalSiteOwners;
-import com.everhomes.server.schema.tables.pojos.EhRentalSitePics;
-import com.everhomes.server.schema.tables.pojos.EhRentalSites;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourcePics;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceRanges;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -37,6 +38,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 	private String ownerType = RentalOwnerType.COMMUNITY.getCode();
 	private Long ownerId = 419L;
 	private Long organizationId=1L;
+	private Long communityId=233L;
 	@Before
 	public void setUp() {
 		super.setUp();
@@ -106,16 +108,16 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 
 		// 登录时不传namepsace，默认为左邻域空间
 		logon(null, userIdentifier, plainTexPassword);
-		List<EhRentalSites> result1 = new ArrayList<>();
+		List<EhRentalv2Resources> result1 = new ArrayList<>();
 		DSLContext dslContext = dbProvider.getDslContext();
 		dslContext.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ORGANIZATION_ID.eq(this.organizationId))
-				.and(Tables.EH_RENTAL_SITES.RESOURCE_TYPE_ID.eq(this.launchPadItemId)) 
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ORGANIZATION_ID.eq(this.organizationId))
+				.and(Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE_ID.eq(this.launchPadItemId)) 
 				.fetch()
 				.map((r) -> {
 					result1.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		UpdateResourceAdminCommand cmd = new UpdateResourceAdminCommand();
@@ -153,40 +155,40 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		
 		
 		
-		List<EhRentalSites> result = new ArrayList<>();
+		List<EhRentalv2Resources> result = new ArrayList<>();
 		dslContext.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ID.eq(cmd.getId())) 
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ID.eq(cmd.getId())) 
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		//验证资源表修改
-		assertEquals(cmd.getSiteName(), result.get(0).getSiteName());
+		assertEquals(cmd.getSiteName(), result.get(0).getResourceName());
 
-		List<EhRentalSiteOwners> resultOwners = new ArrayList<>();
+		List<EhRentalv2ResourceRanges> resultOwners = new ArrayList<>();
 		dslContext.select()
-				.from(Tables.EH_RENTAL_SITE_OWNERS)
-				.where(Tables.EH_RENTAL_SITE_OWNERS.RENTAL_SITE_ID.eq(cmd.getId()))
+				.from(Tables.EH_RENTALV2_RESOURCE_RANGES)
+				.where(Tables.EH_RENTALV2_RESOURCE_RANGES.RENTAL_RESOURCE_ID.eq(cmd.getId()))
 				.fetch()
 				.map((r) -> {
 					resultOwners.add(ConvertHelper.convert(r,
-							EhRentalSiteOwners.class));
+							EhRentalv2ResourceRanges.class));
 					return null;
 				});
 		assertEquals(21, resultOwners.size());
 		
-		List<EhRentalSitePics> resultPics = new ArrayList<>();
+		List<EhRentalv2ResourcePics> resultPics = new ArrayList<>();
 		dslContext.select()
-				.from(Tables.EH_RENTAL_SITE_PICS)
-				.where(Tables.EH_RENTAL_SITE_PICS.OWNER_ID.eq(cmd.getId()))
-				.and(Tables.EH_RENTAL_SITE_PICS.OWNER_TYPE.eq(EhRentalSites.class.getSimpleName())) 
+				.from(Tables.EH_RENTALV2_RESOURCE_PICS)
+				.where(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_ID.eq(cmd.getId()))
+				.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE.eq(EhRentalv2Resources.class.getSimpleName())) 
 				.fetch()
 				.map((r) -> {
 					resultPics.add(ConvertHelper.convert(r,
-							EhRentalSitePics.class));
+							EhRentalv2ResourcePics.class));
 					return null;
 				});
 		assertEquals(21, resultPics.size());
@@ -199,6 +201,7 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		cmd.setResourceTypeId(this.launchPadItemId);
 		cmd.setOrganizationId(this.organizationId);
 		cmd.setOwners(new ArrayList<SiteOwnerDTO>());
+		cmd.setCommunityId(communityId);
 		SiteOwnerDTO ownerDTO=new SiteOwnerDTO();
 		ownerDTO.setOwnerId(this.ownerId);
 		ownerDTO.setOwnerType(this.ownerType);
@@ -207,9 +210,9 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 		ownerDTO2.setOwnerId(233L);
 		ownerDTO2.setOwnerType(this.ownerType);
 		cmd.getOwners().add(ownerDTO2);
-		cmd.setSiteName("资源名称");
+		cmd.setSiteName("测试添加的资源");
 		cmd.setSpec("规格：40座");
-		cmd.setAddress("地址不用获取");
+		cmd.setAddress("没有地址");
 		cmd.setLatitude(22.5655);
 		cmd.setLongitude(115.5654);
 		cmd.setContactPhonenum("135-8644-4564");
@@ -232,42 +235,42 @@ public class RentalAdminResourceTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response)); 
 		DSLContext context = dbProvider.getDslContext();
-		List<EhRentalSites> result = new ArrayList<>();
+		List<EhRentalv2Resources> result = new ArrayList<>();
 		context.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ORGANIZATION_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ORGANIZATION_ID.eq(cmd
 						.getOrganizationId()))
-				.and(Tables.EH_RENTAL_SITES.RESOURCE_TYPE_ID.eq(cmd
+				.and(Tables.EH_RENTALV2_RESOURCES.RESOURCE_TYPE_ID.eq(cmd
 						.getResourceTypeId())) 
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		assertEquals(30, result.size());
 
-		List<EhRentalSiteOwners> resultOwners = new ArrayList<>();
+		List<EhRentalv2ResourceRanges> resultOwners = new ArrayList<>();
 		context.select()
-				.from(Tables.EH_RENTAL_SITE_OWNERS)
-				.where(Tables.EH_RENTAL_SITE_OWNERS.RENTAL_SITE_ID.eq(result.get(0).getId()))
+				.from(Tables.EH_RENTALV2_RESOURCE_RANGES)
+				.where(Tables.EH_RENTALV2_RESOURCE_RANGES.RENTAL_RESOURCE_ID.eq(result.get(0).getId()))
 				.fetch()
 				.map((r) -> {
 					resultOwners.add(ConvertHelper.convert(r,
-							EhRentalSiteOwners.class));
+							EhRentalv2ResourceRanges.class));
 					return null;
 				});
 		assertEquals(2, resultOwners.size());
 		
-		List<EhRentalSitePics> resultPics = new ArrayList<>();
+		List<EhRentalv2ResourcePics> resultPics = new ArrayList<>();
 		context.select()
-				.from(Tables.EH_RENTAL_SITE_PICS)
-				.where(Tables.EH_RENTAL_SITE_PICS.OWNER_ID.eq(result.get(0).getId()))
-				.and(Tables.EH_RENTAL_SITE_PICS.OWNER_TYPE.eq(EhRentalSites.class.getSimpleName())) 
+				.from(Tables.EH_RENTALV2_RESOURCE_PICS)
+				.where(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_ID.eq(result.get(0).getId()))
+				.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE.eq(EhRentalv2Resources.class.getSimpleName())) 
 				.fetch()
 				.map((r) -> {
 					resultPics.add(ConvertHelper.convert(r,
-							EhRentalSitePics.class));
+							EhRentalv2ResourcePics.class));
 					return null;
 				});
 		assertEquals(3, resultPics.size());

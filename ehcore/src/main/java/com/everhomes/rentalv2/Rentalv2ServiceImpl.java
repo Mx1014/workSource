@@ -61,7 +61,6 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -116,8 +115,6 @@ import com.everhomes.rest.rentalv2.FindRentalSitesCommand;
 import com.everhomes.rest.rentalv2.FindRentalSitesCommandResponse;
 import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
 import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.GetRentalTypeRuleCommand;
-import com.everhomes.rest.rentalv2.GetRentalTypeRuleCommandResponse;
 import com.everhomes.rest.rentalv2.IncompleteBillCommand;
 import com.everhomes.rest.rentalv2.InvoiceFlag;
 import com.everhomes.rest.rentalv2.ListRentalBillCountCommand;
@@ -624,6 +621,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item type can not be null"); 
 		RentalItem siteItem = ConvertHelper.convert(cmd,RentalItem.class );
 		siteItem.setName(cmd.getItemName());
+		siteItem.setRentalResourceId(cmd.getRentalSiteId());
 		siteItem.setPrice(cmd.getItemPrice());
 		rentalProvider.createRentalSiteItem(siteItem);
 	}
@@ -1195,13 +1193,57 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				// 在支付时间之后 为待支付全款
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 	//		}
-	
+
+			//使用详情
+			StringBuffer useDetailSB = new StringBuffer();
+			// 循环存site订单
+			for (rentalBillRuleDTO siteRule : cmd.getRules())  { 
+				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
+				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
+					useDetailSB.append("使用时间:");
+					useDetailSB.append("从");
+					useDetailSB.append(datetimeSF.format(rsr.getBeginTime()));
+					useDetailSB.append("到");
+					useDetailSB.append(datetimeSF.format(rsr.getEndTime()));
+				}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
+					useDetailSB.append("使用时间:");
+					useDetailSB.append(dateSF.format(rsr.getResourceRentalDate()));
+				}else {
+					useDetailSB.append("使用时间:");
+					useDetailSB.append(dateSF.format(rsr.getResourceRentalDate()));
+					if(rsr.getAmorpm().equals(AmorpmFlag.AM))
+						useDetailSB.append("早上");
+					if(rsr.getAmorpm().equals(AmorpmFlag.PM))
+						useDetailSB.append("下午");
+					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT))
+						useDetailSB.append("晚上");
+				}
+				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
+				//独占资源 只有时间				 
+				}
+				else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+					//不需要资源编号
+					useDetailSB.append(";预约数量:");
+					useDetailSB.append(siteRule.getRentalCount());
+				}
+				else {
+					//不需要资源编号
+					useDetailSB.append(";资源编号:");
+					useDetailSB.append(rsr.getResourceNumber());
+//					useDetailSB.append("号");
+				}
+				useDetailSB.append("\n");
+//				if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+//					Integer loopCnt = 0; 
+////					assignSiteNumber(rsb,rsr,billDTO,loopCnt);
+//				}
+			}
+			rentalBill.setUseDetail(useDetailSB.toString());
 			rentalBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			rentalBill.setCreatorUid(userId);
 			rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
-	
-			// Long rentalBillId = this.rentalProvider.createRentalBill(rentalBill);
+	 
 			//用基于服务器平台的锁添加订单（包括验证和添加）
 			Tuple<Long, Boolean> tuple = (Tuple<Long, Boolean>) this.coordinationProvider
 					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
@@ -1260,9 +1302,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	//					rentalBill.getEndTime().getTime() + rs.getOvertimeTime());
 	//		}
 
-			//使用详情
-			StringBuffer useDetailSB = new StringBuffer();
-			// 循环存site订单
 			for (rentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
 				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
@@ -1291,49 +1330,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rsb.setCreatorUid(userId);
 	
 				rentalProvider.createRentalSiteBill(rsb);
-				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
-					useDetailSB.append("使用时间:");
-					useDetailSB.append("从");
-					useDetailSB.append(datetimeSF.format(rsr.getBeginTime()));
-					useDetailSB.append("到");
-					useDetailSB.append(datetimeSF.format(rsr.getEndTime()));
-				}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
-					useDetailSB.append("使用时间:");
-					useDetailSB.append(dateSF.format(rsr.getResourceRentalDate()));
-				}else {
-					useDetailSB.append("使用时间:");
-					useDetailSB.append(dateSF.format(rsr.getResourceRentalDate()));
-					if(rsr.getAmorpm().equals(AmorpmFlag.AM))
-						useDetailSB.append("早上");
-					if(rsr.getAmorpm().equals(AmorpmFlag.PM))
-						useDetailSB.append("下午");
-					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT))
-						useDetailSB.append("晚上");
-				}
-				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
-				//独占资源 只有时间				 
-				}
-				else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
-					//不需要资源编号
-					useDetailSB.append(";预约数量:");
-					useDetailSB.append(rsb.getRentalCount());
-				}
-				else {
-					//不需要资源编号
-					useDetailSB.append(";资源编号:");
-					useDetailSB.append(rsr.getResourceNumber());
-//					useDetailSB.append("号");
-				}
-				useDetailSB.append("\n");
-//				if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-//					Integer loopCnt = 0; 
-////					assignSiteNumber(rsb,rsr,billDTO,loopCnt);
-//				}
 			}
 			//验证site订单是否超过了site数量，如果有，抛异常，回滚操作
 //			this.valiRentalBill(0.0, cmd.getRules());
-			rentalBill.setUseDetail(useDetailSB.toString());
-			this.rentalProvider.updateRentalBill(rentalBill);
+//			this.rentalProvider.updateRentalBill(rentalBill);
 			mappingRentalBillDTO(billDTO, rentalBill);
 			return billDTO;
 		});
@@ -3312,6 +3312,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid launchPadItemId parameter in the command");
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalResource rentalsite = ConvertHelper.convert(cmd, RentalResource.class);
+			rentalsite.setResourceName(cmd.getSiteName());
 			rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
 			rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -3383,8 +3384,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid ItemType   parameter in the command : null");
 		RentalItem siteItem =this.rentalProvider.getRentalSiteItemById(cmd.getId());
-		if(cmd.getItemType().equals(RentalItemType.SALE.getCode()))
-			siteItem.setCounts(cmd.getCounts()+siteItem.getCounts());
+		 
+		if(cmd.getItemType().equals(RentalItemType.SALE.getCode())){
+			//设置的是库存，存储的是总量还要库存+已售
+			Integer sumInteger = this.rentalProvider.countRentalSiteItemSoldCount(cmd.getId()); 
+			siteItem.setCounts(cmd.getCounts()+sumInteger);
+			}
 		else
 			siteItem.setCounts(cmd.getCounts());
 			
@@ -3400,7 +3405,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void updateItems(UpdateItemsAdminCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			for(SiteItemDTO dto : cmd.getItemDTOs()){
-				UpdateItemAdminCommand cmd2 = ConvertHelper.convert(dto, UpdateItemAdminCommand.class);
+				UpdateItemAdminCommand cmd2 = ConvertHelper.convert(dto, UpdateItemAdminCommand.class); 
 				updateItem(cmd2);
 			}
 			

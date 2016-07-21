@@ -157,7 +157,7 @@ DROP TABLE IF EXISTS eh_rentalv2_resource_pics;
 CREATE TABLE `eh_rentalv2_resource_pics` (
 `id` BIGINT(20)    COMMENT '',
 `owner_id` BIGINT(20)    COMMENT '',
-`owner_type` VARCHAR(255)  COMMENT '"eh_rental_resources"',
+`owner_type` VARCHAR(255)  COMMENT 'EhRentalv2Resources',
 `uri` VARCHAR(1024)  COMMENT '',
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	

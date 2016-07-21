@@ -63,15 +63,9 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 	 
 	}
  
-	
-	private void truncateRentalTable() {
-
-		String serverInitfilePath = "data/tables/rental2.0_truncate_tables.sql";
-		dbProvider.runClassPathSqlFile(serverInitfilePath);
-
-	}
+	 
 	//查询接口放到一个test里，一面删数据加数据浪费时间
-//	@Test
+	@Test
 	public void testFindAPI(){
 		testFindRentalSites();
 		testFindRentalSiteWeekStatus();
@@ -584,6 +578,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 		String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
+        
 	}
 
 }

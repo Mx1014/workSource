@@ -32,13 +32,7 @@ public class RentalRefundOrderTest extends BaseLoginAuthTestCase {
 	public void setUp() {
 		super.setUp(); 
 	}
-
-	private void truncateRentalTable() {
-
-		String serverInitfilePath = "data/tables/rental2.0_truncate_tables.sql";
-		dbProvider.runClassPathSqlFile(serverInitfilePath);
-
-	}
+ 
 	//查询接口放到一个test里，一面删数据加数据浪费时间
 	@Test
 	public void testFindAPI(){ 

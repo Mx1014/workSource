@@ -131,8 +131,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		List<EhRentalv2Cells> resultRules1 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITE_RULES)
-				.where(Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(cmd
 						.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
@@ -205,8 +205,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		List<EhRentalv2Cells> resultRules2 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITE_RULES)
-				.where(Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(cmd
 						.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
@@ -287,8 +287,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		List<EhRentalv2Cells> resultRules3 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITE_RULES)
-				.where(Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(cmd
 						.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
@@ -364,8 +364,8 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		List<EhRentalv2Cells> resultRules1 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITE_RULES)
-				.where(Tables.EH_RENTAL_SITE_RULES.ID.eq(282L))
+				.from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.ID.eq(282L))
 				.fetch()
 				.map((r) -> {
 					resultRules1.add(ConvertHelper.convert(r,

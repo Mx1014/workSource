@@ -1,8 +1,8 @@
 {
-    "eh_rental_refund_orders": [
+    "eh_rentalv2_refund_orders": [
         {
             "id": 1,
-            "rental_bill_id": 2,
+            "order_id": 2,
             "refund_order_no": 3333333356353,
             "resource_type_id": 510,
             "order_no": 333333332342,
@@ -14,7 +14,7 @@
         },
         {
             "id": 2,
-            "rental_bill_id": 2,
+            "order_id": 2,
             "refund_order_no": 3333333356353,
             "resource_type_id": 510,
             "order_no": 333333332342,
@@ -26,7 +26,7 @@
         },
         {
             "id": 3,
-            "rental_bill_id": 2,
+            "order_id": 2,
             "refund_order_no": 3333333356353,
             "resource_type_id": 510,
             "order_no": 333333332342,
@@ -38,7 +38,7 @@
         },
         {
             "id": 4,
-            "rental_bill_id": 2,
+            "order_id": 2,
             "refund_order_no": 3333333356353,
             "resource_type_id": 510,
             "order_no": 333333332342,
@@ -50,7 +50,7 @@
         },
         {
             "id": 5,
-            "rental_bill_id": 2,
+            "order_id": 2,
             "refund_order_no": 3333333356353,
             "resource_type_id": 510,
             "order_no": 333333332342,
@@ -62,7 +62,7 @@
         },
         {
             "id": 6,
-            "rental_bill_id": 2,
+            "order_id": 2,
             "refund_order_no": 3333333356353,
             "resource_type_id": 510,
             "order_no": 333333332342,

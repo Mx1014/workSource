@@ -32,8 +32,7 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 
 	@Before
 	public void setUp() {
-		super.setUp();
-		truncateRentalTable();
+		super.setUp(); 
 	}
 	@Test
 	public void Test(){
@@ -41,9 +40,7 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 		testUpdateDefaultRule();
 	}
 	private void truncateRentalTable() {
-
-		String serverInitfilePath = "data/tables/rental2.0_truncate_tables.sql";
-		dbProvider.runClassPathSqlFile(serverInitfilePath);
+ 
 
 	}
 
