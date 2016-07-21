@@ -65,7 +65,7 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
  
 	 
 	//查询接口放到一个test里，一面删数据加数据浪费时间
-	@Test
+//	@Test
 	public void testFindAPI(){
 		testFindRentalSites();
 		testFindRentalSiteWeekStatus();

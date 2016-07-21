@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1758,7 +1759,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setCancelTime(cmd.getCancelTime());
 			rs.setRefundFlag(cmd.getRefundFlag());
 			rs.setRefundRatio(cmd.getRefundRatio());
-			this.rentalProvider.updateRentalSite(rs);
+			
+			//重新生成附件
 			this.rentalProvider.deleteRentalConfigAttachmentsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
 			if(null!=cmd.getAttachments())
 				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:cmd.getAttachments()){
@@ -1771,8 +1773,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			
 			BigDecimal weekendPrice = cmd.getWeekendPrice() == null ? new BigDecimal(0) : cmd.getWeekendPrice(); 
 			BigDecimal workdayPrice = cmd.getWorkdayPrice() == null ? new BigDecimal(0) : cmd.getWorkdayPrice();
-			
+
 			if(cmd.getTimeIntervals() != null) {
+
 				Double beginTime = null;
 				Double endTime = null;
 				for(TimeIntervalDTO timeInterval:cmd.getTimeIntervals()){
@@ -1793,12 +1796,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(endTime>24.0||beginTime<0.0)
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
+				rs.setDayBeginTime(new Time((long) (beginTime*1000*60*60L)));
+				rs.setDayBeginTime(new Time((long) (endTime*1000*60*60L)));
 			} else {
 				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 				signleCmd.setWeekendPrice(weekendPrice); 
 				signleCmd.setWorkdayPrice(workdayPrice);
 				addRentalSiteSingleSimpleRule(signleCmd);
 			}
+
+			this.rentalProvider.updateRentalSite(rs);
+			
 			return null;
 		});
 	}
