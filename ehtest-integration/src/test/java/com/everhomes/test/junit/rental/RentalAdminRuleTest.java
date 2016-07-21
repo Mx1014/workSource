@@ -10,35 +10,24 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ch.qos.logback.core.joran.conditional.ElseAction;
-
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
 import com.everhomes.rest.rentalv2.LoopType;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.rentalv2.RentalItemType;
 import com.everhomes.rest.rentalv2.RentalOwnerType;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.RentalType;
-import com.everhomes.rest.rentalv2.SiteItemDTO;
-import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AdminGetItemListRestResponse;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.rentalv2.admin.DiscountType;
 import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
-import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhRentalConfigAttachments;
-import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
-import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
-import com.everhomes.server.schema.tables.pojos.EhRentalSites;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ConfigAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -139,7 +128,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 		DSLContext dslContext = dbProvider.getDslContext();
-		List<EhRentalSiteRules> resultRules1 = new ArrayList<EhRentalSiteRules>();
+		List<EhRentalv2Cells> resultRules1 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
 				.from(Tables.EH_RENTAL_SITE_RULES)
@@ -148,38 +137,38 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				.fetch()
 				.map((r) -> {
 					resultRules1.add(ConvertHelper.convert(r,
-							EhRentalSiteRules.class));
+							EhRentalv2Cells.class));
 					return null;
 				});
 		// 7周，其中每周7天也就是49天有效的，每天10场所，按日租，为280个单元格
 		assertEquals(490, resultRules1.size());
 
-		List<EhRentalSites> resultSite1 = new ArrayList<EhRentalSites>();
+		List<EhRentalv2Resources> resultSite1 = new ArrayList<EhRentalv2Resources>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ID.eq(cmd.getRentalSiteId()))
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ID.eq(cmd.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
 					resultSite1.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		// 添加规则会修改资源表
 		assertEquals(cmd.getMultiUnit(), resultSite1.get(0).getMultiUnit());
 
-		List<EhRentalConfigAttachments> resultConfigAttach1 = new ArrayList<EhRentalConfigAttachments>();
+		List<EhRentalv2ConfigAttachments> resultConfigAttach1 = new ArrayList<EhRentalv2ConfigAttachments>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_CONFIG_ATTACHMENTS)
-				.where(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS)
+				.where(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_ID.eq(cmd
 						.getRentalSiteId()))
-				.and(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_TYPE
-						.eq(EhRentalSites.class.getSimpleName()))
+				.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_TYPE
+						.eq(EhRentalv2Resources.class.getSimpleName()))
 				.fetch()
 				.map((r) -> {
 					resultConfigAttach1.add(ConvertHelper.convert(r,
-							EhRentalConfigAttachments.class));
+							EhRentalv2ConfigAttachments.class));
 					return null;
 				});
 		// 增加了两个附件设置
@@ -213,7 +202,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		assertTrue("The user scenes should be get from server, response="
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
-		List<EhRentalSiteRules> resultRules2 = new ArrayList<EhRentalSiteRules>();
+		List<EhRentalv2Cells> resultRules2 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
 				.from(Tables.EH_RENTAL_SITE_RULES)
@@ -222,39 +211,39 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				.fetch()
 				.map((r) -> {
 					resultRules2.add(ConvertHelper.convert(r,
-							EhRentalSiteRules.class));
+							EhRentalv2Cells.class));
 					return null;
 				});
 		// 49天有效的，每天10场所，10-17点18-20，2小时为一个周期 每天4个单元格 总共
 		assertEquals(1960, resultRules2.size());
 
-		List<EhRentalSites> resultSite2 = new ArrayList<EhRentalSites>();
+		List<EhRentalv2Resources> resultSite2 = new ArrayList<EhRentalv2Resources>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ID.eq(cmd.getRentalSiteId()))
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ID.eq(cmd.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
 					resultSite2.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		// 添加规则会修改资源表
 		assertEquals(cmd.getMultiUnit(), resultSite2.get(0).getMultiUnit());
 		assertEquals(cmd.getRefundFlag(), resultSite2.get(0).getRefundFlag());
 
-		List<EhRentalConfigAttachments> resultConfigAttach2 = new ArrayList<EhRentalConfigAttachments>();
+		List<EhRentalv2ConfigAttachments> resultConfigAttach2 = new ArrayList<EhRentalv2ConfigAttachments>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_CONFIG_ATTACHMENTS)
-				.where(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS)
+				.where(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_ID.eq(cmd
 						.getRentalSiteId()))
-				.and(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_TYPE
-						.eq(EhRentalSites.class.getSimpleName()))
+				.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_TYPE
+						.eq(EhRentalv2Resources.class.getSimpleName()))
 				.fetch()
 				.map((r) -> {
 					resultConfigAttach2.add(ConvertHelper.convert(r,
-							EhRentalConfigAttachments.class));
+							EhRentalv2ConfigAttachments.class));
 					return null;
 				});
 		// 之前的2个附件应该删掉，增加新的附件 1个
@@ -295,7 +284,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		assertTrue("The user scenes should be get from server, response="
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
-		List<EhRentalSiteRules> resultRules3 = new ArrayList<EhRentalSiteRules>();
+		List<EhRentalv2Cells> resultRules3 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
 				.from(Tables.EH_RENTAL_SITE_RULES)
@@ -304,39 +293,39 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				.fetch()
 				.map((r) -> {
 					resultRules3.add(ConvertHelper.convert(r,
-							EhRentalSiteRules.class));
+							EhRentalv2Cells.class));
 					return null;
 				});
 		// 49天有效的，1场所，10-17点18-20，2小时为一个周期 每天4个单元格 总共
 		assertEquals(196, resultRules3.size());
 
-		List<EhRentalSites> resultSite3 = new ArrayList<EhRentalSites>();
+		List<EhRentalv2Resources> resultSite3 = new ArrayList<EhRentalv2Resources>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ID.eq(cmd.getRentalSiteId()))
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ID.eq(cmd.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
 					resultSite3.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		// 添加规则会修改资源表
 		assertEquals(cmd.getMultiUnit(), resultSite3.get(0).getMultiUnit());
 		assertEquals(cmd.getRefundFlag(), resultSite3.get(0).getRefundFlag());
 
-		List<EhRentalConfigAttachments> resultConfigAttach3 = new ArrayList<EhRentalConfigAttachments>();
+		List<EhRentalv2ConfigAttachments> resultConfigAttach3 = new ArrayList<EhRentalv2ConfigAttachments>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_CONFIG_ATTACHMENTS)
-				.where(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_ID.eq(cmd
+				.from(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS)
+				.where(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_ID.eq(cmd
 						.getRentalSiteId()))
-				.and(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_TYPE
-						.eq(EhRentalSites.class.getSimpleName()))
+				.and(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.OWNER_TYPE
+						.eq(EhRentalv2Resources.class.getSimpleName()))
 				.fetch()
 				.map((r) -> {
 					resultConfigAttach3.add(ConvertHelper.convert(r,
-							EhRentalConfigAttachments.class));
+							EhRentalv2ConfigAttachments.class));
 					return null;
 				});
 		// 之前的2个附件应该删掉，增加新的附件 1个
@@ -372,7 +361,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 		DSLContext dslContext = dbProvider.getDslContext();
-		List<EhRentalSiteRules> resultRules1 = new ArrayList<EhRentalSiteRules>();
+		List<EhRentalv2Cells> resultRules1 = new ArrayList<EhRentalv2Cells>();
 		dslContext
 				.select()
 				.from(Tables.EH_RENTAL_SITE_RULES)
@@ -380,26 +369,26 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				.fetch()
 				.map((r) -> {
 					resultRules1.add(ConvertHelper.convert(r,
-							EhRentalSiteRules.class));
+							EhRentalv2Cells.class));
 					return null;
 				});
 		// 28号的更新成功，之后的应该不更新
 		assertEquals(cmd.getOriginalPrice().doubleValue(), resultRules1.get(0).getOriginalPrice().doubleValue());
-		assertEquals(cmd.getHalfsiteOriginalPrice().doubleValue(), resultRules1.get(0).getHalfsiteOriginalPrice().doubleValue());
+//		assertEquals(cmd.getHalfsiteOriginalPrice().doubleValue(), resultRules1.get(0).getHalfsiteOriginalPrice().doubleValue());
  
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITE_RULES)
-				.where(Tables.EH_RENTAL_SITE_RULES.ID.eq(916L))
+				.from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.ID.eq(916L))
 				.fetch()
 				.map((r) -> {
 					resultRules1.add(ConvertHelper.convert(r,
-							EhRentalSiteRules.class));
+							EhRentalv2Cells.class));
 					return null;
 				});
 		// 28号的更新成功，之后的应该不更新
 		assertEquals(null, resultRules1.get(1).getOriginalPrice());
-		assertEquals(null, resultRules1.get(1).getHalfsiteOriginalPrice());
+//		assertEquals(null, resultRules1.get(1).getHalfsiteOriginalPrice());
 		
 
 	}
@@ -423,15 +412,15 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 				httpClientService.isReponseSuccess(response));
 		DSLContext dslContext = dbProvider.getDslContext();
 
-		List<EhRentalSites> resultSite1 = new ArrayList<EhRentalSites>();
+		List<EhRentalv2Resources> resultSite1 = new ArrayList<EhRentalv2Resources>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_SITES)
-				.where(Tables.EH_RENTAL_SITES.ID.eq(cmd.getRentalSiteId()))
+				.from(Tables.EH_RENTALV2_RESOURCES)
+				.where(Tables.EH_RENTALV2_RESOURCES.ID.eq(cmd.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
 					resultSite1.add(ConvertHelper.convert(r,
-							EhRentalSites.class));
+							EhRentalv2Resources.class));
 					return null;
 				});
 		assertEquals(cmd.getDiscountType(), resultSite1.get(0).getDiscountType());

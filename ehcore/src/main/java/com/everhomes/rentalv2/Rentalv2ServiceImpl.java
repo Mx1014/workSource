@@ -59,6 +59,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -221,6 +224,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
 
+	@Autowired
+	private CommunityProvider communityProvider;
 	@Autowired
 	private DbProvider dbProvider;
 	@Autowired
@@ -3265,7 +3270,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		for (RentalResource rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO =convertRentalSite2DTO(rentalSite);
-			
+			rSiteDTO.setSiteName(rentalSite.getResourceName());
+			User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
+			if(null != charger)
+				rSiteDTO.setChargeName(charger.getNickName());
+			Community community = this.communityProvider.findCommunityById(rSiteDTO.getCommunityId());
+			if(null != community)
+				rSiteDTO.setCommunityName(community.getName());
 			response.getRentalSites().add(rSiteDTO);
 		}
  

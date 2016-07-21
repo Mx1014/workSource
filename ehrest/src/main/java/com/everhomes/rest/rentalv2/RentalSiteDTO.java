@@ -3,6 +3,8 @@ package com.everhomes.rest.rentalv2;
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
@@ -17,7 +19,12 @@ import com.everhomes.util.StringHelper;
  * <li>avgPrice：平均价格</li>
  * <li>spec：规格：用户设置座位数等</li>
  * <li>companyId：场所隶属的公司id</li>
- * <li>ownId：负责人id</li>
+ * <li>longitude：经度</li>
+ * <li>latitude：纬度</li>
+ * <li>chargeUid：负责人id</li>
+ * <li>chargeName：负责人名称</li> 
+ * <li>communityId：所属园区id</li> 
+ * <li>communityName：所属园区名称</li> 
  * <li>contactPhonenum：电话号码</li>
  * <li>introduction：详情</li>
  * <li>	coverUri：	封面图uri	</li>
@@ -48,7 +55,13 @@ public class RentalSiteDTO {
 	private Long rentalSiteId; 
 	private String siteName;
 	private String buildingName;
-	private String address;
+	private String address; 
+	private Double longitude; 
+	private Double latitude;
+	private Long chargeUid;
+	private String chargeName; 
+	private Long communityId;
+	private String communityName;
 	private BigDecimal avgPrice;
 	private String spec;
 	private String companyName;
@@ -105,6 +118,66 @@ public class RentalSiteDTO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+
+	public Long getChargeUid() {
+		return chargeUid;
+	}
+
+
+	public void setChargeUid(Long chargeUid) {
+		this.chargeUid = chargeUid;
+	}
+
+
+	public String getChargeName() {
+		return chargeName;
+	}
+
+
+	public void setChargeName(String chargeName) {
+		this.chargeName = chargeName;
+	}
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
 
 	public String getSpec() {
 		return spec;
