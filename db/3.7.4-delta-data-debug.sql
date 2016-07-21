@@ -17,3 +17,12 @@ VALUES ( 809, '1000000', '0', '0', '0', '/home', 'GovAgencies', '社区活动', 
 		
 INSERT INTO `eh_launch_pad_items` ( `id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 VALUES ( 810, '1000000', '0', '0', '0', '/home', 'GovAgencies', '社区活动', '社区活动', 'cs://1/image/aW1hZ2UvTVRwalptSm1PRFE1T1dObVpqTXdZelZqWVRNME56azBNelk1TkdNNU1UUm1Zdw', '4', '1', '50', '', '1', '0', '1', '1', '', '1', NULL, NULL, NULL, '1', 'pm_admin');
+
+#电商离线包配置
+INSERT INTO `eh_version_realm` VALUES ('49', 'biz', null, UTC_TIMESTAMP(), '0');
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(52,49,'-0.1','2099200','0','2.2.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES (53,49,'2099199.9','2100224','0','2.3.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.2.0', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-2-0-tag.zip', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-2-0-tag.zip', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('25', '49', '2.3.0', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-3-0-tag.zip', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-3-0-tag.zip', '0');
+
+
