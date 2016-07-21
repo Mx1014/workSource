@@ -84,6 +84,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.GetTopicCommand;
@@ -92,6 +93,7 @@ import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostFavoriteFlag;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
@@ -101,6 +103,8 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
@@ -127,7 +131,9 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.StatusChecker;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 
 @Component
@@ -2042,4 +2048,74 @@ public class ActivityServiceImpl implements ActivityService {
         
 		return response;
 	}
+
+	@Override
+	public ListActivitiesReponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand command) {
+		Long userId = UserContext.current().getUser().getId();
+		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
+		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
+		processSceneToken(userId, sceneTokenDTO, cmd);
+		cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+		cmd.setEmbeddedAppId(AppConstants.APPID_ACTIVITY);
+		cmd.setOfficialFlag(OfficialFlag.YES.getCode());
+		cmd.setPageAnchor(command.getPageAnchor());
+		cmd.setPageSize(command.getPageSize());
+		
+		ListPostCommandResponse postResponse = forumService.listOrgTopics(cmd);
+		List<PostDTO> posts = postResponse.getPosts();		
+		final List<ActivityDTO> activities = new ArrayList<>();
+		if (posts != null && posts.size() > 0) {
+			posts.forEach(p->{
+				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
+				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
+				activity.setFavoriteFlag(p.getFavoriteFlag());
+				activities.add(activity);
+			});
+		}
+		
+		ListActivitiesReponse reponse = new ListActivitiesReponse(postResponse.getNextPageAnchor(), activities);
+		return reponse;
+	}
+
+	private void processSceneToken(Long userId, SceneTokenDTO sceneTokenDTO, QueryOrganizationTopicCommand cmd) {
+		Long organizationId = null;
+		Long communityId = null;
+	    SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+	    switch(sceneType) {
+	    case DEFAULT:
+	    case PARK_TOURIST:
+	        communityId = sceneTokenDTO.getEntityId();
+			List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+			if (list != null && list.size() > 0) {
+				organizationId = list.get(0).getOrganizationId();
+			}
+	        break;
+	    case FAMILY:
+	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+	        if(family != null) {
+	            communityId = family.getCommunityId();
+	            list = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+				if (list != null && list.size() > 0) {
+					organizationId = list.get(0).getOrganizationId();
+				}
+	        } else {
+	            if(LOGGER.isWarnEnabled()) {
+	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
+	            }
+	        }
+	        break;
+        case ENTERPRISE: 
+        case ENTERPRISE_NOAUTH: 
+        case PM_ADMIN:
+        	organizationId = sceneTokenDTO.getEntityId();
+            break;
+	    default:
+	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
+	        break;
+	    }
+	    
+	    cmd.setOrganizationId(organizationId);
+	}
+	
+	
 }

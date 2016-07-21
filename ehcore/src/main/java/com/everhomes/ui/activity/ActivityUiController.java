@@ -36,5 +36,20 @@ public class ActivityUiController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
+    
+    /**
+     * <b>URL: /ui/activity/listOfficialActivitiesByScene</b>
+     * <p>列出官方活动</p>
+     */
+    @RequestMapping("listOfficialActivitiesByScene")
+    @RestReturn(value=ListActivitiesReponse.class)
+    public RestResponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd){
+    	com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand.class);
+        ListActivitiesReponse rsp = activityService.listOfficialActivitiesByScene(command);
+        RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
 
 }

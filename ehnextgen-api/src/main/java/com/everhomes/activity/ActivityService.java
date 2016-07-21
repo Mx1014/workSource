@@ -83,4 +83,8 @@ public interface ActivityService {
     ListActivitiesReponse listOrgNearbyActivities(ListOrgNearbyActivitiesCommand cmd);
     
     ActivityShareDetailResponse getActivityShareDetail(ActivityTokenDTO postToken);
+
+	ListActivitiesReponse listOfficialActivitiesByScene(
+			ListNearbyActivitiesBySceneCommand command);
+
 }
