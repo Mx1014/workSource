@@ -345,6 +345,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	@Override
 	public void addDefaultRule( AddDefaultRuleAdminCommand cmd){
+
+		if(null== cmd.getRentalEndTime())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalEndTime can not be null");  
+		if(null== cmd.getRentalStartTime())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
 			//default rule
 			RentalDefaultRule defaultRule = ConvertHelper.convert(cmd, RentalDefaultRule.class); 
@@ -1707,7 +1714,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //	}
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd) {
-		
+		if(null== cmd.getRentalEndTime())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalEndTime can not be null");  
+		if(null== cmd.getRentalStartTime())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
 			
 			//设置默认规则，删除所有的单元格
