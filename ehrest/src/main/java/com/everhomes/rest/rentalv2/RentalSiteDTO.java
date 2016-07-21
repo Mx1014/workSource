@@ -77,8 +77,8 @@ public class RentalSiteDTO {
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
 	private Double   timeStep;
-	private java.sql.Time        dayBeginTime;
-	private java.sql.Time        dayEndTime;
+	private Long  dayBeginTime;
+	private Long  dayEndTime;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -358,23 +358,24 @@ public class RentalSiteDTO {
 		this.timeStep = timeStep;
 	}
 
+ 
 
-	public java.sql.Time getDayBeginTime() {
+	public Long getDayBeginTime() {
 		return dayBeginTime;
 	}
 
 
-	public void setDayBeginTime(java.sql.Time dayBeginTime) {
+	public void setDayBeginTime(Long dayBeginTime) {
 		this.dayBeginTime = dayBeginTime;
 	}
 
 
-	public java.sql.Time getDayEndTime() {
+	public Long getDayEndTime() {
 		return dayEndTime;
 	}
 
 
-	public void setDayEndTime(java.sql.Time dayEndTime) {
+	public void setDayEndTime(Long dayEndTime) {
 		this.dayEndTime = dayEndTime;
 	}
 

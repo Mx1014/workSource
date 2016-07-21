@@ -903,6 +903,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite){
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
+		rSiteDTO.setDayBeginTime(rSiteDTO.getDayBeginTime());
+		rSiteDTO.setDayEndTime(rSiteDTO.getDayEndTime());
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
 		rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime()); 
 		rSiteDTO.setCoverUrl(this.contentServerService.parserUri(rSiteDTO.getCoverUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
@@ -1797,7 +1799,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
 				rs.setDayBeginTime(new Time((long) (beginTime*1000*60*60L)));
-				rs.setDayBeginTime(new Time((long) (endTime*1000*60*60L)));
+				rs.setDayEndTime(new Time((long) (endTime*1000*60*60L)));
 			} else {
 				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 				signleCmd.setWeekendPrice(weekendPrice); 
