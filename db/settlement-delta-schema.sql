@@ -3,7 +3,7 @@ CREATE TABLE `eh_stat_orders` (
   `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
   `namespace_id` int(11) DEFAULT 0,
-  `order_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `order_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
   `payer_uid` bigint(20) NOT NULL COMMENT '支付用户编号',
@@ -23,7 +23,7 @@ CREATE TABLE `eh_stat_transactions` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
-  `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `paid_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
@@ -43,7 +43,7 @@ CREATE TABLE `eh_stat_transactions` (
   `settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '结算金额',
   `paid_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '支付状态',
   `paid_time` DATETIME DEFAULT NULL,
-  `update_date` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -53,7 +53,7 @@ CREATE TABLE `eh_stat_refunds` (
   `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
   `namespace_id` int(11) DEFAULT 0,
-  `refund_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `refund_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
@@ -68,7 +68,7 @@ CREATE TABLE `eh_stat_refunds` (
   `fee_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总手续费',
   `settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总结算金额，交易总金额-交易总手续费',
   `refund_time` DATETIME DEFAULT NULL,
-  `update_date` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -78,7 +78,7 @@ CREATE TABLE `eh_stat_settlements` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
-  `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `paid_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
@@ -94,7 +94,7 @@ CREATE TABLE `eh_stat_settlements` (
   `refund_fee_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款总手续费',
   `refund_settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款总结算金额，退款总金额-退款总手续费',
   `refund_count` bigint(20) NOT NULL DEFAULT 0 COMMENT '退款总笔数',
-  `update_date` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -104,7 +104,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
   `community_id` bigint(20) DEFAULT 0,
-  `paid_date` DATE DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `paid_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
@@ -116,7 +116,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   `payment_card_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '一卡通退款金額',
   `total_paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总金额',
   `total_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总金额',
-  `update_date` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
