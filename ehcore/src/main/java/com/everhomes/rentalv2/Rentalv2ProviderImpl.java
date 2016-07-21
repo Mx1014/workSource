@@ -121,7 +121,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(rentalSiteId);
 		step.where(condition);
 		List<RentalItem> result = step
-				.orderBy(Tables.EH_RENTALV2_ITEMS.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTALV2_ITEMS.DEFAULT_ORDER.asc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalItem.class);
 				});
@@ -533,7 +533,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(rentalSiteItemId);
 		step.where(condition);
 		List<RentalItem> result = step
-				.orderBy(Tables.EH_RENTALV2_ITEMS.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTALV2_ITEMS.DEFAULT_ORDER.asc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalItem.class);
 				});
@@ -1140,7 +1140,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Condition condition = Tables.EH_RENTALV2_ITEMS.ID.equal(id);
 		step.where(condition);
 		List<RentalItem> result = step
-				.orderBy(Tables.EH_RENTALV2_ITEMS.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_ITEMS.DEFAULT_ORDER.asc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalItem.class);
 				});
 		if (null != result && result.size() > 0)
