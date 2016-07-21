@@ -2,14 +2,14 @@
 // EvhRentalAdminGetRefundOrderListRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhRefundOrderDTO.h"
+#import "EvhGetRefundOrderListResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalAdminGetRefundOrderListRestResponse
 //
 @interface EvhRentalAdminGetRefundOrderListRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhRefundOrderDTO* response;
+@property(nonatomic, strong) EvhGetRefundOrderListResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -24,6 +24,8 @@
 
 @property(nonatomic, copy) NSNumber* latitude;
 
+@property(nonatomic, copy) NSNumber* communityId;
+
 @property(nonatomic, copy) NSString* contactPhonenum;
 
 @property(nonatomic, copy) NSNumber* chargeUid;

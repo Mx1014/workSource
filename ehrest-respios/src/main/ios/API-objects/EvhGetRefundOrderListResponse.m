@@ -2,7 +2,7 @@
 // EvhGetRefundOrderListResponse.m
 //
 #import "EvhGetRefundOrderListResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhRefundOrderDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhGetRefundOrderListResponse
@@ -36,7 +36,7 @@
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.refundOrders) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhBuildingDTO* item in self.refundOrders) {
+        for(EvhRefundOrderDTO* item in self.refundOrders) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -55,7 +55,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"refundOrders"];
             for(id itemJson in jsonArray) {
-                EvhBuildingDTO* item = [EvhBuildingDTO new];
+                EvhRefundOrderDTO* item = [EvhRefundOrderDTO new];
                 
                 [item fromJson: itemJson];
                 [self.refundOrders addObject: item];

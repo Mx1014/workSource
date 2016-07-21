@@ -3,7 +3,7 @@
 //
 #import "EvhRentalBillDTO.h"
 #import "EvhSiteItemDTO.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhRentalv2RentalSiteRulesDTO.h"
 #import "EvhBillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,8 +94,8 @@
         [jsonObject setObject: self.useDetail forKey: @"useDetail"];
     if(self.vendorType)
         [jsonObject setObject: self.vendorType forKey: @"vendorType"];
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhSiteItemDTO* item in self.siteItems) {
@@ -107,7 +107,7 @@
     }
     if(self.rentalSiteRules) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteRulesDTO* item in self.rentalSiteRules) {
+        for(EvhRentalv2RentalSiteRulesDTO* item in self.rentalSiteRules) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -246,9 +246,9 @@
         if(self.vendorType && [self.vendorType isEqual:[NSNull null]])
             self.vendorType = nil;
 
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
@@ -262,7 +262,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSiteRules"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteRulesDTO* item = [EvhRentalSiteRulesDTO new];
+                EvhRentalv2RentalSiteRulesDTO* item = [EvhRentalv2RentalSiteRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalSiteRules addObject: item];

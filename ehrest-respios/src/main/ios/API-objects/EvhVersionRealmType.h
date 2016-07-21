@@ -31,6 +31,7 @@
 #define EvhVersionRealmType_IOS_CHUNENG @"iOS_Chuneng"
 #define EvhVersionRealmType_ANDROID_IBASE @"Android_Ibase"
 #define EvhVersionRealmType_IOS_IBASE @"iOS_Ibase"
+#define EvhVersionRealmType_BIZ @"biz"
 
 ///////////////////////////////////////////////////////////////////////////////
 

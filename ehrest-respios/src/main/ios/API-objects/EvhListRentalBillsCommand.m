@@ -34,8 +34,8 @@
         [jsonObject setObject: self.organizationId forKey: @"organizationId"];
     if(self.rentalSiteId)
         [jsonObject setObject: self.rentalSiteId forKey: @"rentalSiteId"];
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.startTime)
         [jsonObject setObject: self.startTime forKey: @"startTime"];
     if(self.endTime)
@@ -61,9 +61,9 @@
         if(self.rentalSiteId && [self.rentalSiteId isEqual:[NSNull null]])
             self.rentalSiteId = nil;
 
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         self.startTime = [jsonObject objectForKey: @"startTime"];
         if(self.startTime && [self.startTime isEqual:[NSNull null]])

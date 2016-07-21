@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhSiteItemDTO.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhRentalv2RentalSiteRulesDTO.h"
 #import "EvhBillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,12 +72,12 @@
 
 @property(nonatomic, copy) NSString* vendorType;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 // item type EvhSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
-// item type EvhRentalSiteRulesDTO*
+// item type EvhRentalv2RentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSiteRules;
 
 // item type EvhBillAttachmentDTO*

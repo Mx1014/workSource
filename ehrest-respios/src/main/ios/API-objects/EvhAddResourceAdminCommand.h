@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 @property(nonatomic, copy) NSNumber* organizationId;
 
@@ -25,6 +25,8 @@
 @property(nonatomic, copy) NSNumber* longitude;
 
 @property(nonatomic, copy) NSNumber* latitude;
+
+@property(nonatomic, copy) NSNumber* communityId;
 
 @property(nonatomic, copy) NSString* contactPhonenum;
 

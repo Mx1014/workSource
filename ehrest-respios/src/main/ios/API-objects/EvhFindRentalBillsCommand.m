@@ -30,8 +30,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -43,9 +43,9 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

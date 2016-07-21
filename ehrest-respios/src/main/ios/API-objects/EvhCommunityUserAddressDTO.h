@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhOrganizationDetailDTO.h"
-#import "EvhAddressAddressDTO.h"
+#import "EvhAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhCommunityUserAddressDTO
@@ -34,7 +34,7 @@
 // item type EvhOrganizationDetailDTO*
 @property(nonatomic, strong) NSMutableArray* orgDtos;
 
-// item type EvhAddressAddressDTO*
+// item type EvhAddressDTO*
 @property(nonatomic, strong) NSMutableArray* addressDtos;
 
 -(id) init;

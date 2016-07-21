@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhBuildingDTO.h"
+#import "EvhRefundOrderDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhGetRefundOrderListResponse
@@ -14,7 +14,7 @@
 
 @property(nonatomic, copy) NSNumber* nextPageAnchor;
 
-// item type EvhBuildingDTO*
+// item type EvhRefundOrderDTO*
 @property(nonatomic, strong) NSMutableArray* refundOrders;
 
 -(id) init;

@@ -55,6 +55,9 @@
 
 @property(nonatomic, copy) NSNumber* siteCounts;
 
+// item type NSString*
+@property(nonatomic, strong) NSMutableArray* siteNumbers;
+
 @property(nonatomic, copy) NSNumber* cancelTime;
 
 @property(nonatomic, copy) NSNumber* refundFlag;

@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-15 15:21:36
+// generated at 2016-07-20 21:13:41
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -183,8 +183,10 @@ public interface ApiConstants {
     public static final String ADMIN_LAUNCHPAD_UPDATELAUNCHPADLAYOUT_URL = "/admin/launchpad/updateLaunchPadLayout";
     public static final String ADMIN_LISTBORDER_URL = "/admin/listBorder";
     public static final String ADMIN_LISTLOGIN_URL = "/admin/listLogin";
+    public static final String ADMIN_LISTLOGINBYPHONE_URL = "/admin/listLoginByPhone";
     public static final String ADMIN_LISTNAMESPACE_URL = "/admin/listNamespace";
     public static final String ADMIN_LISTPERSISTSERVER_URL = "/admin/listPersistServer";
+    public static final String ADMIN_MESSAGETEST_URL = "/admin/messageTest";
     public static final String ADMIN_ORG_ACCEPTTASK_URL = "/admin/org/acceptTask";
     public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
@@ -253,6 +255,7 @@ public interface ApiConstants {
     public static final String ADMIN_PROMOTION_NEWORDERPRICE_URL = "/admin/promotion/newOrderPrice";
     public static final String ADMIN_PROMOTION_SEARCHPROMOTION_URL = "/admin/promotion/searchPromotion";
     public static final String ADMIN_PROMOTION_UPDATEPROMOTION_URL = "/admin/promotion/updatePromotion";
+    public static final String ADMIN_PUSHTEST_URL = "/admin/pushTest";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
     public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
@@ -818,6 +821,7 @@ public interface ApiConstants {
     public static final String RENTAL_FINDAUTOASSIGNRENTALSITEDAYSTATUS_URL = "/rental/findAutoAssignRentalSiteDayStatus";
     public static final String RENTAL_FINDAUTOASSIGNRENTALSITEWEEKSTATUS_URL = "/rental/findAutoAssignRentalSiteWeekStatus";
     public static final String RENTAL_FINDRENTALSITEITEMSANDATTACHMENTS_URL = "/rental/findRentalSiteItemsAndAttachments";
+    public static final String RENTAL_FINDRENTALSITEMONTHSTATUS_URL = "/rental/findRentalSiteMonthStatus";
     public static final String RENTAL_FINDRENTALSITEWEEKSTATUS_URL = "/rental/findRentalSiteWeekStatus";
     public static final String RENTAL_FINDRENTALSITES_URL = "/rental/findRentalSites";
     public static final String RENTAL_FINDUSERRENTALBILLS_URL = "/rental/findUserRentalBills";
@@ -868,6 +872,39 @@ public interface ApiConstants {
     public static final String TECHPARK_PUNCH_LISTYEARPUNCHLOGS_URL = "/techpark/punch/listYearPunchLogs";
     public static final String TECHPARK_PUNCH_PUNCHCLOCK_URL = "/techpark/punch/punchClock";
     public static final String TECHPARK_PUNCH_UPDATEPUNCHRULE_URL = "/techpark/punch/updatePunchRule";
+    public static final String TECHPARK_RENTAL_ADDRENTALBILL_URL = "/techpark/rental/addRentalBill";
+    public static final String TECHPARK_RENTAL_ADDRENTALITEMBILL_URL = "/techpark/rental/addRentalItemBill";
+    public static final String TECHPARK_RENTAL_ADDRENTALSITE_URL = "/techpark/rental/addRentalSite";
+    public static final String TECHPARK_RENTAL_ADDRENTALSITEITEMS_URL = "/techpark/rental/addRentalSiteItems";
+    public static final String TECHPARK_RENTAL_ADDRENTALSITESIMPLERULES_URL = "/techpark/rental/addRentalSiteSimpleRules";
+    public static final String TECHPARK_RENTAL_BATCHCOMPLETEBILL_URL = "/techpark/rental/batchCompleteBill";
+    public static final String TECHPARK_RENTAL_BATCHINCOMPLETEBILL_URL = "/techpark/rental/batchIncompleteBill";
+    public static final String TECHPARK_RENTAL_CANCELRENTALBILL_URL = "/techpark/rental/cancelRentalBill";
+    public static final String TECHPARK_RENTAL_COMPLETEBILL_URL = "/techpark/rental/completeBill";
+    public static final String TECHPARK_RENTAL_CONFIRMBILL_URL = "/techpark/rental/confirmBill";
+    public static final String TECHPARK_RENTAL_DELETERENTALBILL_URL = "/techpark/rental/deleteRentalBill";
+    public static final String TECHPARK_RENTAL_DELETERENTALSITE_URL = "/techpark/rental/deleteRentalSite";
+    public static final String TECHPARK_RENTAL_DELETERENTALSITEITEM_URL = "/techpark/rental/deleteRentalSiteItem";
+    public static final String TECHPARK_RENTAL_DELETERENTALSITERULES_URL = "/techpark/rental/deleteRentalSiteRules";
+    public static final String TECHPARK_RENTAL_DISABLERENTALSITE_URL = "/techpark/rental/disableRentalSite";
+    public static final String TECHPARK_RENTAL_ENABLERENTALSITE_URL = "/techpark/rental/enableRentalSite";
+    public static final String TECHPARK_RENTAL_EXPORTRENTALBILLS_URL = "/techpark/rental/exportRentalBills";
+    public static final String TECHPARK_RENTAL_FINDRENTALBILLS_URL = "/techpark/rental/findRentalBills";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITEITEMS_URL = "/techpark/rental/findRentalSiteItems";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITERULES_URL = "/techpark/rental/findRentalSiteRules";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITEWEEKSTATUS_URL = "/techpark/rental/findRentalSiteWeekStatus";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITES_URL = "/techpark/rental/findRentalSites";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITESSTATUS_URL = "/techpark/rental/findRentalSitesStatus";
+    public static final String TECHPARK_RENTAL_GETRENTALSITETYPE_URL = "/techpark/rental/getRentalSiteType";
+    public static final String TECHPARK_RENTAL_GETRENTALTYPERULE_URL = "/techpark/rental/getRentalTypeRule";
+    public static final String TECHPARK_RENTAL_INCOMPLETEBILL_URL = "/techpark/rental/incompleteBill";
+    public static final String TECHPARK_RENTAL_LISTRENTALBILLCOUNT_URL = "/techpark/rental/listRentalBillCount";
+    public static final String TECHPARK_RENTAL_LISTRENTALBILLS_URL = "/techpark/rental/listRentalBills";
+    public static final String TECHPARK_RENTAL_LISTRENTALSITEITEMS_URL = "/techpark/rental/listRentalSiteItems";
+    public static final String TECHPARK_RENTAL_ONLINEPAYCALLBACK_URL = "/techpark/rental/onlinePayCallback";
+    public static final String TECHPARK_RENTAL_UPDATERENTALRULE_URL = "/techpark/rental/updateRentalRule";
+    public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
+    public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
     public static final String UI_ACTIVITY_LISTNEARBYACTIVITIESBYSCENE_URL = "/ui/activity/listNearbyActivitiesByScene";
     public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
     public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
@@ -922,6 +959,7 @@ public interface ApiConstants {
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
     public static final String USER_GETUSERSNAPSHOTINFO_URL = "/user/getUserSnapshotInfo";
     public static final String USER_LISTACTIVITYFAVORITE_URL = "/user/listActivityFavorite";
+    public static final String USER_LISTBORDERS_URL = "/user/listBorders";
     public static final String USER_LISTCONTACTS_URL = "/user/listContacts";
     public static final String USER_LISTPOSTEDACTIVITIES_URL = "/user/listPostedActivities";
     public static final String USER_LISTPOSTEDTOPICS_URL = "/user/listPostedTopics";

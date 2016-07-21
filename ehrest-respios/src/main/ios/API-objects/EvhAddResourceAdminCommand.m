@@ -33,8 +33,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.organizationId)
         [jsonObject setObject: self.organizationId forKey: @"organizationId"];
     if(self.siteName)
@@ -47,6 +47,8 @@
         [jsonObject setObject: self.longitude forKey: @"longitude"];
     if(self.latitude)
         [jsonObject setObject: self.latitude forKey: @"latitude"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.contactPhonenum)
         [jsonObject setObject: self.contactPhonenum forKey: @"contactPhonenum"];
     if(self.chargeUid)
@@ -78,9 +80,9 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         self.organizationId = [jsonObject objectForKey: @"organizationId"];
         if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
@@ -105,6 +107,10 @@
         self.latitude = [jsonObject objectForKey: @"latitude"];
         if(self.latitude && [self.latitude isEqual:[NSNull null]])
             self.latitude = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.contactPhonenum = [jsonObject objectForKey: @"contactPhonenum"];
         if(self.contactPhonenum && [self.contactPhonenum isEqual:[NSNull null]])

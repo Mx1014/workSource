@@ -17,7 +17,7 @@
 
 @property(nonatomic, copy) NSNumber* ownerId;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 @property(nonatomic, copy) NSNumber* exclusiveFlag;
 
@@ -60,6 +60,9 @@
 @property(nonatomic, copy) NSNumber* weekendPrice;
 
 @property(nonatomic, copy) NSNumber* siteCounts;
+
+// item type NSString*
+@property(nonatomic, strong) NSMutableArray* siteNumbers;
 
 @property(nonatomic, copy) NSNumber* cancelTime;
 

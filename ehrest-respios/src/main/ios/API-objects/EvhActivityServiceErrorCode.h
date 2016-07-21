@@ -11,3 +11,5 @@
 #define EvhActivityServiceErrorCode_ERROR_INVALID_USER 10005
 #define EvhActivityServiceErrorCode_ERROR_INVALID_ACTIVITY_ROSTER 10006
 #define EvhActivityServiceErrorCode_ERROR_CHECKIN_BEFORE 10007
+#define EvhActivityServiceErrorCode_ERROR_CHECKIN_UN_CONFIRMED 10008
+#define EvhActivityServiceErrorCode_ERROR_CHECKIN_ALREADY 10009

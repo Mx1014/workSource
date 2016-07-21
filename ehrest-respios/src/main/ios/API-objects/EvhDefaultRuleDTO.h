@@ -19,7 +19,7 @@
 
 @property(nonatomic, copy) NSNumber* ownerId;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 @property(nonatomic, copy) NSNumber* exclusiveFlag;
 

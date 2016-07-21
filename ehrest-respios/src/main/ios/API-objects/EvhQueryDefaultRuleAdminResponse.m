@@ -29,6 +29,7 @@
         _timeIntervals = [NSMutableArray new];
         _openWeekday = [NSMutableArray new];
         _closeDates = [NSMutableArray new];
+        _siteNumbers = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -98,6 +99,13 @@
         [jsonObject setObject: self.weekendPrice forKey: @"weekendPrice"];
     if(self.siteCounts)
         [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
+    if(self.siteNumbers) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.siteNumbers) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"siteNumbers"];
+    }
     if(self.cancelTime)
         [jsonObject setObject: self.cancelTime forKey: @"cancelTime"];
     if(self.refundFlag)
@@ -199,6 +207,12 @@
         if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
             self.siteCounts = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"siteNumbers"];
+            for(id itemJson in jsonArray) {
+                [self.siteNumbers addObject: itemJson];
+            }
+        }
         self.cancelTime = [jsonObject objectForKey: @"cancelTime"];
         if(self.cancelTime && [self.cancelTime isEqual:[NSNull null]])
             self.cancelTime = nil;

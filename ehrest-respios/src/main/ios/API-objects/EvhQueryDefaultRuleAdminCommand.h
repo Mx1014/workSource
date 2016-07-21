@@ -15,7 +15,7 @@
 
 @property(nonatomic, copy) NSNumber* ownerId;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

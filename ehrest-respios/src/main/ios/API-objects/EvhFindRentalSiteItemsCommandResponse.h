@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSiteItemsCommandResponse
@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-// item type EvhSiteItemDTO*
+// item type EvhRentalSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
 -(id) init;

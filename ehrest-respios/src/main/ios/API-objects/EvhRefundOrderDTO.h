@@ -17,7 +17,7 @@
 
 @property(nonatomic, copy) NSNumber* refundOrderNo;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 @property(nonatomic, copy) NSNumber* amount;
 

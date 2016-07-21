@@ -20,3 +20,4 @@
 #define EvhRentalServiceErrorCode_ERROR_SITE_ASSGIN_NULL 11001
 #define EvhRentalServiceErrorCode_ERROR_LOOP_TOOMUCH 12000
 #define EvhRentalServiceErrorCode_ERROR_DEFAULT_RULE_NOTFOUND 13000
+#define EvhRentalServiceErrorCode_ERROR_REFOUND_ERROR 15000

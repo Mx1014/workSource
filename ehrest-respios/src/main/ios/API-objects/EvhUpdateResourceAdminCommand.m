@@ -45,6 +45,8 @@
         [jsonObject setObject: self.longitude forKey: @"longitude"];
     if(self.latitude)
         [jsonObject setObject: self.latitude forKey: @"latitude"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.contactPhonenum)
         [jsonObject setObject: self.contactPhonenum forKey: @"contactPhonenum"];
     if(self.chargeUid)
@@ -99,6 +101,10 @@
         self.latitude = [jsonObject objectForKey: @"latitude"];
         if(self.latitude && [self.latitude isEqual:[NSNull null]])
             self.latitude = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.contactPhonenum = [jsonObject objectForKey: @"contactPhonenum"];
         if(self.contactPhonenum && [self.contactPhonenum isEqual:[NSNull null]])

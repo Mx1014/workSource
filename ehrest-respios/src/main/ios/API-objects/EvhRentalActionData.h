@@ -11,9 +11,9 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSString* ownerType;
 
-@property(nonatomic, copy) NSNumber* pageType;
+@property(nonatomic, copy) NSString* entityTag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

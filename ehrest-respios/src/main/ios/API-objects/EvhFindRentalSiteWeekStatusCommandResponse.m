@@ -2,7 +2,7 @@
 // EvhFindRentalSiteWeekStatusCommandResponse.m
 //
 #import "EvhFindRentalSiteWeekStatusCommandResponse.h"
-#import "EvhRentalSiteDayRulesDTO.h"
+#import "EvhRentalv2RentalSiteDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
 #import "EvhSiteItemDTO.h"
@@ -80,7 +80,7 @@
         [jsonObject setObject: self.anchorTime forKey: @"anchorTime"];
     if(self.siteDays) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteDayRulesDTO* item in self.siteDays) {
+        for(EvhRentalv2RentalSiteDayRulesDTO* item in self.siteDays) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -202,7 +202,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteDays"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteDayRulesDTO* item = [EvhRentalSiteDayRulesDTO new];
+                EvhRentalv2RentalSiteDayRulesDTO* item = [EvhRentalv2RentalSiteDayRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteDays addObject: item];

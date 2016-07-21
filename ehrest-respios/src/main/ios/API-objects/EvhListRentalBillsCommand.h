@@ -15,7 +15,7 @@
 
 @property(nonatomic, copy) NSNumber* rentalSiteId;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 @property(nonatomic, copy) NSNumber* startTime;
 

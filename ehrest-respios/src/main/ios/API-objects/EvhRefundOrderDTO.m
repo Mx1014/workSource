@@ -36,8 +36,8 @@
         [jsonObject setObject: self.rentalBillId forKey: @"rentalBillId"];
     if(self.refundOrderNo)
         [jsonObject setObject: self.refundOrderNo forKey: @"refundOrderNo"];
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.amount)
         [jsonObject setObject: self.amount forKey: @"amount"];
     if(self.vendorType)
@@ -67,9 +67,9 @@
         if(self.refundOrderNo && [self.refundOrderNo isEqual:[NSNull null]])
             self.refundOrderNo = nil;
 
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         self.amount = [jsonObject objectForKey: @"amount"];
         if(self.amount && [self.amount isEqual:[NSNull null]])

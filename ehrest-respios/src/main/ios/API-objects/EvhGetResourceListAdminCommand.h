@@ -15,7 +15,9 @@
 
 @property(nonatomic, copy) NSString* ownerType;
 
-@property(nonatomic, copy) NSNumber* launchPadItemId;
+@property(nonatomic, copy) NSNumber* communityId;
+
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
 @property(nonatomic, copy) NSNumber* organizationId;
 

@@ -34,8 +34,10 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.organizationId)
         [jsonObject setObject: self.organizationId forKey: @"organizationId"];
     if(self.pageAnchor)
@@ -55,9 +57,13 @@
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
 
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         self.organizationId = [jsonObject objectForKey: @"organizationId"];
         if(self.organizationId && [self.organizationId isEqual:[NSNull null]])

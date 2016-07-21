@@ -34,8 +34,8 @@
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
     if(self.ownerId)
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -49,9 +49,9 @@
         if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
             self.ownerId = nil;
 
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         return self;
     }

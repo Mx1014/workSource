@@ -29,6 +29,7 @@
         _timeIntervals = [NSMutableArray new];
         _openWeekday = [NSMutableArray new];
         _closeDates = [NSMutableArray new];
+        _siteNumbers = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -40,8 +41,8 @@
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
     if(self.ownerId)
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
-    if(self.launchPadItemId)
-        [jsonObject setObject: self.launchPadItemId forKey: @"launchPadItemId"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.exclusiveFlag)
         [jsonObject setObject: self.exclusiveFlag forKey: @"exclusiveFlag"];
     if(self.unit)
@@ -104,6 +105,13 @@
         [jsonObject setObject: self.weekendPrice forKey: @"weekendPrice"];
     if(self.siteCounts)
         [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
+    if(self.siteNumbers) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.siteNumbers) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"siteNumbers"];
+    }
     if(self.cancelTime)
         [jsonObject setObject: self.cancelTime forKey: @"cancelTime"];
     if(self.refundFlag)
@@ -123,9 +131,9 @@
         if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
             self.ownerId = nil;
 
-        self.launchPadItemId = [jsonObject objectForKey: @"launchPadItemId"];
-        if(self.launchPadItemId && [self.launchPadItemId isEqual:[NSNull null]])
-            self.launchPadItemId = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
         self.exclusiveFlag = [jsonObject objectForKey: @"exclusiveFlag"];
         if(self.exclusiveFlag && [self.exclusiveFlag isEqual:[NSNull null]])
@@ -217,6 +225,12 @@
         if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
             self.siteCounts = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"siteNumbers"];
+            for(id itemJson in jsonArray) {
+                [self.siteNumbers addObject: itemJson];
+            }
+        }
         self.cancelTime = [jsonObject objectForKey: @"cancelTime"];
         if(self.cancelTime && [self.cancelTime isEqual:[NSNull null]])
             self.cancelTime = nil;
