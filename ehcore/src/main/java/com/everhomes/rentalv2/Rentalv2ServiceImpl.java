@@ -147,7 +147,7 @@ import com.everhomes.rest.rentalv2.SiteRuleStatus;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
 import com.everhomes.rest.rentalv2.VisibleFlag;
-import com.everhomes.rest.rentalv2.rentalBillRuleDTO;
+import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
@@ -1077,7 +1077,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rentalBill.setRentalCount(cmd.getRentalCount());
 			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
 			Map<java.sql.Date  , Set<Byte>> dayMap= new HashMap<Date, Set<Byte>>();
-			for (rentalBillRuleDTO siteRule : cmd.getRules()) {
+			for (RentalBillRuleDTO siteRule : cmd.getRules()) {
 
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1224,7 +1224,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//使用详情
 			StringBuffer useDetailSB = new StringBuffer();
 			// 循环存site订单
-			for (rentalBillRuleDTO siteRule : cmd.getRules())  { 
+			for (RentalBillRuleDTO siteRule : cmd.getRules())  { 
 				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
 				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
 					useDetailSB.append("使用时间:");
@@ -1329,7 +1329,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	//					rentalBill.getEndTime().getTime() + rs.getOvertimeTime());
 	//		}
 
-			for (rentalBillRuleDTO siteRule : cmd.getRules())  {
+			for (RentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
 				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
 				if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
@@ -1473,9 +1473,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //}
 
 	@Override
-	public void valiRentalBill(Double rentalcount, List<rentalBillRuleDTO> ruleDTOs) {
+	public void valiRentalBill(Double rentalcount, List<RentalBillRuleDTO> ruleDTOs) {
 		// 如果有一个规则，剩余的数量少于预定的数量
-		for (rentalBillRuleDTO dto  : ruleDTOs) {
+		for (RentalBillRuleDTO dto  : ruleDTOs) {
 			if (dto == null)
 				continue;
 			Double totalCount = Double.valueOf(this.rentalProvider
@@ -1496,9 +1496,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public void valiRentalBill(List<rentalBillRuleDTO> ruleDTOs) {
+	public void valiRentalBill(List<RentalBillRuleDTO> ruleDTOs) {
 		// 如果有一个规则，剩余的数量少于预定的数量
-		for (rentalBillRuleDTO dto : ruleDTOs) {
+		for (RentalBillRuleDTO dto : ruleDTOs) {
 			if (dto.getRuleId() == null)
 				continue;
 			Double totalCount = Double.valueOf(this.rentalProvider

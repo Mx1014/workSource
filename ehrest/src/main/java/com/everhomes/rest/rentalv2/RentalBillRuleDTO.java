@@ -6,7 +6,7 @@ package com.everhomes.rest.rentalv2;
  * <li>rentalcount：预定场所数量 Double</li> 
  * </ul>
  */
-public class rentalBillRuleDTO {
+public class RentalBillRuleDTO {
 private Long ruleId;
 private Double rentalCount;
 public Long getRuleId() {
