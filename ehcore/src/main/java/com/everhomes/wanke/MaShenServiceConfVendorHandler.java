@@ -393,6 +393,11 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
         	accessToken = refreshAndGetAccessToken();
         	param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + accessToken;
         	entity = httpGet(param);
+        	if(!entity.isSuccess()){
+        		LOGGER.error("Wanke get user info failed, param={}, entity={}", param, entity);
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    					"Wanke get user info failed");
+        	}
 		}
         return entity;
 	}
