@@ -201,6 +201,23 @@ import com.google.gson.reflect.TypeToken;
 public class Rentalv2ServiceImpl implements Rentalv2Service {
 	final String downloadDir ="\\download\\";
 
+	private Time convertTime(Long TimeLong) {
+		if (null != TimeLong) {
+			//从8点开始计算
+			return new Time(TimeLong-MILLISECONDGMT);
+		}
+		return null;
+	}
+	 
+	private Long convertTimeToGMTMillisecond(Time time) {
+		if (null != time) {
+			//从8点开始计算
+			return time.getTime()+MILLISECONDGMT;
+		}
+		return null;
+	}
+	
+    private final Long MILLISECONDGMT=8*3600*1000L;
 	// N分钟后取消
 	private Long cancelTime = 5 * 60 * 1000L;
 	
@@ -904,9 +921,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite){
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 		if(null!=rentalSite.getDayBeginTime())
-			rSiteDTO.setDayBeginTime(rentalSite.getDayBeginTime().getTime());
+			rSiteDTO.setDayBeginTime(convertTimeToGMTMillisecond(rentalSite.getDayBeginTime() ));
 		if(null!=rentalSite.getDayEndTime())
-			rSiteDTO.setDayEndTime(rentalSite.getDayEndTime().getTime());
+			rSiteDTO.setDayEndTime(convertTimeToGMTMillisecond(rentalSite.getDayEndTime()));
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
 		rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime()); 
 		rSiteDTO.setCoverUrl(this.contentServerService.parserUri(rSiteDTO.getCoverUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
@@ -1800,8 +1817,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(endTime>24.0||beginTime<0.0)
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
-				rs.setDayBeginTime(new Time((long) (beginTime*1000*60*60L)));
-				rs.setDayEndTime(new Time((long) (endTime*1000*60*60L)));
+				rs.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
+				rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
 			} else {
 				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 				signleCmd.setWeekendPrice(weekendPrice); 
