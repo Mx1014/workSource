@@ -40,7 +40,7 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `geohash` VARCHAR(64),
   `qr_code_token` TEXT,
   `qr_code_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
-  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: incomplete(不完整), 2: in use(使用中), 3: in maintenance(维修中), 4: discarded(报废), 5: disabled(停用), 6: standby(备用)',
+  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: incomplete(不完整), 2: in use(使用中), 3: in maintenance(维修中), 4: discarded(报废), 5: disabled(停用), 6: standby(备用)',
   `installation_time` DATETIME,
   `repair_time` DATETIME,
   `initial_asset_value` VARCHAR(128),
@@ -92,7 +92,6 @@ CREATE TABLE `eh_equipment_inspection_equipment_parameters` (
   `equipment_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
   `parameter_name` VARCHAR(128),
   `parameter_unit` VARCHAR(128),
-  `parameter_value` VARCHAR(128),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -132,7 +131,7 @@ CREATE TABLE `eh_equipment_inspection_tasks` (
      `process_expire_time` DATETIME,
      `process_time` DATETIME,
      `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: waiting for executing, 2: waiting for maintenance, 3: in maintenance, 4: closed',
-     `result` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: complete ok, 2: complete delay, 3: complete maintenance ok, 4: complete maintenance delay',
+     `result` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: complete ok, 2: complete delay, 3: need maintenance ok, 4: need maintenance delay, 5：need maintenance ok complete ok, 6: need maintenance ok complete delay, 7: need maintenance delay complete ok, 8: need maintenance delay complete delay',
      `reviewer_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who review the task, organization, etc',
      `reviewer_id`  BIGINT NOT NULL DEFAULT 0,
      `review_result` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: qualified, 2: unqualified',
@@ -165,8 +164,9 @@ CREATE TABLE `eh_equipment_inspection_task_logs` (
   `target_id` BIGINT NOT NULL DEFAULT '0',
   `process_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: complete, 2: complete maintenance, 3: review, 4: need maintenance ',
   `process_end_time` DATETIME DEFAULT NULL,
-  `process_result` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: complete ok, 2: complete delay, 3: complete maintenance ok, 4: complete maintenance delay, 5: review qualified, 6: review unqualified',
+  `process_result` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: complete ok, 2: complete delay, 3: need maintenance ok, 4: need maintenance delay, 5：need maintenance ok complete ok, 6: need maintenance ok complete delay, 7: need maintenance delay complete ok, 8: need maintenance delay complete delay, 9: review qualified, 10: review unqualified',
   `process_message` TEXT,
+  `parameter_value` VARCHAR(128),
   `process_time` DATETIME DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
