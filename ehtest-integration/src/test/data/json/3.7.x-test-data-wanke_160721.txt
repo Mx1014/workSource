@@ -1,0 +1,18 @@
+{
+  "eh_community_services": [
+        {
+            "id": 1,
+            "namespace_id": 0,
+            "owner_type": "community",
+            "owner_id": 240111044331051500,
+            "scope_code": 1,
+            "scope_id": 1,
+            "item_name": "物业报修",
+            "item_label": "物业报修",
+            "icon_uri": "cs://1/image/aW1hZ2UvTVRveU5tSXhOMlV6TmpSak5qQmpOMlk1T1RVMFpqSTNPR0U1TXpNMll6QmlNdw",
+            "action_type": 1,
+            "action_data": "{\"contentCategory\":1004,\"actionCategory\":0,\"forumId\":1,\"embedAppId\":27,\"entityTag\":\"PM\"}",
+            "scene_type": "default"
+        }
+    ]
+}
