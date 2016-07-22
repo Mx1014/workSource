@@ -76,7 +76,9 @@ public class PunchProviderImpl implements PunchProvider {
 	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId,
 			String queryDate, byte clockCode) {
 		Date date = java.sql.Date.valueOf(queryDate);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		//DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_LOGS);
 		Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.equal(date);
@@ -99,7 +101,9 @@ public class PunchProviderImpl implements PunchProvider {
 			String beginDate, String endDate) {
 		Date beginSqlDate = java.sql.Date.valueOf(beginDate);
 		Date endSqlDate = java.sql.Date.valueOf(endDate);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Date>> step = context.selectDistinct(
 				Tables.EH_PUNCH_LOGS.PUNCH_DATE).from(Tables.EH_PUNCH_LOGS);
 		Condition condition3 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(
@@ -117,7 +121,9 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public PunchRule getPunchRuleByCompanyId(Long companyId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_RULES);
 		Condition condition = Tables.EH_PUNCH_RULES.ENTERPRISE_ID.equal(companyId);
@@ -137,7 +143,9 @@ public class PunchProviderImpl implements PunchProvider {
 	// })
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchLog.getEnterpriseId() ));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchLog.getEnterpriseId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 //		long id = sequenceProvider.getNextSequence(NameMapper
 //				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
 		String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchLogs.class);
@@ -160,7 +168,9 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_GEOPOINTS);
 		Condition condition = Tables.EH_PUNCH_GEOPOINTS.ENTERPRISE_ID
@@ -179,7 +189,9 @@ public class PunchProviderImpl implements PunchProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchRules.class));
 		punchRule.setId(id);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchRule.getEnterpriseId() ));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchRule.getEnterpriseId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchRulesRecord record = ConvertHelper.convert(punchRule,
 				EhPunchRulesRecord.class);
 		InsertQuery<EhPunchRulesRecord> query = context
@@ -226,14 +238,17 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public PunchRule findPunchRuleById(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), PunchRule.class);
 	}
 
 	@Override
 	public PunchRule findPunchRuleByCompanyId(Long companyId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhPunchRulesRecord> query = context
 				.selectQuery(Tables.EH_PUNCH_RULES);
@@ -254,7 +269,9 @@ public class PunchProviderImpl implements PunchProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchGeopoints.class));
 		punchGeopoint.setId(id);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchGeopoint.getEnterpriseId() ));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchGeopoint.getEnterpriseId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchGeopointsRecord record = ConvertHelper.convert(punchGeopoint,
 				EhPunchGeopointsRecord.class);
 		InsertQuery<EhPunchGeopointsRecord> query = context
@@ -306,7 +323,8 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public PunchGeopoint findPunchGeopointById(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(
 				context.configuration());
 		return ConvertHelper.convert(dao.findById(id), PunchGeopoint.class);
@@ -333,7 +351,9 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public List<PunchWorkday> listWorkdays(DateStatus dateStatus) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_WORKDAY);
 		Condition condition = Tables.EH_PUNCH_WORKDAY.DATE_STATUS
@@ -350,7 +370,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchExceptionRequest(
 			PunchExceptionRequest punchExceptionRequest) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionRequest.getEnterpriseId() ));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionRequest.getEnterpriseId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = sequenceProvider
 				.getNextSequence(NameMapper
 						.getSequenceDomainFromTablePojo(EhPunchExceptionRequests.class));
@@ -369,7 +391,9 @@ public class PunchProviderImpl implements PunchProvider {
 	public List<PunchExceptionRequest> listExceptionRequestsByDate(Long userId,
 			Long companyId, String logDay) { 
 		Date date = java.sql.Date.valueOf(logDay);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 		Condition condition = Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE
@@ -391,7 +415,9 @@ public class PunchProviderImpl implements PunchProvider {
 	public PunchExceptionApproval getPunchExceptionApprovalByDate(Long userId,
 			Long companyId, String logDay) { 
 		Date date = java.sql.Date.valueOf(logDay);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_EXCEPTION_APPROVALS);
 		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE
@@ -415,7 +441,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public Integer countExceptionRequests(Long userId,List<Long> userIds, Long companyId, String startDay, String endDay, Byte status,
 			Byte processCode,Byte requestType) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -444,7 +472,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public List<PunchExceptionRequest> listExceptionRequests(Long userId,List<Long> userIds, Long companyId, String startDay,String endDay,
 			Byte status, Byte processCode,Integer pageOffset,Integer pageSize,Byte requestType) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+	    // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -484,7 +514,9 @@ public class PunchProviderImpl implements PunchProvider {
 	public int countExceptionRequests(List<Long> userIds, Long companyId,
 			String startDay, String endDay, Byte status,
 			Byte processCode, Byte requestType) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -525,7 +557,9 @@ public class PunchProviderImpl implements PunchProvider {
 	public List<PunchExceptionRequest> listExceptionRequests(List<Long> userIds,
 			Long companyId, String startDay, String endDay, Byte status,
 			Byte processCode, Integer pageOffset, int pageSize, Byte requestType) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -562,8 +596,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public PunchExceptionApproval  getExceptionApproval(Long userId, Long companyId,
 			Date punchDate) {
-		 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_EXCEPTION_APPROVALS);
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.equal(companyId));
@@ -582,7 +617,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchExceptionApproval(
 			PunchExceptionApproval punchExceptionApproval) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionApproval.getEnterpriseId() ));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionApproval.getEnterpriseId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = sequenceProvider
 				.getNextSequence(NameMapper
 						.getSequenceDomainFromTablePojo(EhPunchExceptionApprovals.class));
@@ -625,7 +662,9 @@ public class PunchProviderImpl implements PunchProvider {
 			String format) {
 
 		Date punchDate = Date.valueOf(format);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_DAY_LOGS);
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
@@ -643,7 +682,9 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public void createPunchDayLog(PunchDayLog punchDayLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchDayLog.getEnterpriseId() ));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchDayLog.getEnterpriseId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 //		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
 		String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class);
@@ -679,7 +720,9 @@ public class PunchProviderImpl implements PunchProvider {
 			String startDay, String endDay, Byte startTimeCompareFlag,
 			String startTime, Byte endTimeCompareFlag, String endTime,
 			Byte workTimeCompareFlag, String workTime, Byte status) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -731,7 +774,9 @@ public class PunchProviderImpl implements PunchProvider {
 			Byte leaveTimeCompareFlag, String leaveTime,
 			Byte workTimeCompareFlag, String workTime, Integer pageOffset,
 			Integer pageSize){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
@@ -793,7 +838,8 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
 			Long companyId, String startDay, String endDay) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
@@ -831,7 +877,9 @@ public class PunchProviderImpl implements PunchProvider {
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay) {
 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -857,21 +905,27 @@ public class PunchProviderImpl implements PunchProvider {
 	public void viewDateFlags(Long userId, Long companyId, String format) {
 		Date logDate = Date.valueOf(format);
 		//update 申请表
-		   DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionRequests.class,companyId));
+		// 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		   // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionRequests.class,companyId));
+		   DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 	        context.update(Tables.EH_PUNCH_EXCEPTION_REQUESTS).set(Tables.EH_PUNCH_EXCEPTION_REQUESTS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
 	        .where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
 	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(companyId))
 	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(logDate)).execute() ;
 
 			//update 日志表
-	        context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchDayLogs.class,companyId));
+	        // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+	        // context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchDayLogs.class,companyId));
+	        context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 	        context.update(Tables.EH_PUNCH_DAY_LOGS).set(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
 	        .where(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId))
 	        .and(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(companyId))
 	        .and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(logDate)).execute() ;
 
 			//update 审批表
-	        context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.class,companyId));
+	        // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+	        // context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.class,companyId));
+	        context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 	        context.update(Tables.EH_PUNCH_EXCEPTION_APPROVALS).set(Tables.EH_PUNCH_EXCEPTION_APPROVALS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
 	        .where(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId))
 	        .and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.eq(companyId))
@@ -881,7 +935,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public List<UserPunchStatusCount> listUserStatusPunch(Long companyId,  String startDay,
 			String endDay) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		Condition condition = Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(companyId);
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
@@ -914,7 +970,9 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public List<UserPunchStatusCount> listUserApprovalStatusPunch(Long companyId,  String startDay,
 			String endDay) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.eq(companyId);
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
@@ -946,7 +1004,9 @@ public class PunchProviderImpl implements PunchProvider {
 	
 	@Override
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record5<Long, Date, Byte, Byte, Time>>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.USER_ID,Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE,Tables.EH_PUNCH_DAY_LOGS.STATUS,Tables.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS,Tables.EH_PUNCH_DAY_LOGS.WORK_TIME).from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 		step.leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_APPROVALS).on(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID))
