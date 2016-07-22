@@ -22,7 +22,7 @@ VALUES ( 810, '1000000', '0', '0', '0', '/home', 'GovAgencies', '社区活动', 
 INSERT INTO `eh_version_realm` VALUES ('49', 'biz', null, UTC_TIMESTAMP(), '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(52,49,'-0.1','2099200','0','2.2.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES (53,49,'2099199.9','2100224','0','2.3.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.2.0', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-2-0-tag.zip', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-2-0-tag.zip', '0');
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('25', '49', '2.3.0', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-3-0-tag.zip', 'http://biz-beta.zuolin.com/nar/web/app/dist/biz-2-3-0-tag.zip', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.2.0', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-2-0-tag.zip', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-2-0-tag.zip', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('25', '49', '2.3.0', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', '0');
 
 

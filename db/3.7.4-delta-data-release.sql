@@ -8,4 +8,4 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('gro
 #电商离线包配置
 INSERT INTO `eh_version_realm` VALUES ('49', 'biz', null, UTC_TIMESTAMP(), '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(52,49,'-0.1','2100224','0','2.3.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.3.0', 'http://biz.zuolin.com/nar/web/app/dist/biz-2-3-0-tag.zip', 'http://biz.zuolin.com/nar/web/app/dist/biz-2-3-0-tag.zip', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.3.0', 'http://biz.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', 'http://biz.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', '0');
