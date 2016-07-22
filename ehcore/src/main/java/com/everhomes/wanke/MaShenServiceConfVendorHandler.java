@@ -1,4 +1,4 @@
-package com.everhomes.serviceconf;
+package com.everhomes.wanke;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -49,9 +49,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.serviceconf.ListCommunityCommand;
-import com.everhomes.rest.serviceconf.ListCommunityResponse;
-import com.everhomes.rest.serviceconf.Type;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.LoginToken;
@@ -59,6 +56,9 @@ import com.everhomes.rest.user.LogonCommandResponse;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.wanke.ListCommunityCommand;
+import com.everhomes.rest.wanke.ListCommunityResponse;
+import com.everhomes.rest.wanke.Type;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -68,6 +68,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.wanke.ServiceConfVendorHandler;
 
 @Component(ServiceConfVendorHandler.SERVICECONF_VENDOR_PREFIX+"wanke")
 public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{

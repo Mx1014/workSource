@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.db.AccessSpec;
-import com.everhomes.rest.serviceconf.ListCommunityCommand;
-import com.everhomes.rest.serviceconf.ListCommunityServiceCommand;
-import com.everhomes.rest.serviceconf.ListCommunityServicesRestResponse;
-import com.everhomes.rest.serviceconf.LoginAndGetCommunitiesRestResponse;
+import com.everhomes.rest.wanke.ListCommunityCommand;
+import com.everhomes.rest.wanke.ListCommunityServiceCommand;
+import com.everhomes.rest.wanke.ListCommunityServicesRestResponse;
+import com.everhomes.rest.wanke.LoginAndGetCommunitiesRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;

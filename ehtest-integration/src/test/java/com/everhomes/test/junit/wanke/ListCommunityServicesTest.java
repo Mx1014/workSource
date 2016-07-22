@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.everhomes.rest.serviceconf.ListCommunityServiceCommand;
-import com.everhomes.rest.serviceconf.ListCommunityServicesRestResponse;
+import com.everhomes.rest.wanke.ListCommunityServiceCommand;
+import com.everhomes.rest.wanke.ListCommunityServicesRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhCommunityServicesRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;

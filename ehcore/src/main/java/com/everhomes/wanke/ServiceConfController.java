@@ -1,4 +1,4 @@
-package com.everhomes.serviceconf;
+package com.everhomes.wanke;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -20,11 +20,12 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.serviceconf.ListCommunityCommand;
-import com.everhomes.rest.serviceconf.ListCommunityResponse;
-import com.everhomes.rest.serviceconf.ListCommunityServiceCommand;
-import com.everhomes.rest.serviceconf.ListCommunityServiceResponse;
+import com.everhomes.rest.wanke.ListCommunityCommand;
+import com.everhomes.rest.wanke.ListCommunityResponse;
+import com.everhomes.rest.wanke.ListCommunityServiceCommand;
+import com.everhomes.rest.wanke.ListCommunityServiceResponse;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.wanke.ServiceConfService;
 
 /**
  * 园区：含住宅小区（即平时所说的小区）和商用园区（如科技园）

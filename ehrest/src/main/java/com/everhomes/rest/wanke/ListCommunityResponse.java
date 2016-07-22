@@ -1,4 +1,4 @@
-package com.everhomes.rest.serviceconf;
+package com.everhomes.rest.wanke;
 
 import java.util.List;
 

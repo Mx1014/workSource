@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.serviceconf;
+package com.everhomes.wanke;
 
 
 import java.util.ArrayList;
@@ -23,6 +23,8 @@ import com.everhomes.server.schema.tables.pojos.EhCommunityServices;
 import com.everhomes.server.schema.tables.records.EhCommunityServicesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.wanke.CommunityService;
+import com.everhomes.wanke.ServiceConfProvider;
 
 @Component
 public class ServiceConfProviderImpl implements ServiceConfProvider {

@@ -1,10 +1,10 @@
-package com.everhomes.serviceconf;
+package com.everhomes.wanke;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.serviceconf.ListCommunityCommand;
-import com.everhomes.rest.serviceconf.ListCommunityResponse;
+import com.everhomes.rest.wanke.ListCommunityCommand;
+import com.everhomes.rest.wanke.ListCommunityResponse;
 
 public interface ServiceConfVendorHandler {
     String SERVICECONF_VENDOR_PREFIX = "ServiceConfVendor-";

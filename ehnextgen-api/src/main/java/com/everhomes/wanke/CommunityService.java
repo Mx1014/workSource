@@ -1,4 +1,4 @@
-package com.everhomes.serviceconf;
+package com.everhomes.wanke;
 
 import com.everhomes.server.schema.tables.pojos.EhCommunityServices;
 import com.everhomes.util.StringHelper;
