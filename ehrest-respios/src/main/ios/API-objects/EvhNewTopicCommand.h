@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhForumAttachmentDescriptor.h"
+#import "EvhAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhNewTopicCommand
@@ -44,7 +44,7 @@
 
 @property(nonatomic, copy) NSNumber* isForwarded;
 
-// item type EvhForumAttachmentDescriptor*
+// item type EvhAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* privateFlag;

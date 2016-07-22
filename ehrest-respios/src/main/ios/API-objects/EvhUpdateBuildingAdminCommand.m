@@ -2,7 +2,7 @@
 // EvhUpdateBuildingAdminCommand.m
 //
 #import "EvhUpdateBuildingAdminCommand.h"
-#import "EvhForumAttachmentDescriptor.h"
+#import "EvhAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUpdateBuildingAdminCommand
@@ -58,7 +58,7 @@
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhForumAttachmentDescriptor* item in self.attachments) {
+        for(EvhAttachmentDescriptor* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -121,7 +121,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhForumAttachmentDescriptor* item = [EvhForumAttachmentDescriptor new];
+                EvhAttachmentDescriptor* item = [EvhAttachmentDescriptor new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];

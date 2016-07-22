@@ -5,8 +5,8 @@
 #import "JsonSerializable.h"
 #import "EvhOrganizationMemberDTO.h"
 #import "EvhCommunityDTO.h"
-#import "EvhAddressAddressDTO.h"
-#import "EvhForumAttachmentDescriptor.h"
+#import "EvhAddressDTO.h"
+#import "EvhAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationDetailDTO
@@ -63,10 +63,10 @@
 
 @property(nonatomic, strong) EvhCommunityDTO* community;
 
-// item type EvhAddressAddressDTO*
+// item type EvhAddressDTO*
 @property(nonatomic, strong) NSMutableArray* addresses;
 
-// item type EvhForumAttachmentDescriptor*
+// item type EvhAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* communityId;

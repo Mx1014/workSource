@@ -2,7 +2,7 @@
 // EvhAddNewsCommentBySceneCommand.m
 //
 #import "EvhAddNewsCommentBySceneCommand.h"
-#import "EvhAttachmentDescriptor.h"
+#import "EvhNewsAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddNewsCommentBySceneCommand
@@ -42,7 +42,7 @@
         [jsonObject setObject: self.contentType forKey: @"contentType"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentDescriptor* item in self.attachments) {
+        for(EvhNewsAttachmentDescriptor* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -73,7 +73,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAttachmentDescriptor* item = [EvhAttachmentDescriptor new];
+                EvhNewsAttachmentDescriptor* item = [EvhNewsAttachmentDescriptor new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];
