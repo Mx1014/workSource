@@ -894,10 +894,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setStatus(new ArrayList<Byte>());
 			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
 		}
+		List<Long> siteIds = new ArrayList<Long>();
 		List<RentalSiteRange> siteOwners = this.rentalProvider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getOwnerType(), cmd.getOwnerId());
-		List<Long> siteIds =null;
 		if(siteOwners !=null)
-			siteIds = new ArrayList<Long>();
 			for(RentalSiteRange siteOwner : siteOwners){
 				siteIds.add(siteOwner.getRentalResourceId());
 			}  
@@ -3300,14 +3299,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		}
 		List<Byte> status = new ArrayList<Byte>();
 		status.add(RentalSiteStatus.NORMAL.getCode());
-		List<RentalSiteRange> siteOwners = this.rentalProvider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getOwnerType(), cmd.getOwnerId());
-		List<Long> siteIds = new ArrayList<>();
-		if(siteOwners !=null)
-			for(RentalSiteRange siteOwner : siteOwners){
-				siteIds.add(siteOwner.getRentalResourceId());
-			}   
-		List<RentalResource> rentalSites = rentalProvider.findRentalSites(
-				cmd.getResourceTypeId(), null,
+		List<Long> siteIds = null;
+		if(null!= cmd.getOwnerType()){
+			siteIds = new ArrayList<>();
+			List<RentalSiteRange> siteOwners = this.rentalProvider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getOwnerType(), cmd.getOwnerId());
+			if(siteOwners !=null)
+				for(RentalSiteRange siteOwner : siteOwners){
+					siteIds.add(siteOwner.getRentalResourceId());
+				}   
+		}
+		List<RentalResource> rentalSites = rentalProvider.findRentalSites(cmd.getResourceTypeId(), null,
 				locator, pageSize,status,siteIds,cmd.getCommunityId());
 		if(null==rentalSites)
 			return response;
