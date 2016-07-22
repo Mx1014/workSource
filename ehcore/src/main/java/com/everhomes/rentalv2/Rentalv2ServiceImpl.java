@@ -895,8 +895,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
 		}
 		List<RentalSiteRange> siteOwners = this.rentalProvider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getOwnerType(), cmd.getOwnerId());
-		List<Long> siteIds = new ArrayList<>();
+		List<Long> siteIds =null;
 		if(siteOwners !=null)
+			siteIds = new ArrayList<Long>();
 			for(RentalSiteRange siteOwner : siteOwners){
 				siteIds.add(siteOwner.getRentalResourceId());
 			}  
