@@ -121,15 +121,16 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_sync_task_logs` (
+CREATE TABLE `eh_stat_task_logs` (
   `id` bigint(20) NOT NULL,
-  `task_no` varchar(20) NOT NULL UNIQUE,
+  `task_no` varchar(20) NOT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '10 同步物业缴费订单到结算订单表 20 同步电商订单订单到结算订单表 30 同步停车充值订单到结算订单表 40 同步一卡通订单到结算订单表 50 同步支付平台交易流水到结算交易流水表 60 同步一卡通交易流水到结算交易流水表 70 同步支付平台退款流水到结算退款流水表 80 同步一卡通退款流水到结算退款流水表 90 生成结算数据 100 生成结算数据结果 110 完成',
-  `islock` tinyint(4) DEFAULT 0 COMMENT '0 未锁 1 有锁',
-  `update_date` datetime DEFAULT NULL,
+  `islock` tinyint(4) DEFAULT '0' COMMENT '0 未锁 1 有锁',
+  `update_Time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `task_no` (`task_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 
 
