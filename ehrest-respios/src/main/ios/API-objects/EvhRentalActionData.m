@@ -30,22 +30,22 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.ownerType)
-        [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.entityTag)
-        [jsonObject setObject: self.entityTag forKey: @"entityTag"];
+    if(self.resourceTypeId)
+        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
+    if(self.pageType)
+        [jsonObject setObject: self.pageType forKey: @"pageType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.ownerType = [jsonObject objectForKey: @"ownerType"];
-        if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
-            self.ownerType = nil;
+        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
+        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
+            self.resourceTypeId = nil;
 
-        self.entityTag = [jsonObject objectForKey: @"entityTag"];
-        if(self.entityTag && [self.entityTag isEqual:[NSNull null]])
-            self.entityTag = nil;
+        self.pageType = [jsonObject objectForKey: @"pageType"];
+        if(self.pageType && [self.pageType isEqual:[NSNull null]])
+            self.pageType = nil;
 
         return self;
     }

@@ -2,7 +2,7 @@
 // EvhListRentalSiteItemsCommandResponse.m
 //
 #import "EvhListRentalSiteItemsCommandResponse.h"
-#import "EvhRentalSiteItemDTO.h"
+#import "EvhSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListRentalSiteItemsCommandResponse
@@ -34,7 +34,7 @@
 {
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteItemDTO* item in self.siteItems) {
+        for(EvhSiteItemDTO* item in self.siteItems) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -49,7 +49,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteItemDTO* item = [EvhRentalSiteItemDTO new];
+                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteItems addObject: item];

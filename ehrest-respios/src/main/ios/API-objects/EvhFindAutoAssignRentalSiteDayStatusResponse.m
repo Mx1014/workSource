@@ -5,7 +5,7 @@
 #import "EvhRentalSiteNumberDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindAutoAssignRentalSiteDayStatusResponse
@@ -107,7 +107,7 @@
     }
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhSiteItemDTO* item in self.siteItems) {
+        for(EvhRentalv2SiteItemDTO* item in self.siteItems) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -229,7 +229,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {
-                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
+                EvhRentalv2SiteItemDTO* item = [EvhRentalv2SiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteItems addObject: item];

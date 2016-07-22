@@ -6,7 +6,7 @@
 #import "EvhRentalSiteNumberDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindAutoAssignRentalSiteDayStatusResponse
@@ -64,7 +64,7 @@
 // item type EvhAttachmentConfigDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
-// item type EvhSiteItemDTO*
+// item type EvhRentalv2SiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
 -(id) init;

@@ -3,10 +3,10 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalv2RentalSiteDayRulesDTO.h"
+#import "EvhRentalSiteDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSiteMonthStatusCommandResponse
@@ -55,7 +55,7 @@
 
 @property(nonatomic, copy) NSNumber* anchorTime;
 
-// item type EvhRentalv2RentalSiteDayRulesDTO*
+// item type EvhRentalSiteDayRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteDays;
 
 // item type EvhRentalSitePicDTO*
@@ -64,7 +64,7 @@
 // item type EvhAttachmentConfigDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
-// item type EvhSiteItemDTO*
+// item type EvhRentalv2SiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
 -(id) init;

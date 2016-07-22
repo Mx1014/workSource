@@ -11,9 +11,9 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* ownerType;
+@property(nonatomic, copy) NSNumber* resourceTypeId;
 
-@property(nonatomic, copy) NSString* entityTag;
+@property(nonatomic, copy) NSNumber* pageType;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
