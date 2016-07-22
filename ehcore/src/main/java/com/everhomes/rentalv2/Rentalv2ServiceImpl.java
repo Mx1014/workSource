@@ -903,8 +903,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite){
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
-		rSiteDTO.setDayBeginTime(rSiteDTO.getDayBeginTime());
-		rSiteDTO.setDayEndTime(rSiteDTO.getDayEndTime());
+		rSiteDTO.setDayBeginTime(rentalSite.getDayBeginTime().getTime());
+		rSiteDTO.setDayEndTime(rentalSite.getDayEndTime().getTime());
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
 		rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime()); 
 		rSiteDTO.setCoverUrl(this.contentServerService.parserUri(rSiteDTO.getCoverUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
