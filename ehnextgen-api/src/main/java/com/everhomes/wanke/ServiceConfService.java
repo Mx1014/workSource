@@ -1,12 +1,12 @@
-package com.everhomes.serviceconf;
+package com.everhomes.wanke;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.serviceconf.ListCommunityCommand;
-import com.everhomes.rest.serviceconf.ListCommunityResponse;
-import com.everhomes.rest.serviceconf.ListCommunityServiceCommand;
-import com.everhomes.rest.serviceconf.ListCommunityServiceResponse;
+import com.everhomes.rest.wanke.ListCommunityCommand;
+import com.everhomes.rest.wanke.ListCommunityResponse;
+import com.everhomes.rest.wanke.ListCommunityServiceCommand;
+import com.everhomes.rest.wanke.ListCommunityServiceResponse;
 
 public interface ServiceConfService {
 	ListCommunityServiceResponse listCommunityServices(ListCommunityServiceCommand cmd);

@@ -1,4 +1,4 @@
-package com.everhomes.rest.serviceconf;
+package com.everhomes.rest.wanke;
 
 import com.everhomes.util.StringHelper;
 
@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>itemName: 每页条数</li>
  * <li>itemLabel: 分页瞄</li>
  * <li>iconUri: 图标路径</li>
- * <li>actionType: 动作类型，参考{@link com.everhomes.rest.serviceconf.ActionType}</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.rest.wanke.ActionType}</li>
  * <li>actionData: 动作所需要的参数，由actionType决定</li>
  * </ul>
  */

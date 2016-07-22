@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.serviceconf;
+package com.everhomes.rest.wanke;
 
 /**
  * <ul>参数类型
