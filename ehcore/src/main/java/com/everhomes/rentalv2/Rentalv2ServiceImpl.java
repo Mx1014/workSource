@@ -212,7 +212,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private Long convertTimeToGMTMillisecond(Time time) {
 		if (null != time) {
 			//从8点开始计算
-			return time.getTime()+MILLISECONDGMT;
+			Calendar cal = Calendar.getInstance();
+	        cal.set(Calendar.HOUR, 0);
+	        cal.set(Calendar.SECOND, 0);
+	        cal.set(Calendar.MINUTE, 0);
+	        cal.set(Calendar.MILLISECOND, 0);
+			return cal.getTimeInMillis()+time.getTime()+MILLISECONDGMT;
 		}
 		return null;
 	}
