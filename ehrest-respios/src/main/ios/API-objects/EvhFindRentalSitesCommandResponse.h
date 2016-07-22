@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalSiteDTO.h"
+#import "EvhRentalv2RentalSiteDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSitesCommandResponse
@@ -12,9 +12,9 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageOffset;
+@property(nonatomic, copy) NSNumber* nextPageAnchor;
 
-// item type EvhRentalSiteDTO*
+// item type EvhRentalv2RentalSiteDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSites;
 
 -(id) init;

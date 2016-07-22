@@ -2,9 +2,9 @@
 // EvhRentalBillDTO.m
 //
 #import "EvhRentalBillDTO.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 #import "EvhRentalv2RentalSiteRulesDTO.h"
-#import "EvhBillAttachmentDTO.h"
+#import "EvhRentalv2BillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalBillDTO
@@ -98,7 +98,7 @@
         [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhSiteItemDTO* item in self.siteItems) {
+        for(EvhRentalv2SiteItemDTO* item in self.siteItems) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -116,7 +116,7 @@
     }
     if(self.billAttachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhBillAttachmentDTO* item in self.billAttachments) {
+        for(EvhRentalv2BillAttachmentDTO* item in self.billAttachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -253,7 +253,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {
-                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
+                EvhRentalv2SiteItemDTO* item = [EvhRentalv2SiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteItems addObject: item];
@@ -271,7 +271,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"billAttachments"];
             for(id itemJson in jsonArray) {
-                EvhBillAttachmentDTO* item = [EvhBillAttachmentDTO new];
+                EvhRentalv2BillAttachmentDTO* item = [EvhRentalv2BillAttachmentDTO new];
                 
                 [item fromJson: itemJson];
                 [self.billAttachments addObject: item];

@@ -2,7 +2,7 @@
 // EvhUpdateItemsAdminCommand.m
 //
 #import "EvhUpdateItemsAdminCommand.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUpdateItemsAdminCommand
@@ -34,7 +34,7 @@
 {
     if(self.itemDTOs) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhSiteItemDTO* item in self.itemDTOs) {
+        for(EvhRentalv2SiteItemDTO* item in self.itemDTOs) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -49,7 +49,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"itemDTOs"];
             for(id itemJson in jsonArray) {
-                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
+                EvhRentalv2SiteItemDTO* item = [EvhRentalv2SiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.itemDTOs addObject: item];

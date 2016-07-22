@@ -2,7 +2,7 @@
 // EvhFindRentalSitesCommandResponse.m
 //
 #import "EvhFindRentalSitesCommandResponse.h"
-#import "EvhRentalSiteDTO.h"
+#import "EvhRentalv2RentalSiteDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSitesCommandResponse
@@ -32,11 +32,11 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.nextPageOffset)
-        [jsonObject setObject: self.nextPageOffset forKey: @"nextPageOffset"];
+    if(self.nextPageAnchor)
+        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.rentalSites) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteDTO* item in self.rentalSites) {
+        for(EvhRentalv2RentalSiteDTO* item in self.rentalSites) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -48,14 +48,14 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.nextPageOffset = [jsonObject objectForKey: @"nextPageOffset"];
-        if(self.nextPageOffset && [self.nextPageOffset isEqual:[NSNull null]])
-            self.nextPageOffset = nil;
+        self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
+        if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
+            self.nextPageAnchor = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSites"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteDTO* item = [EvhRentalSiteDTO new];
+                EvhRentalv2RentalSiteDTO* item = [EvhRentalv2RentalSiteDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalSites addObject: item];

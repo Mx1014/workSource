@@ -30,8 +30,14 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.resourceTypeId)
-        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
+    if(self.ownerType)
+        [jsonObject setObject: self.ownerType forKey: @"ownerType"];
+    if(self.ownerId)
+        [jsonObject setObject: self.ownerId forKey: @"ownerId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.siteType)
+        [jsonObject setObject: self.siteType forKey: @"siteType"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -43,9 +49,21 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
-        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
-            self.resourceTypeId = nil;
+        self.ownerType = [jsonObject objectForKey: @"ownerType"];
+        if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
+            self.ownerType = nil;
+
+        self.ownerId = [jsonObject objectForKey: @"ownerId"];
+        if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
+            self.ownerId = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.siteType = [jsonObject objectForKey: @"siteType"];
+        if(self.siteType && [self.siteType isEqual:[NSNull null]])
+            self.siteType = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

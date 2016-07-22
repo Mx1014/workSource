@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUpdateItemsAdminCommand
@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-// item type EvhSiteItemDTO*
+// item type EvhRentalv2SiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* itemDTOs;
 
 -(id) init;

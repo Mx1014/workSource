@@ -2,7 +2,7 @@
 // EvhRentalv2RentalSiteDTO.m
 //
 #import "EvhRentalv2RentalSiteDTO.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhSiteOwnerDTO.h"
 #import "EvhAttachmentConfigDTO.h"
@@ -46,6 +46,18 @@
         [jsonObject setObject: self.buildingName forKey: @"buildingName"];
     if(self.address)
         [jsonObject setObject: self.address forKey: @"address"];
+    if(self.longitude)
+        [jsonObject setObject: self.longitude forKey: @"longitude"];
+    if(self.latitude)
+        [jsonObject setObject: self.latitude forKey: @"latitude"];
+    if(self.chargeUid)
+        [jsonObject setObject: self.chargeUid forKey: @"chargeUid"];
+    if(self.chargeName)
+        [jsonObject setObject: self.chargeName forKey: @"chargeName"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.communityName)
+        [jsonObject setObject: self.communityName forKey: @"communityName"];
     if(self.avgPrice)
         [jsonObject setObject: self.avgPrice forKey: @"avgPrice"];
     if(self.spec)
@@ -98,7 +110,7 @@
         [jsonObject setObject: self.createTime forKey: @"createTime"];
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhSiteItemDTO* item in self.siteItems) {
+        for(EvhRentalv2SiteItemDTO* item in self.siteItems) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -152,6 +164,30 @@
         self.address = [jsonObject objectForKey: @"address"];
         if(self.address && [self.address isEqual:[NSNull null]])
             self.address = nil;
+
+        self.longitude = [jsonObject objectForKey: @"longitude"];
+        if(self.longitude && [self.longitude isEqual:[NSNull null]])
+            self.longitude = nil;
+
+        self.latitude = [jsonObject objectForKey: @"latitude"];
+        if(self.latitude && [self.latitude isEqual:[NSNull null]])
+            self.latitude = nil;
+
+        self.chargeUid = [jsonObject objectForKey: @"chargeUid"];
+        if(self.chargeUid && [self.chargeUid isEqual:[NSNull null]])
+            self.chargeUid = nil;
+
+        self.chargeName = [jsonObject objectForKey: @"chargeName"];
+        if(self.chargeName && [self.chargeName isEqual:[NSNull null]])
+            self.chargeName = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.communityName = [jsonObject objectForKey: @"communityName"];
+        if(self.communityName && [self.communityName isEqual:[NSNull null]])
+            self.communityName = nil;
 
         self.avgPrice = [jsonObject objectForKey: @"avgPrice"];
         if(self.avgPrice && [self.avgPrice isEqual:[NSNull null]])
@@ -256,7 +292,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {
-                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
+                EvhRentalv2SiteItemDTO* item = [EvhRentalv2SiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteItems addObject: item];

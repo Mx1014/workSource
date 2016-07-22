@@ -3,9 +3,9 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalSiteItemDTO.h"
+#import "EvhSiteItemDTO.h"
 #import "EvhRentalSiteRulesDTO.h"
-#import "EvhRentalBillAttachmentDTO.h"
+#import "EvhBillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalRentalBillDTO
@@ -76,13 +76,13 @@
 
 @property(nonatomic, copy) NSNumber* rentalCount;
 
-// item type EvhRentalSiteItemDTO*
+// item type EvhSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
 // item type EvhRentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSiteRules;
 
-// item type EvhRentalBillAttachmentDTO*
+// item type EvhBillAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* billAttachments;
 
 -(id) init;

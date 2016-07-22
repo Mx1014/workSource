@@ -2,10 +2,10 @@
 // EvhFindRentalSiteMonthStatusCommandResponse.m
 //
 #import "EvhFindRentalSiteMonthStatusCommandResponse.h"
-#import "EvhRentalv2RentalSiteDayRulesDTO.h"
+#import "EvhRentalSiteDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSiteMonthStatusCommandResponse
@@ -80,7 +80,7 @@
         [jsonObject setObject: self.anchorTime forKey: @"anchorTime"];
     if(self.siteDays) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalv2RentalSiteDayRulesDTO* item in self.siteDays) {
+        for(EvhRentalSiteDayRulesDTO* item in self.siteDays) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -107,7 +107,7 @@
     }
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhSiteItemDTO* item in self.siteItems) {
+        for(EvhRentalv2SiteItemDTO* item in self.siteItems) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -202,7 +202,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteDays"];
             for(id itemJson in jsonArray) {
-                EvhRentalv2RentalSiteDayRulesDTO* item = [EvhRentalv2RentalSiteDayRulesDTO new];
+                EvhRentalSiteDayRulesDTO* item = [EvhRentalSiteDayRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteDays addObject: item];
@@ -229,7 +229,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {
-                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
+                EvhRentalv2SiteItemDTO* item = [EvhRentalv2SiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteItems addObject: item];

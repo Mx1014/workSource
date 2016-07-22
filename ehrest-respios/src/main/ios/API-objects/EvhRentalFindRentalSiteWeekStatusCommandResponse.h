@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalSiteDayRulesDTO.h"
+#import "EvhRentalRentalSiteDayRulesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalFindRentalSiteWeekStatusCommandResponse
@@ -32,7 +32,7 @@
 
 @property(nonatomic, copy) NSNumber* anchorTime;
 
-// item type EvhRentalSiteDayRulesDTO*
+// item type EvhRentalRentalSiteDayRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteDays;
 
 -(id) init;

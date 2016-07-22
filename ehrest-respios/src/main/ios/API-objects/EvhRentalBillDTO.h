@@ -3,9 +3,9 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
 #import "EvhRentalv2RentalSiteRulesDTO.h"
-#import "EvhBillAttachmentDTO.h"
+#import "EvhRentalv2BillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalBillDTO
@@ -74,13 +74,13 @@
 
 @property(nonatomic, copy) NSNumber* resourceTypeId;
 
-// item type EvhSiteItemDTO*
+// item type EvhRentalv2SiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
 // item type EvhRentalv2RentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSiteRules;
 
-// item type EvhBillAttachmentDTO*
+// item type EvhRentalv2BillAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* billAttachments;
 
 @property(nonatomic, copy) NSNumber* toastFlag;
