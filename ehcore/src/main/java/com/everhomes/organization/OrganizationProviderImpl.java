@@ -141,7 +141,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	}
 
-
+	@Override
+	public Organization findOrganizationByOrganizationToken(String organizationToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq(organizationToken));
+		return ConvertHelper.convert(query.fetchOne(), Organization.class);
+	}
 	@Override
 	public void updateOrganization(Organization department){
 		assert(department.getId() == null);

@@ -197,5 +197,6 @@ public interface OrganizationProvider {
 	
 	Organization findOrganizationByGroupId(Long groupId);
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
-	
+  //根据第三方机构token获取organization
+    Organization findOrganizationByOrganizationToken(String organizationToken);
 }

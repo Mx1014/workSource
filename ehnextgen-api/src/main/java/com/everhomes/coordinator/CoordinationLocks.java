@@ -18,7 +18,8 @@ public enum CoordinationLocks {
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
     CREATE_QUALITY_TASK("quality.task.create"),
     PAYMENT_CARD("payment.card"),
-	UPDATE_NEWS("news.update");
+	UPDATE_NEWS("news.update"),
+	WANKE_LOGIN("wanke.login");
     
 
     private String code;

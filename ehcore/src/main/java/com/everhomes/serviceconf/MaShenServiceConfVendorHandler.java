@@ -1,0 +1,433 @@
+package com.everhomes.serviceconf;
+
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import com.alibaba.fastjson.JSON;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServer;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
+import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
+import com.everhomes.rest.serviceconf.ListCommunityCommand;
+import com.everhomes.rest.serviceconf.ListCommunityResponse;
+import com.everhomes.rest.serviceconf.Type;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.LogonCommandResponse;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
+
+@Component(ServiceConfVendorHandler.SERVICECONF_VENDOR_PREFIX+"wanke")
+public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
+	private static final Logger LOGGER = LoggerFactory.getLogger(MaShenServiceConfVendorHandler.class);
+	private static CloseableHttpClient httpClient = null;
+	static{ 
+		SSLContext sslcontext = null;
+		try {
+			sslcontext = SSLContext.getInstance("SSLv3");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	// 实现一个X509TrustManager接口，用于绕过验证，不用修改里面的方法
+		X509TrustManager trustManager = new X509TrustManager() {
+			@Override
+			public void checkClientTrusted(
+					java.security.cert.X509Certificate[] paramArrayOfX509Certificate,
+					String paramString) throws CertificateException {
+			}
+
+			@Override
+			public void checkServerTrusted(
+					java.security.cert.X509Certificate[] paramArrayOfX509Certificate,
+					String paramString) throws CertificateException {
+			}
+
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+		};
+		try {
+			sslcontext.init(null, new TrustManager[] { trustManager }, null);
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		}
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
+        httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+	}
+	
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private DbProvider dbProvider;
+	@Autowired
+	private UserProvider userProvider;
+	@Autowired
+	private BorderProvider borderProvider;
+	@Autowired
+	private ContentServerService contentServerService;
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	@Autowired
+	private OrganizationService organizationService;
+	@Autowired
+    BigCollectionProvider bigCollectionProvider;
+	@Autowired
+    private ConfigurationProvider configProvider;
+	@Autowired
+    private CoordinationProvider coordinationProvider;
+	
+	@Override
+	public ListCommunityResponse loginAndGetCommunities(ListCommunityCommand cmd, HttpServletRequest req, HttpServletResponse resp) {
+     	ListCommunityResponse listCommunityResponse = new ListCommunityResponse();
+     	String userToken = null;
+     	String identifierToken = null;
+     	String organizationToken = "123";
+     	final String initPassword = "123456";
+     	//如果debug开启，则用来测试
+     	if(cmd.isDebugged()) {
+     		String[] arr = cmd.getToken().split(",");
+     		userToken = arr[0];
+     		identifierToken = arr[1];
+     		organizationToken = arr[3];
+     	}else {
+     		MashenResponseEntity entity = getUserInfoByToken(cmd.getToken());
+    		Map<String, Object> result = entity.getData();
+    		userToken = (String) result.get("uid");
+    		identifierToken = (String) result.get("mobile");
+    		//List organizationList = result.get("orgList");
+     	}
+     	
+		String regIp = getIp(req);
+		UserIdentifier identifier = signup(userToken, identifierToken, cmd.getNamespaceId(), regIp);
+		LogonCommandResponse logonCommandResponse = login(identifier, initPassword, req, resp);
+		ListOrganizationCommunityCommand listOrganizationCommunityCommand = new ListOrganizationCommunityCommand();
+		Organization organization = organizationProvider.findOrganizationByOrganizationToken(organizationToken);
+		if(organization == null) {
+			LOGGER.error("organization not found, cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"organization not found");
+		}
+		listOrganizationCommunityCommand.setOrganizationId(organization.getId());
+		ListOrganizationCommunityV2CommandResponse listOrganizationCommunityV2CommandResponse = organizationService
+				.listOrganizationCommunitiesV2(listOrganizationCommunityCommand);
+		listCommunityResponse.setCommunities(listOrganizationCommunityV2CommandResponse.getCommunities());
+		//listCommunityResponse.setNextPageAnchor(listOrganizationCommunityV2CommandResponse.getNextPageOffset());
+		return listCommunityResponse;
+	}
+	
+	private UserIdentifier signup(String userToken, String identifierToken, Integer namespaceId, String regIp) {
+
+		final Integer newNamespaceId = (namespaceId == null) ? Namespace.DEFAULT_NAMESPACE : namespaceId;
+		
+		UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(newNamespaceId, identifierToken);
+		if(identifier == null) {
+			identifier = this.dbProvider.execute((TransactionStatus status) -> {
+				User user = new User();
+				user.setStatus(UserStatus.ACTIVE.getCode());
+				user.setRegIp(regIp);
+				user.setRegChannelId(0L);
+				user.setNamespaceId(newNamespaceId);
+				user.setNamespaceUserToken(userToken);
+				user.setNamespaceUserType(Type.WANKE.getCode());
+				user.setGender(UserGender.UNDISCLOSURED.getCode());
+				String salt=EncryptionUtils.createRandomSalt();
+				user.setSalt(salt);
+				try {
+					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","123456",salt)));
+				} catch (Exception e) {
+					LOGGER.error("encode password failed");
+					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+				}
+				userProvider.createUser(user);
+
+				UserIdentifier newIdentifier = new UserIdentifier();
+				newIdentifier.setOwnerUid(user.getId());
+				newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+				newIdentifier.setIdentifierToken(identifierToken);
+				newIdentifier.setNamespaceId(newNamespaceId);
+				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				userProvider.createIdentifier(newIdentifier);
+				return newIdentifier;
+			});
+		}
+		return identifier;
+	}
+	
+	private LogonCommandResponse login(UserIdentifier identifier, String password, HttpServletRequest req, HttpServletResponse resp){
+		UserLogin login = this.userService.logon(identifier.getNamespaceId(), identifier.getIdentifierToken(), 
+				password, "", "");
+		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, JSON.toJSONString(login)));
+		setCookieInResponse("token", tokenString, req, resp);
+        
+        // 当从园区版登录时，有指定的namespaceId，需要对这些用户进行特殊处理
+        Integer namespaceId = UserContext.getCurrentNamespaceId(identifier.getNamespaceId());
+        if(namespaceId != null) {
+            setCookieInResponse("namespace_id", String.valueOf(namespaceId), req, resp);
+            userService.setDefaultCommunity(login.getUserId(), namespaceId);
+        }
+
+        LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
+		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
+		cmdResponse.setContentServer(getContentServer());
+		return cmdResponse;
+	}
+	
+	private String getIp(HttpServletRequest request) {
+		String ip = request.getHeader("x-forwarded-for");
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("Proxy-Client-IP"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("WL-Proxy-Client-IP"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("HTTP_CLIENT_IP"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR"); 
+		} 
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+			ip = request.getRemoteAddr(); 
+		}
+		return ip;
+	}
+	
+	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
+			HttpServletResponse response) {
+
+		Cookie cookie = findCookieInRequest(name, request);
+		if(cookie == null)
+			cookie = new Cookie(name, value);
+		else
+			cookie.setValue(value);
+		cookie.setPath("/");
+		if(value == null || value.isEmpty())
+			cookie.setMaxAge(0);
+
+		response.addCookie(cookie);
+	}
+	
+	private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
+		List<Cookie> matchedCookies = new ArrayList<>();
+
+		Cookie[] cookies = request.getCookies();
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
+				if(cookie.getName().equals(name)) {
+					LOGGER.debug("Found matched cookie with name {} at value: {}, path: {}, version: {}", name,
+							cookie.getValue(), cookie.getPath(), cookie.getVersion());
+					matchedCookies.add(cookie);
+				}
+			}
+		}
+
+		if(matchedCookies.size() > 0)
+			return matchedCookies.get(matchedCookies.size() - 1);
+		return null;
+	}
+	
+	private List<String> listAllBorderAccessPoints() {
+		List<Border> borders = this.borderProvider.listAllBorders();
+		return borders.stream().map((Border border) -> {
+			return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+		}).collect(Collectors.toList());
+	}
+
+	private String getContentServer(){
+		try {
+			ContentServer server = contentServerService.selectContentServer();
+			return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+		} catch (Exception e) {
+			LOGGER.error("cannot find content server",e);
+			return null;
+		}
+	}
+	
+	private String getAccessToken() {
+		String appId = configProvider.getValue("wanke.mashen.appId", "");
+        String appSecret = configProvider.getValue("wanke.mashen.appSecret", "");
+		
+    	return this.coordinationProvider.getNamedLock(CoordinationLocks.WANKE_LOGIN.getCode()).enter(()-> {
+    		String accessToken = getAccessTokenFromCache(appId);
+            if(accessToken == null) {
+            	refreshAccessToken(appId, appSecret);
+            	accessToken = getAccessTokenFromCache(appId);
+            }
+            return accessToken;
+        }).first();
+    	
+    }
+	
+	private String refreshAndGetAccessToken() {
+		String appId = configProvider.getValue("wanke.mashen.appId", "");
+        String appSecret = configProvider.getValue("wanke.mashen.appSecret", "");
+		
+    	return this.coordinationProvider.getNamedLock(CoordinationLocks.WANKE_LOGIN.getCode()).enter(()-> {
+    		refreshAccessToken(appId, appSecret);
+    		String accessToken = getAccessTokenFromCache(appId);
+            return accessToken;
+        }).first();
+    	
+    }
+	
+	private String getAccessTokenFromCache(String appId) {
+        String key = getAccessTokenKey(appId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+      
+        Object value = redisTemplate.opsForValue().get(key);
+        
+        String accessToken = null;
+        if(value != null) {
+        	accessToken = (String) value;    
+        }
+        if(LOGGER.isDebugEnabled())
+        	LOGGER.debug("Get mashen token from cache, key={}, accessToken={}", key, accessToken);
+        
+        return accessToken;
+    }
+	
+	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+	private void refreshAccessToken(String appId, String appSecret) {
+        String key = getAccessTokenKey(appId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        
+        Long chnlSn = System.currentTimeMillis();
+        //从第三方请求accessToken
+        MashenResponseEntity result = loginForAccessToken(appId, appSecret);
+        Map<String, Object> map = result.getData();
+        String accessToken = (String) map.get("accessToken");
+        redisTemplate.opsForValue().set(key,accessToken);
+        
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Refresh token, key={}, accessToken={}", key, accessToken);
+		}
+		
+    }
+	
+	private String getAccessTokenKey(String appId) {
+        return "wanke-accessToken-" + appId;
+    }
+	
+	private MashenResponseEntity loginForAccessToken(String appId, String appSecret) {
+		String param = "/token/get?appId=" + appId + "&appSecret=" + appSecret;
+		MashenResponseEntity entity = httpGet(param);
+		if(!entity.isSuccess()) {
+			LOGGER.error("the response of Mashen, result={}.", entity);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"the response of Mashen failed");
+		}
+        return entity;
+	}
+	
+	private MashenResponseEntity getUserInfoByToken(String token) {
+		String accessToken = getAccessToken();
+        String param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + accessToken;
+        MashenResponseEntity entity = httpGet(param);
+        if(!entity.isSuccess()) {
+        	accessToken = refreshAndGetAccessToken();
+        	param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + accessToken;
+        	entity = httpGet(param);
+		}
+        return entity;
+	}
+	
+	private MashenResponseEntity httpGet(String param){
+		String url = configProvider.getValue("wanke.mashen.url", "");
+		if(StringUtils.isBlank(url)) {
+			LOGGER.error("Wanke.mashen.url not found, url={}", url);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Wanke.mashen.url not found");
+		}
+		HttpGet request = new HttpGet(url + param);
+		HttpResponse rsp = null;
+		try{
+			rsp = httpClient.execute(request);
+		}catch(Exception e){
+			LOGGER.error("HTTP client execute exception, param={}", param, e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"HTTP client execute exception.");
+		}
+		
+		StatusLine status = rsp.getStatusLine();
+		if(status.getStatusCode() == 200){
+			String rspText;
+			try {
+				rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
+			} catch (Exception e) {
+				LOGGER.error("HTTP client EntityUtils toString exception, param={}", param, e);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"HTTP client EntityUtils toString exception");
+			}
+			if(LOGGER.isDebugEnabled())
+				LOGGER.debug("Mashen response info :rspText={}", rspText);
+			
+			//MashenResponseEntity resp = (MashenResponseEntity) StringHelper.fromJsonString(rspText, MashenResponseEntity.class);
+			MashenResponseEntity resp = JSON.parseObject(rspText, MashenResponseEntity.class);
+			
+			return resp;
+		}else{
+			LOGGER.error("Mashen HTTP request response status is not 200, status, rspText={}.", status, rsp.getEntity());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Mashen HTTP request response status is not 200");
+		}
+	}
+}
