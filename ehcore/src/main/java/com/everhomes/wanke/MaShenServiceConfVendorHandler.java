@@ -135,7 +135,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
      	ListCommunityResponse listCommunityResponse = new ListCommunityResponse();
      	String userToken = null;
      	String identifierToken = null;
-     	String organizationToken = "123";
+     	String organizationToken = null;
      	final String initPassword = "123456";
      	//如果debug开启，则用来测试
      	if(cmd.isDebugged()) {
@@ -148,7 +148,13 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
     		Map<String, Object> result = entity.getData();
     		userToken = (String) result.get("uid");
     		identifierToken = (String) result.get("mobile");
-    		//List organizationList = result.get("orgList");
+    		List organizationList = (List) result.get("orgList");
+    		if(null == organizationList || organizationList.isEmpty()){
+    			LOGGER.error("user is not in organization, cmd={}, entity={}", cmd, entity);
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    					"user is not in organization");
+    		}
+    		organizationToken = ((Map<String, Object>)organizationList.get(0)).get("orgId").toString();
      	}
      	
 		String regIp = getIp(req);
