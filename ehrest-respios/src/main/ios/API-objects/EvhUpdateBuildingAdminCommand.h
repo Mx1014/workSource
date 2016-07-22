@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhAttachmentDescriptor.h"
+#import "EvhForumAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUpdateBuildingAdminCommand
@@ -36,7 +36,7 @@
 
 @property(nonatomic, copy) NSNumber* namespaceId;
 
-// item type EvhAttachmentDescriptor*
+// item type EvhForumAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 -(id) init;

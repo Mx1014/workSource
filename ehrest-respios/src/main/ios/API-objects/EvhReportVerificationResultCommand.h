@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhAttachmentDescriptor.h"
+#import "EvhForumAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhReportVerificationResultCommand
@@ -16,7 +16,7 @@
 
 @property(nonatomic, copy) NSNumber* verificationResult;
 
-// item type EvhAttachmentDescriptor*
+// item type EvhForumAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* endTime;

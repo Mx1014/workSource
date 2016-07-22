@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhNewsAttachmentDescriptor.h"
+#import "EvhAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddNewsCommentCommand
@@ -22,7 +22,7 @@
 
 @property(nonatomic, copy) NSString* content;
 
-// item type EvhNewsAttachmentDescriptor*
+// item type EvhAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 -(id) init;

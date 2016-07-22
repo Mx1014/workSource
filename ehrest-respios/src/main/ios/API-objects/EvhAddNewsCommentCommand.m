@@ -2,7 +2,7 @@
 // EvhAddNewsCommentCommand.m
 //
 #import "EvhAddNewsCommentCommand.h"
-#import "EvhNewsAttachmentDescriptor.h"
+#import "EvhAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddNewsCommentCommand
@@ -44,7 +44,7 @@
         [jsonObject setObject: self.content forKey: @"content"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhNewsAttachmentDescriptor* item in self.attachments) {
+        for(EvhAttachmentDescriptor* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -79,7 +79,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhNewsAttachmentDescriptor* item = [EvhNewsAttachmentDescriptor new];
+                EvhAttachmentDescriptor* item = [EvhAttachmentDescriptor new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];

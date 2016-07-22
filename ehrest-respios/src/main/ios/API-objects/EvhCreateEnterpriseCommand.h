@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhOrganizationAddressDTO.h"
-#import "EvhAttachmentDescriptor.h"
+#import "EvhForumAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhCreateEnterpriseCommand
@@ -48,7 +48,7 @@
 // item type EvhOrganizationAddressDTO*
 @property(nonatomic, strong) NSMutableArray* addressDTOs;
 
-// item type EvhAttachmentDescriptor*
+// item type EvhForumAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 -(id) init;

@@ -16,3 +16,4 @@
 #define EvhOrganizationServiceErrorCode_ERROR_COMMUNITY_EXISTS 300001
 #define EvhOrganizationServiceErrorCode_ERROR_ENTERPRISE_CONTACT_NOT_FOUND 10101
 #define EvhOrganizationServiceErrorCode_ERROR_PARAMETER_NOT_EXIST 400001
+#define EvhOrganizationServiceErrorCode_ERROR_OBJECT_NOT_EXIST 400002

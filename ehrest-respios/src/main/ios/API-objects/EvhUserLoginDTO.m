@@ -52,6 +52,16 @@
         [jsonObject setObject: self.partnerId forKey: @"partnerId"];
     if(self.pusherIdentify)
         [jsonObject setObject: self.pusherIdentify forKey: @"pusherIdentify"];
+    if(self.isOnline)
+        [jsonObject setObject: self.isOnline forKey: @"isOnline"];
+    if(self.deviceType)
+        [jsonObject setObject: self.deviceType forKey: @"deviceType"];
+    if(self.borderStatus)
+        [jsonObject setObject: self.borderStatus forKey: @"borderStatus"];
+    if(self.borderSessionId)
+        [jsonObject setObject: self.borderSessionId forKey: @"borderSessionId"];
+    if(self.lastPushPing)
+        [jsonObject setObject: self.lastPushPing forKey: @"lastPushPing"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -100,6 +110,26 @@
         self.pusherIdentify = [jsonObject objectForKey: @"pusherIdentify"];
         if(self.pusherIdentify && [self.pusherIdentify isEqual:[NSNull null]])
             self.pusherIdentify = nil;
+
+        self.isOnline = [jsonObject objectForKey: @"isOnline"];
+        if(self.isOnline && [self.isOnline isEqual:[NSNull null]])
+            self.isOnline = nil;
+
+        self.deviceType = [jsonObject objectForKey: @"deviceType"];
+        if(self.deviceType && [self.deviceType isEqual:[NSNull null]])
+            self.deviceType = nil;
+
+        self.borderStatus = [jsonObject objectForKey: @"borderStatus"];
+        if(self.borderStatus && [self.borderStatus isEqual:[NSNull null]])
+            self.borderStatus = nil;
+
+        self.borderSessionId = [jsonObject objectForKey: @"borderSessionId"];
+        if(self.borderSessionId && [self.borderSessionId isEqual:[NSNull null]])
+            self.borderSessionId = nil;
+
+        self.lastPushPing = [jsonObject objectForKey: @"lastPushPing"];
+        if(self.lastPushPing && [self.lastPushPing isEqual:[NSNull null]])
+            self.lastPushPing = nil;
 
         return self;
     }

@@ -6,7 +6,7 @@
 #import "EvhOrganizationMemberDTO.h"
 #import "EvhCommunityDTO.h"
 #import "EvhAddressAddressDTO.h"
-#import "EvhAttachmentDescriptor.h"
+#import "EvhForumAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationDetailDTO
@@ -66,7 +66,7 @@
 // item type EvhAddressAddressDTO*
 @property(nonatomic, strong) NSMutableArray* addresses;
 
-// item type EvhAttachmentDescriptor*
+// item type EvhForumAttachmentDescriptor*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* communityId;

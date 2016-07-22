@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-12 18:01:58
+// generated at 2016-07-22 15:33:30
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -183,8 +183,10 @@ public interface ApiConstants {
     public static final String ADMIN_LAUNCHPAD_UPDATELAUNCHPADLAYOUT_URL = "/admin/launchpad/updateLaunchPadLayout";
     public static final String ADMIN_LISTBORDER_URL = "/admin/listBorder";
     public static final String ADMIN_LISTLOGIN_URL = "/admin/listLogin";
+    public static final String ADMIN_LISTLOGINBYPHONE_URL = "/admin/listLoginByPhone";
     public static final String ADMIN_LISTNAMESPACE_URL = "/admin/listNamespace";
     public static final String ADMIN_LISTPERSISTSERVER_URL = "/admin/listPersistServer";
+    public static final String ADMIN_MESSAGETEST_URL = "/admin/messageTest";
     public static final String ADMIN_ORG_ACCEPTTASK_URL = "/admin/org/acceptTask";
     public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
@@ -253,6 +255,7 @@ public interface ApiConstants {
     public static final String ADMIN_PROMOTION_NEWORDERPRICE_URL = "/admin/promotion/newOrderPrice";
     public static final String ADMIN_PROMOTION_SEARCHPROMOTION_URL = "/admin/promotion/searchPromotion";
     public static final String ADMIN_PROMOTION_UPDATEPROMOTION_URL = "/admin/promotion/updatePromotion";
+    public static final String ADMIN_PUSHTEST_URL = "/admin/pushTest";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
     public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
@@ -782,6 +785,8 @@ public interface ApiConstants {
     public static final String REGION_LISTDESCENDANTS_URL = "/region/listDescendants";
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
     public static final String REPEAT_TESTEXPRESSIONANALYZE_URL = "/repeat/testExpressionAnalyze";
+    public static final String SERVICECONF_LISTCOMMUNITYSERVICES_URL = "/serviceConf/listCommunityServices";
+    public static final String SERVICECONF_LOGINANDGETCOMMUNITIES_URL = "/serviceConf/loginAndGetCommunities";
     public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
     public static final String TECHPARK_ENTRY_CREATELEASEPROMOTION_URL = "/techpark/entry/createLeasePromotion";
     public static final String TECHPARK_ENTRY_DELETEAPPLYENTRY_URL = "/techpark/entry/deleteApplyEntry";
@@ -913,6 +918,7 @@ public interface ApiConstants {
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
     public static final String USER_GETUSERSNAPSHOTINFO_URL = "/user/getUserSnapshotInfo";
     public static final String USER_LISTACTIVITYFAVORITE_URL = "/user/listActivityFavorite";
+    public static final String USER_LISTBORDERS_URL = "/user/listBorders";
     public static final String USER_LISTCONTACTS_URL = "/user/listContacts";
     public static final String USER_LISTPOSTEDACTIVITIES_URL = "/user/listPostedActivities";
     public static final String USER_LISTPOSTEDTOPICS_URL = "/user/listPostedTopics";

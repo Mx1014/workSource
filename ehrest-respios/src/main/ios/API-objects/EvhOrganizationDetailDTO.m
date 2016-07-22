@@ -5,7 +5,7 @@
 #import "EvhOrganizationMemberDTO.h"
 #import "EvhCommunityDTO.h"
 #import "EvhAddressAddressDTO.h"
-#import "EvhAttachmentDescriptor.h"
+#import "EvhForumAttachmentDescriptor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationDetailDTO
@@ -103,7 +103,7 @@
     }
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentDescriptor* item in self.attachments) {
+        for(EvhForumAttachmentDescriptor* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -225,7 +225,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAttachmentDescriptor* item = [EvhAttachmentDescriptor new];
+                EvhForumAttachmentDescriptor* item = [EvhForumAttachmentDescriptor new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];
