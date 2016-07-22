@@ -1949,6 +1949,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				// 按日预定
 				else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
+					//TODO:产品说按天预定没有场所编号，所以默认只为noneed，以后可能会改就注释掉下面这一句
+					cmd.setAutoAssign(NormalFlag.NONEED.getCode());
 					rsr.setRentalResourceId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getSiteCounts());
@@ -1975,7 +1977,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 	public void createRSR(RentalCell rsr,AddRentalSiteSingleSimpleRule cmd){
 		if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-			//自动分配sitenumber
+			//自动分配sitenumber --这个需求被改掉
+			//根据用户填写分配sitenumber
 			for(int num =0;num<cmd.getSiteCounts();num++){
 				rsr.setCounts(1.0);
 				rsr.setResourceNumber(cmd.getSiteNumbers().get(num));
