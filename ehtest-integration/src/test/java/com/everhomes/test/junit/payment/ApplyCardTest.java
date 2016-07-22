@@ -20,6 +20,7 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
 import com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentCardsRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
+import com.everhomes.test.core.util.EncryptionUtils;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
