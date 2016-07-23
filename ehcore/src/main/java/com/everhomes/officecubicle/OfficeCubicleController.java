@@ -10,9 +10,14 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
 import com.everhomes.rest.officecubicle.CityDTO;
+import com.everhomes.rest.officecubicle.GetSpaceDetailCommand;
 import com.everhomes.rest.officecubicle.GetSpaceListCommand;
-import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminResponse;
+import com.everhomes.rest.officecubicle.GetSpaceListResponse;
+import com.everhomes.rest.officecubicle.OfficeOrderDTO;
+import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
+import com.everhomes.rest.officecubicle.UnvisibleSpaceOrderCommand;
 
 /**
  * <ul>
@@ -55,5 +60,69 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
+    
 
+    
+    /**
+     * <b>URL: /officecubicle/getSpaceDetail</b> 
+     * <p>工位预定-空间详情</p>
+     */
+    @RequestMapping("getSpaceDetail")
+    @RestReturn(value=OfficeSpaceDTO.class )
+    public RestResponse getSpaceDetail(GetSpaceDetailCommand cmd) {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+
+    /**
+     * <b>URL: /officecubicle/addSpaceOrder</b> 
+     * <p>工位预定-添加预定</p>
+     */
+    @RequestMapping("addSpaceOrder")
+    @RestReturn(value=String.class )
+    public RestResponse addSpaceOrder(AddSpaceOrderCommand cmd) {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+
+    /**
+     * <b>URL: /officecubicle/getUserOrderList</b> 
+     * <p>预订记录-列表</p>
+     */
+    @RequestMapping("getUserOrderList")
+    @RestReturn(value=OfficeOrderDTO.class ,collection = true)
+    public RestResponse getUserOrderList() {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+
+    /**
+     * <b>URL: /officecubicle/unvisibleSpaceOrder</b> 
+     * <p>预订记录-删除预订记录（置为不可见）</p>
+     */
+    @RequestMapping("unvisibleSpaceOrder")
+    @RestReturn(value=String.class )
+    public RestResponse unvisibleSpaceOrder(UnvisibleSpaceOrderCommand cmd) {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
 }
+
