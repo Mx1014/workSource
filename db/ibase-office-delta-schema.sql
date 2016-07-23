@@ -98,8 +98,6 @@ CREATE TABLE `eh_office_cubicle_orders` (
 `reserver_name` VARCHAR(64)  COMMENT '预订人姓名',
 `reserve_contact_token` VARCHAR(32)  COMMENT '预定联系方式',
 `reserve_enterprise` VARCHAR(512)  COMMENT '预订人公司',
-`creator_uid` BIGINT   COMMENT '',
-`create_time` DATETIME   COMMENT '',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
