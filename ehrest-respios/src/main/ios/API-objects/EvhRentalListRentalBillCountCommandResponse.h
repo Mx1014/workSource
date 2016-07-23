@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalRentalBillCountDTO.h"
+#import "EvhRentalBillCountDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalListRentalBillCountCommandResponse
@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-// item type EvhRentalRentalBillCountDTO*
+// item type EvhRentalBillCountDTO*
 @property(nonatomic, strong) NSMutableArray* rentalBillCounts;
 
 -(id) init;

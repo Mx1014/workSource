@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhAddressAddressDTO.h"
+#import "EvhAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListAddressByKeywordCommandResponse
@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-// item type EvhAddressAddressDTO*
+// item type EvhAddressDTO*
 @property(nonatomic, strong) NSMutableArray* requests;
 
 @property(nonatomic, copy) NSNumber* nextPageOffset;

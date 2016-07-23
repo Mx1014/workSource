@@ -2,7 +2,7 @@
 // EvhGetResourceListAdminResponse.m
 //
 #import "EvhGetResourceListAdminResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhCommunityBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhGetResourceListAdminResponse
@@ -36,7 +36,7 @@
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.rentalSites) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhBuildingDTO* item in self.rentalSites) {
+        for(EvhCommunityBuildingDTO* item in self.rentalSites) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -55,7 +55,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSites"];
             for(id itemJson in jsonArray) {
-                EvhBuildingDTO* item = [EvhBuildingDTO new];
+                EvhCommunityBuildingDTO* item = [EvhCommunityBuildingDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalSites addObject: item];

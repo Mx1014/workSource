@@ -2,14 +2,14 @@
 // EvhTechparkRentalBatchIncompleteBillRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhRentalBatchCompleteBillCommandResponse.h"
+#import "EvhBatchCompleteBillCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalBatchIncompleteBillRestResponse
 //
 @interface EvhTechparkRentalBatchIncompleteBillRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhRentalBatchCompleteBillCommandResponse* response;
+@property(nonatomic, strong) EvhBatchCompleteBillCommandResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

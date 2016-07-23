@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhRentalRentalSiteRulesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalRentalSiteDayRulesDTO
@@ -14,7 +14,7 @@
 
 @property(nonatomic, copy) NSNumber* rentalDate;
 
-// item type EvhRentalSiteRulesDTO*
+// item type EvhRentalRentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteRules;
 
 -(id) init;

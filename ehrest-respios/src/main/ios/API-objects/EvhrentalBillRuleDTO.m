@@ -1,19 +1,19 @@
 //
-// EvhrentalBillRuleDTO.m
+// EvhRentalBillRuleDTO.m
 //
-#import "EvhrentalBillRuleDTO.h"
+#import "EvhRentalBillRuleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhrentalBillRuleDTO
+// EvhRentalBillRuleDTO
 //
 
-@implementation EvhrentalBillRuleDTO
+@implementation EvhRentalBillRuleDTO
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhrentalBillRuleDTO* obj = [EvhrentalBillRuleDTO new];
+        EvhRentalBillRuleDTO* obj = [EvhRentalBillRuleDTO new];
         return [obj fromJson:jsonObject];
     }
     return nil;

@@ -41,6 +41,8 @@
 
 @property(nonatomic, copy) NSNumber* rentalStep;
 
+@property(nonatomic, copy) NSNumber* siteCounts;
+
 @property(nonatomic, copy) NSNumber* exclusiveFlag;
 
 @property(nonatomic, copy) NSNumber* autoAssign;

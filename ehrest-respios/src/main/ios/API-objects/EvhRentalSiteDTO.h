@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhSiteItemDTO.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhRentalRentalSiteRulesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalSiteDTO
@@ -46,7 +46,7 @@
 // item type EvhSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
-// item type EvhRentalSiteRulesDTO*
+// item type EvhRentalRentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteRules;
 
 -(id) init;
