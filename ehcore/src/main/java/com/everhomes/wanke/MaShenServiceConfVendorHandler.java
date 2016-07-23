@@ -138,7 +138,8 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
      	String organizationToken = null;
      	final String initPassword = "123456";
      	//如果debug开启，则用来测试
-     	if(cmd.isDebugged()) {
+		boolean isDebugEnabled = configProvider.getBooleanValue("ehcore.test.isDebugEnabled", false);
+     	if(isDebugEnabled) {
      		String[] arr = cmd.getToken().split(",");
      		userToken = arr[0];
      		identifierToken = arr[1];

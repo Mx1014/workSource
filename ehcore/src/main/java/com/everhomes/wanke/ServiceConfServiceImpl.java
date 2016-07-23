@@ -74,6 +74,7 @@ public class ServiceConfServiceImpl implements ServiceConfService {
 	
 	@Override
 	public ListCommunityResponse loginAndGetCommunities(ListCommunityCommand cmd, HttpServletRequest req, HttpServletResponse resp) {
+		cmd.setType("wanke");
 		checkListCommunityCommand(cmd.getToken(),cmd.getType());
 		ServiceConfVendorHandler handler = getServiceConfVendorHandler(cmd.getType());
 		ListCommunityResponse response = handler.loginAndGetCommunities(cmd, req, resp);

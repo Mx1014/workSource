@@ -18,8 +18,6 @@ public class ListCommunityCommand {
 	private Integer pageSize;
 	private Long pageAnchor;
 	
-	private boolean isDebugged = false;
-	
 	public String getType() {
 		return type;
 	}
@@ -54,12 +52,6 @@ public class ListCommunityCommand {
 	}
 	public void setToken(String token) {
 		this.token = token;
-	}
-	public boolean isDebugged() {
-		return isDebugged;
-	}
-	public void setDebugged(boolean isDebugged) {
-		this.isDebugged = isDebugged;
 	}
 
 }
