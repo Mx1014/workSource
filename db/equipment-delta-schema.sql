@@ -166,7 +166,7 @@ CREATE TABLE `eh_equipment_inspection_task_logs` (
   `process_end_time` DATETIME DEFAULT NULL,
   `process_result` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: complete ok, 2: complete delay, 3: need maintenance ok, 4: need maintenance delay, 5：need maintenance ok complete ok, 6: need maintenance ok complete delay, 7: need maintenance delay complete ok, 8: need maintenance delay complete delay, 9: review qualified, 10: review unqualified',
   `process_message` TEXT,
-  `parameter_value` VARCHAR(128),
+  `parameter_value` VARCHAR(1024),
   `process_time` DATETIME DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
