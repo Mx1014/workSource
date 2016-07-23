@@ -36,6 +36,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.util.jaxb.ForcedType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -3359,13 +3360,107 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid launchPadItemId parameter in the command");
 		this.dbProvider.execute((TransactionStatus status) -> {
-			RentalResource rentalsite = ConvertHelper.convert(cmd, RentalResource.class);
-			rentalsite.setResourceName(cmd.getSiteName());
-			rentalsite.setStatus(RentalSiteStatus.DISABLE.getCode());
-			rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+			RentalResource resource = ConvertHelper.convert(cmd, RentalResource.class);
+			resource.setResourceName(cmd.getSiteName());
+			resource.setStatus(RentalSiteStatus.DISABLE.getCode());
+			resource.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
-			rentalsite.setCreatorUid( UserContext.current().getUser().getId());
-			Long siteId = rentalProvider.createRentalSite(rentalsite);
+			resource.setCreatorUid( UserContext.current().getUser().getId());
+			QueryDefaultRuleAdminCommand cmd2 = new QueryDefaultRuleAdminCommand();
+			cmd2.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
+			cmd2.setOwnerId(resource.getOrganizationId());
+			cmd2.setResourceTypeId(resource.getResourceTypeId());
+			QueryDefaultRuleAdminResponse defaultRule = this.queryDefaultRule(cmd2); 
+			if (null == defaultRule){
+				cmd2.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+				cmd2.setOwnerId(resource.getCommunityId());
+				defaultRule = this.queryDefaultRule(cmd2); 
+			} 
+			if (null == defaultRule)
+				throw RuntimeErrorException
+				.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
+			if(defaultRule.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
+				defaultRule.setUnit(1.0);
+				defaultRule.setAutoAssign(NormalFlag.NONEED.getCode());
+				defaultRule.setMultiUnit(NormalFlag.NONEED.getCode());
+				defaultRule.setSiteCounts(1.0);
+			}
+			if(null == defaultRule.getAutoAssign())
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
+			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())&&
+					!defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size())))
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
+			resource.setAutoAssign(defaultRule.getAutoAssign());
+			resource.setMultiUnit(defaultRule.getMultiUnit());
+			resource.setNeedPay(defaultRule.getNeedPay());
+			if(defaultRule.getNeedPay().equals(NormalFlag.NONEED.getCode())){
+				defaultRule.setWeekendPrice(new BigDecimal(0));
+				defaultRule.setWorkdayPrice(new BigDecimal(0));
+			}
+			resource.setMultiTimeInterval(defaultRule.getMultiTimeInterval());
+			resource.setRentalType(defaultRule.getRentalType());
+			resource.setRentalEndTime(defaultRule.getRentalEndTime());
+			resource.setRentalStartTime(defaultRule.getRentalStartTime());
+			resource.setTimeStep(defaultRule.getTimeStep());
+			resource.setCancelTime(defaultRule.getCancelTime());
+			resource.setRefundFlag(defaultRule.getRefundFlag());
+			resource.setRefundRatio(defaultRule.getRefundRatio());
+			
+			
+			if(null!=defaultRule.getAttachments())
+				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:defaultRule.getAttachments()){
+					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
+					rca.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+					rca.setOwnerId(resource.getId());
+					this.rentalProvider.createRentalConfigAttachment(rca);
+				}
+			
+			
+			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
+			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
+			List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
+			if(defaultRule.getTimeIntervals() != null) {
+
+				Double beginTime = null;
+				Double endTime = null;
+				for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
+					if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+						continue;
+					if(beginTime==null||beginTime>timeInterval.getBeginTime())
+						beginTime=timeInterval.getBeginTime();
+					if(endTime==null||endTime<timeInterval.getEndTime())
+						endTime=timeInterval.getEndTime();
+					AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
+					signleCmd.setBeginTime(timeInterval.getBeginTime());
+					signleCmd.setEndTime(timeInterval.getEndTime());
+					signleCmd.setWeekendPrice(weekendPrice); 
+					signleCmd.setWorkdayPrice(workdayPrice);
+					addSingleRules.add(signleCmd);
+					
+				}
+				if(endTime>24.0||beginTime<0.0)
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
+				resource.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
+				resource.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
+			} else {
+				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
+				signleCmd.setWeekendPrice(weekendPrice); 
+				signleCmd.setWorkdayPrice(workdayPrice);
+				addSingleRules.add(signleCmd);
+			}
+
+			
+			Long siteId = rentalProvider.createRentalSite(resource);
+			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
+				signleCmd.setRentalSiteId(resource.getId());
+				addRentalSiteSingleSimpleRule(signleCmd);
+				}
+			
 			if(cmd.getOwners() != null){
 				for(SiteOwnerDTO dto:cmd.getOwners()){
 					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
@@ -3382,6 +3477,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					this.rentalProvider.createRentalSitePic(detailPic);
 				}
 			}
+			
+			
 			return null;
 		});
 	}
