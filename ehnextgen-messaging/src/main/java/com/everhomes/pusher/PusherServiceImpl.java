@@ -402,13 +402,18 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         deviceMsgs.setAnchor(l.getAnchor());
 
         for(Message mb : msgInBox) {
+            String msgStr = null;
             try {
-                DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(mb.getContent(), DeviceMessage.class);
-                if(msg != null) {
-                    deviceMsgs.add(msg);    
+                msgStr = mb.getContent();
+                if(msgStr != null && !msgStr.isEmpty()) {
+                    DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(msgStr, DeviceMessage.class);
+                    if(msg != null) {
+                        deviceMsgs.add(msg);    
+                        }
                     }
+                
             } catch(Exception ex) {
-                LOGGER.error("device message error ", ex);
+                LOGGER.error("device message error msgStr=" + msgStr, ex);
             }
             
         }
