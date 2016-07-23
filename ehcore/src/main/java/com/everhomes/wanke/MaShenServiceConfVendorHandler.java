@@ -138,12 +138,11 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
      	String organizationToken = null;
      	final String initPassword = "123456";
      	//如果debug开启，则用来测试
-		boolean isDebugEnabled = configProvider.getBooleanValue("ehcore.test.isDebugEnabled", false);
+		boolean isDebugEnabled = configProvider.getBooleanValue("wanke.test.isDebugEnabled", false);
      	if(isDebugEnabled) {
-     		String[] arr = cmd.getToken().split(",");
-     		userToken = arr[0];
-     		identifierToken = arr[1];
-     		organizationToken = arr[3];
+     		userToken = configProvider.getValue("wanke.test.userToken", "");
+     		identifierToken = configProvider.getValue("wanke.test.identifierToken", "");
+     		organizationToken = configProvider.getValue("wanke.test.organizationToken", "");
      	}else {
      		MashenResponseEntity entity = getUserInfoByToken(cmd.getToken());
     		Map<String, Object> result = entity.getData();

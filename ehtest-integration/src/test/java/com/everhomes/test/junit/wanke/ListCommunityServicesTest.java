@@ -25,15 +25,15 @@ public class ListCommunityServicesTest extends BaseLoginAuthTestCase {
     @Test
     public void testListCommunityServices() {
     	String ownerType = "community";
-        Long ownerId = 240111044331051500L;
+        Long ownerId = 240111044331051460L;
         Byte scopeCode = 1;
         Long scopeId = 1L;
         Long pageAnchor = 0L;
         Integer pageSize = 5;
         
-        String userIdentifier = "13265549907";
+        Integer namespaceId = 0;
+        String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
-        Integer namespaceId = 999990;
         // 登录时不传namepsace，默认为左邻域空间
         logon(namespaceId, userIdentifier, plainTexPassword);
         

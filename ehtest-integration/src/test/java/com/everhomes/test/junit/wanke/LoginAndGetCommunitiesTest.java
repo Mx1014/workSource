@@ -40,12 +40,11 @@ public class LoginAndGetCommunitiesTest extends BaseLoginAuthTestCase {
         Integer pageSize = 5;
         
         ListCommunityCommand cmd = new ListCommunityCommand();
-        cmd.setToken("");
+        cmd.setToken("test");
         cmd.setNamespaceId(0);
         cmd.setType("wanke");
         cmd.setPageAnchor(pageAnchor);
         cmd.setPageSize(pageSize);
-        cmd.setDebugged(true);
         
         String commandRelativeUri = "/serviceConf/loginAndGetCommunities";
         LoginAndGetCommunitiesRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, LoginAndGetCommunitiesRestResponse.class);
@@ -56,7 +55,7 @@ public class LoginAndGetCommunitiesTest extends BaseLoginAuthTestCase {
         
         DSLContext context = dbProvider.getDslContext();
     	SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-    	query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq(""));
+    	query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq("80320"));
     	EhOrganizationsRecord record = query.fetchOne();
 
     	SelectQuery<EhOrganizationCommunitiesRecord> query1 = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
