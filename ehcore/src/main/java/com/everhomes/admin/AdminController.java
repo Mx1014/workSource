@@ -311,7 +311,12 @@ public class AdminController extends ControllerBase {
                 if("expression".equals(field.getName())) {
                     ItemType itemType = field.getAnnotation(ItemType.class);
                     if(itemType != null) {
-                        LOGGER.debug("Find item type");
+                        Class<?> itemClz = itemType.value();
+                        String clsName = null;
+                        if(itemClz != null) {
+                            clsName = itemClz.getName();
+                        }
+                        LOGGER.debug("Find item type, clsName={}", clsName);
                     }
                 } 
             }
