@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>size: 场所大小 - 对于工位是个数，对于面积是平米</li> 
  * </ul>
  */
-public class AddOfficeSiteDTO { 
+public class AddOfficeSiteAdminDTO { 
 	private Byte siteType;
 	private String size;
 

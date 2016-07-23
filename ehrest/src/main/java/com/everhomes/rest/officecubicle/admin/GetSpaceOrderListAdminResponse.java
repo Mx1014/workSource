@@ -13,12 +13,12 @@ import com.everhomes.util.StringHelper;
  * <li>spaces: 空间列表list{@link com.everhomes.rest.officecubicle.OfficeSpaceDTO}</li> 
  * </ul>
  */
-public class GetSpaceListResponse {
+public class GetSpaceOrderListAdminResponse {
 
 	private Long nextPageAnchor;
 	
 	@ItemType(OfficeSpaceDTO.class)
-	private List<OfficeSpaceDTO> spaces;
+	private List<OfficeSpaceDTO> orders;
 
 	@Override
     public String toString() {
@@ -32,13 +32,6 @@ public class GetSpaceListResponse {
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
 	}
-
-	public List<OfficeSpaceDTO> getSpaces() {
-		return spaces;
-	}
-
-	public void setSpaces(List<OfficeSpaceDTO> spaces) {
-		this.spaces = spaces;
-	}
+ 
 	
 }

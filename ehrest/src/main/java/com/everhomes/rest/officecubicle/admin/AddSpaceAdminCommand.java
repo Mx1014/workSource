@@ -22,10 +22,10 @@ import com.everhomes.util.StringHelper;
 *<li> details : 详情-html片	</li>
 *<li> coverUri : 封面图片uri</li>
  * <li>bannerUris: banner图的uris </li> 
- * <li>sites: 工位空间list{@link com.everhomes.rest.officecubicle.admin.AddOfficeSiteDTO}</li> 
+ * <li>sites: 工位空间list{@link com.everhomes.rest.officecubicle.admin.AddOfficeSiteAdminDTO}</li> 
  * </ul>
  */
-public class AddSpaceCommand { 
+public class AddSpaceAdminCommand { 
 	private String name;
 	private Long provinceId;
 	private String provinceName;
@@ -40,8 +40,8 @@ public class AddSpaceCommand {
 	private String coverUri;
 	@ItemType(String.class)
 	private List<String> bannerUris;
-	@ItemType(AddOfficeSiteDTO.class)
-	private List<AddOfficeSiteDTO> sites;
+	@ItemType(AddOfficeSiteAdminDTO.class)
+	private List<AddOfficeSiteAdminDTO> sites;
 
 	@Override
     public String toString() {
@@ -147,12 +147,12 @@ public class AddSpaceCommand {
  
 
 
-	public List<AddOfficeSiteDTO> getSites() {
+	public List<AddOfficeSiteAdminDTO> getSites() {
 		return sites;
 	}
 
 
-	public void setSites(List<AddOfficeSiteDTO> sites) {
+	public void setSites(List<AddOfficeSiteAdminDTO> sites) {
 		this.sites = sites;
 	}
 

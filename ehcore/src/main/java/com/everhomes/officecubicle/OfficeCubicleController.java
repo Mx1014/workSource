@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminCommand;
+import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminResponse;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.ui.user.UserUiController;
 
@@ -25,15 +28,18 @@ public class OfficeCubicleController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(OfficeCubicleController.class);
 
     /**
-     * <b>URL: /ui/user/listUserRelatedScenes</b>
-     * <p>列出用户当前域空间下的相关场景。</p>
-     * <p>必须在请求的Header中提供域空间。</p>
+     * <b>URL: /officecubicle/getSpaceList</b> 
+     * <p>空间管理-获取空间列表</p>
      */
-    @RequestMapping("listUserRelatedScenes")
-    @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listUserRelatedScenes() {
+    @RequestMapping("getSpaceList")
+    @RestReturn(value=GetSpaceListAdminResponse.class )
+    public RestResponse getSpaceList(GetSpaceListAdminCommand cmd) {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     	
     }
-    
 
 }

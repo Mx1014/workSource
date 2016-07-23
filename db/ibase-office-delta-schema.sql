@@ -79,6 +79,11 @@ CREATE TABLE `eh_office_cubicle_orders` (
 `size` VARCHAR(10)  COMMENT '工位数或面积数',
 `status` TINYINT  COMMENT '0：用户可见 -1用户不可见',
 `order_type` TINYINT  COMMENT '预定类别：0：参观 1：预定',
+`reserve_uid` BIGINT(20)   COMMENT '预订人uid',
+`reserve_time` DATETIME  COMMENT '预定时间',
+`reserve_person` VARCHAR(40)  COMMENT '预订人姓名',
+`reserve_contact` VARCHAR(20)  COMMENT '预定联系方式',
+`reservce_company` VARCHAR(300)  COMMENT '预订人公司',
 
 
   PRIMARY KEY (`id`)
