@@ -905,7 +905,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				locator, pageSize,cmd.getStatus(),siteIds,cmd.getCommunityId());
 		if(null==rentalSites)
 			return response;
-
+		 
 		Long nextPageAnchor = null;
 		if(rentalSites != null && rentalSites.size() > pageSize) {
 			rentalSites.remove(rentalSites.size() - 1);
@@ -930,6 +930,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null!=rentalSite.getDayEndTime())
 			rSiteDTO.setDayEndTime(convertTimeToGMTMillisecond(rentalSite.getDayEndTime()));
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
+		rSiteDTO.setSiteName(rentalSite.getResourceName());
+		
 		rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime()); 
 		rSiteDTO.setCoverUrl(this.contentServerService.parserUri(rSiteDTO.getCoverUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 		List<RentalResourcePic> pics = this.rentalProvider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
@@ -959,8 +961,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rSiteDTO.getSiteItems().add(siteItemDTO);
 			}
 		}
-
-
 		List<RentalConfigAttachment> attachments=this.rentalProvider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
 		if(null!=attachments){
 			rSiteDTO.setAttachments(new ArrayList<AttachmentConfigDTO>());
