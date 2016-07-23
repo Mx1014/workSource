@@ -150,7 +150,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
     		identifierToken = (String) result.get("mobile");
     		List organizationList = (List) result.get("orgList");
     		if(null == organizationList || organizationList.isEmpty()){
-    			LOGGER.error("user is not in organization, cmd={}, entity={}", cmd, entity);
+    			LOGGER.error("User is not in organization, cmd={}, entity={}", cmd, entity);
     			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     					"user is not in organization");
     		}
@@ -163,9 +163,9 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 		ListOrganizationCommunityCommand listOrganizationCommunityCommand = new ListOrganizationCommunityCommand();
 		Organization organization = organizationProvider.findOrganizationByOrganizationToken(organizationToken);
 		if(organization == null) {
-			LOGGER.error("organization not found, cmd=" + cmd);
+			LOGGER.error("Organization not found, cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"organization not found");
+					"Organization not found");
 		}
 		listOrganizationCommunityCommand.setOrganizationId(organization.getId());
 		ListOrganizationCommunityV2CommandResponse listOrganizationCommunityV2CommandResponse = organizationService
@@ -378,9 +378,9 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 		String param = "/token/get?appId=" + appId + "&appSecret=" + appSecret;
 		MashenResponseEntity entity = httpGet(param);
 		if(!entity.isSuccess()) {
-			LOGGER.error("the response of Mashen, result={}.", entity);
+			LOGGER.error("Response of Mashen, result={}.", entity);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"the response of Mashen failed");
+					"Request of Mashen failed");
 		}
         return entity;
 	}
