@@ -57,7 +57,7 @@ import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalRuleCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
 import com.everhomes.rest.rentalv2.VerifyRentalBillCommandResponse;
-import com.everhomes.rest.rentalv2.rentalBillRuleDTO;
+import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
@@ -175,8 +175,8 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteDayStatusCommand cmd);
 	void updateRentalSiteSimpleRules(UpdateRentalSiteRulesAdminCommand cmd);
 	void updateRentalSiteDiscount(UpdateRentalSiteDiscountAdminCommand cmd);
-	void valiRentalBill(List<rentalBillRuleDTO> ruleDTOs);
-	void valiRentalBill(Double rentalcount, List<rentalBillRuleDTO> ruleDTOs);
+	void valiRentalBill(List<RentalBillRuleDTO> ruleDTOs);
+	void valiRentalBill(Double rentalcount, List<RentalBillRuleDTO> ruleDTOs);
 
 	void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd);
 

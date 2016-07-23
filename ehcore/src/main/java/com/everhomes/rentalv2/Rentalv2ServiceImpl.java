@@ -1769,7 +1769,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					!cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size())))
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
-			
+			rs.setStatus(RentalSiteStatus.NORMAL.getCode());
 			rs.setAutoAssign(cmd.getAutoAssign());
 			rs.setMultiUnit(cmd.getMultiUnit());
 			rs.setNeedPay(cmd.getNeedPay());
@@ -3361,7 +3361,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalResource rentalsite = ConvertHelper.convert(cmd, RentalResource.class);
 			rentalsite.setResourceName(cmd.getSiteName());
-			rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
+			rentalsite.setStatus(RentalSiteStatus.DISABLE.getCode());
 			rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			rentalsite.setCreatorUid( UserContext.current().getUser().getId());
