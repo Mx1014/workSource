@@ -200,6 +200,34 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return result;
 	}
+
+	@Override
+	public List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId,String beginTime, String   endTime) throws ParseException {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_CELLS);
+		Condition condition = Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.equal(rentalSiteId);
+	
+
+		if (null != beginTime) {
+			condition = condition.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.greaterOrEqual(new Date(dateSF.parse(beginTime).getTime())));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.lessOrEqual(new Date(dateSF.parse(endTime).getTime())));
+		} 
+		step.where(condition);
+		List<RentalCell> result = step
+				.orderBy(Tables.EH_RENTALV2_CELLS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalCell.class);
+				});
+
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	
+	
 	@Override
 	public List<RentalCell> findRentalSiteRules(Long rentalSiteId,
 			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength,Byte status) {

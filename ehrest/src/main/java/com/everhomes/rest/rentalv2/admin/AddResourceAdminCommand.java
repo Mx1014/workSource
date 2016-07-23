@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactPhonenum: 咨询电话</li>
  * <li>chargeUid: 负责人id</li>
  * <li>introduction: 详情</li>
+ * <li>notice: 备注信息</li>
  * <li>coverUri: 封面图uri</li>
  * <li>detailUris: 详情图</li>
  * <li>owners: 可见社区</li>
@@ -48,6 +49,7 @@ public class AddResourceAdminCommand {
 	private Long chargeUid;
 	@NotNull
 	private String introduction;
+	private String notice;
 	@NotNull
 	private String coverUri;
 	@ItemType(String.class)
@@ -179,6 +181,14 @@ public class AddResourceAdminCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public String getNotice() {
+		return notice;
+	}
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
 
 }

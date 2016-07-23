@@ -235,6 +235,10 @@ public interface Rentalv2Provider {
 
 	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator);
 
+
+	List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId,
+			String beginTime, String endTime) throws ParseException;
+
  
 
  

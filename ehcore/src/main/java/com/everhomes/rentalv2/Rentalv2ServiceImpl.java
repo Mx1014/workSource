@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -916,7 +917,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		for (RentalResource rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO =convertRentalSite2DTO(rentalSite);
-			
+			 
 			response.getRentalSites().add(rSiteDTO);
 		}
  
@@ -968,6 +969,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rSiteDTO.getAttachments().add(ConvertHelper.convert(single, AttachmentConfigDTO .class));
 			}
 		}
+		Calendar beginCalendar = Calendar.getInstance();
+		Calendar endCalendar = Calendar.getInstance();
+		endCalendar.add(Calendar.DAY_OF_MONTH, 7); 
+		try {
+			List<RentalCell> cells = this.rentalProvider.findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), dateSF.format(beginCalendar.getTime()), 
+					dateSF.format(endCalendar.getTime()));
+			if(null == cells)
+				rSiteDTO.setAvgPrice(new BigDecimal(0));
+			else {
+				BigDecimal sum = new BigDecimal(0);
+				for(RentalCell cell : cells)
+				{
+					sum = sum.add(cell.getPrice());
+				}
+				//四舍五入保留三位
+				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
+			}
+		} catch (ParseException e) {
+			 LOGGER.error("计算平均值-时间转换 异常");
+		}
+			 
+				
 		return rSiteDTO;
 	}
 	public SiteItemDTO convertItem2DTO(RentalItem item ){
