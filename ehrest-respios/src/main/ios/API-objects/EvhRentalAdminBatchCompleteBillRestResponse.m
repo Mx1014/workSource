@@ -2,7 +2,7 @@
 // EvhRentalAdminBatchCompleteBillRestResponse.m
 //
 #import "EvhRentalAdminBatchCompleteBillRestResponse.h"
-#import "EvhBatchCompleteBillCommandResponse.h"
+#import "EvhRentalv2BatchCompleteBillCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalAdminBatchCompleteBillRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhBatchCompleteBillCommandResponse new];
+        self.response = [EvhRentalv2BatchCompleteBillCommandResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

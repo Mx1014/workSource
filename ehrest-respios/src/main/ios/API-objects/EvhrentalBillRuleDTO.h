@@ -1,13 +1,13 @@
 //
-// EvhrentalBillRuleDTO.h
+// EvhRentalBillRuleDTO.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhrentalBillRuleDTO
+// EvhRentalBillRuleDTO
 //
-@interface EvhrentalBillRuleDTO
+@interface EvhRentalBillRuleDTO
     : NSObject<EvhJsonSerializable>
 
 

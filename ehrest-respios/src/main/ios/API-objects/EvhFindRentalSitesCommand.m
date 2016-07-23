@@ -35,14 +35,12 @@
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
     if(self.ownerId)
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
-    if(self.communityId)
-        [jsonObject setObject: self.communityId forKey: @"communityId"];
-    if(self.resourceTypeId)
-        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
+    if(self.siteType)
+        [jsonObject setObject: self.siteType forKey: @"siteType"];
     if(self.keyword)
         [jsonObject setObject: self.keyword forKey: @"keyword"];
-    if(self.anchor)
-        [jsonObject setObject: self.anchor forKey: @"anchor"];
+    if(self.pageOffset)
+        [jsonObject setObject: self.pageOffset forKey: @"pageOffset"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
     if(self.status) {
@@ -65,21 +63,17 @@
         if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
             self.ownerId = nil;
 
-        self.communityId = [jsonObject objectForKey: @"communityId"];
-        if(self.communityId && [self.communityId isEqual:[NSNull null]])
-            self.communityId = nil;
-
-        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
-        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
-            self.resourceTypeId = nil;
+        self.siteType = [jsonObject objectForKey: @"siteType"];
+        if(self.siteType && [self.siteType isEqual:[NSNull null]])
+            self.siteType = nil;
 
         self.keyword = [jsonObject objectForKey: @"keyword"];
         if(self.keyword && [self.keyword isEqual:[NSNull null]])
             self.keyword = nil;
 
-        self.anchor = [jsonObject objectForKey: @"anchor"];
-        if(self.anchor && [self.anchor isEqual:[NSNull null]])
-            self.anchor = nil;
+        self.pageOffset = [jsonObject objectForKey: @"pageOffset"];
+        if(self.pageOffset && [self.pageOffset isEqual:[NSNull null]])
+            self.pageOffset = nil;
 
         self.pageSize = [jsonObject objectForKey: @"pageSize"];
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])

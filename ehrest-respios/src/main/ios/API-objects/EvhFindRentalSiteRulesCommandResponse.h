@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalv2RentalSiteRulesDTO.h"
+#import "EvhRentalRentalSiteRulesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSiteRulesCommandResponse
@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-// item type EvhRentalv2RentalSiteRulesDTO*
+// item type EvhRentalRentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSiteRules;
 
 -(id) init;

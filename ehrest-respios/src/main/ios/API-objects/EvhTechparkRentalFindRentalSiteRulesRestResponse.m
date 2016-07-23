@@ -2,7 +2,7 @@
 // EvhTechparkRentalFindRentalSiteRulesRestResponse.m
 //
 #import "EvhTechparkRentalFindRentalSiteRulesRestResponse.h"
-#import "EvhRentalFindRentalSiteRulesCommandResponse.h"
+#import "EvhFindRentalSiteRulesCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalFindRentalSiteRulesRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhRentalFindRentalSiteRulesCommandResponse new];
+        self.response = [EvhFindRentalSiteRulesCommandResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

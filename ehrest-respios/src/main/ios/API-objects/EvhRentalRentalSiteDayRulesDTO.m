@@ -2,7 +2,7 @@
 // EvhRentalRentalSiteDayRulesDTO.m
 //
 #import "EvhRentalRentalSiteDayRulesDTO.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhRentalRentalSiteRulesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalRentalSiteDayRulesDTO
@@ -36,7 +36,7 @@
         [jsonObject setObject: self.rentalDate forKey: @"rentalDate"];
     if(self.siteRules) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteRulesDTO* item in self.siteRules) {
+        for(EvhRentalRentalSiteRulesDTO* item in self.siteRules) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -55,7 +55,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteRules"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteRulesDTO* item = [EvhRentalSiteRulesDTO new];
+                EvhRentalRentalSiteRulesDTO* item = [EvhRentalRentalSiteRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteRules addObject: item];

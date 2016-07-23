@@ -15,13 +15,11 @@
 
 @property(nonatomic, copy) NSNumber* ownerId;
 
-@property(nonatomic, copy) NSNumber* communityId;
-
-@property(nonatomic, copy) NSNumber* resourceTypeId;
+@property(nonatomic, copy) NSString* siteType;
 
 @property(nonatomic, copy) NSString* keyword;
 
-@property(nonatomic, copy) NSNumber* anchor;
+@property(nonatomic, copy) NSNumber* pageOffset;
 
 @property(nonatomic, copy) NSNumber* pageSize;
 

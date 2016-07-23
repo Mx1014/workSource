@@ -3,8 +3,8 @@
 //
 #import "EvhRentalBillDTO.h"
 #import "EvhRentalv2SiteItemDTO.h"
-#import "EvhRentalv2RentalSiteRulesDTO.h"
-#import "EvhRentalv2BillAttachmentDTO.h"
+#import "EvhRentalSiteRulesDTO.h"
+#import "EvhBillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalBillDTO
@@ -107,7 +107,7 @@
     }
     if(self.rentalSiteRules) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalv2RentalSiteRulesDTO* item in self.rentalSiteRules) {
+        for(EvhRentalSiteRulesDTO* item in self.rentalSiteRules) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -116,7 +116,7 @@
     }
     if(self.billAttachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalv2BillAttachmentDTO* item in self.billAttachments) {
+        for(EvhBillAttachmentDTO* item in self.billAttachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -262,7 +262,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSiteRules"];
             for(id itemJson in jsonArray) {
-                EvhRentalv2RentalSiteRulesDTO* item = [EvhRentalv2RentalSiteRulesDTO new];
+                EvhRentalSiteRulesDTO* item = [EvhRentalSiteRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalSiteRules addObject: item];
@@ -271,7 +271,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"billAttachments"];
             for(id itemJson in jsonArray) {
-                EvhRentalv2BillAttachmentDTO* item = [EvhRentalv2BillAttachmentDTO new];
+                EvhBillAttachmentDTO* item = [EvhBillAttachmentDTO new];
                 
                 [item fromJson: itemJson];
                 [self.billAttachments addObject: item];

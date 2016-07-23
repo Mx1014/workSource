@@ -64,6 +64,8 @@
         [jsonObject setObject: self.rentalType forKey: @"rentalType"];
     if(self.rentalStep)
         [jsonObject setObject: self.rentalStep forKey: @"rentalStep"];
+    if(self.siteCounts)
+        [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
     if(self.exclusiveFlag)
         [jsonObject setObject: self.exclusiveFlag forKey: @"exclusiveFlag"];
     if(self.autoAssign)
@@ -170,6 +172,10 @@
         self.rentalStep = [jsonObject objectForKey: @"rentalStep"];
         if(self.rentalStep && [self.rentalStep isEqual:[NSNull null]])
             self.rentalStep = nil;
+
+        self.siteCounts = [jsonObject objectForKey: @"siteCounts"];
+        if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
+            self.siteCounts = nil;
 
         self.exclusiveFlag = [jsonObject objectForKey: @"exclusiveFlag"];
         if(self.exclusiveFlag && [self.exclusiveFlag isEqual:[NSNull null]])
