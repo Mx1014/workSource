@@ -32,8 +32,8 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `name` VARCHAR(1024),
   `manufacturer` VARCHAR(1024),
   `equipment_model` VARCHAR(1024),
-  `category_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_categories',
-  `category_path` varchar(128) DEFAULT NULL COMMENT 'refernece to the path of eh_categories',
+  `category_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_categories',
+  `category_path` VARCHAR(128) DEFAULT NULL COMMENT 'refernece to the path of eh_categories',
   `location` VARCHAR(1024),
   `longitude` DOUBLE,
   `latitude` DOUBLE,
@@ -66,6 +66,8 @@ CREATE TABLE `eh_equipment_inspection_accessories` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the spare parts, enterprise, etc',
   `owner_id` BIGINT NOT NULL DEFAULT '0',
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the accessory, etc',
+  `target_id` BIGINT NOT NULL DEFAULT '0',
   `name` VARCHAR(1024),
   `manufacturer` VARCHAR(1024),
   `model_number` VARCHAR(1024),
@@ -81,7 +83,7 @@ CREATE TABLE `eh_equipment_inspection_accessory_map` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `equipment_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
   `accessory_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_accessories',
-  `quantity` integer NOT NULL DEFAULT '0', 
+  `quantity` INTEGER NOT NULL DEFAULT '0', 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -120,6 +122,7 @@ CREATE TABLE `eh_equipment_inspection_tasks` (
      `task_name` VARCHAR(1024),
      `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT '0: parent task, others children-task',
      `child_count` BIGINT NOT NULL DEFAULT 0,
+     `executive_group_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc',
      `executive_group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
      `executive_start_time` DATETIME,
      `executive_expire_time` DATETIME,
