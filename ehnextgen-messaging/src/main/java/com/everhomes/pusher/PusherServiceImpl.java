@@ -72,6 +72,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
@@ -401,11 +402,15 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         deviceMsgs.setAnchor(l.getAnchor());
 
         for(Message mb : msgInBox) {
-            Gson gson = new Gson();
-            DeviceMessage msg = gson.fromJson(mb.getContent(), DeviceMessage.class);
-            if(msg != null) {
-                deviceMsgs.add(msg);    
-                }
+            try {
+                DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(mb.getContent(), DeviceMessage.class);
+                if(msg != null) {
+                    deviceMsgs.add(msg);    
+                    }
+            } catch(Exception ex) {
+                LOGGER.error("device message error ", ex);
+            }
+            
         }
 
         return deviceMsgs;
