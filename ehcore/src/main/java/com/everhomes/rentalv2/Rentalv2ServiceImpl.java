@@ -36,7 +36,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.util.jaxb.ForcedType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -131,6 +130,7 @@ import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalBillCountDTO;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
 import com.everhomes.rest.rentalv2.RentalItemType;
 import com.everhomes.rest.rentalv2.RentalOwnerType;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -148,7 +148,6 @@ import com.everhomes.rest.rentalv2.SiteRuleStatus;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
 import com.everhomes.rest.rentalv2.VisibleFlag;
-import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
@@ -2556,7 +2555,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//start 这个月第一天
 		start.set(Calendar.DAY_OF_MONTH,1);
 		//end 下个月的第一天
-		end.add(Calendar.MONTH, end.get(Calendar.MONTH)+1);
+		end.set(Calendar.MONTH, end.get(Calendar.MONTH)+1);
 		end.set(Calendar.DAY_OF_MONTH,1);
 //		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<RentalSiteDayRulesDTO>());
