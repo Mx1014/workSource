@@ -59,9 +59,9 @@ CREATE TABLE `eh_office_cubicle_sites` (
 -- 
 -- 工位预定空间表
 -- 
-DROP TABLE IF EXISTS `eh_office_cubicle_space`;
+DROP TABLE IF EXISTS `eh_office_cubicle_orders`;
 
-CREATE TABLE `eh_office_cubicle_space` ( 
+CREATE TABLE `eh_office_cubicle_orders` ( 
 `id` BIGINT(20)  COMMENT 'id',
 `name` VARCHAR(100)  COMMENT '工位空间名称',
 `province_id` BIGINT(20)   COMMENT '省份id',
@@ -74,6 +74,7 @@ CREATE TABLE `eh_office_cubicle_space` (
 `contact_phone` VARCHAR(20)  COMMENT '咨询电话',
 `charge_uid` BIGINT(20)   COMMENT '负责人uid',
 `details` TEXT  COMMENT '详情-html片',
+`cover_uri` VARCHAR(1000)  COMMENT '封面图片',
 `site_type` TINYINT  COMMENT '开放场所类别0开放式工位 1工位办公室 2面积办公室',
 `size` VARCHAR(10)  COMMENT '工位数或面积数',
 `status` TINYINT  COMMENT '0：用户可见 -1用户不可见',
