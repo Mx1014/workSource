@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>	discountRatio：    	折扣比例	</li>
  * <li>	rentalType： 0: 按小时预定  1-半天 2-天 3-支持晚上的半天	</li>
  * <li>	rentalStep：     步长，每次最少预定多少个单元格（目前默认都是1）</li>
+ * <li>	siteCounts：   场所数量</li>
  * <li>	exclusiveFlag：   是否为独占资源0否 1 是	</li>
  * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
  * <li>	multiUnit：        	是否允许预约多个场所 1是 0否	</li>
@@ -47,6 +48,7 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
 	private java.lang.Integer    rentalStep;
+	private java.lang.Integer    siteCounts;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -309,6 +311,16 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 
 	public void setContactPhonenum(String contactPhonenum) {
 		this.contactPhonenum = contactPhonenum;
+	}
+
+
+	public java.lang.Integer getSiteCounts() {
+		return siteCounts;
+	}
+
+
+	public void setSiteCounts(java.lang.Integer siteCounts) {
+		this.siteCounts = siteCounts;
 	}
  
 

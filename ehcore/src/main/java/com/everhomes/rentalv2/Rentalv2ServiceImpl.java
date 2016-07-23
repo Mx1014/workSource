@@ -2829,6 +2829,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				dayDto.getSiteNumbers().add(siteNumberRuleDTO);
 			}
 		}
+		//即使单元格为空也会有days不用担心空指针
+		response.setSiteCounts(response.getSiteDays().get(0).getSiteNumbers().size());
 		return response;
 	}
 
@@ -2951,7 +2953,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
 			response.getSiteNumbers().add(siteNumberRuleDTO);
 		}
-		 
+
+		//即使单元格为空也会有sitenumbers不用担心空指针
+		response.setSiteCounts(response.getSiteNumbers().size());
 		return response;
 	}
 	@Override
