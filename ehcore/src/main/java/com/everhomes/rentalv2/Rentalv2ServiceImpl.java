@@ -2555,7 +2555,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//start 这个月第一天
 		start.set(Calendar.DAY_OF_MONTH,1);
 		//end 下个月的第一天
-		end.set(Calendar.MONTH, end.get(Calendar.MONTH)+1);
+		end.add(Calendar.MONTH, 1);
 		end.set(Calendar.DAY_OF_MONTH,1);
 //		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<RentalSiteDayRulesDTO>());
