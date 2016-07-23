@@ -5,6 +5,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,6 +48,7 @@ import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.ItemType;
 import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
@@ -63,6 +66,7 @@ import com.everhomes.rest.border.BorderDTO;
 import com.everhomes.rest.border.UpdateBorderCommand;
 import com.everhomes.rest.persist.server.AddPersistServerCommand;
 import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
@@ -227,6 +231,8 @@ public class AdminController extends ControllerBase {
         context.setContextParam("dest.dir.java", StringHelper.interpolate(this.destinationJavaDir));
         LOGGER.info("Set destination of generating java, path={}", this.destinationJavaDir);
         
+        checkItemTypeTest();
+        
         if(language.equalsIgnoreCase("objc")) {
             ObjectiveCGenerator generator = new ObjectiveCGenerator();
             // generator.generatePojos(BorderDTO.class, context);
@@ -294,6 +300,24 @@ public class AdminController extends ControllerBase {
 //            return response;
 //        }
         return new RestResponse("OK");
+    }
+    
+    private void checkItemTypeTest() {
+        Field[] fields = ExpressionDTO.class.getDeclaredFields();
+    
+        if(fields != null) {
+            for(Field field : fields) {
+                LOGGER.debug("Find field for ExpressionDTO, fieldName={}", field.getName());
+                if("expression".equals(field.getName())) {
+                    ItemType itemType = field.getAnnotation(ItemType.class);
+                    if(itemType != null) {
+                        LOGGER.debug("Find item type");
+                    }
+                } 
+            }
+        } else {
+            LOGGER.debug("No field found for ExpressionDTO");
+        }
     }
     
     private boolean shouldExclude(Class<?> clz) {
