@@ -63,7 +63,8 @@ DROP TABLE IF EXISTS `eh_office_cubicle_orders`;
 
 CREATE TABLE `eh_office_cubicle_orders` ( 
 `id` BIGINT(20)  COMMENT 'id',
-`name` VARCHAR(100)  COMMENT '工位空间名称',
+`space_id` VARCHAR(100)  COMMENT '工位空间id',
+`space_name` VARCHAR(100)  COMMENT '工位空间名称',
 `province_id` BIGINT(20)   COMMENT '省份id',
 `province_name` VARCHAR(100)  COMMENT '省份名称',
 `city_id` BIGINT(20)   COMMENT '城市id',

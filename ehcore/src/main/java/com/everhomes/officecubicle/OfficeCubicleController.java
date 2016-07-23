@@ -10,10 +10,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminCommand;
+import com.everhomes.rest.officecubicle.CityDTO;
+import com.everhomes.rest.officecubicle.GetSpaceListCommand;
 import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminResponse;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.ui.user.UserUiController;
 
 /**
  * <ul>
@@ -28,12 +27,27 @@ public class OfficeCubicleController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(OfficeCubicleController.class);
 
     /**
+     * <b>URL: /officecubicle/getCityList</b> 
+     * <p>工位预定-获取城市列表</p>
+     */
+    @RequestMapping("getCityList")
+    @RestReturn(value=CityDTO.class ,collection=true)
+    public RestResponse getCityList() {
+    	
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
+    
+    /**
      * <b>URL: /officecubicle/getSpaceList</b> 
-     * <p>空间管理-获取空间列表</p>
+     * <p>工位预定-获取空间列表</p>
      */
     @RequestMapping("getSpaceList")
-    @RestReturn(value=GetSpaceListAdminResponse.class )
-    public RestResponse getSpaceList(GetSpaceListAdminCommand cmd) {
+    @RestReturn(value=GetSpaceListResponse.class )
+    public RestResponse getSpaceList(GetSpaceListCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

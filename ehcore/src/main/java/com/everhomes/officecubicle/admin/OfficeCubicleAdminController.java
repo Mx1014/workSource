@@ -1,5 +1,8 @@
 package com.everhomes.officecubicle.admin;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +17,7 @@ import com.everhomes.rest.officecubicle.admin.AddSpaceAdminCommand;
 import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminCommand;
 import com.everhomes.rest.officecubicle.admin.GetSpaceListAdminResponse;
 import com.everhomes.rest.officecubicle.admin.GetSpaceOrderListAdminCommand;
+import com.everhomes.rest.officecubicle.admin.GetSpaceOrderListAdminResponse;
 import com.everhomes.rest.officecubicle.admin.UpdateSpaceAdminCommand;
 
 /**
@@ -87,5 +91,16 @@ public class OfficeCubicleAdminController extends ControllerBase {
         return response;
     	
     }
+	/**
+	 * <b>URL: /officecubicle/admin/exprotSpaceOrders</b>
+	 * <p>
+	 * 导出预订详情
+	 * </p>
+	 */
+	@RequestMapping("exprotSpaceOrders")
+	public String exprotSpaceOrders(@Valid GetSpaceOrderListAdminCommand cmd,HttpServletResponse response) {
+//		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
+		return null;
+	}
     
 }

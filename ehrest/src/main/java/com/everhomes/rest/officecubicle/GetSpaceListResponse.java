@@ -1,24 +1,24 @@
-package com.everhomes.rest.officecubicle.admin;
+package com.everhomes.rest.officecubicle;
 
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.officecubicle.OfficeOrderDTO;
+import com.everhomes.rest.officecubicle.OfficeSpaceDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * 列出工位预定的空间
  * <li>nextPageAnchor: 分页，下一页锚点</li>
- * <li>orders: 空间列表list{@link com.everhomes.rest.officecubicle.OfficeOrderDTO}</li> 
+ * <li>spaces: 空间列表list{@link com.everhomes.rest.officecubicle.OfficeSpaceDTO}</li> 
  * </ul>
  */
-public class GetSpaceOrderListAdminResponse {
+public class GetSpaceListResponse {
 
 	private Long nextPageAnchor;
 	
-	@ItemType(OfficeOrderDTO.class)
-	private List<OfficeOrderDTO> orders;
+	@ItemType(OfficeSpaceDTO.class)
+	private List<OfficeSpaceDTO> spaces;
 
 	@Override
     public String toString() {
@@ -33,13 +33,12 @@ public class GetSpaceOrderListAdminResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<OfficeOrderDTO> getOrders() {
-		return orders;
+	public List<OfficeSpaceDTO> getSpaces() {
+		return spaces;
 	}
 
-	public void setOrders(List<OfficeOrderDTO> orders) {
-		this.orders = orders;
+	public void setSpaces(List<OfficeSpaceDTO> spaces) {
+		this.spaces = spaces;
 	}
- 
 	
 }
