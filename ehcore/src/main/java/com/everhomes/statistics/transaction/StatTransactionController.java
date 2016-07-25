@@ -3,8 +3,6 @@ package com.everhomes.statistics.transaction;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -84,7 +82,6 @@ public class StatTransactionController extends ControllerBase {
     @RequestMapping("exportStatServiceSettlementAmounts")
     @RestReturn(value=String.class)
     public RestResponse exportStatServiceSettlementAmounts(@Valid ListStatServiceSettlementAmountsCommand cmd) {
-    	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1,6 +1,7 @@
 package com.everhomes.organization.pmsy;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyPayerStatus;
@@ -258,4 +260,35 @@ public class PmsyProviderImpl implements PmsyProvider {
 		return ConvertHelper.convert(record, PmsyOrder.class);
 	}
 
+	@Override
+	public List<PmsyOrder> listPmsyOrders(Integer pageSize,
+			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
+			CrossShardListingLocator locator) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrders.class));
+		List<PmsyOrder> results = new ArrayList<PmsyOrder>();
+		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
+		if(null != locator.getAnchor())
+			query.addConditions(Tables.EH_PMSY_ORDERS.ID.gt(locator.getAnchor()));
+		if(null != startDate)
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.ge(startDate));
+		if(null != endDate)
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.lt(endDate));
+		if(null != statuses && statuses.size() > 0){
+			query.addConditions(Tables.EH_PMSY_ORDERS.STATUS.in(statuses));
+		}
+		query.addOrderBy(Tables.EH_PMSY_ORDERS.ID.asc());
+		query.addLimit(pageSize + 1);
+		
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, PmsyOrder.class));
+			return null;
+		});
+		
+		locator.setAnchor(null);
+		if(results.size() > pageSize){
+			results.remove(results.size() - 1);
+			locator.setAnchor(results.get(results.size() -1).getId());
+		}
+		return results;
+	}
 }
