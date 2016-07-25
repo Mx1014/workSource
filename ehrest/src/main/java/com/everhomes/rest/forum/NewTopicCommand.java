@@ -94,6 +94,16 @@ public class NewTopicCommand {
     
     private Byte officialFlag;
     
+    private Byte mediaDisplayFlag;
+    
+    public Byte getMediaDisplayFlag() {
+		return mediaDisplayFlag;
+	}
+
+	public void setMediaDisplayFlag(Byte mediaDisplayFlag) {
+		this.mediaDisplayFlag = mediaDisplayFlag;
+	}
+	
     public Byte getOfficialFlag() {
 		return officialFlag;
 	}

@@ -142,6 +142,16 @@ public class PostDTO {
     private Long startTime;
     
     private Long endTime;
+    
+    private Byte mediaDisplayFlag;
+    
+    public Byte getMediaDisplayFlag() {
+		return mediaDisplayFlag;
+	}
+
+	public void setMediaDisplayFlag(Byte mediaDisplayFlag) {
+		this.mediaDisplayFlag = mediaDisplayFlag;
+	}
 
 	public Long getId() {
         return id;

@@ -89,7 +89,17 @@ public class NewTopicBySceneCommand {
     
     private Byte visibleRegionType;
     
-    public NewTopicBySceneCommand() {
+    private Byte mediaDisplayFlag;
+    
+    public Byte getMediaDisplayFlag() {
+		return mediaDisplayFlag;
+	}
+
+	public void setMediaDisplayFlag(Byte mediaDisplayFlag) {
+		this.mediaDisplayFlag = mediaDisplayFlag;
+	}
+
+	public NewTopicBySceneCommand() {
     }
     
     public String getSceneToken() {
