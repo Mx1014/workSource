@@ -181,7 +181,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
@@ -397,7 +397,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals())
 				for(TimeIntervalDTO intervalDTO : cmd.getTimeIntervals()){
 					RentalTimeInterval timeInterval = ConvertHelper.convert(intervalDTO, RentalTimeInterval.class);
-					timeInterval.setOwnerType(EhRentalv2ResourceTypes.class.getSimpleName());
+					timeInterval.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					timeInterval.setOwnerId(defaultRule.getId());
 					this.rentalProvider.createTimeInterval(timeInterval);
 				}
@@ -406,7 +406,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				for(Long closedate:cmd.getCloseDates()){
 					RentalCloseDate rcd=new RentalCloseDate();
 					rcd.setCloseDate(new Date(closedate));
-					rcd.setOwnerType(EhRentalv2ResourceTypes.class.getSimpleName());
+					rcd.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					rcd.setOwnerId(defaultRule.getId());
 					this.rentalProvider.createRentalCloseDate(rcd);
 				}
@@ -414,7 +414,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null!=cmd.getAttachments())
 				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:cmd.getAttachments()){
 					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
-					rca.setOwnerType(EhRentalv2ResourceTypes.class.getSimpleName());
+					rca.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					rca.setOwnerId(defaultRule.getId());
 					this.rentalProvider.createRentalConfigAttachment(rca);
 				}
@@ -478,14 +478,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         	openWeekInt = openWeekInt/10;
         }
 		 
-		List<RentalTimeInterval> timeIntervals = this.rentalProvider.queryRentalTimeIntervalByOwner(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
+		List<RentalTimeInterval> timeIntervals = this.rentalProvider.queryRentalTimeIntervalByOwner(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 		if(null!=timeIntervals){
 			response.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
 			for(RentalTimeInterval timeInterval:timeIntervals){
 				response.getTimeIntervals().add(ConvertHelper.convert(timeInterval, TimeIntervalDTO.class));
 			}
 		}
-		List<RentalCloseDate> closeDates=this.rentalProvider.queryRentalCloseDateByOwner(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
+		List<RentalCloseDate> closeDates=this.rentalProvider.queryRentalCloseDateByOwner(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 		if(null!=closeDates){
 			response.setCloseDates(new ArrayList<Long>());
 			for(RentalCloseDate single:closeDates){
@@ -496,7 +496,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 			}
 		}
-		List<RentalConfigAttachment> attachments=this.rentalProvider.queryRentalConfigAttachmentByOwner(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
+		List<RentalConfigAttachment> attachments=this.rentalProvider.queryRentalConfigAttachmentByOwner(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 		if(null!=attachments){
 			response.setAttachments(new ArrayList<com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO>());
 			for(RentalConfigAttachment single:attachments){
@@ -534,14 +534,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			newDefaultRule.setEndDate(new Date(cmd.getEndDate()));
 			newDefaultRule.setId(defaultRule.getId());
 			this.rentalProvider.updateRentalDefaultRule(newDefaultRule);
-			this.rentalProvider.deleteTimeIntervalsByOwnerId(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
-			this.rentalProvider.deleteRentalCloseDatesByOwnerId(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
-			this.rentalProvider.deleteRentalConfigAttachmentsByOwnerId(EhRentalv2ResourceTypes.class.getSimpleName(),defaultRule.getId());
+			this.rentalProvider.deleteTimeIntervalsByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
+			this.rentalProvider.deleteRentalCloseDatesByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
+			this.rentalProvider.deleteRentalConfigAttachmentsByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 			//time intervals
 			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals())
 				for(TimeIntervalDTO intervalDTO : cmd.getTimeIntervals()){
 					RentalTimeInterval timeInterval = ConvertHelper.convert(intervalDTO, RentalTimeInterval.class);
-					timeInterval.setOwnerType(EhRentalv2ResourceTypes.class.getSimpleName());
+					timeInterval.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					timeInterval.setOwnerId(defaultRule.getId());
 					this.rentalProvider.createTimeInterval(timeInterval);
 				}
@@ -550,7 +550,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				for(Long closedate:cmd.getCloseDates()){
 					RentalCloseDate rcd=new RentalCloseDate();
 					rcd.setCloseDate(new Date(closedate));
-					rcd.setOwnerType(EhRentalv2ResourceTypes.class.getSimpleName());
+					rcd.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					rcd.setOwnerId(defaultRule.getId());
 					this.rentalProvider.createRentalCloseDate(rcd);
 				}
@@ -558,7 +558,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null!=cmd.getAttachments())
 				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:cmd.getAttachments()){
 					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
-					rca.setOwnerType(EhRentalv2ResourceTypes.class.getSimpleName());
+					rca.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					rca.setOwnerId(defaultRule.getId());
 					this.rentalProvider.createRentalConfigAttachment(rca);
 				}
