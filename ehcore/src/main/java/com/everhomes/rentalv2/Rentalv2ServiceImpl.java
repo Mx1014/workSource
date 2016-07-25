@@ -3605,6 +3605,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalsite.setNotice(cmd.getNotice()); 
 			rentalsite.setChargeUid(cmd.getChargeUid());
 			rentalsite.setCoverUri(cmd.getCoverUri());
+			rentalsite.setStatus(cmd.getStatus());
 			rentalProvider.updateRentalSite(rentalsite);
 			this.rentalProvider.deleteRentalSitePicsBySiteId(cmd.getId());
 			this.rentalProvider.deleteRentalSiteOwnersBySiteId(cmd.getId());
