@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityName：所属园区名称</li> 
  * <li>contactPhonenum：电话号码</li>
  * <li>introduction：详情</li>
+ * <li>notice ：提示文字</li>
  * <li>	coverUri：	封面图uri	</li>
  * <li>	coverUrl：	封面图url	</li>
  * <li>	discountType：     	折扣信息：0不打折 1满减优惠2比例折扣	</li>
@@ -45,6 +46,8 @@ import com.everhomes.util.StringHelper;
  * <li>	needPay：          	是否需要支付 1是 0否	</li>
  * <li>	status：资源状态</li>
  * <li>	createTime：创建时间</li>
+ * <li>	siteCounts：资源数量</li>
+ * <li>	siteNumbers：资源编号列表 {String}</li>
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li>
  * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
@@ -87,6 +90,9 @@ public class RentalSiteDTO {
 	private java.lang.Byte       needPay;
 	private java.lang.Byte     status;
 	private Long createTime;
+	private Double siteCounts;
+	@ItemType(String.class)
+	private List<String> siteNumbers;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 //	@ItemType(RentalSiteRulesDTO.class)
@@ -487,6 +493,26 @@ public class RentalSiteDTO {
 
 	public void setAttachments(List<AttachmentConfigDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+
+	public Double getSiteCounts() {
+		return siteCounts;
+	}
+
+
+	public void setSiteCounts(Double siteCounts) {
+		this.siteCounts = siteCounts;
+	}
+
+
+	public List<String> getSiteNumbers() {
+		return siteNumbers;
+	}
+
+
+	public void setSiteNumbers(List<String> siteNumbers) {
+		this.siteNumbers = siteNumbers;
 	}
  
 }

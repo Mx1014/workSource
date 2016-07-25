@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：场所id</li> 
  * <li>siteName：场所名称</li>
  * <li>introduction：详情</li>
+ * <li>notice：备注文字</li>
  * <li>address：地址</li>
  * <li>longitude：经纬度</li>
  * <li>latitude：经纬度</li>
@@ -19,8 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>	cutPrice：         	减XX元	</li>
  * <li>	discountRatio：    	折扣比例	</li>
  * <li>	rentalType： 0: 按小时预定  1-半天 2-天 3-支持晚上的半天	</li>
- * <li>	rentalStep：     步长，每次最少预定多少个单元格（目前默认都是1）</li>
- * <li>	siteCounts：   场所数量</li>
+ * <li>	rentalStep：     步长，每次最少预定多少个单元格（目前默认都是1）</li> 
  * <li>	exclusiveFlag：   是否为独占资源0否 1 是	</li>
  * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
  * <li>	multiUnit：        	是否允许预约多个场所 1是 0否	</li>
@@ -28,6 +28,8 @@ import com.everhomes.util.StringHelper;
  * <li>	cancelFlag：       	是否允许取消 1是 0否	</li>
  * <li>	needPay：          	是否需要支付 1是 0否	</li>
  * <li>anchorTime：规则日期</li>  
+ * <li>	siteCounts：资源数量</li>
+ * <li>	siteNames：资源编号名称列表 {String}</li>
  * <li>siteNumbers： 每个资源编号的单元格{@link com.everhomes.rest.rentalv2.RentalSiteNumberRuleDTO}</li> 
  * <li>sitePics：{@link com.everhomes.rest.rentalv2.RentalSitePicDTO}详情图片多张 </li> 
  * <li>attachments：{@link com.everhomes.rest.rentalv2.AttachmentDTO}附件列表 </li> 
@@ -38,6 +40,7 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private Long rentalSiteId; 
 	private String siteName; 
 	private String introduction;  
+	private String notice;
 	private String address;
 	private double longitude;
 	private double latitude;
@@ -48,7 +51,6 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
 	private java.lang.Integer    rentalStep;
-	private java.lang.Integer    siteCounts;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -56,7 +58,10 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private java.lang.Byte       cancelFlag;
 	private java.lang.Byte       needPay;
 	private Long anchorTime;
-	@ItemType(RentalSiteNumberDayRulesDTO.class)
+	private Double    siteCounts;
+	@ItemType(String.class)
+	private List<String> siteNames;
+	@ItemType(RentalSiteNumberRuleDTO.class)
 	private List<RentalSiteNumberRuleDTO> siteNumbers;
 	@ItemType(RentalSitePicDTO.class)
 	private List<RentalSitePicDTO> sitePics;
@@ -313,13 +318,35 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 		this.contactPhonenum = contactPhonenum;
 	}
 
+ 
 
-	public java.lang.Integer getSiteCounts() {
+
+	public String getNotice() {
+		return notice;
+	}
+
+
+	public void setNotice(String notice) {
+		this.notice = notice;
+	}
+
+
+	public List<String> getSiteNames() {
+		return siteNames;
+	}
+
+
+	public void setSiteNames(List<String> siteNames) {
+		this.siteNames = siteNames;
+	}
+
+
+	public Double getSiteCounts() {
 		return siteCounts;
 	}
 
 
-	public void setSiteCounts(java.lang.Integer siteCounts) {
+	public void setSiteCounts(Double siteCounts) {
 		this.siteCounts = siteCounts;
 	}
  

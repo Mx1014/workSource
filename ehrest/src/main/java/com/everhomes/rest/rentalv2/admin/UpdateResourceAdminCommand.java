@@ -44,6 +44,7 @@ public class UpdateResourceAdminCommand {
 	private Long chargeUid;
 	@NotNull
 	private String introduction;
+	private String notice;
 	@NotNull
 	private String coverUri;
 	@ItemType(String.class)
@@ -173,6 +174,16 @@ public class UpdateResourceAdminCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+
+	public String getNotice() {
+		return notice;
+	}
+
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
 
 }

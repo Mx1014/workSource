@@ -239,6 +239,16 @@ public interface Rentalv2Provider {
 	List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId,
 			String beginTime, String endTime) throws ParseException;
 
+
+	void createRentalResourceNumber(RentalResourceNumber resourceNumber);
+
+
+	Integer deleteRentalResourceNumbersByOwnerId(String simpleName, Long id);
+
+
+	List<RentalResourceNumber> queryRentalResourceNumbersByOwner(
+			String simpleName, Long id);
+
  
 
  

@@ -60,6 +60,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2OrderAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2OrderPayorderMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Orders;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2RefundOrders;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceNumbers;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceOrders;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourcePics;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
@@ -76,6 +77,7 @@ import com.everhomes.server.schema.tables.records.EhRentalv2OrderAttachmentsReco
 import com.everhomes.server.schema.tables.records.EhRentalv2OrderPayorderMapRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2OrdersRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2RefundOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhRentalv2ResourceNumbersRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2ResourceOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2ResourcePicsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2ResourceRangesRecord;
@@ -1769,6 +1771,57 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result ;
 		return null;
 
+	}
+
+	@Override
+	public void createRentalResourceNumber(RentalResourceNumber resourceNumber) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2ResourceNumbers.class));
+		resourceNumber.setId(id);	 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2ResourceNumbersRecord record = ConvertHelper.convert(resourceNumber,
+				EhRentalv2ResourceNumbersRecord.class);
+		InsertQuery<EhRentalv2ResourceNumbersRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_RESOURCE_NUMBERS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2ResourceNumbers.class,
+				null); 
+	}
+
+	@Override
+	public Integer deleteRentalResourceNumbersByOwnerId(String ownerType, Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2ResourceNumbersRecord> step = context
+				.delete(Tables.EH_RENTALV2_RESOURCE_NUMBERS);
+		Condition condition = Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
+				.equal(ownerType).and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_ID
+				.equal(id));
+		 
+		step.where(condition);
+		Integer deleteCount = step.execute();
+		return deleteCount;
+	}
+
+	@Override
+	public List<RentalResourceNumber> queryRentalResourceNumbersByOwner(
+			String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_RESOURCE_NUMBERS);
+		Condition condition = Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_NUMBERS.OWNER_TYPE
+				.equal(ownerType));
+		step.where(condition);
+		List<RentalResourceNumber> result = step
+				.orderBy(Tables.EH_RENTALV2_RESOURCE_NUMBERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalResourceNumber.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
 	}
  
 	

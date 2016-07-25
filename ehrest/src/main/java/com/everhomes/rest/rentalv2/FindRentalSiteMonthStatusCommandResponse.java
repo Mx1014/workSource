@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：场所id</li> 
  * <li>siteName：场所名称</li>
  * <li>introduction：详情</li>
+ * <li>notice：备注文字</li>
  * <li>address：地址</li>
  * <li>longitude：经纬度</li>
  * <li>latitude：经纬度</li>
@@ -37,6 +38,7 @@ public class FindRentalSiteMonthStatusCommandResponse {
 	private Long rentalSiteId; 
 	private String siteName; 
 	private String introduction;  
+	private String notice;
 	private String address;
 	private double longitude;
 	private double latitude;
@@ -307,6 +309,16 @@ public class FindRentalSiteMonthStatusCommandResponse {
 
 	public void setContactPhonenum(String contactPhonenum) {
 		this.contactPhonenum = contactPhonenum;
+	}
+
+
+	public String getNotice() {
+		return notice;
+	}
+
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
  
 
