@@ -975,23 +975,20 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context
 				.select()
-				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
-				.join(Tables.EH_RENTALV2_ORDERS)
-				.on(Tables.EH_RENTALV2_ORDERS.ID
-						.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS);
+			 
 
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID
 				.equal(id);
 //		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 //				.ne(SiteBillStatus.FAIL.getCode()));
 		step.where(condition);
-		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
+		List<RentalResourceOrder> result  = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
-				.map(new RentalResourceOrderRecordMapper());
-
-		List<RentalResourceOrder> result = resultRecord.stream().map((r) -> {
-			return ConvertHelper.convert(r, RentalResourceOrder.class);
-		}).collect(Collectors.toList());
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalResourceOrder.class);
+				});;
+ 
 
 		return result;
 	}
