@@ -137,6 +137,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
 import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
+import com.everhomes.rest.ui.forum.MediaDisplayFlag;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.PostFilterType;
 import com.everhomes.rest.ui.forum.PostSentScopeType;
@@ -2335,6 +2336,12 @@ public class ForumServiceImpl implements ForumService {
         post.setPrivateFlag(privateFlag.getCode());
         
         post.setAssignedFlag(PostAssignedFlag.NONE.getCode());
+        
+        if (MediaDisplayFlag.fromCode(cmd.getMediaDisplayFlag()) != MediaDisplayFlag.NO) {
+			post.setMediaDisplayFlag(MediaDisplayFlag.YES.getCode());
+		}else{
+			post.setMediaDisplayFlag(cmd.getMediaDisplayFlag());
+		}
         
         return post;
     }
