@@ -48,6 +48,20 @@ CREATE TABLE `eh_rentalv2_default_rules` (
 -- 
 -- 对于按小时预定的场所默认设置，保存时间段
 -- 
+DROP TABLE IF EXISTS eh_rentalv2_resource_numbers;
+
+CREATE TABLE `eh_rentalv2_resource_numbers` (
+`id` BIGINT(20)    COMMENT '',
+`owner_id` BIGINT(20)    COMMENT '',
+`owner_type` VARCHAR(255)  COMMENT '"EhRentalv2DefaultRules"-默认规则,"EhRentalv2Resources"-具体场所',
+`resource_number` DOUBLE  COMMENT '开始时间-24小时制', 
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
+;
+
+-- 
+-- 对于按小时预定的场所默认设置，保存时间段
+-- 
 DROP TABLE IF EXISTS eh_rentalv2_time_interval;
 
 CREATE TABLE `eh_rentalv2_time_interval` (
@@ -128,6 +142,7 @@ CREATE TABLE `eh_rentalv2_resources` (
 `day_begin_time` TIME  COMMENT '对于按小时预定的每天开始时间',
 `day_end_time` TIME  COMMENT '对于按小时预定的每天结束时间',
 `community_id` BIGINT(20)    COMMENT '所属的社区ID（和可见范围的不一样）',
+`resource_counts` DOUBLE  COMMENT '可预约个数',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
