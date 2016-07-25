@@ -1125,7 +1125,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(cmd.getRentalSiteId()==null)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rental site id");
-
+		if(null==cmd.getRentalDate())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rental date");
 		if(cmd.getRules()==null||cmd.getRules().size()==0)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rules");
@@ -1423,6 +1425,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rsb.setTotalMoney(  money);
 				rsb.setRentalCount(siteRule.getRentalCount());
 				rsb.setRentalResourceRuleId(rsr.getId());
+				rsb.setResourceRentalDate(new Date(cmd.getRentalDate()));
 				rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
 				rsb.setCreatorUid(userId);
