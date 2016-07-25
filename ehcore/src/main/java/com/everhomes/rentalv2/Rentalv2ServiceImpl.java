@@ -1418,6 +1418,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				RentalResourceOrder rsb = ConvertHelper.convert(rsr, RentalResourceOrder.class);
 				rsb.setRentalOrderId(rentalBillId);
 				rsb.setAmorpm(rsr.getAmorpm()); 
+				rsb.setEndTime(rsr.getEndTime());
+				rsb.setBeginTime(rsr.getBeginTime());
 				rsb.setTotalMoney(  money);
 				rsb.setRentalCount(siteRule.getRentalCount());
 				rsb.setRentalResourceRuleId(rsr.getId());
