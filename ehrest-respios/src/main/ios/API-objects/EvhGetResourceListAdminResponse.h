@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhGetResourceListAdminResponse
@@ -14,7 +14,7 @@
 
 @property(nonatomic, copy) NSNumber* nextPageAnchor;
 
-// item type EvhCommunityBuildingDTO*
+// item type EvhBuildingDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSites;
 
 -(id) init;

@@ -34,6 +34,8 @@
 
 @property(nonatomic, copy) NSString* introduction;
 
+@property(nonatomic, copy) NSString* notice;
+
 @property(nonatomic, copy) NSString* coverUri;
 
 // item type NSString*

@@ -2,7 +2,7 @@
 // EvhRentalBatchCompleteBillCommandResponse.m
 //
 #import "EvhRentalBatchCompleteBillCommandResponse.h"
-#import "EvhRentalRentalBillDTO.h"
+#import "EvhRentalBillDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalBatchCompleteBillCommandResponse
@@ -34,7 +34,7 @@
 {
     if(self.bills) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalRentalBillDTO* item in self.bills) {
+        for(EvhRentalBillDTO* item in self.bills) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -49,7 +49,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"bills"];
             for(id itemJson in jsonArray) {
-                EvhRentalRentalBillDTO* item = [EvhRentalRentalBillDTO new];
+                EvhRentalBillDTO* item = [EvhRentalBillDTO new];
                 
                 [item fromJson: itemJson];
                 [self.bills addObject: item];

@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalRentalBillDTO.h"
+#import "EvhRentalBillDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalListRentalBillsCommandResponse
@@ -14,7 +14,7 @@
 
 @property(nonatomic, copy) NSNumber* nextPageOffset;
 
-// item type EvhRentalRentalBillDTO*
+// item type EvhRentalBillDTO*
 @property(nonatomic, strong) NSMutableArray* rentalBills;
 
 -(id) init;

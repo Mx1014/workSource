@@ -2,7 +2,7 @@
 // EvhFindRentalSiteRulesCommandResponse.m
 //
 #import "EvhFindRentalSiteRulesCommandResponse.h"
-#import "EvhRentalRentalSiteRulesDTO.h"
+#import "EvhRentalSiteRulesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhFindRentalSiteRulesCommandResponse
@@ -34,7 +34,7 @@
 {
     if(self.rentalSiteRules) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalRentalSiteRulesDTO* item in self.rentalSiteRules) {
+        for(EvhRentalSiteRulesDTO* item in self.rentalSiteRules) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -49,7 +49,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSiteRules"];
             for(id itemJson in jsonArray) {
-                EvhRentalRentalSiteRulesDTO* item = [EvhRentalRentalSiteRulesDTO new];
+                EvhRentalSiteRulesDTO* item = [EvhRentalSiteRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalSiteRules addObject: item];

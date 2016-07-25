@@ -2,8 +2,8 @@
 // EvhRentalBillDTO.m
 //
 #import "EvhRentalBillDTO.h"
-#import "EvhRentalv2SiteItemDTO.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhSiteItemDTO.h"
+#import "EvhRentalRentalSiteRulesDTO.h"
 #import "EvhBillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +38,14 @@
 {
     if(self.rentalBillId)
         [jsonObject setObject: self.rentalBillId forKey: @"rentalBillId"];
+    if(self.ownerType)
+        [jsonObject setObject: self.ownerType forKey: @"ownerType"];
+    if(self.ownerId)
+        [jsonObject setObject: self.ownerId forKey: @"ownerId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.siteType)
+        [jsonObject setObject: self.siteType forKey: @"siteType"];
     if(self.siteName)
         [jsonObject setObject: self.siteName forKey: @"siteName"];
     if(self.buildingName)
@@ -90,15 +98,9 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.rentalCount)
         [jsonObject setObject: self.rentalCount forKey: @"rentalCount"];
-    if(self.useDetail)
-        [jsonObject setObject: self.useDetail forKey: @"useDetail"];
-    if(self.vendorType)
-        [jsonObject setObject: self.vendorType forKey: @"vendorType"];
-    if(self.resourceTypeId)
-        [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalv2SiteItemDTO* item in self.siteItems) {
+        for(EvhSiteItemDTO* item in self.siteItems) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -107,7 +109,7 @@
     }
     if(self.rentalSiteRules) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteRulesDTO* item in self.rentalSiteRules) {
+        for(EvhRentalRentalSiteRulesDTO* item in self.rentalSiteRules) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -123,8 +125,6 @@
         }
         [jsonObject setObject: jsonArray forKey: @"billAttachments"];
     }
-    if(self.toastFlag)
-        [jsonObject setObject: self.toastFlag forKey: @"toastFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -133,6 +133,22 @@
         self.rentalBillId = [jsonObject objectForKey: @"rentalBillId"];
         if(self.rentalBillId && [self.rentalBillId isEqual:[NSNull null]])
             self.rentalBillId = nil;
+
+        self.ownerType = [jsonObject objectForKey: @"ownerType"];
+        if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
+            self.ownerType = nil;
+
+        self.ownerId = [jsonObject objectForKey: @"ownerId"];
+        if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
+            self.ownerId = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.siteType = [jsonObject objectForKey: @"siteType"];
+        if(self.siteType && [self.siteType isEqual:[NSNull null]])
+            self.siteType = nil;
 
         self.siteName = [jsonObject objectForKey: @"siteName"];
         if(self.siteName && [self.siteName isEqual:[NSNull null]])
@@ -238,22 +254,10 @@
         if(self.rentalCount && [self.rentalCount isEqual:[NSNull null]])
             self.rentalCount = nil;
 
-        self.useDetail = [jsonObject objectForKey: @"useDetail"];
-        if(self.useDetail && [self.useDetail isEqual:[NSNull null]])
-            self.useDetail = nil;
-
-        self.vendorType = [jsonObject objectForKey: @"vendorType"];
-        if(self.vendorType && [self.vendorType isEqual:[NSNull null]])
-            self.vendorType = nil;
-
-        self.resourceTypeId = [jsonObject objectForKey: @"resourceTypeId"];
-        if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
-            self.resourceTypeId = nil;
-
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {
-                EvhRentalv2SiteItemDTO* item = [EvhRentalv2SiteItemDTO new];
+                EvhSiteItemDTO* item = [EvhSiteItemDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteItems addObject: item];
@@ -262,7 +266,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSiteRules"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteRulesDTO* item = [EvhRentalSiteRulesDTO new];
+                EvhRentalRentalSiteRulesDTO* item = [EvhRentalRentalSiteRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalSiteRules addObject: item];
@@ -277,10 +281,6 @@
                 [self.billAttachments addObject: item];
             }
         }
-        self.toastFlag = [jsonObject objectForKey: @"toastFlag"];
-        if(self.toastFlag && [self.toastFlag isEqual:[NSNull null]])
-            self.toastFlag = nil;
-
         return self;
     }
     

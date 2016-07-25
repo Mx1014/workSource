@@ -55,6 +55,8 @@
         [jsonObject setObject: self.chargeUid forKey: @"chargeUid"];
     if(self.introduction)
         [jsonObject setObject: self.introduction forKey: @"introduction"];
+    if(self.notice)
+        [jsonObject setObject: self.notice forKey: @"notice"];
     if(self.coverUri)
         [jsonObject setObject: self.coverUri forKey: @"coverUri"];
     if(self.detailUris) {
@@ -123,6 +125,10 @@
         self.introduction = [jsonObject objectForKey: @"introduction"];
         if(self.introduction && [self.introduction isEqual:[NSNull null]])
             self.introduction = nil;
+
+        self.notice = [jsonObject objectForKey: @"notice"];
+        if(self.notice && [self.notice isEqual:[NSNull null]])
+            self.notice = nil;
 
         self.coverUri = [jsonObject objectForKey: @"coverUri"];
         if(self.coverUri && [self.coverUri isEqual:[NSNull null]])

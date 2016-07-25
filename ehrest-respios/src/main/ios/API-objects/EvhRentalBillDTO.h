@@ -3,8 +3,8 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalv2SiteItemDTO.h"
-#import "EvhRentalSiteRulesDTO.h"
+#import "EvhSiteItemDTO.h"
+#import "EvhRentalRentalSiteRulesDTO.h"
 #import "EvhBillAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,14 @@
 
 
 @property(nonatomic, copy) NSNumber* rentalBillId;
+
+@property(nonatomic, copy) NSString* ownerType;
+
+@property(nonatomic, copy) NSNumber* ownerId;
+
+@property(nonatomic, copy) NSNumber* communityId;
+
+@property(nonatomic, copy) NSString* siteType;
 
 @property(nonatomic, copy) NSString* siteName;
 
@@ -68,22 +76,14 @@
 
 @property(nonatomic, copy) NSNumber* rentalCount;
 
-@property(nonatomic, copy) NSString* useDetail;
-
-@property(nonatomic, copy) NSString* vendorType;
-
-@property(nonatomic, copy) NSNumber* resourceTypeId;
-
-// item type EvhRentalv2SiteItemDTO*
+// item type EvhSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
-// item type EvhRentalSiteRulesDTO*
+// item type EvhRentalRentalSiteRulesDTO*
 @property(nonatomic, strong) NSMutableArray* rentalSiteRules;
 
 // item type EvhBillAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* billAttachments;
-
-@property(nonatomic, copy) NSNumber* toastFlag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

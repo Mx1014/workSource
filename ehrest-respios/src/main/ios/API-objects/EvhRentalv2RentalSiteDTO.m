@@ -27,6 +27,7 @@
 {
     self = [super init];
     if(self) {
+        _siteNumbers = [NSMutableArray new];
         _siteItems = [NSMutableArray new];
         _sitePics = [NSMutableArray new];
         _owners = [NSMutableArray new];
@@ -108,6 +109,15 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.createTime)
         [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.siteCounts)
+        [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
+    if(self.siteNumbers) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.siteNumbers) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"siteNumbers"];
+    }
     if(self.siteItems) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhRentalv2SiteItemDTO* item in self.siteItems) {
@@ -289,6 +299,16 @@
         if(self.createTime && [self.createTime isEqual:[NSNull null]])
             self.createTime = nil;
 
+        self.siteCounts = [jsonObject objectForKey: @"siteCounts"];
+        if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
+            self.siteCounts = nil;
+
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"siteNumbers"];
+            for(id itemJson in jsonArray) {
+                [self.siteNumbers addObject: itemJson];
+            }
+        }
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteItems"];
             for(id itemJson in jsonArray) {

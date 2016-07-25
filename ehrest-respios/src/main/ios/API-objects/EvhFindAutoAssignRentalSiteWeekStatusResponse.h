@@ -21,6 +21,8 @@
 
 @property(nonatomic, copy) NSString* introduction;
 
+@property(nonatomic, copy) NSString* notice;
+
 @property(nonatomic, copy) NSString* address;
 
 @property(nonatomic, copy) NSNumber* longitude;
@@ -56,6 +58,9 @@
 @property(nonatomic, copy) NSNumber* needPay;
 
 @property(nonatomic, copy) NSNumber* anchorTime;
+
+// item type NSString*
+@property(nonatomic, strong) NSMutableArray* siteNames;
 
 // item type EvhRentalSiteNumberDayRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteDays;
