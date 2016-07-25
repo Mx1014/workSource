@@ -64,6 +64,7 @@ import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.DefaultRuleDTO;
+import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
 import com.everhomes.rest.rentalv2.admin.DeleteResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
 import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
@@ -201,5 +202,8 @@ public interface Rentalv2Service {
 
 	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd);
+
+
+	void deleteResource(DeleteResourceCommand cmd);
 
 }

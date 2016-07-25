@@ -36,7 +36,7 @@ public interface Rentalv2Provider {
 
 	List<RentalItemsOrder> findRentalItemsBillByItemsId(Long siteItemId);
 
-	Integer deleteRentalSiteRules(Long rentalSiteId, Long beginDate, Long endDate);
+	Integer deleteResourceCells(Long rentalSiteId, Long beginDate, Long endDate);
 
 	 
 	RentalResource getRentalSiteById(Long rentalSiteId);
@@ -57,7 +57,7 @@ public interface Rentalv2Provider {
 
 	void updateRentalSite(RentalResource rentalsite);
 
-	void deleteRentalSite(Long rentalSiteId);
+	void deleteResource(Long rentalSiteId);
 
 	void updateRentalSiteStatus(Long rentalSiteId, byte status);
 

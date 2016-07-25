@@ -156,6 +156,7 @@ import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
+import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
 import com.everhomes.rest.rentalv2.admin.DeleteResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.DiscountType;
 import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
@@ -1818,7 +1819,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			
 			//设置默认规则，删除所有的单元格
-			Integer deleteCount = rentalProvider.deleteRentalSiteRules(
+			Integer deleteCount = rentalProvider.deleteResourceCells(
 					cmd.getRentalSiteId(), null, null);
 			LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 					+ "  from rental site rules  ");
@@ -2083,7 +2084,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}.getType());
 		for (Long deleteDate : deleteDates) {
 			rentalProvider
-					.deleteRentalSiteRules(Long.valueOf(cmd.getRentalSiteId()),
+					.deleteResourceCells(Long.valueOf(cmd.getRentalSiteId()),
 							deleteDate, deleteDate);
 		}
 	}
@@ -2229,9 +2230,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_HAVE_BILL,
 							"HAS BILL IN YOUR DELETE STUFF");
 		}
-		rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(), null, null);
+		rentalProvider.deleteResourceCells(cmd.getRentalSiteId(), null, null);
 //		rentalProvider.deleteRentalBillBySiteId(cmd.getRentalSiteId());
-		rentalProvider.deleteRentalSite(cmd.getRentalSiteId());
+		rentalProvider.deleteResource(cmd.getRentalSiteId());
 	}
 	@Override
 	public void disableRentalSite(DisableRentalSiteCommand cmd) {
@@ -4046,6 +4047,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void openResourceType(OpenResourceTypeCommand cmd) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteResource(DeleteResourceCommand cmd) {
+
+		rentalProvider.deleteResourceCells(cmd.getId(), null, null); 
+		rentalProvider.deleteResource(cmd.getId());
 		
 	}
 

@@ -437,7 +437,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public Integer deleteRentalSiteRules(Long rentalSiteId, Long beginDate,
+	public Integer deleteResourceCells(Long rentalSiteId, Long beginDate,
 			Long endDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2CellsRecord> step = context
@@ -674,7 +674,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public void deleteRentalSite(Long rentalSiteId) {
+	public void deleteResource(Long rentalSiteId) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhRentalv2ResourcesRecord> step = context
