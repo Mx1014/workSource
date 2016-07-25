@@ -89,8 +89,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         }
         
         if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
-			cmd.setOfficialFlag(null);
-			post.setOfficialFlag(null);
+			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
+			post.setOfficialFlag(OfficialFlag.NO.getCode());
 		}else {
 			post.setOfficialFlag(cmd.getOfficialFlag());
 		}
