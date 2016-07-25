@@ -2,7 +2,7 @@
 // EvhListRentalBillsCommandResponse.m
 //
 #import "EvhListRentalBillsCommandResponse.h"
-#import "EvhRentalBillDTO.h"
+#import "EvhRentalv2RentalBillDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListRentalBillsCommandResponse
@@ -36,7 +36,7 @@
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.rentalBills) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalBillDTO* item in self.rentalBills) {
+        for(EvhRentalv2RentalBillDTO* item in self.rentalBills) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -55,7 +55,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalBills"];
             for(id itemJson in jsonArray) {
-                EvhRentalBillDTO* item = [EvhRentalBillDTO new];
+                EvhRentalv2RentalBillDTO* item = [EvhRentalv2RentalBillDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalBills addObject: item];

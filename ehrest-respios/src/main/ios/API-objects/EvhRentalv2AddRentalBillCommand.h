@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhrentalBillRuleDTO.h"
+#import "EvhRentalBillRuleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalv2AddRentalBillCommand
@@ -20,7 +20,7 @@
 
 @property(nonatomic, copy) NSNumber* endTime;
 
-// item type EvhrentalBillRuleDTO*
+// item type EvhRentalBillRuleDTO*
 @property(nonatomic, strong) NSMutableArray* rules;
 
 -(id) init;

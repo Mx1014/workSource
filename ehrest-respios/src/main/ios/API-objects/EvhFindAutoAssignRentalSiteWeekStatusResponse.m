@@ -27,6 +27,7 @@
 {
     self = [super init];
     if(self) {
+        _siteNames = [NSMutableArray new];
         _siteDays = [NSMutableArray new];
         _sitePics = [NSMutableArray new];
         _attachments = [NSMutableArray new];
@@ -44,6 +45,8 @@
         [jsonObject setObject: self.siteName forKey: @"siteName"];
     if(self.introduction)
         [jsonObject setObject: self.introduction forKey: @"introduction"];
+    if(self.notice)
+        [jsonObject setObject: self.notice forKey: @"notice"];
     if(self.address)
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.longitude)
@@ -80,6 +83,13 @@
         [jsonObject setObject: self.needPay forKey: @"needPay"];
     if(self.anchorTime)
         [jsonObject setObject: self.anchorTime forKey: @"anchorTime"];
+    if(self.siteNames) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.siteNames) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"siteNames"];
+    }
     if(self.siteDays) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhRentalSiteNumberDayRulesDTO* item in self.siteDays) {
@@ -132,6 +142,10 @@
         self.introduction = [jsonObject objectForKey: @"introduction"];
         if(self.introduction && [self.introduction isEqual:[NSNull null]])
             self.introduction = nil;
+
+        self.notice = [jsonObject objectForKey: @"notice"];
+        if(self.notice && [self.notice isEqual:[NSNull null]])
+            self.notice = nil;
 
         self.address = [jsonObject objectForKey: @"address"];
         if(self.address && [self.address isEqual:[NSNull null]])
@@ -205,6 +219,12 @@
         if(self.anchorTime && [self.anchorTime isEqual:[NSNull null]])
             self.anchorTime = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"siteNames"];
+            for(id itemJson in jsonArray) {
+                [self.siteNames addObject: itemJson];
+            }
+        }
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteDays"];
             for(id itemJson in jsonArray) {

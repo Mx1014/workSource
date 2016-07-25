@@ -2,7 +2,7 @@
 // EvhRentalv2AddRentalBillCommand.m
 //
 #import "EvhRentalv2AddRentalBillCommand.h"
-#import "EvhrentalBillRuleDTO.h"
+#import "EvhRentalBillRuleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalv2AddRentalBillCommand
@@ -42,7 +42,7 @@
         [jsonObject setObject: self.endTime forKey: @"endTime"];
     if(self.rules) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhrentalBillRuleDTO* item in self.rules) {
+        for(EvhRentalBillRuleDTO* item in self.rules) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -73,7 +73,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rules"];
             for(id itemJson in jsonArray) {
-                EvhrentalBillRuleDTO* item = [EvhrentalBillRuleDTO new];
+                EvhRentalBillRuleDTO* item = [EvhRentalBillRuleDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rules addObject: item];

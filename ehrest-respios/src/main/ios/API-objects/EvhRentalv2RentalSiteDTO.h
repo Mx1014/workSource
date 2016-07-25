@@ -85,6 +85,11 @@
 
 @property(nonatomic, copy) NSNumber* createTime;
 
+@property(nonatomic, copy) NSNumber* siteCounts;
+
+// item type NSString*
+@property(nonatomic, strong) NSMutableArray* siteNumbers;
+
 // item type EvhRentalv2SiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 

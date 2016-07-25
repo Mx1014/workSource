@@ -2,7 +2,7 @@
 // EvhFindRentalSiteMonthStatusCommandResponse.m
 //
 #import "EvhFindRentalSiteMonthStatusCommandResponse.h"
-#import "EvhRentalSiteDayRulesDTO.h"
+#import "EvhRentalv2RentalSiteDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
 #import "EvhRentalv2SiteItemDTO.h"
@@ -44,6 +44,8 @@
         [jsonObject setObject: self.siteName forKey: @"siteName"];
     if(self.introduction)
         [jsonObject setObject: self.introduction forKey: @"introduction"];
+    if(self.notice)
+        [jsonObject setObject: self.notice forKey: @"notice"];
     if(self.address)
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.longitude)
@@ -80,7 +82,7 @@
         [jsonObject setObject: self.anchorTime forKey: @"anchorTime"];
     if(self.siteDays) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteDayRulesDTO* item in self.siteDays) {
+        for(EvhRentalv2RentalSiteDayRulesDTO* item in self.siteDays) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -130,6 +132,10 @@
         self.introduction = [jsonObject objectForKey: @"introduction"];
         if(self.introduction && [self.introduction isEqual:[NSNull null]])
             self.introduction = nil;
+
+        self.notice = [jsonObject objectForKey: @"notice"];
+        if(self.notice && [self.notice isEqual:[NSNull null]])
+            self.notice = nil;
 
         self.address = [jsonObject objectForKey: @"address"];
         if(self.address && [self.address isEqual:[NSNull null]])
@@ -202,7 +208,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteDays"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteDayRulesDTO* item = [EvhRentalSiteDayRulesDTO new];
+                EvhRentalv2RentalSiteDayRulesDTO* item = [EvhRentalv2RentalSiteDayRulesDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteDays addObject: item];

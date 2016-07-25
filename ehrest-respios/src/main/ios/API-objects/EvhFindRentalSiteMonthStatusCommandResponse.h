@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalSiteDayRulesDTO.h"
+#import "EvhRentalv2RentalSiteDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
 #import "EvhRentalv2SiteItemDTO.h"
@@ -20,6 +20,8 @@
 @property(nonatomic, copy) NSString* siteName;
 
 @property(nonatomic, copy) NSString* introduction;
+
+@property(nonatomic, copy) NSString* notice;
 
 @property(nonatomic, copy) NSString* address;
 
@@ -55,7 +57,7 @@
 
 @property(nonatomic, copy) NSNumber* anchorTime;
 
-// item type EvhRentalSiteDayRulesDTO*
+// item type EvhRentalv2RentalSiteDayRulesDTO*
 @property(nonatomic, strong) NSMutableArray* siteDays;
 
 // item type EvhRentalSitePicDTO*

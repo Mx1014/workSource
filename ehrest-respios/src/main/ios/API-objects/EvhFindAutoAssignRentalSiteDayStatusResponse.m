@@ -2,7 +2,7 @@
 // EvhFindAutoAssignRentalSiteDayStatusResponse.m
 //
 #import "EvhFindAutoAssignRentalSiteDayStatusResponse.h"
-#import "EvhRentalSiteNumberDayRulesDTO.h"
+#import "EvhRentalSiteNumberRuleDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhAttachmentConfigDTO.h"
 #import "EvhRentalv2SiteItemDTO.h"
@@ -27,6 +27,7 @@
 {
     self = [super init];
     if(self) {
+        _siteNames = [NSMutableArray new];
         _siteNumbers = [NSMutableArray new];
         _sitePics = [NSMutableArray new];
         _attachments = [NSMutableArray new];
@@ -44,6 +45,8 @@
         [jsonObject setObject: self.siteName forKey: @"siteName"];
     if(self.introduction)
         [jsonObject setObject: self.introduction forKey: @"introduction"];
+    if(self.notice)
+        [jsonObject setObject: self.notice forKey: @"notice"];
     if(self.address)
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.longitude)
@@ -64,8 +67,6 @@
         [jsonObject setObject: self.rentalType forKey: @"rentalType"];
     if(self.rentalStep)
         [jsonObject setObject: self.rentalStep forKey: @"rentalStep"];
-    if(self.siteCounts)
-        [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
     if(self.exclusiveFlag)
         [jsonObject setObject: self.exclusiveFlag forKey: @"exclusiveFlag"];
     if(self.autoAssign)
@@ -80,9 +81,18 @@
         [jsonObject setObject: self.needPay forKey: @"needPay"];
     if(self.anchorTime)
         [jsonObject setObject: self.anchorTime forKey: @"anchorTime"];
+    if(self.siteCounts)
+        [jsonObject setObject: self.siteCounts forKey: @"siteCounts"];
+    if(self.siteNames) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.siteNames) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"siteNames"];
+    }
     if(self.siteNumbers) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalSiteNumberDayRulesDTO* item in self.siteNumbers) {
+        for(EvhRentalSiteNumberRuleDTO* item in self.siteNumbers) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -133,6 +143,10 @@
         if(self.introduction && [self.introduction isEqual:[NSNull null]])
             self.introduction = nil;
 
+        self.notice = [jsonObject objectForKey: @"notice"];
+        if(self.notice && [self.notice isEqual:[NSNull null]])
+            self.notice = nil;
+
         self.address = [jsonObject objectForKey: @"address"];
         if(self.address && [self.address isEqual:[NSNull null]])
             self.address = nil;
@@ -173,10 +187,6 @@
         if(self.rentalStep && [self.rentalStep isEqual:[NSNull null]])
             self.rentalStep = nil;
 
-        self.siteCounts = [jsonObject objectForKey: @"siteCounts"];
-        if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
-            self.siteCounts = nil;
-
         self.exclusiveFlag = [jsonObject objectForKey: @"exclusiveFlag"];
         if(self.exclusiveFlag && [self.exclusiveFlag isEqual:[NSNull null]])
             self.exclusiveFlag = nil;
@@ -205,10 +215,20 @@
         if(self.anchorTime && [self.anchorTime isEqual:[NSNull null]])
             self.anchorTime = nil;
 
+        self.siteCounts = [jsonObject objectForKey: @"siteCounts"];
+        if(self.siteCounts && [self.siteCounts isEqual:[NSNull null]])
+            self.siteCounts = nil;
+
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"siteNames"];
+            for(id itemJson in jsonArray) {
+                [self.siteNames addObject: itemJson];
+            }
+        }
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"siteNumbers"];
             for(id itemJson in jsonArray) {
-                EvhRentalSiteNumberDayRulesDTO* item = [EvhRentalSiteNumberDayRulesDTO new];
+                EvhRentalSiteNumberRuleDTO* item = [EvhRentalSiteNumberRuleDTO new];
                 
                 [item fromJson: itemJson];
                 [self.siteNumbers addObject: item];

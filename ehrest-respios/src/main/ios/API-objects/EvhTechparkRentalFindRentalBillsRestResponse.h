@@ -2,14 +2,14 @@
 // EvhTechparkRentalFindRentalBillsRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhRentalFindRentalBillsCommandResponse.h"
+#import "EvhFindRentalBillsCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalFindRentalBillsRestResponse
 //
 @interface EvhTechparkRentalFindRentalBillsRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhRentalFindRentalBillsCommandResponse* response;
+@property(nonatomic, strong) EvhFindRentalBillsCommandResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
