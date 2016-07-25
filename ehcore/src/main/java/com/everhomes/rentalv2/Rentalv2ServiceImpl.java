@@ -1415,9 +1415,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							new   java.math.BigDecimal(siteRule.getRentalCount() )));
 		 
 				}
-				RentalResourceOrder rsb = new RentalResourceOrder();
+				RentalResourceOrder rsb = ConvertHelper.convert(rsr, RentalResourceOrder.class);
 				rsb.setRentalOrderId(rentalBillId);
-				
+				rsb.setAmorpm(rsr.getAmorpm()); 
 				rsb.setTotalMoney(  money);
 				rsb.setRentalCount(siteRule.getRentalCount());
 				rsb.setRentalResourceRuleId(rsr.getId());
@@ -1724,60 +1724,42 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null!=billPaybillMaps && billPaybillMaps.size()>0)
 			dto.setVendorType(billPaybillMaps.get(0).getVendorType());
 		// 订单的rules
+		dto.setRentalSiteRules(new ArrayList<>());
 		List<RentalResourceOrder> rsbs = rentalProvider
 				.findRentalResourceOrderByOrderId(bill.getId());
-//		for (RentalResourceOrder rsb : rsbs) {
-//			RentalSiteRule rsr = rentalProvider.findRentalSiteRulesByRuleId(rsb.getRentalSiteRuleId());
-//			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
-//			ruleDto.setId(rsb.getId());
-//			ruleDto.setRentalSiteId(rsr.getRentalSiteId());
-//			ruleDto.setRentalType(rsb.getRentalType());
-//			ruleDto.setRentalStep(rsr.getRentalStep()); 
-//			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) {
-//				ruleDto.setTimeStep(rsr.getTimeStep());
-//				ruleDto.setBeginTime(rsr.getBeginTime().getTime());
-//				ruleDto.setEndTime(rsr.getEndTime().getTime());
-//			} else if (ruleDto.getRentalType().equals(
-//					RentalType.HALFDAY.getCode())) {
-//				ruleDto.setAmorpm(rsr.getAmorpm());
-//			}
-//			ruleDto.setUnit(rsr.getUnit());
-//			ruleDto.setPrice(rsr.getPrice());
-//			ruleDto.setRuleDate(rsr.getResourceRentalDate().getTime());
-//			if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-//
-//				List<RentalResourceOrderNumber> siteNumbers = this.rentalProvider.findSitesBillNumbersByBillId(rsr.getId()); 
-//				ruleDto.setSiteNumber("");
-//				if(null == siteNumbers)
-//					throw RuntimeErrorException
-//					.errorWith(
-//							RentalServiceErrorCode.SCOPE,
-//							RentalServiceErrorCode.ERROR_SITE_ASSGIN_NULL,
-//							localeStringService.getLocalizedString(
-//									String.valueOf(RentalServiceErrorCode.SCOPE),
-//									String.valueOf(RentalServiceErrorCode.ERROR_SITE_ASSGIN_NULL),
-//									UserContext.current().getUser()
-//											.getLocale(),
-//									" error: no assgined site number  "));
-//				for(RentalResourceOrderNumber siteNumber : siteNumbers){
-//					if(StringUtils.isBlank( ruleDto.getSiteNumber()))
-//						ruleDto.setSiteNumber(String.valueOf(siteNumber.getSiteNumber())+"号");
-//					else
-//						ruleDto.setSiteNumber(ruleDto.getSiteNumber()+","+String.valueOf(siteNumber.getSiteNumber())+"号");
-//				}
-//				
-//			}
-
-//			ruleDto.setSiteNumber(String.valueOf(rsr.getSiteNumber())+"号");
-//			if(rsb.getRentalCount()<1)
-//				ruleDto.setSiteNumber(ruleDto.getSiteNumber()+"（半场）");
-//			dto.getRentalSiteRules().add(ruleDto);
-//			ruleDto.setSiteNumber(rsr.getSiteNumber());
-//			
-//		}
-		
-		
-		
+		for (RentalResourceOrder rsb : rsbs) { 
+			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
+			ruleDto.setId(rsb.getId());
+			ruleDto.setRentalSiteId(rsb.getRentalResourceRuleId());
+			ruleDto.setRentalType(rsb.getRentalType());
+			ruleDto.setRentalStep(rsb.getRentalStep()); 
+			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) { 
+				ruleDto.setBeginTime(rsb.getBeginTime().getTime());
+				ruleDto.setEndTime(rsb.getEndTime().getTime());
+			} else if (ruleDto.getRentalType().equals(
+					RentalType.HALFDAY.getCode())) {
+				ruleDto.setAmorpm(rsb.getAmorpm());
+			} 
+			ruleDto.setPrice(rsb.getPrice());
+			ruleDto.setRuleDate(rsb.getResourceRentalDate().getTime()); 
+			  
+			dto.getRentalSiteRules().add(ruleDto); 
+			
+		}
+		List<RentalItemsOrder> ribs = rentalProvider
+				.findRentalItemsBillBySiteBillId(bill.getId());
+		if(null!=ribs){
+			dto.setSiteItems(new ArrayList<SiteItemDTO>());
+			ribs.forEach((item)->{
+				SiteItemDTO siDTO = ConvertHelper.convert(item, SiteItemDTO.class);
+				siDTO.setImgUrl(this.contentServerService.parserUri(item.getImgUri(), EntityType.USER.getCode(), 
+						UserContext.current().getUser().getId()));
+				siDTO.setItemName(item.getItemName());
+				siDTO.setCounts(item.getRentalCount());
+				siDTO.setItemType(item.getItemType());
+				dto.getSiteItems().add(siDTO);
+			});
+		}
 		
 		dto.setUseDetail(bill.getUseDetail());
 				
