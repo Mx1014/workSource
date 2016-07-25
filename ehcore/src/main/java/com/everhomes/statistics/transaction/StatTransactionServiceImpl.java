@@ -43,7 +43,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 public class StatTransactionServiceImpl implements StatTransactionService{
@@ -78,13 +77,19 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
 		
-		if(null == startDate || null == endDate || startDate > endDate){
+		if(null == startDate || null == endDate){
 			startDate = calendar.getTimeInMillis();
 			endDate = calendar.getTimeInMillis();
 		}
 		
 		//如果结束时间大于昨天，结束时间就取昨天的值
 		if(DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH).compareTo(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH)) > 0){
+			endDate = calendar.getTimeInMillis();
+		}
+		
+		// 结束时间大于开始时间
+		if(startDate > endDate){
+			startDate = calendar.getTimeInMillis();
 			endDate = calendar.getTimeInMillis();
 		}
 		

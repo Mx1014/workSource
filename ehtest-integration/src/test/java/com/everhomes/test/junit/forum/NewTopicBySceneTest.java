@@ -12,6 +12,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.ui.forum.ForumNewTopicBySceneRestResponse;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
@@ -22,7 +25,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class NewTopicBySceneTest extends BaseLoginAuthTestCase {
-    @Before @Ignore
+    @Before
     public void setUp() {
         super.setUp();
     }
@@ -190,7 +193,7 @@ public class NewTopicBySceneTest extends BaseLoginAuthTestCase {
         assertEquals(1, resultItem.size());
     }
         
-    @Test
+    @Test  @Ignore
     public void testNewTopicByScene4() {
             Integer namespaceId = 0;
             String userIdentifier = "12000000020"; // 管理员帐号
@@ -225,6 +228,63 @@ public class NewTopicBySceneTest extends BaseLoginAuthTestCase {
             });
             
             assertEquals(1, resultItem.size());
+    }
+    
+    @Test 
+    public void testNewTopicByScene5() {
+        Integer namespaceId = 0;
+        String userIdentifier = "12000000001"; // 管理员帐号
+        String plainTexPassword = "123456";
+        logon(null, userIdentifier, plainTexPassword);
+        
+        NewTopicBySceneCommand cmd = new NewTopicBySceneCommand();
+        cmd.setSceneToken("K06rblY1jXyf_8BDY9W884n2RqcC5riME1F2g2bZRBMXQrEitiL9miy4GHhPjtpT74ANDdQD58BEJzwPAC938zx40-TXSnATOWnEatD6NvWiP3sBm2g5h-wU5iGG2BaH5-n0NVMSkGOVNb1JiAY61A");
+        cmd.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+        cmd.setVisibleRegionId(24210090697425925L);
+        cmd.setSubject("我发一个新帖试试看");
+        cmd.setForumId(1L);
+        cmd.setTargetTag(PostEntityTag.PM.getCode());
+        cmd.setContentCategory(1004L);
+        cmd.setContent("这是我心法的贴内容");
+        cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
+        String commandRelativeUri = "/ui/forum/newTopicByScene";
+        ForumNewTopicBySceneRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, ForumNewTopicBySceneRestResponse.class, context);
+        
+        assertNotNull("The reponse of may not be null", response);
+        assertTrue("The user scenes should be get from server, response=" + 
+            StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+       
+        List<EhForumPosts> resultItem = new ArrayList<>();
+        DSLContext dslContext = dbProvider.getDslContext();
+        
+        List<EhForumPosts> resultTasks = new ArrayList<>();
+        dslContext.select().from(EH_ORGANIZATION_TASKS) 
+        .where(EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(1000750L))
+        .and(EH_ORGANIZATION_TASKS.CREATOR_UID.eq(10001L))
+        .and(EH_ORGANIZATION_TASKS.TASK_TYPE.eq(OrganizationTaskType.REPAIRS.getCode()))
+        .and(EH_ORGANIZATION_TASKS.VISIBLE_REGION_ID.eq(24210090697425925L))
+        .and(EH_ORGANIZATION_TASKS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode()))
+        .fetch().map((r) -> {
+        	resultTasks.add(ConvertHelper.convert(r, EhForumPosts.class));
+            return null;
+        });
+        
+        assertEquals(1, resultTasks.size());
+        
+        dslContext.select().from(EH_FORUM_POSTS) 
+            .where(EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode()))
+            .and(EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(24210090697425925L))
+            .and(EH_FORUM_POSTS.FORUM_ID.eq(1L))
+            .and(EH_FORUM_POSTS.CATEGORY_ID.eq(1004L))
+            .and(EH_FORUM_POSTS.CREATOR_TAG.eq("USER"))
+            .and(EH_FORUM_POSTS.SUBJECT.eq("我发一个新帖试试看"))
+            .and(EH_FORUM_POSTS.EMBEDDED_ID.eq(resultTasks.get(0).getId()))
+            .fetch().map((r) -> {
+            	resultItem.add(ConvertHelper.convert(r, EhForumPosts.class));
+                return null;
+        });
+        assertEquals(1, resultItem.size());
+
     }
     
     @After
