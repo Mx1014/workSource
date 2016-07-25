@@ -979,6 +979,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rSiteDTO.getSitePics().add(picDTO);
 			}
 		}
+		rSiteDTO.setSiteCounts(rentalSite.getResourceCounts());
 		if(rentalSite.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			List<RentalResourceNumber> resourceNumbers = this.rentalProvider.queryRentalResourceNumbersByOwner(
 					EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
@@ -1881,31 +1882,32 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			
 			BigDecimal weekendPrice = cmd.getWeekendPrice() == null ? new BigDecimal(0) : cmd.getWeekendPrice(); 
 			BigDecimal workdayPrice = cmd.getWorkdayPrice() == null ? new BigDecimal(0) : cmd.getWorkdayPrice();
-
-			if(cmd.getTimeIntervals() != null) {
-
-				Double beginTime = null;
-				Double endTime = null;
-				for(TimeIntervalDTO timeInterval:cmd.getTimeIntervals()){
-					if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
-						continue;
-					if(beginTime==null||beginTime>timeInterval.getBeginTime())
-						beginTime=timeInterval.getBeginTime();
-					if(endTime==null||endTime<timeInterval.getEndTime())
-						endTime=timeInterval.getEndTime();
-					AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
-					signleCmd.setBeginTime(timeInterval.getBeginTime());
-					signleCmd.setEndTime(timeInterval.getEndTime());
-					signleCmd.setWeekendPrice(weekendPrice); 
-					signleCmd.setWorkdayPrice(workdayPrice);
-					addRentalSiteSingleSimpleRule(signleCmd);
-					
+			if (cmd.getRentalType().equals(RentalType.HOUR.getCode()))  {
+				if(cmd.getTimeIntervals() != null) {
+	
+					Double beginTime = null;
+					Double endTime = null;
+					for(TimeIntervalDTO timeInterval:cmd.getTimeIntervals()){
+						if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+							continue;
+						if(beginTime==null||beginTime>timeInterval.getBeginTime())
+							beginTime=timeInterval.getBeginTime();
+						if(endTime==null||endTime<timeInterval.getEndTime())
+							endTime=timeInterval.getEndTime();
+						AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
+						signleCmd.setBeginTime(timeInterval.getBeginTime());
+						signleCmd.setEndTime(timeInterval.getEndTime());
+						signleCmd.setWeekendPrice(weekendPrice); 
+						signleCmd.setWorkdayPrice(workdayPrice);
+						addRentalSiteSingleSimpleRule(signleCmd);
+						
+					}
+					if(endTime>24.0||beginTime<0.0)
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+				                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
+					rs.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
+					rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
 				}
-				if(endTime>24.0||beginTime<0.0)
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
-				rs.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
-				rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
 			} else {
 				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 				signleCmd.setWeekendPrice(weekendPrice); 
@@ -3523,32 +3525,34 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
 			List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
-			if(defaultRule.getTimeIntervals() != null) {
-
-				Double beginTime = null;
-				Double endTime = null;
-				for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
-					if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
-						continue;
-					if(beginTime==null||beginTime>timeInterval.getBeginTime())
-						beginTime=timeInterval.getBeginTime();
-					if(endTime==null||endTime<timeInterval.getEndTime())
-						endTime=timeInterval.getEndTime();
-					AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
-					signleCmd.setBeginTime(timeInterval.getBeginTime());
-					signleCmd.setEndTime(timeInterval.getEndTime());
-					signleCmd.setWeekendPrice(weekendPrice); 
-					signleCmd.setWorkdayPrice(workdayPrice);
-					addSingleRules.add(signleCmd);
-					
+			if (defaultRule.getRentalType().equals(RentalType.HOUR.getCode()))  {
+				if(defaultRule.getTimeIntervals() != null){
+					Double beginTime = null;
+					Double endTime = null;
+					for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
+						if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+							continue;
+						if(beginTime==null||beginTime>timeInterval.getBeginTime())
+							beginTime=timeInterval.getBeginTime();
+						if(endTime==null||endTime<timeInterval.getEndTime())
+							endTime=timeInterval.getEndTime();
+						AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
+						signleCmd.setBeginTime(timeInterval.getBeginTime());
+						signleCmd.setEndTime(timeInterval.getEndTime());
+						signleCmd.setWeekendPrice(weekendPrice); 
+						signleCmd.setWorkdayPrice(workdayPrice);
+						addSingleRules.add(signleCmd);
+					}
+					 	
+				
+					if(endTime>24.0||beginTime<0.0)
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+				                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
+					resource.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
+					resource.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
 				}
-				if(endTime>24.0||beginTime<0.0)
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
-				resource.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
-				resource.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
 			} else {
-				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
+				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class ); 
 				signleCmd.setWeekendPrice(weekendPrice); 
 				signleCmd.setWorkdayPrice(workdayPrice);
 				addSingleRules.add(signleCmd);
