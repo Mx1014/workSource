@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>spaces: 空间列表list{@link com.everhomes.rest.officecubicle.OfficeSpaceDTO}</li> 
  * </ul>
  */
-public class GetSpaceListResponse {
+public class QuerySpacesResponse {
 
 	private Long nextPageAnchor;
 	

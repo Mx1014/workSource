@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderId: 预定记录id</li> 
  * </ul>
  */
-public class UnvisibleSpaceOrderCommand {
+public class DeleteUserSpaceOrderCommand {
 
 	private Long orderId;
 

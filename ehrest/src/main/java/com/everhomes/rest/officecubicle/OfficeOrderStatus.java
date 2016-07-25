@@ -1,7 +1,7 @@
 package com.everhomes.rest.officecubicle;
 
 public enum OfficeOrderStatus {
-	NORMAL((byte) 0, "用户客户端可见"), UNVISABLE((byte) -1, "用户客户端不可见");
+	NORMAL((byte) 2, "用户客户端可见"), UNVISABLE((byte) 0, "用户客户端不可见");
 
 	private byte code;
 	private String msg;
@@ -11,7 +11,7 @@ public enum OfficeOrderStatus {
 		this.msg = msg;
 	}
 
-	public int getCode() {
+	public byte getCode() {
 		return code;
 	}
 

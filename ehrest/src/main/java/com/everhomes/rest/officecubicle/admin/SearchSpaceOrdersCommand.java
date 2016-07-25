@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 一页的大小</li> 
  * </ul>
  */
-public class GetSpaceOrderListAdminCommand {
+public class SearchSpaceOrdersCommand {
 	private Long beginDate;
 	private Long endDate;
 	private String spaceName;

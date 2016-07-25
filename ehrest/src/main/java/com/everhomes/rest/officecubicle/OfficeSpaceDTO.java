@@ -18,14 +18,14 @@ import com.everhomes.util.StringHelper;
 *<li> longitude : 经度	</li>
 *<li>latitude  : 纬度	</li>
 *<li>contactPhone  : 咨询电话	</li>
-*<li> chargeUid : 负责人uid	</li>
-*<li> chargeName : 负责人name</li>
-*<li> chargePhone : 负责人telephone	</li>
-*<li> details : 详情-html片	</li>
+*<li> managerUid : 负责人uid	</li>
+*<li> managerName : 负责人name</li>
+*<li> managerPhone : 负责人telephone	</li>
+*<li> description : 详情-html片	</li>
 *<li> coverUri : 封面图片uri</li>
 *<li> coverUrl : 封面图片url</li> 
- * <li>bannerUrls: banner图的urls </li> 
- * <li>sites: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeSiteDTO}</li> 
+ * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
+ * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * </ul>
  */
 public class OfficeSpaceDTO {
@@ -39,16 +39,16 @@ public class OfficeSpaceDTO {
 	private double longitude;
 	private double latitude;
 	private String contactPhone;
-	private Long chargeUid;
-	private String chargeName;
-	private String chargePhone;
-	private String details;
+	private Long managerUid;
+	private String managerName;
+	private String managerPhone;
+	private String description;
 	private String coverUri;
 	private String coverUrl;
-	@ItemType(String.class)
-	private List<String> bannerUrls;
-	@ItemType(OfficeSiteDTO.class)
-	private List<OfficeSiteDTO> sites;
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> attachments;
+	@ItemType(OfficeCategoryDTO.class)
+	private List<OfficeCategoryDTO> categories;
 
 	@Override
     public String toString() {
@@ -135,36 +135,36 @@ public class OfficeSpaceDTO {
 		this.contactPhone = contactPhone;
 	}
 
-	public Long getChargeUid() {
-		return chargeUid;
+	public Long getmanagerUid() {
+		return managerUid;
 	}
 
-	public void setChargeUid(Long chargeUid) {
-		this.chargeUid = chargeUid;
+	public void setmanagerUid(Long managerUid) {
+		this.managerUid = managerUid;
 	}
 
-	public String getChargeName() {
-		return chargeName;
+	public String getmanagerName() {
+		return managerName;
 	}
 
-	public void setChargeName(String chargeName) {
-		this.chargeName = chargeName;
+	public void setmanagerName(String managerName) {
+		this.managerName = managerName;
 	}
 
-	public String getChargePhone() {
-		return chargePhone;
+	public String getmanagerPhone() {
+		return managerPhone;
 	}
 
-	public void setChargePhone(String chargePhone) {
-		this.chargePhone = chargePhone;
+	public void setmanagerPhone(String managerPhone) {
+		this.managerPhone = managerPhone;
 	}
 
-	public String getDetails() {
-		return details;
+	public String getdescription() {
+		return description;
 	}
 
-	public void setDetails(String details) {
-		this.details = details;
+	public void setdescription(String description) {
+		this.description = description;
 	}
 
 	public String getCoverUri() {
@@ -183,21 +183,54 @@ public class OfficeSpaceDTO {
 		this.coverUrl = coverUrl;
 	}
  
-
-	public List<String> getBannerUrls() {
-		return bannerUrls;
+ 
+ 
+	public Long getManagerUid() {
+		return managerUid;
 	}
 
-	public void setBannerUrls(List<String> bannerUrls) {
-		this.bannerUrls = bannerUrls;
+	public void setManagerUid(Long managerUid) {
+		this.managerUid = managerUid;
 	}
 
-	public List<OfficeSiteDTO> getSites() {
-		return sites;
+	public String getManagerName() {
+		return managerName;
 	}
 
-	public void setSites(List<OfficeSiteDTO> sites) {
-		this.sites = sites;
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}
+
+	public String getManagerPhone() {
+		return managerPhone;
+	}
+
+	public void setManagerPhone(String managerPhone) {
+		this.managerPhone = managerPhone;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<OfficeCategoryDTO> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<OfficeCategoryDTO> categories) {
+		this.categories = categories;
+	}
+
+	public List<OfficeAttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<OfficeAttachmentDTO> attachments) {
+		this.attachments = attachments;
 	}
 	
 }

@@ -3,12 +3,14 @@ package com.everhomes.rest.officecubicle.admin;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.officecubicle.OfficeSiteDTO;
+import com.everhomes.rest.officecubicle.OfficeAttachmentDTO;
+import com.everhomes.rest.officecubicle.OfficeCategoryDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * add工位预定的空间 
+ *<li> id: id</li>
  *<li> name: 工位空间名称	</li>
 *<li> provinceId : 省份id	</li>
 *<li> provinceName : 省份名称	</li>
@@ -19,13 +21,14 @@ import com.everhomes.util.StringHelper;
 *<li>latitude  : 纬度	</li>
 *<li>contactPhone  : 咨询电话	</li>
 *<li> chargeUid : 负责人uid	</li>
-*<li> details : 详情-html片	</li>
+*<li> • description : 详情-html片	</li>
 *<li> coverUri : 封面图片uri</li>
- * <li>bannerUris: banner图的uris </li> 
- * <li>sites: 工位空间list{@link com.everhomes.rest.officecubicle.admin.AddOfficeSiteAdminDTO}</li> 
+ * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
+ * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * </ul>
  */
-public class AddSpaceAdminCommand { 
+public class UpdateSpaceCommand { 
+	private Long id;
 	private String name;
 	private Long provinceId;
 	private String provinceName;
@@ -35,13 +38,13 @@ public class AddSpaceAdminCommand {
 	private double longitude;
 	private double latitude;
 	private String contactPhone;
-	private Long chargeUid;
-	private String details;
-	private String coverUri;
-	@ItemType(String.class)
-	private List<String> bannerUris;
-	@ItemType(AddOfficeSiteAdminDTO.class)
-	private List<AddOfficeSiteAdminDTO> sites;
+	private Long managerUid; 
+	private String description;
+	private String coverUri; 
+	@ItemType(OfficeAttachmentDTO.class)
+	private List<OfficeAttachmentDTO> attachments;
+	@ItemType(OfficeCategoryDTO.class)
+	private List<OfficeCategoryDTO> categories;
 
 	@Override
     public String toString() {
@@ -121,50 +124,66 @@ public class AddSpaceAdminCommand {
 		this.contactPhone = contactPhone;
 	}
 
-	public Long getChargeUid() {
-		return chargeUid;
+
+	public Long getId() {
+		return id;
 	}
 
-	public void setChargeUid(Long chargeUid) {
-		this.chargeUid = chargeUid;
-	}
- 
-	public String getDetails() {
-		return details;
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	public void setDetails(String details) {
-		this.details = details;
+
+	public Long getManagerUid() {
+		return managerUid;
 	}
+
+
+	public void setManagerUid(Long managerUid) {
+		this.managerUid = managerUid;
+	}
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 
 	public String getCoverUri() {
 		return coverUri;
 	}
 
+
 	public void setCoverUri(String coverUri) {
 		this.coverUri = coverUri;
 	}
- 
 
 
-	public List<AddOfficeSiteAdminDTO> getSites() {
-		return sites;
+	public List<OfficeAttachmentDTO> getAttachments() {
+		return attachments;
 	}
 
 
-	public void setSites(List<AddOfficeSiteAdminDTO> sites) {
-		this.sites = sites;
+	public void setAttachments(List<OfficeAttachmentDTO> attachments) {
+		this.attachments = attachments;
 	}
 
 
-	public List<String> getBannerUris() {
-		return bannerUris;
+	public List<OfficeCategoryDTO> getCategories() {
+		return categories;
 	}
 
 
-	public void setBannerUris(List<String> bannerUris) {
-		this.bannerUris = bannerUris;
+	public void setCategories(List<OfficeCategoryDTO> categories) {
+		this.categories = categories;
 	}
+  
 
  
 }

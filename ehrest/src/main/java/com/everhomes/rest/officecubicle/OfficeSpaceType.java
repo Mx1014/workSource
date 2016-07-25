@@ -1,13 +1,13 @@
 package com.everhomes.rest.officecubicle;
 
-public enum OfficeOrderType {
-	VISIT((byte) 1, "预约参观"), ORDER((byte)  2, "工位续订");
+public enum OfficeSpaceType {
+	VISIT((byte) 1, "个"), ORDER((byte)  2, "㎡");
 
 	
 	private byte code;
 	private String msg;
 
-	private OfficeOrderType(byte code, String msg) {
+	private OfficeSpaceType(byte code, String msg) {
 		this.code = code;
 		this.msg = msg;
 	}
@@ -20,8 +20,8 @@ public enum OfficeOrderType {
 		return msg;
 	}
 
-	public static OfficeOrderType fromCode(byte code) {
-		for (OfficeOrderType t : OfficeOrderType.values()) {
+	public static OfficeSpaceType fromCode(byte code) {
+		for (OfficeSpaceType t : OfficeSpaceType.values()) {
 			if (t.code == code) {
 				return t;
 			}

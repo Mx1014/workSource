@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 一页的大小</li> 
  * </ul>
  */
-public class GetSpaceListCommand { 
+public class QuerySpacesCommand { 
 	private Long cityId;
 	
 	private Long pageAnchor;

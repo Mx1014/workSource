@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 一页的大小</li> 
  * </ul>
  */
-public class GetSpaceListAdminCommand {
+public class SearchSpacesAdminCommand {
 	private String keyWords;
 	
 	private Long pageAnchor;
