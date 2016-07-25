@@ -803,3 +803,15 @@ INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `targe
 	VALUES (10865, 'EhOrganizations', 1001740, 'EhUsers', 223634, 1005, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
     VALUES(1110147,240111044331051380, 'organization', 1001740, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());    
+
+    
+-- 测试视频会议app的升级    
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
+    VALUES(45,15,'-0.1','2097154','0','2.0.2','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
+    VALUES(46,16,'-0.1','2097154','0','2.0.2','0',UTC_TIMESTAMP());
+
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES ('15', '15', '2.0.2', '${homeurl}/web/download/apk/Videoconf-2.0.2.2016072101-release.apk', '${homeurl}/web/download/apk/andriod-meeting-2-0-2.html', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES ('16', '16', '2.0.2', '', '${homeurl}/web/download/apk/iOS-meeting-2-0-2.html', '0');
