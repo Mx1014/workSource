@@ -234,7 +234,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		locator.setAnchor(cmd.getPageAnchor());
 
 		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getBeginDate(), cmd.getEndDate(),
-				cmd.getReserveKeyword(), cmd.getSpaceName(), locator, pageSize + 1);
+				cmd.getReserveKeyword(), cmd.getSpaceName(), locator, pageSize + 1,UserContext.getCurrentNamespaceId());
 		if (null == orders)
 			return response;
 		Long nextPageAnchor = null;
@@ -258,7 +258,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public HttpServletResponse exprotSpaceOrders(SearchSpaceOrdersCommand cmd, HttpServletResponse response) {
 		Integer pageSize = Integer.MAX_VALUE;
 		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getBeginDate(), cmd.getEndDate(),
-				cmd.getReserveKeyword(), cmd.getSpaceName(), new CrossShardListingLocator(), pageSize);
+				cmd.getReserveKeyword(), cmd.getSpaceName(), new CrossShardListingLocator(), pageSize,UserContext.getCurrentNamespaceId());
 		if (null == orders) {
 			return null;
 		}

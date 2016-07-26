@@ -20,7 +20,7 @@ public interface OfficeCubicleProvider {
 	void deleteCategoriesBySpaceId(Long id);
 
 	List<OfficeCubicleOrder> searchOrders(Long beginDate, Long endDate, String reserveKeyword, String spaceName,
-			CrossShardListingLocator locator, int i);
+			CrossShardListingLocator locator, Integer pageSize,Integer currentNamespaceId );
 
 	List<OfficeCubicleSpace> searchSpaces(String keyWords, CrossShardListingLocator locator, int pageSize, Integer currentNamespaceId);
 
