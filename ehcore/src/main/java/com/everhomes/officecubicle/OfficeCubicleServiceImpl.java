@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -157,6 +158,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
+			space.setGeohash(GeoHashUtils.encode(space.getLatitude(), space.getLongitude()));
 			this.officeCubicleProvider.createSpace(space);
 			cmd.getAttachments().forEach((dto) -> {
 				Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
@@ -435,6 +437,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of space id error: space not found ");
 		OfficeCubicleOrder order = ConvertHelper.convert(space, OfficeCubicleOrder.class);
+		order.setSpaceId(cmd.getSpaceId());
+		order.setSpaceName(space.getName());
 		order.setSpaceSize(cmd.getSize() + "");
 		order.setReserveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		order.setReserverUid(UserContext.current().getUser().getId());
