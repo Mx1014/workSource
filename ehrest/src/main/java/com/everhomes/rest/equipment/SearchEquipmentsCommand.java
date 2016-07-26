@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetType: 设备所属管理处类型</li>
  *  <li>categoryId: 设备类型id</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
- *  <li>relatedStatus: 设备关联状态  0-未关联 1-待审批 2-审批通过 3-审批不通过</li>
+ *  <li>reviewStatus: 设备-标准关联状态，参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -30,7 +30,9 @@ public class SearchEquipmentsCommand {
 	
 	private String targetType;
 	
-	private Byte relatedStatus;
+	private Byte reviewStatus;
+	
+	private Byte reviewResult;
 	
 	private Byte status;
 	
@@ -74,12 +76,20 @@ public class SearchEquipmentsCommand {
 		this.targetType = targetType;
 	}
 
-	public Byte getRelatedStatus() {
-		return relatedStatus;
+	public Byte getReviewStatus() {
+		return reviewStatus;
 	}
 
-	public void setRelatedStatus(Byte relatedStatus) {
-		this.relatedStatus = relatedStatus;
+	public void setReviewStatus(Byte reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
+	public Byte getReviewResult() {
+		return reviewResult;
+	}
+
+	public void setReviewResult(Byte reviewResult) {
+		this.reviewResult = reviewResult;
 	}
 
 	public Long getCategoryId() {

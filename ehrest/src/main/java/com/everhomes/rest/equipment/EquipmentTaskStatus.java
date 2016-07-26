@@ -6,13 +6,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>NONE : 0</li>
  *	<li>WAITING_FOR_EXECUTING : 1 待执行</li>
- *	<li>WAITING_FOR_MAINTENANCE : 2 待维修</li>
+ *	<li>NEED_MAINTENANCE : 2 需维修</li>
  *	<li>IN_MAINTENANCE : 3 维修中</li>
  *	<li>CLOSE : 4 关闭</li>
  * </ul>
  */
 public enum EquipmentTaskStatus {
-	NONE((byte)0), WAITING_FOR_EXECUTING((byte)1), WAITING_FOR_MAINTENANCE((byte)2), IN_MAINTENANCE((byte)3),
+	NONE((byte)0), WAITING_FOR_EXECUTING((byte)1), NEED_MAINTENANCE((byte)2), IN_MAINTENANCE((byte)3),
 	CLOSE((byte)4);
 	
 	private byte code;

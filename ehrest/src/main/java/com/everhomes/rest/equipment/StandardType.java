@@ -11,18 +11,24 @@ import com.everhomes.util.StringHelper;
  */
 public enum StandardType {
 
-	NONE((byte)0), ROUTING_INSPECTION((byte)1), MAINTAIN((byte)2);
+	NONE((byte)0, ""), ROUTING_INSPECTION((byte)1, "巡检"), MAINTAIN((byte)2, "保养");
 	
 	private byte code;
+	private String name;
 	
-	private StandardType(byte code){
+	private StandardType(byte code, String name){
 		this.code = code;
+		this.name = name;
 	}
 	
 	public byte getCode() {
 		return code;
 	}
 	
+	public String getName() {
+		return name;
+	}
+
 	public static StandardType fromStatus(byte code) {
 		for(StandardType v : StandardType.values()) {
 			if(v.getCode() == code)

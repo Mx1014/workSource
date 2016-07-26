@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>id: 备件id</li>
  *  <li>name: 备件名称</li>
  *  <li>manufacturer: 生产厂商</li>
- *  <li>equipmentModel: 备品型号</li>
+ *  <li>modelNumber: 备品型号</li>
  *  <li>specification: 规格</li>
  *  <li>location: 存放地点</li>
  * </ul>

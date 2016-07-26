@@ -23,7 +23,7 @@ import com.everhomes.util.StringHelper;
  *  <li>location: 设备位置</li>
  *  <li>longitude: 设备经度</li>
  *  <li>latitude: 设备纬度</li>
- *  <li>qrCodeStatus: 二维码状态</li>
+ *  <li>qrCodeFlag: 二维码状态</li>
  *  <li>status: 设备状态</li>
  *  <li>installationTime: 安装时间</li>
  *  <li>repairTime: 保修时间</li>
@@ -68,7 +68,7 @@ public class UpdateEquipmentsCommand {
 	
     private Double latitude;
     
-    private Byte qrCodeStatus;
+    private Byte qrCodeFlag;
     
     private Byte status;
     
@@ -82,8 +82,8 @@ public class UpdateEquipmentsCommand {
     
     private Long standardId;
     
-    @ItemType(AttachmentDTO.class)
-    private List<AttachmentDTO> attachments;
+    @ItemType(EquipmentAttachmentDTO.class)
+    private List<EquipmentAttachmentDTO> attachments;
     @ItemType(EquipmentParameterDTO.class)
     private List<EquipmentParameterDTO> eqParameter;
     @ItemType(EquipmentAccessoryMapDTO.class)
@@ -195,12 +195,12 @@ public class UpdateEquipmentsCommand {
 		this.latitude = latitude;
 	}
 
-	public Byte getQrCodeStatus() {
-		return qrCodeStatus;
+	public Byte getQrCodeFlag() {
+		return qrCodeFlag;
 	}
 
-	public void setQrCodeStatus(Byte qrCodeStatus) {
-		this.qrCodeStatus = qrCodeStatus;
+	public void setQrCodeFlag(Byte qrCodeFlag) {
+		this.qrCodeFlag = qrCodeFlag;
 	}
 
 	public Byte getStatus() {
@@ -251,11 +251,11 @@ public class UpdateEquipmentsCommand {
 		this.standardId = standardId;
 	}
 
-	public List<AttachmentDTO> getAttachments() {
+	public List<EquipmentAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentDTO> attachments) {
+	public void setAttachments(List<EquipmentAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 

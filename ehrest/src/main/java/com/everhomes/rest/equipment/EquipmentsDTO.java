@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 设备所属管理处id</li>
  *  <li>targetType: 设备所属管理处类型</li>
+ *  <li>targetType: 设备所属管理处名称</li>
  *  <li>name: 设备名称</li>
  *  <li>manufacturer: 生产厂商</li>
  *  <li>equipmentModel: 设备型号</li>
@@ -24,7 +25,7 @@ import com.everhomes.util.StringHelper;
  *  <li>longitude: 设备经度</li>
  *  <li>latitude: 设备纬度</li>
  *  <li>qrCodeToken: 设备二维码token</li>
- *  <li>qrCodeStatus: 二维码状态 0: inactive, 1: active</li>
+ *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
  *  <li>installationTime: 安装时间</li>
  *  <li>repairTime: 保修时间</li>
@@ -36,6 +37,8 @@ import com.everhomes.util.StringHelper;
  *  <li>remarks: 备注</li>
  *  <li>eqParameter: 设备参数 参考{@link com.everhomes.rest.equipment.EquipmentParameterDTO}</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
+ *  <li>reviewStatus: 审批状态 参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
+ *  <li>reviewResult: 审批结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  * </ul>
  */
 public class EquipmentsDTO {
@@ -52,6 +55,8 @@ public class EquipmentsDTO {
 	
 	@NotNull
 	private String targetType;
+	
+	private String targetName;
 	
 	private String name;
 	
@@ -71,7 +76,7 @@ public class EquipmentsDTO {
     
     private String qrCodeToken;
     
-    private Byte qrCodeStatus;
+    private Byte qrCodeFlag;
     
     private Byte status;
     
@@ -87,14 +92,18 @@ public class EquipmentsDTO {
     
     private String standardName;
     
-    @ItemType(AttachmentDTO.class)
-    private List<AttachmentDTO> attachments;
+    @ItemType(EquipmentAttachmentDTO.class)
+    private List<EquipmentAttachmentDTO> attachments;
     @ItemType(EquipmentParameterDTO.class)
     private List<EquipmentParameterDTO> eqParameter;
     @ItemType(EquipmentAccessoryMapDTO.class)
     private List<EquipmentAccessoryMapDTO> eqAccessoryMap;
     
     private String remarks;
+	
+	private Byte reviewStatus;
+	
+	private Byte reviewResult;
     
     public Long getId() {
 		return id;
@@ -134,6 +143,14 @@ public class EquipmentsDTO {
 
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	public String getName() {
@@ -208,12 +225,12 @@ public class EquipmentsDTO {
 		this.qrCodeToken = qrCodeToken;
 	}
 
-	public Byte getQrCodeStatus() {
-		return qrCodeStatus;
+	public Byte getQrCodeFlag() {
+		return qrCodeFlag;
 	}
 
-	public void setQrCodeStatus(Byte qrCodeStatus) {
-		this.qrCodeStatus = qrCodeStatus;
+	public void setQrCodeFlag(Byte qrCodeFlag) {
+		this.qrCodeFlag = qrCodeFlag;
 	}
 
 	public Byte getStatus() {
@@ -272,11 +289,11 @@ public class EquipmentsDTO {
 		this.standardName = standardName;
 	}
 
-	public List<AttachmentDTO> getAttachments() {
+	public List<EquipmentAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentDTO> attachments) {
+	public void setAttachments(List<EquipmentAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 
@@ -302,6 +319,22 @@ public class EquipmentsDTO {
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+
+	public Byte getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(Byte reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
+	public Byte getReviewResult() {
+		return reviewResult;
+	}
+
+	public void setReviewResult(Byte reviewResult) {
+		this.reviewResult = reviewResult;
 	}
 
 	@Override

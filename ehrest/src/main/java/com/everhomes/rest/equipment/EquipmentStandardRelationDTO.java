@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetName: 标准所属管理处名</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>equipmentModel: 设备型号</li>
- *  <li>qrCodeStatus: 二维码状态</li>
+ *  <li>qrCodeFlag: 二维码状态</li>
  *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
  *  <li>standardId: 关联标准id</li>
  *  <li>standardName: 标准名称</li>
@@ -29,7 +29,7 @@ public class EquipmentStandardRelationDTO {
 	
 	private String equipmentModel;
 	
-	private Byte qrCodeStatus;
+	private Byte qrCodeFlag;
 	
 	private Byte status;
 	
@@ -81,12 +81,13 @@ public class EquipmentStandardRelationDTO {
 		this.equipmentModel = equipmentModel;
 	}
 
-	public Byte getQrCodeStatus() {
-		return qrCodeStatus;
+
+	public Byte getQrCodeFlag() {
+		return qrCodeFlag;
 	}
 
-	public void setQrCodeStatus(Byte qrCodeStatus) {
-		this.qrCodeStatus = qrCodeStatus;
+	public void setQrCodeFlag(Byte qrCodeFlag) {
+		this.qrCodeFlag = qrCodeFlag;
 	}
 
 	public Byte getStatus() {

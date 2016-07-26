@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  *  <li>processEndTime: 操作截止时间</li>
  *  <li>processResult: 操作结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessResult}</li>
  *  <li>processMessage: 操作内容</li>
+ *  <li>parameterValue: 设备参数</li>
  *  <li>createTime: 创建时间</li>
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
  * </ul>
@@ -52,6 +53,8 @@ public class EquipmentTaskLogsDTO {
 	private Byte processResult;
 	
 	private String processMessage;
+	
+	private String parameterValue;
 	
 	private Timestamp createTime;
 	
@@ -160,6 +163,14 @@ public class EquipmentTaskLogsDTO {
 
 	public void setProcessMessage(String processMessage) {
 		this.processMessage = processMessage;
+	}
+
+	public String getParameterValue() {
+		return parameterValue;
+	}
+
+	public void setParameterValue(String parameterValue) {
+		this.parameterValue = parameterValue;
 	}
 
 	public Timestamp getCreateTime() {

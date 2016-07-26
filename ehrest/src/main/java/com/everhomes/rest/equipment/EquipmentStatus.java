@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>0: none</li>
+ *  <li>0: inactive 已删除</li>
  *  <li>1: incomplete(不完整)</li>
  *  <li>2: in use(使用中)</li>
  *  <li>3: in maintenance(维修中)</li>
@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public enum EquipmentStatus {
 
-	NONE((byte)0), INCOMPLETE((byte)1), IN_USE((byte)2), IN_MAINTENANCE((byte)3), 
+	INACTIVE((byte)0), INCOMPLETE((byte)1), IN_USE((byte)2), IN_MAINTENANCE((byte)3), 
 	DISCARDED((byte)4), DISABLED((byte)5), STANDBY((byte)6);
 	
 	private byte code;

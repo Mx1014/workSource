@@ -2,6 +2,7 @@ package com.everhomes.rest.equipment;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>description: 具体内容</li>
  *  <li>remarks: 备注</li>
  *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
+ *  <li>repeat: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -39,6 +41,8 @@ public class UpdateEquipmentStandardCommand {
 	private String remarks;
 	
 	private Byte standardType;
+	
+	private RepeatSettingsDTO repeat;
 	
 	public Long getId() {
 		return id;
@@ -110,6 +114,14 @@ public class UpdateEquipmentStandardCommand {
 
 	public void setStandardType(Byte standardType) {
 		this.standardType = standardType;
+	}
+
+	public RepeatSettingsDTO getRepeat() {
+		return repeat;
+	}
+
+	public void setRepeat(RepeatSettingsDTO repeat) {
+		this.repeat = repeat;
 	}
 
 	@Override

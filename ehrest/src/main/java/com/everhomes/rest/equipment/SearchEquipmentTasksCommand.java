@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>startTime: 开始时间</li>
  *  <li>endTime: 截止时间</li>
  *  <li>status: 任务状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
+ *  <li>reviewStatus: 任务审核状态 0: UNREVIEWED  1: REVIEWED</li>
  *  <li>taskType: 类型 参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
@@ -35,6 +36,8 @@ public class SearchEquipmentTasksCommand {
 	private Long endTime;
 	
 	private Byte status;
+	
+	private Byte reviewStatus;
 	
 	private Byte taskType;
 	
@@ -98,6 +101,14 @@ public class SearchEquipmentTasksCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Byte getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(Byte reviewStatus) {
+		this.reviewStatus = reviewStatus;
 	}
 
 	public Byte getTaskType() {

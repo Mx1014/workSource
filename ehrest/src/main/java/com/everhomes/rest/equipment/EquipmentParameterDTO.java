@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>parameterId: 设备参数id</li>
+ *  <li>id: 设备参数id</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>parameterName: 参数名称</li>
  *  <li>parameterUnit: 参数单位</li>
@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class EquipmentParameterDTO {
 	
-	private Long parameterId;
+	private Long id;
 	
 	private Long equipmentId;
 	
@@ -23,12 +23,12 @@ public class EquipmentParameterDTO {
 	
 	private String parameterValue;
 	
-	public Long getParameterId() {
-		return parameterId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setParameterId(Long parameterId) {
-		this.parameterId = parameterId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Long getEquipmentId() {

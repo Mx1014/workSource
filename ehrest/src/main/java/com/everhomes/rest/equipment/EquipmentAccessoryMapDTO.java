@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>eqAccessories: 备品配件信息 参考{@link com.everhomes.rest.equipment.EquipmentAccessoriesDTO}</li>
  *  <li>quantity: 数量</li>
  *  <li>equipmentId: 设备id</li>
+ *  <li>id: 主键id</li>
  * </ul>
  */
 public class EquipmentAccessoryMapDTO {
@@ -17,6 +18,16 @@ public class EquipmentAccessoryMapDTO {
 	
 	private Long equipmentId;
 	
+	private Long id;
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public EquipmentAccessoriesDTO getEqAccessories() {
 		return eqAccessories;
 	}

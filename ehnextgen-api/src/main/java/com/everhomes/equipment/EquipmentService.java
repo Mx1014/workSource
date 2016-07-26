@@ -10,7 +10,11 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
+import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
+import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.ImportOwnerCommand;
+import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -40,34 +44,30 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 
 public interface EquipmentService {
 	
-	EquipmentStandardsDTO creatEquipmentStandard(CreatEquipmentStandardCommand cmd);
 	EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd);
-	EquipmentStandardsDTO findEquipmentStandard(Long standardId);
+	EquipmentStandardsDTO findEquipmentStandard(DeleteEquipmentStandardCommand cmd);
 	void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd);
-	SearchEquipmentStandardsResponse searchEquipmentStandards(SearchEquipmentStandardsCommand cmd);
 	HttpServletResponse exportEquipmentStandards(SearchEquipmentStandardsCommand cmd,HttpServletResponse response);
-	SearchEquipmentStandardRelationsResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd);
 	void reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd);
 	void deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd);
 	EquipmentsDTO updateEquipments(UpdateEquipmentsCommand cmd);
 	void deleteEquipments(DeleteEquipmentsCommand cmd);
-	SearchEquipmentsResponse searchEquipments(SearchEquipmentsCommand cmd);
 	HttpServletResponse exportEquipments(SearchEquipmentsCommand cmd,HttpServletResponse response);
 	EquipmentAccessoriesDTO updateEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd);
 	void deleteEquipmentAccessories(DeleteEquipmentAccessoriesCommand cmd);
-	SearchEquipmentAccessoriesResponse searchEquipmentAccessories(SearchEquipmentAccessoriesCommand cmd);
 	HttpServletResponse exportEquipmentAccessories(SearchEquipmentAccessoriesCommand cmd,HttpServletResponse response);
-	ListEquipmentTasksResponse searchEquipmentTasks(SearchEquipmentTasksCommand cmd);
 	ListEquipmentTasksResponse listEquipmentTasks(ListEquipmentTasksCommand cmd);
 	EquipmentTaskDTO reportEquipmentTask(ReportEquipmentTaskCommand cmd);
 	void reviewEquipmentTask(ReviewEquipmentTaskCommand cmd);
-	void createEquipmentTaskByStandard(Long standardId);
+	void createEquipmentTask(DeleteEquipmentsCommand equipmentId);
 	void verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd);
 	HttpServletResponse exportEquipmentTasks(SearchEquipmentTasksCommand cmd,HttpServletResponse response);
 	ListLogsByTaskIdResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd);
-	ImportDataResponse importEquipmentStandards(MultipartFile mfile, Long userId);
-	ImportDataResponse importEquipments(MultipartFile mfile, Long userId);
-	ImportDataResponse importEquipmentAccessories(MultipartFile mfile, Long userId);
+	ImportDataResponse importEquipmentStandards(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+	ImportDataResponse importEquipments(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+	ImportDataResponse importEquipmentAccessories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
 	List<CategoryDTO> listEquipmentsCategories();
-	
+	EquipmentsDTO findEquipment(DeleteEquipmentsCommand cmd);
+	List<EquipmentParameterDTO> listParametersByEquipmentId(DeleteEquipmentsCommand cmd);
+	List<EquipmentAttachmentDTO> listAttachmentsByEquipmentId(ListAttachmentsByEquipmentIdCommand cmd);
 }

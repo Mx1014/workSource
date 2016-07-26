@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>id: 任务主键id</li>
  *  <li>standardId: 标准id</li>
+ *  <li>standardName: 标准名称</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>parentId: 父任务id</li>
  *  <li>childCount: 子任务数量</li>
@@ -40,6 +41,8 @@ public class EquipmentTaskDTO {
 	private Long id;
 	
 	private Long standardId;
+	
+	private String standardName;
 	
 	private Long equipmentId;
 	
@@ -109,6 +112,14 @@ public class EquipmentTaskDTO {
 
 	public void setStandardId(Long standardId) {
 		this.standardId = standardId;
+	}
+
+	public String getStandardName() {
+		return standardName;
+	}
+
+	public void setStandardName(String standardName) {
+		this.standardName = standardName;
 	}
 
 	public Long getEquipmentId() {
