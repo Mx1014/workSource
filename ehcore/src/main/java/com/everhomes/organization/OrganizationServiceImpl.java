@@ -4592,7 +4592,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-	//	userSearcher.feedDoc(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
