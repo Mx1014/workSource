@@ -3909,6 +3909,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else{
 				LOGGER.error("user not found userId = " + order.getCreatorUid());
 			}
+			RentalOrder rentalOrder = this.rentalProvider.findRentalBillById(order.getOrderId());
+			if(null!=rentalOrder){
+				dto.setUseDetail(rentalOrder.getUseDetail());
+				dto.setRentalCount(rentalOrder.getRentalCount());
+			}else{
+				LOGGER.error("rentalOrder not found  Order id = " + order.getOrderId());
+			}
 			dto.setApplyTime(order.getCreateTime().getTime());
 			response.getRefundOrders().add(dto);
 		});

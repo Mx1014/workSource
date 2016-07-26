@@ -23,6 +23,8 @@ public class RefundOrderDTO {
 	private java.lang.Long       resourceTypeId;
 	private java.math.BigDecimal amount;
 	private java.lang.String     vendorType;
+	private java.lang.String     useDetail;
+	private Double rentalCount; 
 	private java.lang.Byte     status;
 	private java.lang.String     applyUserName;
 	private java.lang.String     applyUserContact;
@@ -113,6 +115,22 @@ public class RefundOrderDTO {
 
 	public void setApplyTime(Long applyTime) {
 		this.applyTime = applyTime;
+	}
+
+	public java.lang.String getUseDetail() {
+		return useDetail;
+	}
+
+	public void setUseDetail(java.lang.String useDetail) {
+		this.useDetail = useDetail;
+	}
+
+	public Double getRentalCount() {
+		return rentalCount;
+	}
+
+	public void setRentalCount(Double rentalCount) {
+		this.rentalCount = rentalCount;
 	}
  
 	
