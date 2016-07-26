@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 订单DTO
  * <li>rentalBillId：订单id</li>
+ * <li>orderNo：订单编号</li>
  * <li>siteName：场所名称</li>
  * <li>buildingName：楼栋名称</li>
  * <li>address：地址</li>
@@ -39,6 +40,7 @@ import com.everhomes.util.StringHelper;
  */
 public class RentalBillDTO {
 	private Long rentalBillId;
+	private String orderNo;
 	private String siteName;
 	private String buildingName;
 	private String address;
@@ -370,6 +372,16 @@ public class RentalBillDTO {
 
 	public void setToastFlag(Byte toastFlag) {
 		this.toastFlag = toastFlag;
+	}
+
+
+	public String getOrderNo() {
+		return orderNo;
+	}
+
+
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
 	}
 
  

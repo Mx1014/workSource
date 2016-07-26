@@ -1153,6 +1153,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter siteRule");
+				rentalBill.setRentalCount(siteRule.getRentalCount());
 				if (null == siteRule)
 					continue;
 				RentalCell rentalSiteRule = rentalProvider
