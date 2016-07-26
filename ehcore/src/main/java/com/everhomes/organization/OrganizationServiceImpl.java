@@ -4498,7 +4498,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-	//	userSearcher.feedDoc(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
@@ -6504,14 +6504,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	private CheckOfficalPrivilegeResponse checkOfficalPrivilege(Long organizationId) {
 		CheckOfficalPrivilegeResponse response = new CheckOfficalPrivilegeResponse();
-		if (organizationId == null || organizationId.longValue() < 0) {
-			response.setOfficialFlag((byte) 0);
-		}else{
+		response.setOfficialFlag((byte) 0);
+		if (organizationId != null && organizationId.longValue() >= 0) {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
-				response.setOfficialFlag((byte) 1);
-			}else {
-				response.setOfficialFlag((byte) 0);
+				try{
+					if (rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.OfficialActivity)) {
+						response.setOfficialFlag((byte) 1);
+					}
+				}catch(Exception e){
+				}
 			}
 		}
 		

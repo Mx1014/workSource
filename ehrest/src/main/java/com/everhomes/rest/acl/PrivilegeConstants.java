@@ -51,4 +51,6 @@ public interface PrivilegeConstants {
     public static final long AclinkManager = 720L;
     
     public static final long AclinkInnerManager = 725L;
+    
+    public static final long OfficialActivity = 310L;
 }

@@ -24,3 +24,11 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES (53,49,'2099199.9','2100224','0','2.3.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.2.0', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-2-0-tag.zip', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-2-0-tag.zip', '0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('25', '49', '2.3.0', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', 'http://biz-beta.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', '0');
+
+-- 添加官方活动权限
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (310,0,'官方活动','官方活动',null);
+
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),310,11100,'官方活动',0,1,'官方活动',16);
