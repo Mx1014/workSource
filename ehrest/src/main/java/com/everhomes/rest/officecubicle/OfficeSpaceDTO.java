@@ -134,33 +134,7 @@ public class OfficeSpaceDTO {
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
 	}
- 
-	public String getdescription() {
-		return description;
-	}
 
-	public void setdescription(String description) {
-		this.description = description;
-	}
-
-	public String getCoverUri() {
-		return coverUri;
-	}
-
-	public void setCoverUri(String coverUri) {
-		this.coverUri = coverUri;
-	}
-
-	public String getCoverUrl() {
-		return coverUrl;
-	}
-
-	public void setCoverUrl(String coverUrl) {
-		this.coverUrl = coverUrl;
-	}
- 
- 
- 
 	public Long getManagerUid() {
 		return managerUid;
 	}
@@ -193,12 +167,20 @@ public class OfficeSpaceDTO {
 		this.description = description;
 	}
 
-	public List<OfficeCategoryDTO> getCategories() {
-		return categories;
+	public String getCoverUri() {
+		return coverUri;
 	}
 
-	public void setCategories(List<OfficeCategoryDTO> categories) {
-		this.categories = categories;
+	public void setCoverUri(String coverUri) {
+		this.coverUri = coverUri;
+	}
+
+	public String getCoverUrl() {
+		return coverUrl;
+	}
+
+	public void setCoverUrl(String coverUrl) {
+		this.coverUrl = coverUrl;
 	}
 
 	public List<OfficeAttachmentDTO> getAttachments() {
@@ -208,5 +190,14 @@ public class OfficeSpaceDTO {
 	public void setAttachments(List<OfficeAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
+
+	public List<OfficeCategoryDTO> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<OfficeCategoryDTO> categories) {
+		this.categories = categories;
+	}
+ 
 	
 }
