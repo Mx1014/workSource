@@ -1136,6 +1136,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Long userId = UserContext.current().getUser().getId(); 
 		RentalBillDTO billDTO = new RentalBillDTO();
 		RentalResource rs =this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId());
+		
 		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalCell> rentalSiteRules = new ArrayList<RentalCell>();
@@ -1155,7 +1156,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter siteRule");
-				rentalBill.setRentalCount(siteRule.getRentalCount());
+				//非独占资源，也不是场所编号的，就要有数量
+				if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())&& 
+						rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode()))
+					rentalBill.setRentalCount(siteRule.getRentalCount());
 				if (null == siteRule)
 					continue;
 				RentalCell rentalSiteRule = rentalProvider
@@ -1295,45 +1299,48 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 	//		}
 
+			SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
+			SimpleDateFormat endtimeSF = new SimpleDateFormat("HH:mm");
 			//使用详情
 			StringBuffer useDetailSB = new StringBuffer();
 			// 循环存site订单
 			for (RentalBillRuleDTO siteRule : cmd.getRules())  { 
 				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
+				if(useDetailSB.length()>1)
+					useDetailSB.append("\n");
 				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
-					useDetailSB.append("使用时间:");
-					useDetailSB.append("从");
-					useDetailSB.append(datetimeSF.format(rsr.getBeginTime()));
-					useDetailSB.append("到");
-					useDetailSB.append(datetimeSF.format(rsr.getEndTime()));
+//					useDetailSB.append("使用时间:");
+//					useDetailSB.append("从");
+					useDetailSB.append(bigentimeSF.format(rsr.getBeginTime()));
+					useDetailSB.append("-");
+					useDetailSB.append(endtimeSF.format(rsr.getEndTime()));
 				}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
-					useDetailSB.append("使用时间:");
-					useDetailSB.append(dateSF.format(rsr.getResourceRentalDate()));
+//					useDetailSB.append("使用时间:");
+					useDetailSB.append(bigentimeSF.format(rsr.getResourceRentalDate()));
 				}else {
-					useDetailSB.append("使用时间:");
-					useDetailSB.append(dateSF.format(rsr.getResourceRentalDate()));
+//					useDetailSB.append("使用时间:");
+					useDetailSB.append(bigentimeSF.format(rsr.getResourceRentalDate()));
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM))
-						useDetailSB.append("早上");
+						useDetailSB.append("早上 ");
 					if(rsr.getAmorpm().equals(AmorpmFlag.PM))
-						useDetailSB.append("下午");
+						useDetailSB.append("下午 ");
 					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT))
-						useDetailSB.append("晚上");
+						useDetailSB.append("晚上 ");
 				}
 				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				//独占资源 只有时间				 
 				}
 				else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
 					//不需要资源编号
-					useDetailSB.append(";预约数量:");
-					useDetailSB.append(siteRule.getRentalCount());
+//					useDetailSB.append(";预约数量:");
+//					useDetailSB.append(siteRule.getRentalCount()+"个 ");
 				}
 				else {
-					//不需要资源编号
-					useDetailSB.append(";资源编号:");
+					// 资源编号
+//					useDetailSB.append(";资源编号:");
 					useDetailSB.append(rsr.getResourceNumber());
 //					useDetailSB.append("号");
 				}
-				useDetailSB.append("\n");
 //				if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 //					Integer loopCnt = 0; 
 ////					assignSiteNumber(rsb,rsr,billDTO,loopCnt);
@@ -1767,10 +1774,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				siDTO.setItemType(item.getItemType());
 				dto.getSiteItems().add(siDTO);
 			});
-		}
-		
-		dto.setUseDetail(bill.getUseDetail());
-				
+		} 
+		dto.setUseDetail(bill.getUseDetail()); 
 				
 		// 订单的附件attachments
 		dto.setBillAttachments(new ArrayList<BillAttachmentDTO>());
