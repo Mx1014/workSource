@@ -1786,7 +1786,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			BillAttachmentDTO attachmentDTO = new BillAttachmentDTO();
 			attachmentDTO.setAttachmentType(attachment.getAttachmentType());
 			attachmentDTO.setBillId(attachment.getRentalOrderId());
-			attachmentDTO.setContent(attachment.getContent());
+			if(attachment.getAttachmentType().equals(AttachmentType.ATTACHMENT.getCode())){
+				attachmentDTO.setContent(this.contentServerService.parserUri(attachment.getContent(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+			}
+			else{
+				attachmentDTO.setContent(attachment.getContent());
+			}
 			attachmentDTO.setId(attachment.getId());
 			dto.getBillAttachments().add(attachmentDTO);
 		}
