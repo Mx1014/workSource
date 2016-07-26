@@ -67,6 +67,7 @@ import com.everhomes.rest.aclink.AclinkMessageMeta;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkNotificationTemplateCode;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
+import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkUserDTO;
@@ -1564,8 +1565,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 
                 for(Aclink ca : aclinks) {
                     String key = keyMap.get(ca.getLinglingDoorId());
-                    ca.setLinglingSDKKey(key);
-                    aclinkProvider.updateAclink(ca);
+                    if(!key.equals(ca.getLinglingSDKKey())) {
+                        ca.setLinglingSDKKey(key);
+                        aclinkProvider.updateAclink(ca);    
+                    }
                     
                     sdkKeys.add(key);
                     }
@@ -1582,8 +1585,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
                 
                 String key = keyMap.get(ca.getLinglingDoorId());
-                ca.setLinglingSDKKey(key);
-                aclinkProvider.updateAclink(ca);
+                if(!key.equals(ca.getLinglingSDKKey())) {
+                    ca.setLinglingSDKKey(key);
+                    aclinkProvider.updateAclink(ca);    
+                }
                 
                 sdkKeys.add(key);
             }
@@ -1616,7 +1621,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             extra.setAuthLevel(1l);
         }
         
-        extra.setAuthStorey(1l);
+        if(!auth.getCurrStorey().equals(0l)) {
+            extra.setAuthStorey(auth.getCurrStorey());    
+        } else {
+            extra.setAuthStorey(1l);
+        }
         
         List<Long> storeyAuthList = new ArrayList<Long>();
         storeyAuthList.add(1l);
@@ -1626,7 +1635,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             if(checkDoorAccessRole(doorAccess)) {
                 extra.setAuthLevel(1l);    
             }            
-            storeyAuthList = getDoorListbyUser(user, doorAccess);
+            storeyAuthList = getDoorListbyUser(user, doorAccess, auth.getCurrStorey());
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
                 extra.setAuthStorey(storeyAuthList.get(0));
                 extra.setStoreyAuthList(storeyAuthList);
@@ -2149,9 +2158,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
     }
     
-    private List<Long> getDoorListbyUser(User user, DoorAccess doorAccess) {
+    private List<Long> getDoorListbyUser(User user, DoorAccess doorAccess, Long curr) {
         List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(0, user.getId(), OrganizationGroupType.ENTERPRISE);
         List<Long> floors = new ArrayList<Long>();
+        Map<Long, Long> floorMap = new HashMap<Long, Long>();
         
         for(OrganizationDTO dto : orgs) {
             List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
@@ -2161,7 +2171,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 try {
                     if(addr2.getApartmentFloor() != null) {
                         Long l = Long.parseLong(addr2.getApartmentFloor());
-                        floors.add(l);    
+                        floorMap.put(l, 1l);
                     } else {
                         String aname = addr2.getAddress();
                         String[] as = aname.split("-");
@@ -2176,7 +2186,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                             aname = m.group(0);
                             Long l = Long.parseLong(aname);
                             if(l >= -255 && l <= 255) {
-                                floors.add(l);    
+                                floorMap.put(l, 1l);
                                 }
                             
                         }
@@ -2188,6 +2198,29 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
         }
         
+        if(floorMap.get(curr) != null) {
+            //Set to first
+            floors.add(curr);
+            
+            floorMap.forEach((key, value) -> {
+                if(!key.equals(curr)) {
+                    floors.add(key);
+                    }
+                });
+        } else {
+            floorMap.forEach((key, value) -> {
+                floors.add(key);
+            });
+        }
+        
         return floors;
+    }
+    
+    public ListDoorAccessQRKeyResponse updateAndQueryQR(AclinkUpdateLinglingStoreyCommand cmd) {
+        DoorAuth auth = this.doorAuthProvider.getDoorAuthById(cmd.getAuthId());
+        if(!auth.getCurrStorey().equals(cmd.getNewStorey())) {
+            this.doorAuthProvider.updateDoorAuth(auth);
+        }
+        return listDoorAccessQRKey();
     }
 }
