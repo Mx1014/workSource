@@ -2435,6 +2435,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rba.setCreatorUid(userId);
 					rba.setAttachmentType(attachment.getAttachmentType());
 					rba.setContent(attachment.getContent());
+					this.rentalProvider.createRentalBillAttachment(rba);
 				} 
 			}
 			//签名
