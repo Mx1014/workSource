@@ -325,6 +325,10 @@ CREATE TABLE `eh_rentalv2_resource_orders` (
 `rental_step` INTEGER   COMMENT 'how many time_step must be rental every time',
 `begin_time` DATETIME   COMMENT '开始时间 对于按时间定',
 `end_time` DATETIME   COMMENT '结束时间 对于按时间定',  
+`exclusive_flag` TINYINT    COMMENT '是否为独占资源0否 1 是',
+`auto_assign` TINYINT    COMMENT '是否动态分配 1是 0否',
+`multi_unit` TINYINT    COMMENT '是否允许预约多个场所 1是 0否',
+`multi_time_interval` TINYINT    COMMENT '是否允许预约多个时段 1是 0否',
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
