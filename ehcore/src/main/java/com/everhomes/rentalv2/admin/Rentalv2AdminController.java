@@ -30,6 +30,7 @@ import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
+import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
 import com.everhomes.rest.rentalv2.admin.DeleteResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
 import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
@@ -132,7 +133,25 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+	
+	
+	/**
+	 * 
+	 * <b>URL: /rental/admin/deleteResource<b>
+	 * <p>
+	 * 删除资源 
+	 * </p>
+	 */
+	@RequestMapping("deleteResource")
+	@RestReturn(String.class)
+	public RestResponse deleteResource(DeleteResourceCommand cmd){
+		this.rentalService.deleteResource(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * 
 	 * <b>URL: /rental/admin/closeResourceType<b>
