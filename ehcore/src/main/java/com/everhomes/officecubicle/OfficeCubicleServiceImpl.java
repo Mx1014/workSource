@@ -263,6 +263,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeOrderDTO dto = ConvertHelper.convert(other, OfficeOrderDTO.class);
 			dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
 					.getUser().getId()));
+			dto.setReserveTime(other.getReserveTime().getTime());
 			response.getOrders().add(dto);
 		});
 
@@ -283,6 +284,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		orders.forEach((other) -> {
 			OfficeOrderDTO dto = ConvertHelper.convert(other, OfficeOrderDTO.class);
+			dto.setReserveTime(other.getReserveTime().getTime());
 			dtos.add(dto);
 		});
 		URL rootPath = OfficeCubicleServiceImpl.class.getResource("/");
