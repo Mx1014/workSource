@@ -7,6 +7,9 @@ import com.everhomes.util.StringHelper;
  * <li>billId：订单id</li>
  * <li>attachmentType: 类型，参考{@link com.everhomes.rest.rentalv2.admin.AttachmentType}</li>
  * <li>content：内容</li> 
+ * <li>resourceUrl：类型为附件时这里有url</li> 
+ * <li>resourceName：类型为附件时这里有附件名称</li> 
+ * <li>resourceSize：类型为附件时这里有附件大小</li> 
  * </ul>
  */
 public class BillAttachmentDTO {
@@ -14,6 +17,9 @@ public class BillAttachmentDTO {
 	private Long billId;
 	private Byte attachmentType ;
 	private String content;
+	private String resourceUrl;
+	private String resourceName;
+	private Integer resourceSize;
 	
 	
 	
@@ -102,6 +108,64 @@ public class BillAttachmentDTO {
 	}
 
 
+
+
+
+
+	public String getResourceName() {
+		return resourceName;
+	}
+
+
+
+
+
+
+	public void setResourceName(String resourceName) {
+		this.resourceName = resourceName;
+	}
+
+
+
+
+
+
+	public Integer getResourceSize() {
+		return resourceSize;
+	}
+
+
+
+
+
+
+	public void setResourceSize(Integer resourceSize) {
+		this.resourceSize = resourceSize;
+	}
+
+
+
+
+
+
+	public String getResourceUrl() {
+		return resourceUrl;
+	}
+
+
+
+
+
+
+	public void setResourceUrl(String resourceUrl) {
+		this.resourceUrl = resourceUrl;
+	}
+
+
+
+
+
+ 
 
 
  

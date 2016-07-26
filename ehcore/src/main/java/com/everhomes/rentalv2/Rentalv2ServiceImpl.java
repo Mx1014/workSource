@@ -65,6 +65,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -1787,11 +1788,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			attachmentDTO.setAttachmentType(attachment.getAttachmentType());
 			attachmentDTO.setBillId(attachment.getRentalOrderId());
 			if(attachment.getAttachmentType().equals(AttachmentType.ATTACHMENT.getCode())){
-				attachmentDTO.setContent(this.contentServerService.parserUri(attachment.getContent(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				attachmentDTO.setResourceUrl(this.contentServerService.parserUri(attachment.getContent(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				ContentServerResource csr = this.contentServerService.findResourceByUri(attachment.getContent());
+				attachmentDTO.setResourceName(csr.getResourceName());
+				attachmentDTO.setResourceSize(csr.getResourceSize());
 			}
-			else{
-				attachmentDTO.setContent(attachment.getContent());
-			}
+			attachmentDTO.setContent(attachment.getContent());
+			 
 			attachmentDTO.setId(attachment.getId());
 			dto.getBillAttachments().add(attachmentDTO);
 		}
