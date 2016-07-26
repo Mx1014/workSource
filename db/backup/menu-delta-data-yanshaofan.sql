@@ -30,6 +30,8 @@ INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (308,0,'设置任务的分类','设置任务的分类',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (309,0,'信息统计','任务统计',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (310,0,'官方活动','官方活动',null);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (380,0,'查看区信息','查看区信息',null);
@@ -916,3 +918,8 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),558,43310,'招租管理',1,1,'招租管理 全部权限',341);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),559,43320,'入住申请',1,1,'入住申请 全部权限',342);
+
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),310,11100,'官方活动',0,1,'官方活动',16);
+
