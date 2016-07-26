@@ -528,6 +528,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd) { 
+		if(null == cmd.getRefundFlag())
+			cmd.setRefundFlag(NormalFlag.NONEED.getCode());
 		RentalDefaultRule defaultRule = this.rentalProvider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getResourceTypeId());
 		if(null==defaultRule){
 			throw RuntimeErrorException
@@ -1798,6 +1800,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //	}
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd) {
+		if(null == cmd.getRefundFlag())
+			cmd.setRefundFlag(NormalFlag.NONEED.getCode());
 		if(null== cmd.getRentalEndTime())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalEndTime can not be null");  
@@ -2099,7 +2103,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.dbProvider.execute((TransactionStatus status) -> {
 				//默认是已退款
 				order.setStatus(SiteBillStatus.REFUNDED.getCode());
-				if (rs.getRefundFlag().equals(NormalFlag.NEED)){ 
+				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())){ 
 					List<RentalOrderPayorderMap>  billmaps = this.rentalProvider.findRentalBillPaybillMapByBillId(order.getId());
 					for(RentalOrderPayorderMap billMap : billmaps){
 						//循环退款
