@@ -234,7 +234,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		locator.setAnchor(cmd.getPageAnchor());
 
 		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getBeginDate(), cmd.getEndDate(),
-				cmd.getReserveKeyword(), cmd.getSpaceName(), locator, pageSize + 1,UserContext.getCurrentNamespaceId());
+				cmd.getReserveKeyword(), cmd.getSpaceName(), locator, pageSize + 1, UserContext.getCurrentNamespaceId());
 		if (null == orders)
 			return response;
 		Long nextPageAnchor = null;
@@ -258,7 +258,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public HttpServletResponse exprotSpaceOrders(SearchSpaceOrdersCommand cmd, HttpServletResponse response) {
 		Integer pageSize = Integer.MAX_VALUE;
 		List<OfficeCubicleOrder> orders = this.officeCubicleProvider.searchOrders(cmd.getBeginDate(), cmd.getEndDate(),
-				cmd.getReserveKeyword(), cmd.getSpaceName(), new CrossShardListingLocator(), pageSize,UserContext.getCurrentNamespaceId());
+				cmd.getReserveKeyword(), cmd.getSpaceName(), new CrossShardListingLocator(), pageSize,
+				UserContext.getCurrentNamespaceId());
 		if (null == orders) {
 			return null;
 		}
@@ -395,7 +396,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setCityId(0L);
 		dto.setCityName("全国");
 		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(null, new CrossShardListingLocator(),
-				Integer.MAX_VALUE,UserContext.getCurrentNamespaceId());
+				Integer.MAX_VALUE, UserContext.getCurrentNamespaceId());
 		if (null != spaces) {
 			spaces.forEach((space) -> {
 				CityDTO cityDTO = ConvertHelper.convert(space, CityDTO.class);
@@ -430,6 +431,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of size error: null ");
 		OfficeCubicleSpace space = this.officeCubicleProvider.getSpaceById(cmd.getSpaceId());
+		if (null == space)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of space id error: space not found ");
 		OfficeCubicleOrder order = ConvertHelper.convert(space, OfficeCubicleOrder.class);
 		order.setSpaceSize(cmd.getSize() + "");
 		order.setReserveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
