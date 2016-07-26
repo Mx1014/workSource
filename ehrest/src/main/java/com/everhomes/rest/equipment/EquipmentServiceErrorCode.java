@@ -19,4 +19,7 @@ public interface EquipmentServiceErrorCode {
     static final int ERROR_EQUIPMENT_TASK_NOT_WAITING_EXECUTE_OR_IN_MAINTENANCE = 10014;//只有待执行和维修中的任务可以上报
 
     static final int EQUIPMENT_PARAMETER_RECORD = 10015;//设备参数记录
+    
+    static final int ERROR_CREATE_EXCEL = 10016;  //生成excel信息有问题
+    static final int ERROR_DOWNLOAD_EXCEL = 10017;  //下载excel信息有问题
 }

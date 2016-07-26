@@ -18,9 +18,12 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -30,6 +33,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 
+@Component
 public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch implements
 		EquipmentAccessoriesSearcher {
 
@@ -40,6 +44,9 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -148,6 +155,9 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
         for(Long id : ids) {
         	EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(id);
         	EquipmentAccessoriesDTO dto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
+        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+    		if(group != null)
+    			dto.setTargetName(group.getName());
 
         	accessories.add(dto);
         }

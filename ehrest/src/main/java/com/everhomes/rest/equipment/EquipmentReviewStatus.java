@@ -11,16 +11,22 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public enum EquipmentReviewStatus {
-	INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), REVIEWED((byte)2), DELETE((byte)2);
+	INACTIVE((byte)0, "已失效"), WAITING_FOR_APPROVAL((byte)1, "待审核"), REVIEWED((byte)2, "已审核"), DELETE((byte)2, "已删除");
 	
 	private byte code;
+	private String name;
 	
-	private EquipmentReviewStatus(byte code){
+	private EquipmentReviewStatus(byte code, String name){
 		this.code = code;
+		this.name = name;
 	}
 	
 	public byte getCode() {
 		return code;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public static EquipmentReviewStatus fromStatus(byte code) {

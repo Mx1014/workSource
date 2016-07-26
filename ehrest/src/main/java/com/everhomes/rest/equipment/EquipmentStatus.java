@@ -15,17 +15,23 @@ import com.everhomes.util.StringHelper;
  */
 public enum EquipmentStatus {
 
-	INACTIVE((byte)0), INCOMPLETE((byte)1), IN_USE((byte)2), IN_MAINTENANCE((byte)3), 
-	DISCARDED((byte)4), DISABLED((byte)5), STANDBY((byte)6);
+	INACTIVE((byte)0, "已删除"), INCOMPLETE((byte)1, "不完整"), IN_USE((byte)2, "使用中"), IN_MAINTENANCE((byte)3, "维修中"), 
+	DISCARDED((byte)4, "报废"), DISABLED((byte)5, "停用"), STANDBY((byte)6, "备用");
 	
 	private byte code;
+	private String name;
 	
-	private EquipmentStatus(byte code){
+	private EquipmentStatus(byte code, String name){
 		this.code = code;
+		this.name = name;
 	}
 	
 	public byte getCode() {
 		return code;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public static EquipmentStatus fromStatus(byte code) {

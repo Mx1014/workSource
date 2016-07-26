@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>id: 备件id</li>
  *  <li>name: 备件名称</li>
  *  <li>manufacturer: 生产厂商</li>
- *  <li>equipmentModel: 备品型号</li>
+ *  <li>modelNumber: 备品型号</li>
  *  <li>specification: 规格</li>
  *  <li>location: 存放地点</li>
  * </ul>
@@ -21,6 +21,12 @@ public class EquipmentAccessoriesDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+	
+	private String targetType;
+	
+	private Long targetId;
+	
+	private String targetName;
 	
 	private String name;
 	
@@ -54,6 +60,30 @@ public class EquipmentAccessoriesDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	public String getName() {

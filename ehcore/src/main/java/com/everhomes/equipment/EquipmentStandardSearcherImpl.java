@@ -24,7 +24,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
+import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -118,7 +120,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             builder.addHighlightedField("standardName").addHighlightedField("standardNumber");
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);
+    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));

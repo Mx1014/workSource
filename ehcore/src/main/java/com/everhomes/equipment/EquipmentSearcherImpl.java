@@ -18,13 +18,16 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
+import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentsDTO;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
@@ -38,6 +41,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.videoconf.ConfOrders;
 
+@Component
 public class EquipmentSearcherImpl extends AbstractElasticSearch implements EquipmentSearcher{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentSearcherImpl.class);
@@ -121,7 +125,10 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             builder.addHighlightedField("name").addHighlightedField("standardName");
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStatus.INACTIVE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
@@ -199,7 +206,10 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             builder.addHighlightedField("name").addHighlightedField("standardName");
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);
+    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));

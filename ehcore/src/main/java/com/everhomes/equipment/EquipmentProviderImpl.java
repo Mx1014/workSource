@@ -9,6 +9,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -18,6 +19,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityInspectionTasks;
+import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesDao;
@@ -52,6 +54,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
 
+@Component
 public class EquipmentProviderImpl implements EquipmentProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentProviderImpl.class);
 	

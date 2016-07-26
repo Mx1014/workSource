@@ -1,6 +1,14 @@
 package com.everhomes.equipment;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -10,6 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+
+
+
+
+
 
 
 
@@ -205,7 +219,17 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
+
+
+
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,6 +237,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
+
+
 
 
 
@@ -401,6 +431,7 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.quality.EvaluationDTO;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
@@ -425,6 +456,7 @@ import com.everhomes.search.EquipmentSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -434,9 +466,10 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
-
 @Component
 public class EquipmentServiceImpl implements EquipmentService {
+	
+	final String downloadDir ="\\download\\";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentServiceImpl.class);
 	
@@ -606,8 +639,124 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public HttpServletResponse exportEquipmentStandards(
 			SearchEquipmentStandardsCommand cmd, HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		return null;
+
+		Integer pageSize = Integer.MAX_VALUE;
+		cmd.setPageSize(pageSize);
+		
+		SearchEquipmentStandardsResponse standards = equipmentStandardSearcher.query(cmd);
+		List<EquipmentStandardsDTO> eqStandards = standards.getEqStandards();
+		
+		URL rootPath = RentalServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "EquipmentStandards"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createEquipmentStandardsBook(filePath, eqStandards);
+		
+		return download(filePath,response);
+	}
+	
+	public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+            
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {  
+                file.delete();  
+            } 
+        } catch (IOException ex) { 
+ 			LOGGER.error(ex.getMessage());
+ 			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+ 					QualityServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
+ 					ex.getLocalizedMessage());
+     		 
+        }
+        return response;
+    }
+	
+	public void createEquipmentStandardsBook(String path,List<EquipmentStandardsDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("equipmentStandards");
+		
+		this.createEquipmentStandardsBookSheetHead(sheet);
+		for (EquipmentStandardsDTO dto : dtos ) {
+			this.setNewEquipmentStandardsBookRow(sheet, dto);
+		}
+		
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+			
+			wb.write(out);
+			wb.close();
+			out.close();
+			
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	private void createEquipmentStandardsBookSheetHead(Sheet sheet){
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("标准编号");
+		row.createCell(++i).setCellValue("标准名称");
+		row.createCell(++i).setCellValue("类别");
+		row.createCell(++i).setCellValue("执行频率");
+		row.createCell(++i).setCellValue("开始执行时间");
+		row.createCell(++i).setCellValue("时间限制");
+		row.createCell(++i).setCellValue("最新更新时间");
+		row.createCell(++i).setCellValue("标准来源");
+		row.createCell(++i).setCellValue("标准状态");
+	}
+	
+	private void setNewEquipmentStandardsBookRow(Sheet sheet ,EquipmentStandardsDTO dto){
+//		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+//		int i = -1;
+//		row.createCell(++i).setCellValue(dto.getStandardNumber());
+//		row.createCell(++i).setCellValue(dto.getName());
+//		row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getStandardType()).getName());
+//		row.createCell(++i).setCellValue(dto.getScore());
+//		row.createCell(++i).setCellValue(dto.getScore());
+//		row.createCell(++i).setCellValue(dto.getScore());
+//		row.createCell(++i).setCellValue(dto.getUpdateTime());
+//		row.createCell(++i).setCellValue(dto.getStandardSource());
+//		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.INACTIVE)
+//			row.createCell(++i).setCellValue("已失效");
+//		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.NOT_COMPLETED)
+//			row.createCell(++i).setCellValue("未完成");
+//		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.ACTIVE)
+//			row.createCell(++i).setCellValue("正常");
+		
 	}
 
 	@Override
@@ -738,6 +887,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		if(EquipmentReviewStatus.fromStatus(equipment.getReviewStatus()) == EquipmentReviewStatus.INACTIVE) {
 			equipment.setReviewStatus(EquipmentReviewStatus.DELETE.getCode());
+			equipment.setReviewResult(ReviewResult.NONE.getCode());
+			equipment.setStandardId(0L);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
 		} else {
@@ -920,8 +1071,91 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public HttpServletResponse exportEquipments(SearchEquipmentsCommand cmd,
 			HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		return null;
+		Integer pageSize = Integer.MAX_VALUE;
+		cmd.setPageSize(pageSize);
+		
+		SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
+		List<EquipmentsDTO> dtos = equipments.getEquipment();
+		
+		URL rootPath = RentalServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createEquipmentsBook(filePath, dtos);
+		
+		return download(filePath,response);
+	}
+	
+	public void createEquipmentsBook(String path,List<EquipmentsDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("equipments");
+		
+		this.createEquipmentsBookSheetHead(sheet);
+		for (EquipmentsDTO dto : dtos ) {
+			this.setNewEquipmentsBookRow(sheet, dto);
+		}
+		
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+			
+			wb.write(out);
+			wb.close();
+			out.close();
+			
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	private void createEquipmentsBookSheetHead(Sheet sheet){
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("所属管理处");
+		row.createCell(++i).setCellValue("设备名称");
+		row.createCell(++i).setCellValue("设备类型");
+		row.createCell(++i).setCellValue("二维码状态");
+		row.createCell(++i).setCellValue("巡检/保养标准");
+		row.createCell(++i).setCellValue("设备当前状态");
+		row.createCell(++i).setCellValue("审批状态");
+		row.createCell(++i).setCellValue("审批结果");
+	}
+	
+	private void setNewEquipmentsBookRow(Sheet sheet ,EquipmentsDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getTargetName());
+		row.createCell(++i).setCellValue(dto.getName());
+		row.createCell(++i).setCellValue(dto.getCategoryPath());
+		if(dto.getQrCodeFlag() == 0)
+			row.createCell(++i).setCellValue("停用");
+		if(dto.getQrCodeFlag() == 1)
+			row.createCell(++i).setCellValue("启用");
+		row.createCell(++i).setCellValue(dto.getStandardName());
+		row.createCell(++i).setCellValue(EquipmentStatus.fromStatus(dto.getStatus()).getName());
+		if(EquipmentReviewStatus.fromStatus(dto.getStatus()) == EquipmentReviewStatus.DELETE) {
+			row.createCell(++i).setCellValue("");
+		}
+		if(EquipmentReviewStatus.fromStatus(dto.getStatus()) != EquipmentReviewStatus.DELETE){
+			row.createCell(++i).setCellValue(EquipmentReviewStatus.fromStatus(dto.getReviewStatus()).getName());
+		}
+		
+		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.NONE)
+			row.createCell(++i).setCellValue("");
+		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.QUALIFIED)
+			row.createCell(++i).setCellValue("审核通过");
+		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.UNQUALIFIED)
+			row.createCell(++i).setCellValue("审核不通过");
+		
 	}
 
 	@Override
@@ -965,14 +1199,79 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		accessory.setStatus((byte) 0);
 		equipmentProvider.updateEquipmentInspectionAccessories(accessory);
-		equipmentAccessoriesSearcher.feedDoc(accessory);
+		equipmentAccessoriesSearcher.deleteById(accessory.getId());
 	}
 
 	@Override
 	public HttpServletResponse exportEquipmentAccessories(
 			SearchEquipmentAccessoriesCommand cmd, HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		return null;
+		Integer pageSize = Integer.MAX_VALUE;
+		cmd.setPageSize(pageSize);
+		
+		SearchEquipmentAccessoriesResponse accessories = equipmentAccessoriesSearcher.query(cmd);
+		List<EquipmentAccessoriesDTO> dtos = accessories.getAccessories();
+		
+		URL rootPath = RentalServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "EquipmentAccessories"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createEquipmentAccessoriesBook(filePath, dtos);
+		
+		return download(filePath,response);
+	}
+
+	public void createEquipmentAccessoriesBook(String path,List<EquipmentAccessoriesDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("equipmentAccessories");
+		
+		this.createEquipmentAccessoriesBookSheetHead(sheet);
+		for (EquipmentAccessoriesDTO dto : dtos ) {
+			this.setNewEquipmentAccessoriesBookRow(sheet, dto);
+		}
+		
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+			
+			wb.write(out);
+			wb.close();
+			out.close();
+			
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	private void createEquipmentAccessoriesBookSheetHead(Sheet sheet){
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("所属管理处");
+		row.createCell(++i).setCellValue("备品名称");
+		row.createCell(++i).setCellValue("生产厂商");
+		row.createCell(++i).setCellValue("备品型号");
+		row.createCell(++i).setCellValue("规格");
+		row.createCell(++i).setCellValue("存放地点");
+	}
+	
+	private void setNewEquipmentAccessoriesBookRow(Sheet sheet ,EquipmentAccessoriesDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getTargetName());
+		row.createCell(++i).setCellValue(dto.getName());
+		row.createCell(++i).setCellValue(dto.getManufacturer());
+		row.createCell(++i).setCellValue(dto.getModelNumber());
+		row.createCell(++i).setCellValue(dto.getSpecification());
+		row.createCell(++i).setCellValue(dto.getLocation());
+		
 	}
 
 
@@ -1559,7 +1858,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public ListLogsByTaskIdResponse listLogsByTaskId(
 			ListLogsByTaskIdCommand cmd) {
-		// TODO Auto-generated method stub
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
