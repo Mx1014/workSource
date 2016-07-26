@@ -162,7 +162,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
 			space.setGeohash(GeoHashUtils.encode(space.getLatitude(), space.getLongitude()));
 
-			space.setCreateTime (new Timestamp(DateHelper.currentGMTTime().getTime()));
+			space.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setCreatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.createSpace(space);
 			cmd.getAttachments().forEach((dto) -> {
@@ -176,7 +176,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 				category.setSpaceSize(dto.getSize());
 				category.setSpaceId(space.getId());
-				category.setCreateTime (new Timestamp(DateHelper.currentGMTTime().getTime()));
+				category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				category.setCreatorUid(UserContext.current().getUser().getId());
 				this.officeCubicleProvider.createCategory(category);
 
@@ -205,7 +205,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
-			space.setOperateTime (new Timestamp(DateHelper.currentGMTTime().getTime()));
+			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.updateSpace(space);
 			// this.attachmentProvider.de
@@ -219,7 +219,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getCategories().forEach((dto) -> {
 					OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 					category.setSpaceId(space.getId());
-					category.setCreateTime (new Timestamp(DateHelper.currentGMTTime().getTime()));
+					category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					category.setCreatorUid(UserContext.current().getUser().getId());
 					this.officeCubicleProvider.createCategory(category);
 
@@ -413,12 +413,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		dto.setCityId(0L);
 		dto.setCityName("全国");
 		resp.add(dto);
-		Set<Long> cityIds=new HashSet<Long>();
+		Set<Long> cityIds = new HashSet<Long>();
 		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(null, new CrossShardListingLocator(),
 				Integer.MAX_VALUE, UserContext.getCurrentNamespaceId());
 		if (null != spaces) {
 			spaces.forEach((space) -> {
-				if(!cityIds.contains(space.getCityId())){
+				if (!cityIds.contains(space.getCityId())) {
 					cityIds.add(space.getCityId());
 					CityDTO cityDTO = ConvertHelper.convert(space, CityDTO.class);
 					resp.add(cityDTO);
@@ -505,7 +505,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-
+		if (cmd.getCityId() == null || cmd.getCityId().equals(0L))
+			cmd.setCityId(null);
 		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.querySpacesByCityId(cmd.getCityId(), locator, pageSize + 1,
 				UserContext.getCurrentNamespaceId());
 		if (null == spaces)

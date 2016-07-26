@@ -113,10 +113,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 	@Override
 	public List<OfficeCubicleOrder> searchOrders(Long beginDate, Long endDate, String reserveKeyword, String spaceName,
-			CrossShardListingLocator locator , Integer pageSize,Integer currentNamespaceId) {
+			CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId); 
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
 		if (null != beginDate)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.gt(new Timestamp(beginDate)));
 		if (null != endDate)
@@ -125,11 +125,11 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVER_NAME.like("%" + reserveKeyword + "%").or(
 					Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_CONTACT_TOKEN.like("%" + reserveKeyword + "%")));
 		if (StringUtils.isNotBlank(spaceName))
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.SPACE_NAME.like("%" + spaceName + "%") ) ;
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.SPACE_NAME.like("%" + spaceName + "%"));
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
-		step.where(condition); 
+		step.where(condition);
 		List<OfficeCubicleOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleOrder.class);
 		});
@@ -143,15 +143,15 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId); 
+		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
 		if (StringUtils.isNotBlank(keyWords))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAME.like("%" + keyWords + "%").or(
 					Tables.EH_OFFICE_CUBICLE_ORDERS.CONTACT_PHONE.like("%" + keyWords + "%")));
-		 
+
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
-		step.where(condition); 
+		step.where(condition);
 		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
 		});
@@ -197,12 +197,13 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId); 
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.lt(cityId));
+		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
+		if (null != cityId)
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.lt(cityId));
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
-		step.where(condition); 
+		step.where(condition);
 		List<OfficeCubicleSpace> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_SPACES.ID.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleSpace.class);
 		});
@@ -215,10 +216,10 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public List<OfficeCubicleOrder> queryOrdersByUser(Long userId, Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId); 
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVER_UID.lt(userId));
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.STATUS.lt(OfficeOrderStatus.NORMAL.getCode()));
-		step.where(condition); 
+		step.where(condition);
 		List<OfficeCubicleOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleOrder.class);
 		});
