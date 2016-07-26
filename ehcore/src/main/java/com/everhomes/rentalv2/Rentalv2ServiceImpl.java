@@ -2424,16 +2424,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			billmap.setCreatorUid(userId);
+			
 			rentalProvider.createRentalBillPaybillMap(billmap);
-			for(AttachmentDTO attachment : cmd.getRentalAttachments()){
-				RentalOrderAttachment rba = new RentalOrderAttachment();
-				rba.setRentalOrderId(cmd.getRentalBillId());
-				rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-						.getTime()));
-				rba.setCreatorUid(userId);
-				rba.setAttachmentType(attachment.getAttachmentType());
-				rba.setContent(attachment.getContent());
-			} 
+			if(null != cmd.getRentalAttachments()){
+				for(AttachmentDTO attachment : cmd.getRentalAttachments()){
+					RentalOrderAttachment rba = new RentalOrderAttachment();
+					rba.setRentalOrderId(cmd.getRentalBillId());
+					rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+							.getTime()));
+					rba.setCreatorUid(userId);
+					rba.setAttachmentType(attachment.getAttachmentType());
+					rba.setContent(attachment.getContent());
+				} 
+			}
 			//签名
 			this.setSignatureParam(response);
 			return null;
