@@ -451,6 +451,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setSpaceId(cmd.getSpaceId());
 		order.setSpaceName(space.getName());
 		order.setSpaceSize(cmd.getSize() + "");
+		order.setRentType(cmd.getRentType());
+		order.setSpaceType(cmd.getSpaceType());
 		order.setReserveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		order.setReserverUid(UserContext.current().getUser().getId());
 		order.setReserverName(cmd.getReserverName());
@@ -458,6 +460,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setReserveEnterprise(cmd.getReserveEnterprise());
 		order.setOrderType(cmd.getOrderType());
 		order.setNamespaceId(UserContext.getCurrentNamespaceId());
+		order.setStatus(OfficeOrderStatus.NORMAL.getCode());
 		this.officeCubicleProvider.createOrder(order);
 
 	}
