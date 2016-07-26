@@ -134,31 +134,7 @@ public class OfficeSpaceDTO {
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
 	}
-
-	public Long getmanagerUid() {
-		return managerUid;
-	}
-
-	public void setmanagerUid(Long managerUid) {
-		this.managerUid = managerUid;
-	}
-
-	public String getmanagerName() {
-		return managerName;
-	}
-
-	public void setmanagerName(String managerName) {
-		this.managerName = managerName;
-	}
-
-	public String getmanagerPhone() {
-		return managerPhone;
-	}
-
-	public void setmanagerPhone(String managerPhone) {
-		this.managerPhone = managerPhone;
-	}
-
+ 
 	public String getdescription() {
 		return description;
 	}
