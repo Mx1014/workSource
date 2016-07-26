@@ -1300,6 +1300,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	//		}
 
 			SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
+			SimpleDateFormat bigenDateSF = new SimpleDateFormat("MM-dd");
 			SimpleDateFormat endtimeSF = new SimpleDateFormat("HH:mm");
 			//使用详情
 			StringBuffer useDetailSB = new StringBuffer();
@@ -1316,10 +1317,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					useDetailSB.append(endtimeSF.format(rsr.getEndTime()));
 				}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
 //					useDetailSB.append("使用时间:");
-					useDetailSB.append(bigentimeSF.format(rsr.getResourceRentalDate()));
+					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 				}else {
 //					useDetailSB.append("使用时间:");
-					useDetailSB.append(bigentimeSF.format(rsr.getResourceRentalDate()));
+					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM))
 						useDetailSB.append("早上 ");
 					if(rsr.getAmorpm().equals(AmorpmFlag.PM))
