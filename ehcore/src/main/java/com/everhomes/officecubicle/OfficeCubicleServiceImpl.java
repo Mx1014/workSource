@@ -168,6 +168,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			});
 			cmd.getCategories().forEach((dto) -> {
 				OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
+				category.setSpaceSize(dto.getSize());
 				category.setSpaceId(space.getId());
 				this.officeCubicleProvider.createCategory(category);
 
