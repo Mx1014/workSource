@@ -12,7 +12,9 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -408,12 +410,17 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		CityDTO dto = new CityDTO();
 		dto.setCityId(0L);
 		dto.setCityName("全国");
+		resp.add(dto);
+		Set<Long> cityIds=new HashSet<Long>();
 		List<OfficeCubicleSpace> spaces = this.officeCubicleProvider.searchSpaces(null, new CrossShardListingLocator(),
 				Integer.MAX_VALUE, UserContext.getCurrentNamespaceId());
 		if (null != spaces) {
 			spaces.forEach((space) -> {
-				CityDTO cityDTO = ConvertHelper.convert(space, CityDTO.class);
-				resp.add(cityDTO);
+				if(!cityIds.contains(space.getCityId())){
+					cityIds.add(space.getCityId());
+					CityDTO cityDTO = ConvertHelper.convert(space, CityDTO.class);
+					resp.add(cityDTO);
+				}
 			});
 		}
 		return resp;

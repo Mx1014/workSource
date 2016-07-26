@@ -21,6 +21,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
@@ -216,6 +217,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId); 
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVER_UID.lt(userId));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.STATUS.lt(OfficeOrderStatus.NORMAL.getCode()));
 		step.where(condition); 
 		List<OfficeCubicleOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleOrder.class);
