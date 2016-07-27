@@ -1856,9 +1856,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//删除资源编号再填充【ownertype是资源】
 			this.rentalProvider.deleteRentalResourceNumbersByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
 			if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				HashSet<String> siteNumberSet = new HashSet<>();
 				if(cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size()))){
 					if( null!=cmd.getSiteNumbers())
 						for(String number : cmd.getSiteNumbers()){
+							siteNumberSet.add(number);
 							RentalResourceNumber resourceNumber = new RentalResourceNumber();
 							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
 							resourceNumber.setOwnerId(rs.getId());
@@ -1869,7 +1871,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				else
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
-						
+				if(!cmd.getSiteCounts().equals(siteNumberSet.size()))
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
+					
 			}
 			rs.setStatus(RentalSiteStatus.NORMAL.getCode());
 			rs.setAutoAssign(cmd.getAutoAssign());
