@@ -1628,6 +1628,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             extra.setAuthLevel(1l);
         }
         
+        if(auth.getCurrStorey() == null) {
+            auth.setCurrStorey(1l);    
+        }
+        
         if(!auth.getCurrStorey().equals(0l)) {
             extra.setAuthStorey(auth.getCurrStorey());    
         } else {
@@ -1933,6 +1937,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
             }
             
+            //TODO check for permission
+//            DoorAuth authChecked = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
+//            if(authChecked == null || (!authChecked.getRightVisitor().equals((byte)1))) {
+//                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "User not auth");   
+//            }
+            
             String uuid = UUID.randomUUID().toString();
             uuid = uuid.replace("-", "");
             uuid = uuid.substring(0, 5);
@@ -1948,8 +1958,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             auth.setPhone(cmd.getPhone());
             auth.setNickname(cmd.getUserName());
             auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
-            
-
+            auth.setValidFromMs(System.currentTimeMillis());
+            auth.setValidEndMs(System.currentTimeMillis() + 24* 60*60*1000l);
             auth.setUserId(0l);
             auth.setOwnerType(doorAccess.getOwnerType());
             auth.setOwnerId(doorAccess.getOwnerId());
@@ -2284,9 +2294,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return floors;
     }
     
+    @Override
     public ListDoorAccessQRKeyResponse updateAndQueryQR(AclinkUpdateLinglingStoreyCommand cmd) {
         DoorAuth auth = this.doorAuthProvider.getDoorAuthById(cmd.getAuthId());
-        if(!auth.getCurrStorey().equals(cmd.getNewStorey())) {
+        if(auth == null) {
+            return listDoorAccessQRKey();
+        }
+        
+        if(auth.getCurrStorey() == null || !auth.getCurrStorey().equals(cmd.getNewStorey())) {
+            auth.setCurrStorey(cmd.getNewStorey());
             this.doorAuthProvider.updateDoorAuth(auth);
         }
         return listDoorAccessQRKey();

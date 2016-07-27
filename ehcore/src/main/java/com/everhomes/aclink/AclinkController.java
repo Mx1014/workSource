@@ -489,7 +489,7 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("updateAndQueryQR")
     @RestReturn(value=ListDoorAccessQRKeyResponse.class)
     public RestResponse updateAndQueryQR(@Valid AclinkUpdateLinglingStoreyCommand cmd) {
-        doorAccessService.remoteOpenDoor(cmd.getAuthId());
+        doorAccessService.updateAndQueryQR(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
