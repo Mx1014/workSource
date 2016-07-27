@@ -10,6 +10,7 @@ import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -38,6 +39,7 @@ import com.everhomes.server.schema.tables.records.EhStatTransactionsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
+@Component
 public class StatTransactionProviderImpl implements StatTransactionProvider {
 	
 	@Autowired
@@ -120,14 +122,14 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				Tables.EH_STAT_TRANSACTIONS.FEE_AMOUNT.sum(),
 				Tables.EH_STAT_TRANSACTIONS.SETTLEMENT_AMOUNT.sum(),
 				Tables.EH_STAT_TRANSACTIONS.TRANSACTION_NO.count())
-				.from(Tables.EH_STAT_REFUNDS)
+				.from(Tables.EH_STAT_TRANSACTIONS)
 				.where(condition)
-				.groupBy(Tables.EH_STAT_REFUNDS.NAMESPACE_ID,
-						Tables.EH_STAT_REFUNDS.COMMUNITY_ID,
-						Tables.EH_STAT_REFUNDS.SERVICE_TYPE,
-						Tables.EH_STAT_REFUNDS.RESOURCE_TYPE,
-						Tables.EH_STAT_REFUNDS.RESOURCE_ID,
-						Tables.EH_STAT_REFUNDS.PAID_CHANNEL)
+				.groupBy(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID,
+						Tables.EH_STAT_TRANSACTIONS.COMMUNITY_ID,
+						Tables.EH_STAT_TRANSACTIONS.SERVICE_TYPE,
+						Tables.EH_STAT_TRANSACTIONS.RESOURCE_TYPE,
+						Tables.EH_STAT_TRANSACTIONS.RESOURCE_ID,
+						Tables.EH_STAT_TRANSACTIONS.PAID_CHANNEL)
 				.fetch().map((r) -> {
 					StatSettlement statSettlement = new StatSettlement();
 					statSettlement.setNamespaceId(Integer.valueOf(r.getValue(0).toString()));
@@ -137,11 +139,11 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 					statSettlement.setResourceType(String.valueOf(r.getValue(4)));
 					statSettlement.setResourceId(Long.valueOf(r.getValue(5).toString()));
 					statSettlement.setPaidChannel(Byte.valueOf(r.getValue(6).toString()));
-					statSettlement.setRefundAmount(new BigDecimal(r.getValue(7).toString()));
-					statSettlement.setRefundFeeRate(new BigDecimal(r.getValue(8).toString()));
-					statSettlement.setRefundFeeAmount(new BigDecimal(r.getValue(9).toString()));
-					statSettlement.setRefundSettlementAmount(new BigDecimal(r.getValue(10).toString()));
-					statSettlement.setRefundCount(Long.valueOf(r.getValue(11).toString()));
+					statSettlement.setPaidAmount(new BigDecimal(r.getValue(7).toString()));
+					statSettlement.setFeeRate(new BigDecimal(r.getValue(8).toString()));
+					statSettlement.setFeeAmount(new BigDecimal(r.getValue(9).toString()));
+					statSettlement.setSettlementAmount(new BigDecimal(r.getValue(10).toString()));
+					statSettlement.setPaidCount(Long.valueOf(r.getValue(11).toString()));
 					results.add(statSettlement);
 					return null;
 				});

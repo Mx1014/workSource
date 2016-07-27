@@ -16,7 +16,7 @@ public class ListStatServiceSettlementAmountsCommand {
     
 	private Long communityId;
 	
-	private Long namespaceId;
+	private Integer namespaceId;
 
 	public Long getStartDate() {
 		return startDate;
@@ -42,11 +42,11 @@ public class ListStatServiceSettlementAmountsCommand {
 		this.communityId = communityId;
 	}
 
-	public Long getNamespaceId() {
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
-	public void setNamespaceId(Long namespaceId) {
+	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
 	

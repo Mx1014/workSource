@@ -1,21 +1,28 @@
 package com.everhomes.statistics.transaction;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
-import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.pmsy.PmsyOrder;
 import com.everhomes.organization.pmsy.PmsyProvider;
@@ -24,11 +31,13 @@ import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.payment.PaymentCardProvider;
 import com.everhomes.payment.PaymentCardRechargeOrder;
 import com.everhomes.payment.PaymentCardTransaction;
+import com.everhomes.promotion.OpPromotionConstant;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardTransactionStatus;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyOwnerType;
+import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.statistics.transaction.SettlementOrderType;
@@ -38,13 +47,17 @@ import com.everhomes.rest.statistics.transaction.SettlementStatOrderStatus;
 import com.everhomes.rest.statistics.transaction.SettlementStatTransactionPaidStatus;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
 import com.everhomes.rest.statistics.transaction.StatTaskStatus;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 
+@Component
 public class StatTransactionServiceImpl implements StatTransactionService{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatTransactionServiceImpl.class);
@@ -70,9 +83,23 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	@Autowired
 	private UserProvider userProvider;
 	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
+	
+	@PostConstruct
+	public void setup(){
+		String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+		String jobName = triggerName;
+		String cronExpression = configurationProvider.getValue("statistics.cron.expression", StatTransactionScheduleJob.CRON_EXPRESSION);
+		//启动定时任务
+		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTransactionScheduleJob.class, null);
+	}
 	
 	@Override
-	public StatTaskLog excuteSettlementTask(Long startDate, Long endDate) {
+	public List<StatTaskLog> excuteSettlementTask(Long startDate, Long endDate) {
+		
+		List<StatTaskLog> statTaskLogs = new ArrayList<StatTaskLog>();
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -96,13 +123,107 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		//获取范围内的所以日期
 		List<Date> dDates = DateUtil.getStartToEndDates(new Date(startDate), new Date(endDate));
 		
+		
 		for (Date date : dDates) {
 			String sDate = DateUtil.dateToStr(date, DateUtil.YMR_SLASH);
 			//按日期结算数据
-			this.settlementByDate(sDate);
+			StatTaskLog statTaskLog = this.settlementByDate(sDate);
+			statTaskLogs.add(statTaskLog);
 		}
 		
-		return null;
+		return statTaskLogs;
+	}
+	
+	@Override
+	public List<StatServiceSettlementResult> listStatServiceSettlementAmountDetails(
+			ListStatServiceSettlementAmountsCommand cmd) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Long startDate = cmd.getStartDate();
+		Long endDate = cmd.getEndDate();
+		if(null == startDate || null == endDate){
+			startDate = calendar.getTimeInMillis();
+			endDate = calendar.getTimeInMillis();
+		}
+		
+		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
+		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
+		Condition cond = null;
+		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+			cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		}
+		
+		if(!StringUtils.isEmpty(cmd.getCommunityId())){
+			if(null == cond)
+				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId());
+			else
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
+		}
+		
+		return statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+	}
+	
+	@Override
+	public List<StatServiceSettlementResult> listStatServiceSettlementAmounts(
+			ListStatServiceSettlementAmountsCommand cmd) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Long startDate = cmd.getStartDate();
+		Long endDate = cmd.getEndDate();
+		if(null == startDate || null == endDate){
+			startDate = calendar.getTimeInMillis();
+			endDate = calendar.getTimeInMillis();
+		}
+		
+		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
+		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
+		
+		Condition cond = null;
+		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+			cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		}
+		
+		if(!StringUtils.isEmpty(cmd.getCommunityId())){
+			if(null == cond)
+				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId());
+			else
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
+		}
+		
+		return statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
+	}
+	
+	@Override
+	public void exportStatServiceSettlementAmounts(
+			ListStatServiceSettlementAmountsCommand cmd) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Long startDate = cmd.getStartDate();
+		Long endDate = cmd.getEndDate();
+		if(null == startDate || null == endDate){
+			startDate = calendar.getTimeInMillis();
+			endDate = calendar.getTimeInMillis();
+		}
+		
+		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
+		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
+		
+		Condition cond = null;
+		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+			cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		}
+		
+		if(!StringUtils.isEmpty(cmd.getCommunityId())){
+			if(null == cond)
+				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId());
+			else
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
+		}
+		
+		List<StatServiceSettlementResult> statServiceSettlementResultDetails = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+		
+		List<StatServiceSettlementResult> statServiceSettlementResults = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
+	
 	}
 	
 	
@@ -272,16 +393,69 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		while (true) {
 			//物业缴费退款订单数据同步
+			break;
 		}
 		
 	}
 	
 	/**
-	 * 同步电商订单订单到结算订单表
+	 * 同步电商订单到结算订单表
 	 * @param date
 	 */
-	private void syncShopToStatOrderByDate(String date){
+	private void syncShopToStatOrderByDate(String date) throws Exception{
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
+		if(StringUtils.isEmpty(serverURL)){
+			LOGGER.error("biz serverURL not configured, param = {}", StatTransactionConstant.BIZ_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz serverURL not configured.");
+		}
 		
+		//先删除数据，以免重复
+		statTransactionProvider.deleteStatOrderByDate(date, SettlementResourceType.SHOP.getCode());
+		
+		String url = serverURL + StatTransactionConstant.BIZ_PAID_ORDER_API;
+		//设置需要查询的订单的状态集
+		List<String> statuses = new ArrayList<String>();
+		statuses.add("2");
+		statuses.add("3");
+		statuses.add("6");
+		statuses.add("7");
+		Map<String, String> params = this.getParams();
+		String pageAnchor = "";
+		params.put("statuses", StringHelper.toJsonString(statuses));
+		
+		String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
+        String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
+        params.put("appKey", appKey);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		while (true) {
+			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+			params.put("startTimeAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(params, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			if(StringUtils.isEmpty(pageAnchor)){
+				break;
+			}
+		}
+		url = serverURL + StatTransactionConstant.BIZ_REFUND_ORDER_API;
+		pageAnchor = "";
+		//设置需要查询的订单的状态集
+		statuses = new ArrayList<String>();
+		statuses.add("4");
+		statuses.add("5");
+		statuses.add("6");
+		params.put("statuses", StringHelper.toJsonString(statuses));
+		while (true) {
+			
+			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+			params.put("startTimeAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(params, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			if(StringUtils.isEmpty(pageAnchor)){
+				break;
+			}
+		}
 	}
 	
 	/**
@@ -346,6 +520,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		while (true) {
 			//停车充值退款订单数据同步
+			break;
 		}
 	}
 	
@@ -418,6 +593,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		while (true) {
 			//一卡通退款订单数据同步
+			break;
 		}
 	}
 	
@@ -425,8 +601,34 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	 * 同步支付平台交易流水到结算交易流水表
 	 * @param date
 	 */
-	private void syncPaidPlatformToStatTransaction(String date){
+	private void syncPaidPlatformToStatTransaction(String date) throws Exception{
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.PAID_SERVER_URL, "");
+		if(StringUtils.isEmpty(serverURL)){
+			LOGGER.error("paid serverURL not configured, param = {}", StatTransactionConstant.PAID_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"paid serverURL not configured.");
+		}
 		
+		String url = serverURL + StatTransactionConstant.PAID_TRANSACTION_API;
+		List<String> statuses = new ArrayList<String>();
+		statuses.add("success");
+		Map<String, String> params = this.getParams();
+		String pageAnchor = "";
+		params.put("statuses", StringHelper.toJsonString(statuses));
+		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
+        String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
+        params.put("appKey", appKey);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		while (true) {
+			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+			params.put("startTimeAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(params, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			if(StringUtils.isEmpty(pageAnchor)){
+				break;
+			}
+		}
 	}
 	
 	/**
@@ -498,8 +700,34 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	 * 同步支付平台退款流水到结算退款流水表
 	 * @param date
 	 */
-	private void syncPaidPlatformToStatRefund(String date){
+	private void syncPaidPlatformToStatRefund(String date) throws Exception{
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.PAID_SERVER_URL, "");
+		if(StringUtils.isEmpty(serverURL)){
+			LOGGER.error("paid serverURL not configured, param = {}", StatTransactionConstant.PAID_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"paid serverURL not configured.");
+		}
 		
+		String url = serverURL + StatTransactionConstant.PAID_REFUND_API;
+		List<String> statuses = new ArrayList<String>();
+		statuses.add("success");
+		Map<String, String> params = this.getParams();
+		String pageAnchor = "";
+		params.put("statuses", StringHelper.toJsonString(statuses));
+		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
+        String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
+        params.put("appKey", appKey);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		while (true) {
+			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+			params.put("startTimeAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(params, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			if(StringUtils.isEmpty(pageAnchor)){
+				break;
+			}
+		}
 	}
 	
 	/**
@@ -623,10 +851,33 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 		}
 	}
+	
+	private Map<String, String> getParams(){
+		 Integer nonce = (int)(Math.random()*1000);
+	     Long timestamp = System.currentTimeMillis();       
+	     
+	     int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 10);
+	     Calendar calendar = Calendar.getInstance();
+	     calendar.add(Calendar.DAY_OF_MONTH, -1);
+	     String sDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH) + " 00:00:00";
+	     Long maxAnchor = Timestamp.valueOf(sDate).getTime();
+	     
+	     Map<String,String> params = new HashMap<String, String>();
+	     params.put("nonce", nonce + "");
+	     params.put("timestamp", timestamp + "");
+	     params.put("pageSize", pageSize + "");
+	     params.put("endTimeAnchor", maxAnchor + "");
+	     
+	     return params;
+
+	}
 
 	public static void main(String[] args) {
 		try {
-			System.out.println("2016-07-20".compareTo("2015-08-19"));
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.MONTH, -2);
+			calendar.add(Calendar.DAY_OF_MONTH, -1);
+			System.out.println(calendar.getTimeInMillis());
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
