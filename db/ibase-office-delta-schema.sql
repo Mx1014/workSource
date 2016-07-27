@@ -54,7 +54,7 @@ DROP TABLE IF EXISTS `eh_office_cubicle_categories`;
 
 CREATE TABLE `eh_office_cubicle_categories` ( 
 `id` BIGINT  COMMENT 'id',
-`namespace_id` BIGINT  COMMENT '',
+`namespace_id` INTEGER  COMMENT '',
 `space_id` BIGINT  COMMENT '工位空间id',
 `rent_type` TINYINT  COMMENT '租赁类别:1-开放式（默认space_type 1）,2-办公室',
 `space_type` TINYINT  COMMENT '空间类别:1-工位,2-面积',
