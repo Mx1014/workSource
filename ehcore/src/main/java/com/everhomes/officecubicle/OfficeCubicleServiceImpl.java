@@ -168,7 +168,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			cmd.getAttachments().forEach((dto) -> {
 				Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
 				attachment.setOwnerId(space.getId());
-
+				attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				attachment.setCreatorUid(UserContext.current().getUser().getId());
+				
 				this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 
 			});
@@ -214,6 +216,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				cmd.getAttachments().forEach((dto) -> {
 					Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
 					attachment.setOwnerId(space.getId());
+					attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					attachment.setCreatorUid(UserContext.current().getUser().getId());
 					this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 
 				});
