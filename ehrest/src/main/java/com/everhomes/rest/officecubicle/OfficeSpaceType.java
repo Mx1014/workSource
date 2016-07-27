@@ -1,7 +1,7 @@
 package com.everhomes.rest.officecubicle;
 
 public enum OfficeSpaceType {
-	VISIT((byte) 1, "个"), ORDER((byte)  2, "㎡");
+	UNIT((byte) 1, "个"), SQ_METRE((byte)  2, "㎡");
 
 	
 	private byte code;

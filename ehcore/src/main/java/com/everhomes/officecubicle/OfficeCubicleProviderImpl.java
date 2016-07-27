@@ -22,6 +22,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
+import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOfficeCubicleCategories;
@@ -143,7 +144,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 			Integer currentNamespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId) ;
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
 		if (StringUtils.isNotBlank(keyWords))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAME.like("%" + keyWords + "%").or(
 					Tables.EH_OFFICE_CUBICLE_ORDERS.CONTACT_PHONE.like("%" + keyWords + "%")));
@@ -198,6 +200,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
 		if (null != cityId)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.lt(cityId));
 		if (null != locator && locator.getAnchor() != null)

@@ -161,7 +161,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
 			space.setGeohash(GeoHashUtils.encode(space.getLatitude(), space.getLongitude()));
-
+			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setCreatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.createSpace(space);
@@ -176,6 +176,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 				category.setSpaceSize(dto.getSize());
 				category.setSpaceId(space.getId());
+//				category.setNamespaceId(UserContext.getCurrentNamespaceId());
 				category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				category.setCreatorUid(UserContext.current().getUser().getId());
 				this.officeCubicleProvider.createCategory(category);
@@ -206,6 +207,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCubicleSpace space = ConvertHelper.convert(cmd, OfficeCubicleSpace.class);
 			space.setNamespaceId(UserContext.getCurrentNamespaceId());
 			space.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.updateSpace(space);
 			// this.attachmentProvider.de
