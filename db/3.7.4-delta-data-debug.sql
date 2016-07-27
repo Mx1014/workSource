@@ -32,3 +32,8 @@ VALUES (310,0,'官方活动','官方活动',null);
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),310,11100,'官方活动',0,1,'官方活动',16);
+
+-- 门禁配置
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.qr_driver_type', 'zuolin', 'the driver type of this namespace.(zuolin/lingling)');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_type', 'zuolin', 'zuolin for techpark');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999990, 'aclink.qr_driver_type', 'lingling', 'lingling for chuneng');

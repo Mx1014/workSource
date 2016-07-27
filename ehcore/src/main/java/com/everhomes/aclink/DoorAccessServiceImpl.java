@@ -81,6 +81,7 @@ import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
@@ -1521,7 +1522,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorAccessCapapilityDTO dto = new DoorAccessCapapilityDTO();
         dto.setIsSupportQR((byte)1);
         dto.setIsSupportSmart((byte)1);
-        dto.setQrDriver(DoorAccessDriverType.LINGLING.getCode());
+        
+        dto.setQrDriver(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode()));
         dto.setSmartDriver(DoorAccessDriverType.ZUOLIN.getCode());
         
         return dto;
@@ -1911,6 +1913,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         return ConvertHelper.convert(doorAccess, DoorAccessDTO.class);
+    }
+    
+    @Override
+    public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
+        return null;
     }
     
     @Override

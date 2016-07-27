@@ -41,6 +41,7 @@ import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
@@ -490,6 +491,21 @@ public class AclinkController extends ControllerBase {
     public RestResponse updateAndQueryQR(@Valid AclinkUpdateLinglingStoreyCommand cmd) {
         doorAccessService.remoteOpenDoor(cmd.getAuthId());
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/createDoorVistor</b>
+     * <p>给令令访客授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createDoorVistor")
+    @RestReturn(value=DoorAuthDTO.class)
+    public RestResponse createLingingVistor(@Valid CreateDoorVisitorCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        

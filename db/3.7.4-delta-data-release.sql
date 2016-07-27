@@ -83,3 +83,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (58, 0, '0', '0', '0', '/home', 'CmntyServices', 'CmntyActivities', '园区活动', 'cs://1/image/aW1hZ2UvTVRvM09UazJOVGd4TVRFek5qaGxNMkl5TlRneU1tTmlZVFEwTURJNVpUWTJNZw', '2', '1', 50,'', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');        
 -- 删除通讯录
 DELETE FROM `eh_launch_pad_items` WHERE `id` IN (10428, 10435) AND `item_label` LIKE '%通讯录%';
+
+-- 门禁配置
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.qr_driver_type', 'zuolin', 'the driver type of this namespace.(zuolin/lingling)');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_type', 'zuolin', 'zuolin for techpark');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999990, 'aclink.qr_driver_type', 'lingling', 'lingling for chuneng');
