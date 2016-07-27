@@ -165,9 +165,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			space.setCreatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.createSpace(space);
-			cmd.getAttachments().forEach((dto) -> {
-				this.saveAttachment(dto, space.getId());
-			});
+			if (null != cmd.getAttachments())
+				cmd.getAttachments().forEach((dto) -> {
+					this.saveAttachment(dto, space.getId());
+				});
 			cmd.getCategories().forEach((dto) -> {
 				this.saveCategory(dto, space.getId());
 
