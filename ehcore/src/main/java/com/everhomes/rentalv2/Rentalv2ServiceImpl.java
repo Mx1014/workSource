@@ -3881,7 +3881,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				"rental resource (site) cannot found ");
 		rs.setDiscountType(cmd.getDiscountType());
 		rs.setFullPrice(cmd.getFullPrice());
-		rs.setCutPrice(cmd.getCutprice());
+		rs.setCutPrice(cmd.getCutPrice());
 		this.rentalProvider.updateRentalSite(rs);
 	}
 

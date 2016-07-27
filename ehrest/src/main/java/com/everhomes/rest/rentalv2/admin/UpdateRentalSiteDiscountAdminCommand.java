@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId: 资源id</li>  
  * <li>discountType: 状态，0不打折1满钱减钱优惠 2满天减钱 3 比例 参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li> 
  * <li>fullPrice: 满多少钱</li>
- * <li>fullPrice: 减多少钱</li> 
+ * <li>cutPrice: 减多少钱</li> 
  * </ul>
  */
 public class UpdateRentalSiteDiscountAdminCommand {
@@ -20,7 +20,7 @@ public class UpdateRentalSiteDiscountAdminCommand {
 	private Byte discountType;
 
 	private java.math.BigDecimal fullPrice;
-	private java.math.BigDecimal cutprice;
+	private java.math.BigDecimal cutPrice;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -43,11 +43,11 @@ public class UpdateRentalSiteDiscountAdminCommand {
 	public void setFullPrice(java.math.BigDecimal fullPrice) {
 		this.fullPrice = fullPrice;
 	}
-	public java.math.BigDecimal getCutprice() {
-		return cutprice;
+	public java.math.BigDecimal getCutPrice() {
+		return cutPrice;
 	}
-	public void setCutprice(java.math.BigDecimal cutprice) {
-		this.cutprice = cutprice;
-	}
+	public void setCutPrice(java.math.BigDecimal cutPrice) {
+		this.cutPrice = cutPrice;
+	} 
 	
 }
