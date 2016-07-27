@@ -166,22 +166,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setCreatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.createSpace(space);
 			cmd.getAttachments().forEach((dto) -> {
-				Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
-				attachment.setOwnerId(space.getId());
-				attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				attachment.setCreatorUid(UserContext.current().getUser().getId());
-
-				this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
-
+				this.saveAttachment(dto, space.getId());
 			});
 			cmd.getCategories().forEach((dto) -> {
-				OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
-				category.setSpaceSize(dto.getSize());
-				category.setSpaceId(space.getId());
-				category.setNamespaceId(UserContext.getCurrentNamespaceId());
-				category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				category.setCreatorUid(UserContext.current().getUser().getId());
-				this.officeCubicleProvider.createCategory(category);
+				this.saveCategory(dto, space.getId());
 
 			});
 
@@ -216,27 +204,36 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
 				if (null != cmd.getAttachments())
 					cmd.getAttachments().forEach((dto) -> {
-						Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
-						attachment.setOwnerId(space.getId());
-						attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						attachment.setCreatorUid(UserContext.current().getUser().getId());
-						this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
-
+						this.saveAttachment(dto, space.getId());
 					});
 				this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
 				if (null != cmd.getCategories())
 					cmd.getCategories().forEach((dto) -> {
-						OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
-						category.setSpaceId(space.getId());
-						category.setNamespaceId(UserContext.getCurrentNamespaceId());
-						category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						category.setCreatorUid(UserContext.current().getUser().getId());
-						this.officeCubicleProvider.createCategory(category);
-
+						this.saveCategory(dto, space.getId());
 					});
 
 				return null;
 			});
+	}
+
+	public void saveAttachment(OfficeAttachmentDTO dto,Long spaceId ){
+		Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
+		attachment.setOwnerId(spaceId);
+		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		attachment.setCreatorUid(UserContext.current().getUser().getId());
+
+		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);	
+	}
+	 
+	public void saveCategory(OfficeCategoryDTO dto,Long spaceId ){
+		OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
+		category.setSpaceSize(dto.getSize());
+		category.setSpaceId(spaceId);
+		category.setNamespaceId(UserContext.getCurrentNamespaceId());
+		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		category.setCreatorUid(UserContext.current().getUser().getId());
+		this.officeCubicleProvider.createCategory(category);
+
 	}
 
 	@Override
