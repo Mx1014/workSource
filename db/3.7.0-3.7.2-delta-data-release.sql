@@ -815,3 +815,23 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
     VALUES ('15', '15', '2.0.2', '${homeurl}/web/download/apk/Videoconf-2.0.2.2016072101-release.apk', '${homeurl}/web/download/apk/andriod-meeting-2-0-2.html', '0');
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
     VALUES ('16', '16', '2.0.2', '', '${homeurl}/web/download/apk/iOS-meeting-2-0-2.html', '0');
+    
+    
+-- 左邻域下新增企业:深圳市长桑技术有限公司
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1002091, UUID(), '深圳市长桑技术有限公司', '深圳市长桑技术有限公司', 1, 0, 0, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180770, 1, 0);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(180770, UUID(), 0, 2, 'EhGroups', 1002091,'深圳市长桑技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	
+INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `group_id`,  `region_scope`,  `region_scope_id`,  `member_role`,  `member_status`,  `create_time`)
+	VALUES (318300, 224402, 'enterprise', 1001755, 0, 0, 7, 3, UTC_TIMESTAMP());
+	
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`,`level`, `status`, `group_type`, `group_id`, `namespace_id`)
+	VALUES(1001755, 0, 'ENTERPRISE', '深圳市长桑技术有限公司', 0, NULL, '/1001755', 1, 2, 'ENTERPRISE', 1002091, 0);
+INSERT INTO `eh_organization_members` (`id`,  `organization_id`,  `target_type`,  `target_id`,  `member_group`,  `contact_name`,  `contact_type`,  `contact_token`,  `contact_description`,  `status`)
+	VALUES (2104150, 1001755, 'USER', 224402, 'manager', '孟媛', 0, '18818561617', NULL, 3);
+INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `target_type`,  `target_id`,  `role_id`,  `creator_uid`,  `create_time`)
+	VALUES (10878, 'EhOrganizations', 1001755, 'EhUsers', 224402, 1005, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
+    VALUES(1110159,240111044331051380, 'organization', 1001755, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+    
