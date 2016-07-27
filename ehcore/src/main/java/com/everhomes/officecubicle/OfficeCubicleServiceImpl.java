@@ -178,12 +178,12 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 				category.setSpaceSize(dto.getSize());
 				category.setSpaceId(space.getId());
-				// category.setNamespaceId(UserContext.getCurrentNamespaceId());
-					category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					category.setCreatorUid(UserContext.current().getUser().getId());
-					this.officeCubicleProvider.createCategory(category);
+				category.setNamespaceId(UserContext.getCurrentNamespaceId());
+				category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				category.setCreatorUid(UserContext.current().getUser().getId());
+				this.officeCubicleProvider.createCategory(category);
 
-				});
+			});
 
 			return null;
 		});
@@ -212,30 +212,31 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			space.setStatus(OfficeStatus.NORMAL.getCode());
 			space.setOperatorUid(UserContext.current().getUser().getId());
 			this.officeCubicleProvider.updateSpace(space);
-			//TODO:删除附件唐彤没有提供
-			this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
-			if (null != cmd.getAttachments())
-				cmd.getAttachments().forEach((dto) -> {
-					Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
-					attachment.setOwnerId(space.getId());
-					attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					attachment.setCreatorUid(UserContext.current().getUser().getId());
-					this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
+			// TODO:删除附件唐彤没有提供
+				this.officeCubicleProvider.deleteAttachmentsBySpaceId(space.getId());
+				if (null != cmd.getAttachments())
+					cmd.getAttachments().forEach((dto) -> {
+						Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
+						attachment.setOwnerId(space.getId());
+						attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						attachment.setCreatorUid(UserContext.current().getUser().getId());
+						this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 
-				});
-			this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
-			if (null != cmd.getCategories())
-				cmd.getCategories().forEach((dto) -> {
-					OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
-					category.setSpaceId(space.getId());
-					category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					category.setCreatorUid(UserContext.current().getUser().getId());
-					this.officeCubicleProvider.createCategory(category);
+					});
+				this.officeCubicleProvider.deleteCategoriesBySpaceId(space.getId());
+				if (null != cmd.getCategories())
+					cmd.getCategories().forEach((dto) -> {
+						OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
+						category.setSpaceId(space.getId());
+						category.setNamespaceId(UserContext.getCurrentNamespaceId());
+						category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						category.setCreatorUid(UserContext.current().getUser().getId());
+						this.officeCubicleProvider.createCategory(category);
 
-				});
+					});
 
-			return null;
-		});
+				return null;
+			});
 	}
 
 	@Override
