@@ -2129,7 +2129,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.dbProvider.execute((TransactionStatus status) -> {
 				//默认是已退款
 				order.setStatus(SiteBillStatus.REFUNDED.getCode());
-				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())){ 
+				if (rs.getRefundFlag().equals(NormalFlag.NEED.getCode())&&(order.getPaidMoney().compareTo(new BigDecimal(0))==1)){ 
 					List<RentalOrderPayorderMap>  billmaps = this.rentalProvider.findRentalBillPaybillMapByBillId(order.getId());
 					for(RentalOrderPayorderMap billMap : billmaps){
 						//循环退款
