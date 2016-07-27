@@ -211,7 +211,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		Condition condition = Tables.EH_OFFICE_CUBICLE_SPACES.NAMESPACE_ID.eq(currentNamespaceId);
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
 		if (null != cityId)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.lt(cityId));
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_ID.eq(cityId));
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
 		step.limit(pageSize);
