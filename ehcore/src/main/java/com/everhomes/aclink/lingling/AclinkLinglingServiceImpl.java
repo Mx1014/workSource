@@ -2,6 +2,7 @@ package com.everhomes.aclink.lingling;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +14,8 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,6 +28,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -36,6 +41,11 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
    
     @Autowired
     private ConfigurationProvider  configProvider;
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     Gson gson = new Gson();
     
@@ -99,13 +109,42 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
         
     }
     
+    private String getKeyFromSdkKey(AclinkLinglingMakeSdkKey sdkKey) {
+        Object[] objs = sdkKey.getDeviceIds().toArray();
+        Arrays.sort(objs);
+        
+        String key = "";
+        for(Object obj: objs) {
+            key += obj.toString() + ":";
+        }
+        
+        return key;
+    }
+    
     @Override
     public Map<Long, String> makeSdkKey(AclinkLinglingMakeSdkKey sdkKey) {
-        String body = this.restCall(AclinkLinglingConstant.MAKE_SDK_KEY, sdkKey);
-        if(body == "") {
+        if(sdkKey.getDeviceIds().size() <= 0) {
             return null;
         }
         
+        String key = getKeyFromSdkKey(sdkKey);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object o = redisTemplate.opsForValue().get(key);
+        
+        String body = "";
+        if(o != null) {
+            body = (String)o;
+        } else {
+            body = this.restCall(AclinkLinglingConstant.MAKE_SDK_KEY, sdkKey);
+            if(body == "") {
+                return null;
+            }
+            
+            //manual cache it to redis
+            redisTemplate.opsForValue().set(key, body, 10*60, TimeUnit.SECONDS);
+        }
+
         AclinkLinglingMapResponse resp = (AclinkLinglingMapResponse)StringHelper.fromJsonString(body, AclinkLinglingMapResponse.class);
         Map<Long, String> keys = new HashMap<Long, String>();
         for(Entry<String, String> item : resp.getResponseResult().entrySet()) {

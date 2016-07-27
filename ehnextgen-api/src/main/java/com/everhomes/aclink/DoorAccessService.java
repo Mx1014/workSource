@@ -17,6 +17,7 @@ import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
@@ -105,8 +106,6 @@ public interface DoorAccessService {
 
     DoorAccessDTO createDoorAccessLingLing(CreateDoorAccessLingLing cmd);
 
-    DoorAuthDTO createLinglingVisitorAuth(CreateLinglingVisitorCommand cmd);
-
     GetVisitorResponse getVisitor(GetVisitorCommand cmd);
 
     DoorMessage queryWifiMgmtMessage(AclinkMgmtCommand cmd);
@@ -122,4 +121,6 @@ public interface DoorAccessService {
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
 
     void remoteOpenDoor(Long doorId);
+
+    DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd);
 }

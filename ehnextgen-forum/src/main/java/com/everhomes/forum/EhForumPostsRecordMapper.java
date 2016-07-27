@@ -71,6 +71,8 @@ public class EhForumPostsRecordMapper implements RecordMapper<Record, EhForumPos
         post.setDeleteTime(r.getValue((Field<Timestamp>)r.field("delete_time")));
         post.setStartTime(r.getValue((Field<Timestamp>)r.field("start_time")));     
         post.setEndTime(r.getValue((Field<Timestamp>)r.field("end_time")));  
+        post.setOfficialFlag(r.getValue((Field<Byte>)r.field("official_flag")));
+        post.setMediaDisplayFlag(r.getValue((Field<Byte>)r.field("media_display_flag")));
         return post;
     }
 }

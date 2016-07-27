@@ -41,6 +41,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.ui.forum.MediaDisplayFlag;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.sequence.SequenceProvider;
@@ -228,6 +229,10 @@ public class ForumProviderImpl implements ForumProvider {
         if(post.getOfficialFlag() == null) {
             post.setOfficialFlag(OfficialFlag.NO.getCode());
         }
+        
+        if (post.getMediaDisplayFlag() == null) {
+			post.setMediaDisplayFlag(MediaDisplayFlag.YES.getCode());
+		}
         
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {

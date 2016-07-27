@@ -4498,7 +4498,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-	//	userSearcher.feedDoc(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
@@ -6491,9 +6491,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = UserContext.current().getUser().getId();
 		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		if (UserCurrentEntityType.fromCode(sceneToken.getEntityType()) != UserCurrentEntityType.ORGANIZATION) {
-			LOGGER.error("Invalid parameter, entity type error");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter, entity type error");
+			return checkOfficalPrivilege(-1L);
 		}
 		
 		return checkOfficalPrivilege(sceneToken.getEntityId());
@@ -6505,17 +6503,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	private CheckOfficalPrivilegeResponse checkOfficalPrivilege(Long organizationId) {
-		if (organizationId == null) {
-			LOGGER.error("Invalid parameter, organization cannot be null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter, organization cannot be null");
-		}
 		CheckOfficalPrivilegeResponse response = new CheckOfficalPrivilegeResponse();
-		Organization organization = organizationProvider.findOrganizationById(organizationId);
-		if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
-			response.setOfficialFlag((byte) 1);
-		}else {
-			response.setOfficialFlag((byte) 0);
+		response.setOfficialFlag((byte) 0);
+		if (organizationId != null && organizationId.longValue() >= 0) {
+			Organization organization = organizationProvider.findOrganizationById(organizationId);
+			if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
+				try{
+					if (rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.OfficialActivity)) {
+						response.setOfficialFlag((byte) 1);
+					}
+				}catch(Exception e){
+				}
+			}
 		}
 		
 		return response;

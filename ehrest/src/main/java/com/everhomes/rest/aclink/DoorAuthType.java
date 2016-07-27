@@ -10,7 +10,7 @@ package com.everhomes.rest.aclink;
  *
  */
 public enum DoorAuthType {
-    FOREVER((byte)0), TEMPERATE((byte)1), LINGLING_VISITOR((byte)2);
+    FOREVER((byte)0), TEMPERATE((byte)1), LINGLING_VISITOR((byte)2), ZUOLIN_VISITOR((byte)3);
     private byte code;
     
     private DoorAuthType(byte code) {
@@ -32,6 +32,8 @@ public enum DoorAuthType {
             return TEMPERATE;
         case 2 :
             return LINGLING_VISITOR;
+        case 3 :
+            return ZUOLIN_VISITOR;
         default :
             break;
         }
