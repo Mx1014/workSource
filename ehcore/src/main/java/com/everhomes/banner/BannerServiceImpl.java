@@ -232,7 +232,9 @@ public class BannerServiceImpl implements BannerService {
 //                dto.setActionData(parserJson(communityId,dto));
 //            }
             if(null != commId){
-         	   dto.setActionData(parserJson(userId, null,dto,request));
+                // 不加上小区ID会在解释JSON中抛空指针异常 by lqs 20160727
+         	   //dto.setActionData(parserJson(userId, null,dto,request));
+         	   dto.setActionData(parserJson(userId, commId,dto,request));
             }else{
          	   LOGGER.error("communityId is null. organizationId = {}", cmd.getOrganizationId());
             }
