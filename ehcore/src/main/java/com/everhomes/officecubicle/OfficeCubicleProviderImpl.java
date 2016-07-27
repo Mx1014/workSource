@@ -229,8 +229,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS);
 		Condition condition = Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(currentNamespaceId);
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVER_UID.lt(userId));
-		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.STATUS.lt(OfficeOrderStatus.NORMAL.getCode()));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVER_UID.eq(userId));
+		condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.STATUS.eq(OfficeOrderStatus.NORMAL.getCode()));
 		step.where(condition);
 		List<OfficeCubicleOrder> result = step.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.desc()).fetch().map((r) -> {
 			return ConvertHelper.convert(r, OfficeCubicleOrder.class);
