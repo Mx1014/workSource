@@ -106,8 +106,6 @@ public interface DoorAccessService {
 
     DoorAccessDTO createDoorAccessLingLing(CreateDoorAccessLingLing cmd);
 
-    DoorAuthDTO createLinglingVisitorAuth(CreateLinglingVisitorCommand cmd);
-
     GetVisitorResponse getVisitor(GetVisitorCommand cmd);
 
     DoorMessage queryWifiMgmtMessage(AclinkMgmtCommand cmd);

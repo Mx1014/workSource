@@ -1529,6 +1529,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return dto;
     }
     
+    private DoorAccessDriverType getQrDriverType(Integer namespaceId) {
+        String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode());
+        return DoorAccessDriverType.fromCode(t);
+    }
+    
     private void doLinglingQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         List<String> hardwares = new ArrayList<String>();
@@ -1917,11 +1922,67 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Override
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
-        return null;
+        DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
+        if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {
+            return createLinglingVisitorAuth(cmd);
+        } else {
+            User user = UserContext.current().getUser();
+            
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            if(doorAccess == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+            }
+            
+            String uuid = UUID.randomUUID().toString();
+            uuid = uuid.replace("-", "");
+            uuid = uuid.substring(0, 5);
+            
+            DoorAuth auth = new DoorAuth();
+            auth.setApplyUserName(cmd.getUserName());
+            auth.setApproveUserId(user.getId());
+            auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
+            auth.setDescription(cmd.getDescription());
+            auth.setDoorId(cmd.getDoorId());
+            auth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+            auth.setOrganization(cmd.getOrganization());
+            auth.setPhone(cmd.getPhone());
+            auth.setNickname(cmd.getUserName());
+            auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
+            
+
+            auth.setUserId(0l);
+            auth.setOwnerType(doorAccess.getOwnerType());
+            auth.setOwnerId(doorAccess.getOwnerId());
+            auth.setStatus(DoorAuthStatus.VALID.getCode());
+            doorAuthProvider.createDoorAuth(auth);
+            
+            AesUserKey aesUserKey = generateAesUserKey(user, auth);
+            if(aesUserKey == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+            }
+            
+            auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+            auth.setQrKey(aesUserKey.getSecret());
+            doorAuthProvider.updateDoorAuth(auth);
+            
+            String nickName = user.getNickName();
+            if(nickName == null || nickName.isEmpty()) {
+                nickName = user.getAccountName();
+            }
+            
+            String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+            List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
+            String templateLocale = user.getLocale();
+            smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
+            
+            return ConvertHelper.convert(auth, DoorAuthDTO.class);
+        }
     }
     
-    @Override
-    public DoorAuthDTO createLinglingVisitorAuth(CreateLinglingVisitorCommand cmd) {
+    private DoorAuthDTO createLinglingVisitorAuth(CreateDoorVisitorCommand cmd) {
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         if(doorAccess == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");

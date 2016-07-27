@@ -363,7 +363,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     SelectQuery<? extends Record> query) {
                 
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.ne(DoorAuthStatus.INVALID.getCode()));
-                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.LINGLING_VISITOR.getCode()));
+//                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.LINGLING_VISITOR.getCode()));
                 query.addConditions(AclinkAuthCustomField.AUTH_LINGLING_UUID.getField().eq(uuid));
 
                 return query;

@@ -28,6 +28,7 @@ import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
 import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DeleteDoorAccessById;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -255,8 +256,8 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("createLingingVistor")
     @RestReturn(value=DoorAuthDTO.class)
-    public RestResponse createLingingVistor(@Valid CreateLinglingVisitorCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.createLinglingVisitorAuth(cmd));
+    public RestResponse createLingingVistor(@Valid CreateDoorVisitorCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
