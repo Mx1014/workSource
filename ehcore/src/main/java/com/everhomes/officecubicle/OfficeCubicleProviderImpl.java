@@ -117,7 +117,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public void deleteAttachmentsBySpaceId(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
-		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.SPACE_ID.equal(id);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.OWNER_ID.equal(id);
 		step.where(condition);
 		step.execute();
 	}
