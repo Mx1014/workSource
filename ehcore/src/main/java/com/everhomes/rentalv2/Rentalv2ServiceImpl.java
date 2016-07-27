@@ -1151,7 +1151,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.valiRentalBill(cmd.getRules());
 //			rentalBill.setRentalCount(cmd.getRentalCount());
 			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
-			Map<java.sql.Date  , Set<Byte>> dayMap= new HashMap<Date, Set<Byte>>();
+			Map<java.sql.Date  , Map<String,Set<Byte>>> dayMap= new HashMap<Date, Map<String,Set<Byte>>>();
 			for (RentalBillRuleDTO siteRule : cmd.getRules()) {
 
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
@@ -1174,8 +1174,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//给半天预定的日期map加入am和pm的byte
 				if(rs.getRentalType().equals(RentalType.HALFDAY)||rs.getRentalType().equals(RentalType.THREETIMEADAY)){
 					if(null==dayMap.get(rentalSiteRule.getResourceRentalDate()))
-						dayMap.put(rentalSiteRule.getResourceRentalDate(), new HashSet<Byte>());
-					dayMap.get(rentalSiteRule.getResourceRentalDate()).add(rentalSiteRule.getAmorpm());
+						dayMap.put(rentalSiteRule.getResourceRentalDate(), new HashMap<String,Set<Byte>>());
+					if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+						if(null==dayMap.get(rentalSiteRule.getResourceRentalDate()).get("无场所"))
+							dayMap.get(rentalSiteRule.getResourceRentalDate()).put("无场所",new HashSet<Byte>());
+						dayMap.get(rentalSiteRule.getResourceRentalDate()).get("无场所").add(rentalSiteRule.getAmorpm());
+					}
+					else{ 
+						if(null==dayMap.get(rentalSiteRule.getResourceRentalDate()).get(rentalSiteRule.getResourceNumber()))
+							dayMap.get(rentalSiteRule.getResourceRentalDate()).put(rentalSiteRule.getResourceNumber(),new HashSet<Byte>());
+						dayMap.get(rentalSiteRule.getResourceRentalDate()).get(rentalSiteRule.getResourceNumber()).add(rentalSiteRule.getAmorpm());
+					}
+					
 				}
 				rentalSiteRules.add(rentalSiteRule);
 				if (null == rentalSiteRule.getBeginTime()) {
@@ -1237,14 +1247,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					//满天减免
 					if(rs.getRentalType().equals(RentalType.HALFDAY)){
 						for(Date rentalDate:dayMap.keySet()){
-							if(dayMap.get(rentalDate).size()==2)
-								multiple++;
+							for(String resourceNumber : dayMap.get(rentalDate).keySet())
+								if(dayMap.get(rentalDate).get(resourceNumber).size()>=2)
+									multiple++;
 						}
 					}
 					else if (rs.getRentalType().equals(RentalType.THREETIMEADAY)){
 						for(Date rentalDate:dayMap.keySet()){
-							if(dayMap.get(rentalDate).size()==3)
-								multiple++;
+							for(String resourceNumber : dayMap.get(rentalDate).keySet())
+								if(dayMap.get(rentalDate).get(resourceNumber).size()>=3)
+									multiple++;
 						}
 					}
 					siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
