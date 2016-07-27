@@ -30,6 +30,7 @@ import com.everhomes.server.schema.tables.daos.EhOfficeCubicleOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOfficeCubicleSpacesDao;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleOrders;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleSpaces;
+import com.everhomes.server.schema.tables.records.EhOfficeCubicleAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleSpacesRecord;
@@ -112,6 +113,14 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		step.execute();
 	}
 
+	@Override
+	public void deleteAttachmentsBySpaceId(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhOfficeCubicleAttachmentsRecord> step = context.delete(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS);
+		Condition condition = Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.SPACE_ID.equal(id);
+		step.where(condition);
+		step.execute();
+	}
 	@Override
 	public List<OfficeCubicleOrder> searchOrders(Long beginDate, Long endDate, String reserveKeyword, String spaceName,
 			CrossShardListingLocator locator, Integer pageSize, Integer currentNamespaceId) {

@@ -32,6 +32,8 @@ public interface OfficeCubicleProvider {
 
 	List<OfficeCubicleSpace> querySpacesByCityId(Long cityId, CrossShardListingLocator locator, int i, Integer currentNamespaceId);
 
-	List<OfficeCubicleOrder> queryOrdersByUser(Long userId, Integer currentNamespaceId); 
+	List<OfficeCubicleOrder> queryOrdersByUser(Long userId, Integer currentNamespaceId);
+
+	void deleteAttachmentsBySpaceId(Long id); 
 
 }
