@@ -1943,7 +1943,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	public void addRentalSiteSingleSimpleRule(AddRentalSiteSingleSimpleRule cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		
+		if(cmd.getSiteCounts() ==null)
+			cmd.setSiteCounts(1.0);
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getBeginDate()));
