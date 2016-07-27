@@ -157,7 +157,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq(OfficeStatus.NORMAL.getCode()));
 		if (StringUtils.isNotBlank(keyWords))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.NAME.like("%" + keyWords + "%").or(
-					Tables.EH_OFFICE_CUBICLE_ORDERS.CONTACT_PHONE.like("%" + keyWords + "%")));
+					Tables.EH_OFFICE_CUBICLE_SPACES.CONTACT_PHONE.like("%" + keyWords + "%")));
 
 		if (null != locator && locator.getAnchor() != null)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_SPACES.ID.lt(locator.getAnchor()));
