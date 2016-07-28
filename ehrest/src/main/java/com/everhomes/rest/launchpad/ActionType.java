@@ -28,6 +28,7 @@ package com.everhomes.rest.launchpad;
  * <li>CONTACTS(46): 通讯录</li>
  * <li>WIFI(47): 储能wifi上网</li>
  * <li>NEWS(48): 新闻</li>
+ * <li>RENTAL(49): 预订2.0</li>
  * <li>OFFICIAL_ACTIVITY(50): 官方活动</li>
  * </ul>
  */
@@ -40,7 +41,7 @@ public enum ActionType {
       ELECSCREEN((byte)26) ,VIDEO_MEETING((byte)27),ENTER_PARK((byte)28),EXCHANGE_HALL((byte)29),PARKING_RECHARGE((byte)30),TOPIC_BY_FORUM((byte)31),
       MAKERZONE((byte)32),SERVICEALLIANCE((byte)33),PARKENTERPRISE((byte)34), USER_GROUPS((byte)35), LIST_GROUPS((byte)36), SERVICE_ORDER((byte)37),
       ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
-      WIFI((byte)47),NEWS((byte)48),OFFICIAL_ACTIVITY((byte)50);
+      WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50);
     private byte code;
     
     private ActionType(byte code) {

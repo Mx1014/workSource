@@ -19,7 +19,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.techpark.rental.AttachmentType;
+import com.everhomes.rest.rentalv2.AttachmentType;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;

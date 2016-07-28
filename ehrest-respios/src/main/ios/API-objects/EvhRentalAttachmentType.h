@@ -1,0 +1,18 @@
+//
+// EvhRentalAttachmentType.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhRentalAttachmentType
+//
+typedef enum {
+
+    EvhRentalAttachmentType_STRING = 0, 
+    EvhRentalAttachmentType_EMAIL = 1, 
+    EvhRentalAttachmentType_FILE = 2
+
+} EvhRentalAttachmentType;
+
+///////////////////////////////////////////////////////////////////////////////
+

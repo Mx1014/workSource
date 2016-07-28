@@ -2,14 +2,14 @@
 // EvhTechparkRentalGetRentalTypeRuleRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhGetRentalTypeRuleCommandResponse.h"
+#import "EvhRentalGetRentalTypeRuleCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalGetRentalTypeRuleRestResponse
 //
 @interface EvhTechparkRentalGetRentalTypeRuleRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhGetRentalTypeRuleCommandResponse* response;
+@property(nonatomic, strong) EvhRentalGetRentalTypeRuleCommandResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

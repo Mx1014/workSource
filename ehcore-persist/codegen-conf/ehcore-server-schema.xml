@@ -37,7 +37,7 @@
         eh_audit_logs | eh_locale_strings | eh_locale_templates | eh_devices | eh_certs |
         eh_regions | eh_communities | eh_community_geopoints | eh_nearby_community_map | eh_organizations | eh_organization_communities |
         eh_organization_members | eh_organization_tasks | eh_organization_address_mappings | eh_organization_bills |
-        eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts |
+        eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts | 
         eh_organization_billing_accounts | eh_organization_billing_transactions | eh_community_profiles | eh_addresses |
         eh_family_billing_accounts | eh_family_billing_transactions |
         eh_family_followers | eh_banners | eh_banner_clicks |
@@ -57,9 +57,9 @@
         eh_enterprise_addresses | eh_enterprise_contacts | eh_enterprise_contact_entries | eh_enterprise_contact_groups |
         eh_enterprise_contact_group_members | eh_enterprise_community_members |
         eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday |
-        eh_punch_exception_approvals | eh_punch_day_logs | eh_rental_rules | eh_rental_sites | eh_rental_site_items |
-		eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills |
-		eh_park_charge | eh_recharge_info| eh_park_apply_card | eh_rental_bill_paybill_map |
+        eh_punch_exception_approvals | eh_punch_day_logs |  
+         eh_rental_rules | eh_rental_sites | eh_rental_site_items | eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills | eh_rental_bill_paybill_map |
+		    eh_park_charge | eh_recharge_info| eh_park_apply_card |  
         eh_enterprise_contact_group_members | eh_enterprise_community_map | eh_building_attachments | eh_buildings |
         eh_enterprise_attachments | eh_organization_assigned_scopes | eh_user_communities |
         eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources | eh_enterprise_details | eh_enterprise_op_requests |
@@ -89,6 +89,9 @@
 		eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags | eh_app_urls |
 		eh_wifi_settings |
 		eh_news | eh_news_attachments | eh_news_comment |
+		eh_rentalv2_default_rules | eh_rentalv2_time_interval | eh_rentalv2_close_dates | eh_rentalv2_resources | eh_rentalv2_resource_ranges | eh_rentalv2_resource_pics |
+		eh_rentalv2_cells | eh_rentalv2_config_attachments | eh_rentalv2_items | eh_rentalv2_orders |eh_rentalv2_resource_orders | 
+		eh_rentalv2_items_orders | eh_rentalv2_order_attachments | eh_rentalv2_order_payorder_map | eh_rentalv2_refund_orders | eh_rentalv2_resource_types | eh_rentalv2_resource_numbers |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

@@ -3,7 +3,8 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhSiteItemDTO.h"
+#import "EvhRentalv2SiteItemDTO.h"
+#import "EvhRentalv2AttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddRentalBillItemCommand
@@ -14,25 +15,13 @@
 
 @property(nonatomic, copy) NSNumber* rentalSiteId;
 
-@property(nonatomic, copy) NSNumber* communityId;
-
-@property(nonatomic, copy) NSString* ownerType;
-
-@property(nonatomic, copy) NSNumber* ownerId;
-
-@property(nonatomic, copy) NSNumber* invoiceFlag;
-
-@property(nonatomic, copy) NSString* siteType;
-
 @property(nonatomic, copy) NSNumber* rentalBillId;
 
-// item type EvhSiteItemDTO*
+// item type EvhRentalv2SiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* rentalItems;
 
-// item type NSString*
+// item type EvhRentalv2AttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* rentalAttachments;
-
-@property(nonatomic, copy) NSNumber* attachmentType;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

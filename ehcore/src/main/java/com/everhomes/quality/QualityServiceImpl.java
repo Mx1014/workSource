@@ -51,6 +51,10 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.quality.QualityService;
+import com.everhomes.rentalv2.RentalOrder;
+import com.everhomes.rentalv2.RentalResourceOrder;
+import com.everhomes.rentalv2.RentalItem;
+import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.app.AppConstants;
@@ -112,18 +116,14 @@ import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
+import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
-import com.everhomes.rest.techpark.rental.RentalBillDTO;
-import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
-import com.everhomes.rest.techpark.rental.SiteBillStatus;
-import com.everhomes.rest.techpark.rental.SiteItemDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.rental.RentalBill;
-import com.everhomes.techpark.rental.RentalItemsBill;
-import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.techpark.rental.RentalSiteItem;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -596,7 +596,7 @@ public class QualityServiceImpl implements QualityService {
         	return dto;
         }).collect(Collectors.toList());
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())
@@ -1699,7 +1699,7 @@ public class QualityServiceImpl implements QualityService {
         
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, null);
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = Rentalv2ServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())
