@@ -1882,7 +1882,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				else
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
-				if(!cmd.getSiteCounts().equals(siteNumberSet.size()))
+				if(!cmd.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
 					
