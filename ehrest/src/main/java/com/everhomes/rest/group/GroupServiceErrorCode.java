@@ -33,4 +33,5 @@ public interface GroupServiceErrorCode {
     static final int ERROR_GROUP_CLUB_CREATOR_ADMIN_REVOKED_NOT_ALLOW = 10027; // 俱乐部创建者不能取消管理员角色
     static final int ERROR_GROUP_CLUB_INVALID_ROLE_STATUS = 10028; // 俱乐部成员状态异常
     static final int ERROR_USER_NO_IN_GROUP_CLUB = 10029; // 用户未加入俱乐部
+    static final int ERROR_GROUP_MEMBER_IS_NOT_CREATOR = 10030; // 非创建者
 }

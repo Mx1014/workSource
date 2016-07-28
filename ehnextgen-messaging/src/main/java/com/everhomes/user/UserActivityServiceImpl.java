@@ -708,12 +708,33 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         rsp.setOrderCount(0);
         bizFindOrderCountByUserId(user.getId(), rsp);
+        
+        rsp.setBusinessUrl(getBusinessUrl());
+        rsp.setBusinessRealm(getBusinessRealm());
         return rsp;
     }
     
-   
-    
-    private String getMyOrderUrl() {
+    private String getBusinessRealm() {
+    	String businessRealm = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_REALM, "");
+        if(businessRealm.length() == 0) {
+            LOGGER.error("Invalid business url path, businessRealm=" + businessRealm);
+            return null;
+        } else {
+            return businessRealm;
+        }
+	}
+
+	private String getBusinessUrl() {
+    	String businessUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_URL, "");
+        if(businessUrl.length() == 0) {
+            LOGGER.error("Invalid business url path, businessUrl=" + businessUrl);
+            return null;
+        } else {
+            return businessUrl;
+        }
+	}
+
+	private String getMyOrderUrl() {
         String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");
         String orderPath = configurationProvider.getValue(ConfigConstants.USER_ORDER_URL, "");
         if(homeurl.length() == 0 || orderPath.length() == 0) {

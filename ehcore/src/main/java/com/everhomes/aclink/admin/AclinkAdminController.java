@@ -28,6 +28,7 @@ import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
 import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DeleteDoorAccessById;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -36,6 +37,8 @@ import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetShortMessageCommand;
+import com.everhomes.rest.aclink.GetShortMessageResponse;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserIdCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
@@ -255,8 +258,8 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("createLingingVistor")
     @RestReturn(value=DoorAuthDTO.class)
-    public RestResponse createLingingVistor(@Valid CreateLinglingVisitorCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.createLinglingVisitorAuth(cmd));
+    public RestResponse createLingingVistor(@Valid CreateDoorVisitorCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
@@ -316,6 +319,20 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAuthResponse.class)
     public RestResponse searchVisitorDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.searchVisitorDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/getShortMessages</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("getShortMessages")
+    @RestReturn(value=GetShortMessageResponse.class)
+    public RestResponse getShortMessages(@Valid GetShortMessageCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.getShortMessages(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

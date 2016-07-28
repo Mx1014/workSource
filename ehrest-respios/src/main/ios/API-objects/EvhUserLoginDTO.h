@@ -33,6 +33,16 @@
 
 @property(nonatomic, copy) NSString* pusherIdentify;
 
+@property(nonatomic, copy) NSNumber* isOnline;
+
+@property(nonatomic, copy) NSString* deviceType;
+
+@property(nonatomic, copy) NSString* borderStatus;
+
+@property(nonatomic, copy) NSString* borderSessionId;
+
+@property(nonatomic, copy) NSNumber* lastPushPing;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

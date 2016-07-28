@@ -29,6 +29,7 @@ import com.everhomes.util.StringHelper;
  *<li>posterUri:海报</li>
  *<li>guest:嘉宾</li>
  *<li>mediaUrl:活动url</li>
+ *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -55,6 +56,16 @@ public class ActivityPostCommand{
     
     private String mediaUrl;
     
+    private Byte officialFlag;
+    
+    public Byte getOfficialFlag() {
+		return officialFlag;
+	}
+
+	public void setOfficialFlag(Byte officialFlag) {
+		this.officialFlag = officialFlag;
+	}
+	
     public ActivityPostCommand() {
     }
 

@@ -53,6 +53,8 @@
 
 @property(nonatomic, copy) NSNumber* endTime;
 
+@property(nonatomic, copy) NSNumber* officialFlag;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

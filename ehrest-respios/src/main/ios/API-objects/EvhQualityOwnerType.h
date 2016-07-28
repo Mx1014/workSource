@@ -4,7 +4,7 @@
 
 #define EvhQualityOwnerType_ENTERPRISE @"enterprise"
 #define EvhQualityOwnerType_USER @"user"
-#define EvhQualityOwnerType_ORGANIZATION_MEMBER @"orgmem"
+#define EvhQualityOwnerType_GROUP @"group"
 
 ///////////////////////////////////////////////////////////////////////////////
 

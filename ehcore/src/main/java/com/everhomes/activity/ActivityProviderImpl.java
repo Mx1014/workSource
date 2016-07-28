@@ -26,6 +26,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
@@ -67,6 +68,9 @@ public class ActivityProviderImpl implements ActivityProivider {
         if(activity.getUuid() == null) {
             activity.setUuid(UUID.randomUUID().toString());
         }
+        if (activity.getOfficialFlag() == null) {
+			activity.setOfficialFlag(OfficialFlag.NO.getCode());
+		}
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
     }

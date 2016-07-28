@@ -130,103 +130,7 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.AddOrgAddressCommand;
-import com.everhomes.rest.organization.AddPersonnelsToGroup;
-import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
-import com.everhomes.rest.organization.AssginOrgTopicCommand;
-import com.everhomes.rest.organization.CreateDepartmentCommand;
-import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
-import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
-import com.everhomes.rest.organization.CreateOrganizationContactCommand;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
-import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
-import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DepartmentDTO;
-import com.everhomes.rest.organization.DepartmentType;
-import com.everhomes.rest.organization.GetOrgDetailCommand;
-import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
-import com.everhomes.rest.organization.ImportOwnerDataCommand;
-import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
-import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.ListUserTaskCommand;
-import com.everhomes.rest.organization.OrganizationAddressDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDTO2;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroup;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberCommand;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
-import com.everhomes.rest.organization.OrganizationNaviFlag;
-import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
-import com.everhomes.rest.organization.OrganizationPostDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskApplyEnityType;
-import com.everhomes.rest.organization.OrganizationTaskDTO2;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskTargetType;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.PmManagementCommunityDTO;
-import com.everhomes.rest.organization.PmManagementIsAll;
-import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
-import com.everhomes.rest.organization.RejectOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
-import com.everhomes.rest.organization.SendOrganizationMessageCommand;
-import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
-import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
-import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
-import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdateOrganizationsCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
-import com.everhomes.rest.organization.UserExitOrganizationCommand;
-import com.everhomes.rest.organization.UserJoinOrganizationCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
@@ -249,6 +153,7 @@ import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -284,6 +189,7 @@ import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -4592,7 +4498,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-	//	userSearcher.feedDoc(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
@@ -6578,5 +6484,39 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    resp.setNextPageAnchor(locator.getAnchor());
 	    
 	    return resp;
+	}
+
+	@Override
+	public CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+		if (UserCurrentEntityType.fromCode(sceneToken.getEntityType()) != UserCurrentEntityType.ORGANIZATION) {
+			return checkOfficalPrivilege(-1L);
+		}
+		
+		return checkOfficalPrivilege(sceneToken.getEntityId());
+	}
+
+	@Override
+	public CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd) {
+		return checkOfficalPrivilege(cmd.getOrganizationId());
+	}
+	
+	private CheckOfficalPrivilegeResponse checkOfficalPrivilege(Long organizationId) {
+		CheckOfficalPrivilegeResponse response = new CheckOfficalPrivilegeResponse();
+		response.setOfficialFlag((byte) 0);
+		if (organizationId != null && organizationId.longValue() >= 0) {
+			Organization organization = organizationProvider.findOrganizationById(organizationId);
+			if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
+				try{
+					if (rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.OfficialActivity)) {
+						response.setOfficialFlag((byte) 1);
+					}
+				}catch(Exception e){
+				}
+			}
+		}
+		
+		return response;
 	}
 }
