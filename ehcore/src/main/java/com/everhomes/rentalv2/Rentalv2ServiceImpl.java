@@ -2588,7 +2588,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void deleteRentalBill(DeleteRentalBillCommand cmd) { 
-		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
+//		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
+		RentalOrder order = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
+		if (null==order)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid   parameter in the command: order not found");
+		if(order.getRentalUid()!=UserContext.current().getUser().getId())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_ACCESS_DENIED,
+					"Permission denied");
 
 	}
  
