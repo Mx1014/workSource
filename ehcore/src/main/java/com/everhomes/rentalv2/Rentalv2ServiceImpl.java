@@ -2598,7 +2598,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_ACCESS_DENIED,
 					"Permission denied");
-
+		order.setVisibleFlag(VisibleFlag.UNVISIBLE.getCode());
+		this.rentalProvider.updateRentalBill(order);
 	}
  
 
