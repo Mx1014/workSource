@@ -1965,7 +1965,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getBeginDate()));
 		end.setTime(new Date(cmd.getEndDate()));
-		
+		if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())&&
+				!cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size())))
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+cmd.getSiteCounts()+".but site numbers size is "+cmd.getSiteNumbers().size());
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (cmd.getOpenWeekday().contains(weekday)) {
@@ -3539,10 +3542,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null == defaultRule.getAutoAssign())
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
-			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())&&
-					!defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size())))
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+			
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setAutoAssign(defaultRule.getAutoAssign());
 			resource.setMultiUnit(defaultRule.getMultiUnit());
