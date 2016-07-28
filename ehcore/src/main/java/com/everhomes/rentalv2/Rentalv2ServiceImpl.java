@@ -1239,9 +1239,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//优惠
 				if(rs.getDiscountType()!=null)
 					if(	rs.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
-						//满减优惠
-						int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
-						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
+						//满减优惠 
+						//每满一次 ,就减多少
+//						int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
+//						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
+						//满了多少次,都只减一个
+						if(siteTotalMoney.compareTo(rs.getFullPrice())> 0)
+							siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice());
 					}
 					else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
 						int multiple =0;
