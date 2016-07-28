@@ -1972,7 +1972,23 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
             
             auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
-            auth.setQrKey(aesUserKey.getSecret());
+            
+            //convert to qr, move it to CmdUtil ?
+            byte[] type = new byte[]{0, 1};
+            byte[] cmdArr = new byte[]{8, 0};
+            byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
+            byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
+            long curTimeMill = System.currentTimeMillis();
+            byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
+            byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length + timeArr.length];
+            System.arraycopy(type, 0, resultArr, 0, type.length);
+            System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
+            System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
+            System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
+            System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
+            String resultStr = Base64.encodeBase64String(resultArr);
+            
+            auth.setQrKey(resultStr);
             doorAuthProvider.updateDoorAuth(auth);
             
             String nickName = user.getNickName();
