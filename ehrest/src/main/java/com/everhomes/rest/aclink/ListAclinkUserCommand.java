@@ -39,6 +39,8 @@ public class ListAclinkUserCommand {
     private String buildingName;
     
     private Byte isAuth;
+    
+    private Byte isOpenAuth;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -110,6 +112,14 @@ public class ListAclinkUserCommand {
 
     public void setBuildingName(String buildingName) {
         this.buildingName = buildingName;
+    }
+
+    public Byte getIsOpenAuth() {
+        return isOpenAuth;
+    }
+
+    public void setIsOpenAuth(Byte isOpenAuth) {
+        this.isOpenAuth = isOpenAuth;
     }
 
     @Override
