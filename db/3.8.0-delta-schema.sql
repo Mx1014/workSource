@@ -81,7 +81,7 @@ CREATE TABLE `eh_rentalv2_time_interval` (
 -- 
 -- 保存默认设置的关闭时间
 -- 
----- DROP TABLE IF EXISTS eh_rentalv2_close_dates;
+-- DROP TABLE IF EXISTS eh_rentalv2_close_dates;
 CREATE TABLE `eh_rentalv2_close_dates` (
   `id` BIGINT COMMENT '',
   `owner_id` BIGINT COMMENT '',
