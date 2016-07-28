@@ -2594,7 +2594,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid   parameter in the command: order not found");
-		if(order.getRentalUid()!=UserContext.current().getUser().getId())
+		if(!order.getRentalUid().equals(UserContext.current().getUser().getId()))
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_ACCESS_DENIED,
 					"Permission denied");
