@@ -217,16 +217,16 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			});
 	}
 
-	public void saveAttachment(OfficeAttachmentDTO dto,Long spaceId ){
+	public void saveAttachment(OfficeAttachmentDTO dto, Long spaceId) {
 		Attachment attachment = ConvertHelper.convert(dto, Attachment.class);
 		attachment.setOwnerId(spaceId);
 		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		attachment.setCreatorUid(UserContext.current().getUser().getId());
 
-		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);	
+		this.attachmentProvider.createAttachment(EhOfficeCubicleAttachments.class, attachment);
 	}
-	 
-	public void saveCategory(OfficeCategoryDTO dto,Long spaceId ){
+
+	public void saveCategory(OfficeCategoryDTO dto, Long spaceId) {
 		OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 		category.setSpaceSize(dto.getSize());
 		category.setSpaceId(spaceId);
@@ -268,10 +268,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setOrders(new ArrayList<OfficeOrderDTO>());
 		orders.forEach((other) -> {
-			OfficeOrderDTO dto = ConvertHelper.convert(other, OfficeOrderDTO.class);
-			dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
-					.getUser().getId()));
-			dto.setReserveTime(other.getReserveTime().getTime());
+			OfficeOrderDTO dto =  this.convertOfficeOrderDTO(other);
 			response.getOrders().add(dto);
 		});
 
@@ -490,12 +487,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if (null == orders)
 			return resp;
 		orders.forEach((other) -> {
-			OfficeOrderDTO dto = ConvertHelper.convert(other, OfficeOrderDTO.class);
-			dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
-					.getUser().getId()));
+			OfficeOrderDTO dto = this.convertOfficeOrderDTO(other);
 			resp.add(dto);
 		});
 		return resp;
+	}
+
+	public OfficeOrderDTO convertOfficeOrderDTO(OfficeCubicleOrder other) {
+		OfficeOrderDTO dto = ConvertHelper.convert(other, OfficeOrderDTO.class);
+		dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
+				.getUser().getId()));
+		dto.setReserveTime(other.getReserveTime().getTime());
+		return dto;
 	}
 
 	@Override
