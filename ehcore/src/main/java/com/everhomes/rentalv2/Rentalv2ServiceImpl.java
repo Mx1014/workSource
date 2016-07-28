@@ -1252,20 +1252,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice());
 					}
 					else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
-						int multiple =0;
+						double multiple =0.0;
 						//满天减免
 						if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
 							for(Date rentalDate:dayMap.keySet()){
 								for(String resourceNumber : dayMap.get(rentalDate).keySet())
 									if(dayMap.get(rentalDate).get(resourceNumber).size()>=2)
-										multiple++;
+										multiple = multiple+cmd.getRules().get(0).getRentalCount();
 							}
 						}
 						else if (rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 							for(Date rentalDate:dayMap.keySet()){
 								for(String resourceNumber : dayMap.get(rentalDate).keySet())
 									if(dayMap.get(rentalDate).get(resourceNumber).size()>=3)
-										multiple++;
+										multiple =multiple+cmd.getRules().get(0).getRentalCount();
 							}
 						}
 						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
