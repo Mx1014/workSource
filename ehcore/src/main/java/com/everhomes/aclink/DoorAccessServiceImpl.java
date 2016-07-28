@@ -2076,9 +2076,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         qrRequest.setStartTime(Long.toString(System.currentTimeMillis() - 5000));
         
         List<Long> floorIds = new ArrayList<Long>();
-        floorIds.add(8l);
+        floorIds.add(cmd.getDoorNumber());
         qrRequest.setFloorIds(floorIds);
-        qrRequest.setAutoFloorId(8l);
+        qrRequest.setAutoFloorId(cmd.getDoorNumber());
         
         Aclink dAc = aclinkProvider.getAclinkByDoorId(cmd.getDoorId());
         qrRequest.setLingLingId(dAc.getDeviceName());
@@ -2095,6 +2095,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setOwnerType(doorAccess.getOwnerType());
         auth.setOwnerId(doorAccess.getOwnerId());
         auth.setStatus(DoorAuthStatus.VALID.getCode());
+        auth.setCurrStorey(cmd.getDoorNumber());
         doorAuthProvider.createDoorAuth(auth);
         
         String nickName = user.getNickName();
