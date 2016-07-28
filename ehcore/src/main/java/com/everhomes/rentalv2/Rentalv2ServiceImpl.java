@@ -481,6 +481,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return response;
 		} 
 		response = ConvertHelper.convert(defaultRule, QueryDefaultRuleAdminResponse.class);
+		response.setSiteCounts(defaultRule.getResourceCounts());
 		response.setBeginDate(defaultRule.getBeginDate().getTime());
 		response.setEndDate(defaultRule.getEndDate().getTime());
 		response.setOpenWeekday(new ArrayList<Integer>());
@@ -537,6 +538,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
 		}
+		if(null==cmd.getSiteCounts()) 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts can not be null"); 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalDefaultRule newDefaultRule = ConvertHelper.convert(cmd, RentalDefaultRule.class); 
 			if(null==newDefaultRule.getCancelFlag())
