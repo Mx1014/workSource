@@ -920,7 +920,7 @@ public class UserProviderImpl implements UserProvider {
                 
                 context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
                 .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
-                .join(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                .rightOuterJoin(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
                         .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())))
                         .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
                                 .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())))
