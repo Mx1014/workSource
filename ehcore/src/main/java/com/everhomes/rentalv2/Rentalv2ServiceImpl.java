@@ -1176,7 +1176,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				
 				
 				//给半天预定的日期map加入am和pm的byte
-				if(rs.getRentalType().equals(RentalType.HALFDAY)||rs.getRentalType().equals(RentalType.THREETIMEADAY)){
+				if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())||rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 					if(null==dayMap.get(rentalSiteRule.getResourceRentalDate()))
 						dayMap.put(rentalSiteRule.getResourceRentalDate(), new HashMap<String,Set<Byte>>());
 					if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
@@ -1254,14 +1254,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
 						int multiple =0;
 						//满天减免
-						if(rs.getRentalType().equals(RentalType.HALFDAY)){
+						if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
 							for(Date rentalDate:dayMap.keySet()){
 								for(String resourceNumber : dayMap.get(rentalDate).keySet())
 									if(dayMap.get(rentalDate).get(resourceNumber).size()>=2)
 										multiple++;
 							}
 						}
-						else if (rs.getRentalType().equals(RentalType.THREETIMEADAY)){
+						else if (rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 							for(Date rentalDate:dayMap.keySet()){
 								for(String resourceNumber : dayMap.get(rentalDate).keySet())
 									if(dayMap.get(rentalDate).get(resourceNumber).size()>=3)
