@@ -227,6 +227,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	}
 
 	public void saveCategory(OfficeCategoryDTO dto, Long spaceId) {
+		if (null == dto.getSize())
+			return;
 		OfficeCubicleCategory category = ConvertHelper.convert(dto, OfficeCubicleCategory.class);
 		category.setSpaceSize(dto.getSize());
 		category.setSpaceId(spaceId);
@@ -268,7 +270,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setOrders(new ArrayList<OfficeOrderDTO>());
 		orders.forEach((other) -> {
-			OfficeOrderDTO dto =  this.convertOfficeOrderDTO(other);
+			OfficeOrderDTO dto = this.convertOfficeOrderDTO(other);
 			response.getOrders().add(dto);
 		});
 
