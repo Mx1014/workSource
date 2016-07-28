@@ -71,6 +71,8 @@ import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -101,6 +103,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private AttachmentProvider attachmentProvider;
+	@Autowired
+	private UserProvider userProvider;
 
 	@Override
 	public SearchSpacesAdminResponse searchSpaces(SearchSpacesAdminCommand cmd) {
@@ -135,7 +139,21 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	 * */
 	private OfficeSpaceDTO convertSpaceDTO(OfficeCubicleSpace other) {
 		// dto需要对图片，attachments ，category 做特殊处理
+		if (null == other) {
+			OfficeSpaceDTO dto = new OfficeSpaceDTO();
+			dto.setStatus(OfficeStatus.DELETED.getCode());
+			return dto;
+		}
 		OfficeSpaceDTO dto = ConvertHelper.convert(other, OfficeSpaceDTO.class);
+		if (null != other.getManagerUid()) 
+		{
+			User manager = this.userProvider.findUserById(other.getManagerUid());
+			if (null != manager) {
+				dto.setManagerName(manager.getNickName());
+				UserIdentifier identifier = this.userProvider.listUserIdentifiersOfUser(manager.getId()).get(0);
+				dto.setManagerPhone(identifier.getIdentifierToken());
+			}
+		}
 		dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
 				.getUser().getId()));
 
@@ -512,7 +530,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		sb.append("\n公司名称:");
 		sb.append(order.getReserveEnterprise());
 		sb.append("\n您可以登陆管理后台查看详情");
-		sendMessageToUser(order.getManagerUid(), sb.toString()); 
+		sendMessageToUser(order.getManagerUid(), sb.toString());
 		// 小红点
 	}
 
@@ -527,7 +545,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		messageDto.setBody(content);
 		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 		LOGGER.debug("messageDTO : ++++ \n " + messageDto);
-		//发消息 +推送
+		// 发消息 +推送
 		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
 				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
