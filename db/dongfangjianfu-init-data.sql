@@ -601,4 +601,6 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (19339, 1002756, 240111044331053516, 239825274387101546, '东方建富大厦3栋-713', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (19340, 1002756, 240111044331053516, 239825274387101547, '东方建富大厦3栋-714', '0');
     
-   
+
+INSERT INTO `eh_organization_addresses` (`id`, `organization_id`, `address_id`, `status`, `creator_uid`, `create_time`, `operator_uid`, `process_code`, `process_details`, `proof_resource_uri`, `approve_time`, `update_time`, `building_id`, `building_name`) 
+VALUES ('112852', '1002756', '239825274387101455', '2', NULL, '2016-07-28 10:12:59', NULL, NULL, NULL, NULL, NULL, NULL, '179054', '东方建富大厦2栋');
