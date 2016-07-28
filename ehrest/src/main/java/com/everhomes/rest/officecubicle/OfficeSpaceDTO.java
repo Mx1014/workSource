@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
 *<li> description : 详情-html片	</li>
 *<li> coverUri : 封面图片uri</li>
 *<li> coverUrl : 封面图片url</li> 
+*<li> status : space 状态 2-普通 0-删除</li> 
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * </ul>
@@ -49,7 +50,7 @@ public class OfficeSpaceDTO {
 	private List<OfficeAttachmentDTO> attachments;
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
-
+	private Byte status;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -197,6 +198,14 @@ public class OfficeSpaceDTO {
 
 	public void setCategories(List<OfficeCategoryDTO> categories) {
 		this.categories = categories;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
  
 	
