@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -26,6 +27,7 @@ import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -53,6 +55,7 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentsCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
@@ -61,6 +64,7 @@ import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value = "Equipment Controller", site = "core")
@@ -628,4 +632,92 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /equipment/listRelatedOrgGroups</b>
+	 * <p>查看管理处</p>
+	 */
+	@RequestMapping("listRelatedOrgGroups")
+	@RestReturn(value = OrganizationDTO.class, collection = true)
+	public RestResponse listRelatedOrgGroups(ListRelatedOrgGroupsCommand cmd) {
+		
+		List<OrganizationDTO> groups = equipmentService.listRelatedOrgGroups(cmd);
+		
+		RestResponse response = new RestResponse(groups);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+     * <b>URL: /equipment/syncEquipmentStandardIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentStandardIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncEquipmentStandardIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        equipmentStandardSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
+     * <b>URL: /equipment/syncEquipmentIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncEquipmentIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        equipmentSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
+     * <b>URL: /equipment/syncEquipmentAccessoriesIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentAccessoriesIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncEquipmentAccessoriesIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        equipmentAccessoriesSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
+     * <b>URL: /equipment/syncEquipmentTasksIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentTasksIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncEquipmentTasksIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        equipmentTasksSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 }

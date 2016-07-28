@@ -16,6 +16,7 @@ import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -40,6 +41,7 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 
 public interface EquipmentService {
@@ -72,4 +74,5 @@ public interface EquipmentService {
 	List<EquipmentAttachmentDTO> listAttachmentsByEquipmentId(ListAttachmentsByEquipmentIdCommand cmd);
 	
 	void creatTaskByStandard(EquipmentInspectionEquipments equipment, EquipmentInspectionStandards standard);
+	List<OrganizationDTO> listRelatedOrgGroups(ListRelatedOrgGroupsCommand cmd);
 }

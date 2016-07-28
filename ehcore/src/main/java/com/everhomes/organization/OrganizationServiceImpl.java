@@ -6579,4 +6579,41 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    return resp;
 	}
+	
+	@Override
+	public List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag) {
+		
+		if(null == naviFlag){
+			naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
+		}
+		
+		
+		Organization org =  this.checkOrganization(id);
+
+		if(null == org){
+			return null;
+		}
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+		
+		if(0 == orgs.size()){
+			return null;
+		}
+		
+		List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
+		for (Organization organization : orgs) {
+			OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+			if(OrganizationNaviFlag.fromCode(naviFlag) == OrganizationNaviFlag.HIDE_NAVI){
+				if(OrganizationNaviFlag.fromCode(organization.getShowFlag()) == OrganizationNaviFlag.SHOW_NAVI){
+					rganizationDTOs.add(orgDto);
+				}
+			}else{
+				rganizationDTOs.add(orgDto);
+			}
+		}
+		
+		
+		return rganizationDTOs;
+	}
 }

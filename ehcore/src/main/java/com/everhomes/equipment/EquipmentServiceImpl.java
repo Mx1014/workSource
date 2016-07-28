@@ -125,7 +125,21 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
+
+
+
 
 
 
@@ -352,6 +366,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
+
+
+
+
+
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Role;
+import com.everhomes.acl.RoleAssignment;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
@@ -380,6 +404,7 @@ import com.everhomes.quality.QualityInspectionTasks;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -411,6 +436,7 @@ import com.everhomes.rest.equipment.ImportDataType;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -441,7 +467,10 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMenuResponse;
+import com.everhomes.rest.organization.OrganizationNaviFlag;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.quality.EvaluationDTO;
 import com.everhomes.rest.quality.GroupUserDTO;
@@ -536,6 +565,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+    private AclProvider aclProvider;
 
 
 	@Override
@@ -2314,6 +2346,55 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}).collect(Collectors.toList());
 		
 		return dtos;
+	}
+
+	@Override
+	public List<OrganizationDTO> listRelatedOrgGroups(ListRelatedOrgGroupsCommand cmd) {
+		User user = UserContext.current().getUser();
+		boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN 
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN 
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					break;
+				}
+			}
+		}
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		
+		if(isAdmin) {
+			List<OrganizationDTO> orgs = organizationService.listAllChildrenOrganizationMenusWithoutMenuStyle(cmd.getOwnerId(), 
+					groupTypes, OrganizationNaviFlag.HIDE_NAVI.getCode());
+			
+			return orgs;
+		} else {
+			List<OrganizationDTO> groupDtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), 
+					user.getId(), OrganizationGroupType.GROUP);
+			List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
+			
+			if(null == groupDtos || groupDtos.size() == 0) {
+				return null;
+			} else {
+				for(OrganizationDTO group : groupDtos) {
+					List<RoleAssignment> res = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), group.getId(), EntityType.USER.getCode(), user.getId());
+					if(null != resources && 0 != resources.size()){
+						for (RoleAssignment resource : res) {
+							if(resource.getRoleId() == RoleConstants.EQUIPMENT_MANAGER) {
+								dtos.add(group);
+								break;
+							}
+						}
+					}
+				}
+			}
+			return dtos;
+		}
 	}
 
 }
