@@ -3452,8 +3452,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			cmd.setStatus(new ArrayList<Byte>());
 //			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
 //		}
-		List<Byte> status = new ArrayList<Byte>();
-		status.add(RentalSiteStatus.NORMAL.getCode());
+		//查全部
+		
+//		List<Byte> status = new ArrayList<Byte>();
+//		status.add(RentalSiteStatus.NORMAL.getCode());
 		List<Long> siteIds = null;
 		if(null!= cmd.getOwnerType()){
 			siteIds = new ArrayList<>();
@@ -3464,7 +3466,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}   
 		}
 		List<RentalResource> rentalSites = rentalProvider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize,status,siteIds,cmd.getCommunityId());
+				locator, pageSize,null,siteIds,cmd.getCommunityId());
 		if(null==rentalSites)
 			return response;
 
