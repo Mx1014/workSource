@@ -19,7 +19,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 
     
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(1003092, UUID(), 'ibase', '东方建富', 1, 1, 1002756, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180771, 1, 0); 
+	VALUES(1003092, UUID(), '深圳市东方建富实业有限公司', '深圳市东方建富实业有限公司', 1, 1, 1002756, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180771, 1, 0); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(180771, UUID(), 0, 2, 'EhGroups', 1003092,'东方建富','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
 
