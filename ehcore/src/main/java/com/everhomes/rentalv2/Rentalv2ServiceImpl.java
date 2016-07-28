@@ -227,7 +227,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
     private final Long MILLISECONDGMT=8*3600*1000L;
 	// N分钟后取消
-	private Long cancelTime = 5 * 60 * 1000L;
+	private Long cancelTime = 15 * 60 * 1000L;
 	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Rentalv2ServiceImpl.class);

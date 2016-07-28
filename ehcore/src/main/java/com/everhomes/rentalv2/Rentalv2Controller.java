@@ -485,7 +485,7 @@ public class Rentalv2Controller extends ControllerBase {
 	/**
 	 * <b>URL: /rental/deleteRentalBill</b>
 	 * <p>
-	 * 取消订单
+	 * 删除订单-前端不展示
 	 * </p>
 	 */
 	@RequestMapping("deleteRentalBill")
