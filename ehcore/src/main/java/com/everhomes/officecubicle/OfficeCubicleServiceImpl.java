@@ -35,8 +35,14 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.officecubicle.AddSpaceOrderCommand;
 import com.everhomes.rest.officecubicle.CityDTO;
 import com.everhomes.rest.officecubicle.DeleteSpaceCommand;
@@ -60,8 +66,10 @@ import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminCommand;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
 import com.everhomes.rest.officecubicle.admin.UpdateSpaceCommand;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -75,6 +83,9 @@ import com.everhomes.util.RuntimeErrorException;
 public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OfficeCubicleController.class);
+
+	@Autowired
+	private MessagingService messagingService;
 
 	SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -479,6 +490,40 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		order.setStatus(OfficeOrderStatus.NORMAL.getCode());
 		this.officeCubicleProvider.createOrder(order);
 
+		// 发消息 +推送
+		StringBuffer sb = new StringBuffer();
+		sb.append("您收到一条");
+		sb.append(space.getName());
+		sb.append("的工位预定订单:\n工位类型:");
+		sb.append(OfficeRentType.fromCode(order.getRentType()).getMsg());
+		sb.append("(");
+		sb.append(order.getSpaceSize());
+		sb.append(OfficeSpaceType.fromCode(order.getSpaceType()).getMsg());
+		sb.append(")\n预订人:");
+		sb.append(order.getReserverName());
+		sb.append("\n手机号:");
+		sb.append(order.getReserveContactToken());
+		sb.append("\n公司名称:");
+		sb.append(order.getReserveEnterprise());
+		sb.append("\n您可以登陆管理后台查看详情");
+		sendMessageToUser(order.getManagerUid(), sb.toString()); 
+		// 小红点
+	}
+
+	private void sendMessageToUser(Long userId, String content) {
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+		messageDto
+				.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+		LOGGER.debug("messageDTO : ++++ \n " + messageDto);
+		//发消息 +推送
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
 	@Override
