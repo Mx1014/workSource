@@ -30,6 +30,8 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetShortMessageCommand;
+import com.everhomes.rest.aclink.GetShortMessageResponse;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
@@ -126,4 +128,6 @@ public interface DoorAccessService {
     DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd);
 
     ListDoorAccessQRKeyResponse updateAndQueryQR(AclinkUpdateLinglingStoreyCommand cmd);
+
+    GetShortMessageResponse getShortMessages(GetShortMessageCommand cmd);
 }

@@ -103,6 +103,8 @@ import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetShortMessageCommand;
+import com.everhomes.rest.aclink.GetShortMessageResponse;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
@@ -1713,6 +1715,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
         
+        resp.setQrTimeout(this.configProvider.getLongValue(AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60*60));
+        
         for(DoorAuth auth : auths) {
             
             if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
@@ -2322,5 +2326,19 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             this.doorAuthProvider.updateDoorAuth(auth);
         }
         return listDoorAccessQRKey();
+    }
+    
+    @Override
+    public GetShortMessageResponse getShortMessages(GetShortMessageCommand cmd) {
+        GetShortMessageResponse resp = new GetShortMessageResponse();
+        resp.setMessages(new ArrayList<String>());
+        
+        String msg = this.configProvider.getValue(AclinkConstant.ACLINK_VISITOR_SHORTS, "");
+        String[] msgs = msg.split("|");
+        for(String m : msgs) {
+            resp.getMessages().add(m);
+        }
+        
+        return resp;
     }
 }

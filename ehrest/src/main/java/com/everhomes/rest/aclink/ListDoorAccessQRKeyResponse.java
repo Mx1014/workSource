@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
 public class ListDoorAccessQRKeyResponse {
     @ItemType(DoorAccessQRKeyDTO.class)
     List<DoorAccessQRKeyDTO> keys;
+    
+    Long qrTimeout;
 
     public List<DoorAccessQRKeyDTO> getKeys() {
         return keys;
@@ -16,7 +18,15 @@ public class ListDoorAccessQRKeyResponse {
     public void setKeys(List<DoorAccessQRKeyDTO> keys) {
         this.keys = keys;
     }
-    
+
+    public Long getQrTimeout() {
+        return qrTimeout;
+    }
+
+    public void setQrTimeout(Long qrTimeout) {
+        this.qrTimeout = qrTimeout;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

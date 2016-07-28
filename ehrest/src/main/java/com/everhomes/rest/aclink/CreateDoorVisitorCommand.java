@@ -2,6 +2,8 @@ package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul> 添加访客授权。
  * <li>phone: 电话</li>
@@ -24,6 +26,7 @@ public class CreateDoorVisitorCommand {
     private String visitorEvent;
     private String organization;
     private String description;
+    private Long doorNumber;
     
     public String getPhone() {
         return phone;
@@ -66,5 +69,16 @@ public class CreateDoorVisitorCommand {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+    public Long getDoorNumber() {
+        return doorNumber;
+    }
+    public void setDoorNumber(Long doorNumber) {
+        this.doorNumber = doorNumber;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
