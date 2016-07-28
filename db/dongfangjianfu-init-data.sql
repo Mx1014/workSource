@@ -603,4 +603,4 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
     
 
 INSERT INTO `eh_organization_addresses` (`id`, `organization_id`, `address_id`, `status`, `creator_uid`, `create_time`, `operator_uid`, `process_code`, `process_details`, `proof_resource_uri`, `approve_time`, `update_time`, `building_id`, `building_name`) 
-VALUES ('112852', '1002756', '239825274387101455', '2', NULL, '2016-07-28 10:12:59', NULL, NULL, NULL, NULL, NULL, NULL, '179054', '东方建富大厦2栋');
+VALUES ('112852', '1002756', '239825274387101455', '2', NULL, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, '179054', '东方建富大厦2栋');
