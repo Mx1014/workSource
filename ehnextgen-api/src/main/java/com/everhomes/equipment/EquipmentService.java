@@ -70,4 +70,6 @@ public interface EquipmentService {
 	EquipmentsDTO findEquipment(DeleteEquipmentsCommand cmd);
 	List<EquipmentParameterDTO> listParametersByEquipmentId(DeleteEquipmentsCommand cmd);
 	List<EquipmentAttachmentDTO> listAttachmentsByEquipmentId(ListAttachmentsByEquipmentIdCommand cmd);
+	
+	void creatTaskByStandard(EquipmentInspectionEquipments equipment, EquipmentInspectionStandards standard);
 }

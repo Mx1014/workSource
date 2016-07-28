@@ -21,7 +21,6 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateEquipmentStandardCommand {
 	
-	@NotNull
 	private Long id;
 
 	@NotNull

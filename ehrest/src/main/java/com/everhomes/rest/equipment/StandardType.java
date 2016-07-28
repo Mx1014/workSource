@@ -1,5 +1,6 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -36,6 +37,16 @@ public enum StandardType {
 		}
 		return null;
 	}
+	
+	public static StandardType fromName(String name) {
+        for(StandardType value : StandardType.values()) {
+            if(value.name.equals(name)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
 	
 	@Override
 	public String toString() {

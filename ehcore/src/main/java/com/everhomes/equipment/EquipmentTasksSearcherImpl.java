@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
@@ -47,6 +49,9 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -179,6 +184,31 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         	EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(id);
         	EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 
+        	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId(), task.getOwnerType(), task.getOwnerId());
+            if(null != standard) {
+            	dto.setTaskType(standard.getStandardType());
+            }
+            
+            EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId(), task.getOwnerType(), task.getOwnerId());
+            if(null != equipment) {
+            	dto.setEquipmentName(equipment.getName());
+            	dto.setEquipmentLocation(equipment.getLocation());
+            }
+            
+            if(task.getExecutorId() != null && task.getExecutorId() != 0) {
+            	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getExecutiveGroupId());
+            	if(executor != null) {
+            		dto.setExecutorName(executor.getContactName());
+            	}
+        	}
+        	
+        	if(task.getOperatorId() != null && task.getOperatorId() != 0) {
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+            	if(operator != null) {
+            		dto.setOperatorName(operator.getContactName());
+            	}
+        	}
+        	
         	tasks.add(dto);
         }
         response.setTasks(tasks);

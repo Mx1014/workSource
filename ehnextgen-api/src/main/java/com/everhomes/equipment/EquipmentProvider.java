@@ -50,5 +50,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);
 	
+	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
+	
 
 }

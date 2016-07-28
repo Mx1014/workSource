@@ -19,8 +19,8 @@ public enum CoordinationLocks {
     CREATE_QUALITY_TASK("quality.task.create"),
     PAYMENT_CARD("payment.card"),
 	UPDATE_NEWS("news.update"),
-	SCHEDULE_EQUIPMENT_TASK("quality.equipment.schedule"),
-    CREATE_EQUIPMENT_TASK("quality.equipment.create"),;
+	SCHEDULE_EQUIPMENT_TASK("equipment.task.schedule"),
+    CREATE_EQUIPMENT_TASK("equipment.task.create"),;
     
 
     private String code;

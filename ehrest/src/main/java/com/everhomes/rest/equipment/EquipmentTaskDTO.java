@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *  <li>standardId: 标准id</li>
  *  <li>standardName: 标准名称</li>
  *  <li>equipmentId: 设备id</li>
+ *  <li>equipmentName: 设备名称</li>
+ *  <li>equipmentLocation: 设备名称</li>
  *  <li>parentId: 父任务id</li>
  *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>
@@ -33,7 +35,7 @@ import com.everhomes.util.StringHelper;
  *  <li>processTime: 维修执行上报时间</li>
  *  <li>status: 执行状态 参考{@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
- *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.quality.QualityInspectionTaskReviewResult}</li>
+ *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>standardDescription: 标准内容</li>
  * </ul>
  */
@@ -46,6 +48,10 @@ public class EquipmentTaskDTO {
 	
 	private Long equipmentId;
 	
+	private String equipmentName;
+	
+	private String equipmentLocation;
+	
 	private Long parentId;
 	
 	private Long childCount;
@@ -53,6 +59,8 @@ public class EquipmentTaskDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+	
+	private Byte taskType;
 	
 	private String taskName;
 	
@@ -130,6 +138,22 @@ public class EquipmentTaskDTO {
 		this.equipmentId = equipmentId;
 	}
 
+	public String getEquipmentName() {
+		return equipmentName;
+	}
+
+	public void setEquipmentName(String equipmentName) {
+		this.equipmentName = equipmentName;
+	}
+
+	public String getEquipmentLocation() {
+		return equipmentLocation;
+	}
+
+	public void setEquipmentLocation(String equipmentLocation) {
+		this.equipmentLocation = equipmentLocation;
+	}
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -160,6 +184,14 @@ public class EquipmentTaskDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Byte getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(Byte taskType) {
+		this.taskType = taskType;
 	}
 
 	public String getTaskName() {
