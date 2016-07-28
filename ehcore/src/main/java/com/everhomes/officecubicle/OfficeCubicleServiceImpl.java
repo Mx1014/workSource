@@ -162,6 +162,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void addSpace(AddSpaceCommand cmd) {
+		if (null == cmd.getManagerUid())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of Categories error: null ");
 		if (null == cmd.getCategories())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
@@ -191,6 +194,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public void updateSpace(UpdateSpaceCommand cmd) {
+		if (null == cmd.getManagerUid())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of Categories error: null ");
 		if (null == cmd.getCategories())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter of Categories error: null ");
