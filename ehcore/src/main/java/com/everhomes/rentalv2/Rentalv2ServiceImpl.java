@@ -1237,30 +1237,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			
 			if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
 				//优惠
-				if(DiscountType.FULL_MOENY_CUT_MONEY.equals(rs.getDiscountType())){
-					//满减优惠
-					int multiple =  siteTotalMoney.intValue()/rs.getFullPrice().intValue();
-					siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
-				}
-				else if(DiscountType.FULL_DAY_CUT_MONEY.equals(rs.getDiscountType()) ){
-					int multiple =0;
-					//满天减免
-					if(rs.getRentalType().equals(RentalType.HALFDAY)){
-						for(Date rentalDate:dayMap.keySet()){
-							for(String resourceNumber : dayMap.get(rentalDate).keySet())
-								if(dayMap.get(rentalDate).get(resourceNumber).size()>=2)
-									multiple++;
-						}
+				if(rs.getDiscountType()!=null)
+					if(	rs.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
+						//满减优惠
+						int multiple =  siteTotalMoney.intValue()/rs.getFullPrice().intValue();
+						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 					}
-					else if (rs.getRentalType().equals(RentalType.THREETIMEADAY)){
-						for(Date rentalDate:dayMap.keySet()){
-							for(String resourceNumber : dayMap.get(rentalDate).keySet())
-								if(dayMap.get(rentalDate).get(resourceNumber).size()>=3)
-									multiple++;
+					else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
+						int multiple =0;
+						//满天减免
+						if(rs.getRentalType().equals(RentalType.HALFDAY)){
+							for(Date rentalDate:dayMap.keySet()){
+								for(String resourceNumber : dayMap.get(rentalDate).keySet())
+									if(dayMap.get(rentalDate).get(resourceNumber).size()>=2)
+										multiple++;
+							}
 						}
+						else if (rs.getRentalType().equals(RentalType.THREETIMEADAY)){
+							for(Date rentalDate:dayMap.keySet()){
+								for(String resourceNumber : dayMap.get(rentalDate).keySet())
+									if(dayMap.get(rentalDate).get(resourceNumber).size()>=3)
+										multiple++;
+							}
+						}
+						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 					}
-					siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
-				}
 			}
 			//不可以在开始时间-最多提前时间之前 预定 太早了
 			if (reserveTime.before(new java.util.Date(rentalBill.getStartTime().getTime()
