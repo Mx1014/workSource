@@ -983,12 +983,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
 		if(cmd.getEqParameter() != null) {
 			for(EquipmentParameterDTO para : cmd.getEqParameter()) {
+				para.setEquipmentId(equipment.getId());
 				updateEquipmentParameter(para);
 				eqParameter.add(para);
 			}
 		}
 		if(cmd.getEqAccessoryMap() != null) {
 			for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+				map.setEquipmentId(equipment.getId());
 				updateEquipmentAccessoryMap(map);
 				eqAccessoryMap.add(map);
 			}
@@ -996,6 +998,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		if(cmd.getAttachments() != null) {
 			for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+				attachment.setEquipmentId(equipment.getId());
 				updateEquipmentAttachment(attachment, user.getId());
 				attachments.add(attachment);
 			}
