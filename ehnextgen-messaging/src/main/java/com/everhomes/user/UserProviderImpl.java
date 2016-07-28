@@ -16,6 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -918,14 +919,20 @@ public class UserProviderImpl implements UserProvider {
                     cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
                 }
                 
-                context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
+                SelectOffsetStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
                 .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
-                .join(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                .rightOuterJoin(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
                         .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())))
                         .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
                                 .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())))
-                        .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2)
-                .fetch().map(r -> {
+                        .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2);
+                query.fetch().map(r -> {
+                    
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("Query users sql=" + query.getSQL());
+//                        LOGGER.debug("Query users bindValues=" + query.getBindValues());
+//                    }
+                    
                     if(list.size() >= pageSize) {
                         return null;
                     }
