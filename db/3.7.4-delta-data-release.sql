@@ -222,3 +222,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 门禁配置
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.qr_timeout', '6000', 'timeout in second for qr');
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.visitor_shorts', '临时来访|入职|面试|送货|出差|开会|施工|其它原因', 'shorts for visitors');
+
+-- 预约2.0配置支付host
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.zuolin.refound','POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record','退款的api','999989',NULL);
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.zuolin.host','https://pay.zuolin.com','退款的host','999989',NULL);
