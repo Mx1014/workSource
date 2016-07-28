@@ -1803,8 +1803,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(attachment.getAttachmentType().equals(AttachmentType.ATTACHMENT.getCode())){
 				attachmentDTO.setResourceUrl(this.contentServerService.parserUri(attachment.getContent(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 				ContentServerResource csr = this.contentServerService.findResourceByUri(attachment.getContent());
-				attachmentDTO.setResourceName(csr.getResourceName());
-				attachmentDTO.setResourceSize(csr.getResourceSize());
+				if(csr!=null){
+					attachmentDTO.setResourceName(csr.getResourceName());
+					attachmentDTO.setResourceSize(csr.getResourceSize());
+				}
 			}
 			attachmentDTO.setContent(attachment.getContent());
 			 
