@@ -66,20 +66,20 @@ public class UpdateRentalOrderStatusToPayingFinalAction implements Runnable {
 			//TODO: 发通知
 			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 //			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
-			StringBuffer sb = new StringBuffer();
-			sb.append("您预定的："); 
-			sb.append(site.getResourceName());
-			sb.append("(时间:");
-			if (site.getRentalType().equals(RentalType.HOUR)){
-				SimpleDateFormat  datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				sb.append(datetimeSF.format(rentalBill.getStartTime()));
-			}else{
-				SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-				sb.append(dateSF.format(rentalBill.getRentalDate()));
-			}
-			sb.append(")");
-			sb.append("需要支付全款了！请速速支付，小心超期被取消哦^ ^"); 
-			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
+//			StringBuffer sb = new StringBuffer();
+//			sb.append("您预定的："); 
+//			sb.append(site.getResourceName());
+//			sb.append("(时间:");
+//			if (site.getRentalType().equals(RentalType.HOUR)){
+//				SimpleDateFormat  datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//				sb.append(datetimeSF.format(rentalBill.getStartTime()));
+//			}else{
+//				SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+//				sb.append(dateSF.format(rentalBill.getRentalDate()));
+//			}
+//			sb.append(")");
+//			sb.append("需要支付全款了！请速速支付，小心超期被取消哦^ ^"); 
+//			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
 		}
 	}
 
