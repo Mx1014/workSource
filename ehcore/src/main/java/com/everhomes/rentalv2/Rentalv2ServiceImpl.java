@@ -1240,7 +1240,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(rs.getDiscountType()!=null)
 					if(	rs.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
 						//满减优惠
-						int multiple =  siteTotalMoney.intValue()/rs.getFullPrice().intValue();
+						int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
 						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 					}
 					else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
