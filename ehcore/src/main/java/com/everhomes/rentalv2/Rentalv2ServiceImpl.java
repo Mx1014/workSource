@@ -2587,13 +2587,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public void deleteRentalBill(DeleteRentalBillCommand cmd) {
-
-		if(null!=cmd.getCommunityId()){
-			cmd.setOwnerId(cmd.getCommunityId());
-			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
-		}
-
+	public void deleteRentalBill(DeleteRentalBillCommand cmd) { 
 		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
 
 	}

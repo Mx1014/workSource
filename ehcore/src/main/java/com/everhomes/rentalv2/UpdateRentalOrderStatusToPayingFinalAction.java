@@ -57,7 +57,7 @@ public class UpdateRentalOrderStatusToPayingFinalAction implements Runnable {
 	}
 	@Override
 	public void run() {
-		// 如果还没成功付全款，则取消订单
+		// 变成可支付全款
 		RentalOrder rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
 		if ((!rentalBill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) && 
 				(!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()))) {

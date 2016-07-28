@@ -20,6 +20,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.rentalv2.RentalType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -63,8 +64,10 @@ public class CancelLockedRentalOrderAction implements Runnable {
 		RentalOrder rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
 		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
+			rentalBill.setVisibleFlag(VisibleFlag.UNVISIBLE.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
-			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
+			rentalProvider.deleteRentalBillById(rentalBill.getId());
+//			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 //			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 //			StringBuffer sb = new StringBuffer();
 //			sb.append("您预定的："); 
