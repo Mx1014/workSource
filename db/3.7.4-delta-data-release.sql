@@ -1,4 +1,3 @@
-delete from eh_launch_pad_items where target_type='biz' and `target_id`>0 and scope_code = 0;
 
 INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES ('business.realm', 'biz', 'business realm');
 INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES ('business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14477417463124576784%3F_k%3Dzlbiz#sign_suffix', 'business url');
@@ -60,6 +59,17 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),310,11100,'官方活动',0,1,'官方活动',16);
 
 
+-- 门禁配置
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.qr_driver_type', 'zuolin', 'the driver type of this namespace.(zuolin/lingling)');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_type', 'zuolin', 'zuolin for techpark');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999990, 'aclink.qr_driver_type', 'lingling', 'lingling for chuneng');
+
+
+
+-- 删除所有电商内容  by yanshaofan
+DELETE FROM `eh_launch_pad_items` where target_type='biz' and `target_id`>0 and scope_code = 0;
+
+
 -- add service market items for techpark by lqs 20160725
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' WHERE `id`=11 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}' WHERE `id`=111 AND `namespace_id`=1000000;
@@ -72,26 +82,6 @@ UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016031201","v
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016031201","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1}]}' WHERE `id`=2 AND `namespace_id`=0;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016031201","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1}]}' WHERE `id`=3 AND `namespace_id`=0;
 
--- 1 | 市场动态     | Coupons    | default      |
--- 2 | 优惠券       | Coupons    | default      |
--- 3 | 市场动态     | Coupons    | park_tourist |
--- 4 | 优惠券       | Coupons    | park_tourist |
--- 5 | 市场动态     | Coupons    | pm_admin     |
--- 6 | 优惠券       | Coupons    | pm_admin     |
--- DELETE FROM `eh_launch_pad_items` WHERE `id` IN (1, 2, 3, 4, 5, 6) AND `namespace_id`=0;
--- 删除通讯录
--- DELETE FROM `eh_launch_pad_items` WHERE `id` IN (10428, 10435) AND `item_label` LIKE '%通讯录%';
---  9 | 任务管理     | GovAgencies | pm_admin   |
--- 12 | 公告管理     | GovAgencies | pm_admin   |
--- UPDATE `eh_launch_pad_items` SET `item_group`='Bizs' WHERE `id`=9 AND `namespace_id`=0;
--- UPDATE `eh_launch_pad_items` SET `item_group`='Bizs' WHERE `id`=12 AND `namespace_id`=0;
--- 31 | /home/NoticeManager | GaActions     | PUBLIC_NOTICE     | 发布公告      (无用记录)
--- DELETE FROM `eh_launch_pad_items` WHERE `id`=31 AND `namespace_id`=0;
-
--- 门禁配置
-INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.qr_driver_type', 'zuolin', 'the driver type of this namespace.(zuolin/lingling)');
-INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_type', 'zuolin', 'zuolin for techpark');
-INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999990, 'aclink.qr_driver_type', 'lingling', 'lingling for chuneng');
 
 
 -- 重新组织左邻通用版本所有items by lqs 20160727
