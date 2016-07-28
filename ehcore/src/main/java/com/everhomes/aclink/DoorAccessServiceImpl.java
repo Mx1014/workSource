@@ -2335,7 +2335,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setMessages(new ArrayList<String>());
         
         String msg = this.configProvider.getValue(AclinkConstant.ACLINK_VISITOR_SHORTS, "");
-        String[] msgs = msg.split("|");
+        String[] msgs = msg.split("\\|");
         for(String m : msgs) {
             resp.getMessages().add(m);
         }
