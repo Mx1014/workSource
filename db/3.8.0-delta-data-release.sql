@@ -235,82 +235,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
  VALUES('15082','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":3,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
 
 -- 预约2.0的
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('3','资源类型','0',NULL,'0','999989');
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('3','资源预订','0',NULL,'0','999989');
 
 -- 工位预定广场配置 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
- VALUES('109789','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预定','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist');
+ VALUES('109789','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预订','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
- VALUES('109790','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预定','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin');
- 
- 
- -- 20160712
--- 根据具体情况去掉菜单 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES(47, 43300,'', 'EhNamespaces', 0 , 0);
-set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (558,0,'工位 招租管理','招租管理 全部功能',null);
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (559,0,'工位 入住申请','招租管理 全部功能',null);
-
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43300,'工位预订',40000,null,null,1,2,'/40000/43300','park',435);
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43310,'招租管理',43300,null,'station_booking_rent_manage',0,2,'/40000/43300/43310','park',436);
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43320,'入住申请',43300,null,'station_booking_enter_apply',0,2,'/40000/43300/43320','park',437);
-
-INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),558,43310,'招租管理',1,1,'招租管理 全部权限',341);
-INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),559,43320,'入住申请',1,1,'入住申请 全部权限',342);
-
--- 资源预订 by sfyan 20160727
-set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (565,0,'默认参数','默认参数 全部功能',null);
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (566,0,'资源发布','资源发布 全部功能',null);
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (567,0,'预定详情','预定详情 全部功能',null);
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (568,0,'退款处理','退款处理 全部功能',null);
-
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43400,'资源预订',40000,null,null,1,2,'/40000/43400','park',438);
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43410,'默认参数',43400,null,'rental_setting',0,2,'/40000/43400/43410','park',439);
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43420,'资源发布',43400,null,'rental_publish',0,2,'/40000/43400/43420','park',440);
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43430,'预定详情',43400,null,'rental_info',0,2,'/40000/43400/43430','park',441);
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43440,'退款处理',43400,null,'refund_management',0,2,'/40000/43400/43440','park',442);
-
-INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),565,43410,'默认参数',1,1,'默认参数  全部权限',343);
-INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),566,43420,'资源发布',1,1,'资源发布 全部权限',344);
-INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),567,43430,'预定详情',1,1,'预定详情  全部权限',345);
-INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),568,43440,'退款处理',1,1,'退款处理 全部权限',346);
-
-
--- ibase 去掉屏蔽  20160729 by sfyan
-DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 43310 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
-
--- 屏蔽资源预订 菜单 20160729 by sfyan 
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43400,'', 'EhNamespaces', 1000000 , 0);
-INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',1000000,0  FROM `eh_web_menus` WHERE `path` LIKE '%43400/%';
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43400,'', 'EhNamespaces', 999999 , 0);
-INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999999,0  FROM `eh_web_menus` WHERE `path` LIKE '%43400/%';
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43400,'', 'EhNamespaces', 999990 , 0);
-INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999990,0  FROM `eh_web_menus` WHERE `path` LIKE '%43400/%';
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43400,'', 'EhNamespaces', 999992 , 0);
-INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999992,0  FROM `eh_web_menus` WHERE `path` LIKE '%43400/%';
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 43400,'', 'EhNamespaces', 999993 , 0);
-INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999993,0  FROM `eh_web_menus` WHERE `path` LIKE '%43400/%';
-
--- 科技园的group 改成公司圈 20160729 by sfyan 
-UPDATE `eh_groups` SET `discriminator` = 'enterprise' WHERE `id` = 1000796;
+ VALUES('109790','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预订','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin');
