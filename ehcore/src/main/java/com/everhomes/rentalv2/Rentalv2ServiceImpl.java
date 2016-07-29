@@ -1358,11 +1358,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else {
 //					useDetailSB.append("使用时间:");
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-					if(rsr.getAmorpm().equals(AmorpmFlag.AM))
+					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
 						useDetailSB.append("早上 ");
-					if(rsr.getAmorpm().equals(AmorpmFlag.PM))
+					if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
 						useDetailSB.append("下午 ");
-					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT))
+					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
 						useDetailSB.append("晚上 ");
 				}
 				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
