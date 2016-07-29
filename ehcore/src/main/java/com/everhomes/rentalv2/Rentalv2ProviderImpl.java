@@ -1813,7 +1813,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalResourceNumber> result = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCE_NUMBERS.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_RESOURCE_NUMBERS.ID.asc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalResourceNumber.class);
 				});
 		if (null != result && result.size() > 0)
