@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>parentId: 父亲区域的ID</li>
  * <li>scope: 范围，参考{@link com.everhomes.rest.region.RegionScope}</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.region.RegionAdminStatus}</li>
+ * <li>namespaceId: 域空间id 没有默认取用户的</li>
  * <li>sortBy</li>
  * <li>sortOrder: 升降排序的方式，{@link com.everhomes.util.SortOrder}</li>
  * <li>keyword: 关键字</li>
@@ -19,7 +20,7 @@ public class ListRegionCommand {
     private Byte status;
     private String sortBy;
     private Byte sortOrder;
-    
+    private Integer namespaceId;
     private String keyword;
     
     public ListRegionCommand() {
@@ -77,4 +78,12 @@ public class ListRegionCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 }
