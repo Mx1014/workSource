@@ -566,49 +566,56 @@ public class ForumServiceImpl implements ForumService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
-        if(post != null) {
-            if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
-            	
-            	//查我发的贴&&当前用户=发帖人 && 发帖人=删帖人时 可以看到该帖 modified by xiongying 20160617
-            	if(getByOwnerId && post.getCreatorUid().equals(userId) && post.getCreatorUid().equals(post.getDeleterUid())) {
-            		this.forumProvider.populatePostAttachments(post);
-                    populatePost(userId, post, communityId, isDetail, getByOwnerId);
-                    return ConvertHelper.convert(post, PostDTO.class);
-            	} else {
-            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-            		return null;
-            	}
-            }
-                //Added by Janson
-//                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
-//                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
-//            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-////            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-////            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
-//            		return null;
-//            	}
-//            }
-//            
-            this.forumProvider.populatePostAttachments(post);
-            populatePost(userId, post, communityId, isDetail, getByOwnerId);
-            
-            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
-            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
-            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
-            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
-            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
-            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
-            } else {
-            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
-            }
-            
-            return dto;
+      //deal with eh_organization_tasks apply_entity_id = 0 issue modified by xiongying 20160729
+//      Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
+        if(topicId != null) {
+        	Post post = this.forumProvider.findPostById(topicId);
+	        if(post != null) {
+	            if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
+	            	
+	            	//查我发的贴&&当前用户=发帖人 && 发帖人=删帖人时 可以看到该帖 modified by xiongying 20160617
+	            	if(getByOwnerId && post.getCreatorUid().equals(userId) && post.getCreatorUid().equals(post.getDeleterUid())) {
+	            		this.forumProvider.populatePostAttachments(post);
+	                    populatePost(userId, post, communityId, isDetail, getByOwnerId);
+	                    return ConvertHelper.convert(post, PostDTO.class);
+	            	} else {
+	            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
+	            		return null;
+	            	}
+	            }
+	                //Added by Janson
+	//                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
+	//                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
+	//            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
+	////            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+	////            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+	//            		return null;
+	//            	}
+	//            }
+	//            
+	            this.forumProvider.populatePostAttachments(post);
+	            populatePost(userId, post, communityId, isDetail, getByOwnerId);
+	            
+	            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
+	            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+	            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
+	            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
+	            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
+	            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+	            } else {
+	            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+	            }
+	            
+	            return dto;
+	        } else {
+	            LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
+	            return null;
+	//            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+	//                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+	        }
         } else {
-            LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
+        	LOGGER.error("Forum post id may not be null, operatorId=" + userId );
             return null;
-//            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-//                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
     }
     

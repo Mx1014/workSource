@@ -2332,7 +2332,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         GetShortMessageResponse resp = new GetShortMessageResponse();
         resp.setMessages(new ArrayList<String>());
         
-        String msg = this.configProvider.getValue(AclinkConstant.ACLINK_VISITOR_SHORTS, "");
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        
+        String msg = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_VISITOR_SHORTS, "");
         String[] msgs = msg.split("\\|");
         for(String m : msgs) {
             resp.getMessages().add(m);
