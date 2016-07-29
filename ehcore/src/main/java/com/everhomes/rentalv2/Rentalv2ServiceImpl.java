@@ -1004,6 +1004,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rSiteDTO.setOwners(new ArrayList<SiteOwnerDTO>());
 			for(RentalSiteRange owner : owners){
 				SiteOwnerDTO dto = ConvertHelper.convert(owner, SiteOwnerDTO.class);
+				Community ownerCom = this.communityProvider.findCommunityById(owner.getOwnerId());
+				if(null != ownerCom)
+					dto.setOwnerName(ownerCom.getName());
 				rSiteDTO.getOwners().add(dto);
 			}
 		} 

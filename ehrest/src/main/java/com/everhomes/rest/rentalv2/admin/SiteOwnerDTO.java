@@ -6,11 +6,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 列出资源列表返回值(根据图标和园区)
  * <li>ownerType: 所属者类型， community， organization</li>
+ * <li>ownerName: 所属者名称</li>
  * <li>ownerId: 所属者id</li>
  * </ul>
  */
 public class SiteOwnerDTO {
 	private String ownerType;
+	private String ownerName;
 	private Long ownerId;
 
 	@Override
@@ -31,6 +33,12 @@ public class SiteOwnerDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+	public String getOwnerName() {
+		return ownerName;
+	}
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
 	}
 
 }
