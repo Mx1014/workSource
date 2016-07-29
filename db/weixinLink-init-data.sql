@@ -65,8 +65,8 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('124', 'app.agreements.url', 'https://core.zuolin.com/mobile/static/app_agreements/ibase_agreements.html', 'the relative path for chuneng app agreements', '999991', NULL);	
 	
-INSERT INTO `eh_version_realm` VALUES ('40', 'Android_WeinxinLink', null, UTC_TIMESTAMP(), '999991');
-INSERT INTO `eh_version_realm` VALUES ('41', 'iOS_WeinxinLink', null, UTC_TIMESTAMP(), '999991');
+INSERT INTO `eh_version_realm` VALUES ('40', 'Android_WeixinLink', null, UTC_TIMESTAMP(), '999991');
+INSERT INTO `eh_version_realm` VALUES ('41', 'iOS_WeixinLink', null, UTC_TIMESTAMP(), '999991');
 
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(47,40,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(48,41,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
