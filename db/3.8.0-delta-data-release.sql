@@ -294,3 +294,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),567,43430,'预定详情',1,1,'预定详情  全部权限',345);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),568,43440,'退款处理',1,1,'退款处理 全部权限',346);
+
+
+-- ibase 去掉屏蔽
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 43310 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
