@@ -1,3 +1,12 @@
+-- 电商链接配置alpha环境
+INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES ('business.realm', 'biz', 'business realm');
+INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES ('business.url', 'http://biz-alpha.lab.everhomes.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-alpha.lab.everhomes.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14646085111657370488%3F_k%3Dzlbiz#sign_suffix', 'business url');
+
+-- 电商链接配置beta环境
+-- INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES ('business.realm', 'biz', 'business realm');
+-- INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES ('business.url', 'https://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz-beta.zuolin.com%2Fnar%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14477417463124576784%3F_k%3Dzlbiz#sign_suffix', 'business url');
+
+
 -- 预约2.0配置支付host
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.zuolin.refound','POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record','退款的api','999989',NULL);
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.zuolin.host','https://pay-beta.zuolin.com','退款的host','999989',NULL);
