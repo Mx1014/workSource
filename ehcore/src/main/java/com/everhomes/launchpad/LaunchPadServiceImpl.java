@@ -699,10 +699,25 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         String sceneType = cmd.getCurrentSceneType();
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         
+        // 产品规则每个公司都有一个办公地点所在的园区/小区，故在公司场景也可以拿到小区ID
+        // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
+        Long communityId = null;
+        OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+        if(org != null) {
+            communityId = org.getCommunityId();
+        } else {
+            LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
+        }
+        
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
         
         //增加定制item流程 by sfyan 20160607
       	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(),cmd.getOrganizationId(),null);
+
+        // 如果只定制scope为公司的，则只有当前公司才能查到，其它公司就查不到，故补充也按园区查询 by lqs 20160729
+      	if(orgItems == null && communityId != null) {
+      	    orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), communityId, null);
+      	}
 
       	List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
       		
@@ -742,17 +757,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             }
             	
       	}
-        
-        
-        // 产品规则每个公司都有一个办公地点所在的园区/小区，故在公司场景也可以拿到小区ID
-        // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
-        Long communityId = null;
-        OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
-        if(org != null) {
-            communityId = org.getCommunityId();
-        } else {
-            LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
-        }
         
         return processLaunchPadItems(token, userId, communityId, allItems, request);
     }
