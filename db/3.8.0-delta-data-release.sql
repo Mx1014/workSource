@@ -2518,5 +2518,7 @@ UPDATE `eh_addresses` SET `apartment_floor`='58' WHERE `id`=239825274387099156;
 UPDATE `eh_addresses` SET `apartment_floor`='58' WHERE `id`=239825274387099157;
 UPDATE `eh_addresses` SET `apartment_floor`='58' WHERE `id`=239825274387099158;
 
+-- 威新看楼申请通知短信模板 20160729
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999991, 'sms.default.yzx', 9, 'zh_CN', '威新-看楼申请', '26943');  
 
 
