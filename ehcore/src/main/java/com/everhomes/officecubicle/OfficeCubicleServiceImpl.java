@@ -66,6 +66,7 @@ import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminCommand;
 import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
 import com.everhomes.rest.officecubicle.admin.UpdateSpaceCommand;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -145,13 +146,14 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			return dto;
 		}
 		OfficeSpaceDTO dto = ConvertHelper.convert(other, OfficeSpaceDTO.class);
-		if (null != other.getManagerUid()) 
-		{
+		if (null != other.getManagerUid()) {
 			User manager = this.userProvider.findUserById(other.getManagerUid());
 			if (null != manager) {
 				dto.setManagerName(manager.getNickName());
-				UserIdentifier identifier = this.userProvider.listUserIdentifiersOfUser(manager.getId()).get(0);
-				dto.setManagerPhone(identifier.getIdentifierToken());
+				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(other.getManagerUid(),
+						IdentifierType.MOBILE.getCode());
+				if (null != identifier)
+					dto.setManagerPhone(identifier.getIdentifierToken());
 			}
 		}
 		dto.setCoverUrl(this.contentServerService.parserUri(other.getCoverUri(), EntityType.USER.getCode(), UserContext.current()
