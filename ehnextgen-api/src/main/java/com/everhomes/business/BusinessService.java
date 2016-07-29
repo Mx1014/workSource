@@ -38,6 +38,9 @@ import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
 import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
+import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -90,4 +93,10 @@ public interface BusinessService {
 	void favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd, String baseScene);
 	
 	List<BusinessDTO> getBusinesses(List<Long> categoryIds,Long communityId);
+	Integer findUserCouponCount(UserCouponsCommand cmd);
+	void updateUserCouponCount(UpdateUserCouponCountCommand cmd);
+	void addUserOrderCount(Long userId);
+	void reduceUserOrderCount(Long userId);
+	Integer findUserOrderCount(UserCouponsCommand cmd);
+	void updateUserOrderCount(UpdateUserOrderCountCommand cmd);
 }

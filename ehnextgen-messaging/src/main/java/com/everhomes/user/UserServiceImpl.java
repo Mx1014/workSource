@@ -1889,15 +1889,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private GetSignatureCommandResponse produceSignature(User user) {
+		//2016-07-29:modify by liujinwne,parameter name don't be signed.
+		
 		Long userId = user.getId();
-		String name = user.getNickName();
+		//String name = user.getNickName();
 		String appKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
 		Long timeStamp = System.currentTimeMillis();
 		Integer randomNum = (int) (Math.random()*1000);
 		App app = appProvider.findAppByKey(appKey);
 		Map<String,String> map = new HashMap<String, String>();
 		map.put("id", userId+"");
-		map.put("name", name);
+		//map.put("name", name);
 		map.put("appKey", appKey+"");
 		map.put("timeStamp", timeStamp+"");
 		map.put("randomNum", randomNum+"");
@@ -1907,7 +1909,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.debug("getBizSignature-elapse2="+(e-s));
 		GetSignatureCommandResponse result = new GetSignatureCommandResponse();
 		result.setId(userId);
-		result.setName(name);
+		//result.setName(name);
 		result.setAppKey(appKey);
 		result.setTimeStamp(timeStamp);
 		result.setRandomNum(randomNum);
@@ -2080,6 +2082,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	private void checkSign(GetUserInfoByIdCommand cmd) {
+		//2016-07-29:modify by liujinwne,parameter name don't be signed.
+		
 		String appKey = cmd.getZlAppKey();
 		App app = appProvider.findAppByKey(appKey);
 		if(app==null){
@@ -2091,7 +2095,7 @@ public class UserServiceImpl implements UserService {
 		Map<String,String> map = new HashMap<String, String>();
 		map.put("appKey", appKey);
 		map.put("id", cmd.getId()+"");
-		map.put("name", cmd.getName());
+		//map.put("name", cmd.getName());
 		map.put("randomNum", cmd.getRandomNum()+"");
 		map.put("timeStamp", cmd.getTimeStamp()+"");
 		String nsignature = SignatureHelper.computeSignature(map, app.getSecretKey());
@@ -2102,15 +2106,16 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 	private void checkIsNull(GetUserInfoByIdCommand cmd) {
-		if(StringUtils.isBlank(cmd.getZlSignature())||StringUtils.isBlank(cmd.getZlAppKey())){
+		//2016-07-29:modify by liujinwne,parameter name don't be signed.
+		if(StringUtils.isEmpty(cmd.getZlSignature())||StringUtils.isEmpty(cmd.getZlAppKey())){
 			LOGGER.error("zlSignature or zlAppKey is null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"zlSignature or zlAppKey is null.");
 		}
-		if(cmd.getId()==null||StringUtils.isBlank(cmd.getName())){
-			LOGGER.error("id or name is null.");
+		if(cmd.getId()==null){
+			LOGGER.error("id is null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"id or name is null.");
+					"id is null.");
 		}
 		if(cmd.getRandomNum()==null||cmd.getTimeStamp()==null){
 			LOGGER.error("randomNum or timeStamp is null.");
