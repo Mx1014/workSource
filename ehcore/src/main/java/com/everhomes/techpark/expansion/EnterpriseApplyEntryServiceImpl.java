@@ -272,7 +272,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if(rentType != null) {
 			switch(rentType) {
 			case ORDINARY:
-				phoneNumber = cmd.getContactPhone();
+				phoneNumber = lp.getContactPhone();
 				break;
 			case BUILDING:
 				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
