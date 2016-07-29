@@ -2968,7 +2968,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			
 			//
-			for(String siteNumber : siteNumberMap.keySet()){
+			for(String siteNumber : response.getSiteNames()){
 				RentalSiteNumberRuleDTO siteNumberRuleDTO = new RentalSiteNumberRuleDTO();
 				siteNumberRuleDTO.setSiteNumber(siteNumber);
 				siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
@@ -3104,7 +3104,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		
 		//
-		for(String siteNumber : siteNumberMap.keySet()){
+		for(String siteNumber : response.getSiteNames()){
 			RentalSiteNumberRuleDTO siteNumberRuleDTO = new RentalSiteNumberRuleDTO();
 			siteNumberRuleDTO.setSiteNumber(siteNumber);
 			siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
