@@ -5,27 +5,27 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 	VALUES (223767, 225500,  '0',  '13760240661',  '221616',  3, UTC_TIMESTAMP(), 999991);
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (225501, UUID(), '9201903', '唐季春', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999991);
+	VALUES (225501, UUID(), '9201906', '唐季春', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (223768, 225501,  '0',  '15818603192',  '221616',  3, UTC_TIMESTAMP(), 999991);
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (225502, UUID(), '9201904', '吴珊', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999991);
+	VALUES (225502, UUID(), '9201907', '吴珊', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (223769, 225502,  '0',  '13798204538',  '221616',  3, UTC_TIMESTAMP(), 999991);
     
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
-	VALUES ('14976', '0', '广东', 'GUANGDONG', 'GD', '/广东', '1', '1', '', '', '2', '2', 999991);
+	VALUES ('14977', '0', '广东', 'GUANGDONG', 'GD', '/广东', '1', '1', '', '', '2', '2', 999991);
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
-	VALUES ('14977', '14976', '深圳市', 'SHENZHENSHI', 'SZS', '/广东/深圳市', '2', '2', NULL, '0755', '2', '1', 999991);
+	VALUES ('14978', '14977', '深圳市', 'SHENZHENSHI', 'SZS', '/广东/深圳市', '2', '2', NULL, '0755', '2', '1', 999991);
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
-	VALUES ('14978', '14977', '南山区', 'NANSHANQU', 'NSQ', '/广东/深圳市/南山区', '3', '3', NULL, '0755', '2', '0', 999991);
+	VALUES ('14979', '14978', '南山区', 'NANSHANQU', 'NSQ', '/广东/深圳市/南山区', '3', '3', NULL, '0755', '2', '0', 999991);
 
 
      
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES( 240111044331053517, UUID(), 14977, '深圳市',  14978, '南山区', '深圳威新软件园', '深圳威新', '深圳市南山区高新南九道', NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 113, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999991);
+	VALUES( 240111044331053517, UUID(), 14978, '深圳市',  14979, '南山区', '深圳威新软件园', '深圳威新', '深圳市南山区高新南九道', NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 113, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049117, 240111044331053517, '', 113.956081, 22.533245, 'ws101nh39jkd');	
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
@@ -91,38 +91,44 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109880, 999991, 0, 0, 0, '/home', 'Bizs', 'PM', '物业报修', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', 1, 1, 2,'{"itemLocation":"/home/Pm","layoutName":"PmLayout","title":"物业报修","entityTag":"PM"}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'pm_admin');  
+    VALUES (109880, 999991, 0, 0, 0, '/home', 'Bizs', 'PM', '物业报修', 'cs://1/image/aW1hZ2UvTVRwa01HVXpObVZoTnprNE1XRmtabU0yTVRVMk9EVmlOVGc1WlROaE5XRTNaUQ', 1, 1, 2,'{"itemLocation":"/home/Pm","layoutName":"PmLayout","title":"物业报修","entityTag":"PM"}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'pm_admin');  
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109881, 999991, 0, 0, 0, '/home', 'Bizs', '场地预约', '场地预约', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', 1, 1, 49,'{\"resourceTypeId\":2,\"pageType\":0}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'pm_admin');        
+    VALUES (109881, 999991, 0, 0, 0, '/home', 'Bizs', '场地预约', '场地预约', 'cs://1/image/aW1hZ2UvTVRwa01EZGtZMlJtWmpWak0yUTNZekkxTVRSaFpEVTBORGRrTWpFNE5tWTVNQQ', 1, 1, 49,'{\"resourceTypeId\":2,\"pageType\":0}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'pm_admin');        
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109882, 999991, 0, 0, 0, '/home', 'Bizs', '物品租赁', '物品租赁', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14691826891539874080%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'pm_admin');    
+    VALUES (109882, 999991, 0, 0, 0, '/home', 'Bizs', '物品租赁', '物品租赁', 'cs://1/image/aW1hZ2UvTVRvd09EQmlZMkZpWmpZNE4yVXlOREZtWVdNd09XVXhaalUzTUdOaVpERmhNdw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14691826891539874080%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'pm_admin');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109883, 999991, 0, 0, 0, '/home', 'Bizs', '迎宾接待', '迎宾接待', 'cs://1/image/aW1hZ2UvTVRvME5qazBPV00yTVRKa1pXVTVZV1ZpWlROa1lqTmpZek0yTWpjMU5EWmxZZw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F1469183917679873112%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '0', 'pm_admin');
+	VALUES (109883, 999991, 0, 0, 0, '/home', 'Bizs', '迎宾接待', '迎宾接待', 'cs://1/image/aW1hZ2UvTVRvNFpUUXpOVEJsTXpZM05UbGpNemhrWkdZeFpqQmpZemczT0dOaU4yTmlNdw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F1469183917679873112%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109884, 999991, 0, 0, 0, '/home', 'Bizs', '今日食堂', '今日食堂', 'cs://1/image/aW1hZ2UvTVRvMFlqbGxNR014TkdZd1pUQTNOV0V3TURBNU5URm1OakF5T0dWak1tTXhaZw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692418502942296174%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1 , 1,'','0',NULL,NULL,NULL, '0', 'pm_admin');    
+	VALUES (109884, 999991, 0, 0, 0, '/home', 'Bizs', '今日食堂', '今日食堂', 'cs://1/image/aW1hZ2UvTVRwak5ETXlaakJsWkRJNFlqQmhabVJpTmpnd1lXSTFOelF4TjJGbU0yUXpOQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692418502942296174%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1 , 1,'','0',NULL,NULL,NULL, '0', 'pm_admin');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109885, 999991, 0, 0, 0, '/home', 'Bizs', '爱车管家', '爱车管家', 'cs://1/image/aW1hZ2UvTVRvNE56STROekpsTldNMFpXVmhNalpqTkdReU0yWTBNRGd3WVRrME5HUTVaQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692455110592651331%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+	VALUES (109885, 999991, 0, 0, 0, '/home', 'Bizs', '爱车管家', '爱车管家', 'cs://1/image/aW1hZ2UvTVRvNE16VmxPRGxtTVRGaE1qZzNNVE00TjJZellUVTRPV014TXpsbE5URTBOdw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692455110592651331%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109886, 999991, 0, 0, 0, '/home', 'Bizs', '办公租赁', '办公租赁', 'cs://1/image/aW1hZ2UvTVRvMVlqY3hOV0V6TldJd1lqa3pZV0U1TmpReU4yTmxObVU1TXpVeFlXRTNaUQ', 1, 1, 14, '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+	VALUES (109886, 999991, 0, 0, 0, '/home', 'Bizs', '办公租赁', '办公租赁', 'cs://1/image/aW1hZ2UvTVRwak1EUTRPREZsWkRFM1lXWTFOVGRqWVRaaU5XVXdOREpqTWpGaFptVTBOZw', 1, 1, 14, '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109887, 999991, 0, 0, 0, '/home', 'Bizs', '创客空间', '创客空间', 'cs://1/image/aW1hZ2UvTVRvME5ESTJaVFZsTlRVd1ptSXhNVEUyTW1FMk0yUm1ZamcyWVdZNU5qUmxOdw', 1, 1, 32, '{"type":1,"forumId":177000,"categoryId":4,"parentId":110001,"tag":"创客"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+	VALUES (109887, 999991, 0, 0, 0, '/home', 'Bizs', '创客空间', '创客空间', 'cs://1/image/aW1hZ2UvTVRwaVpHRTRPR1F5WkdVME4yTmlZVFZsTVRJMU9EWTFPR1F5WVRFd01HTmhOZw', 1, 1, 32, '{"type":1,"forumId":177000,"categoryId":4,"parentId":110001,"tag":"创客"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109888, 999991, 0, 0, 0, '/home', 'Bizs', '租车预约', '租车预约', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"http://www.car2share.com.cn/"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+	VALUES (109888, 999991, 0, 0, 0, '/home', 'Bizs', '租车预约', '租车预约', 'cs://1/image/aW1hZ2UvTVRwbU5tWTVPVEk1WkRka01HRTNOamN4TlRZeFlqRTBNRGcyTVdRMVpUTmpOdw', 1, 1, 14, '{"url":"http://www.car2share.com.cn/"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+
+--INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+--	VALUES (109889, 999991, 0, 0, 0, '/home', 'Bizs', '说粉', '说粉', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692459898518874242%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 0, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+--INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+--	VALUES (109890, 999991, 0, 0, 0, '/home', 'Bizs', '够咖啡', '够咖啡', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692461598558384133%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 0, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+--INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+--	VALUES (109891, 999991, 0, 0, 0, '/home', 'Bizs', 'Urban Table', 'Urban Table', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692462917469898322%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 0, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109889, 999991, 0, 0, 0, '/home', 'Bizs', '说粉', '说粉', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692459898518874242%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 0, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109890, 999991, 0, 0, 0, '/home', 'Bizs', '够咖啡', '够咖啡', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692461598558384133%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 0, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109891, 999991, 0, 0, 0, '/home', 'Bizs', 'Urban Table', 'Urban Table', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692462917469898322%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 0, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
-
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109892, 999991, 0, 0, 0, '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRwa00yVmlOVFl6TmpRM01EQTFabU5pT1dKbU5Ua3lZalZoTVdVeU5qWm1NZw', 1, 1, 1, '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', 30, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+    VALUES (109892, 999991, 0, 0, 0, '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRvMVpUaG1NRFl5TUdFM1lqQXpNRFV3WVdRME9XTXhaalJtTXpCaU5qaGlOQQ', 1, 1, 1, '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', 30, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 
 
 -- 园区游客场景    
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
 	VALUES (229, 999991, 'ServiceMarketLayout', '{"versionCode":"2015120406","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21}]}', '2015120406', '0', '2', '2016-07-12 17:02:30', 'park_tourist');
+
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
+    VALUES (10559, 999991, 0, '/home', 'Default', '0', '0', 'weixinLink', 'weixinLink', 'cs://1/image/aW1hZ2UvTVRwaFptUTBPVEU1TkdFM05HUTRNakUzTlRJeE4yRTROV1UxT1RaaFpEVmhOUQ', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
+    VALUES (10560, 999991, 0, '/home', 'Default', '0', '0', 'weixinLink', 'weixinLink', 'cs://1/image/aW1hZ2UvTVRwaFptUTBPVEU1TkdFM05HUTRNakUzTlRJeE4yRTROV1UxT1RaaFpEVmhOUQ', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
+
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (109893, 999991, 0, 0, 0, '/home', 'Coupons', '优惠', '优惠', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', 3, 1, 14,'{"url":"https://biz.zuolin.com/zl-ec?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fallpromotions#sign_suffix"}', 1, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'park_tourist');  
@@ -131,25 +137,25 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109895, 999991, 0, 0, 0, '/home', 'Bizs', 'PM', '物业报修', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', 1, 1, 2,'{"itemLocation":"/home/Pm","layoutName":"PmLayout","title":"物业报修","entityTag":"PM"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');  
+    VALUES (109895, 999991, 0, 0, 0, '/home', 'Bizs', 'PM', '物业报修', 'cs://1/image/aW1hZ2UvTVRwa01HVXpObVZoTnprNE1XRmtabU0yTVRVMk9EVmlOVGc1WlROaE5XRTNaUQ', 1, 1, 2,'{"itemLocation":"/home/Pm","layoutName":"PmLayout","title":"物业报修","entityTag":"PM"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');  
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109896, 999991, 0, 0, 0, '/home', 'Bizs', '场地预约', '场地预约', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', 1, 1, 49,'{\"resourceTypeId\":2,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');        
+    VALUES (109896, 999991, 0, 0, 0, '/home', 'Bizs', '场地预约', '场地预约', 'cs://1/image/aW1hZ2UvTVRwa01EZGtZMlJtWmpWak0yUTNZekkxTVRSaFpEVTBORGRrTWpFNE5tWTVNQQ', 1, 1, 49,'{\"resourceTypeId\":2,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');        
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109897, 999991, 0, 0, 0, '/home', 'Bizs', '物品租赁', '物品租赁', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14691826891539874080%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');    
+    VALUES (109897, 999991, 0, 0, 0, '/home', 'Bizs', '物品租赁', '物品租赁', 'cs://1/image/aW1hZ2UvTVRvd09EQmlZMkZpWmpZNE4yVXlOREZtWVdNd09XVXhaalUzTUdOaVpERmhNdw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14691826891539874080%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109898, 999991, 0, 0, 0, '/home', 'Bizs', '迎宾接待', '迎宾接待', 'cs://1/image/aW1hZ2UvTVRvME5qazBPV00yTVRKa1pXVTVZV1ZpWlROa1lqTmpZek0yTWpjMU5EWmxZZw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F1469183917679873112%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '0', 'park_tourist');
+	VALUES (109898, 999991, 0, 0, 0, '/home', 'Bizs', '迎宾接待', '迎宾接待', 'cs://1/image/aW1hZ2UvTVRvNFpUUXpOVEJsTXpZM05UbGpNemhrWkdZeFpqQmpZemczT0dOaU4yTmlNdw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F1469183917679873112%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109899, 999991, 0, 0, 0, '/home', 'Bizs', '今日食堂', '今日食堂', 'cs://1/image/aW1hZ2UvTVRvMFlqbGxNR014TkdZd1pUQTNOV0V3TURBNU5URm1OakF5T0dWak1tTXhaZw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692418502942296174%3F_k%3Dzlbiz#sign_suffix"}', '0','0','1','0','','0',NULL,NULL,NULL, '0', 'park_tourist');    
+	VALUES (109899, 999991, 0, 0, 0, '/home', 'Bizs', '今日食堂', '今日食堂', 'cs://1/image/aW1hZ2UvTVRwak5ETXlaakJsWkRJNFlqQmhabVJpTmpnd1lXSTFOelF4TjJGbU0yUXpOQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692418502942296174%3F_k%3Dzlbiz#sign_suffix"}', '0','0','1','0','','0',NULL,NULL,NULL, '0', 'park_tourist');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109900, 999991, 0, 0, 0, '/home', 'Bizs', '爱车管家', '爱车管家', 'cs://1/image/aW1hZ2UvTVRvNE56STROekpsTldNMFpXVmhNalpqTkdReU0yWTBNRGd3WVRrME5HUTVaQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692455110592651331%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
+	VALUES (109900, 999991, 0, 0, 0, '/home', 'Bizs', '爱车管家', '爱车管家', 'cs://1/image/aW1hZ2UvTVRvNE16VmxPRGxtTVRGaE1qZzNNVE00TjJZellUVTRPV014TXpsbE5URTBOdw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692455110592651331%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109901, 999991, 0, 0, 0, '/home', 'Bizs', '办公租赁', '办公租赁', 'cs://1/image/aW1hZ2UvTVRvMVlqY3hOV0V6TldJd1lqa3pZV0U1TmpReU4yTmxObVU1TXpVeFlXRTNaUQ', 1, 1, 14, '{"url":"http://wx.dudubashi.com"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
+	VALUES (109901, 999991, 0, 0, 0, '/home', 'Bizs', '办公租赁', '办公租赁', 'cs://1/image/aW1hZ2UvTVRwak1EUTRPREZsWkRFM1lXWTFOVGRqWVRaaU5XVXdOREpqTWpGaFptVTBOZw', 1, 1, 14, '{"url":"http://wx.dudubashi.com"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109902, 999991, 0, 0, 0, '/home', 'Bizs', '创客空间', '创客空间', 'cs://1/image/aW1hZ2UvTVRvME5ESTJaVFZsTlRVd1ptSXhNVEUyTW1FMk0yUm1ZamcyWVdZNU5qUmxOdw', 1, 1, 32, '{"type":1,"forumId":177000,"categoryId":4,"parentId":110001,"tag":"创客"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
+	VALUES (109902, 999991, 0, 0, 0, '/home', 'Bizs', '创客空间', '创客空间', 'cs://1/image/aW1hZ2UvTVRwaVpHRTRPR1F5WkdVME4yTmlZVFZsTVRJMU9EWTFPR1F5WVRFd01HTmhOZw', 1, 1, 32, '{"type":1,"forumId":177000,"categoryId":4,"parentId":110001,"tag":"创客"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109903, 999991, 0, 0, 0, '/home', 'Bizs', '租车预约', '租车预约', 'cs://1/image/aW1hZ2UvTVRveU9USXpaV1UzWldJd01XWmlObVl5WkRsaU1XRmtaREF3WW1VM09XVXlOUQ', 1, 1, 14, '{"url":"http://www.car2share.com.cn/"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
+	VALUES (109903, 999991, 0, 0, 0, '/home', 'Bizs', '租车预约', '租车预约', 'cs://1/image/aW1hZ2UvTVRwbU5tWTVPVEk1WkRka01HRTNOamN4TlRZeFlqRTBNRGcyTVdRMVpUTmpOdw', 1, 1, 14, '{"url":"http://www.car2share.com.cn/"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (109904, 999991, 0, 0, 0, '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRwa00yVmlOVFl6TmpRM01EQTFabU5pT1dKbU5Ua3lZalZoTVdVeU5qWm1NZw', 1, 1, 1, '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', 30, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+    VALUES (109904, 999991, 0, 0, 0, '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRvMVpUaG1NRFl5TUdFM1lqQXpNRFV3WVdRME9XTXhaalJtTXpCaU5qaGlOQQ', 1, 1, 1, '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', 30, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
 
 
@@ -163,231 +169,231 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 	VALUES(179057, 240111044331053517, '园区二期', '威新二期', manager_uid, '15818603192', '深圳市南山区高新南九道', 1790, NULL, NULL, NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999991);
     
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101548,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼1层北翼东侧','园区一期','1号楼1层北翼东侧','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101548,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼1层北翼东侧','园区一期','1号楼1层北翼东侧','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101549,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼1层东翼','园区一期','1号楼1层东翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101549,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼1层东翼','园区一期','1号楼1层东翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101550,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼1层南翼','园区一期','1号楼1层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101550,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼1层南翼','园区一期','1号楼1层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101551,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼1层南翼东侧','园区一期','1号楼1层南翼东侧','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101551,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼1层南翼东侧','园区一期','1号楼1层南翼东侧','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101552,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼1层西翼01C-2','园区一期','1号楼1层西翼01C-2','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101552,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼1层西翼01C-2','园区一期','1号楼1层西翼01C-2','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101553,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼2层北翼','园区一期','1号楼2层北翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101553,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼2层北翼','园区一期','1号楼2层北翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101554,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼2层北翼并东翼03A-1','园区一期','1号楼2层北翼并东翼03A-1','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101554,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼2层北翼并东翼03A-1','园区一期','1号楼2层北翼并东翼03A-1','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101555,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼2层东南翼','园区一期','1号楼2层东南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101555,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼2层东南翼','园区一期','1号楼2层东南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101556,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼2层西翼','园区一期','1号楼2层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101556,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼2层西翼','园区一期','1号楼2层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101557,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼3层东翼03A-2','园区一期','1号楼3层东翼03A-2','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101557,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼3层东翼03A-2','园区一期','1号楼3层东翼03A-2','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101558,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼3层南翼','园区一期','1号楼3层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101558,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼3层南翼','园区一期','1号楼3层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101559,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼3层西翼','园区一期','1号楼3层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101559,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼3层西翼','园区一期','1号楼3层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101560,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼4层北翼','园区一期','1号楼4层北翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101560,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼4层北翼','园区一期','1号楼4层北翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101561,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼4层东翼','园区一期','1号楼4层东翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101561,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼4层东翼','园区一期','1号楼4层东翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101562,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼4层南翼','园区一期','1号楼4层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101562,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼4层南翼','园区一期','1号楼4层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101563,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼4层西翼','园区一期','1号楼4层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101563,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼4层西翼','园区一期','1号楼4层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101564,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼4层西翼01C-1','园区一期','1号楼4层西翼01C-1','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101564,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼4层西翼01C-1','园区一期','1号楼4层西翼01C-1','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101565,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼5层东翼','园区一期','1号楼5层东翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101565,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼5层东翼','园区一期','1号楼5层东翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101566,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼5层南翼','园区一期','1号楼5层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101566,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼5层南翼','园区一期','1号楼5层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101567,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-1号楼5层西翼','园区一期','1号楼5层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101567,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-1号楼5层西翼','园区一期','1号楼5层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101568,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层北翼01D-1','园区一期','2号楼1层北翼01D-1','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101568,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层北翼01D-1','园区一期','2号楼1层北翼01D-1','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101569,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层北翼01D-2','园区一期','2号楼1层北翼01D-2','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101569,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层北翼01D-2','园区一期','2号楼1层北翼01D-2','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101570,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层东翼','园区一期','2号楼1层东翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101570,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层东翼','园区一期','2号楼1层东翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101571,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层东翼西侧','园区一期','2号楼1层东翼西侧','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101571,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层东翼西侧','园区一期','2号楼1层东翼西侧','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101572,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层南翼','园区一期','2号楼1层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101572,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层南翼','园区一期','2号楼1层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101573,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层南翼西侧','园区一期','2号楼1层南翼西侧','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101573,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层南翼西侧','园区一期','2号楼1层南翼西侧','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101574,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼1层西翼','园区一期','2号楼1层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101574,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼1层西翼','园区一期','2号楼1层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101575,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼2层北翼','园区一期','2号楼2层北翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101575,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼2层北翼','园区一期','2号楼2层北翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101576,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼2层东翼','园区一期','2号楼2层东翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101576,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼2层东翼','园区一期','2号楼2层东翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101577,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼2层南翼并西翼','园区一期','2号楼2层南翼并西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101577,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼2层南翼并西翼','园区一期','2号楼2层南翼并西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101578,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼3层北翼','园区一期','2号楼3层北翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101578,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼3层北翼','园区一期','2号楼3层北翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101579,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼3层东翼','园区一期','2号楼3层东翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101579,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼3层东翼','园区一期','2号楼3层东翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101580,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼3层南翼','园区一期','2号楼3层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101580,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼3层南翼','园区一期','2号楼3层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101581,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼3层西翼','园区一期','2号楼3层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101581,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼3层西翼','园区一期','2号楼3层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101582,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼4层北翼04D-1','园区一期','2号楼4层北翼04D-1','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101582,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼4层北翼04D-1','园区一期','2号楼4层北翼04D-1','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101583,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼4层北翼04D-2','园区一期','2号楼4层北翼04D-2','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101583,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼4层北翼04D-2','园区一期','2号楼4层北翼04D-2','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101584,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼4层东翼并南翼','园区一期','2号楼4层东翼并南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101584,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼4层东翼并南翼','园区一期','2号楼4层东翼并南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101585,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼4层西翼','园区一期','2号楼4层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101585,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼4层西翼','园区一期','2号楼4层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101586,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层北翼05D-1','园区一期','2号楼5层北翼05D-1','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101586,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层北翼05D-1','园区一期','2号楼5层北翼05D-1','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101587,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层北翼501-502','园区一期','2号楼5层北翼501-502','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101587,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层北翼501-502','园区一期','2号楼5层北翼501-502','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101588,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层北翼502','园区一期','2号楼5层北翼502','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101588,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层北翼502','园区一期','2号楼5层北翼502','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101589,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层北翼503并504','园区一期','2号楼5层北翼503并504','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101589,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层北翼503并504','园区一期','2号楼5层北翼503并504','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101590,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层东翼501-502','园区一期','2号楼5层东翼501-502','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101590,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层东翼501-502','园区一期','2号楼5层东翼501-502','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101591,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层东翼503','园区一期','2号楼5层东翼503','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101591,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层东翼503','园区一期','2号楼5层东翼503','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101592,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层东翼503A','园区一期','2号楼5层东翼503A','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101592,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层东翼503A','园区一期','2号楼5层东翼503A','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101593,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层南翼','园区一期','2号楼5层南翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101593,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层南翼','园区一期','2号楼5层南翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101594,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-2号楼5层西翼','园区一期','2号楼5层西翼','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101594,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-2号楼5层西翼','园区一期','2号楼5层西翼','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101595,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼1层101','园区一期','3号楼1层101','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101595,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼1层101','园区一期','3号楼1层101','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101596,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼1层102A','园区一期','3号楼1层102A','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101596,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼1层102A','园区一期','3号楼1层102A','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101597,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼1层102B','园区一期','3号楼1层102B','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101597,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼1层102B','园区一期','3号楼1层102B','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101598,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼1层102C','园区一期','3号楼1层102C','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101598,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼1层102C','园区一期','3号楼1层102C','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101599,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼1层103','园区一期','3号楼1层103','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101599,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼1层103','园区一期','3号楼1层103','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101600,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼2层','园区一期','3号楼2层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101600,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼2层','园区一期','3号楼2层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101601,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼3层','园区一期','3号楼3层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101601,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼3层','园区一期','3号楼3层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101602,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼4层','园区一期','3号楼4层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101602,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼4层','园区一期','3号楼4层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101603,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区一期-3号楼5层','园区一期','3号楼5层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101603,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区一期-3号楼5层','园区一期','3号楼5层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101604,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5层北翼05D','园区二期','5层北翼05D','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101604,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5层北翼05D','园区二期','5层北翼05D','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101605,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼1层','园区二期','5号楼1层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101605,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼1层','园区二期','5号楼1层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101606,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼1层101','园区二期','5号楼1层101','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101606,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼1层101','园区二期','5号楼1层101','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101607,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼1层102','园区二期','5号楼1层102','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101607,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼1层102','园区二期','5号楼1层102','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101608,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼2层','园区二期','5号楼2层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101608,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼2层','园区二期','5号楼2层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101609,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼3层','园区二期','5号楼3层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101609,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼3层','园区二期','5号楼3层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101610,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼4层04-11','园区二期','5号楼4层04-11','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101610,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼4层04-11','园区二期','5号楼4层04-11','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101611,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼4层401-403','园区二期','5号楼4层401-403','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101611,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼4层401-403','园区二期','5号楼4层401-403','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101612,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼4层412','园区二期','5号楼4层412','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101612,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼4层412','园区二期','5号楼4层412','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101613,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼501-511','园区二期','5号楼501-511','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101613,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼501-511','园区二期','5号楼501-511','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101614,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼5层512室','园区二期','5号楼5层512室','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101614,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼5层512室','园区二期','5号楼5层512室','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101615,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-5号楼6层','园区二期','5号楼6层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101615,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-5号楼6层','园区二期','5号楼6层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101616,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼1层','园区二期','6号楼1层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101616,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼1层','园区二期','6号楼1层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101617,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼2层','园区二期','6号楼2层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101617,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼2层','园区二期','6号楼2层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101618,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼3层','园区二期','6号楼3层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101618,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼3层','园区二期','6号楼3层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101619,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼4层','园区二期','6号楼4层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101619,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼4层','园区二期','6号楼4层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101620,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼5层','园区二期','6号楼5层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101620,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼5层','园区二期','6号楼5层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101621,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼6层','园区二期','6号楼6层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101621,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼6层','园区二期','6号楼6层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101622,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-6号楼7层','园区二期','6号楼7层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101622,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-6号楼7层','园区二期','6号楼7层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101623,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼1层101A','园区二期','7号楼1层101A','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101623,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼1层101A','园区二期','7号楼1层101A','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101624,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼1层101B','园区二期','7号楼1层101B','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101624,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼1层101B','园区二期','7号楼1层101B','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101625,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼1层102','园区二期','7号楼1层102','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101625,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼1层102','园区二期','7号楼1层102','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101626,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼1层103','园区二期','7号楼1层103','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101626,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼1层103','园区二期','7号楼1层103','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101627,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼1层104','园区二期','7号楼1层104','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101627,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼1层104','园区二期','7号楼1层104','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101628,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼2层','园区二期','7号楼2层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101628,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼2层','园区二期','7号楼2层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101629,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼3层301-308','园区二期','7号楼3层301-308','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101629,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼3层301-308','园区二期','7号楼3层301-308','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101630,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼3层309-312','园区二期','7号楼3层309-312','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101630,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼3层309-312','园区二期','7号楼3层309-312','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101631,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼5层','园区二期','7号楼5层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101631,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼5层','园区二期','7号楼5层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101632,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼6层','园区二期','7号楼6层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101632,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼6层','园区二期','7号楼6层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101633,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼7层','园区二期','7号楼7层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101633,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼7层','园区二期','7号楼7层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101634,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼8层','园区二期','7号楼8层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101634,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼8层','园区二期','7号楼8层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101635,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-7号楼9层','园区二期','7号楼9层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101635,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-7号楼9层','园区二期','7号楼9层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101636,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼103A','园区二期','8号楼103A','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101636,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼103A','园区二期','8号楼103A','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101637,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼1层101','园区二期','8号楼1层101','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101637,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼1层101','园区二期','8号楼1层101','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101638,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼1层1025','园区二期','8号楼1层1025','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101638,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼1层1025','园区二期','8号楼1层1025','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101639,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼1层102A','园区二期','8号楼1层102A','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101639,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼1层102A','园区二期','8号楼1层102A','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101640,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼1层103','园区二期','8号楼1层103','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101640,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼1层103','园区二期','8号楼1层103','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101641,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼2层201-212','园区二期','8号楼2层201-212','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101641,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼2层201-212','园区二期','8号楼2层201-212','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101642,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼3层','园区二期','8号楼3层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101642,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼3层','园区二期','8号楼3层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101643,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼4层401-402','园区二期','8号楼4层401-402','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101643,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼4层401-402','园区二期','8号楼4层401-402','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101644,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼4层403-406','园区二期','8号楼4层403-406','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101644,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼4层403-406','园区二期','8号楼4层403-406','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101645,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼4层407-408','园区二期','8号楼4层407-408','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101645,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼4层407-408','园区二期','8号楼4层407-408','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101646,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼4层409-411','园区二期','8号楼4层409-411','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101646,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼4层409-411','园区二期','8号楼4层409-411','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101647,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼4层412','园区二期','8号楼4层412','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101647,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼4层412','园区二期','8号楼4层412','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101648,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼5层501-502','园区二期','8号楼5层501-502','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101648,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼5层501-502','园区二期','8号楼5层501-502','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101649,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼5层503-506','园区二期','8号楼5层503-506','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101649,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼5层503-506','园区二期','8号楼5层503-506','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101650,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼5层512','园区二期','8号楼5层512','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101650,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼5层512','园区二期','8号楼5层512','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101651,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼6层601-612','园区二期','8号楼6层601-612','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101651,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼6层601-612','园区二期','8号楼6层601-612','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101652,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼7层','园区二期','8号楼7层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101652,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼7层','园区二期','8号楼7层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101653,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼8层','园区二期','8号楼8层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101653,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼8层','园区二期','8号楼8层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101654,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼9层02-06','园区二期','8号楼9层02-06','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101654,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼9层02-06','园区二期','8号楼9层02-06','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101655,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼9层07-10','园区二期','8号楼9层07-10','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101655,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼9层07-10','园区二期','8号楼9层07-10','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101656,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼9层901','园区二期','8号楼9层901','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101656,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼9层901','园区二期','8号楼9层901','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101657,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼9层901','园区二期','8号楼9层901','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101657,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼9层901','园区二期','8号楼9层901','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101658,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-8号楼9层911-912','园区二期','8号楼9层911-912','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101658,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-8号楼9层911-912','园区二期','8号楼9层911-912','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101659,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-9号楼1至2层','园区二期','9号楼1至2层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101659,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-9号楼1至2层','园区二期','9号楼1至2层','2','0',UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387101660,UUID(),240111044331053517, 14977, '深圳市',  14978, '宝安区' ,'园区二期-9号楼3层','园区二期','9号楼3层','2','0',UTC_TIMESTAMP(), 999991);
+	VALUES(239825274387101660,UUID(),240111044331053517, 14978, '深圳市',  14979, '宝安区' ,'园区二期-9号楼3层','园区二期','9号楼3层','2','0',UTC_TIMESTAMP(), 999991);
 
 
 
