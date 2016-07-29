@@ -5,7 +5,7 @@ INSERT INTO `ehcore`.`eh_configurations` (`name`, `value`, `description`) VALUES
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('group', '10030', 'zh_CN', '您不是群主，无权操作');
 
 -- 电商离线包配置
-INSERT INTO `eh_version_realm` VALUES ('49', 'biz', null, UTC_TIMESTAMP(), '0');
+INSERT INTO `eh_version_realm` VALUES ('49', 'biz', NULL, UTC_TIMESTAMP(), '0');
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(52,49,'-0.1','2100224','0','2.3.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('24', '49', '2.3.0', 'http://biz.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', 'http://biz.zuolin.com/nar/biz/web/app/dist/biz-2-3-0-tag.zip', '0');
 
@@ -52,9 +52,9 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 
 -- 添加官方活动权限
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (310,0,'官方活动','官方活动',null);
+VALUES (310,0,'官方活动','官方活动',NULL);
 
-set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),310,11100,'官方活动',0,1,'官方活动',16);
 
@@ -67,7 +67,7 @@ INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`
 
 
 -- 删除所有电商内容  by yanshaofan
-DELETE FROM `eh_launch_pad_items` where target_type='biz' and `target_id`>0 and scope_code = 0;
+DELETE FROM `eh_launch_pad_items` WHERE target_type='biz' AND `target_id`>0 AND scope_code = 0;
 
 
 -- add service market items for techpark by lqs 20160725
@@ -226,3 +226,19 @@ INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`
 -- 预约2.0配置支付host
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.zuolin.refound','POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record','退款的api','999989',NULL);
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.zuolin.host','https://pay.zuolin.com','退款的host','999989',NULL);
+
+
+-- 预约2.0广场配置
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
+ VALUES('15081','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":2,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+ VALUES('15082','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":2,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
+
+-- 预约2.0的
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('2','测试资源类型','0',NULL,'0','999989');
+
+-- 工位预定广场配置 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+ VALUES('109789','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预定','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+ VALUES('109790','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预定','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin');

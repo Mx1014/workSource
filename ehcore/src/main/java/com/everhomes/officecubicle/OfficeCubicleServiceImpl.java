@@ -288,7 +288,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public SearchSpaceOrdersResponse searchSpaceOrders(SearchSpaceOrdersCommand cmd) {
 		SearchSpaceOrdersResponse response = new SearchSpaceOrdersResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(0L);
+			cmd.setPageAnchor(Long.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
