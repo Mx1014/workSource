@@ -2,22 +2,10 @@ package com.everhomes.user;
 
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
-import javax.validation.Valid;
-
 import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
 import com.everhomes.rest.user.CommunityStatusResponse;
@@ -84,4 +72,8 @@ public interface UserActivityService {
 	ListActivitiesReponse listActivityFavorite(ListUserFavoriteActivityCommand cmd);
 	ListActivitiesReponse listPostedActivities(ListPostedActivityByOwnerIdCommand cmd);
 	ListActivitiesReponse listSignupActivities(ListSignupActivitiesCommand cmd);
+
+	UserProfileDTO findUserProfileBySpecialKey(Long userId,String itemName);
+
+	void updateProfileIfNotExist(Long userId, String itemName, Integer itemValue);
 }

@@ -49,6 +49,8 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.openapi.BusinessMessageCommand;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
+import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
@@ -287,7 +289,7 @@ public class BusinessOpenController extends ControllerBase {
 
 	/**
 	 * <b>URL: /openapi/receiveCoupon</b>
-	 * <p>同步用户领取优惠券</p>
+	 * <p>用户优惠券数加1</p>
 	 */
 	@RequestMapping("receiveCoupon")
 	@RestReturn(String.class)
@@ -302,12 +304,41 @@ public class BusinessOpenController extends ControllerBase {
 	/**
 	 * 
 	 * <b>URL: /openapi/invalidCoupon</b>
-	 * <p>同步用户不能使用的优惠券</p>
+	 * <p>用户优惠券数减1</p>
 	 */
 	@RequestMapping("invalidCoupon")
 	@RestReturn(String.class)
 	public RestResponse invalidCoupon(UserCouponsCommand cmd) {
 		userActivityService.invalidCoupon(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * 
+	 * <b>URL: /openapi/findUserCouponCount</b>
+	 * <p>查询用户优惠券数</p>
+	 */
+	@RequestMapping("findUserCouponCount")
+	@RestReturn(Integer.class)
+	public RestResponse findUserCouponCount(UserCouponsCommand cmd) {
+		Integer couponCount = businessService.findUserCouponCount(cmd);
+		RestResponse response =  new RestResponse(couponCount);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /openapi/updateUserCouponCount</b>
+	 * <p>更新用户优惠券数</p>
+	 */
+	@RequestMapping("updateUserCouponCount")
+	@RestReturn(String.class)
+	public RestResponse updateUserCouponCount(UpdateUserCouponCountCommand cmd) {
+		businessService.updateUserCouponCount(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -556,4 +587,62 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+	 * <b>URL: /openapi/addUserOrderCount</b>
+	 * <p>用户订单数加1</p>
+	 */
+	@RequestMapping("addUserOrderCount")
+	@RestReturn(String.class)
+	public RestResponse addUserOrderCount(UserCouponsCommand cmd) {
+		businessService.addUserOrderCount(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /openapi/reduceUserOrderCount</b>
+	 * <p>用户订单数减1</p>
+	 */
+	@RequestMapping("reduceUserOrderCount")
+	@RestReturn(String.class)
+	public RestResponse reduceUserOrderCount(UserCouponsCommand cmd) {
+		businessService.reduceUserOrderCount(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * 
+	 * <b>URL: /openapi/findUserOrderCount</b>
+	 * <p>查询用户订单数</p>
+	 */
+	@RequestMapping("findUserOrderCount")
+	@RestReturn(Integer.class)
+	public RestResponse findUserOrderCount(UserCouponsCommand cmd) {
+		Integer orderCount = businessService.findUserOrderCount(cmd);
+		RestResponse response =  new RestResponse(orderCount);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /openapi/updateUserOrderCount</b>
+	 * <p>更新用户订单数</p>
+	 */
+	@RequestMapping("updateUserOrderCount")
+	@RestReturn(String.class)
+	public RestResponse updateUserOrderCount(UpdateUserOrderCountCommand cmd) {
+		businessService.updateUserOrderCount(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
