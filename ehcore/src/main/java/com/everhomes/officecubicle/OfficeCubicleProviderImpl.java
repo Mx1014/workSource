@@ -130,7 +130,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (null != beginDate)
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.gt(new Timestamp(beginDate)));
 		if (null != endDate)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.gt(new Timestamp(endDate)));
+			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.lt(new Timestamp(endDate)));
 		if (StringUtils.isNotBlank(reserveKeyword))
 			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVER_NAME.like("%" + reserveKeyword + "%").or(
 					Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_CONTACT_TOKEN.like("%" + reserveKeyword + "%")));
