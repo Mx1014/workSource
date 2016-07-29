@@ -5,12 +5,12 @@ INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`
 
 -- 预约2.0广场配置
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES('15081','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":2,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0');
+ VALUES('15081','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":3,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
- VALUES('15082','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":2,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
+ VALUES('15082','999989','0','0','0','/home','Bizs','资源预订','资源预订','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','49','{\"resourceTypeId\":3,\"pageType\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
 
 -- 预约2.0的
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('2','测试资源类型','0',NULL,'0','999989');
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('3','测试资源类型','0',NULL,'0','999989');
 
 -- 工位预定广场配置 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
