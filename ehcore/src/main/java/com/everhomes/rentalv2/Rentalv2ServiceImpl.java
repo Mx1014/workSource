@@ -21,6 +21,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,10 +30,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+
+
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
+
+
 import net.greghaines.jesque.Job;
+
+
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -58,6 +66,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -1159,8 +1169,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rentalBill.setRentalCount(cmd.getRentalCount());
 			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
 			Map<java.sql.Date  , Map<String,Set<Byte>>> dayMap= new HashMap<Date, Map<String,Set<Byte>>>();
+			List<Long> siteRuleIds = new ArrayList<Long>();
 			for (RentalBillRuleDTO siteRule : cmd.getRules()) {
-
+				siteRuleIds.add(siteRule.getRuleId());
 				if(siteRule.getRentalCount()==null||siteRule.getRuleId() == null )
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter siteRule");
@@ -1327,11 +1338,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
 			SimpleDateFormat bigenDateSF = new SimpleDateFormat("MM-dd");
 			SimpleDateFormat endtimeSF = new SimpleDateFormat("HH:mm");
-			//使用详情
+			//拼装使用详情
 			StringBuffer useDetailSB = new StringBuffer();
+			Collections.sort(siteRuleIds);
 			// 循环存site订单
-			for (RentalBillRuleDTO siteRule : cmd.getRules())  { 
-				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
+			for (Long siteRuleId : siteRuleIds)  { 
+				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRuleId);
 				if(useDetailSB.length()>1)
 					useDetailSB.append("\n");
 				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
