@@ -26,16 +26,10 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.address.Address;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.Enterprise;
-import com.everhomes.enterprise.EnterpriseAddress;
-import com.everhomes.enterprise.EnterpriseAttachment;
-import com.everhomes.enterprise.EnterpriseCommunityMap;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -44,9 +38,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -54,7 +45,6 @@ import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -80,7 +70,6 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
@@ -2277,5 +2266,33 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	        }
 	        
 	        return result;
+	}
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByOrganizationIds(
+			ListingLocator locator, int pageSize, Condition cond,
+			List<Long> organizationIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> results = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(organizationIds));
+		if(null != locator.getAnchor()){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+		}
+		query.addConditions(cond);
+		query.addLimit(pageSize + 1);
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.desc());
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		
+		locator.setAnchor(null);
+		if(results.size() > pageSize){
+			results.remove(results.size() - 1);
+			locator.setAnchor(results.get(results.size() - 1).getCreateTime().getTime());
+		}
+		
+		return results;
 	}
 }

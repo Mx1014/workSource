@@ -49,6 +49,7 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationOwners;
@@ -122,7 +123,9 @@ import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -1449,16 +1452,106 @@ public class CommunityServiceImpl implements CommunityService {
 		return dto;
 	}
 	
+	private CommunityUserResponse listUserByOrganizationIdOrCommunityId(ListCommunityUsersCommand cmd){
+		if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
+			LOGGER.error("organizationId and communityId All are empty");
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"organizationId and communityId All are empty");
+		}
+		List<Long> communityIds = new ArrayList<Long>();
+		CommunityUserResponse res = new CommunityUserResponse(); 
+		List<Long> organizationIds = new ArrayList<Long>();
+		if(null == cmd.getCommunityId() && null != cmd.getOrganizationId()){
+			List<CommunityDTO> communityDTOs = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+			for (CommunityDTO communityDTO : communityDTOs) {
+				communityIds.add(communityDTO.getId());
+			}
+			organizationIds.add(cmd.getOrganizationId());
+		}else{
+			communityIds.add(cmd.getCommunityId());
+		}
+		
+		//查询园区下面的所有公司
+		for (Long commId : communityIds) {
+			List<OrganizationCommunityRequest> organizationCommunityRequests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), commId, 1000000, null);
+			for (OrganizationCommunityRequest organizationCommunityRequest : organizationCommunityRequests) {
+				organizationIds.add(organizationCommunityRequest.getMemberId());
+			}
+		}
+		
+		//查询所有公司下面所有的子公司
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		
+		List<Long> childOrganizationIds = new ArrayList<Long>();
+		for (Long organizationId : organizationIds) {
+			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/" + organizationId + "/%", groupTypes);
+			for (Organization organization : organizations) {
+				childOrganizationIds.add(organization.getId());
+			}
+		}
+		organizationIds.addAll(childOrganizationIds);
+		
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode());
+		
+		if(1 == cmd.getIsAuth()){
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		}else if(2 == cmd.getIsAuth()){
+			Condition condition = Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
+			condition = condition.or(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()));
+			cond = cond.and(condition);
+		}else{
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		}
+		
+		if(!StringUtils.isNullOrEmpty(cmd.getKeywords())){
+			Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(cmd.getKeywords());
+			condition = condition.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.eq(cmd.getKeywords()));
+			cond = cond.and(condition);
+		}
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByOrganizationIds(locator, pageSize, cond, organizationIds);
+		
+		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
+		
+		for (OrganizationMember organizationMember : members) {
+			CommunityUserDto dto = new CommunityUserDto();
+			dto.setUserId(organizationMember.getTargetId());
+			dto.setUserName(organizationMember.getContactName());
+			dto.setPhone(organizationMember.getContactToken());
+			dto.setApplyTime(organizationMember.getCreateTime());
+			if(OrganizationMemberStatus.fromCode(organizationMember.getStatus()) == OrganizationMemberStatus.ACTIVE){
+				dto.setIsAuth(1);
+			}else{
+				dto.setIsAuth(2);
+			}
+			dtos.add(dto);
+		}
+		
+		res.setNextPageAnchor(locator.getAnchor());
+		res.setUserCommunities(dtos);
+		return res;
+	}
 	
 	@Override
 	public CommunityUserResponse listUserCommunities(
 			ListCommunityUsersCommand cmd) {
+		
 		CommunityUserResponse res = new CommunityUserResponse();
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		
+		//当是左邻域下的某个园区查询
+		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
+			res = this.listUserByOrganizationIdOrCommunityId(cmd);
+			return res;
+		}
 		List<User> users = null;
 		
 		int index = 100;
@@ -1468,9 +1561,6 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		
 		users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, index);
-		
-		
-		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
 		
 		if(null == users) 
 			return res;
