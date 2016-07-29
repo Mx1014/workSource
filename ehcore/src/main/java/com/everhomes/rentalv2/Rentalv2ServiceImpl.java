@@ -1004,6 +1004,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rSiteDTO.setOwners(new ArrayList<SiteOwnerDTO>());
 			for(RentalSiteRange owner : owners){
 				SiteOwnerDTO dto = ConvertHelper.convert(owner, SiteOwnerDTO.class);
+				Community ownerCom = this.communityProvider.findCommunityById(owner.getOwnerId());
+				if(null != ownerCom)
+					dto.setOwnerName(ownerCom.getName());
 				rSiteDTO.getOwners().add(dto);
 			}
 		} 
@@ -2968,7 +2971,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			
 			//
-			for(String siteNumber : siteNumberMap.keySet()){
+			for(String siteNumber : response.getSiteNames()){
 				RentalSiteNumberRuleDTO siteNumberRuleDTO = new RentalSiteNumberRuleDTO();
 				siteNumberRuleDTO.setSiteNumber(siteNumber);
 				siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
@@ -3104,7 +3107,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		
 		//
-		for(String siteNumber : siteNumberMap.keySet()){
+		for(String siteNumber : response.getSiteNames()){
 			RentalSiteNumberRuleDTO siteNumberRuleDTO = new RentalSiteNumberRuleDTO();
 			siteNumberRuleDTO.setSiteNumber(siteNumber);
 			siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
@@ -3608,8 +3611,32 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			
 			Long siteId = rentalProvider.createRentalSite(resource);
+			//建立了resource之后才有id 
+			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				HashSet<String> siteNumberSet = new HashSet<>();
+				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
+					if( null!=defaultRule.getSiteNumbers())
+						for(String number : defaultRule.getSiteNumbers()){
+							siteNumberSet.add(number);
+							RentalResourceNumber resourceNumber = new RentalResourceNumber();
+							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+							resourceNumber.setOwnerId(resource.getId());
+							resourceNumber.setResourceNumber(number);
+							this.rentalProvider.createRentalResourceNumber(resourceNumber);
+						}
+				}
+				else
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
+					
+			}
+			
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
-				signleCmd.setRentalSiteId(resource.getId());
+				//在这里统一处理 
+				signleCmd.setRentalSiteId(resource.getId()); 
 				addRentalSiteSingleSimpleRule(signleCmd);
 				}
 			

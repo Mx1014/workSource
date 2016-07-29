@@ -17,7 +17,10 @@ public interface UserProfileContstant {
      * 优惠券数
      */
     public static final String RECEIVED_COUPON_COUNT = "receivedCouponCount";
-    
+    /**
+     * 订单数
+     */
+    public static final String RECEIVED_ORDER_COUNT = "receivedOrderCount";
     /**
      * 查看过的新的活动
      */
