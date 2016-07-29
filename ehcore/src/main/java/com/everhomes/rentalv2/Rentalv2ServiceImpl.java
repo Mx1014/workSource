@@ -3562,7 +3562,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCancelTime(defaultRule.getCancelTime());
 			resource.setRefundFlag(defaultRule.getRefundFlag());
 			resource.setRefundRatio(defaultRule.getRefundRatio());
-			
+			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				HashSet<String> siteNumberSet = new HashSet<>();
+				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
+					if( null!=defaultRule.getSiteNumbers())
+						for(String number : defaultRule.getSiteNumbers()){
+							siteNumberSet.add(number);
+							RentalResourceNumber resourceNumber = new RentalResourceNumber();
+							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+							resourceNumber.setOwnerId(resource.getId());
+							resourceNumber.setResourceNumber(number);
+							this.rentalProvider.createRentalResourceNumber(resourceNumber);
+						}
+				}
+				else
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
+					
+			}
 			
 			if(null!=defaultRule.getAttachments())
 				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:defaultRule.getAttachments()){
@@ -3612,7 +3632,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			
 			Long siteId = rentalProvider.createRentalSite(resource);
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
-				signleCmd.setRentalSiteId(resource.getId());
+				//在这里统一处理 
+				signleCmd.setRentalSiteId(resource.getId()); 
 				addRentalSiteSingleSimpleRule(signleCmd);
 				}
 			
