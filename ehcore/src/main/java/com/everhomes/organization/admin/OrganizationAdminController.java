@@ -1035,7 +1035,7 @@ public class OrganizationAdminController extends ControllerBase {
           }
           
           /**
-           * <b>URL: /admin/org/importOwnerData</b>
+           * <b>URL: /admin/org/listOrganizationByName</b>
            * <p>导入业主信息</p>
            */
           @RequestMapping("listOrganizationByName")

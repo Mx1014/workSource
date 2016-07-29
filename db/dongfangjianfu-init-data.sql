@@ -10,7 +10,7 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
     
        
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES( 240111044331053516, UUID(), 13905, '深圳市',  13909, '宝安区', '东方建富大厦', '东方建富大厦', '深圳市宝安区宝安47区自由路东方建富大厦', NULL, '东方建富大厦，屹立于深圳市宝安中心区，以东方建富大厦为商业核心聚点，与天虹商场、旺轩酒楼、宝晖商务酒店、新一佳商场等构成的集购物、娱乐、餐饮、酒店等繁华商业圈，具有独特优越的商业发展潜力。大厦集办公、酒店、会展、娱乐等多功能于一体，其人性化、智能化的设计足以体现现代化商业大厦特质，东方建富实业有限公司总部设于大厦七楼。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 44, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 0);
+	VALUES( 240111044331053516, UUID(), 13905, '深圳市',  13909, '宝安区', '东方建富大厦', '东方建富大厦', '深圳市宝安区宝安47区自由路东方建富大厦', NULL, '东方建富大厦，屹立于深圳市宝安中心区，以东方建富大厦为商业核心聚点，与天虹商场、旺轩酒楼、宝晖商务酒店、新一佳商场等构成的集购物、娱乐、餐饮、酒店等繁华商业圈，具有独特优越的商业发展潜力。大厦集办公、酒店、会展、娱乐等多功能于一体，其人性化、智能化的设计足以体现现代化商业大厦特质，东方建富实业有限公司总部设于大厦七楼。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 180, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 0);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049116, 240111044331053516, '', 113.896821, 22.574873, 'ws0brv9hhm34');	
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
@@ -21,7 +21,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES(1003092, UUID(), '深圳市东方建富实业有限公司', '深圳市东方建富实业有限公司', 1, 1, 1002756, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180771, 1, 0); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(180771, UUID(), 0, 2, 'EhGroups', 1003092,'东方建富','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
+	VALUES(180771, UUID(), 0, 2, 'EhGroups', 1003092,'深圳市东方建富实业有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
 	VALUES(1002756, 0, 'PM', '深圳市东方建富实业有限公司', '', '/1002756', 1, 2, 'ENTERPRISE', 0, 1003092);
@@ -601,4 +601,6 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (19339, 1002756, 240111044331053516, 239825274387101546, '东方建富大厦3栋-713', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (19340, 1002756, 240111044331053516, 239825274387101547, '东方建富大厦3栋-714', '0');
     
-   
+
+INSERT INTO `eh_organization_addresses` (`id`, `organization_id`, `address_id`, `status`, `creator_uid`, `create_time`, `operator_uid`, `process_code`, `process_details`, `proof_resource_uri`, `approve_time`, `update_time`, `building_id`, `building_name`) 
+VALUES ('112852', '1002756', '239825274387101455', '2', NULL, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, '179054', '东方建富大厦2栋');

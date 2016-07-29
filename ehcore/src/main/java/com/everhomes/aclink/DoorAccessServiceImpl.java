@@ -412,9 +412,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<AclinkUser> users = null;
-        users = userProvider.searchDoorUsers(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getBuildingId(),
-                cmd.getBuildingName(), cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
+        List<AclinkUser> users = userProvider.searchDoorUsers(cmd, locator, pageSize);
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
         for(AclinkUser u : users) {
