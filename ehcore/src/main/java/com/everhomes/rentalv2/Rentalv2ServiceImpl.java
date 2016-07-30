@@ -1671,6 +1671,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				cmd.getResourceTypeId(), locator, pageSize + 1,
 				status);
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
+		if (null == billList)
+			return response;
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalOrder bill : billList) {
 			RentalResource rs = this.rentalProvider.getRentalSiteById(bill.getRentalResourceId());
