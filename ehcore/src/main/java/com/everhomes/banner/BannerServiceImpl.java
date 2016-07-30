@@ -199,6 +199,17 @@ public class BannerServiceImpl implements BannerService {
 		List<Banner> allBanners = new ArrayList<Banner>();
 		
         List<Banner> orgBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.ORGANIZATION.getCode(), organizationId);
+        // 如果只定制scope为公司的，则只有当前公司才能查到，其它公司就查不到，故补充也按园区查询 by lqs 20160730
+        int orgBannerSize = (orgBanners == null) ? 0 : orgBanners.size();
+        int cmntyBannerSize = 0;
+        if((orgBanners == null || orgBanners.size() == 0) && communityId != null) {
+            orgBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), communityId);
+            cmntyBannerSize = (orgBanners == null) ? 0 : orgBanners.size();
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Check custom banners, namespaceId={}, sceneType={}, organizationId={}, communityId={}, orgBannersize={}, cmntyBannerSize={}", 
+                namespaceId, sceneTypeStr, organizationId, communityId, orgBannerSize, cmntyBannerSize);
+        }
 		
         List<Banner> customizedBanners = new ArrayList<Banner>();
         
