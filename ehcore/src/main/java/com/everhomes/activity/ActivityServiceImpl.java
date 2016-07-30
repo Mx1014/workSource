@@ -105,6 +105,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
@@ -2054,14 +2055,16 @@ public class ActivityServiceImpl implements ActivityService {
 		Long userId = UserContext.current().getUser().getId();
 		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
 		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
-		processSceneToken(userId, sceneTokenDTO, cmd);
+		processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
 		cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
 		cmd.setEmbeddedAppId(AppConstants.APPID_ACTIVITY);
 		cmd.setOfficialFlag(OfficialFlag.YES.getCode());
 		cmd.setPageAnchor(command.getPageAnchor());
 		cmd.setPageSize(command.getPageSize());
 		
-		ListPostCommandResponse postResponse = forumService.listOrgTopics(cmd);
+		// 由于listOrgTopics查询官方活动时，当一个机构下面没有管理小区或者以普通公司的身份查询的时候，会查不到东西，使用新的方法来解决 by lqs 20160730
+		// ListPostCommandResponse postResponse = forumService.listOrgTopics(cmd);
+		ListPostCommandResponse postResponse = forumService.listOfficialActivityTopics(cmd);
 		List<PostDTO> posts = postResponse.getPosts();		
 		final List<ActivityDTO> activities = new ArrayList<>();
 		if (posts != null && posts.size() > 0) {
@@ -2077,7 +2080,7 @@ public class ActivityServiceImpl implements ActivityService {
 		return reponse;
 	}
 
-	private void processSceneToken(Long userId, SceneTokenDTO sceneTokenDTO, QueryOrganizationTopicCommand cmd) {
+	private void processOfficalActivitySceneToken(Long userId, SceneTokenDTO sceneTokenDTO, QueryOrganizationTopicCommand cmd) {
 		Long organizationId = null;
 		Long communityId = null;
 	    SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
@@ -2106,6 +2109,18 @@ public class ActivityServiceImpl implements ActivityService {
 	        break;
         case ENTERPRISE: 
         case ENTERPRISE_NOAUTH: 
+            // 对于普通公司，也需要取到其对应的管理公司，以便拿到管理公司所发的公告 by lqs 20160730
+            OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDTO.getEntityId());
+            if(org != null) {
+                communityId = org.getCommunityId();
+                if(communityId == null) {
+                    LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}", 
+                        sceneTokenDTO.getEntityId(), cmd, sceneTokenDTO);
+                }
+            } else {
+                LOGGER.error("Organization not found, organizationId={}, cmd={}, sceneToken={}", sceneTokenDTO.getEntityId(), cmd, sceneTokenDTO);
+            }
+            break;
         case PM_ADMIN:
         	organizationId = sceneTokenDTO.getEntityId();
             break;
@@ -2115,6 +2130,8 @@ public class ActivityServiceImpl implements ActivityService {
 	    }
 	    
 	    cmd.setOrganizationId(organizationId);
+	    // 补充小区/园区ID，方便后面构建查询条件：既要查本园区的官方活动，又要查对应的管理公司发给所有园区的官方活动 by lqs 20160730
+	    cmd.setCommunityId(communityId);
 	}
 	
 	
