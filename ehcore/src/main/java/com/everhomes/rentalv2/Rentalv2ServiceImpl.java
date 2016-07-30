@@ -1160,6 +1160,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<RentalCell> rentalSiteRules = new ArrayList<RentalCell>();
 
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
+			rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
 			rentalBill.setResourceName(rs.getResourceName());
 			rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
