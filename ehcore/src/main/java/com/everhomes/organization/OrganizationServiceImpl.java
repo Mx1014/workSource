@@ -6075,13 +6075,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			locator.setAnchor(cmd.getPageOffset());
 			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organizationIds,cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
 			List<PostDTO> dtos = new ArrayList<PostDTO>();
-			LOGGER.info("ORG TASK IS : ++++++++++++++"+orgTasks.toString()); 
+			
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
 				if(null == dto){
 					continue;
 				}
-				LOGGER.info("PostDTO IS : ++++++++++++++"+dto.toString()); 
 				
 				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
 				if(null != member){
