@@ -2181,7 +2181,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
 						refundCmd.setOrderNo(String.valueOf(billMap.getOrderNo()));
 						refundCmd.setOnlinePayStyleNo(VendorType.fromCode(billMap.getVendorType()).getStyleNo()); 
-						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALREFUND.getPycode());
+						refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 						//已付金额乘以退款比例除以100
 						refundCmd.setRefundAmount(order.getPaidMoney().multiply(new BigDecimal(rs.getRefundRatio()/100)));
 						refundCmd.setRefundMsg("预订单取消退款");
@@ -4067,7 +4067,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		refundCmd.setRefundOrderNo(String.valueOf(refundOrder.getRefundOrderNo()) );
 		refundCmd.setOrderNo(String.valueOf(refundOrder.getOrderNo()));
 		refundCmd.setOnlinePayStyleNo(refundOrder.getOnlinePayStyleNo()); 
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALREFUND.getPycode());
+		refundCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		//已付金额乘以退款比例除以100
 		refundCmd.setRefundAmount( refundOrder.getAmount());
 		refundCmd.setRefundMsg("预订单取消退款");

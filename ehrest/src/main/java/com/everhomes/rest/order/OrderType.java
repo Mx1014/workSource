@@ -15,8 +15,7 @@ public class OrderType {
 	public static final int PARKING_CODE = 10000002;
 	public static final int PM_SIYUAN_CODE = 10000003;
 	public static final int PAYMENT_CARD_CODE = 10000004;
-	public static final int RENTAL_ORDER_CODE = 10000005;
-	public static final int RENTAL_REFUND_CODE = 10000006;
+	public static final int RENTAL_ORDER_CODE = 10000005; 
 	
 	
 	public static enum OrderTypeEnum{
@@ -24,8 +23,7 @@ public class OrderType {
 		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付"),
 		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业"), 
 		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通"),
-		RENTALORDER(OrderType.RENTAL_REFUND_CODE,"rentalOrder","资源预订下单"),
-		RENTALREFUND(OrderType.RENTAL_REFUND_CODE,"rentalrefund","资源预订退款"); 
+		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订") ; 
 
 		private int code;
 		private String pycode;
