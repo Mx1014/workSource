@@ -1545,8 +1545,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		managerContent.append(rentalBill.getResourceName());
 		managerContent.append("\n使用详情：");
 		managerContent.append(rentalBill.getUseDetail());
-		managerContent.append("\n预约数：");
-		managerContent.append(rentalBill.getRentalCount());
+		if(null != rentalBill.getRentalCount() ){
+			managerContent.append("\n预约数：");
+			managerContent.append(rentalBill.getRentalCount());
+		}
 		sendMessageToUser(rs.getChargeUid(), managerContent.toString());
 	}
 	private void sendMessageToUser(Long userId, String content) {
@@ -2327,8 +2329,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		managerContent.append(rentalBill.getResourceName());
 		managerContent.append("\n使用详情：");
 		managerContent.append(rentalBill.getUseDetail());
-		managerContent.append("\n预约数：");
-		managerContent.append(rentalBill.getRentalCount());
+		if(null != rentalBill.getRentalCount() ){
+			managerContent.append("\n预约数：");
+			managerContent.append(rentalBill.getRentalCount());
+		}
 		sendMessageToUser(rs.getChargeUid(), managerContent.toString());
 		}
 	
