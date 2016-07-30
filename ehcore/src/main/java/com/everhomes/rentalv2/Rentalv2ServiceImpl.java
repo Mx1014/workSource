@@ -2471,7 +2471,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public AddRentalBillItemCommandResponse addRentalItemBill(
 			AddRentalBillItemCommand cmd) {
- 
+
+		RentalOrder bill = rentalProvider.findRentalBillById(cmd
+				.getRentalBillId());
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -2480,8 +2482,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode()); 
 			Long userId = UserContext.current().getUser().getId();
 	
-			RentalOrder bill = rentalProvider.findRentalBillById(cmd
-					.getRentalBillId());
 			if (bill.getStatus().equals(SiteBillStatus.FAIL.getCode())) {
 				throw RuntimeErrorException
 						.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_BILL_OVERTIME, "BILL OVERTIME");
@@ -2569,7 +2569,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				response.setOrderNo(String.valueOf(orderNo));
 			} else {
 				response.setAmount(new java.math.BigDecimal(0));
-				addOrderSendMessage(bill );
 			}
 			// save bill and online pay bill
 			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();
@@ -2597,7 +2596,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.setSignatureParam(response);
 			return null;
 		});
-		
+		if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()))
+			addOrderSendMessage(bill );
 		// 客户端生成订单
 		return response;
 	}

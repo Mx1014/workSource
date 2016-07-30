@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
 public class RefundOrderDTO {
 
 	private java.lang.Long     id;
-	private java.lang.Long     rentalBillId;
+	private java.lang.String     rentalBillId;
 	private java.lang.Long       refundOrderNo;
 	private java.lang.Long       resourceTypeId;
 	private java.math.BigDecimal amount;
@@ -44,15 +44,7 @@ public class RefundOrderDTO {
 	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
-
-	public java.lang.Long getRentalBillId() {
-		return rentalBillId;
-	}
-
-	public void setRentalBillId(java.lang.Long rentalBillId) {
-		this.rentalBillId = rentalBillId;
-	}
-
+ 
 	public java.lang.Long getRefundOrderNo() {
 		return refundOrderNo;
 	}
@@ -131,6 +123,14 @@ public class RefundOrderDTO {
 
 	public void setRentalCount(Double rentalCount) {
 		this.rentalCount = rentalCount;
+	}
+
+	public java.lang.String getRentalBillId() {
+		return rentalBillId;
+	}
+
+	public void setRentalBillId(java.lang.String rentalBillId) {
+		this.rentalBillId = rentalBillId;
 	}
  
 	
