@@ -2111,12 +2111,16 @@ public class ActivityServiceImpl implements ActivityService {
         case ENTERPRISE_NOAUTH: 
             // 对于普通公司，也需要取到其对应的管理公司，以便拿到管理公司所发的公告 by lqs 20160730
             OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDTO.getEntityId());
-            organizationId = sceneTokenDTO.getEntityId();
             if(org != null) {
                 communityId = org.getCommunityId();
                 if(communityId == null) {
                     LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}", 
                         sceneTokenDTO.getEntityId(), cmd, sceneTokenDTO);
+                } else {
+                    list = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+                    if (list != null && list.size() > 0) {
+                        organizationId = list.get(0).getOrganizationId();
+                    }
                 }
             } else {
                 LOGGER.error("Organization not found, organizationId={}, cmd={}, sceneToken={}", sceneTokenDTO.getEntityId(), cmd, sceneTokenDTO);
@@ -2124,6 +2128,14 @@ public class ActivityServiceImpl implements ActivityService {
             break;
         case PM_ADMIN:
         	organizationId = sceneTokenDTO.getEntityId();
+        	org = organizationService.getOrganizationById(sceneTokenDTO.getEntityId());
+            if(org != null) {
+                communityId = org.getCommunityId();
+                if(communityId == null) {
+                    LOGGER.error("No community found for organization, organizationId={}, cmd={}, sceneToken={}", 
+                        sceneTokenDTO.getEntityId(), cmd, sceneTokenDTO);
+                } 
+            }
             break;
 	    default:
 	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
