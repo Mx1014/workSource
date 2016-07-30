@@ -2298,9 +2298,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				else{
 					//如果不需要退款，直接状态为已取消
 					order.setStatus(SiteBillStatus.FAIL.getCode());
-					cancelOrderSendMessage(order);
+				
 				}
 				//更新bill状态
+				//只要退款就给管理员发消息,不管是退款中还是已退款
+				cancelOrderSendMessage(order);
 				rentalProvider.updateRentalBill(order); 
 				return null;
 			});

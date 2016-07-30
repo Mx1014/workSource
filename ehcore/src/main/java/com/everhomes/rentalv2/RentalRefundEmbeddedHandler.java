@@ -33,7 +33,7 @@ public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 			bill.setStatus(SiteBillStatus.REFUNDED.getCode());
 			rentalProvider.updateRentalBill(bill); 
 			rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
-			rentalService.cancelOrderSendMessage(bill);
+//			rentalService.cancelOrderSendMessage(bill);
 			return null;
 		});
 	}
