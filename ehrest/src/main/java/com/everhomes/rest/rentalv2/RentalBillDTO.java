@@ -67,6 +67,9 @@ public class RentalBillDTO {
 	private Byte invoiceFlag;
 	private Byte status;
 	private Double rentalCount; 
+    private Byte refundFlag;
+    private Integer refundRatio;
+    private Byte cancelFlag;
 	private java.lang.String     useDetail;
 	private java.lang.String     vendorType;
 	private java.lang.Long       resourceTypeId; 
@@ -382,6 +385,36 @@ public class RentalBillDTO {
 
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
+	}
+
+
+	public Byte getRefundFlag() {
+		return refundFlag;
+	}
+
+
+	public void setRefundFlag(Byte refundFlag) {
+		this.refundFlag = refundFlag;
+	}
+
+
+	public Integer getRefundRatio() {
+		return refundRatio;
+	}
+
+
+	public void setRefundRatio(Integer refundRatio) {
+		this.refundRatio = refundRatio;
+	}
+
+
+	public Byte getCancelFlag() {
+		return cancelFlag;
+	}
+
+
+	public void setCancelFlag(Byte cancelFlag) {
+		this.cancelFlag = cancelFlag;
 	}
 
  
