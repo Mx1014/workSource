@@ -4117,6 +4117,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				LOGGER.error("rentalOrder not found  Order id = " + order.getOrderId());
 			}
 			dto.setApplyTime(order.getCreateTime().getTime());
+			dto.setRentalBillId(rentalOrder.getOrderNo());
 			response.getRefundOrders().add(dto);
 		});
 		
