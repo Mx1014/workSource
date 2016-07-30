@@ -2552,7 +2552,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 //	
 //			}
-			rentalProvider.updateRentalBill(bill);
 			 
 			Long orderNo = null;
 			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
@@ -2570,6 +2569,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			} else {
 				response.setAmount(new java.math.BigDecimal(0));
 			}
+			bill.setOrderNo(String.valueOf(orderNo));
+			rentalProvider.updateRentalBill(bill);
 			// save bill and online pay bill
 			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();
 	 
