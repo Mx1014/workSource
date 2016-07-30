@@ -527,7 +527,7 @@ CREATE TABLE `eh_office_cubicle_orders` (
 -- 添加字段
 
 
- ALTER TABLE  eh_rentalv2_refund_orders ADD COLUMN  `refund_flag` TINYINT COMMENT '是否支持退款 1是 0否';
- ALTER TABLE  eh_rentalv2_refund_orders ADD COLUMN  `refund_ratio` INTEGER COMMENT '退款比例';
+ ALTER TABLE  eh_rentalv2_orders ADD COLUMN  `refund_flag` TINYINT COMMENT '是否支持退款 1是 0否';
+ ALTER TABLE  eh_rentalv2_orders ADD COLUMN  `refund_ratio` INTEGER COMMENT '退款比例';
  
- ALTER TABLE  eh_rentalv2_refund_orders ADD COLUMN  `cancel_flag` TINYINT  COMMENT '是否允许取消 1是 0否';
+ ALTER TABLE  eh_rentalv2_orders ADD COLUMN  `cancel_flag` TINYINT  COMMENT '是否允许取消 1是 0否';
