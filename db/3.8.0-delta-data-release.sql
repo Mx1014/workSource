@@ -241,7 +241,7 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
  VALUES('109789','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预订','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
- VALUES('109790','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预定','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin');
+ VALUES('109790','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预订','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://core.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin');
 
  
 -- 储能门禁二维码授权来访事由
@@ -2637,4 +2637,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
  VALUES ('10973', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '会议室预约', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', '1', '1', '49', '{\"resourceTypeId\":7,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 
+-- 删除临时工位预订的广场配置
 
+DELETE FROM eh_launch_pad_items WHERE id = 10955 AND  item_label='工位预订';
+DELETE FROM eh_launch_pad_items WHERE id = 10972 AND  item_label='工位预订';
