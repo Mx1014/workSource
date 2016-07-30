@@ -12,6 +12,8 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -176,6 +178,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			OfficeCategoryDTO categoryDTO = ConvertHelper.convert(category, OfficeCategoryDTO.class);
 			categoryDTO.setSize(category.getSpaceSize());
 			dto.getCategories().add(categoryDTO);
+		});
+		Collections.sort(dto.getCategories(),new Comparator<OfficeCategoryDTO>(){
+			public int compare(OfficeCategoryDTO s1, OfficeCategoryDTO s2) {
+                return s2.getSize() - s1.getSize();
+            }
 		});
 		return dto;
 	}
