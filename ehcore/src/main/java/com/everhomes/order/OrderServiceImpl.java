@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService{
 	}
 
 	private RefundEmbeddedHandler getRefundHandler(String orderType) {
-		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
+		return PlatformContext.getComponent(RefundEmbeddedHandler.REFUND_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
 	}
 	@Override
 	public void refundCallback(RefundCallbackCommand cmd) { 

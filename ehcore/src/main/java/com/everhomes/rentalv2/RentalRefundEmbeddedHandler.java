@@ -14,7 +14,7 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.RefundCallbackCommand;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 
-@Component(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX + OrderType.RENTAL_ORDER_CODE )
+@Component(RefundEmbeddedHandler.REFUND_EMBEDED_OBJ_RESOLVER_PREFIX + OrderType.RENTAL_ORDER_CODE )
 public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 
 	@Autowired

@@ -11,7 +11,7 @@ import com.everhomes.rest.order.RefundCallbackCommand;
  * </ul> 
  */
 public interface RefundEmbeddedHandler {
-	String ORDER_EMBEDED_OBJ_RESOLVER_PREFIX = "OrderEmbededApp-";
+	String REFUND_EMBEDED_OBJ_RESOLVER_PREFIX = "RefundEmbededApp-";
 	/**
 	 * 支付成功
 	 */
