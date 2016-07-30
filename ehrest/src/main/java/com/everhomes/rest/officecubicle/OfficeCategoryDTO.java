@@ -63,4 +63,7 @@ public class OfficeCategoryDTO {
 		this.size = size;
 	}
   
+	public int compareTo(OfficeCategoryDTO other ){
+		return this.getSize() - other.getSize();
+	}
 }
