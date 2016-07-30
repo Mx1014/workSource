@@ -1779,12 +1779,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 	@Override
 	public void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill) {
-		RentalResource rs = rentalProvider
-				.getRentalSiteById(bill.getRentalResourceId());
-		if(null== rs){
-			LOGGER.debug("RentalSite is null...bill id  = " + bill.getId()+",and site id = "+bill.getRentalResourceId());
-			return ;
-		}
+//		RentalResource rs = rentalProvider
+//				.getRentalSiteById(bill.getRentalResourceId());
+//		if(null== rs){
+//			LOGGER.debug("RentalSite is null...bill id  = " + bill.getId()+",and site id = "+bill.getRentalResourceId());
+//			return ;
+//		}
 		// 
 //		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
 //		RentalRule rr=null;
@@ -2690,10 +2690,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for (RentalOrder bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
 			mappingRentalBillDTO(dto, bill);
-			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsOrder> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
 			if(null!=rentalSiteItems)
+				dto.setSiteItems(new ArrayList<SiteItemDTO>());
 				for (RentalItemsOrder rib : rentalSiteItems) {
 					SiteItemDTO siDTO = new SiteItemDTO();
 					siDTO.setCounts(rib.getRentalCount());
