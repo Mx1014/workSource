@@ -2111,6 +2111,7 @@ public class ActivityServiceImpl implements ActivityService {
         case ENTERPRISE_NOAUTH: 
             // 对于普通公司，也需要取到其对应的管理公司，以便拿到管理公司所发的公告 by lqs 20160730
             OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDTO.getEntityId());
+            organizationId = sceneTokenDTO.getEntityId();
             if(org != null) {
                 communityId = org.getCommunityId();
                 if(communityId == null) {
