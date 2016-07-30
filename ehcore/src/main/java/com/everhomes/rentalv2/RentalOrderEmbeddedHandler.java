@@ -47,7 +47,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 						order.setStatus(SiteBillStatus.RESERVED.getCode());
 					}
 					else if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
-						if(order.getPayTotalMoney().equals(order.getPaidMoney())){
+						if(order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0){
 							order.setStatus(SiteBillStatus.SUCCESS.getCode());
 						}
 						else{
