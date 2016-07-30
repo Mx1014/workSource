@@ -1379,6 +1379,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				else {
 					// 资源编号
 //					useDetailSB.append(";资源编号:");
+					useDetailSB.append(" ");
 					useDetailSB.append(rsr.getResourceNumber());
 //					useDetailSB.append("号");
 				}
