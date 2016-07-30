@@ -1458,40 +1458,9 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"organizationId and communityId All are empty");
 		}
-		List<Long> communityIds = new ArrayList<Long>();
 		CommunityUserResponse res = new CommunityUserResponse(); 
-		List<Long> organizationIds = new ArrayList<Long>();
-		if(null == cmd.getCommunityId() && null != cmd.getOrganizationId()){
-			List<CommunityDTO> communityDTOs = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
-			for (CommunityDTO communityDTO : communityDTOs) {
-				communityIds.add(communityDTO.getId());
-			}
-			organizationIds.add(cmd.getOrganizationId());
-		}else{
-			communityIds.add(cmd.getCommunityId());
-		}
 		
-		//查询园区下面的所有公司
-		for (Long commId : communityIds) {
-			List<OrganizationCommunityRequest> organizationCommunityRequests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), commId, 1000000, null);
-			for (OrganizationCommunityRequest organizationCommunityRequest : organizationCommunityRequests) {
-				organizationIds.add(organizationCommunityRequest.getMemberId());
-			}
-		}
-		
-		//查询所有公司下面所有的子公司
-		List<String> groupTypes = new ArrayList<String>();
-		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-		
-		List<Long> childOrganizationIds = new ArrayList<Long>();
-		for (Long organizationId : organizationIds) {
-			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/" + organizationId + "/%", groupTypes);
-			for (Organization organization : organizations) {
-				childOrganizationIds.add(organization.getId());
-			}
-		}
-		organizationIds.addAll(childOrganizationIds);
+		List<Long> organizationIds = this.getAllOrganizationIds(cmd.getCommunityId(), cmd.getOrganizationId());
 		
 		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode());
 		
@@ -1535,6 +1504,44 @@ public class CommunityServiceImpl implements CommunityService {
 		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(dtos);
 		return res;
+	}
+	
+	private List<Long> getAllOrganizationIds(Long communityId, Long orgId){
+		List<Long> communityIds = new ArrayList<Long>();
+		List<Long> organizationIds = new ArrayList<Long>();
+		if(null == communityId && null != orgId){
+			List<CommunityDTO> communityDTOs = organizationService.listAllChildrenOrganizationCoummunities(orgId);
+			for (CommunityDTO communityDTO : communityDTOs) {
+				communityIds.add(communityDTO.getId());
+			}
+			organizationIds.add(orgId);
+		}else{
+			communityIds.add(communityId);
+		}
+		
+		//查询园区下面的所有公司
+		for (Long commId : communityIds) {
+			List<OrganizationCommunityRequest> organizationCommunityRequests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), commId, 1000000, null);
+			for (OrganizationCommunityRequest organizationCommunityRequest : organizationCommunityRequests) {
+				organizationIds.add(organizationCommunityRequest.getMemberId());
+			}
+		}
+		
+		//查询所有公司下面所有的子公司
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		
+		List<Long> childOrganizationIds = new ArrayList<Long>();
+		for (Long organizationId : organizationIds) {
+			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/" + organizationId + "/%", groupTypes);
+			for (Organization organization : organizations) {
+				childOrganizationIds.add(organization.getId());
+			}
+		}
+		organizationIds.addAll(childOrganizationIds);
+		
+		return organizationIds;
 	}
 	
 	@Override
@@ -1620,6 +1627,13 @@ public class CommunityServiceImpl implements CommunityService {
 	public CountCommunityUserResponse countCommunityUsers(
 			CountCommunityUsersCommand cmd) {
 		
+		/**
+		 * 园区用户统计
+		 */
+		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		int communityUserCount  = 0;
+		List<Long> orgIds  = new ArrayList<Long>();
+		
 		if(cmd.getCommunityId() != null) {
 			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 			
@@ -1668,19 +1682,45 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		
-		/**
-		 * 园区用户统计
-		 */
-		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		
-		int communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
-		
-		List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, null ,new CrossShardListingLocator(), 1000000);
-		List<Long> orgIds  = new ArrayList<Long>();
-		for (Organization organization : orgs) {
-			orgIds.add(organization.getId());
+		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
+			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
+				LOGGER.error("organizationId and communityId All are empty");
+				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"organizationId and communityId All are empty");
+			}
+			
+			//获取园区或者机构所管辖的所有园区下的所有企业，包括自己的机构id
+			orgIds = this.getAllOrganizationIds(cmd.getCommunityId(), cmd.getOrganizationId());
+			
+			//获取所有机构集的所有注册用户
+			Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode());
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, cond);
+			
+			List<Long> userIds = new ArrayList<Long>();
+			if(null != members){
+				for (OrganizationMember member : members) {
+					if(!userIds.contains(member.getTargetId())){
+						userIds.add(member.getTargetId());
+					}
+				}
+			}
+			
+			communityUserCount = userIds.size();
+			
+		}else{
+			// 如果是其他域的情况，则获取域下面所有的公司
+			communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
+			List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, null ,new CrossShardListingLocator(), 1000000);
+			for (Organization organization : orgs) {
+				orgIds.add(organization.getId());
+			}
 		}
-		List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, OrganizationMemberStatus.ACTIVE);
+		
+		// 获取所有机构集的所有认证用户
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode());
+		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+		List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, cond);
 		List<Long> userIds = new ArrayList<Long>();
 		if(null != members){
 			for (OrganizationMember member : members) {
@@ -1690,8 +1730,9 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		
-		
 		int authUserCount = userIds.size();
+		
+		//总注册用户-认证用户 = 非认证用户
 		int notAuthUsers = communityUserCount - authUserCount;
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();

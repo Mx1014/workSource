@@ -2065,12 +2065,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	
 	@Override
-	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status) {
+	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, Condition cond) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(ids));
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(status.getCode()));
+		query.addConditions(cond);
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;

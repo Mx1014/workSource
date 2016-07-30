@@ -173,7 +173,7 @@ public interface OrganizationProvider {
 	
 	List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(Long orgId, String memberGroup);
 
-	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status);
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, Condition cond);
 	
 	List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,List<Long> organizationIds,Long targetId, String taskType, Byte taskStatus, Byte visibleRegionType, Long visibleRegionId, int pageSize);
 	
