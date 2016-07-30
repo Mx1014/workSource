@@ -30,6 +30,9 @@ import com.everhomes.util.StringHelper;
  * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>  
  * <li>rentalCount：场所预定数量</li> 
  * <li>useDetail：使用详情</li> 
+ * <li>refundFlag：是否退款 0-否 1-是</li> 
+ * <li>refundRatio：退款比例 百分比 </li> 
+ * <li>cancelFlag：是否允许取消,永远为1</li> 
  * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
  * <li>resourceTypeId：广场图标id</li> 
  * <li>siteItems：场所商品</li> 
