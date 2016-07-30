@@ -2173,7 +2173,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//循环退款
 						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 						String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-						String appKey = configurationProvider.getValue("pay.appKey", "b86ddb3b-ac77-4a65-ae03-7e8482a3db70");
+						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
 						refundCmd.setAppKey(appKey);
 						Long timestamp = System.currentTimeMillis();
 						refundCmd.setTimestamp(timestamp);
@@ -2534,7 +2534,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	
 	private void setSignatureParam(AddRentalBillItemCommandResponse response) {
-		String appKey = configurationProvider.getValue("pay.appKey", "b86ddb3b-ac77-4a65-ae03-7e8482a3db70");
+		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
 		Long timestamp = System.currentTimeMillis();
 		Integer randomNum = (int) (Math.random()*1000);
 		App app = appProvider.findAppByKey(appKey);
@@ -4060,8 +4060,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 
 					RentalServiceErrorCode.ERROR_REFOUND_ERROR, "refund order is wechat  ");
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-		String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-		String appKey = configurationProvider.getValue("pay.appKey", "b86ddb3b-ac77-4a65-ae03-7e8482a3db70");
+		String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "");
+		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
 		refundCmd.setAppKey(appKey);
 		Long timestamp = System.currentTimeMillis();
 		refundCmd.setTimestamp(timestamp);
