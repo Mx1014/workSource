@@ -290,8 +290,6 @@ CREATE TABLE `eh_rentalv2_orders` (
   `notice` TEXT COMMENT '',
   `community_id` BIGINT COMMENT '资源所属园区的ID',
   `namespace_id` INTEGER  COMMENT '域空间',
-  `refund_flag` TINYINT COMMENT '是否支持退款 1是 0否',
-  `refund_ratio` INTEGER COMMENT '退款比例',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -525,3 +523,9 @@ CREATE TABLE `eh_office_cubicle_orders` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 添加字段
+
+
+ ALTER TABLE  eh_rentalv2_refund_orders ADD COLUMN  `refund_flag` TINYINT COMMENT '是否支持退款 1是 0否';
+ ALTER TABLE  eh_rentalv2_refund_orders ADD COLUMN  `refund_ratio` INTEGER COMMENT '退款比例';
