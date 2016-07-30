@@ -1271,7 +1271,7 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter userId,userId is not found");
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
-			this.userActivityService.cancelShop(user.getId());
+			//this.userActivityService.cancelShop(user.getId());
 			if(business != null){
 				this.businessProvider.deleteBusiness(business.getId());
 				//删除服务市场item
