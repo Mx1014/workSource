@@ -32,15 +32,15 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 				//success
 				if(cmd.getPayStatus().toLowerCase().equals("success"))
 				{
-					RentalOrderPayorderMap bpbMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
-					RentalOrder order = rentalProvider.findRentalBillById(bpbMap.getOrderId());
+					RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
+					RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
 					order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getPayAmount())));
 					order.setVendorType(cmd.getVendorType());
-					bpbMap.setVendorType(cmd.getVendorType());
+					orderMap.setVendorType(cmd.getVendorType());
 					order.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
 							.getTime()));
 
-					bpbMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
 							.getTime()));
 //					bill.setOperatorUid(UserContext.current().getUser().getId());
 					if(order.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
@@ -60,6 +60,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 						LOGGER.error("待付款订单:id ["+order.getId()+"]状态有问题： 订单状态是："+order.getStatus());
 					}
 					rentalProvider.updateRentalBill(order);
+					rentalProvider.updateRentalOrderPayorderMap(orderMap);
 				} 
 	}
 

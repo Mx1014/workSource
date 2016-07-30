@@ -44,6 +44,7 @@ import com.everhomes.server.schema.tables.EhRentalv2ResourceRanges;
 import com.everhomes.server.schema.tables.daos.EhRentalv2CellsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2DefaultRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2ItemsDao;
+import com.everhomes.server.schema.tables.daos.EhRentalv2OrderPayorderMapDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2OrdersDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2RefundOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2ResourceRangesDao;
@@ -923,6 +924,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		dao.update(bill);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2Orders.class,
 				bill.getId());
+	}
+	@Override
+	public void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap) {
+		assert (ordeMap.getId() == null);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2OrderPayorderMapDao dao = new EhRentalv2OrderPayorderMapDao(context.configuration());
+		dao.update(ordeMap);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderPayorderMap.class,
+				ordeMap.getId());
 	}
 
 	@Override

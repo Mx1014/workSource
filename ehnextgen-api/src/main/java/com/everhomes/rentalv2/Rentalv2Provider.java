@@ -249,6 +249,9 @@ public interface Rentalv2Provider {
 	List<RentalResourceNumber> queryRentalResourceNumbersByOwner(
 			String simpleName, Long id);
 
+
+	void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap);
+
  
 
  
