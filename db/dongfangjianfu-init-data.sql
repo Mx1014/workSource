@@ -26,12 +26,14 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
   
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
 	VALUES(2105190, 1002756, 'USER', 225498, 'manager', '喻超文', 0, '13430865789', 3);	
-
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
+	VALUES(2105191, 1002756, 'USER', 216903, 'manager', '孔静', 0, '13798499059', 3);	
 
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(10993, 'EhOrganizations', 1002756, 'EhUsers', 225498, 1001, 1, UTC_TIMESTAMP());
-
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES(10994, 'EhOrganizations', 1002756, 'EhUsers', 216903, 1001, 1, UTC_TIMESTAMP());
 
   
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
@@ -73,7 +75,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (109922, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaActions', 'HELP', '咨询求助', 'cs://1/image/aW1hZ2UvTVRvMFlqazJOalppWkRjME4yTXpOVEE1TlRnNFlqRTFNemMwWXpjeVlqTTNZUQ', 1, 1, 19, '{"contentCategory":1005,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109923, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaActions', 'REPAIR', '报修', 'cs://1/image/aW1hZ2UvTVRwaFpqUmxNRGd6WkRJME1URmtNMlJtWm1Sak1USmtNamN6WTJJelltSTJZUQc', 1, 1, 19, '{"contentCategory":1004,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
+	VALUES (109923, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaActions', 'REPAIR', '报修', 'cs://1/image/aW1hZ2UvTVRwaFpqUmxNRGd6WkRJME1URmtNMlJtWm1Sak1USmtNamN6WTJJelltSTJZUQ', 1, 1, 19, '{"contentCategory":1004,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (109925, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaPosts', 'ADVISE', '投诉建议', NULL, 1, 1, 15, '{"contentCategory":1006,"actionCategory":0,"forumId":176520,"embedAppId":27}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -87,7 +89,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (109929, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaActions', 'HELP', '咨询求助', 'cs://1/image/aW1hZ2UvTVRvMFlqazJOalppWkRjME4yTXpOVEE1TlRnNFlqRTFNemMwWXpjeVlqTTNZUQ', 1, 1, 19, '{"contentCategory":1005,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (109930, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaActions', 'REPAIR', '报修', 'cs://1/image/aW1hZ2UvTVRwaFpqUmxNRGd6WkRJME1URmtNMlJtWm1Sak1USmtNamN6WTJJelltSTJZUQc', 1, 1, 19, '{"contentCategory":1004,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
+	VALUES (109930, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaActions', 'REPAIR', '报修', 'cs://1/image/aW1hZ2UvTVRwaFpqUmxNRGd6WkRJME1URmtNMlJtWm1Sak1USmtNamN6WTJJelltSTJZUQ', 1, 1, 19, '{"contentCategory":1004,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (109932, 0, 0, 1, 240111044331053516, '/home/Pm', 'GaPosts', 'ADVISE', '投诉建议', NULL, 1, 1, 15, '{"contentCategory":1006,"actionCategory":0,"forumId":176520,"embedAppId":27}', 0, 3, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
