@@ -2686,6 +2686,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
  
  
 -- 支付appkey
-INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES('300','1','81c4cacf-954f-4868-be8f-c5e817b4137f','Mh1AX1HDzZEpFZ3N07q+TYKsFDFGza7BgxeF608ecATr543EZkCLuxf45iHjH/5Ri8S/R2ixRijeh0336Hpg2w==','pay.app','pay.app','1','2016-01-12 14:52:06',NULL,NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('63','pay.appKey','81c4cacf-954f-4868-be8f-c5e817b4137f','pay.appKey','999989',NULL);
+-- INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES('300','1','81c4cacf-954f-4868-be8f-c5e817b4137f','Mh1AX1HDzZEpFZ3N07q+TYKsFDFGza7BgxeF608ecATr543EZkCLuxf45iHjH/5Ri8S/R2ixRijeh0336Hpg2w==','pay.app','pay.app','1','2016-01-12 14:52:06',NULL,NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('pay.appKey','81c4cacf-954f-4868-be8f-c5e817b4137f','pay.appKey','999989',NULL);
  
