@@ -1169,6 +1169,81 @@ public class ForumServiceImpl implements ForumService {
     	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
     }
     
+    /**
+     * 独立出一个方法来专门查询官方活动，以简化帖子条件的查询条件；而原来使用listOrgTopics(QueryOrganizationTopicCommand cmd)
+     * 存在着BUG：当一个机构没有管理小区或者以普通机构的身份访问时会查不到帖子；
+     */
+    public ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd){
+        long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Long organizationId = cmd.getOrganizationId();
+        Long communityId = cmd.getCommunityId();
+        List<Long> forumIds = new ArrayList<Long>();
+        
+        List<Long> communityIdList = new ArrayList<Long>();
+        // 获取所管理的所有小区对应的社区论坛
+        ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+        command.setOrganizationId(organizationId);;
+        List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+        if(communities != null){
+            for (CommunityDTO communityDTO : communities) {
+                communityIdList.add(communityDTO.getId());
+                forumIds.add(communityDTO.getDefaultForumId());
+            }
+        }
+        // 办公地点所在园区对应的社区论坛
+        Community community = communityProvider.findCommunityById(communityId);
+        communityIdList.add(community.getId());
+        forumIds.add(community.getDefaultForumId());
+        
+        // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
+        if(forumIds.size() == 0) {
+            LOGGER.error("Forum not found for offical activities, cmd={}", cmd);
+            return null;
+        }
+        
+        Condition forumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds);
+        
+        // 可见性条件：如果有当前小区/园区，则加上小区条件；如果有对应的管理机构，则加上机构条件；这两个条件为或的关系；
+        Condition communityCondition = null;
+        if(communityId != null) {
+            communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+            communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(communityId));
+        }
+        Condition orgCondition = null;
+        if(organizationId != null) {
+            orgCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            orgCondition = orgCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
+        }
+        Condition visibleCondition = communityCondition;
+        if(visibleCondition == null) {
+            visibleCondition = orgCondition;
+        } else {
+            visibleCondition = visibleCondition.or(orgCondition);
+        }
+        
+        Condition condition = forumCondition;
+        if(visibleCondition != null) {
+            condition = condition.and(visibleCondition);
+        }
+        condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY));
+        condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
+        CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }   
+        return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+   }
+    
     
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
