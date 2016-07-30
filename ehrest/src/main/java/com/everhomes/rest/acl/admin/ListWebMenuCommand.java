@@ -1,6 +1,8 @@
 package com.everhomes.rest.acl.admin;
 
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -10,6 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListWebMenuCommand {
 	
+	@NotNull
 	private Long organizationId;
 	
 	public Long getOrganizationId() {

@@ -144,17 +144,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
 		User user = UserContext.current().getUser();
 		
+		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
-		
+		//获取用户在机构范围内的所有权限
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		
 		if(null == privilegeIds){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
 		}
+		//根据权限获取所有菜单
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
 		
 		List<Long> menuIds = new ArrayList<Long>();
@@ -164,9 +166,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<WebMenu> menus = webMenuPrivilegeProvider.listWebMenuByMenuIds(this.getAllMenuIds(menuIds));
 		
+		//根据机构获取全部要屏蔽的菜单
+		List<WebMenuScope> orgWebMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getOrganizationId()));
+		
+		//根据域获取全部要屏蔽的菜单
 		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
 		
-		menus = this.handleMenus(menus, webMenuScopes);
+		//去掉机构要屏蔽的菜单
+		if(null != orgWebMenuScopes && orgWebMenuScopes.size() > 0){
+			menus = this.handleMenus(menus, orgWebMenuScopes);
+		}
+		
+		//去掉域要屏蔽的菜单
+		if(null != webMenuScopes && webMenuScopes.size() > 0)
+			menus = this.handleMenus(menus, webMenuScopes);
 		
 		if(null == menus){
 			res.setMenus(new ArrayList<WebMenuDTO>());
@@ -190,7 +203,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
+		
+		//根据机构获取全部要屏蔽的菜单权限
+		List<WebMenuScope> orgWebMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getOrganizationId()));
+		
+		//屏蔽域下面的菜单权限
 		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+		
+		if(null != webMenuScopes){
+			webMenuScopes.addAll(orgWebMenuScopes);
+		}else{
+			webMenuScopes = orgWebMenuScopes;
+		}
 		
 		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
