@@ -133,3 +133,29 @@ UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2015111401","v
 UPDATE `eh_launch_pad_items` SET `item_name`='EXCHANGE_HALL', `item_label`='交流大厅', `action_type`=50, `icon_uri`='cs://1/image/aW1hZ2UvTVRwbE5UTTFNRE0wWXpBd1lqVTNaVFF4WWpCaVpEa3dZVGhrTlRGbVl6UTJNUQ' WHERE `id`=802 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_items` SET `item_name`='EXCHANGE_HALL', `item_label`='交流大厅', `action_type`=50, `icon_uri`='cs://1/image/aW1hZ2UvTVRwbE5UTTFNRE0wWXpBd1lqVTNaVFF4WWpCaVpEa3dZVGhrTlRGbVl6UTJNUQ' WHERE `id`=10303 AND `namespace_id`=1000000;
 DELETE FROM `eh_launch_pad_items` WHERE `id` IN (809, 810, 10306, 10307);
+
+
+
+-- beta环境威新店铺
+UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698800015553144547%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=109988 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698800015553144547%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=109998 AND `namespace_id`=999991;
+
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698801244186478224%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=109989 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698801244186478224%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=109999 AND `namespace_id`=999991;
+
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698810062984565715%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=109990 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698810062984565715%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110000 AND `namespace_id`=999991;
+
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698810485164586601%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=109991 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698810485164586601%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110001 AND `namespace_id`=999991;
+
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698802883673719700%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110006 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698802883673719700%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110009 AND `namespace_id`=999991;
+
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698804136609025817%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110007 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698804136609025817%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110010 AND `namespace_id`=999991;
+
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698808388956497963%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110008 AND `namespace_id`=999991;
+ UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14698808388956497963%3F_k%3Dzlbiz#sign_suffix"}'  WHERE `id`=110011 AND `namespace_id`=999991;
+
+ -- end
