@@ -2623,21 +2623,30 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 VALUES('7','会议室预约','0',NULL,'0','1000000');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES ('10956', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '电子屏预约', 'cs://1/image/aW1hZ2UvTVRwallXSXdOalUyTXpKaU9EVmxObUZoWm1WbVpHVTNNekF6WW1FeVlURXdZZw', '1', '1', '49', '{\"resourceTypeId\":5,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
+ VALUES (109954, '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '电子屏预约', 'cs://1/image/aW1hZ2UvTVRwallXSXdOalUyTXpKaU9EVmxObUZoWm1WbVpHVTNNekF6WW1FeVlURXdZZw', '1', '1', '49', '{\"resourceTypeId\":5,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES ('10973', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '电子屏预约', 'cs://1/image/aW1hZ2UvTVRwallXSXdOalUyTXpKaU9EVmxObUZoWm1WbVpHVTNNekF6WW1FeVlURXdZZw', '1', '1', '49', '{\"resourceTypeId\":5,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
+ VALUES (109955, '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '电子屏预约', 'cs://1/image/aW1hZ2UvTVRwallXSXdOalUyTXpKaU9EVmxObUZoWm1WbVpHVTNNekF6WW1FeVlURXdZZw', '1', '1', '49', '{\"resourceTypeId\":5,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 
  INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES ('10956', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', 'VIP车位预约', 'cs://1/image/aW1hZ2UvTVRvM09HUmxZMlkzWm1OaFpEazFNamd4TXpVeU5qQTVPV0prWkRVME9XUXhNZw', '1', '1', '49', '{\"resourceTypeId\":6,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
+ VALUES (109956, '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', 'VIP车位预约', 'cs://1/image/aW1hZ2UvTVRvM09HUmxZMlkzWm1OaFpEazFNamd4TXpVeU5qQTVPV0prWkRVME9XUXhNZw', '1', '1', '49', '{\"resourceTypeId\":6,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES ('10973', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', 'VIP车位预约', 'cs://1/image/aW1hZ2UvTVRvM09HUmxZMlkzWm1OaFpEazFNamd4TXpVeU5qQTVPV0prWkRVME9XUXhNZw', '1', '1', '49', '{\"resourceTypeId\":6,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
+ VALUES (109957, '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', 'VIP车位预约', 'cs://1/image/aW1hZ2UvTVRvM09HUmxZMlkzWm1OaFpEazFNamd4TXpVeU5qQTVPV0prWkRVME9XUXhNZw', '1', '1', '49', '{\"resourceTypeId\":6,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES ('10956', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '会议室预约', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', '1', '1', '49', '{\"resourceTypeId\":7,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
+ VALUES (109958, '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '会议室预约', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', '1', '1', '49', '{\"resourceTypeId\":7,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES ('10973', '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '会议室预约', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', '1', '1', '49', '{\"resourceTypeId\":7,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
+ VALUES (109959, '1000000', '0', '0', '0', '/home', 'Bizs', 'MEETINGROOM', '会议室预约', 'cs://1/image/aW1hZ2UvTVRwallXRm1NVEkwTlRNM09HTmtOMlU0TmpJNFpHSXhNREExT0RkbE56TTVNQQ', '1', '1', '49', '{\"resourceTypeId\":7,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 
 -- 删除临时工位预订的广场配置
 
 DELETE FROM eh_launch_pad_items WHERE id = 10955 AND  item_label='工位预订';
 DELETE FROM eh_launch_pad_items WHERE id = 10972 AND  item_label='工位预订';
+
+
+-- 修改菜单名称 by sfyan 20160730
+UPDATE `eh_acl_privileges` SET `name` = '工位 空间管理' WHERE `id` = 558;
+UPDATE `eh_acl_privileges` SET `name` = '工位 预订详情' WHERE `id` = 559;
+UPDATE `eh_web_menus` SET `name` = '空间管理' WHERE `id` = 43310;
+UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 43320;
+UPDATE `eh_web_menu_privileges` SET `name` = '空间管理', discription= '空间管理 全部权限' WHERE `id` = 43310 AND `privilege_id` = 558;
+UPDATE `eh_web_menu_privileges` SET `name` = '预订详情', discription= '预订详情 全部权限' WHERE `id` = 43320 AND `privilege_id` = 559;
