@@ -47,12 +47,12 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES(1111161, 240111044331053517, 'organization', 1002757, 3, 0, UTC_TIMESTAMP());    
   
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES(2105192, 1002757, 'USER', 225501, 'manager', '唐季春', 0, '15818603192', 3);	
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES(2105193, 1002757, 'USER', 225502, 'manager', '吴珊', 0, '13798204538', 3);	
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES(2105194, 1002757, 'USER', 225500, 'manager', '吴珊', 0, '13798204538', 3);
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, create_time)
+	VALUES(2105192, 1002757, 'USER', 225501, 'manager', '唐季春', 0, '15818603192', 3, UTC_TIMESTAMP());	
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, create_time)
+	VALUES(2105193, 1002757, 'USER', 225502, 'manager', '吴珊', 0, '13798204538', 3, UTC_TIMESTAMP());	
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, create_time)
+	VALUES(2105194, 1002757, 'USER', 225500, 'manager', '吴珊', 0, '13798204538', 3, UTC_TIMESTAMP());
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(10995, 'EhOrganizations', 1002757, 'EhUsers', 225501, 1001, 1, UTC_TIMESTAMP());
