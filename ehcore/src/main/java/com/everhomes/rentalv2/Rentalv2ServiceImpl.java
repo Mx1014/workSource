@@ -302,7 +302,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	
 	public Object restCall(String api, Object command, Class<?> responseType) {
-		String host = this.configurationProvider.getValue("pay.zuolin.host", "https://pay.zuolin.com");
+		String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
 		return restCall(api, command, responseType, host);
 	}
 	public Object restCall(String api, Object o, Class<?> responseType,String host) {
@@ -2245,7 +2245,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					for(RentalOrderPayorderMap billMap : billmaps){
 						//循环退款
 						PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-						String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+						String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
 						String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
 						refundCmd.setAppKey(appKey);
 						Long timestamp = System.currentTimeMillis();
@@ -4158,7 +4158,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 
 					RentalServiceErrorCode.ERROR_REFOUND_ERROR, "refund order is wechat  ");
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-		String refoundApi =  this.configurationProvider.getValue("pay.zuolin.refound", "");
+		String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "");
 		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
 		refundCmd.setAppKey(appKey);
 		Long timestamp = System.currentTimeMillis();
