@@ -2692,7 +2692,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			mappingRentalBillDTO(dto, bill);
 			List<RentalItemsOrder> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			if(null!=rentalSiteItems)
+			if(null!=rentalSiteItems){
 				dto.setSiteItems(new ArrayList<SiteItemDTO>());
 				for (RentalItemsOrder rib : rentalSiteItems) {
 					SiteItemDTO siDTO = new SiteItemDTO();
@@ -2706,6 +2706,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalResourceItemId() + ", cmd=" + cmd);
 					}
 				}
+			}
 			response.getRentalBills().add(dto);
 		}
  
