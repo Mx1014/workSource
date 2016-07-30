@@ -18,6 +18,8 @@ import com.everhomes.rest.rentalv2.SiteBillStatus;
 public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 
 	@Autowired
+	private Rentalv2Service rentalService;
+	@Autowired
 	private Rentalv2Provider rentalProvider;
 
 	@Autowired
@@ -31,6 +33,7 @@ public class RentalRefundEmbeddedHandler implements RefundEmbeddedHandler {
 			bill.setStatus(SiteBillStatus.REFUNDED.getCode());
 			rentalProvider.updateRentalBill(bill); 
 			rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
+			rentalService.cancelOrderSendMessage(bill);
 			return null;
 		});
 	}

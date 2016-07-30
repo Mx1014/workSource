@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,16 +29,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-
-
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 import net.greghaines.jesque.Job;
-
-
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -67,10 +60,9 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-
-
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -83,9 +75,15 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.rentalv2.AddItemAdminCommand;
@@ -193,6 +191,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -209,6 +208,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service {
@@ -246,7 +246,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String queueName = "rentalService";
-	
+
+	@Autowired
+	private MessagingService messagingService;
 	@Autowired
 	ContentServerService contentServerService;
     @Autowired
@@ -1485,11 +1487,82 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			this.valiRentalBill(0.0, cmd.getRules());
 //			this.rentalProvider.updateRentalBill(rentalBill);
 			mappingRentalBillDTO(billDTO, rentalBill);
+			
 			return billDTO;
 		});
 		return billDTO;
 	}
-	
+	/**
+	 * 给成功的订单发推送
+	 * 
+	 * */
+	@Override
+	public void addOrderSendMessage(RentalOrder rentalBill ){
+		//消息推送
+		//定时任务给用户推送
+		SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
+		StringBuffer content = new StringBuffer();
+		content.append("您预约的");
+		content.append(rentalBill.getResourceName());
+		content.append("已临近使用时间，使用时间为");
+		content.append("已临近使用时间，使用时间为"+bigentimeSF.format(rentalBill.getStartTime()));
+		RentalResource rs = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
+		if(null == rs)
+			return;
+		RentalType rentalType = RentalType.fromCode(rs.getRentalType());
+		final Job job3 = new Job(
+				SendMessageAction.class.getName(),
+				new Object[] {rentalBill.getRentalUid(), content.toString()});
+		if(rentalType != null) {
+			switch(rentalType) {
+			case HOUR:
+				// 在开始时间前30分钟提醒 
+				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+						rentalBill.getStartTime().getTime() - 30*60*1000L );
+				break; 
+			default:
+				// 在开始时间前一天的下午16点提醒
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(rentalBill.getStartTime() );
+				calendar.add(Calendar.DATE, -1);
+				calendar.set(Calendar.HOUR_OF_DAY, 16);
+				calendar.set(Calendar.SECOND, 0);
+				calendar.set(Calendar.MINUTE, 0);
+				calendar.set(Calendar.MILLISECOND, 0);
+				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
+				break;
+				
+			}
+		} 
+		//给负责人推送
+		StringBuffer managerContent = new StringBuffer();
+		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
+		if (null == user )
+			return;
+		managerContent.append(user.getNickName());
+		managerContent.append("预约了");
+		managerContent.append(rentalBill.getResourceName());
+		managerContent.append("\n使用详情：");
+		managerContent.append(rentalBill.getUseDetail());
+		managerContent.append("\n预约数：");
+		managerContent.append(rentalBill.getRentalCount());
+		sendMessageToUser(rs.getChargeUid(), managerContent.toString());
+	}
+	private void sendMessageToUser(Long userId, String content) {
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+		messageDto
+				.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+		LOGGER.debug("messageDTO : ++++ \n " + messageDto);
+		// 发消息 +推送
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
 //	private void assignSiteNumber(RentalResourceOrder rsb ,RentalSiteRule rsr, RentalBillDTO billDTO,Integer loopCnt) {
 //		
 //		if(loopCnt++>20){
@@ -2224,6 +2297,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				else{
 					//如果不需要退款，直接状态为已取消
 					order.setStatus(SiteBillStatus.FAIL.getCode());
+					cancelOrderSendMessage(order);
 				}
 				//更新bill状态
 				rentalProvider.updateRentalBill(order); 
@@ -2231,6 +2305,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			});
 		}
 	}
+	/**
+	 * 取消订单发推送
+	 * 
+	 * */
+	@Override
+	public void cancelOrderSendMessage(RentalOrder rentalBill){
+		RentalResource rs = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
+		if(null == rs)
+			return;
+		//给负责人推送
+		StringBuffer managerContent = new StringBuffer();
+		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
+		if (null == user )
+			return;
+		managerContent.append(user.getNickName());
+		managerContent.append("取消了");
+		managerContent.append(rentalBill.getResourceName());
+		managerContent.append("\n使用详情：");
+		managerContent.append(rentalBill.getUseDetail());
+		managerContent.append("\n预约数：");
+		managerContent.append(rentalBill.getRentalCount());
+		sendMessageToUser(rs.getChargeUid(), managerContent.toString());
+		}
 	
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
@@ -2465,6 +2562,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				response.setOrderNo(String.valueOf(orderNo));
 			} else {
 				response.setAmount(new java.math.BigDecimal(0));
+				addOrderSendMessage(bill );
 			}
 			// save bill and online pay bill
 			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();

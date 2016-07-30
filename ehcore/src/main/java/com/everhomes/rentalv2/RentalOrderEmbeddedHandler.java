@@ -18,6 +18,8 @@ import com.everhomes.util.DateHelper;
 public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 	@Autowired
+	private Rentalv2Service rentalService;
+	@Autowired
 	Rentalv2Provider rentalProvider;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RentalOrderEmbeddedHandler.class);
@@ -61,6 +63,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					}
 					rentalProvider.updateRentalBill(order);
 					rentalProvider.updateRentalOrderPayorderMap(orderMap);
+					rentalService.addOrderSendMessage(order);
 				} 
 	}
 

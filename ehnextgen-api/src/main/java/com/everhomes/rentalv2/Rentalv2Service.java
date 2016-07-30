@@ -206,4 +206,10 @@ public interface Rentalv2Service {
 
 	void deleteResource(DeleteResourceCommand cmd);
 
+
+	void addOrderSendMessage(RentalOrder rentalBill);
+
+
+	void cancelOrderSendMessage(RentalOrder rentalBill);
+
 }
