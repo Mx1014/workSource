@@ -2641,3 +2641,12 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 DELETE FROM eh_launch_pad_items WHERE id = 10955 AND  item_label='工位预订';
 DELETE FROM eh_launch_pad_items WHERE id = 10972 AND  item_label='工位预订';
+
+
+-- 修改菜单名称 by sfyan 20160730
+UPDATE `eh_acl_privileges` SET `name` = '工位 空间管理' WHERE `id` = 558;
+UPDATE `eh_acl_privileges` SET `name` = '工位 预订详情' WHERE `id` = 559;
+UPDATE `eh_web_menus` SET `name` = '空间管理' WHERE `id` = 43310;
+UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 43320;
+UPDATE `eh_web_menu_privileges` SET `name` = '空间管理', discription= '空间管理 全部权限' WHERE `id` = 43310 AND `privilege_id` = 558;
+UPDATE `eh_web_menu_privileges` SET `name` = '预订详情', discription= '预订详情 全部权限' WHERE `id` = 43320 AND `privilege_id` = 559;
