@@ -498,7 +498,7 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 VALUES(239825274387101547,UUID(),240111044331053516, 13905, '深圳市',  13909, '宝安区' ,'东方建富大厦3栋-714','东方建富大厦3栋','714','2','0',UTC_TIMESTAMP(), 0);	
 
 
-
+SET @organization_address_mapping_id = (SELECT MAX(id) FROM `eh_organization_address_mappings`);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002756, 240111044331053516, 239825274387101368, '东方建富大厦1栋-301', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002756, 240111044331053516, 239825274387101369, '东方建富大厦1栋-302', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002756, 240111044331053516, 239825274387101370, '东方建富大厦1栋-303', '0');
