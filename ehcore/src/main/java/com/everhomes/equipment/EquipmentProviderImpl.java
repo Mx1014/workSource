@@ -429,7 +429,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId) {
+	public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, Byte processType) {
 		
 		List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
 		assert(locator.getEntityId() != 0);
@@ -439,6 +439,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.lt(locator.getAnchor()));
         }
+		
+		if(processType != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(processType));
+		}
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID.eq(taskId));
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.desc());
         query.addLimit(count);
@@ -680,7 +684,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasks(
-			String ownerType, Long ownerId, String targetType, Long targetId,
+			String ownerType, Long ownerId, List<String> targetType, List<Long> targetId,
 			CrossShardListingLocator locator, Integer pageSize) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
@@ -692,11 +696,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
-		if(!StringUtils.isNullOrEmpty(targetType))
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_TYPE.eq(targetType));
+		if(targetType != null && targetType.size() > 0)
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_TYPE.in(targetType));
 		
-		if(targetId != null && targetId != 0)
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(targetId));
+		if(targetId != null && targetId.size() > 0)
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.in(targetId));
 		
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
         query.addLimit(pageSize);
@@ -732,6 +736,67 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(result.size()==0)
 			return null;
 		return result;
+	}
+
+	@Override
+	public List<EquipmentInspectionTasks> listTasksByEquipmentId(
+			Long equipmentId, List<Long> standardIds,
+			CrossShardListingLocator locator, Integer pageSize) {
+		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+            
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+            	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+            }
+            
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID.eq(equipmentId));
+            
+            if(standardIds != null && standardIds.size() > 0)
+            	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
+            
+            query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
+            query.addLimit(pageSize - tasks.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
+                return null;
+            });
+
+            if (tasks.size() >= pageSize) {
+                locator.setAnchor(tasks.get(tasks.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return tasks;
+	}
+
+	@Override
+	public List<Long> listStandardIdsByType(Byte type) {
+		List<Long> standardIds = new ArrayList<Long>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionStandardsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.STANDARD_TYPE.eq(type));
+		 
+		query.fetch().map((r) -> {
+			standardIds.add(r.getId());
+			return null;
+		});
+		if(standardIds.size()==0)
+			return null;
+		
+		return standardIds;
 	}
 
 }

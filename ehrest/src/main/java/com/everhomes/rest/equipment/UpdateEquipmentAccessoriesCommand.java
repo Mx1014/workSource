@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>ownerId: 备件所属的主体id</li>
  *  <li>ownerType: 备件所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>targetId: 设备备件所属管理处id</li>
+ *  <li>targetType: 设备备件所属管理处类型</li>
  *  <li>id: 备件id</li>
  *  <li>name: 备件名称</li>
  *  <li>manufacturer: 生产厂商</li>
@@ -25,6 +27,10 @@ public class UpdateEquipmentAccessoriesCommand {
 	
 	@NotNull
 	private String ownerType;
+	
+	private Long targetId;
+	
+	private String targetType;
 	
 	private String name;
 	
@@ -58,6 +64,22 @@ public class UpdateEquipmentAccessoriesCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public String getName() {

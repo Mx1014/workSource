@@ -37,7 +37,7 @@ public interface EquipmentProvider {
 	void updateEquipmentTask(EquipmentInspectionTasks task);
 	
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
-	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId);
+	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, Byte processType);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
 	
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandards(CrossShardListingLocator locator, Integer pageSize);
@@ -45,12 +45,14 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listEquipments(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, 
-			String targetType, Long targetId, CrossShardListingLocator locator, Integer pageSize);
+			List<String> targetType, List<Long> targetId, CrossShardListingLocator locator, Integer pageSize);
 	
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);
 	
 	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
 	
+	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, CrossShardListingLocator locator, Integer pageSize);
 
+	List<Long> listStandardIdsByType(Byte type);
 }

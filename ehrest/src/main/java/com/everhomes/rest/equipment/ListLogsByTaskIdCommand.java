@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>taskId: 任务id</li>
  *  <li>ownerId: 设备所属的主体id</li>
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>processType: 操作类型 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessType}</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
@@ -21,6 +22,8 @@ public class ListLogsByTaskIdCommand {
 	
 	@NotNull
 	private String ownerType;
+	
+	private Byte processType;
 	
 	private Long pageAnchor;
 	
@@ -64,6 +67,14 @@ public class ListLogsByTaskIdCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Byte getProcessType() {
+		return processType;
+	}
+
+	public void setProcessType(Byte processType) {
+		this.processType = processType;
 	}
 
 	@Override
