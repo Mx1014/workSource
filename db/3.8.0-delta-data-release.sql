@@ -296,7 +296,7 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),568,43440,'退款
 
 
 -- ibase 去掉屏蔽  20160729 by sfyan
-DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 43310 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 43310 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999989;
 
 -- 屏蔽资源预订 菜单 20160729 by sfyan 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
