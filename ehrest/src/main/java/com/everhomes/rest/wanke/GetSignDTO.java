@@ -1,5 +1,14 @@
 package com.everhomes.rest.wanke;
 
+/**
+ * <ul>
+ * <li>appId: 应用id</li>
+ * <li>timestamp: 时间戳</li>
+ * <li>nonceStr: 随机数</li>
+ * <li>signature: 签名</li>
+ * <li>url: 当前页面url</li>
+ * </ul>
+ */
 public class GetSignDTO {
 	private String appId;
 	private String timestamp;
