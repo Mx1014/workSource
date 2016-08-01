@@ -1,11 +1,16 @@
 package com.everhomes.wanke;
 
+import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
@@ -354,15 +359,21 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	private void refreshAccessToken(String appId, String appSecret) {
         String key = getAccessTokenKey(appId);
+        String jsKey = getJsTokenKey(appId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         
         Long chnlSn = System.currentTimeMillis();
         //从第三方请求accessToken
-        MashenResponseEntity result = loginForAccessToken(appId, appSecret);
+        MashenResponseEntity result = loginForAccessToken(appId, appSecret);        
         Map<String, Object> map = result.getData();
         String accessToken = (String) map.get("accessToken");
+      //从第三方请求jsApiToken
+        MashenResponseEntity jsResult = getJsToken(accessToken);
+        Map<String, Object> jsMap = jsResult.getData();
+        String jsapiToken = (String) jsMap.get("jsapiToken");
         redisTemplate.opsForValue().set(key,accessToken);
+        redisTemplate.opsForValue().set(jsKey,jsapiToken);
         
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Refresh token, key={}, accessToken={}", key, accessToken);
@@ -374,8 +385,23 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
         return "wanke-accessToken-" + appId;
     }
 	
+	private String getJsTokenKey(String appId) {
+        return "wanke-jsToken-" + appId;
+    }
+	
 	private MashenResponseEntity loginForAccessToken(String appId, String appSecret) {
 		String param = "/token/get?appId=" + appId + "&appSecret=" + appSecret;
+		MashenResponseEntity entity = httpGet(param);
+		if(!entity.isSuccess()) {
+			LOGGER.error("Response of Mashen, result={}.", entity);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Request of Mashen failed");
+		}
+        return entity;
+	}
+	
+	private MashenResponseEntity getJsToken(String accessToken) {
+		String param = "/token/getJsapiToken?accessToken=" + accessToken;
 		MashenResponseEntity entity = httpGet(param);
 		if(!entity.isSuccess()) {
 			LOGGER.error("Response of Mashen, result={}.", entity);
@@ -442,4 +468,62 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 					"Mashen HTTP request response status is not 200");
 		}
 	}
+	
+	 public Map<String, String> sign(String jsapi_ticket, String url) {
+	        Map<String, String> ret = new HashMap<String, String>();
+	        String nonce_str = create_nonce_str();
+	        String timestamp = create_timestamp();
+	        String string1;
+	        String signature = "";
+	        ret.put("url", url);
+	        ret.put("jsapi_ticket", jsapi_ticket);
+	        ret.put("nonceStr", nonce_str);
+	        ret.put("timestamp", timestamp);
+	        //注意这里参数名必须全部小写，且必须有序
+	        string1 = "jsapi_ticket=" + jsapi_ticket +
+	                  "&noncestr=" + nonce_str +
+	                  "&timestamp=" + timestamp +
+	                  "&url=" + url;
+	        System.out.println(string1);
+
+	        try
+	        {
+	            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+	            crypt.reset();
+	            crypt.update(string1.getBytes("UTF-8"));
+	            signature = byteToHex(crypt.digest());
+	        }
+	        catch (NoSuchAlgorithmException e)
+	        {
+	            e.printStackTrace();
+	        }
+	        catch (UnsupportedEncodingException e)
+	        {
+	            e.printStackTrace();
+	        }
+
+	        
+	        ret.put("signature", signature);
+
+	        return ret;
+	    }
+	 	
+	    private String byteToHex(final byte[] hash) {
+	        Formatter formatter = new Formatter();
+	        for (byte b : hash)
+	        {
+	            formatter.format("%02x", b);
+	        }
+	        String result = formatter.toString();
+	        formatter.close();
+	        return result;
+	    }
+
+	    private String create_nonce_str() {
+	        return UUID.randomUUID().toString();
+	    }
+
+	    private String create_timestamp() {
+	        return Long.toString(System.currentTimeMillis() / 1000);
+	    }
 }
