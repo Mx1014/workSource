@@ -43,15 +43,15 @@ public class ListCommunityCommand {
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
+	
 	public String getToken() {
 		return token;
 	}
 	public void setToken(String token) {
 		this.token = token;
 	}
-
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

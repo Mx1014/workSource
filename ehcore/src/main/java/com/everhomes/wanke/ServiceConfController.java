@@ -20,6 +20,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.wanke.GetSignCommand;
+import com.everhomes.rest.wanke.GetSignDTO;
 import com.everhomes.rest.wanke.ListCommunityCommand;
 import com.everhomes.rest.wanke.ListCommunityResponse;
 import com.everhomes.rest.wanke.ListCommunityServiceCommand;
@@ -48,6 +50,20 @@ public class ServiceConfController extends ControllerBase {
     public RestResponse listCommunityServices(ListCommunityServiceCommand cmd) {
     	ListCommunityServiceResponse listCommunityServiceResponse = serviceConfService.listCommunityServices(cmd);
         RestResponse response =  new RestResponse(listCommunityServiceResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /serviceConf/getSign</b>
+     * <p>获取签名</p>
+     */
+    @RequestMapping("getSign")
+    @RestReturn(value=GetSignDTO.class)
+    public RestResponse getSign(GetSignCommand cmd) {
+    	GetSignDTO dto = serviceConfService.getSign(cmd);
+        RestResponse response =  new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

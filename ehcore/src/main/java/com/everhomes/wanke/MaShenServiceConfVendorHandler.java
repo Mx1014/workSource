@@ -6,11 +6,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
@@ -37,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
@@ -61,6 +66,8 @@ import com.everhomes.rest.user.LogonCommandResponse;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.wanke.GetSignCommand;
+import com.everhomes.rest.wanke.GetSignDTO;
 import com.everhomes.rest.wanke.ListCommunityCommand;
 import com.everhomes.rest.wanke.ListCommunityResponse;
 import com.everhomes.rest.wanke.Type;
@@ -312,54 +319,53 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 		}
 	}
 	
-	private String getAccessToken() {
+	private MashenToken getAccessToken() {
 		String appId = configProvider.getValue("wanke.mashen.appId", "");
         String appSecret = configProvider.getValue("wanke.mashen.appSecret", "");
 		
     	return this.coordinationProvider.getNamedLock(CoordinationLocks.WANKE_LOGIN.getCode()).enter(()-> {
-    		String accessToken = getAccessTokenFromCache(appId);
-            if(accessToken == null) {
+    		MashenToken ret = getAccessTokenFromCache(appId);
+            if(ret == null) {
             	refreshAccessToken(appId, appSecret);
-            	accessToken = getAccessTokenFromCache(appId);
+            	ret = getAccessTokenFromCache(appId);
             }
-            return accessToken;
+            return ret;
         }).first();
     	
     }
 	
-	private String refreshAndGetAccessToken() {
+	private MashenToken refreshAndGetAccessToken() {
 		String appId = configProvider.getValue("wanke.mashen.appId", "");
         String appSecret = configProvider.getValue("wanke.mashen.appSecret", "");
 		
     	return this.coordinationProvider.getNamedLock(CoordinationLocks.WANKE_LOGIN.getCode()).enter(()-> {
     		refreshAccessToken(appId, appSecret);
-    		String accessToken = getAccessTokenFromCache(appId);
-            return accessToken;
+    		MashenToken token = getAccessTokenFromCache(appId);
+            return token;
         }).first();
     	
     }
 	
-	private String getAccessTokenFromCache(String appId) {
+	private MashenToken getAccessTokenFromCache(String appId) {
         String key = getAccessTokenKey(appId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
       
         Object value = redisTemplate.opsForValue().get(key);
         
-        String accessToken = null;
+        MashenToken ret = null;
         if(value != null) {
-        	accessToken = (String) value;    
+        	ret = JSONObject.parseObject(value.toString(), MashenToken.class);    
         }
         if(LOGGER.isDebugEnabled())
-        	LOGGER.debug("Get mashen token from cache, key={}, accessToken={}", key, accessToken);
+        	LOGGER.debug("Get mashen token from cache, key={}, Token={}", key, ret);
         
-        return accessToken;
+        return ret;
     }
 	
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	private void refreshAccessToken(String appId, String appSecret) {
         String key = getAccessTokenKey(appId);
-        String jsKey = getJsTokenKey(appId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         
@@ -372,9 +378,12 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
         MashenResponseEntity jsResult = getJsToken(accessToken);
         Map<String, Object> jsMap = jsResult.getData();
         String jsapiToken = (String) jsMap.get("jsapiToken");
-        redisTemplate.opsForValue().set(key,accessToken);
-        redisTemplate.opsForValue().set(jsKey,jsapiToken);
+        MashenToken mashenToken = new MashenToken();
+        mashenToken.setAccessToken(accessToken);
+        mashenToken.setJsapiToken(jsapiToken);
         
+        redisTemplate.opsForValue().set(key, JSONObject.toJSONString(mashenToken));
+        redisTemplate.expire(key, 2, TimeUnit.HOURS);
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Refresh token, key={}, accessToken={}", key, accessToken);
 		}
@@ -383,10 +392,6 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 	
 	private String getAccessTokenKey(String appId) {
         return "wanke-accessToken-" + appId;
-    }
-	
-	private String getJsTokenKey(String appId) {
-        return "wanke-jsToken-" + appId;
     }
 	
 	private MashenResponseEntity loginForAccessToken(String appId, String appSecret) {
@@ -412,12 +417,12 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 	}
 	
 	private MashenResponseEntity getUserInfoByToken(String token) {
-		String accessToken = getAccessToken();
-        String param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + accessToken;
+		MashenToken mashenToken = getAccessToken();
+        String param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + mashenToken.getAccessToken();
         MashenResponseEntity entity = httpGet(param);
         if(!entity.isSuccess()) {
-        	accessToken = refreshAndGetAccessToken();
-        	param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + accessToken;
+        	mashenToken = refreshAndGetAccessToken();
+        	param = "/auth/getUserInfoByToken?token=" + token + "&accessToken=" + mashenToken.getAccessToken();
         	entity = httpGet(param);
         	if(!entity.isSuccess()){
         		LOGGER.error("Wanke get user info failed, param={}, entity={}", param, entity);
@@ -469,23 +474,23 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 		}
 	}
 	
-	 public Map<String, String> sign(String jsapi_ticket, String url) {
-	        Map<String, String> ret = new HashMap<String, String>();
-	        String nonce_str = create_nonce_str();
-	        String timestamp = create_timestamp();
-	        String string1;
-	        String signature = "";
-	        ret.put("url", url);
-	        ret.put("jsapi_ticket", jsapi_ticket);
-	        ret.put("nonceStr", nonce_str);
-	        ret.put("timestamp", timestamp);
-	        //注意这里参数名必须全部小写，且必须有序
-	        string1 = "jsapi_ticket=" + jsapi_ticket +
-	                  "&noncestr=" + nonce_str +
+	@Override
+	public GetSignDTO getSign(GetSignCommand cmd) {
+		MashenToken mashenToken = getAccessToken();
+		GetSignDTO dto = sign(mashenToken.getJsapiToken(), cmd.getUrl());
+		return dto;
+	}
+	
+	 public GetSignDTO sign(String jsapiToken, String url) {
+		 GetSignDTO dto = new GetSignDTO();
+	     String nonceStr = create_nonce_str();
+	     String timestamp = create_timestamp();
+	     String string1;
+	     String signature = "";
+	     string1 = "jsapitoken=" + jsapiToken +
+	                  "&noncestr=" + nonceStr +
 	                  "&timestamp=" + timestamp +
 	                  "&url=" + url;
-	        System.out.println(string1);
-
 	        try
 	        {
 	            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
@@ -501,29 +506,34 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 	        {
 	            e.printStackTrace();
 	        }
+	        String appId = configProvider.getValue("wanke.mashen.appId", "");
+	        dto.setUrl(url);
+	        dto.setAppId(appId);
+	        dto.setTimestamp(timestamp);
+	        dto.setNonceStr(nonceStr);
+	        dto.setSignature(signature);
 
-	        
-	        ret.put("signature", signature);
-
-	        return ret;
-	    }
+	        return dto;
+	  }
 	 	
-	    private String byteToHex(final byte[] hash) {
-	        Formatter formatter = new Formatter();
+	 private String byteToHex(final byte[] hash) {
+		 Formatter formatter = new Formatter();
 	        for (byte b : hash)
 	        {
 	            formatter.format("%02x", b);
 	        }
-	        String result = formatter.toString();
-	        formatter.close();
-	        return result;
-	    }
+	     String result = formatter.toString();
+	     formatter.close();
+	     return result;	        
+	 }
 
-	    private String create_nonce_str() {
-	        return UUID.randomUUID().toString();
-	    }
+	 private String create_nonce_str() {
+		 return UUID.randomUUID().toString();
+	 }
 
-	    private String create_timestamp() {
-	        return Long.toString(System.currentTimeMillis() / 1000);
-	    }
+	 private String create_timestamp() {
+	     return Long.toString(System.currentTimeMillis());
+	 }	    
+
+		
 }

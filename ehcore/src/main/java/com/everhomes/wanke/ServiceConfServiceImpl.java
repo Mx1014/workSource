@@ -17,6 +17,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.wanke.CommunityServiceDTO;
+import com.everhomes.rest.wanke.GetSignCommand;
+import com.everhomes.rest.wanke.GetSignDTO;
 import com.everhomes.rest.wanke.ListCommunityCommand;
 import com.everhomes.rest.wanke.ListCommunityResponse;
 import com.everhomes.rest.wanke.ListCommunityServiceCommand;
@@ -74,11 +76,27 @@ public class ServiceConfServiceImpl implements ServiceConfService {
 	
 	@Override
 	public ListCommunityResponse loginAndGetCommunities(ListCommunityCommand cmd, HttpServletRequest req, HttpServletResponse resp) {
-		cmd.setType("wanke");
 		checkListCommunityCommand(cmd.getToken(),cmd.getType());
 		ServiceConfVendorHandler handler = getServiceConfVendorHandler(cmd.getType());
 		ListCommunityResponse response = handler.loginAndGetCommunities(cmd, req, resp);
 		return response;
+	}
+	
+	@Override
+	public GetSignDTO getSign(GetSignCommand cmd) {
+		if(StringUtils.isBlank(cmd.getType())) {
+        	LOGGER.error("Type cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Type cannot be null.");
+        }
+		if(StringUtils.isBlank(cmd.getUrl())) {
+        	LOGGER.error("Url cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Url cannot be null.");
+        }
+		ServiceConfVendorHandler handler = getServiceConfVendorHandler(cmd.getType());
+		GetSignDTO dto = handler.getSign(cmd);
+		return dto;
 	}
 	
 	private ServiceConfVendorHandler getServiceConfVendorHandler(String vendorName) {
@@ -116,15 +134,6 @@ public class ServiceConfServiceImpl implements ServiceConfService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Type cannot be null.");
         }
-//    	if(StringUtils.isBlank(organizationToken)) {
-//        	LOGGER.error("OrganizationToken cannot be null.");
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"OrganizationToken cannot be null.");
-//        }
-//    	if(StringUtils.isBlank(vendor)) {
-//        	LOGGER.error("OrganizationId cannot be null.");
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"OrganizationId cannot be null.");
-//        }
 	}
+
 }
