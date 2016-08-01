@@ -3,6 +3,7 @@ package com.everhomes.aclink;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -2077,6 +2078,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         floorIds.add(cmd.getDoorNumber());
         qrRequest.setFloorIds(floorIds);
         qrRequest.setAutoFloorId(cmd.getDoorNumber());
+        qrRequest.setBaseFloorId(-3l);
         
         Aclink dAc = aclinkProvider.getAclinkByDoorId(cmd.getDoorId());
         qrRequest.setLingLingId(dAc.getDeviceName());
@@ -2302,18 +2304,22 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         if(floorMap.get(curr) != null) {
-            //Set to first
-            floors.add(curr);
-            
             floorMap.forEach((key, value) -> {
                 if(!key.equals(curr)) {
                     floors.add(key);
                     }
                 });
+            
+            Collections.sort(floors);
+         
+            //Set to end
+            floors.add(0, curr);
+            
         } else {
             floorMap.forEach((key, value) -> {
                 floors.add(key);
             });
+            Collections.sort(floors);
         }
         
         return floors;
