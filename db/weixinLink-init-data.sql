@@ -26,8 +26,10 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
      
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331053517, UUID(), 14978, '深圳市',  14979, '南山区', '深圳威新软件园', '深圳威新', '深圳市南山区高新南九道', NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 113, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 180773, 180774, UTC_TIMESTAMP(), 999991);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`);
+
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-	VALUES(SELECT MAX(id) FROM `eh_community_geopoints`, 240111044331053517, '', 113.956081, 22.533245, 'ws101nh39jkd');	
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), 240111044331053517, '', 113.956081, 22.533245, 'ws101nh39jkd');	
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1002757, 240111044331053517);
 
@@ -65,9 +67,9 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1225, 999991, 'COMMUNITY', 240111044331053517, UTC_TIMESTAMP());
 
-
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES (SELECT MAX(id) FROM `eh_configurations`, 'app.agreements.url', 'https://core.zuolin.com/mobile/static/app_agreements/ibase_agreements.html', 'the relative path for chuneng app agreements', '999991', NULL);	
+	VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'app.agreements.url', 'https://core.zuolin.com/mobile/static/app_agreements/ibase_agreements.html', 'the relative path for chuneng app agreements', '999991', NULL);	
 	
 INSERT INTO `eh_version_realm` VALUES ('40', 'Android_WeixinLink', null, UTC_TIMESTAMP(), '999991');
 INSERT INTO `eh_version_realm` VALUES ('41', 'iOS_WeixinLink', null, UTC_TIMESTAMP(), '999991');
@@ -443,7 +445,7 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 
 
 
-
+SET @organization_address_mapping_id = (SELECT MAX(id) FROM `eh_organization_address_mappings`);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101548, '园区一期-1号楼1层北翼东侧', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
