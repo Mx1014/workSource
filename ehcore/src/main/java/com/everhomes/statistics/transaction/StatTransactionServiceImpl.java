@@ -91,7 +91,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	public void setup(){
 		String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
 		String jobName = triggerName;
-		String cronExpression = configurationProvider.getValue("statistics.cron.expression", StatTransactionScheduleJob.CRON_EXPRESSION);
+		String cronExpression = configurationProvider.getValue(StatTransactionConstant.STAT_CRON_EXPRESSION, StatTransactionScheduleJob.CRON_EXPRESSION);
 		//启动定时任务
 		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatTransactionScheduleJob.class, null);
 	}
@@ -353,12 +353,12 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 10);
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<Byte> statuses = new ArrayList<Byte>();
-		statuses.add(PmsyOrderStatus.UNPAID.getCode());
-		statuses.add(PmsyOrderStatus.PAID.getCode());
+		List<Byte> status = new ArrayList<Byte>();
+		status.add(PmsyOrderStatus.UNPAID.getCode());
+		status.add(PmsyOrderStatus.PAID.getCode());
 		while (true) {
 			//物业缴费交易订单数据同步
-			List<PmsyOrder> pmsyOrders = pmsyProvider.listPmsyOrders(pageSize, startDate, endDate,statuses, locator);
+			List<PmsyOrder> pmsyOrders = pmsyProvider.listPmsyOrders(pageSize, startDate, endDate,status, locator);
 			for (PmsyOrder pmsyOrder : pmsyOrders) {
 				StatOrder statOrder = new StatOrder();
 				if(PmsyOwnerType.fromCode(pmsyOrder.getOwnerType()) == PmsyOwnerType.COMMUNITY){
@@ -415,49 +415,122 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		String url = serverURL + StatTransactionConstant.BIZ_PAID_ORDER_API;
 		//设置需要查询的订单的状态集
-		List<String> statuses = new ArrayList<String>();
-		statuses.add("2");
-		statuses.add("3");
-		statuses.add("6");
-		statuses.add("7");
-		Map<String, String> params = this.getParams();
+		List<String> status = new ArrayList<String>();
+		status.add("2");
+		status.add("3");
+		status.add("6");
+		status.add("7");
+		Map<String, Object> params = this.getParams();
 		String pageAnchor = "";
-		params.put("statuses", StringHelper.toJsonString(statuses));
-		
+		params.put("status", status);
 		String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
         params.put("appKey", appKey);
-        String signature = SignatureHelper.computeSignature(params, secretKey);
+        
+        Map<String, String> mapForSignature = new HashMap<String, String>();
+        for(Map.Entry<String, Object> entry : params.entrySet()) {
+        	if(!entry.getKey().equals("status")) {
+				mapForSignature.put(entry.getKey(), entry.getValue().toString());
+			}
+        }
+        mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+        String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
-			params.put("startTimeAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(params, secretKey);
+			ListPaidOrderResponse response = (ListPaidOrderResponse)StringHelper.fromJsonString(result, ListPaidOrderResponse.class);
+			
+			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode());
+			
+			if(null != response.getResponse()){
+				PaidOrderResponse res = response.getResponse();
+				pageAnchor = res.getNextAnchor();
+				
+				if(null != res.getList()){
+					// 批量添加支付订单
+					this.batchAddStatOrder(res.getList(), SettlementOrderType.TRANSACTION);
+				}
+			}
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 			if(StringUtils.isEmpty(pageAnchor)){
 				break;
 			}
 		}
+		
 		url = serverURL + StatTransactionConstant.BIZ_REFUND_ORDER_API;
-		pageAnchor = "";
+		params = this.getParams();
 		//设置需要查询的订单的状态集
-		statuses = new ArrayList<String>();
-		statuses.add("4");
-		statuses.add("5");
-		statuses.add("6");
-		params.put("statuses", StringHelper.toJsonString(statuses));
+		status = new ArrayList<String>();
+		status.add("4");
+		status.add("5");
+		status.add("6");
+		params.put("status", status);
+		params.put("appKey", appKey);
+		mapForSignature = new HashMap<String, String>();
+	    for(Map.Entry<String, Object> entry : params.entrySet()) {
+	    	if(!entry.getKey().equals("status")) {
+	    		mapForSignature.put(entry.getKey(), entry.getValue().toString());
+	    	}
+	    }
+	    mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+	    signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 		while (true) {
-			
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
-			params.put("startTimeAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(params, secretKey);
+			
+			ListRefundOrderResponse response = (ListRefundOrderResponse)StringHelper.fromJsonString(result, ListRefundOrderResponse.class);
+			
+			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode());
+			
+			if(null != response.getResponse()){
+				RefundOrderResponse res = response.getResponse();
+				pageAnchor = res.getNextAnchor();
+				
+				if(null != res.getList()){
+					// 批量添加退款订单
+					this.batchAddStatOrder(res.getList(), SettlementOrderType.REFUND);
+				}
+			}
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 			if(StringUtils.isEmpty(pageAnchor)){
+				
 				break;
 			}
 		}
 	}
 	
+	
+	private void batchAddStatOrder(List<BizPaidOrder> orders, SettlementOrderType settlementOrderType){
+		for (BizPaidOrder bizPaidOrder : orders) {
+			StatOrder order = new StatOrder();
+			order.setCommunityId(0L);
+			order.setNamespaceId(0);
+			order.setOrderNo(bizPaidOrder.getOrderNo());
+			order.setOrderAmount(bizPaidOrder.getPaidAmount());
+			order.setStatus(bizPaidOrder.getStatus());
+			order.setOrderType(settlementOrderType.getCode());
+			if(1 == bizPaidOrder.getPayType() || 2 == bizPaidOrder.getPayType()){
+				Long userId = Long.valueOf(bizPaidOrder.getBuyerUserId());
+				User user = userProvider.findUserById(userId);
+				order.setPayerUid(userId);
+				if(null != user){
+					order.setNamespaceId(user.getNamespaceId());
+				}
+			}
+			order.setResourceType(SettlementResourceType.SHOP.getCode());
+			order.setResourceId(Long.valueOf(bizPaidOrder.getShopNo()));
+			order.setOrderTime(new Timestamp(bizPaidOrder.getPaidTime()));
+			order.setOrderDate(DateUtil.dateToStr(new Date(bizPaidOrder.getPaidTime()), DateUtil.YMR_SLASH));
+			statTransactionProvider.createStatOrder(order);
+		}
+	}
 	/**
 	 * 同步停车充值订单到结算订单表
 	 * @param date
@@ -478,13 +551,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 10);
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<Byte> statuses = new ArrayList<Byte>();
-		statuses.add(ParkingRechargeOrderStatus.UNPAID.getCode());
-		statuses.add(ParkingRechargeOrderStatus.PAID.getCode());
+		List<Byte> status = new ArrayList<Byte>();
+		status.add(ParkingRechargeOrderStatus.UNPAID.getCode());
+		status.add(ParkingRechargeOrderStatus.PAID.getCode());
 		
 		while (true) {
 			//停车充值交易订单数据同步
-			List<ParkingRechargeOrder> parkingRechargeOrders = parkingProvider.listParkingRechargeOrders(pageSize, startDate, endDate,statuses, locator);
+			List<ParkingRechargeOrder> parkingRechargeOrders = parkingProvider.listParkingRechargeOrders(pageSize, startDate, endDate,status, locator);
 			for (ParkingRechargeOrder parkingRechargeOrder : parkingRechargeOrders) {
 				StatOrder statOrder = new StatOrder();
 				if(PmsyOwnerType.fromCode(parkingRechargeOrder.getOwnerType()) == PmsyOwnerType.COMMUNITY){
@@ -552,13 +625,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 10);
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<Byte> statuses = new ArrayList<Byte>();
-		statuses.add(CardOrderStatus.UNPAID.getCode());
-		statuses.add(CardOrderStatus.PAID.getCode());
+		List<Byte> status = new ArrayList<Byte>();
+		status.add(CardOrderStatus.UNPAID.getCode());
+		status.add(CardOrderStatus.PAID.getCode());
 		
 		while (true) {
 			//一卡通交易订单数据同步
-			List<PaymentCardRechargeOrder> paymentCardRechargeOrders = paymentCardProvider.listPaymentCardRechargeOrders(pageSize, startDate, endDate,statuses, locator);
+			List<PaymentCardRechargeOrder> paymentCardRechargeOrders = paymentCardProvider.listPaymentCardRechargeOrders(pageSize, startDate, endDate,status, locator);
 			for (PaymentCardRechargeOrder paymentCardRechargeOrder : paymentCardRechargeOrders) {
 				StatOrder statOrder = new StatOrder();
 				if(PmsyOwnerType.fromCode(paymentCardRechargeOrder.getOwnerType()) == PmsyOwnerType.COMMUNITY){
@@ -610,20 +683,31 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 		
 		String url = serverURL + StatTransactionConstant.PAID_TRANSACTION_API;
-		List<String> statuses = new ArrayList<String>();
-		statuses.add("success");
-		Map<String, String> params = this.getParams();
+		List<String> status = new ArrayList<String>();
+		status.add("success");
+		Map<String, Object> params = this.getParams();
 		String pageAnchor = "";
-		params.put("statuses", StringHelper.toJsonString(statuses));
+		params.put("status", StringHelper.toJsonString(status));
 		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
         params.put("appKey", appKey);
-        String signature = SignatureHelper.computeSignature(params, secretKey);
+        Map<String, String> mapForSignature = new HashMap<String, String>();
+        for(Map.Entry<String, Object> entry : params.entrySet()) {
+        	if(!entry.getKey().equals("status")) {
+				mapForSignature.put(entry.getKey(), entry.getValue().toString());
+			}
+        }
+        mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+        String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
-			params.put("startTimeAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(params, secretKey);
+			
+			
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 			if(StringUtils.isEmpty(pageAnchor)){
 				break;
@@ -651,12 +735,12 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 10);
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<Byte> statuses = new ArrayList<Byte>();
-		statuses.add(CardTransactionStatus.PAIDED.getCode());
+		List<Byte> status = new ArrayList<Byte>();
+		status.add(CardTransactionStatus.PAIDED.getCode());
 		
 		while (true) {
 			//一卡通交易交易数据同步
-			List<PaymentCardTransaction> paymentCardTransactions = paymentCardProvider.listCardTransactions(pageSize, startDate, endDate,statuses, locator);
+			List<PaymentCardTransaction> paymentCardTransactions = paymentCardProvider.listCardTransactions(pageSize, startDate, endDate,status, locator);
 			for (PaymentCardTransaction paymentCardTransaction : paymentCardTransactions) {
 				StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(paymentCardTransaction.getOrderNo(), SettlementResourceType.PAYMENT_CARD.getCode());
 				StatTransaction statTransaction = new StatTransaction();
@@ -709,20 +793,31 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 		
 		String url = serverURL + StatTransactionConstant.PAID_REFUND_API;
-		List<String> statuses = new ArrayList<String>();
-		statuses.add("success");
-		Map<String, String> params = this.getParams();
+		List<String> status = new ArrayList<String>();
+		status.add("success");
+		Map<String, Object> params = this.getParams();
 		String pageAnchor = "";
-		params.put("statuses", StringHelper.toJsonString(statuses));
+		params.put("status", StringHelper.toJsonString(status));
 		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
         params.put("appKey", appKey);
-        String signature = SignatureHelper.computeSignature(params, secretKey);
+        Map<String, String> mapForSignature = new HashMap<String, String>();
+        for(Map.Entry<String, Object> entry : params.entrySet()) {
+        	if(!entry.getKey().equals("status")) {
+				mapForSignature.put(entry.getKey(), entry.getValue().toString());
+			}
+        }
+        mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+        String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
-			params.put("startTimeAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(params, secretKey);
+			
+			
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor);
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 			if(StringUtils.isEmpty(pageAnchor)){
 				break;
@@ -852,7 +947,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 	}
 	
-	private Map<String, String> getParams(){
+	private Map<String, Object> getParams(){
 		 Integer nonce = (int)(Math.random()*1000);
 	     Long timestamp = System.currentTimeMillis();       
 	     
@@ -862,25 +957,30 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	     String sDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH) + " 00:00:00";
 	     Long maxAnchor = Timestamp.valueOf(sDate).getTime();
 	     
-	     Map<String,String> params = new HashMap<String, String>();
+	     Map<String,Object> params = new HashMap<String, Object>();
 	     params.put("nonce", nonce + "");
 	     params.put("timestamp", timestamp + "");
 	     params.put("pageSize", pageSize + "");
-	     params.put("endTimeAnchor", maxAnchor + "");
-	     
+	     params.put("maxAnchor", maxAnchor + "");
+	     params.put("pageAnchor", "");
 	     return params;
 
 	}
 
-	public static void main(String[] args) {
-		try {
-			Calendar calendar = Calendar.getInstance();
-			calendar.add(Calendar.MONTH, -2);
-			calendar.add(Calendar.DAY_OF_MONTH, -1);
-			System.out.println(calendar.getTimeInMillis());
-		} catch (Exception e) {
-			// TODO: handle exception
+	private void checkErrorCode(String url, String params, Integer code){
+		if(200 != code){
+			LOGGER.error("Failed to get data, url = {}, params = {}, code = ", url, params , code);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_RESPONSE,
+					"Failed to get data.");
 		}
-		
+	}
+	
+	public static void main(String[] args) {
+		String json = "{\"version\" : \"1\",\"response\" : {\"nextAnchor\" : \"1\",list:[{\"orderNo\" : \"1\"}]}}";
+		ListPaidOrderResponse response = (ListPaidOrderResponse)StringHelper.fromJsonString(json, ListPaidOrderResponse.class);
+		PaidOrderResponse res = response.getResponse();
+		List<BizPaidOrder> list  = res.getList();
+		Integer s = 200;
+		System.out.println(200 == s);
 	}
 }

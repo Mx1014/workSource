@@ -21,4 +21,6 @@ public interface StatTransactionConstant {
 	String PAID_APPKEY = "";
 	
 	String PAID_SECRET_KEY = "";
+	
+	String STAT_CRON_EXPRESSION = "statistics.cron.expression";
 }
