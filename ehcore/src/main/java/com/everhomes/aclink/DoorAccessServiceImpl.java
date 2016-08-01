@@ -1550,7 +1550,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
                 List<DoorAccess> childs = null;
                 
-                if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
+                if(doorAccess.isVip()) {
                     childs = doorAccessProvider.listAllDoorAccessLingling(doorAccess.getOwnerId(), doorAccess.getOwnerType(), maxCount);
                 } else {
                     childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);    
@@ -1624,7 +1624,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         
         extra.setAuthLevel(0l);
-        if(doorAccess.getName() != null && doorAccess.getName().toLowerCase().indexOf("vip") >= 0) {
+        if(doorAccess.isVip()) {
             extra.setAuthLevel(1l);
         }
         
@@ -2259,6 +2259,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(0, user.getId(), OrganizationGroupType.ENTERPRISE);
         List<Long> floors = new ArrayList<Long>();
         Map<Long, Long> floorMap = new HashMap<Long, Long>();
+        
+        if(doorAccess.isVip()) {
+            floorMap.put(3l, 1l);
+            floorMap.put(-3l, 1l);
+            floorMap.put(1l, 1l);
+        }
         
         for(OrganizationDTO dto : orgs) {
             List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
