@@ -27,7 +27,7 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331053517, UUID(), 14978, '深圳市',  14979, '南山区', '深圳威新软件园', '深圳威新', '深圳市南山区高新南九道', NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 113, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 180773, 180774, UTC_TIMESTAMP(), 999991);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-	VALUES(240111044331049117, 240111044331053517, '', 113.956081, 22.533245, 'ws101nh39jkd');	
+	VALUES(SELECT MAX(id) FROM `eh_community_geopoints`, 240111044331053517, '', 113.956081, 22.533245, 'ws101nh39jkd');	
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1002757, 240111044331053517);
 
@@ -67,7 +67,7 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('124', 'app.agreements.url', 'https://core.zuolin.com/mobile/static/app_agreements/ibase_agreements.html', 'the relative path for chuneng app agreements', '999991', NULL);	
+	VALUES (SELECT MAX(id) FROM `eh_configurations`, 'app.agreements.url', 'https://core.zuolin.com/mobile/static/app_agreements/ibase_agreements.html', 'the relative path for chuneng app agreements', '999991', NULL);	
 	
 INSERT INTO `eh_version_realm` VALUES ('40', 'Android_WeixinLink', null, UTC_TIMESTAMP(), '999991');
 INSERT INTO `eh_version_realm` VALUES ('41', 'iOS_WeixinLink', null, UTC_TIMESTAMP(), '999991');
@@ -445,228 +445,228 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 
 
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19341, 1002757, 240111044331053517, 239825274387101548, '园区一期-1号楼1层北翼东侧', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101548, '园区一期-1号楼1层北翼东侧', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19342, 1002757, 240111044331053517, 239825274387101549, '园区一期-1号楼1层东翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101549, '园区一期-1号楼1层东翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19343, 1002757, 240111044331053517, 239825274387101550, '园区一期-1号楼1层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101550, '园区一期-1号楼1层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19344, 1002757, 240111044331053517, 239825274387101551, '园区一期-1号楼1层南翼东侧', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101551, '园区一期-1号楼1层南翼东侧', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19345, 1002757, 240111044331053517, 239825274387101552, '园区一期-1号楼1层西翼01C-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101552, '园区一期-1号楼1层西翼01C-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19346, 1002757, 240111044331053517, 239825274387101553, '园区一期-1号楼2层北翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101553, '园区一期-1号楼2层北翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19347, 1002757, 240111044331053517, 239825274387101554, '园区一期-1号楼2层北翼并东翼03A-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101554, '园区一期-1号楼2层北翼并东翼03A-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19348, 1002757, 240111044331053517, 239825274387101555, '园区一期-1号楼2层东南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101555, '园区一期-1号楼2层东南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19349, 1002757, 240111044331053517, 239825274387101556, '园区一期-1号楼2层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101556, '园区一期-1号楼2层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19350, 1002757, 240111044331053517, 239825274387101557, '园区一期-1号楼3层东翼03A-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101557, '园区一期-1号楼3层东翼03A-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19351, 1002757, 240111044331053517, 239825274387101558, '园区一期-1号楼3层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101558, '园区一期-1号楼3层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19352, 1002757, 240111044331053517, 239825274387101559, '园区一期-1号楼3层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101559, '园区一期-1号楼3层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19353, 1002757, 240111044331053517, 239825274387101560, '园区一期-1号楼4层北翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101560, '园区一期-1号楼4层北翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19354, 1002757, 240111044331053517, 239825274387101561, '园区一期-1号楼4层东翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101561, '园区一期-1号楼4层东翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19355, 1002757, 240111044331053517, 239825274387101562, '园区一期-1号楼4层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101562, '园区一期-1号楼4层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19356, 1002757, 240111044331053517, 239825274387101563, '园区一期-1号楼4层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101563, '园区一期-1号楼4层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19357, 1002757, 240111044331053517, 239825274387101564, '园区一期-1号楼4层西翼01C-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101564, '园区一期-1号楼4层西翼01C-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19358, 1002757, 240111044331053517, 239825274387101565, '园区一期-1号楼5层东翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101565, '园区一期-1号楼5层东翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19359, 1002757, 240111044331053517, 239825274387101566, '园区一期-1号楼5层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101566, '园区一期-1号楼5层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19360, 1002757, 240111044331053517, 239825274387101567, '园区一期-1号楼5层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101567, '园区一期-1号楼5层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19361, 1002757, 240111044331053517, 239825274387101568, '园区一期-2号楼1层北翼01D-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101568, '园区一期-2号楼1层北翼01D-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19362, 1002757, 240111044331053517, 239825274387101569, '园区一期-2号楼1层北翼01D-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101569, '园区一期-2号楼1层北翼01D-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19363, 1002757, 240111044331053517, 239825274387101570, '园区一期-2号楼1层东翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101570, '园区一期-2号楼1层东翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19364, 1002757, 240111044331053517, 239825274387101571, '园区一期-2号楼1层东翼西侧', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101571, '园区一期-2号楼1层东翼西侧', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19365, 1002757, 240111044331053517, 239825274387101572, '园区一期-2号楼1层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101572, '园区一期-2号楼1层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19366, 1002757, 240111044331053517, 239825274387101573, '园区一期-2号楼1层南翼西侧', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101573, '园区一期-2号楼1层南翼西侧', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19367, 1002757, 240111044331053517, 239825274387101574, '园区一期-2号楼1层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101574, '园区一期-2号楼1层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19368, 1002757, 240111044331053517, 239825274387101575, '园区一期-2号楼2层北翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101575, '园区一期-2号楼2层北翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19369, 1002757, 240111044331053517, 239825274387101576, '园区一期-2号楼2层东翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101576, '园区一期-2号楼2层东翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19370, 1002757, 240111044331053517, 239825274387101577, '园区一期-2号楼2层南翼并西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101577, '园区一期-2号楼2层南翼并西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19371, 1002757, 240111044331053517, 239825274387101578, '园区一期-2号楼3层北翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101578, '园区一期-2号楼3层北翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19372, 1002757, 240111044331053517, 239825274387101579, '园区一期-2号楼3层东翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101579, '园区一期-2号楼3层东翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19373, 1002757, 240111044331053517, 239825274387101580, '园区一期-2号楼3层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101580, '园区一期-2号楼3层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19374, 1002757, 240111044331053517, 239825274387101581, '园区一期-2号楼3层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101581, '园区一期-2号楼3层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19375, 1002757, 240111044331053517, 239825274387101582, '园区一期-2号楼4层北翼04D-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101582, '园区一期-2号楼4层北翼04D-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19376, 1002757, 240111044331053517, 239825274387101583, '园区一期-2号楼4层北翼04D-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101583, '园区一期-2号楼4层北翼04D-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19377, 1002757, 240111044331053517, 239825274387101584, '园区一期-2号楼4层东翼并南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101584, '园区一期-2号楼4层东翼并南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19378, 1002757, 240111044331053517, 239825274387101585, '园区一期-2号楼4层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101585, '园区一期-2号楼4层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19379, 1002757, 240111044331053517, 239825274387101586, '园区一期-2号楼5层北翼05D-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101586, '园区一期-2号楼5层北翼05D-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19380, 1002757, 240111044331053517, 239825274387101587, '园区一期-2号楼5层北翼501-502', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101587, '园区一期-2号楼5层北翼501-502', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19381, 1002757, 240111044331053517, 239825274387101588, '园区一期-2号楼5层北翼502', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101588, '园区一期-2号楼5层北翼502', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19382, 1002757, 240111044331053517, 239825274387101589, '园区一期-2号楼5层北翼503并504', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101589, '园区一期-2号楼5层北翼503并504', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19383, 1002757, 240111044331053517, 239825274387101590, '园区一期-2号楼5层东翼501-502', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101590, '园区一期-2号楼5层东翼501-502', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19384, 1002757, 240111044331053517, 239825274387101591, '园区一期-2号楼5层东翼503', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101591, '园区一期-2号楼5层东翼503', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19385, 1002757, 240111044331053517, 239825274387101592, '园区一期-2号楼5层东翼503A', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101592, '园区一期-2号楼5层东翼503A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19386, 1002757, 240111044331053517, 239825274387101593, '园区一期-2号楼5层南翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101593, '园区一期-2号楼5层南翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19387, 1002757, 240111044331053517, 239825274387101594, '园区一期-2号楼5层西翼', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101594, '园区一期-2号楼5层西翼', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19388, 1002757, 240111044331053517, 239825274387101595, '园区一期-3号楼1层101', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101595, '园区一期-3号楼1层101', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19389, 1002757, 240111044331053517, 239825274387101596, '园区一期-3号楼1层102A', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101596, '园区一期-3号楼1层102A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19390, 1002757, 240111044331053517, 239825274387101597, '园区一期-3号楼1层102B', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101597, '园区一期-3号楼1层102B', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19391, 1002757, 240111044331053517, 239825274387101598, '园区一期-3号楼1层102C', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101598, '园区一期-3号楼1层102C', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19392, 1002757, 240111044331053517, 239825274387101599, '园区一期-3号楼1层103', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101599, '园区一期-3号楼1层103', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19393, 1002757, 240111044331053517, 239825274387101600, '园区一期-3号楼2层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101600, '园区一期-3号楼2层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19394, 1002757, 240111044331053517, 239825274387101601, '园区一期-3号楼3层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101601, '园区一期-3号楼3层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19395, 1002757, 240111044331053517, 239825274387101602, '园区一期-3号楼4层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101602, '园区一期-3号楼4层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19396, 1002757, 240111044331053517, 239825274387101603, '园区一期-3号楼5层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101603, '园区一期-3号楼5层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19397, 1002757, 240111044331053517, 239825274387101604, '园区二期-5层北翼05D', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101604, '园区二期-5层北翼05D', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19398, 1002757, 240111044331053517, 239825274387101605, '园区二期-5号楼1层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101605, '园区二期-5号楼1层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19399, 1002757, 240111044331053517, 239825274387101606, '园区二期-5号楼1层101', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101606, '园区二期-5号楼1层101', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19400, 1002757, 240111044331053517, 239825274387101607, '园区二期-5号楼1层102', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101607, '园区二期-5号楼1层102', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19401, 1002757, 240111044331053517, 239825274387101608, '园区二期-5号楼2层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101608, '园区二期-5号楼2层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19402, 1002757, 240111044331053517, 239825274387101609, '园区二期-5号楼3层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101609, '园区二期-5号楼3层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19403, 1002757, 240111044331053517, 239825274387101610, '园区二期-5号楼4层04-11', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101610, '园区二期-5号楼4层04-11', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19404, 1002757, 240111044331053517, 239825274387101611, '园区二期-5号楼4层401-403', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101611, '园区二期-5号楼4层401-403', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19405, 1002757, 240111044331053517, 239825274387101612, '园区二期-5号楼4层412', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101612, '园区二期-5号楼4层412', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19406, 1002757, 240111044331053517, 239825274387101613, '园区二期-5号楼501-511', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101613, '园区二期-5号楼501-511', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19407, 1002757, 240111044331053517, 239825274387101614, '园区二期-5号楼5层512室', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101614, '园区二期-5号楼5层512室', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19408, 1002757, 240111044331053517, 239825274387101615, '园区二期-5号楼6层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101615, '园区二期-5号楼6层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19409, 1002757, 240111044331053517, 239825274387101616, '园区二期-6号楼1层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101616, '园区二期-6号楼1层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19410, 1002757, 240111044331053517, 239825274387101617, '园区二期-6号楼2层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101617, '园区二期-6号楼2层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19411, 1002757, 240111044331053517, 239825274387101618, '园区二期-6号楼3层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101618, '园区二期-6号楼3层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19412, 1002757, 240111044331053517, 239825274387101619, '园区二期-6号楼4层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101619, '园区二期-6号楼4层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19413, 1002757, 240111044331053517, 239825274387101620, '园区二期-6号楼5层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101620, '园区二期-6号楼5层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19414, 1002757, 240111044331053517, 239825274387101621, '园区二期-6号楼6层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101621, '园区二期-6号楼6层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19415, 1002757, 240111044331053517, 239825274387101622, '园区二期-6号楼7层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101622, '园区二期-6号楼7层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19416, 1002757, 240111044331053517, 239825274387101623, '园区二期-7号楼1层101A', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101623, '园区二期-7号楼1层101A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19417, 1002757, 240111044331053517, 239825274387101624, '园区二期-7号楼1层101B', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101624, '园区二期-7号楼1层101B', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19418, 1002757, 240111044331053517, 239825274387101625, '园区二期-7号楼1层102', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101625, '园区二期-7号楼1层102', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19419, 1002757, 240111044331053517, 239825274387101626, '园区二期-7号楼1层103', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101626, '园区二期-7号楼1层103', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19420, 1002757, 240111044331053517, 239825274387101627, '园区二期-7号楼1层104', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101627, '园区二期-7号楼1层104', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19421, 1002757, 240111044331053517, 239825274387101628, '园区二期-7号楼2层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101628, '园区二期-7号楼2层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19422, 1002757, 240111044331053517, 239825274387101629, '园区二期-7号楼3层301-308', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101629, '园区二期-7号楼3层301-308', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19423, 1002757, 240111044331053517, 239825274387101630, '园区二期-7号楼3层309-312', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101630, '园区二期-7号楼3层309-312', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19424, 1002757, 240111044331053517, 239825274387101631, '园区二期-7号楼5层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101631, '园区二期-7号楼5层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19425, 1002757, 240111044331053517, 239825274387101632, '园区二期-7号楼6层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101632, '园区二期-7号楼6层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19426, 1002757, 240111044331053517, 239825274387101633, '园区二期-7号楼7层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101633, '园区二期-7号楼7层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19427, 1002757, 240111044331053517, 239825274387101634, '园区二期-7号楼8层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101634, '园区二期-7号楼8层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19428, 1002757, 240111044331053517, 239825274387101635, '园区二期-7号楼9层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101635, '园区二期-7号楼9层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19429, 1002757, 240111044331053517, 239825274387101636, '园区二期-8号楼103A', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101636, '园区二期-8号楼103A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19430, 1002757, 240111044331053517, 239825274387101637, '园区二期-8号楼1层101', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101637, '园区二期-8号楼1层101', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19431, 1002757, 240111044331053517, 239825274387101638, '园区二期-8号楼1层1025', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101638, '园区二期-8号楼1层1025', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19432, 1002757, 240111044331053517, 239825274387101639, '园区二期-8号楼1层102A', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101639, '园区二期-8号楼1层102A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19433, 1002757, 240111044331053517, 239825274387101640, '园区二期-8号楼1层103', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101640, '园区二期-8号楼1层103', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19434, 1002757, 240111044331053517, 239825274387101641, '园区二期-8号楼2层201-212', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101641, '园区二期-8号楼2层201-212', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19435, 1002757, 240111044331053517, 239825274387101642, '园区二期-8号楼3层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101642, '园区二期-8号楼3层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19436, 1002757, 240111044331053517, 239825274387101643, '园区二期-8号楼4层401-402', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101643, '园区二期-8号楼4层401-402', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19437, 1002757, 240111044331053517, 239825274387101644, '园区二期-8号楼4层403-406', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101644, '园区二期-8号楼4层403-406', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19438, 1002757, 240111044331053517, 239825274387101645, '园区二期-8号楼4层407-408', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101645, '园区二期-8号楼4层407-408', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19439, 1002757, 240111044331053517, 239825274387101646, '园区二期-8号楼4层409-411', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101646, '园区二期-8号楼4层409-411', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19440, 1002757, 240111044331053517, 239825274387101647, '园区二期-8号楼4层412', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101647, '园区二期-8号楼4层412', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19441, 1002757, 240111044331053517, 239825274387101648, '园区二期-8号楼5层501-502', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101648, '园区二期-8号楼5层501-502', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19442, 1002757, 240111044331053517, 239825274387101649, '园区二期-8号楼5层503-506', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101649, '园区二期-8号楼5层503-506', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19443, 1002757, 240111044331053517, 239825274387101650, '园区二期-8号楼5层512', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101650, '园区二期-8号楼5层512', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19444, 1002757, 240111044331053517, 239825274387101651, '园区二期-8号楼6层601-612', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101651, '园区二期-8号楼6层601-612', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19445, 1002757, 240111044331053517, 239825274387101652, '园区二期-8号楼7层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101652, '园区二期-8号楼7层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19446, 1002757, 240111044331053517, 239825274387101653, '园区二期-8号楼8层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101653, '园区二期-8号楼8层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19447, 1002757, 240111044331053517, 239825274387101654, '园区二期-8号楼9层02-06', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101654, '园区二期-8号楼9层02-06', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19448, 1002757, 240111044331053517, 239825274387101655, '园区二期-8号楼9层07-10', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101655, '园区二期-8号楼9层07-10', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19449, 1002757, 240111044331053517, 239825274387101656, '园区二期-8号楼9层901', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101656, '园区二期-8号楼9层901', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19450, 1002757, 240111044331053517, 239825274387101657, '园区二期-8号楼9层901', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101657, '园区二期-8号楼9层901', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19451, 1002757, 240111044331053517, 239825274387101658, '园区二期-8号楼9层911-912', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101658, '园区二期-8号楼9层911-912', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19452, 1002757, 240111044331053517, 239825274387101659, '园区二期-9号楼1至2层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101659, '园区二期-9号楼1至2层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (19453, 1002757, 240111044331053517, 239825274387101660, '园区二期-9号楼3层', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101660, '园区二期-9号楼3层', '0');
