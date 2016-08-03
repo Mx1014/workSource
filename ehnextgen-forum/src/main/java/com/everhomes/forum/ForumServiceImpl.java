@@ -1183,19 +1183,23 @@ public class ForumServiceImpl implements ForumService {
         
         List<Long> communityIdList = new ArrayList<Long>();
         // 获取所管理的所有小区对应的社区论坛
-        ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-        command.setOrganizationId(organizationId);;
-        List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
-        if(communities != null){
-            for (CommunityDTO communityDTO : communities) {
-                communityIdList.add(communityDTO.getId());
-                forumIds.add(communityDTO.getDefaultForumId());
+        if(organizationId != null) {
+            ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+            command.setOrganizationId(organizationId);
+            List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+            if(communities != null){
+                for (CommunityDTO communityDTO : communities) {
+                    communityIdList.add(communityDTO.getId());
+                    forumIds.add(communityDTO.getDefaultForumId());
+                }
             }
         }
         // 办公地点所在园区对应的社区论坛
-        Community community = communityProvider.findCommunityById(communityId);
-        communityIdList.add(community.getId());
-        forumIds.add(community.getDefaultForumId());
+        if(communityId != null) {
+            Community community = communityProvider.findCommunityById(communityId);
+            communityIdList.add(community.getId());
+            forumIds.add(community.getDefaultForumId());
+        }
         
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {

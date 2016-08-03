@@ -224,6 +224,7 @@ CREATE TABLE `eh_activities` (
   `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
   `guest` VARCHAR(2048),
   `media_url` VARCHAR(1024),
+  `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
   KEY `i_eh_act_start_time_ms`(`start_time_ms`),
@@ -618,9 +619,9 @@ DROP TABLE IF EXISTS `eh_borders`;
 CREATE TABLE `eh_borders` (
   `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `private_address` VARCHAR(128) NOT NULL,
-  `private_port` INTEGER NOT NULL DEFAULT 8086,
+  `private_port` INTEGER NOT NULL DEFAULT '8086',
   `public_address` VARCHAR(128) NOT NULL,
-  `public_port` INTEGER NOT NULL DEFAULT 80,
+  `public_port` INTEGER NOT NULL DEFAULT '80',
   `status` INTEGER NOT NULL DEFAULT 0 COMMENT '0 : disabled, 1: enabled',
   `config_tag` VARCHAR(32),
   `description` VARCHAR(256),
@@ -1995,6 +1996,8 @@ CREATE TABLE `eh_forum_posts` (
   `tag` VARCHAR(32),
   `start_time` DATETIME COMMENT 'publish start time',
   `end_time` DATETIME COMMENT 'publish end time',
+  `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
+  `media_display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'whether display image',
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
@@ -2642,6 +2645,106 @@ CREATE TABLE `eh_oauth2_tokens` (
   KEY `i_eh_otoken_expiration_time`(`expiration_time`),
   KEY `i_eh_otoken_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  
+-- 
+-- 工位预定  附件-banner图表
+-- 
+DROP TABLE IF EXISTS `eh_office_cubicle_attachments`;
+CREATE TABLE `eh_office_cubicle_attachments` (  
+  `id` BIGINT  NOT NULL DEFAULT 0  COMMENT 'id',
+  `owner_id` BIGINT  COMMENT '工位空间id',
+  `content_type` VARCHAR(32)  COMMENT '内容类型',
+  `content_uri` VARCHAR(1024)  COMMENT 'uri',
+  `creator_uid` BIGINT   COMMENT '',
+  `create_time` DATETIME   COMMENT '',
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
+
+
+-- 
+-- 工位预定 出租空间表
+-- 
+DROP TABLE IF EXISTS `eh_office_cubicle_categories`;
+CREATE TABLE `eh_office_cubicle_categories` ( 
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `namespace_id` INTEGER,
+  `space_id` BIGINT  COMMENT '工位空间id',
+  `rent_type` TINYINT  COMMENT '租赁类别:1-开放式（默认space_type 1）,2-办公室',
+  `space_type` TINYINT  COMMENT '空间类别:1-工位,2-面积',
+  `space_size` INTEGER  COMMENT '工位数或面积数',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;  
+
+
+-- 
+-- 工位预定 订单表
+-- 
+DROP TABLE IF EXISTS `eh_office_cubicle_orders`;
+CREATE TABLE `eh_office_cubicle_orders` ( 
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `namespace_id` INTEGER,
+  `space_id` BIGINT COMMENT '工位空间id',
+  `space_name` VARCHAR(128) COMMENT '工位空间名称',
+  `province_id` BIGINT COMMENT '省份id',
+  `province_name` VARCHAR(100) COMMENT '省份名称',
+  `city_id` BIGINT COMMENT '城市id',
+  `city_name` VARCHAR(128) COMMENT '城市名称',
+  `cover_uri` VARCHAR(1024) COMMENT '封面图片',
+  `address` VARCHAR(1024) COMMENT '地址',
+  `longitude` DOUBLE COMMENT '经度',
+  `latitude` DOUBLE COMMENT '纬度',
+  `geohash` VARCHAR(32),
+  `contact_phone` VARCHAR(32) COMMENT '咨询电话',
+  `manager_uid` BIGINT COMMENT '负责人uid',
+  `description` TEXT COMMENT '详情-html片',
+  `rent_type` TINYINT COMMENT '租赁类别:1-开放式（默认space_type 1）,2-办公室',
+  `space_type` TINYINT COMMENT '空间类别:1-工位,2-面积',
+  `space_size` VARCHAR(32) COMMENT '工位数或面积数',
+  `status` TINYINT COMMENT '状态:2-用户可见,0-用户不可见',
+  `order_type` TINYINT COMMENT '预定类别：1-参观 2-预定',
+  `reserver_uid` BIGINT COMMENT '预订人uid',
+  `reserve_time` DATETIME COMMENT '预定时间',
+  `reserver_name` VARCHAR(64) COMMENT '预订人姓名',
+  `reserve_contact_token` VARCHAR(32) COMMENT '预定联系方式',
+  `reserve_enterprise` VARCHAR(512) COMMENT '预订人公司',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 工位预定空间表
+-- 
+DROP TABLE IF EXISTS `eh_office_cubicle_spaces`;
+CREATE TABLE `eh_office_cubicle_spaces` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `namespace_id` INTEGER,
+  `name` VARCHAR(128) COMMENT '工位空间名称',
+  `province_id` BIGINT COMMENT '省份id',
+  `province_name` VARCHAR(128) COMMENT '省份名称',
+  `city_id` BIGINT COMMENT '城市id',
+  `city_name` VARCHAR(128) COMMENT '城市名称',
+  `cover_uri` VARCHAR(1024) COMMENT '封面图片',
+  `address` VARCHAR(1024) COMMENT '地址',
+  `longitude` DOUBLE COMMENT '经度',
+  `latitude` DOUBLE COMMENT '纬度',
+  `geohash` VARCHAR(32),
+  `contact_phone` VARCHAR(32) COMMENT '咨询电话',
+  `manager_uid` BIGINT COMMENT '负责人uid',
+  `description` TEXT COMMENT '详情-html片',
+  `status` TINYINT COMMENT '状态：2-正常 ,0-不可用',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -4118,10 +4221,10 @@ CREATE TABLE `eh_regions` (
   
   PRIMARY KEY(`id`),
   UNIQUE KEY `u_eh_region_name`(`namespace_id`, `parent_id`, `name`),
-   KEY `i_eh_region_name_level`(`name`, `level`),   
+  KEY `i_eh_region_name_level`(`name`, `level`),   
   KEY `i_eh_region_path`(`path`),
-   KEY `i_eh_region_path_level`(`path`, `level`),   
-   KEY `i_eh_region_parent`(`parent_id`)   
+  KEY `i_eh_region_path_level`(`path`, `level`),   
+  KEY `i_eh_region_parent`(`parent_id`)   
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -4141,7 +4244,7 @@ CREATE TABLE `eh_rental_bill_attachments`(
   `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
 
 DROP TABLE IF EXISTS `eh_rental_bill_paybill_map`;
@@ -4343,6 +4446,437 @@ CREATE TABLE `eh_rental_sites_bills`(
   `operate_time` DATETIME,
   `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 场所设定好的单元格表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_cells`;
+CREATE TABLE `eh_rentalv2_cells` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `rental_resource_id` BIGINT COMMENT 'rental_resource id',
+  `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
+  `amorpm` TINYINT COMMENT '0:am 1:pm 2:night',
+  `rental_step` INTEGER COMMENT 'how many time_step must be rental every time',
+  `begin_time` DATETIME COMMENT '开始时间 对于按时间定',
+  `end_time` DATETIME COMMENT '结束时间 对于按时间定',
+  `counts` DOUBLE COMMENT '共多少个',
+  `unit` DOUBLE COMMENT '是否支持0.5个',
+  `price` DECIMAL(10,2) COMMENT '折后价',
+  `resource_rental_date` DATE COMMENT 'which day',
+  `status` TINYINT COMMENT 'unuse 0:open 1:closed',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `time_step` DOUBLE,
+  `original_price` DECIMAL(10,2) COMMENT '原价（如果不为null则price为打折价）',
+  `exclusive_flag` TINYINT COMMENT '是否为独占资源0否 1 是',
+  `auto_assign` TINYINT COMMENT '是否动态分配 1是 0否',
+  `multi_unit` TINYINT COMMENT '是否允许预约多个场所 1是 0否',
+  `multi_time_interval` TINYINT COMMENT '是否允许预约多个时段 1是 0否',
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `resource_number` VARCHAR(100)  COMMENT '场所号',
+  `halfresource_price` DECIMAL(10,2) COMMENT '半场折后价',
+  `halfresource_original_price` DECIMAL(10,2) COMMENT '半场原价（如果不为null则price为打折价）',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 保存默认设置的关闭时间
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_close_dates`;
+CREATE TABLE `eh_rentalv2_close_dates` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
+  `close_date` DATE,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 
+-- 保存场所附件设置
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_config_attachments`;
+CREATE TABLE `eh_rentalv2_config_attachments` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
+  `attachment_type` TINYINT,
+  `content` TEXT COMMENT '根据type，这里可能是文本或者附件url',
+  `must_options` TINYINT COMMENT '0 非必须 1 必选',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 保存一个公司的一个场所图标的默认设置
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_default_rules`;
+CREATE TABLE `eh_rentalv2_default_rules` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
+  `owner_id` BIGINT COMMENT 'community id or organization id',
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `rental_start_time` BIGINT COMMENT '最多提前多少时间预定',
+  `rental_end_time` BIGINT COMMENT '最少提前多少时间预定',
+  `pay_start_time` BIGINT,
+  `pay_end_time` BIGINT,
+  `payment_ratio` INTEGER COMMENT 'payment ratio',
+  `refund_flag` TINYINT COMMENT '是否支持退款: 1-是, 0-否',
+  `refund_ratio` INTEGER COMMENT '退款比例',
+  `contact_num` VARCHAR(20) COMMENT 'phone number',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `rental_type` TINYINT COMMENT '0-as hour:min, 1-as half day, 2-as day, 3-支持晚上的半天',
+  `cancel_time` BIGINT COMMENT '至少提前取消时间',
+  `overtime_time` BIGINT COMMENT '超期时间',
+  `exclusive_flag` TINYINT COMMENT '是否为独占资源: 0-否, 1-是',
+  `unit` DOUBLE  COMMENT '1-整租, 0.5-可半个租',
+  `auto_assign` TINYINT COMMENT '是否动态分配: 1-是, 0-否',
+  `multi_unit` TINYINT COMMENT '是否允许预约多个场所: 1-是, 0-否',
+  `multi_time_interval` TINYINT COMMENT '是否允许预约多个时段: 1-是, 0-否',
+  `cancel_flag` TINYINT COMMENT '是否允许取消: 1-是, 0-否',
+  `rental_step` INTEGER COMMENT 'how many time_step must be rental every time',
+  `need_pay` TINYINT COMMENT '是否需要支付: 1-是, 0-否', 
+  `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
+  `weekend_price` DECIMAL(10,2) COMMENT '周末价格',
+  `resource_counts` DOUBLE  COMMENT '可预约个数',
+  `begin_date` DATE  COMMENT '开始日期',
+  `end_date` DATE  COMMENT '结束日期',
+  `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
+  `time_step` DOUBLE  COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 物品表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_items`;
+CREATE TABLE `eh_rentalv2_items` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `rental_resource_id` BIGINT COMMENT 'rental_resource id',
+  `name` VARCHAR(128),
+  `price` DECIMAL(10,2),
+  `counts` INTEGER COMMENT 'item count',
+  `status` TINYINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `default_order` INTEGER COMMENT '排序字段',
+  `img_uri` VARCHAR(1024) COMMENT '图片uri',
+  `item_type` TINYINT COMMENT '1购买型 2租用型',
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+
+-- 
+-- 订单分表-物品订单表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_items_orders`;
+CREATE TABLE `eh_rentalv2_items_orders` (
+  `id` BIGINT NOT NULL  COMMENT 'id',
+  `rental_order_id` BIGINT,
+  `rental_resource_item_id` BIGINT,
+  `rental_count` INTEGER,
+  `total_money` DECIMAL(10,2),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `item_name` VARCHAR(128),
+  `img_uri` VARCHAR(1024),
+  `item_type` TINYINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 订单附件表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_order_attachments`;
+CREATE TABLE `eh_rentalv2_order_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `rental_order_id` BIGINT,
+  `attachment_type` TINYINT COMMENT '0:文本 1:车牌 2:显示内容 3：附件链接',
+  `content` VARCHAR(500),
+  `file_path` VARCHAR(500),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 订单-支付关联表 
+-- 订单可能多次支付
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_order_payorder_map`;
+CREATE TABLE `eh_rentalv2_order_payorder_map` (
+  `id` BIGINT NOT NULL  COMMENT 'id',
+  `order_id` BIGINT,
+  `order_no` BIGINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `vendor_type` VARCHAR(255) COMMENT '支付方式,10001-支付宝，10002-微信',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 订单主表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_orders`;
+CREATE TABLE `eh_rentalv2_orders` (
+  `id` BIGINT NOT NULL  COMMENT 'id',
+  `order_no` VARCHAR(20) NOT NULL COMMENT '订单编号',
+  `rental_resource_id` BIGINT NOT NULL  COMMENT 'id',
+  `rental_uid` BIGINT COMMENT 'rental user id',
+  `rental_date` DATE COMMENT '使用日期',
+  `start_time` DATETIME COMMENT '使用开始时间',
+  `end_time` DATETIME COMMENT '使用结束时间',
+  `rental_count` DOUBLE COMMENT '预约数',
+  `pay_total_money` DECIMAL(10,2) COMMENT '总价',
+  `resource_total_money` DECIMAL(10,2),
+  `reserve_money` DECIMAL(10,2),
+  `reserve_time` DATETIME COMMENT 'reserve time',
+  `pay_start_time` DATETIME,
+  `pay_end_time` DATETIME,
+  `pay_time` DATETIME,
+  `cancel_time` DATETIME,
+  `paid_money` DECIMAL(10,2),
+  `status` TINYINT COMMENT '0:wait for reserve 1:paid reserve 2:paid all money reserve success 3:wait for final payment 4:unlock reserve fail',
+  `visible_flag` TINYINT COMMENT '0:visible 1:unvisible',
+  `invoice_flag` TINYINT COMMENT '0:want invocie 1 no need',
+  `creator_uid` BIGINT COMMENT '预约人',
+  `create_time` DATETIME COMMENT '下单时间',
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `resource_name` VARCHAR(255) COMMENT '名称',
+  `use_detail` VARCHAR(255) COMMENT '使用时间',
+  `vendor_type` VARCHAR(255) COMMENT '支付方式,10001-支付宝，10002-微信 --多次支付怎木办，估计产品都没想清楚',
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `organization_id` BIGINT COMMENT '所属公司的ID', 
+  `spec` VARCHAR(255) COMMENT '规格',
+  `address` VARCHAR(192) COMMENT '地址',
+  `longitude` DOUBLE  COMMENT '地址经度',
+  `latitude` DOUBLE  COMMENT '地址纬度',
+  `contact_phonenum` VARCHAR(20) COMMENT '咨询电话',
+  `introduction` TEXT COMMENT '详情',
+  `notice` TEXT,
+  `community_id` BIGINT COMMENT '资源所属园区的ID',
+  `namespace_id` INTEGER COMMENT '域空间',
+  `refund_flag` TINYINT COMMENT '是否支持退款 1是 0否',
+  `refund_ratio` INTEGER COMMENT '退款比例',
+  `cancel_flag` TINYINT COMMENT '是否允许取消 1是 0否',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 订单-退款表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_refund_orders`;
+CREATE TABLE `eh_rentalv2_refund_orders` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `order_id` BIGINT COMMENT '订单id',
+  `refund_order_no` BIGINT COMMENT '退款的refoundOrderNo-服务端退款时候生成',
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `order_no` BIGINT COMMENT '支付的orderno-下单时候生成',
+  `online_pay_style_no` VARCHAR(20) COMMENT '支付方式,alipay-支付宝,wechat-微信',
+  `amount` DECIMAL(10,2)  COMMENT '退款金额',
+  `url` VARCHAR(1024) COMMENT '支付宝的退款链接',
+  `status` TINYINT COMMENT '退款的状态，和订单状态保持一致',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 对于按小时预定的场所默认设置，保存时间段
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_resource_numbers`;
+CREATE TABLE `eh_rentalv2_resource_numbers` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT 'EhRentalv2DefaultRules-默认规则,EhRentalv2Resources-具体场所',
+  `resource_number` VARCHAR(255) COMMENT '场所编号',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 订单分表-场所订单表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_resource_orders`;
+CREATE TABLE `eh_rentalv2_resource_orders` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `rental_order_id` BIGINT,
+  `rental_resource_rule_id` BIGINT,
+  `rental_count` DOUBLE,
+  `total_money` DECIMAL(10,2),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `price` DECIMAL(10,2) COMMENT '折后价',
+  `resource_rental_date` DATE COMMENT 'which day',
+  `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
+  `amorpm` TINYINT COMMENT '0:am 1:pm 2:night',
+  `rental_step` INTEGER COMMENT 'how many time_step must be rental every time',
+  `begin_time` DATETIME COMMENT '开始时间 对于按时间定',
+  `end_time` DATETIME COMMENT '结束时间 对于按时间定',
+  `exclusive_flag` TINYINT COMMENT '是否为独占资源0否 1 是',
+  `auto_assign` TINYINT COMMENT '是否动态分配 1是 0否',
+  `multi_unit` TINYINT COMMENT '是否允许预约多个场所 1是 0否',
+  `multi_time_interval` TINYINT COMMENT '是否允许预约多个时段 1是 0否',
+
+  PRIMARY KEY (`id`),
+  KEY `i_eh_rental_order_rule_id` (`rental_resource_rule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 保存场所详情图片
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_resource_pics`;
+CREATE TABLE `eh_rentalv2_resource_pics` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT 'EhRentalv2Resources',
+  `uri` VARCHAR(1024),
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 场所和归属园区的关联表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_resource_ranges`;
+CREATE TABLE `eh_rentalv2_resource_ranges` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
+  `owner_id` BIGINT COMMENT 'community id or organization id',
+  `rental_resource_id` BIGINT COMMENT 'rental_resource id',
+  PRIMARY KEY (`id`)
+  
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 资源类型表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_resource_types`;
+CREATE TABLE `eh_rentalv2_resource_types` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `name` VARCHAR(50) COMMENT '名称',
+  `page_type` TINYINT COMMENT '预定展示0代表默认页面DefaultType, 1代表定制页面CustomType',
+  `icon_uri` VARCHAR(1024) COMMENT '工作日价格',
+  `status` TINYINT COMMENT '状态：0关闭 2开启',
+  `namespace_id` INTEGER COMMENT '域空间',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 场所表
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_resources`;
+CREATE TABLE `eh_rentalv2_resources` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `parent_id` BIGINT,
+  `resource_name` VARCHAR(127) COMMENT '名称：',
+  `resource_type2` TINYINT,
+  `building_name` VARCHAR(128),
+  `building_id` BIGINT,
+  `address` VARCHAR(192) COMMENT '地址',
+  `address_id` BIGINT,
+  `spec` VARCHAR(255) COMMENT '规格',
+  `own_company_name` VARCHAR(60),
+  `contact_name` VARCHAR(40),
+  `contact_phonenum` VARCHAR(20) COMMENT '咨询电话',
+  `contact_phonenum2` VARCHAR(20),
+  `contact_phonenum3` VARCHAR(20),
+  `status` TINYINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `introduction` TEXT COMMENT '详情',
+  `notice` TEXT,
+  `charge_uid` BIGINT COMMENT '负责人id',
+  `cover_uri` VARCHAR(1024) COMMENT '封面图uri',
+  `discount_type` TINYINT COMMENT '折扣信息：0不打折 1满减优惠2比例折扣',
+  `full_price` DECIMAL(10,2) COMMENT '满XX元',
+  `cut_price` DECIMAL(10,2) COMMENT '减XX元',
+  `discount_ratio` DOUBLE COMMENT '折扣比例',
+  `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
+  `time_step` DOUBLE COMMENT '按小时预约：最小单元格是多少小时，浮点型',
+  `exclusive_flag` TINYINT COMMENT '是否为独占资源0否 1 是',
+  `auto_assign` TINYINT COMMENT '是否动态分配 1是 0否',
+  `multi_unit` TINYINT COMMENT '是否允许预约多个场所 1是 0否',
+  `multi_time_interval` TINYINT COMMENT '是否允许预约多个时段 1是 0否',
+  `cancel_flag` TINYINT COMMENT '是否允许取消 1是 0否',
+  `need_pay` TINYINT COMMENT '是否需要支付 1是 0否',
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `cancel_time` BIGINT COMMENT '至少提前取消时间',
+  `rental_start_time` BIGINT COMMENT '最多提前多少时间预定',
+  `rental_end_time` BIGINT COMMENT '最少提前多少时间预定',
+  `refund_flag` TINYINT COMMENT '是否支持退款 1是 0否',
+  `refund_ratio` INTEGER COMMENT '退款比例',
+  `longitude` DOUBLE COMMENT '地址经度',
+  `latitude` DOUBLE COMMENT '地址纬度',
+  `organization_id` BIGINT COMMENT '所属公司的ID',
+  `day_begin_time` TIME COMMENT '对于按小时预定的每天开始时间',
+  `day_end_time` TIME COMMENT '对于按小时预定的每天结束时间',
+  `community_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
+  `resource_counts` DOUBLE COMMENT '可预约个数',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 
+-- 对于按小时预定的场所默认设置，保存时间段
+-- 
+DROP TABLE IF EXISTS `eh_rentalv2_time_interval`;
+CREATE TABLE `eh_rentalv2_time_interval` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
+  `begin_time` DOUBLE COMMENT '开始时间-24小时制',
+  `end_time` DOUBLE COMMENT '结束时间-24小时制',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
