@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>standardName: 标准名称</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>equipmentName: 设备名称</li>
- *  <li>equipmentLocation: 设备名称</li>
+ *  <li>equipmentLocation: 设备位置</li>
  *  <li>parentId: 父任务id</li>
  *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>

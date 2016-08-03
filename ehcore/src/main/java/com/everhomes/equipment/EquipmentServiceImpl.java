@@ -2156,6 +2156,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 				LOGGER.info("add standard");
 				equipmentProvider.creatEquipmentStandard(standard);
+				equipmentStandardSearcher.feedDoc(standard);
 				return null;
 			});
 		}
@@ -2184,8 +2185,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setTargetId(cmd.getTargetId());
 				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
 				
-				LOGGER.info("add standard");
+				LOGGER.info("add equipment");
 				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+				equipmentSearcher.feedDoc(equipment);
 				return null;
 			});
 		}
@@ -2215,6 +2217,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 				LOGGER.info("add equipment accessory");
 				equipmentProvider.creatEquipmentInspectionAccessories(accessory);
+				equipmentAccessoriesSearcher.feedDoc(accessory);
 				return null;
 			});
 		}

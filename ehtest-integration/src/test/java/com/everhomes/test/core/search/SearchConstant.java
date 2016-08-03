@@ -22,4 +22,12 @@ public interface SearchConstant {
     public static final String CONFORDERINDEXTYPE = "conforder";
     
     public static final String NEWS = "news";
+    
+    public static final String EQUIPMENTTASKINDEXTYPE = "equipmentTask";
+    
+    public static final String EQUIPMENTACCESSORYINDEXTYPE = "equipmentAccessory";
+    
+    public static final String EQUIPMENTINDEXTYPE = "equipment";
+    
+    public static final String EQUIPMENTSTANDARDINDEXTYPE = "equipmentStandard";
 }
