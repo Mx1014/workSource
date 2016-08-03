@@ -57,7 +57,7 @@ CREATE TABLE `eh_stat_refunds` (
   `refund_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
-  `resource_id` bigint(20) DEFAULT 0 COMMENT '来源实体店ID',
+  `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
   `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
   `payer_uid` bigint(20) NOT NULL COMMENT '支付用户编号',
   `refund_no` varchar(100) DEFAULT NULL COMMENT '平台退款流水号',
