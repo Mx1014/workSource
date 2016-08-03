@@ -13,4 +13,12 @@ public class DoorAccess extends EhDoorAccess {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+    
+    public boolean isVip() {
+        if(this.getName() != null && this.getName().toLowerCase().indexOf("vip") >= 0) {
+            return true;
+        }
+        
+        return false;
+    }
 }
