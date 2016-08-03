@@ -93,6 +93,7 @@
 		eh_rentalv2_cells | eh_rentalv2_config_attachments | eh_rentalv2_items | eh_rentalv2_orders |eh_rentalv2_resource_orders | 
 		eh_rentalv2_items_orders | eh_rentalv2_order_attachments | eh_rentalv2_order_payorder_map | eh_rentalv2_refund_orders | eh_rentalv2_resource_types | eh_rentalv2_resource_numbers |
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | 
+        eh_journals | eh_journal_configs
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
