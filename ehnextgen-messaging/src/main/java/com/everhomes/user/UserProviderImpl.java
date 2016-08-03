@@ -1004,7 +1004,7 @@ public class UserProviderImpl implements UserProvider {
 	public User findUserByNamespace(Integer namespaceId, String namespaceUserToken) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return ConvertHelper.convert(context.select().from(Tables.EH_USERS)
-				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).fetchOne(),
+				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).limit(1).fetchOne(),
 				User.class);
 	}
 	
