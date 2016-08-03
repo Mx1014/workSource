@@ -13,10 +13,12 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
@@ -96,4 +98,32 @@ public class YellowPageController  extends ControllerBase {
          return response;
     }
     
+    
+    /**
+	 * <b>URL: /yellowPage/updateServiceAllianceCategory</b>
+	 * <p> 新建或修改服务联盟类型 </p>
+	 */
+    @RequestMapping("updateServiceAllianceCategory")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceAllianceCategory(@Valid UpdateServiceAllianceCategoryCommand cmd) {
+    	 this.yellowPageService.updateServiceAllianceCategory(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/deleteServiceAllianceCategory</b>
+   	 * <p> 删除服务联盟类型 </p>
+   	 */
+       @RequestMapping("deleteServiceAllianceCategory")
+       @RestReturn(value=String.class)
+       public RestResponse deleteServiceAllianceCategory(@Valid DeleteServiceAllianceCategoryCommand cmd) {
+       	 this.yellowPageService.deleteServiceAllianceCategory(cmd);
+       	 RestResponse response = new RestResponse();
+            response.setErrorCode(ErrorCodes.SUCCESS);
+            response.setErrorDescription("OK");
+            return response;
+       }
 }

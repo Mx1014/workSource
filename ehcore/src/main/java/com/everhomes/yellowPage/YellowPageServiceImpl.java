@@ -21,10 +21,12 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.rentalv2.AttachmentType;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
@@ -260,6 +262,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 				response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
 		}
 		return response;
+	}
+
+	@Override
+	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteServiceAllianceCategory(DeleteServiceAllianceCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
