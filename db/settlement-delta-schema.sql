@@ -13,6 +13,7 @@ CREATE TABLE `eh_stat_orders` (
   `order_type` varchar(64) DEFAULT NULL COMMENT '订单类型  transaction refund',
   `order_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '订单金额',
   `status` tinyint(4) NOT NULL DEFAULT '0',
+  `shop_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '1-platform shop,2-self shop',
   `order_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
