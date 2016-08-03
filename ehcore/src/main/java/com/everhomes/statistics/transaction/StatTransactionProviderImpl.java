@@ -137,7 +137,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 					statSettlement.setServiceType(String.valueOf(r.getValue(2)));
 					statSettlement.setPaidDate(date);
 					statSettlement.setResourceType(String.valueOf(r.getValue(4)));
-					statSettlement.setResourceId(Long.valueOf(r.getValue(5).toString()));
+					statSettlement.setResourceId(r.getValue(5).toString());
 					statSettlement.setPaidChannel(Byte.valueOf(r.getValue(6).toString()));
 					statSettlement.setPaidAmount(new BigDecimal(r.getValue(7).toString()));
 					statSettlement.setFeeRate(new BigDecimal(r.getValue(8).toString()));
@@ -202,7 +202,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 					statSettlement.setServiceType(String.valueOf(r.getValue(2)));
 					statSettlement.setPaidDate(r.getValue(3).toString());
 					statSettlement.setResourceType(String.valueOf(r.getValue(4)));
-					statSettlement.setResourceId(Long.valueOf(r.getValue(5).toString()));
+					statSettlement.setResourceId(r.getValue(5).toString());
 					statSettlement.setPaidChannel(Byte.valueOf(r.getValue(6).toString()));
 					statSettlement.setRefundAmount(new BigDecimal(r.getValue(7).toString()));
 					statSettlement.setRefundFeeRate(new BigDecimal(r.getValue(8).toString()));

@@ -17,6 +17,8 @@ public class BizPaidOrder {
 	private String buyerUserId;
 	
 	private Byte payType;
+	
+	private Byte shopCreateType;
 
 	public String getOrderNo() {
 		return orderNo;
@@ -72,6 +74,14 @@ public class BizPaidOrder {
 
 	public void setPayType(Byte payType) {
 		this.payType = payType;
+	}
+
+	public Byte getShopCreateType() {
+		return shopCreateType;
+	}
+
+	public void setShopCreateType(Byte shopCreateType) {
+		this.shopCreateType = shopCreateType;
 	}
 	
 	

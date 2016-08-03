@@ -31,7 +31,6 @@ import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.payment.PaymentCardProvider;
 import com.everhomes.payment.PaymentCardRechargeOrder;
 import com.everhomes.payment.PaymentCardTransaction;
-import com.everhomes.promotion.OpPromotionConstant;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardTransactionStatus;
@@ -374,7 +373,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statOrder.setOrderType(SettlementOrderType.TRANSACTION.getCode());
 				statOrder.setPayerUid(pmsyOrder.getCreatorUid());
 				statOrder.setResourceType(SettlementResourceType.PMSY.getCode());
-				statOrder.setResourceId(0L);
 				
 				//转换成结算订单数据的状态
 				if(PmsyOrderStatus.fromCode(pmsyOrder.getStatus()) == PmsyOrderStatus.PAID){
@@ -410,18 +408,34 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					"biz serverURL not configured.");
 		}
 		
+		String paidOrderApi = configurationProvider.getValue(StatTransactionConstant.BIZ_PAID_ORDER_API, "");
+		
+		if(StringUtils.isEmpty(paidOrderApi)){
+			LOGGER.error("biz paid order api not configured, param = {}", StatTransactionConstant.BIZ_PAID_ORDER_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz paid order api not configured.");
+		}
+		
+		String refundOrderApi = configurationProvider.getValue(StatTransactionConstant.BIZ_REFUND_ORDER_API, "");
+
+		if(StringUtils.isEmpty(refundOrderApi)){
+			LOGGER.error("biz refund order api not configured, param = {}", StatTransactionConstant.BIZ_REFUND_ORDER_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz refund order api not configured.");
+		}
+		
 		//先删除数据，以免重复
 		statTransactionProvider.deleteStatOrderByDate(date, SettlementResourceType.SHOP.getCode());
 		
-		String url = serverURL + StatTransactionConstant.BIZ_PAID_ORDER_API;
+		String url = serverURL + paidOrderApi;
 		//设置需要查询的订单的状态集
 		List<String> status = new ArrayList<String>();
 		status.add("2");
 		status.add("3");
 		status.add("6");
 		status.add("7");
-		Map<String, Object> params = this.getParams();
-		String pageAnchor = "";
+		Map<String, Object> params = this.getParams(date);
+		String pageAnchor = null;
 		params.put("status", status);
 		String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
@@ -433,14 +447,14 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				mapForSignature.put(entry.getKey(), entry.getValue().toString());
 			}
         }
-        mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+        mapForSignature.put("status", org.apache.commons.lang.StringUtils.join(status, ","));
         String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
 			ListPaidOrderResponse response = (ListPaidOrderResponse)StringHelper.fromJsonString(result, ListPaidOrderResponse.class);
 			
-			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode());
+			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode(), result);
 			
 			if(null != response.getResponse()){
 				PaidOrderResponse res = response.getResponse();
@@ -452,17 +466,17 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				}
 			}
 			
+			if(StringUtils.isEmpty(pageAnchor)){
+				break;
+			}
 			params.put("pageAnchor", pageAnchor);
 			mapForSignature.put("pageAnchor", pageAnchor);
 			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
-			if(StringUtils.isEmpty(pageAnchor)){
-				break;
-			}
 		}
 		
-		url = serverURL + StatTransactionConstant.BIZ_REFUND_ORDER_API;
-		params = this.getParams();
+		url = serverURL + refundOrderApi;
+		params = this.getParams(date);
 		//设置需要查询的订单的状态集
 		status = new ArrayList<String>();
 		status.add("4");
@@ -476,14 +490,14 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	    		mapForSignature.put(entry.getKey(), entry.getValue().toString());
 	    	}
 	    }
-	    mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+	    mapForSignature.put("status", org.apache.commons.lang.StringUtils.join(status, ","));
 	    signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
 			
 			ListRefundOrderResponse response = (ListRefundOrderResponse)StringHelper.fromJsonString(result, ListRefundOrderResponse.class);
 			
-			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode());
+			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode(), result);
 			
 			if(null != response.getResponse()){
 				RefundOrderResponse res = response.getResponse();
@@ -495,14 +509,15 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				}
 			}
 			
-			params.put("pageAnchor", pageAnchor);
-			mapForSignature.put("pageAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
-	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 			if(StringUtils.isEmpty(pageAnchor)){
 				
 				break;
 			}
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor.toString());
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		}
 	}
 	
@@ -524,8 +539,9 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					order.setNamespaceId(user.getNamespaceId());
 				}
 			}
+			order.setShopType(bizPaidOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
-			order.setResourceId(Long.valueOf(bizPaidOrder.getShopNo()));
+			order.setResourceId(bizPaidOrder.getShopNo());
 			order.setOrderTime(new Timestamp(bizPaidOrder.getPaidTime()));
 			order.setOrderDate(DateUtil.dateToStr(new Date(bizPaidOrder.getPaidTime()), DateUtil.YMR_SLASH));
 			statTransactionProvider.createStatOrder(order);
@@ -574,7 +590,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statOrder.setOrderType(SettlementOrderType.TRANSACTION.getCode());
 				statOrder.setPayerUid(parkingRechargeOrder.getPayerUid());
 				statOrder.setResourceType(SettlementResourceType.PARKING_RECHARGE.getCode());
-				statOrder.setResourceId(0L);
 				
 				//转换成结算订单数据的状态
 				if(ParkingRechargeOrderStatus.fromCode(parkingRechargeOrder.getStatus()) == ParkingRechargeOrderStatus.PAID){
@@ -647,7 +662,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statOrder.setOrderType(SettlementOrderType.TRANSACTION.getCode());
 				statOrder.setPayerUid(paymentCardRechargeOrder.getPayerUid());
 				statOrder.setResourceType(SettlementResourceType.PAYMENT_CARD.getCode());
-				statOrder.setResourceId(0L);
 				
 				//转换成结算订单数据的状态
 				if(CardOrderStatus.fromCode(paymentCardRechargeOrder.getPayStatus()) == CardOrderStatus.PAID){
@@ -681,12 +695,18 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
 					"paid serverURL not configured.");
 		}
+		String paidTransactionApi = configurationProvider.getValue(StatTransactionConstant.PAID_TRANSACTION_API, "");
+		if(StringUtils.isEmpty(paidTransactionApi)){
+			LOGGER.error("paid transaction api not configured, param = {}", StatTransactionConstant.PAID_TRANSACTION_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"paid transaction api not configured.");
+		}
 		
-		String url = serverURL + StatTransactionConstant.PAID_TRANSACTION_API;
+		String url = serverURL + paidTransactionApi;
 		List<String> status = new ArrayList<String>();
 		status.add("success");
-		Map<String, Object> params = this.getParams();
-		String pageAnchor = "";
+		Map<String, Object> params = this.getParams(date);
+		String pageAnchor = null;
 		params.put("status", StringHelper.toJsonString(status));
 		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
@@ -697,22 +717,116 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				mapForSignature.put(entry.getKey(), entry.getValue().toString());
 			}
         }
-        mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+        mapForSignature.put("status", org.apache.commons.lang.StringUtils.join(status, ","));
         String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
 			
+			ListPaidTransactionResponse response = (ListPaidTransactionResponse)StringHelper.fromJsonString(result, ListPaidTransactionResponse.class);
+
+			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode(), result);
 			
-			
-			params.put("pageAnchor", pageAnchor);
-			mapForSignature.put("pageAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
-	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			if(null != response.getResponse()){
+				PaidTransactionResponse res = response.getResponse();
+				pageAnchor = res.getNextAnchor();
+				if(null != res.getList()){
+					// 批量添加支付流水
+					this.batchAddStatTransaction(res.getList());
+				}
+			}
+
 			if(StringUtils.isEmpty(pageAnchor)){
 				break;
 			}
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor.toString());
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		}
+	}
+	
+	private void batchAddStatTransaction(List<PaidTransaction> transactions){
+		for (PaidTransaction paidTransaction : transactions) {
+			StatTransaction statTransaction = new StatTransaction();
+			statTransaction.setPaidAmount(paidTransaction.getPaidAmount());
+			statTransaction.setFeeRate(BigDecimal.valueOf(0));
+			statTransaction.setFeeAmount(statTransaction.getPaidAmount().multiply(statTransaction.getFeeRate()));
+			statTransaction.setSettlementAmount(statTransaction.getPaidAmount().subtract(statTransaction.getFeeAmount()));
+			statTransaction.setOrderNo(paidTransaction.getOrderNo());
+			statTransaction.setPaidChannel(this.getPaidChannel(paidTransaction.getOnlinePayStyleNo()).getCode());
+			statTransaction.setPaidStatus(SettlementStatTransactionPaidStatus.PAID.getCode());
+			statTransaction.setPaidType(paidTransaction.getPayType());
+			statTransaction.setResourceType(this.getResourceType(paidTransaction.getOrderType()).getCode());
+			statTransaction.setPaidTime(new Timestamp(paidTransaction.getPaidTime()));
+			statTransaction.setTransactionNo(paidTransaction.getPayNo());
+			
+			StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statTransaction.getOrderNo(), statTransaction.getResourceType());
+			
+			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidTransaction.getOrderType())){
+				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+			}
+			
+			if(null != statOrder){
+				statTransaction.setCommunityId(statOrder.getCommunityId());
+				statTransaction.setNamespaceId(statOrder.getNamespaceId());
+				statTransaction.setPayerUid(statOrder.getPayerUid());
+				if(StatTransactionConstant.PAY_RECORD_ORDER_TYPE_DIANSHANG.equals(paidTransaction.getOrderType())){
+					if(statOrder.getShopType() == StatTransactionConstant.PAY_ORDER_SHOP_TYPE_PLATFORM){
+						statTransaction.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
+					}else if(statOrder.getShopType() == StatTransactionConstant.PAY_ORDER_SHOP_TYPE_SELF){
+						statTransaction.setServiceType(SettlementServiceType.OTHER_SHOP.getCode());
+					}
+					statTransaction.setResourceId(statOrder.getResourceId());
+				}
+			}else{
+				statTransaction.setCommunityId(0L);
+				statTransaction.setNamespaceId(0);
+			}
+			statTransaction.setPaidDate(DateUtil.dateToStr(new Date(paidTransaction.getPaidTime()), DateUtil.YMR_SLASH));
+			statTransactionProvider.createStatTransaction(statTransaction);
+		}
+	}
+	
+	private PaidChannel getPaidChannel(String payType){
+		PaidChannel paidChannel = PaidChannel.OHTER;
+		switch (payType) {
+		case StatTransactionConstant.PAY_RECORD_PAY_TYPE_ALIPAY:
+			paidChannel = PaidChannel.ALIPAY;
+			break;
+		case StatTransactionConstant.PAY_RECORD_PAY_TYPE_WECHAT:
+			paidChannel = PaidChannel.WECHAT;
+			break;
+		default:
+			break;
+		}
+		return paidChannel;
+	}
+	
+	private SettlementResourceType getResourceType(String orderType){
+		SettlementResourceType resourceType = SettlementResourceType.OTHER;
+		switch (orderType) {
+		case StatTransactionConstant.PAY_RECORD_ORDER_TYPE_DIANSHANG:
+			resourceType = SettlementResourceType.SHOP;
+			break;
+		case StatTransactionConstant.PAY_RECORD_ORDER_TYPE_PMSY:
+			resourceType = SettlementResourceType.PMSY;
+			break;
+		case StatTransactionConstant.PAY_RECORD_ORDER_TYPE_PAYMENTCARD:
+			resourceType = SettlementResourceType.PAYMENT_CARD;
+			break;
+		case StatTransactionConstant.PAY_RECORD_ORDER_TYPE_RENTALORDER:
+			resourceType = SettlementResourceType.RENTAL_SITE;
+			break;
+		case StatTransactionConstant.PAY_RECORD_ORDER_TYPE_PARKING:
+			resourceType = SettlementResourceType.PARKING_RECHARGE;
+			break;
+		default:
+			break;
+		}
+		
+		return resourceType;
 	}
 	
 	/**
@@ -758,7 +872,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					statTransaction.setPayerUid(statOrder.getPayerUid());
 				}
 				statTransaction.setResourceType(SettlementResourceType.PAYMENT_CARD.getCode());
-				statTransaction.setResourceId(0L);
 				statTransaction.setPaidDate(date);
 				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
 				statTransaction.setOrderNo(paymentCardTransaction.getOrderNo());
@@ -770,6 +883,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statTransaction.setVendorTransactionNo(paymentCardTransaction.getTransactionNo());
 				statTransaction.setPaidStatus(SettlementStatTransactionPaidStatus.PAID.getCode());
 				statTransaction.setPaidTime(paymentCardTransaction.getTransactionTime());
+				statTransaction.setPaidChannel(PaidChannel.PAYMENT.getCode());
 				statTransactionProvider.createStatOrder(statOrder);
 			}
 			
@@ -792,11 +906,19 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					"paid serverURL not configured.");
 		}
 		
-		String url = serverURL + StatTransactionConstant.PAID_REFUND_API;
+		String paidRefundApi = configurationProvider.getValue(StatTransactionConstant.PAID_REFUND_API, "");
+		if(StringUtils.isEmpty(paidRefundApi)){
+			LOGGER.error("paid refund api not configured, param = {}", StatTransactionConstant.PAID_REFUND_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"paid refund api not configured.");
+		}
+		
+		
+		String url = serverURL + paidRefundApi;
 		List<String> status = new ArrayList<String>();
 		status.add("success");
-		Map<String, Object> params = this.getParams();
-		String pageAnchor = "";
+		Map<String, Object> params = this.getParams(date);
+		String pageAnchor = null;
 		params.put("status", StringHelper.toJsonString(status));
 		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
@@ -807,21 +929,74 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				mapForSignature.put(entry.getKey(), entry.getValue().toString());
 			}
         }
-        mapForSignature.put("status", org.jooq.tools.StringUtils.join(status, ","));
+        mapForSignature.put("status", org.apache.commons.lang.StringUtils.join(status, ","));
         String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
 			
+			ListPaidRefundResponse response = (ListPaidRefundResponse)StringHelper.fromJsonString(result, ListPaidRefundResponse.class);
+
+			this.checkErrorCode(url, StringHelper.toJsonString(params), response.getErrorCode(), result);
 			
+			if(null != response.getResponse()){
+				PaidRefundResponse res = response.getResponse();
+				pageAnchor = res.getNextAnchor();
+				if(null != res.getList()){
+					// 批量添加退款流水
+					this.batchAddStatRefund(res.getList());
+				}
+			}
 			
-			params.put("pageAnchor", pageAnchor);
-			mapForSignature.put("pageAnchor", pageAnchor);
-			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
-	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 			if(StringUtils.isEmpty(pageAnchor)){
 				break;
 			}
+			
+			params.put("pageAnchor", pageAnchor);
+			mapForSignature.put("pageAnchor", pageAnchor.toString());
+			signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+	        params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		}
+	}
+	
+	
+	private void batchAddStatRefund(List<PaidRefund> refunds){
+		for (PaidRefund paidRefund : refunds) {
+			StatRefund statRefund = new StatRefund();
+			statRefund.setRefundAmount(paidRefund.getRefundAmount());
+			statRefund.setFeeRate(BigDecimal.valueOf(0));
+			statRefund.setFeeAmount(statRefund.getRefundAmount().multiply(statRefund.getFeeRate()));
+			statRefund.setSettlementAmount(statRefund.getRefundAmount().subtract(statRefund.getFeeAmount()));
+			statRefund.setOrderNo(paidRefund.getOrderNo());
+			statRefund.setPaidChannel(this.getPaidChannel(paidRefund.getOnlinePayStyleNo()).getCode());
+			statRefund.setResourceType(this.getResourceType(paidRefund.getOrderType()).getCode());
+			statRefund.setRefundTime(new Timestamp(paidRefund.getRefundTime()));
+			statRefund.setRefundNo(paidRefund.getPayNo());
+			
+			StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), statRefund.getResourceType());
+			
+			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidRefund.getOrderType())){
+				statRefund.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+			}
+			
+			if(null != statOrder){
+				statRefund.setCommunityId(statOrder.getCommunityId());
+				statRefund.setNamespaceId(statOrder.getNamespaceId());
+				statRefund.setPayerUid(statOrder.getPayerUid());
+				statRefund.setResourceId(statOrder.getResourceId());
+				if(StatTransactionConstant.PAY_RECORD_ORDER_TYPE_DIANSHANG.equals(paidRefund.getOrderType())){
+					if(statOrder.getShopType() == StatTransactionConstant.PAY_ORDER_SHOP_TYPE_PLATFORM){
+						statRefund.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
+					}else if(statOrder.getShopType() == StatTransactionConstant.PAY_ORDER_SHOP_TYPE_SELF){
+						statRefund.setServiceType(SettlementServiceType.OTHER_SHOP.getCode());
+					}
+				}
+			}else{
+				statRefund.setCommunityId(0L);
+				statRefund.setNamespaceId(0);
+			}
+			statRefund.setRefundDate(DateUtil.dateToStr(new Date(paidRefund.getRefundTime()), DateUtil.YMR_SLASH));
+			statTransactionProvider.createStatRefund(statRefund);
 		}
 	}
 	
@@ -947,29 +1122,30 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 	}
 	
-	private Map<String, Object> getParams(){
+	private Map<String, Object> getParams(String date){
 		 Integer nonce = (int)(Math.random()*1000);
 	     Long timestamp = System.currentTimeMillis();       
 	     
 	     int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 10);
-	     Calendar calendar = Calendar.getInstance();
-	     calendar.add(Calendar.DAY_OF_MONTH, -1);
-	     String sDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH) + " 00:00:00";
-	     Long maxAnchor = Timestamp.valueOf(sDate).getTime();
+	     
+	     Timestamp startDate = Timestamp.valueOf(date + " 00:00:00");
+		 Timestamp endDate = Timestamp.valueOf(date + " 00:00:00");
+		 endDate.setDate(endDate.getDate() + 1);
 	     
 	     Map<String,Object> params = new HashMap<String, Object>();
-	     params.put("nonce", nonce + "");
-	     params.put("timestamp", timestamp + "");
-	     params.put("pageSize", pageSize + "");
-	     params.put("maxAnchor", maxAnchor + "");
-	     params.put("pageAnchor", "");
+	     params.put("nonce", nonce);
+	     params.put("timestamp", timestamp);
+	     params.put("pageSize", pageSize);
+//	     params.put("pageAnchor", 1464157283126L);
+	     params.put("startTime", startDate.getTime());
+	     params.put("endTime", endDate.getTime() - 1);     
 	     return params;
 
 	}
 
-	private void checkErrorCode(String url, String params, Integer code){
+	private void checkErrorCode(String url, String params, Integer code, String result){
 		if(200 != code){
-			LOGGER.error("Failed to get data, url = {}, params = {}, code = ", url, params , code);
+			LOGGER.error("Failed to get data, url = {}, params = {}, result = {}", url, params , result);
 			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_RESPONSE,
 					"Failed to get data.");
 		}
@@ -982,5 +1158,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		List<BizPaidOrder> list  = res.getList();
 		Integer s = 200;
 		System.out.println(200 == s);
+		
+		System.out.println(Long.valueOf("14598342843426081282"));
 	}
 }

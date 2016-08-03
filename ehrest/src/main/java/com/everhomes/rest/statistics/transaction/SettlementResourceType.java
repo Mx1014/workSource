@@ -1,7 +1,7 @@
 package com.everhomes.rest.statistics.transaction;
 
 public enum SettlementResourceType {
-	SHOP("shop"), PARKING_RECHARGE("parking_recharge"), RENTAL_SITE("rental_site"), PMSY("pmsy"), PAYMENT_CARD("payment_card");
+	SHOP("shop"), PARKING_RECHARGE("parking_recharge"), RENTAL_SITE("rental_site"), PMSY("pmsy"), PAYMENT_CARD("payment_card"), OTHER("other");
 	
 	private String code;
 	

@@ -6,7 +6,7 @@ CREATE TABLE `eh_stat_orders` (
   `order_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
-  `payer_uid` bigint(20) NOT NULL COMMENT '支付用户编号',
+  `payer_uid` bigint(20) COMMENT '支付用户编号',
   `item_code` varchar(64) DEFAULT null COMMENT '商品编号',
   `vendor_code` varchar(64) DEFAULT null COMMENT '供应商编号',
   `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
@@ -30,7 +30,7 @@ CREATE TABLE `eh_stat_transactions` (
   `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
   `item_code` varchar(64) DEFAULT null COMMENT '商品编号',
   `vendor_code` varchar(64) DEFAULT null COMMENT '供应商编号',
-  `payer_uid` bigint(20) NOT NULL COMMENT '支付用户编号',
+  `payer_uid` bigint(20) COMMENT '支付用户编号',
   `transaction_no` varchar(100) DEFAULT NULL COMMENT '平台流水号',
   `vendor_transaction_no` varchar(100) DEFAULT NULL COMMENT '第三方支付流水号',
   `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
@@ -59,7 +59,7 @@ CREATE TABLE `eh_stat_refunds` (
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
   `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
-  `payer_uid` bigint(20) NOT NULL COMMENT '支付用户编号',
+  `payer_uid` bigint(20) COMMENT '支付用户编号',
   `refund_no` varchar(100) DEFAULT NULL COMMENT '平台退款流水号',
   `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
   `vendor_refund_no` varchar(100) DEFAULT NULL COMMENT'第三方退款流水号',
@@ -131,10 +131,4 @@ CREATE TABLE `eh_stat_task_logs` (
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `task_no` (`task_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-
-
-
-
-
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

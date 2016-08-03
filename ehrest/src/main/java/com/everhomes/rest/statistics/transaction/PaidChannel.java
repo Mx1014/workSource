@@ -1,7 +1,7 @@
 package com.everhomes.rest.statistics.transaction;
 
 public enum PaidChannel {
-	ALIPAY((byte)0), WECHAT((byte)1), PAYMENT((byte)2);
+	ALIPAY((byte)0), WECHAT((byte)1), PAYMENT((byte)2), OHTER((byte)10);
 	
 	private byte code;
 	
