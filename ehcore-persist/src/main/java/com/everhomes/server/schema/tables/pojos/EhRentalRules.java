@@ -11,10 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1006277510;
+	private static final long serialVersionUID = -1750886796;
 
 	private java.lang.Long     id;
-	private java.lang.String   ownerType;
 	private java.lang.Long     ownerId;
 	private java.lang.String   siteType;
 	private java.lang.Long     rentalStartTime;
@@ -44,6 +43,7 @@ public class EhRentalRules implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.String   ownerType;
 	private java.lang.Byte     rentalType;
 	private java.lang.Long     cancelTime;
 	private java.lang.Long     overtimeTime;
@@ -52,7 +52,6 @@ public class EhRentalRules implements java.io.Serializable {
 
 	public EhRentalRules(
 		java.lang.Long     id,
-		java.lang.String   ownerType,
 		java.lang.Long     ownerId,
 		java.lang.String   siteType,
 		java.lang.Long     rentalStartTime,
@@ -82,12 +81,12 @@ public class EhRentalRules implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
+		java.lang.String   ownerType,
 		java.lang.Byte     rentalType,
 		java.lang.Long     cancelTime,
 		java.lang.Long     overtimeTime
 	) {
 		this.id = id;
-		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalStartTime = rentalStartTime;
@@ -117,6 +116,7 @@ public class EhRentalRules implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
 		this.rentalType = rentalType;
 		this.cancelTime = cancelTime;
 		this.overtimeTime = overtimeTime;
@@ -128,14 +128,6 @@ public class EhRentalRules implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getOwnerId() {
@@ -368,6 +360,14 @@ public class EhRentalRules implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 
 	public java.lang.Byte getRentalType() {

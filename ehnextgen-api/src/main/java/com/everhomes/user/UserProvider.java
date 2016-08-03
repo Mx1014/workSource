@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
@@ -85,6 +86,5 @@ public interface UserProvider {
 	 * @param pageSize
 	 * @return
 	 */
-    List<AclinkUser> searchDoorUsers(Integer namespaceId, Long organizationId, Long buildingId, String buildingName, Byte isAuth, String keyword,
-            CrossShardListingLocator locator, int pageSize);
+    List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize);
 }

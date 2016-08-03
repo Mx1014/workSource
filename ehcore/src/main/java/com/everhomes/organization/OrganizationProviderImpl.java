@@ -26,16 +26,10 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.address.Address;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.Enterprise;
-import com.everhomes.enterprise.EnterpriseAddress;
-import com.everhomes.enterprise.EnterpriseAttachment;
-import com.everhomes.enterprise.EnterpriseCommunityMap;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -44,9 +38,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -54,7 +45,6 @@ import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -80,7 +70,6 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
@@ -129,11 +118,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public void createOrganization(Organization organization) {
-		
-		long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
+		// eh_organizations表是global表，不能使用key table表的方式来获取id  modify by lqs 20160722
+		// long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
+	    long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizations.class));
 		organization.setId(id);
 		organization.setPath(organization.getPath() + "/" + id);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
 		dao.insert(organization);
 		
@@ -1534,7 +1525,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void createOrganizationDetail(OrganizationDetail organizationDetail) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationDetails.class));
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getOrganizationId()));
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getOrganizationId()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
 		organizationDetail.setId(id);
 		dao.insert(organizationDetail);
@@ -1542,14 +1534,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public void updateOrganizationDetail(OrganizationDetail organizationDetail) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getOrganizationId()));
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getOrganizationId()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
 		dao.update(organizationDetail);
 	}
 	
 	@Override
 	public OrganizationDetail findOrganizationDetailByOrganizationId(Long organizationId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+	    // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_DETAILS);
 		query.addConditions(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId));
 		List<OrganizationDetail> organizationDetails = new ArrayList<OrganizationDetail>();
@@ -1567,7 +1562,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
     public void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest) {
     	long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationCommunityRequests.class));
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         organizationCommunityRequest.setId(id);
         organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1577,7 +1574,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
     @Override
     public void updateOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhOrganizationCommunityRequestsDao dao = new EhOrganizationCommunityRequestsDao(context.configuration());
         organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1586,7 +1585,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     
     @Override
     public void deleteOrganizationCommunityRequestById(OrganizationCommunityRequest organizationCommunityRequest) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhOrganizationCommunityRequestsDao dao = new EhOrganizationCommunityRequestsDao(context.configuration());
         dao.delete(organizationCommunityRequest);        
@@ -1595,8 +1596,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public OrganizationCommunityRequest getOrganizationCommunityRequestById(Long id) {
     	OrganizationCommunityRequest[] result = new OrganizationCommunityRequest[1];
-        
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+        dbProvider.mapReduce(AccessSpec.readOnly(), null, 
             (DSLContext context, Object reducingContext) -> {
                 result[0] = context.select().from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
                     .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.ID.eq(id))
@@ -1636,8 +1639,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //            });
 //        
 //        return result[0];
-    	
-    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+    	// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
 		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId));
 		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
@@ -1657,7 +1662,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public List<OrganizationCommunityRequest> queryOrganizationCommunityRequestByCommunityId(ListingLocator locator, Long comunityId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
     	final List<OrganizationCommunityRequest> contacts = new ArrayList<OrganizationCommunityRequest>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, comunityId));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, comunityId));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         count = count + 1;
         SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
         if(queryBuilderCallback != null)
@@ -1753,8 +1760,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public void createOrganizationAttachment(OrganizationAttachment attachment) {
 
 		assert(attachment.getOrganizationId() != null);
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, attachment.getOrganizationId()));
+
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, attachment.getOrganizationId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAttachments.class));
         attachment.setId(id);
         
@@ -1768,8 +1777,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public void createOrganizationAddress(OrganizationAddress address) {
 
 		assert(address.getOrganizationId() != null);
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getOrganizationId()));
+
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getOrganizationId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddresses.class));
         address.setId(id);
         
@@ -1781,7 +1792,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
     public List<OrganizationAttachment> listOrganizationAttachments(long organizationId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         
         return context.selectFrom(Tables.EH_ORGANIZATION_ATTACHMENTS)
             .where(Tables.EH_ORGANIZATION_ATTACHMENTS.ORGANIZATION_ID.eq(organizationId))
@@ -1794,8 +1807,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public Organization findOrganizationByAddressId(long addressId) {
 		final Organization[] result = new Organization[1];
-		
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), result, 
+
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), result, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<Organization> list = context.select().from(Tables.EH_ORGANIZATIONS).leftOuterJoin(Tables.EH_ORGANIZATION_ADDRESSES)
 							.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
@@ -1820,7 +1835,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public Boolean isExistInOrganizationAddresses(long organizationId,
 			long addressId) {
 		List<Integer> addr = new ArrayList<Integer>();
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+	    dbProvider.mapReduce(AccessSpec.readOnly(), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
 					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
@@ -1845,7 +1862,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public void deleteOrganizationAttachmentsByOrganizationId(long organizationId) {
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhOrganizationAttachmentsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ATTACHMENTS);
 					query.addConditions(Tables.EH_ORGANIZATION_ATTACHMENTS.ORGANIZATION_ID.eq(organizationId));
@@ -1862,8 +1881,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public void deleteOrganizationAddressByOrganizationId(long organizationId) {
-		
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
 					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
@@ -1879,7 +1900,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
     private void deleteOrganizationeAttachmentsById(long id) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationAttachmentsDao dao = new EhOrganizationAttachmentsDao(context.configuration());
         dao.deleteById(id);        
     }
@@ -1888,7 +1911,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			Long organizationId) {
 		
 		List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId), null, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
 					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
@@ -1907,7 +1931,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public void deleteOrganizationAddress(OrganizationAddress address) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getOrganizationId()));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getOrganizationId()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
         dao.delete(address); 		
@@ -1915,14 +1941,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public void deleteOrganizationAddressById(Long id) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
         dao.deleteById(id);		
 	}
 
 	@Override
 	public void updateOrganizationAddress(OrganizationAddress oa) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, oa.getOrganizationId()));
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, oa.getOrganizationId()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		oa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
 		oa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1934,7 +1964,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public OrganizationAddress findOrganizationAddressByAddressId(Long addressId) {
 		final OrganizationAddress[] result = new OrganizationAddress[1];
 
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationAddresses.class), result, 
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+        // this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationAddresses.class), result, 
+        this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
             (DSLContext context, Object reducingContext) -> {
            	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
        		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
@@ -1951,7 +1983,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<OrganizationAddress> listOrganizationAddressByBuildingId(Long buildingId, Integer pageSize, CrossShardListingLocator locator) {
 		List<OrganizationAddress> addresses = new ArrayList<OrganizationAddress>();
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
 				(DSLContext context, Object reducingContext) -> {
 					int size = pageSize + 1;
 					Condition cond = Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId);
@@ -1983,7 +2017,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName) {
 		List<OrganizationAddress> addresses = new ArrayList<OrganizationAddress>();
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
+        // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
 				(DSLContext context, Object reducingContext) -> {
 					Condition cond = Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.eq(buildingName);
 					cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
@@ -2029,12 +2065,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	
 	@Override
-	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status) {
+	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, Condition cond) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(ids));
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(status.getCode()));
+		query.addConditions(cond);
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
@@ -2200,7 +2236,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	        List<Organization> result  = new ArrayList<Organization>();
 	        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 	        
-	        query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode()));
+	        query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode())
+	                .or(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode())));
+	        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+	        
 	        if(namespaceId != null) {
 	            query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 	        }
@@ -2227,5 +2266,33 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	        }
 	        
 	        return result;
+	}
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByOrganizationIds(
+			ListingLocator locator, int pageSize, Condition cond,
+			List<Long> organizationIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> results = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(organizationIds));
+		if(null != locator.getAnchor()){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+		}
+		query.addConditions(cond);
+		query.addLimit(pageSize + 1);
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.desc());
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		
+		locator.setAnchor(null);
+		if(results.size() > pageSize){
+			results.remove(results.size() - 1);
+			locator.setAnchor(results.get(results.size() - 1).getCreateTime().getTime());
+		}
+		
+		return results;
 	}
 }

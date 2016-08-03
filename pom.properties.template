@@ -4,7 +4,7 @@ ehutil.version=0.0.7-SNAPSHOT
 ehutil-common.version=0.0.2-SNAPSHOT
 ehplatform.version=0.0.8-SNAPSHOT
 ehplatform-persist.version=0.0.4-SNAPSHOT
-ehcodegen.version=0.0.3-SNAPSHOT
+ehcodegen.version=0.0.2-SNAPSHOT
 
 bluto.version=1.0.3
 scrabbler.version=1.0.0

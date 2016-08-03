@@ -29,6 +29,8 @@
 
 @property(nonatomic, copy) NSNumber* embeddedAppId;
 
+@property(nonatomic, copy) NSNumber* officialFlag;
+
 // item type NSNumber*
 @property(nonatomic, strong) NSMutableArray* excludeCategories;
 

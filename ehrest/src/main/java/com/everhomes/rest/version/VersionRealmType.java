@@ -63,6 +63,8 @@ public enum VersionRealmType {
     IOS_JINDI("iOS_Jindi"),
     ANDROID_CHUNENG("Android_Chuneng"), 
     IOS_CHUNENG("iOS_Chuneng"),
+    ANDROID_WEIXINLINK("Android_WeixinLink"), 
+    IOS_WEIXINLINK("iOS_WeixinLink"),
     ANDROID_IBASE("Android_Ibase"), 
     IOS_IBASE("iOS_Ibase"),
     BIZ("biz");

@@ -2,14 +2,14 @@
 // EvhAdminCommunityUpdateBuildingRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAdminCommunityUpdateBuildingRestResponse
 //
 @interface EvhAdminCommunityUpdateBuildingRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhCommunityBuildingDTO* response;
+@property(nonatomic, strong) EvhBuildingDTO* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

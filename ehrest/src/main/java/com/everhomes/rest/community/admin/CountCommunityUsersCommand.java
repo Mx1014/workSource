@@ -12,6 +12,8 @@ public class CountCommunityUsersCommand {
 	private Integer namespaceId;
 	
 	private Long communityId;
+	
+	private Long organizationId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -29,6 +31,15 @@ public class CountCommunityUsersCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

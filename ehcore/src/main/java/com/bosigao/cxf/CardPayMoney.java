@@ -1,4 +1,4 @@
-
+ 
 package com.bosigao.cxf;
 
 import javax.xml.bind.annotation.XmlAccessType;

@@ -35,6 +35,14 @@ public class DoorAuth extends EhDoorAuth {
         AclinkAuthCustomField.AUTH_LINGLING_VALID.setIntegralValue(this, validTime);
     }
     
+    public Long getCurrStorey() {
+        return AclinkAuthCustomField.AUTH_LINGLING_STOREY.getIntegralValue(this);
+    }
+    
+    public void setCurrStorey(Long storey) {
+        AclinkAuthCustomField.AUTH_LINGLING_STOREY.setIntegralValue(this, storey);
+    }
+    
     public String getLinglingSDKKey() {
         return AclinkAuthCustomField.AUTH_LINGLING_SDK_KEY.getStringValue(this);
     }

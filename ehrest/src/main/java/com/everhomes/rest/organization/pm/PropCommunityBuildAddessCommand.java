@@ -30,6 +30,8 @@ public class PropCommunityBuildAddessCommand {
     private List<String> mobilePhones;
     
     private String message;
+    
+    private String messageBodyType;
    
     public PropCommunityBuildAddessCommand() {
     }
@@ -95,6 +97,16 @@ public class PropCommunityBuildAddessCommand {
 
 	public void setBuildingIds(List<Long> buildingIds) {
 		this.buildingIds = buildingIds;
+	}
+
+
+	public String getMessageBodyType() {
+		return messageBodyType;
+	}
+
+
+	public void setMessageBodyType(String messageBodyType) {
+		this.messageBodyType = messageBodyType;
 	}
 
 

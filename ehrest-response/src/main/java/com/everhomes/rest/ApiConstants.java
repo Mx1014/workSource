@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-07-12 18:01:58
+// generated at 2016-07-21 12:29:22
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -183,8 +183,10 @@ public interface ApiConstants {
     public static final String ADMIN_LAUNCHPAD_UPDATELAUNCHPADLAYOUT_URL = "/admin/launchpad/updateLaunchPadLayout";
     public static final String ADMIN_LISTBORDER_URL = "/admin/listBorder";
     public static final String ADMIN_LISTLOGIN_URL = "/admin/listLogin";
+    public static final String ADMIN_LISTLOGINBYPHONE_URL = "/admin/listLoginByPhone";
     public static final String ADMIN_LISTNAMESPACE_URL = "/admin/listNamespace";
     public static final String ADMIN_LISTPERSISTSERVER_URL = "/admin/listPersistServer";
+    public static final String ADMIN_MESSAGETEST_URL = "/admin/messageTest";
     public static final String ADMIN_ORG_ACCEPTTASK_URL = "/admin/org/acceptTask";
     public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
@@ -253,6 +255,7 @@ public interface ApiConstants {
     public static final String ADMIN_PROMOTION_NEWORDERPRICE_URL = "/admin/promotion/newOrderPrice";
     public static final String ADMIN_PROMOTION_SEARCHPROMOTION_URL = "/admin/promotion/searchPromotion";
     public static final String ADMIN_PROMOTION_UPDATEPROMOTION_URL = "/admin/promotion/updatePromotion";
+    public static final String ADMIN_PUSHTEST_URL = "/admin/pushTest";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
     public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
@@ -502,6 +505,7 @@ public interface ApiConstants {
     public static final String GROUP_LISTNEARBYGROUPS_URL = "/group/listNearbyGroups";
     public static final String GROUP_LISTPUBLICGROUPS_URL = "/group/listPublicGroups";
     public static final String GROUP_LISTUSERRELATEDGROUPS_URL = "/group/listUserRelatedGroups";
+    public static final String GROUP_QUITANDTRANSFERPRIVILEGE_URL = "/group/quitAndTransferPrivilege";
     public static final String GROUP_REJECTADMINROLE_URL = "/group/rejectAdminRole";
     public static final String GROUP_REJECTJOININVITATION_URL = "/group/rejectJoinInvitation";
     public static final String GROUP_REJECTJOINREQUEST_URL = "/group/rejectJoinRequest";
@@ -587,12 +591,15 @@ public interface ApiConstants {
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
     public static final String ORDER_PAYCALLBACK_URL = "/order/payCallback";
+    public static final String ORDER_REFUNDCALLBACK_URL = "/order/refundCallback";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYFORENTERPRISECONTACT_URL = "/org/applyForEnterpriseContact";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
     public static final String ORG_APPROVEORGANIZATIONMEMBER_URL = "/org/approveOrganizationMember";
     public static final String ORG_ASSIGNORGTOPIC_URL = "/org/assignOrgTopic";
     public static final String ORG_CANCELLIKEORGTOPIC_URL = "/org/cancelLikeOrgTopic";
+    public static final String ORG_CHECKOFFICALPRIVILEGE_URL = "/org/checkOfficalPrivilege";
+    public static final String ORG_CHECKOFFICALPRIVILEGEBYSCENE_URL = "/org/checkOfficalPrivilegeByScene";
     public static final String ORG_CREATEORGCONTACT_URL = "/org/createOrgContact";
     public static final String ORG_CREATEORGANIZATIONCOMMUNITY_URL = "/org/createOrganizationCommunity";
     public static final String ORG_DELETEORGCONTACT_URL = "/org/deleteOrgContact";
@@ -781,6 +788,48 @@ public interface ApiConstants {
     public static final String REGION_LISTCHILDREN_URL = "/region/listChildren";
     public static final String REGION_LISTDESCENDANTS_URL = "/region/listDescendants";
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
+    public static final String RENTAL_ADDRENTALBILL_URL = "/rental/addRentalBill";
+    public static final String RENTAL_ADDRENTALITEMBILL_URL = "/rental/addRentalItemBill";
+    public static final String RENTAL_ADMIN_ADDITEM_URL = "/rental/admin/addItem";
+    public static final String RENTAL_ADMIN_ADDRENTALSITERULES_URL = "/rental/admin/addRentalSiteRules";
+    public static final String RENTAL_ADMIN_ADDRESOURCE_URL = "/rental/admin/addResource";
+    public static final String RENTAL_ADMIN_BATCHCOMPLETEBILL_URL = "/rental/admin/batchCompleteBill";
+    public static final String RENTAL_ADMIN_BATCHINCOMPLETEBILL_URL = "/rental/admin/batchIncompleteBill";
+    public static final String RENTAL_ADMIN_CLOSERESOURCETYPE_URL = "/rental/admin/closeResourceType";
+    public static final String RENTAL_ADMIN_COMPLETEBILL_URL = "/rental/admin/completeBill";
+    public static final String RENTAL_ADMIN_CREATERESOURCETYPE_URL = "/rental/admin/createResourceType";
+    public static final String RENTAL_ADMIN_DELETEITEM_URL = "/rental/admin/deleteItem";
+    public static final String RENTAL_ADMIN_DELETERESOURCETYPE_URL = "/rental/admin/deleteResourceType";
+    public static final String RENTAL_ADMIN_EXPORTRENTALBILLS_URL = "/rental/admin/exportRentalBills";
+    public static final String RENTAL_ADMIN_GETITEMLIST_URL = "/rental/admin/getItemList";
+    public static final String RENTAL_ADMIN_GETREFUNDORDERLIST_URL = "/rental/admin/getRefundOrderList";
+    public static final String RENTAL_ADMIN_GETREFUNDURL_URL = "/rental/admin/getRefundUrl";
+    public static final String RENTAL_ADMIN_GETRENTALBILL_URL = "/rental/admin/getRentalBill";
+    public static final String RENTAL_ADMIN_GETRESOURCELIST_URL = "/rental/admin/getResourceList";
+    public static final String RENTAL_ADMIN_GETRESOURCETYPELIST_URL = "/rental/admin/getResourceTypeList";
+    public static final String RENTAL_ADMIN_INCOMPLETEBILL_URL = "/rental/admin/incompleteBill";
+    public static final String RENTAL_ADMIN_LISTRENTALBILLS_URL = "/rental/admin/listRentalBills";
+    public static final String RENTAL_ADMIN_OPENRESOURCETYPE_URL = "/rental/admin/openResourceType";
+    public static final String RENTAL_ADMIN_QUERYDEFAULTRULE_URL = "/rental/admin/queryDefaultRule";
+    public static final String RENTAL_ADMIN_UPDATEDEFAULTRULE_URL = "/rental/admin/updateDefaultRule";
+    public static final String RENTAL_ADMIN_UPDATEITEM_URL = "/rental/admin/updateItem";
+    public static final String RENTAL_ADMIN_UPDATEITEMS_URL = "/rental/admin/updateItems";
+    public static final String RENTAL_ADMIN_UPDATERENTALSITEDISCOUNT_URL = "/rental/admin/updateRentalSiteDiscount";
+    public static final String RENTAL_ADMIN_UPDATERENTALSITERULES_URL = "/rental/admin/updateRentalSiteRules";
+    public static final String RENTAL_ADMIN_UPDATERESOURCE_URL = "/rental/admin/updateResource";
+    public static final String RENTAL_ADMIN_UPDATERESOURCETYPE_URL = "/rental/admin/updateResourceType";
+    public static final String RENTAL_CANCELRENTALBILL_URL = "/rental/cancelRentalBill";
+    public static final String RENTAL_DELETERENTALBILL_URL = "/rental/deleteRentalBill";
+    public static final String RENTAL_EXPORTRENTALBILLS_URL = "/rental/exportRentalBills";
+    public static final String RENTAL_FINDAUTOASSIGNRENTALSITEDAYSTATUS_URL = "/rental/findAutoAssignRentalSiteDayStatus";
+    public static final String RENTAL_FINDAUTOASSIGNRENTALSITEWEEKSTATUS_URL = "/rental/findAutoAssignRentalSiteWeekStatus";
+    public static final String RENTAL_FINDRENTALSITEITEMSANDATTACHMENTS_URL = "/rental/findRentalSiteItemsAndAttachments";
+    public static final String RENTAL_FINDRENTALSITEMONTHSTATUS_URL = "/rental/findRentalSiteMonthStatus";
+    public static final String RENTAL_FINDRENTALSITEWEEKSTATUS_URL = "/rental/findRentalSiteWeekStatus";
+    public static final String RENTAL_FINDRENTALSITES_URL = "/rental/findRentalSites";
+    public static final String RENTAL_FINDUSERRENTALBILLS_URL = "/rental/findUserRentalBills";
+    public static final String RENTAL_LISTRENTALBILLS_URL = "/rental/listRentalBills";
+    public static final String RENTAL_ONLINEPAYCALLBACK_URL = "/rental/onlinePayCallback";
     public static final String REPEAT_TESTEXPRESSIONANALYZE_URL = "/repeat/testExpressionAnalyze";
     public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
     public static final String TECHPARK_ENTRY_CREATELEASEPROMOTION_URL = "/techpark/entry/createLeasePromotion";
@@ -860,6 +909,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
     public static final String UI_ACTIVITY_LISTNEARBYACTIVITIESBYSCENE_URL = "/ui/activity/listNearbyActivitiesByScene";
+    public static final String UI_ACTIVITY_LISTOFFICIALACTIVITIESBYSCENE_URL = "/ui/activity/listOfficialActivitiesByScene";
     public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
     public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
     public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
@@ -913,6 +963,7 @@ public interface ApiConstants {
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
     public static final String USER_GETUSERSNAPSHOTINFO_URL = "/user/getUserSnapshotInfo";
     public static final String USER_LISTACTIVITYFAVORITE_URL = "/user/listActivityFavorite";
+    public static final String USER_LISTBORDERS_URL = "/user/listBorders";
     public static final String USER_LISTCONTACTS_URL = "/user/listContacts";
     public static final String USER_LISTPOSTEDACTIVITIES_URL = "/user/listPostedActivities";
     public static final String USER_LISTPOSTEDTOPICS_URL = "/user/listPostedTopics";

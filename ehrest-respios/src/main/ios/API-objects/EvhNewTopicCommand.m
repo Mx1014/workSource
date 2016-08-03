@@ -79,6 +79,8 @@
         [jsonObject setObject: self.startTime forKey: @"startTime"];
     if(self.endTime)
         [jsonObject setObject: self.endTime forKey: @"endTime"];
+    if(self.officialFlag)
+        [jsonObject setObject: self.officialFlag forKey: @"officialFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -168,6 +170,10 @@
         self.endTime = [jsonObject objectForKey: @"endTime"];
         if(self.endTime && [self.endTime isEqual:[NSNull null]])
             self.endTime = nil;
+
+        self.officialFlag = [jsonObject objectForKey: @"officialFlag"];
+        if(self.officialFlag && [self.officialFlag isEqual:[NSNull null]])
+            self.officialFlag = nil;
 
         return self;
     }

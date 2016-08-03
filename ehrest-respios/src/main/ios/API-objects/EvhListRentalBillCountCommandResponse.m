@@ -2,7 +2,7 @@
 // EvhListRentalBillCountCommandResponse.m
 //
 #import "EvhListRentalBillCountCommandResponse.h"
-#import "EvhRentalBillCountDTO.h"
+#import "EvhRentalv2RentalBillCountDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListRentalBillCountCommandResponse
@@ -34,7 +34,7 @@
 {
     if(self.rentalBillCounts) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRentalBillCountDTO* item in self.rentalBillCounts) {
+        for(EvhRentalv2RentalBillCountDTO* item in self.rentalBillCounts) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -49,7 +49,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalBillCounts"];
             for(id itemJson in jsonArray) {
-                EvhRentalBillCountDTO* item = [EvhRentalBillCountDTO new];
+                EvhRentalv2RentalBillCountDTO* item = [EvhRentalv2RentalBillCountDTO new];
                 
                 [item fromJson: itemJson];
                 [self.rentalBillCounts addObject: item];

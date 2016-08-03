@@ -1,0 +1,19 @@
+//
+// EvhDiscountType.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhDiscountType
+//
+typedef enum {
+
+    EvhDiscountType_NO_DISCOUNT = 0, 
+    EvhDiscountType_FULL_MOENY_CUT_MONEY = 1, 
+    EvhDiscountType_FULL_DAY_CUT_MONEY = 2, 
+    EvhDiscountType_RATIO = 3
+
+} EvhDiscountType;
+
+///////////////////////////////////////////////////////////////////////////////
+

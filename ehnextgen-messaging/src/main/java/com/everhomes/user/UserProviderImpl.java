@@ -16,6 +16,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectOffsetStep;
+import org.jooq.SelectOnConditionStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +42,9 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.aclink.DoorAuthStatus;
+import com.everhomes.rest.aclink.DoorAuthType;
+import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -875,9 +881,13 @@ public class UserProviderImpl implements UserProvider {
 	 * added by Janson
 	 */
 	@Override
-    public List<AclinkUser> searchDoorUsers(Integer namespaceId, Long organizationId, 
-            Long buildingId, String buildingName, Byte isAuth, String keyword,
-            CrossShardListingLocator locator, int pageSize) {
+    public List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize) {
+	    Integer namespaceId = cmd.getNamespaceId();
+	    Long organizationId = cmd.getOrganizationId();
+	    Long buildingId = cmd.getBuildingId();
+	    String buildingName =  cmd.getBuildingName();
+	    Byte isAuth = cmd.getIsAuth();
+	    String keyword = cmd.getKeyword();
         
         List<AclinkUser> list = new ArrayList<AclinkUser>();
         Map<Long, Long> isExists = new HashMap<Long, Long>();
@@ -918,14 +928,37 @@ public class UserProviderImpl implements UserProvider {
                     cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
                 }
                 
-                context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
+                SelectOnConditionStep<Record> onQuery = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
                 .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
-                .join(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                .rightOuterJoin(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
                         .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())))
                         .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
-                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())))
-                        .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2)
-                .fetch().map(r -> {
+                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())));
+                                
+                SelectConditionStep<Record> select = null;
+                
+                if(cmd.getIsOpenAuth() != null) {
+               
+                    if(cmd.getIsOpenAuth() > 0) {
+                        select = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID))
+                        .where(
+                                cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+                                        .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))
+                                        ));   
+                    }
+                    
+                } else {
+                    select = onQuery.where(cond);
+                }
+                
+                SelectOffsetStep<Record> query = select.orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2);
+                query.fetch().map(r -> {
+                    
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("Query users sql=" + query.getSQL());
+//                        LOGGER.debug("Query users bindValues=" + query.getBindValues());
+//                    }
+                    
                     if(list.size() >= pageSize) {
                         return null;
                     }

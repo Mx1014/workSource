@@ -8,9 +8,10 @@
 //
 typedef enum {
 
-    EvhAttachmentType_STRING = 0, 
-    EvhAttachmentType_EMAIL = 1, 
-    EvhAttachmentType_FILE = 2
+    EvhAttachmentType_TEXT_REMARK = 0, 
+    EvhAttachmentType_LICENSE_NUMBER = 1, 
+    EvhAttachmentType_SHOW_CONTENT = 2, 
+    EvhAttachmentType_ATTACHMENT = 3
 
 } EvhAttachmentType;
 

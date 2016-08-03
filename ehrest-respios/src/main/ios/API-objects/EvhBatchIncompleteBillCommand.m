@@ -31,12 +31,6 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.ownerType)
-        [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.ownerId)
-        [jsonObject setObject: self.ownerId forKey: @"ownerId"];
-    if(self.siteType)
-        [jsonObject setObject: self.siteType forKey: @"siteType"];
     if(self.rentalBillIds) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(NSNumber* item in self.rentalBillIds) {
@@ -49,18 +43,6 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.ownerType = [jsonObject objectForKey: @"ownerType"];
-        if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
-            self.ownerType = nil;
-
-        self.ownerId = [jsonObject objectForKey: @"ownerId"];
-        if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
-            self.ownerId = nil;
-
-        self.siteType = [jsonObject objectForKey: @"siteType"];
-        if(self.siteType && [self.siteType isEqual:[NSNull null]])
-            self.siteType = nil;
-
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalBillIds"];
             for(id itemJson in jsonArray) {
