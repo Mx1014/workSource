@@ -6,13 +6,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -148,6 +144,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
      	String userToken = null;
      	String identifierToken = null;
      	String organizationToken = null;
+     	String nickName = "";
      	final String initPassword = "123456";
      	//如果debug开启，则用来测试
 		boolean isDebugEnabled = configProvider.getBooleanValue("wanke.test.isDebugEnabled", false);
@@ -160,6 +157,12 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
     		Map<String, Object> result = entity.getData();
     		userToken = (String) result.get("uid");
     		identifierToken = (String) result.get("mobile");
+    		nickName = (String) result.get("name");
+    		if(StringUtils.isBlank(userToken) || StringUtils.isBlank(identifierToken)) {
+    			LOGGER.error("UserToken or identifierToken from wanke is null, userToken={}, identifierToken={}", userToken, identifierToken);
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    					"UserToken or identifierToken from wanke is null");
+    		}
     		List organizationList = (List) result.get("orgList");
     		if(null == organizationList || organizationList.isEmpty()){
     			LOGGER.error("User is not in organization, cmd={}, entity={}", cmd, entity);
@@ -170,7 +173,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
      	}
      	
 		String regIp = getIp(req);
-		UserIdentifier identifier = signup(userToken, identifierToken, cmd.getNamespaceId(), regIp);
+		UserIdentifier identifier = signup(userToken, identifierToken, cmd.getNamespaceId(), regIp, nickName);
 		LogonCommandResponse logonCommandResponse = login(identifier, initPassword, req, resp);
 		ListOrganizationCommunityCommand listOrganizationCommunityCommand = new ListOrganizationCommunityCommand();
 		Organization organization = organizationProvider.findOrganizationByOrganizationToken(organizationToken);
@@ -183,11 +186,12 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 		ListOrganizationCommunityV2CommandResponse listOrganizationCommunityV2CommandResponse = organizationService
 				.listOrganizationCommunitiesV2(listOrganizationCommunityCommand);
 		listCommunityResponse.setCommunities(listOrganizationCommunityV2CommandResponse.getCommunities());
-		//listCommunityResponse.setNextPageAnchor(listOrganizationCommunityV2CommandResponse.getNextPageOffset());
+		listCommunityResponse.setUserId(identifier.getOwnerUid());
+		
 		return listCommunityResponse;
 	}
 	
-	private UserIdentifier signup(String userToken, String identifierToken, Integer namespaceId, String regIp) {
+	private UserIdentifier signup(String userToken, String identifierToken, Integer namespaceId, String regIp, String nickName) {
 
 		final Integer newNamespaceId = (namespaceId == null) ? Namespace.DEFAULT_NAMESPACE : namespaceId;
 		
@@ -202,6 +206,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 				user.setNamespaceUserToken(userToken);
 				user.setNamespaceUserType(Type.WANKE.getCode());
 				user.setGender(UserGender.UNDISCLOSURED.getCode());
+				user.setNickName(nickName);
 				String salt=EncryptionUtils.createRandomSalt();
 				user.setSalt(salt);
 				try {

@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
 public class ListCommunityResponse {
 	private Long nextPageAnchor;
+	private Long userId;
 	
 	@ItemType(CommunityDTO.class)
     private List<CommunityDTO> communities;
@@ -32,5 +33,13 @@ public class ListCommunityResponse {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }
