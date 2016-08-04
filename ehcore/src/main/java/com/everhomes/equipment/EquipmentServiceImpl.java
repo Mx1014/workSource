@@ -1759,6 +1759,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		task.setExecutiveGroupId(equipment.getTargetId());
 		task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setResult(EquipmentTaskResult.NONE.getCode());
+		task.setReviewResult(ReviewResult.NONE.getCode());
 		
 		StandardType type = StandardType.fromStatus(standard.getStandardType());
 		
