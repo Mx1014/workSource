@@ -28,8 +28,7 @@ CREATE TABLE `eh_punch_time_rules` (
 
 ALTER TABLE `eh_punch_geopoints` ADD COLUMN `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type';
 ALTER TABLE `eh_punch_geopoints` ADD COLUMN `owner_id` BIGINT COMMENT 'owner resource(user/organization) id';
-ALTER TABLE `eh_punch_geopoints` ADD COLUMN `location_rule_id` BIGINT COMMENT 'fk:eh_punch_geopoints id';
-ALTER TABLE `eh_punch_geopoints` ADD COLUMN `description` VARCHAR(256);
+ALTER TABLE `eh_punch_geopoints` ADD COLUMN `location_rule_id` BIGINT COMMENT 'fk:eh_punch_geopoints id'; 
 
 
 -- 
@@ -63,7 +62,7 @@ CREATE TABLE `eh_punch_wifis` (
   `creator_uid` BIGINT ,
   `create_time` DATETIME ,
   
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -98,7 +97,7 @@ CREATE TABLE `eh_punch_holidays` (
   `creator_uid` BIGINT ,
   `create_time` DATETIME ,
   
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -138,7 +137,7 @@ CREATE TABLE `eh_punch_rules` (
   `operator_uid` BIGINT ,
   `operate_time` DATETIME ,
   
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 ;
 
 
