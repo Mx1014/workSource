@@ -122,6 +122,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
@@ -835,6 +836,7 @@ public class UserServiceImpl implements UserService {
 		Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
 		UserLogin foundLogin = null;
 		int nextLoginId = 1;
+		int foundIndex = 0xFFFF;
 
 		if(maxLoginId != null) {
 			for(int i = 1; i <= maxLoginId.intValue(); i++) {
@@ -854,15 +856,34 @@ public class UserServiceImpl implements UserService {
 							}
 							break;
 						} else if(login.getDeviceIdentifier() != null && deviceIdentifier != null) {
-							if(login.getDeviceIdentifier().equals(deviceIdentifier)) {
+							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
 								foundLogin = login;
 								break;
+							} else {
+							    if(foundLogin == null) {
+							       login.setStatus(UserLoginStatus.LOGGED_OFF);
+                            login.setDeviceIdentifier(deviceIdentifier);
+                            foundLogin = login;
+                            foundIndex = i+2;
+							    } else {
+							        //found twice, delete all logins
+							        accessor.getTemplate().delete(accessor.getBucketName());
+							        foundLogin = null;
+							        nextLoginId = 1;
+							        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+							        break;   
+							    }
 							}
 						}
 					}
 
-					if(login.getLoginId() >= nextLoginId)
+					if(foundLogin == null && login.getLoginId() >= nextLoginId)
 						nextLoginId = login.getLoginId() + 1;
+					
+					if(i > foundIndex && foundLogin != null) {
+					    //already found
+					    break;
+					}
 				}
 			}
 		}
