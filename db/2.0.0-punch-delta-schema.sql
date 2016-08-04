@@ -144,7 +144,7 @@ CREATE TABLE `eh_punch_rules` (
 -- 
 -- 打卡规则和owner的映射表
 -- 
--- DROP TABLE IF EXISTS eh_punch_scheduling_rules;
+-- DROP TABLE IF EXISTS `eh_punch_rule_owner_map`;
 CREATE TABLE `eh_punch_rule_owner_map` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR (128) COMMENT 'owner resource(user/organization) type',
