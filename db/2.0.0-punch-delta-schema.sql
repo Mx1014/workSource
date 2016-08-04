@@ -149,6 +149,8 @@ CREATE TABLE `eh_punch_rule_owner_map` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR (128) COMMENT 'owner resource(user/organization) type',
   `owner_id` BIGINT COMMENT 'owner resource(user/organization) id',
+  `target_type` VARCHAR (128) COMMENT 'target resource(user/organization) type',
+  `target_id` BIGINT COMMENT 'target resource(user/organization) id',
   `punch_rule_id` BIGINT COMMENT 'fk:eh_punch_rules id',
   `review_rule_id` BIGINT COMMENT 'fk:review rule id',
   `description` VARCHAR (256),
