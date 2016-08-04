@@ -26,17 +26,17 @@ public class MessageRoutingContext {
     /**
      * 确认是否发消息
      * @param userId
-     * @return true 表示已经发消息，不在往此用户不发消息
+     * @return false 表示已经发消息，不在往此用户发消息
      */
     public Boolean checkAndAdd(Long userId) {
         Long l = sendUsers.get(userId);
         if(null == l) {
             sendUsers.put(userId, new Long(1));
-            return false;
+            return true;
         } else {
             l += 1;
             sendUsers.put(userId, l);
-            return true;
+            return false;
             }
     }
 

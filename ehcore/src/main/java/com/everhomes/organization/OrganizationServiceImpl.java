@@ -6422,6 +6422,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		return members;
 	    	}
 	    	
+	    	Integer namespaceId = UserContext.getCurrentNamespaceId(organization.getNamespaceId());
+	    	if(!namespaceId.equals(organization.getNamespaceId())) {
+	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Namespace error for group forward");
+	    	}
+	    	
 	    	List<OrganizationMember> organizationMember = organizationProvider.listOrganizationMembersByOrgId(organization.getId());
 	    	for (OrganizationMember member : organizationMember) {
 				if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE && OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
