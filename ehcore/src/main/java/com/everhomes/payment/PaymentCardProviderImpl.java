@@ -117,7 +117,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     	EhPaymentCardIssuersDao dao = new EhPaymentCardIssuersDao(context.configuration());
 
         dao.update(paymentCardIssuer);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentCardIssuers.class, null);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentCardIssuers.class, null);
 
     }
     
