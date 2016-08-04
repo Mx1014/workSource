@@ -1,0 +1,230 @@
+package com.everhomes.rest.yellowPage;
+
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *  <li>id: id</li>
+ *  <li>parentId: 父id</li>
+ *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerId: 拥有者ID</li>
+ *  <li>name: 企业名称</li>
+ *  <li>nickName: 简称</li>
+ *  <li>address: 地址</li>
+ *  <li>contact: 咨询电话</li>
+ *  <li>description: 介绍</li>
+ *  <li>posterUri: 标题图</li>
+ *  <li>longitude: 经度</li>
+ *  <li>latitude: 纬度</li>
+ *  <li>contactName: 负责人</li>
+ *  <li>contactMobile: 手机号</li>
+ *  <li>categoryId: 所属服务联盟类型id</li>
+ *  <li>attachments: 附件</li>
+ *  <li>serviceUrl: 服务链接</li>
+ *  <li>discount: 优惠 0：否 1：是</li>
+ *  <li>discountDesc: 优惠信息</li>
+ * </ul>
+ */
+public class UpdateServiceAllianceEnterpriseCommand {
+
+	private Long     id;
+	
+	private Long     parentId;
+	@NotNull
+	private String   ownerType;
+	@NotNull
+	private Long     ownerId;
+	
+	private String   name;
+	
+	private String   nickName;
+	
+	private String   address;
+	
+	private String   contact;
+	
+	private String   description;
+	
+	private String   posterUri;
+	
+	private Double   longitude;
+	
+	private Double   latitude;
+	
+	private String   contactName;
+	
+	private String   contactMobile;
+	
+	private Long     categoryId;
+	
+	@ItemType(YellowPageAattchmentDTO.class)
+	private List<YellowPageAattchmentDTO> attachments;
+	
+	private Long discount;
+	
+	private String serviceUrl;
+	
+	private String discountDesc;
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getNickName() {
+		return nickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getContact() {
+		return contact;
+	}
+
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	public String getContactMobile() {
+		return contactMobile;
+	}
+
+	public void setContactMobile(String contactMobile) {
+		this.contactMobile = contactMobile;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public List<YellowPageAattchmentDTO> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<YellowPageAattchmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
+	public Long getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Long discount) {
+		this.discount = discount;
+	}
+
+	public String getServiceUrl() {
+		return serviceUrl;
+	}
+
+	public void setServiceUrl(String serviceUrl) {
+		this.serviceUrl = serviceUrl;
+	}
+
+	public String getDiscountDesc() {
+		return discountDesc;
+	}
+
+	public void setDiscountDesc(String discountDesc) {
+		this.discountDesc = discountDesc;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

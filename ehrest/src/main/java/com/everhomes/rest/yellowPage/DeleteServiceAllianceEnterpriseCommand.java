@@ -1,0 +1,26 @@
+package com.everhomes.rest.yellowPage;
+
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * 
+ * id:id
+ *
+ */
+public class DeleteServiceAllianceEnterpriseCommand {
+	@NotNull
+	private Long id;
+ 
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

@@ -1,6 +1,7 @@
 package com.everhomes.yellowPage;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.common.lang3.StringUtils;
@@ -179,7 +180,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public YellowPage queryYellowPageTopic(String ownerType, Long ownerId,
 			Byte type) {
-		// TODO Auto-generated method stub
 		   CrossShardListingLocator locator = new CrossShardListingLocator();
 	        locator.setAnchor(0L);
 	        List<YellowPage> yellowPages = this.queryYellowPagesByOwnerId(locator, ownerId, 20, new ListingQueryBuilderCallback() {
@@ -203,5 +203,66 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	            return yellowPages.get(0);
 	        }
 	        return null;
+	}
+
+
+	@Override
+	public List<YellowPage> getYellowPagesByCategoryId(Long categoryId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhYellowPagesRecord> query = context.selectQuery(Tables.EH_YELLOW_PAGES);
+ 
+        query.addConditions(Tables.EH_YELLOW_PAGES.INTEGRAL_TAG2.eq(categoryId));
+        
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, YellowPage.class);
+        });
+	}
+
+
+	@Override
+	public List<YellowPage> queryServiceAlliance(
+			CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, String keywords) {
+		List<YellowPage> yellowPages = new ArrayList<YellowPage>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhYellowPagesRecord> query = context.selectQuery(Tables.EH_YELLOW_PAGES);
+ 
+        if (!StringUtils.isEmpty(ownerType) )
+    		query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
+        
+        query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_ID.eq(ownerId));
+        
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_YELLOW_PAGES.ID.gt(locator.getAnchor()));
+            }
+        
+        query.addConditions(Tables.EH_YELLOW_PAGES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+        
+        if(!org.springframework.util.StringUtils.isEmpty(keywords)){
+        	query.addConditions(Tables.EH_YELLOW_PAGES.NAME.like("%" + keywords + "%"));
+        }
+        
+        if(categoryId != null) {
+        	query.addConditions(Tables.EH_YELLOW_PAGES.INTEGRAL_TAG2.eq(categoryId));
+        }
+        
+        if(null!=parentId){
+        	query.addConditions(Tables.EH_YELLOW_PAGES.PARENT_ID.eq(parentId));
+        } else {
+    		query.addConditions(Tables.EH_YELLOW_PAGES.PARENT_ID.ne(0L));
+		}
+        query.addLimit(pageSize);
+       
+        query.fetch().map((r) -> {
+        	yellowPages.add(ConvertHelper.convert(r, YellowPage.class));
+            return null;
+        });
+        
+        if(yellowPages != null && yellowPages.size() > 0) {
+            return yellowPages;
+        }
+        return yellowPages;
 	}
 }
