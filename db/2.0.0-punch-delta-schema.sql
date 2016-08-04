@@ -131,7 +131,7 @@ CREATE TABLE `eh_punch_rules` (
   `time_rule_id` BIGINT COMMENT 'fk:eh_punch_time_rules id',
   `location_rule_id` BIGINT COMMENT 'fk:eh_punch_geopoints id',
   `wifi_rule_id` BIGINT COMMENT 'fk:eh_punch_wifi_rules id',
-  `workday_rule_id` BIGINT COMMENT 'fk:eh_punch_scheduling_rules id',
+  `workday_rule_id` BIGINT COMMENT 'fk:eh_punch_workday_rules id',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT ,
