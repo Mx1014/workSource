@@ -166,6 +166,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (110005, 999991, 0, 0, 0, '/home', 'Bizs', '更多服务', '更多服务', 'cs://1/image/aW1hZ2UvTVRvMVpUaG1NRFl5TUdFM1lqQXpNRFV3WVdRME9XTXhaalJtTXpCaU5qaGlOQQ', 1, 1, 1, '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', 30, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 
+update eh_launch_pad_items set delete_flag = 1 where id >= 109986 and id <= 109994;
+update eh_launch_pad_items set delete_flag = 1 where id >= 109996 and id <= 110004; 
 
  INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (110006, 999991, 0, 0, 0, '/home/Biz', 'BizList', '说粉', '说粉', 'cs://1/image/aW1hZ2UvTVRvellqRTBaR1kyWTJNd05HWTJORGMxT0dSak56QXlabVJrT1dSa01XVXdaZw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692459898518874242%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
