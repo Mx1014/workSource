@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.statistics.transaction;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.statistics.transaction.ExecuteTaskCommand;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
-import com.everhomes.rest.statistics.transaction.StatTransactionSettlementDTO;
+import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 
 /**
  * <ul>
@@ -47,7 +48,7 @@ public class StatTransactionController extends ControllerBase {
      * <p>統計服務結算金額</p>
      */
     @RequestMapping("listStatServiceSettlementAmounts")
-    @RestReturn(value=StatTransactionSettlementDTO.class, collection=true)
+    @RestReturn(value=StatServiceSettlementResultDTO.class, collection=true)
     public RestResponse listStatServiceSettlementAmounts(@Valid ListStatServiceSettlementAmountsCommand cmd) {
         RestResponse response = new RestResponse(statTransactionService.listStatServiceSettlementAmounts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -60,7 +61,7 @@ public class StatTransactionController extends ControllerBase {
      * <p>統計服務結算明細金額</p>
      */
     @RequestMapping("listStatServiceSettlementAmountDetails")
-    @RestReturn(value=StatTransactionSettlementDTO.class, collection=true)
+    @RestReturn(value=StatServiceSettlementResultDTO.class, collection=true)
     public RestResponse listStatServiceSettlementAmountDetails(@Valid ListStatServiceSettlementAmountsCommand cmd) {
         RestResponse response = new RestResponse(statTransactionService.listStatServiceSettlementAmountDetails(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -74,8 +75,9 @@ public class StatTransactionController extends ControllerBase {
      */
     @RequestMapping("exportStatServiceSettlementAmounts")
     @RestReturn(value=String.class)
-    public RestResponse exportStatServiceSettlementAmounts(@Valid ListStatServiceSettlementAmountsCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse exportStatServiceSettlementAmounts(@Valid ListStatServiceSettlementAmountsCommand cmd, HttpServletResponse res) {
+    	statTransactionService.exportStatServiceSettlementAmounts(cmd, res);
+    	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

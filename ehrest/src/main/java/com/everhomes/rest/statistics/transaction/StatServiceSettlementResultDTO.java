@@ -19,21 +19,23 @@ package com.everhomes.rest.statistics.transaction;
  *<li>totalCardRefundAmount:統計退款總額</li>
  *</ul>
  */
-public class StatTransactionSettlementDTO {
+public class StatServiceSettlementResultDTO {
 	
 	private Long namespaceId;
 	
 	private Long communityId;
 	
-	private Long communityName;
+	private String communityName;
 	
 	private String serviceType;
 	
+	private String serviceName;
+	
 	private String resourceType;
 	
-	private Long resourceId;
+	private String resourceId;
 	
-	private Long resourceName;
+	private String resourceName;
 	
 	private Double alipayPaidAmount;
 	
@@ -47,9 +49,9 @@ public class StatTransactionSettlementDTO {
 	
 	private Double paymentCardRefundAmount;
 	
-	private Double totalCardPaidAmount;
+	private Double totalPaidAmount;
 	
-	private Double totalCardRefundAmount;
+	private Double totalRefundAmount;
 
 	public Long getNamespaceId() {
 		return namespaceId;
@@ -67,11 +69,11 @@ public class StatTransactionSettlementDTO {
 		this.communityId = communityId;
 	}
 
-	public Long getCommunityName() {
+	public String getCommunityName() {
 		return communityName;
 	}
 
-	public void setCommunityName(Long communityName) {
+	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
 	}
 
@@ -83,6 +85,14 @@ public class StatTransactionSettlementDTO {
 		this.serviceType = serviceType;
 	}
 
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+
 	public String getResourceType() {
 		return resourceType;
 	}
@@ -91,35 +101,35 @@ public class StatTransactionSettlementDTO {
 		this.resourceType = resourceType;
 	}
 
-	public Long getResourceId() {
+	public String getResourceId() {
 		return resourceId;
 	}
 
-	public void setResourceId(Long resourceId) {
+	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
 	}
 
-	public Long getResourceName() {
+	public String getResourceName() {
 		return resourceName;
 	}
 
-	public void setResourceName(Long resourceName) {
+	public void setResourceName(String resourceName) {
 		this.resourceName = resourceName;
 	}
 
-	public Double getalipayPaidAmount() {
+	public Double getAlipayPaidAmount() {
 		return alipayPaidAmount;
 	}
 
-	public void setalipayPaidAmount(Double alipayPaidAmount) {
+	public void setAlipayPaidAmount(Double alipayPaidAmount) {
 		this.alipayPaidAmount = alipayPaidAmount;
 	}
 
-	public Double getalipayRefundAmount() {
+	public Double getAlipayRefundAmount() {
 		return alipayRefundAmount;
 	}
 
-	public void setalipayRefundAmount(Double alipayRefundAmount) {
+	public void setAlipayRefundAmount(Double alipayRefundAmount) {
 		this.alipayRefundAmount = alipayRefundAmount;
 	}
 
@@ -139,38 +149,6 @@ public class StatTransactionSettlementDTO {
 		this.wechatRefundAmount = wechatRefundAmount;
 	}
 
-	public Double getpaymentCardPaidAmount() {
-		return paymentCardPaidAmount;
-	}
-
-	public void setpaymentCardPaidAmount(Double paymentCardPaidAmount) {
-		this.paymentCardPaidAmount = paymentCardPaidAmount;
-	}
-
-	public Double getpaymentCardRefundAmount() {
-		return paymentCardRefundAmount;
-	}
-
-	public void setpaymentCardRefundAmount(Double paymentCardRefundAmount) {
-		this.paymentCardRefundAmount = paymentCardRefundAmount;
-	}
-
-	public Double getAlipayPaidAmount() {
-		return alipayPaidAmount;
-	}
-
-	public void setAlipayPaidAmount(Double alipayPaidAmount) {
-		this.alipayPaidAmount = alipayPaidAmount;
-	}
-
-	public Double getAlipayRefundAmount() {
-		return alipayRefundAmount;
-	}
-
-	public void setAlipayRefundAmount(Double alipayRefundAmount) {
-		this.alipayRefundAmount = alipayRefundAmount;
-	}
-
 	public Double getPaymentCardPaidAmount() {
 		return paymentCardPaidAmount;
 	}
@@ -187,20 +165,20 @@ public class StatTransactionSettlementDTO {
 		this.paymentCardRefundAmount = paymentCardRefundAmount;
 	}
 
-	public Double getTotalCardPaidAmount() {
-		return totalCardPaidAmount;
+	public Double getTotalPaidAmount() {
+		return totalPaidAmount;
 	}
 
-	public void setTotalCardPaidAmount(Double totalCardPaidAmount) {
-		this.totalCardPaidAmount = totalCardPaidAmount;
+	public void setTotalPaidAmount(Double totalPaidAmount) {
+		this.totalPaidAmount = totalPaidAmount;
 	}
 
-	public Double getTotalCardRefundAmount() {
-		return totalCardRefundAmount;
+	public Double getTotalRefundAmount() {
+		return totalRefundAmount;
 	}
 
-	public void setTotalCardRefundAmount(Double totalCardRefundAmount) {
-		this.totalCardRefundAmount = totalCardRefundAmount;
+	public void setTotalRefundAmount(Double totalRefundAmount) {
+		this.totalRefundAmount = totalRefundAmount;
 	}
 
 	

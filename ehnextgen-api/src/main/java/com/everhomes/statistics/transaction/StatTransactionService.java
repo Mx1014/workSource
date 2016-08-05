@@ -2,15 +2,19 @@ package com.everhomes.statistics.transaction;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
+import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
+import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
 
 public interface StatTransactionService {
 
-	List<StatTaskLog> excuteSettlementTask(Long startDate, Long endDate);
+	List<StatTaskLogDTO> excuteSettlementTask(Long startDate, Long endDate);
 	
-	List<StatServiceSettlementResult> listStatServiceSettlementAmounts(ListStatServiceSettlementAmountsCommand cmd);
+	List<StatServiceSettlementResultDTO> listStatServiceSettlementAmounts(ListStatServiceSettlementAmountsCommand cmd);
 	
-	List<StatServiceSettlementResult> listStatServiceSettlementAmountDetails(ListStatServiceSettlementAmountsCommand cmd);
+	List<StatServiceSettlementResultDTO> listStatServiceSettlementAmountDetails(ListStatServiceSettlementAmountsCommand cmd);
 	
-	void exportStatServiceSettlementAmounts(ListStatServiceSettlementAmountsCommand cmd);
+	void exportStatServiceSettlementAmounts(ListStatServiceSettlementAmountsCommand cmd, HttpServletResponse response);
 }

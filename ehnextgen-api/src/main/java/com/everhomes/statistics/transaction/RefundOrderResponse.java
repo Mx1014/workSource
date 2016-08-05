@@ -6,7 +6,7 @@ public class RefundOrderResponse {
 
 	private String nextAnchor;
 	
-	private List<BizPaidOrder> list;
+	private List<BizRefundOrder> list;
 
 	public String getNextAnchor() {
 		return nextAnchor;
@@ -16,11 +16,11 @@ public class RefundOrderResponse {
 		this.nextAnchor = nextAnchor;
 	}
 
-	public List<BizPaidOrder> getList() {
+	public List<BizRefundOrder> getList() {
 		return list;
 	}
 
-	public void setList(List<BizPaidOrder> list) {
+	public void setList(List<BizRefundOrder> list) {
 		this.list = list;
 	}
 

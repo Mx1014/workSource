@@ -1,5 +1,6 @@
 package com.everhomes.statistics.transaction;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -10,8 +11,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 
+
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+
+
+
+
+
+
+
+
+
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.Region;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +45,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
+
+
+
+
+
+
+
+
+
+import com.everhomes.business.Business;
+import com.everhomes.business.BusinessProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
@@ -31,6 +69,7 @@ import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.payment.PaymentCardProvider;
 import com.everhomes.payment.PaymentCardRechargeOrder;
 import com.everhomes.payment.PaymentCardTransaction;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardTransactionStatus;
@@ -44,7 +83,9 @@ import com.everhomes.rest.statistics.transaction.SettlementResourceType;
 import com.everhomes.rest.statistics.transaction.SettlementServiceType;
 import com.everhomes.rest.statistics.transaction.SettlementStatOrderStatus;
 import com.everhomes.rest.statistics.transaction.SettlementStatTransactionPaidStatus;
+import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
+import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskStatus;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
@@ -52,6 +93,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -85,6 +127,12 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	@Autowired
 	private ScheduleProvider scheduleProvider;
 	
+	@Autowired
+	private BusinessProvider businessProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
+	
 	
 	@PostConstruct
 	public void setup(){
@@ -96,7 +144,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	}
 	
 	@Override
-	public List<StatTaskLog> excuteSettlementTask(Long startDate, Long endDate) {
+	public List<StatTaskLogDTO> excuteSettlementTask(Long startDate, Long endDate) {
 		
 		List<StatTaskLog> statTaskLogs = new ArrayList<StatTaskLog>();
 		
@@ -130,11 +178,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			statTaskLogs.add(statTaskLog);
 		}
 		
-		return statTaskLogs;
+		return statTaskLogs.stream().map(r ->{
+			return ConvertHelper.convert(r, StatTaskLogDTO.class);
+		}).collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<StatServiceSettlementResult> listStatServiceSettlementAmountDetails(
+	public List<StatServiceSettlementResultDTO> listStatServiceSettlementAmountDetails(
 			ListStatServiceSettlementAmountsCommand cmd) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -159,11 +209,51 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
 		
-		return statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+		
+		
+		List<StatServiceSettlementResult> results = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+		
+		return results.stream().map(r ->{
+			return this.convertStatServiceSettlementResultDTO(r);
+		}).collect(Collectors.toList());
+	}
+	
+	private StatServiceSettlementResultDTO convertStatServiceSettlementResultDTO(StatServiceSettlementResult statServiceSettlementResult){
+		StatServiceSettlementResultDTO dto = ConvertHelper.convert(statServiceSettlementResult, StatServiceSettlementResultDTO.class);
+		dto.setServiceName(this.getServiceName(dto.getServiceType()));
+		if(SettlementResourceType.fromCode(dto.getResourceType()) == SettlementResourceType.SHOP){
+			Business business = businessProvider.findBusinessByTargetId(dto.getResourceId());
+			if(null != business){
+				dto.setResourceName(business.getName());
+			}
+		}
+		dto.setResourceName(this.getResourceName(dto.getResourceType(), dto.getResourceName()));
+		
+		if(null == dto.getCommunityId()){
+			dto.setCommunityName("-");
+		}else{
+			Community community = communityProvider.findCommunityById(dto.getCommunityId());
+			if(null != community){
+				dto.setCommunityName(community.getName());
+			}else{
+				dto.setCommunityName("-");
+			}
+		}
+		
+		
+		dto.setAlipayPaidAmount(statServiceSettlementResult.getAlipayPaidAmount().doubleValue());
+		dto.setAlipayRefundAmount(statServiceSettlementResult.getAlipayRefundAmount().doubleValue());
+		dto.setWechatPaidAmount(statServiceSettlementResult.getWechatPaidAmount().doubleValue());
+		dto.setWechatRefundAmount(statServiceSettlementResult.getWechatRefundAmount().doubleValue());
+		dto.setPaymentCardPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount().doubleValue());
+		dto.setPaymentCardRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount().doubleValue());
+		dto.setTotalPaidAmount(statServiceSettlementResult.getTotalPaidAmount().doubleValue());
+		dto.setTotalRefundAmount(statServiceSettlementResult.getTotalRefundAmount().doubleValue());
+		return dto;
 	}
 	
 	@Override
-	public List<StatServiceSettlementResult> listStatServiceSettlementAmounts(
+	public List<StatServiceSettlementResultDTO> listStatServiceSettlementAmounts(
 			ListStatServiceSettlementAmountsCommand cmd) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -189,12 +279,15 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
 		
-		return statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
+		List<StatServiceSettlementResult> results = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
+		return results.stream().map(r ->{
+			return this.convertStatServiceSettlementResultDTO(r);
+		}).collect(Collectors.toList());
 	}
 	
 	@Override
 	public void exportStatServiceSettlementAmounts(
-			ListStatServiceSettlementAmountsCommand cmd) {
+			ListStatServiceSettlementAmountsCommand cmd, HttpServletResponse response) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
 		Long startDate = cmd.getStartDate();
@@ -221,10 +314,157 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		List<StatServiceSettlementResult> statServiceSettlementResultDetails = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
 		
+		List<StatServiceSettlementResultDTO> statServiceSettlementResultDetailDTOs = statServiceSettlementResultDetails.stream().map(r -> {
+			return this.convertStatServiceSettlementResultDTO(r);
+		}).collect(Collectors.toList());
+		
 		List<StatServiceSettlementResult> statServiceSettlementResults = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
 	
+		List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs = statServiceSettlementResults.stream().map(r -> {
+			return this.convertStatServiceSettlementResultDTO(r);
+		}).collect(Collectors.toList());
+		
+		this.exportStatServiceSettlementAmountFile(statServiceSettlementResultDetailDTOs, statServiceSettlementResultsDTOs, response);
 	}
 	
+	private void exportStatServiceSettlementAmountFile(List<StatServiceSettlementResultDTO> statServiceSettlementResultDetailDTOs,List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs, HttpServletResponse response){
+		try {
+			String sheetName = "结算报表";
+			HSSFWorkbook wb = new HSSFWorkbook();
+			HSSFSheet sheet = wb.createSheet(sheetName);
+			
+			// 创建单元格样式
+			HSSFCellStyle style = wb.createCellStyle();// 样式对象
+//			style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直  
+//	        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平 
+//	        
+//			// 设置边框
+//			style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+//			style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+//			style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+//			style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+			
+			//设置标题字体格式  
+	        Font font = wb.createFont();
+	        font.setFontHeightInPoints((short)20);  
+	        font.setFontName("Courier New");
+	        
+	        style.setFont(font);
+	        
+	        HSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+	        titleStyle.setFont(font);
+	        titleStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER); 
+	        
+	        int rowNum = 0;
+	        
+	        HSSFRow row1 = sheet.createRow(rowNum ++);
+	        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+	        HSSFCell cell1 = row1.createCell(0);
+	        cell1.setCellStyle(titleStyle);  
+	        cell1.setCellValue("项目类型统计总表"); 
+	        
+	        HSSFRow row2 = sheet.createRow(rowNum ++);
+	        row2.setRowStyle(style);
+	        row2.createCell(0).setCellValue("项目类型");
+	        row2.createCell(1).setCellValue("支付宝实收");
+	        row2.createCell(2).setCellValue("支付宝退款");
+	        row2.createCell(3).setCellValue("微信实收");
+	        row2.createCell(4).setCellValue("微信退款");
+	        row2.createCell(5).setCellValue("一卡通实收");
+	        row2.createCell(6).setCellValue("一卡通退款");
+	        row2.createCell(7).setCellValue("实收总计");
+	        row2.createCell(8).setCellValue("退款总计");
+	        
+	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultsDTOs) {
+	        	
+	        	HSSFRow row = sheet.createRow(rowNum ++);
+	        	row.setRowStyle(style);
+	        	row.createCell(0).setCellValue(statServiceSettlementResult.getServiceName());
+	        	row.createCell(1).setCellValue(statServiceSettlementResult.getAlipayPaidAmount());
+	            row.createCell(2).setCellValue(statServiceSettlementResult.getAlipayRefundAmount());
+	            row.createCell(3).setCellValue(statServiceSettlementResult.getWechatPaidAmount());
+	            row.createCell(4).setCellValue(statServiceSettlementResult.getWechatRefundAmount());
+	            row.createCell(5).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
+	            row.createCell(6).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
+	            row.createCell(7).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
+	            row.createCell(8).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
+			}
+	        
+	        HSSFRow row3 = sheet.createRow(rowNum);
+	        sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, 10));
+	        HSSFCell cell2 = row3.createCell(0);
+	        cell2.setCellStyle(titleStyle);
+	        cell2.setCellValue("具体项目统计表"); 
+	        rowNum ++;
+	        HSSFRow row4 = sheet.createRow(rowNum ++);
+	        row4.setRowStyle(style);
+	        row4.createCell(0).setCellValue("项目类型");
+	        row4.createCell(1).setCellValue("社区名称");
+	        row4.createCell(2).setCellValue("项目名称");
+	        row4.createCell(3).setCellValue("支付宝实收");
+	        row4.createCell(4).setCellValue("支付宝退款");
+	        row4.createCell(5).setCellValue("微信实收");
+	        row4.createCell(6).setCellValue("微信退款");
+	        row4.createCell(7).setCellValue("一卡通实收");
+	        row4.createCell(8).setCellValue("一卡通退款");
+	        row4.createCell(9).setCellValue("实收总计");
+	        row4.createCell(10).setCellValue("退款总计");
+	        
+	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultDetailDTOs) {
+	        	
+	        	HSSFRow row = sheet.createRow(rowNum ++);
+	        	row.setRowStyle(style);
+	        	row.createCell(0).setCellValue(statServiceSettlementResult.getServiceName());
+	        	row.createCell(1).setCellValue(statServiceSettlementResult.getCommunityName());
+	        	row.createCell(2).setCellValue(statServiceSettlementResult.getResourceName());
+	        	row.createCell(3).setCellValue(statServiceSettlementResult.getAlipayPaidAmount());
+	            row.createCell(4).setCellValue(statServiceSettlementResult.getAlipayRefundAmount());
+	            row.createCell(5).setCellValue(statServiceSettlementResult.getWechatPaidAmount());
+	            row.createCell(6).setCellValue(statServiceSettlementResult.getWechatRefundAmount());
+	            row.createCell(7).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
+	            row.createCell(8).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
+	            row.createCell(9).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
+	            row.createCell(10).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
+			}
+	        
+	        ByteArrayOutputStream out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtil.download(out, response);
+			
+		} catch (Exception e) {
+			LOGGER.error("export excel error", e);
+		}
+		
+	}
+	
+	private String getServiceName(String serviceType){
+		if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.COMMUNITY_SERVICE){
+			return "社区服务";
+		}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.ZUOLIN_SHOP){
+			return "左邻小站";
+		}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
+			return "其他店铺";
+		}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.THIRD_SERVICE){
+			return "第三方服务";
+		}
+		return "其他服务";
+	}
+	
+	private String getResourceName(String resourceType, String resourceName){
+		if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.SHOP){
+			return resourceName;
+		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PARKING_RECHARGE){
+			return "停车充值";
+		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PAYMENT_CARD){
+			return "一卡通";
+		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PMSY){
+			return "物业缴费";
+		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.RENTAL_SITE){
+			return "资源预定";
+		}
+		
+		return "其他服务";
+	}
 	
 	/**
 	 * 按天生成结算
@@ -462,7 +702,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				
 				if(null != res.getList()){
 					// 批量添加支付订单
-					this.batchAddStatOrder(res.getList(), SettlementOrderType.TRANSACTION);
+					this.batchAddStatPaidOrder(res.getList());
 				}
 			}
 			
@@ -492,6 +732,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	    }
 	    mapForSignature.put("status", org.apache.commons.lang.StringUtils.join(status, ","));
 	    signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+	    params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		while (true) {
 			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
 			
@@ -505,7 +746,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				
 				if(null != res.getList()){
 					// 批量添加退款订单
-					this.batchAddStatOrder(res.getList(), SettlementOrderType.REFUND);
+					this.batchAddStatRefundOrder(res.getList());
 				}
 			}
 			
@@ -522,7 +763,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	}
 	
 	
-	private void batchAddStatOrder(List<BizPaidOrder> orders, SettlementOrderType settlementOrderType){
+	private void batchAddStatPaidOrder(List<BizPaidOrder> orders){
 		for (BizPaidOrder bizPaidOrder : orders) {
 			StatOrder order = new StatOrder();
 			order.setCommunityId(0L);
@@ -530,7 +771,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			order.setOrderNo(bizPaidOrder.getOrderNo());
 			order.setOrderAmount(bizPaidOrder.getPaidAmount());
 			order.setStatus(bizPaidOrder.getStatus());
-			order.setOrderType(settlementOrderType.getCode());
+			order.setOrderType(SettlementOrderType.TRANSACTION.getCode());
 			if(1 == bizPaidOrder.getPayType() || 2 == bizPaidOrder.getPayType()){
 				Long userId = Long.valueOf(bizPaidOrder.getBuyerUserId());
 				User user = userProvider.findUserById(userId);
@@ -547,6 +788,33 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			statTransactionProvider.createStatOrder(order);
 		}
 	}
+	
+	private void batchAddStatRefundOrder(List<BizRefundOrder> orders){
+		for (BizRefundOrder bizRefundOrder : orders) {
+			StatOrder order = new StatOrder();
+			order.setCommunityId(0L);
+			order.setNamespaceId(0);
+			order.setOrderNo(bizRefundOrder.getRefundOrderNo());
+			order.setOrderAmount(bizRefundOrder.getRefundAmount());
+			order.setStatus(bizRefundOrder.getRefundStatus());
+			order.setOrderType(SettlementOrderType.REFUND.getCode());
+			if(1 == bizRefundOrder.getPayType() || 2 == bizRefundOrder.getPayType()){
+				Long userId = Long.valueOf(bizRefundOrder.getBuyerUserId());
+				User user = userProvider.findUserById(userId);
+				order.setPayerUid(userId);
+				if(null != user){
+					order.setNamespaceId(user.getNamespaceId());
+				}
+			}
+			order.setShopType(bizRefundOrder.getShopCreateType());
+			order.setResourceType(SettlementResourceType.SHOP.getCode());
+			order.setResourceId(bizRefundOrder.getShopNo());
+			order.setOrderTime(new Timestamp(bizRefundOrder.getRefundTime()));
+			order.setOrderDate(DateUtil.dateToStr(new Date(bizRefundOrder.getRefundTime()), DateUtil.YMR_SLASH));
+			statTransactionProvider.createStatOrder(order);
+		}
+	}
+	
 	/**
 	 * 同步停车充值订单到结算订单表
 	 * @param date
@@ -702,12 +970,21 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					"paid transaction api not configured.");
 		}
 		
+		/*根据业务 删除除一卡通的支付流水*/
+		SettlementResourceType[] resourceTypes = SettlementResourceType.values();
+		for (SettlementResourceType resourceType : resourceTypes) {
+			if(SettlementResourceType.PAYMENT_CARD != resourceType){
+				statTransactionProvider.deleteStatTransactionByDate(date, resourceType.getCode());
+			}
+		}
+		
+		
 		String url = serverURL + paidTransactionApi;
 		List<String> status = new ArrayList<String>();
 		status.add("success");
 		Map<String, Object> params = this.getParams(date);
 		String pageAnchor = null;
-		params.put("status", StringHelper.toJsonString(status));
+		params.put("status", status);
 		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
         params.put("appKey", appKey);
@@ -856,7 +1133,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			//一卡通交易交易数据同步
 			List<PaymentCardTransaction> paymentCardTransactions = paymentCardProvider.listCardTransactions(pageSize, startDate, endDate,status, locator);
 			for (PaymentCardTransaction paymentCardTransaction : paymentCardTransactions) {
-				StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(paymentCardTransaction.getOrderNo(), SettlementResourceType.PAYMENT_CARD.getCode());
+//				StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(paymentCardTransaction.getOrderNo(), SettlementResourceType.PAYMENT_CARD.getCode());
 				StatTransaction statTransaction = new StatTransaction();
 				if(PmsyOwnerType.fromCode(paymentCardTransaction.getOwnerType()) == PmsyOwnerType.COMMUNITY){
 					statTransaction.setCommunityId(paymentCardTransaction.getOwnerId());
@@ -865,12 +1142,12 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				}
 				statTransaction.setNamespaceId(paymentCardTransaction.getNamespaceId());
 				statTransaction.setPayerUid(paymentCardTransaction.getPayerUid());
-				if(null != statOrder){
-					statTransaction.setOrderAmount(statOrder.getOrderAmount());
-					statTransaction.setItemCode(statOrder.getItemCode());
-					statTransaction.setVendorCode(statOrder.getVendorCode());
-					statTransaction.setPayerUid(statOrder.getPayerUid());
-				}
+//				if(null != statOrder){
+//					statTransaction.setOrderAmount(statOrder.getOrderAmount());
+//					statTransaction.setItemCode(statOrder.getItemCode());
+//					statTransaction.setVendorCode(statOrder.getVendorCode());
+//					statTransaction.setPayerUid(statOrder.getPayerUid());
+//				}
 				statTransaction.setResourceType(SettlementResourceType.PAYMENT_CARD.getCode());
 				statTransaction.setPaidDate(date);
 				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
@@ -884,7 +1161,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statTransaction.setPaidStatus(SettlementStatTransactionPaidStatus.PAID.getCode());
 				statTransaction.setPaidTime(paymentCardTransaction.getTransactionTime());
 				statTransaction.setPaidChannel(PaidChannel.PAYMENT.getCode());
-				statTransactionProvider.createStatOrder(statOrder);
+				statTransactionProvider.createStatTransaction(statTransaction);
 			}
 			
 			//没查出记录或者anchor为null 代表已经是尾页了
@@ -913,13 +1190,20 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					"paid refund api not configured.");
 		}
 		
+		/*根据业务 删除除一卡通的退款流水*/
+		SettlementResourceType[] resourceTypes = SettlementResourceType.values();
+		for (SettlementResourceType resourceType : resourceTypes) {
+			if(SettlementResourceType.PAYMENT_CARD != resourceType){
+				statTransactionProvider.deleteStatRefundByDate(date, resourceType.getCode());
+			}
+		}
 		
 		String url = serverURL + paidRefundApi;
 		List<String> status = new ArrayList<String>();
 		status.add("success");
 		Map<String, Object> params = this.getParams(date);
 		String pageAnchor = null;
-		params.put("status", StringHelper.toJsonString(status));
+		params.put("status", status);
 		String appKey = configurationProvider.getValue(StatTransactionConstant.PAID_APPKEY, "");
         String secretKey = configurationProvider.getValue(StatTransactionConstant.PAID_SECRET_KEY, "");
         params.put("appKey", appKey);
@@ -1013,6 +1297,9 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	 * @param date
 	 */
 	private void generateStatSettlementByDate(String date){
+		// 先删除数据，重新生成
+		statTransactionProvider.deleteStatSettlementByDate(date);
+		
 		List<StatSettlement> transactionSettlements = statTransactionProvider.countStatTransactionSettlement(date);
 		
 		List<StatSettlement> refundSettlements = statTransactionProvider.countStatRefundSettlement(date);
@@ -1062,6 +1349,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	 * @param date
 	 */
 	private void generateStatServiceSettlementResultByDate(String date){
+		
+		//先删除数据，重新生成
+		statTransactionProvider.deleteStatServiceSettlementResultByDate(date);
+		
 		List<StatServiceSettlementResult> alipaySettlementResults = statTransactionProvider.countStatServiceSettlementResult(PaidChannel.ALIPAY.getCode(), date);
 		List<StatServiceSettlementResult> wechatSettlementResults = statTransactionProvider.countStatServiceSettlementResult(PaidChannel.WECHAT.getCode(), date);
 		List<StatServiceSettlementResult> paymentSettlementResults = statTransactionProvider.countStatServiceSettlementResult(PaidChannel.PAYMENT.getCode(), date);
@@ -1073,53 +1364,85 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 		if(alipaySettlementResults.size() > 0){
 			for (StatServiceSettlementResult statServiceSettlementResult : alipaySettlementResults) {
+				statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getAlipayPaidAmount());
+				statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getAlipayRefundAmount());
 				statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 			}
 			
 			for (StatServiceSettlementResult statServiceSettlementResult : wechatSettlementResults) {
-				Condition cond = Tables.EH_STAT_SETTLEMENTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.SERVICE_TYPE.eq(statServiceSettlementResult.getServiceType()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.RESOURCE_TYPE.eq(statServiceSettlementResult.getResourceType()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.RESOURCE_ID.eq(statServiceSettlementResult.getResourceId()));
+				Condition cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(statServiceSettlementResult.getServiceType()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statServiceSettlementResult.getResourceType()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq(statServiceSettlementResult.getResourceId()));
 				StatServiceSettlementResult settlementResult = statTransactionProvider.findStatServiceSettlementResultDate(cond, date);
 				if(null == settlementResult){
+					statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getWechatPaidAmount());
+					statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getWechatRefundAmount());
 					statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
+				}else{
+					settlementResult.setWechatPaidAmount(statServiceSettlementResult.getWechatPaidAmount());
+					settlementResult.setWechatRefundAmount(statServiceSettlementResult.getWechatRefundAmount());
+					settlementResult.setTotalPaidAmount(settlementResult.getAlipayPaidAmount().add(settlementResult.getWechatPaidAmount()));
+					settlementResult.setTotalRefundAmount(settlementResult.getAlipayRefundAmount().add(settlementResult.getWechatRefundAmount()));
+					statTransactionProvider.updateStatServiceSettlementResult(settlementResult);
 				}
 			}
 			
 			for (StatServiceSettlementResult statServiceSettlementResult : paymentSettlementResults) {
-				Condition cond = Tables.EH_STAT_SETTLEMENTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.SERVICE_TYPE.eq(statServiceSettlementResult.getServiceType()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.RESOURCE_TYPE.eq(statServiceSettlementResult.getResourceType()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.RESOURCE_ID.eq(statServiceSettlementResult.getResourceId()));
+				Condition cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(statServiceSettlementResult.getServiceType()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statServiceSettlementResult.getResourceType()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq(statServiceSettlementResult.getResourceId()));
 				StatServiceSettlementResult settlementResult = statTransactionProvider.findStatServiceSettlementResultDate(cond, date);
 				if(null == settlementResult){
+					statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
+					statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
 					statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
+				}else{
+					settlementResult.setPaymentCardPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
+					settlementResult.setPaymentCardRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+					settlementResult.setTotalPaidAmount(settlementResult.getAlipayPaidAmount().add(settlementResult.getWechatPaidAmount()).add(settlementResult.getPaymentCardPaidAmount()));
+					settlementResult.setTotalRefundAmount(settlementResult.getAlipayRefundAmount().add(settlementResult.getWechatRefundAmount()).add(settlementResult.getPaymentCardRefundAmount()));
+					statTransactionProvider.updateStatServiceSettlementResult(settlementResult);
 				}
 			}
 		}else if(wechatSettlementResults.size() > 0){
 			for (StatServiceSettlementResult statServiceSettlementResult : wechatSettlementResults) {
+				statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getWechatPaidAmount());
+				statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getWechatRefundAmount());
 				statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 			}
 			
 			for (StatServiceSettlementResult statServiceSettlementResult : paymentSettlementResults) {
-				Condition cond = Tables.EH_STAT_SETTLEMENTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.SERVICE_TYPE.eq(statServiceSettlementResult.getServiceType()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.RESOURCE_TYPE.eq(statServiceSettlementResult.getResourceType()));
-				cond = cond.and(Tables.EH_STAT_SETTLEMENTS.RESOURCE_ID.eq(statServiceSettlementResult.getResourceId()));
+				Condition cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(statServiceSettlementResult.getServiceType()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statServiceSettlementResult.getResourceType()));
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq(statServiceSettlementResult.getResourceId()));
 				StatServiceSettlementResult settlementResult = statTransactionProvider.findStatServiceSettlementResultDate(cond, date);
 				if(null == settlementResult){
+					statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
+					statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
 					statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
+				}else{
+					settlementResult.setPaymentCardPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
+					settlementResult.setPaymentCardRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+					settlementResult.setTotalPaidAmount(settlementResult.getWechatPaidAmount().add(settlementResult.getPaymentCardPaidAmount()));
+					settlementResult.setTotalRefundAmount(settlementResult.getWechatRefundAmount().add(settlementResult.getPaymentCardRefundAmount()));
+					statTransactionProvider.updateStatServiceSettlementResult(settlementResult);
 				}
 			}
 		}else if(paymentSettlementResults.size() > 0){
 			for (StatServiceSettlementResult statServiceSettlementResult : paymentSettlementResults) {
+				statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
+				statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
 				statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 			}
 		}
+		
+		
 	}
 	
 	private Map<String, Object> getParams(String date){
@@ -1157,7 +1480,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		PaidOrderResponse res = response.getResponse();
 		List<BizPaidOrder> list  = res.getList();
 		Integer s = 200;
-		System.out.println(200 == s);
+		System.out.println(Timestamp.valueOf("2016-08-03" + " 00:00:00").getTime());
 		
 		System.out.println(Long.valueOf("14598342843426081282"));
 	}

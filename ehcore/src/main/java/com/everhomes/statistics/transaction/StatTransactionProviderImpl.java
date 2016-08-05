@@ -137,7 +137,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 					statSettlement.setServiceType(String.valueOf(r.getValue(2)));
 					statSettlement.setPaidDate(date);
 					statSettlement.setResourceType(String.valueOf(r.getValue(4)));
-					statSettlement.setResourceId(r.getValue(5).toString());
+					statSettlement.setResourceId(String.valueOf(r.getValue(5)));
 					statSettlement.setPaidChannel(Byte.valueOf(r.getValue(6).toString()));
 					statSettlement.setPaidAmount(new BigDecimal(r.getValue(7).toString()));
 					statSettlement.setFeeRate(new BigDecimal(r.getValue(8).toString()));
@@ -202,7 +202,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 					statSettlement.setServiceType(String.valueOf(r.getValue(2)));
 					statSettlement.setPaidDate(r.getValue(3).toString());
 					statSettlement.setResourceType(String.valueOf(r.getValue(4)));
-					statSettlement.setResourceId(r.getValue(5).toString());
+					statSettlement.setResourceId(String.valueOf(r.getValue(5)));
 					statSettlement.setPaidChannel(Byte.valueOf(r.getValue(6).toString()));
 					statSettlement.setRefundAmount(new BigDecimal(r.getValue(7).toString()));
 					statSettlement.setRefundFeeRate(new BigDecimal(r.getValue(8).toString()));
@@ -315,6 +315,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 			StatServiceSettlementResult statServiceSettlementResult) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhStatServiceSettlementResultsDao dao = new EhStatServiceSettlementResultsDao(context.configuration());
+		statServiceSettlementResult.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(statServiceSettlementResult);
 	}
 
@@ -345,18 +346,45 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 			Condition cond, String startDate, String endDate) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		List<StatServiceSettlementResult> results = new ArrayList<StatServiceSettlementResult>();
-		SelectQuery<EhStatServiceSettlementResultsRecord> query = context.selectQuery(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS);
-		query.addConditions(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE.ge(startDate));
-		query.addConditions(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE.le(endDate));
+		Condition condition = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE.ge(startDate);
+		condition = condition.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE.le(endDate));
 		if(null != cond){
-			query.addConditions(cond);
+			condition = condition.and(cond);
 		}
 		
-		query.fetch().map((r) -> {
-			results.add(ConvertHelper.convert(r, StatServiceSettlementResult.class));
-			return null;
-		});
-		
+		context.select(
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID,
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE,
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID,
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.WECHAT_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.WECHAT_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
+				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
+				.where(condition)
+				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID)
+				.fetch().map((r) -> {
+					StatServiceSettlementResult statServiceSettlementResult = new StatServiceSettlementResult();
+					statServiceSettlementResult.setServiceType(String.valueOf(r.getValue(0)));
+					statServiceSettlementResult.setCommunityId(Long.valueOf(r.getValue(1).toString()));
+					statServiceSettlementResult.setResourceType(String.valueOf(r.getValue(2)));
+					statServiceSettlementResult.setResourceId(String.valueOf(r.getValue(3)));
+					statServiceSettlementResult.setAlipayPaidAmount(new BigDecimal(r.getValue(4).toString()));
+					statServiceSettlementResult.setAlipayRefundAmount(new BigDecimal(r.getValue(5).toString()));
+					statServiceSettlementResult.setWechatPaidAmount(new BigDecimal(r.getValue(6).toString()));
+					statServiceSettlementResult.setWechatRefundAmount(new BigDecimal(r.getValue(7).toString()));
+					statServiceSettlementResult.setPaymentCardPaidAmount(new BigDecimal(r.getValue(8).toString()));
+					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(r.getValue(9).toString()));
+					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(r.getValue(10).toString()));
+					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(r.getValue(11).toString()));
+					results.add(statServiceSettlementResult);
+					return null;
+				});
 		return results;
 	}
 
@@ -372,7 +400,6 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		}
 		context.select(
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,
-				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE,
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_PAID_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_REFUND_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.WECHAT_PAID_AMOUNT.sum(),
@@ -383,19 +410,18 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
 				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
 				.where(condition)
-				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE)
+				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE)
 				.fetch().map((r) -> {
 					StatServiceSettlementResult statServiceSettlementResult = new StatServiceSettlementResult();
 					statServiceSettlementResult.setServiceType(String.valueOf(r.getValue(0)));
-					statServiceSettlementResult.setPaidDate(r.getValue(1).toString());
-					statServiceSettlementResult.setAlipayPaidAmount(new BigDecimal(r.getValue(2).toString()));
-					statServiceSettlementResult.setAlipayRefundAmount(new BigDecimal(r.getValue(3).toString()));
-					statServiceSettlementResult.setWechatPaidAmount(new BigDecimal(r.getValue(4).toString()));
-					statServiceSettlementResult.setWechatRefundAmount(new BigDecimal(r.getValue(5).toString()));
-					statServiceSettlementResult.setPaymentCardPaidAmount(new BigDecimal(r.getValue(6).toString()));
-					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(r.getValue(7).toString()));
-					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(r.getValue(8).toString()));
-					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(r.getValue(9).toString()));
+					statServiceSettlementResult.setAlipayPaidAmount(new BigDecimal(r.getValue(1).toString()));
+					statServiceSettlementResult.setAlipayRefundAmount(new BigDecimal(r.getValue(2).toString()));
+					statServiceSettlementResult.setWechatPaidAmount(new BigDecimal(r.getValue(3).toString()));
+					statServiceSettlementResult.setWechatRefundAmount(new BigDecimal(r.getValue(4).toString()));
+					statServiceSettlementResult.setPaymentCardPaidAmount(new BigDecimal(r.getValue(5).toString()));
+					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(r.getValue(6).toString()));
+					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(r.getValue(7).toString()));
+					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(r.getValue(8).toString()));
 					results.add(statServiceSettlementResult);
 					return null;
 				});

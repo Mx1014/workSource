@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
+
 @Component
 @Scope("prototype")
 public class StatTransactionScheduleJob extends QuartzJobBean{
@@ -37,7 +39,7 @@ public class StatTransactionScheduleJob extends QuartzJobBean{
 		Long startDate = calendar.getTimeInMillis();
 		Long endDate = calendar.getTimeInMillis();
 		//执行任务
-		List<StatTaskLog> statTaskLogs =  statTransactionService.excuteSettlementTask(startDate, endDate);
+		List<StatTaskLogDTO> statTaskLogs =  statTransactionService.excuteSettlementTask(startDate, endDate);
 		
 		LOGGER.debug("schedele job result: {}", statTaskLogs);
 	}
