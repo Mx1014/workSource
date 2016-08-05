@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -44,7 +45,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactProvider;
-import com.everhomes.enterprise.EnterpriseContactService;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -54,7 +55,6 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -93,12 +93,29 @@ import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.PunchLogsMonthList;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
+import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -549,13 +566,13 @@ public class PunchServiceImpl implements PunchService {
 				ClockCode.SUCESS.getCode());
 		Date now = new Date();
 		
-		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(companyId);
+		PunchTimeRule punchTimeRule = punchProvider.getPunchTimeRuleByCompanyId(companyId);
 		
-		if (null == punchRule)
+		if (null == punchTimeRule)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"公司还没有打卡规则 ");
-		pdl.setPunchTimesPerDay(punchRule.getPunchTimesPerDay());
+		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
 			if (!isWorkDay(logDay.getTime())|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
@@ -573,7 +590,7 @@ public class PunchServiceImpl implements PunchService {
 		for (PunchLog log : punchLogs){
 			pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
 		}
-		if(PunchTimesPerDay.TWICE.getCode().equals(punchRule.getPunchTimesPerDay())){
+		if(PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 //			if (punchLogs.size() == 1) {
 //				// 如果只有一次打卡，就把离开设置为未打卡,当天设置为旷工
 //				PunchLogDTO arriveLogDTO = new PunchLogDTO();
@@ -604,24 +621,24 @@ public class PunchServiceImpl implements PunchService {
 			Calendar startMaxTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
 			startMinTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.format(punchRule.getStartEarlyTime())));
+					+ timeSF.format(punchTimeRule.getStartEarlyTime())));
 	
 			startMaxTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.format(punchRule.getStartLateTime())));
+					+ timeSF.format(punchTimeRule.getStartLateTime())));
 	
 			workTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0)
-					.getPunchDate()) + " " + timeSF.format(punchRule.getWorkTime())));
+					.getPunchDate()) + " " + timeSF.format(punchTimeRule.getWorkTime())));
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
 			Time leaveCalendarTime = Time.valueOf(timeSF.format(leaveCalendar.getTime()));
 			Time arriveCalendarTime = Time.valueOf(timeSF.format(arriveCalendar.getTime()));
-			Time AfternoonArriveTimeTime = Time.valueOf(timeSF.format(punchRule.getAfternoonArriveTime()));
-			Time NoonLeaveTimeTime = Time.valueOf(timeSF.format(punchRule.getNoonLeaveTime()));
+			Time AfternoonArriveTimeTime = Time.valueOf(timeSF.format(punchTimeRule.getAfternoonArriveTime()));
+			Time NoonLeaveTimeTime = Time.valueOf(timeSF.format(punchTimeRule.getNoonLeaveTime()));
 			long realWorkTime = 0L;
 			if(leaveCalendarTime.after(AfternoonArriveTimeTime)&&arriveCalendarTime.before(NoonLeaveTimeTime)){
 				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
-					-punchRule.getAfternoonArriveTime().getTime() +punchRule.getNoonLeaveTime().getTime();
+					-punchTimeRule.getAfternoonArriveTime().getTime() +punchTimeRule.getNoonLeaveTime().getTime();
 			}else {
 				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis();
 						
@@ -687,7 +704,7 @@ public class PunchServiceImpl implements PunchService {
 				return pdl;
 			}
 		}
-		else if(PunchTimesPerDay.FORTH.getCode().equals(punchRule.getPunchTimesPerDay())){
+		else if(PunchTimesPerDay.FORTH.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 			 //计算计算日中午十三点
 			Calendar noonAnchor = Calendar.getInstance();
 			noonAnchor.setTime(logDay.getTime());
@@ -724,15 +741,15 @@ public class PunchServiceImpl implements PunchService {
 			Calendar workTime = Calendar.getInstance();
 			Calendar arriveCalendar = Calendar.getInstance();
 			startMinTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.format(punchRule.getStartEarlyTime())));
+					+ timeSF.format(punchTimeRule.getStartEarlyTime())));
 			startMaxTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.format(punchRule.getStartLateTime())));
+					+ timeSF.format(punchTimeRule.getStartLateTime())));
 			noonLeaveTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.format(punchRule.getNoonLeaveTime())));
+					+ timeSF.format(punchTimeRule.getNoonLeaveTime())));
 			afternoonArriveTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.format(punchRule.getAfternoonArriveTime())));
+					+ timeSF.format(punchTimeRule.getAfternoonArriveTime())));
 			workTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0)
-					.getPunchDate()) + " " + timeSF.format(punchRule.getWorkTime())));
+					.getPunchDate()) + " " + timeSF.format(punchTimeRule.getWorkTime())));
 			long realWorkTime = 0L;
 			if(null == pdl.getMorningPunchStatus()){
 				
@@ -1034,10 +1051,10 @@ public class PunchServiceImpl implements PunchService {
 	public void createPunchRule(AddPunchRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
 				.getEnterpriseId()); 
 		if(punchRule == null) {
-			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
+			punchRule = ConvertHelper.convert(cmd, PunchTimeRule.class);
  			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
 			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
@@ -1045,45 +1062,46 @@ public class PunchServiceImpl implements PunchService {
 			punchRule.setCreatorUid(userId);
 			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
-			punchProvider.createPunchRule(punchRule);
-			createPunchGeopoints(userId, cmd.getPunchGeoPoints(),cmd.getEnterpriseId());
+			punchProvider.createPunchTimeRule(punchRule);
+//			createPunchGeopoints(userId, cmd.getPunchGeoPoints(),cmd.getEnterpriseId());
 		}
 
 	}
 	@Override
 	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-		checkCompanyIdIsNull(cmd.getEnterpriseId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
-				.getEnterpriseId()); 
-		if (punchRule != null) {
-			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
-			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
-			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
-			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime()));
-			punchRule.setOperatorUid(userId);
-			punchRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			punchProvider.updatePunchRule(punchRule);
-			if (null!=cmd.getPunchGeoPoints()) {
-				List<PunchGeopoint> geopoints = punchProvider
-						.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
-				if (geopoints != null && geopoints.size() > 0) {
-					for (PunchGeopoint punchGeopoint : geopoints) {
-						punchProvider.deletePunchGeopoint(punchGeopoint);
-					}
-				}
-				createPunchGeopoints(userId, cmd.getPunchGeoPoints(),
-						cmd.getEnterpriseId());
-			}
-		}
+//		Long userId = UserContext.current().getUser().getId();
+//		checkCompanyIdIsNull(cmd.getEnterpriseId());
+//		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
+//				.getEnterpriseId()); 
+//		if (punchRule != null) {
+//			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+//			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
+//			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
+//			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime()));
+//			punchRule.setOperatorUid(userId);
+//			punchRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+//					.getTime()));
+//			punchProvider.updatePunchTimeRule(punchRule);
+//			if (null!=cmd.getPunchGeoPoints()) {
+//				List<PunchGeopoint> geopoints = punchProvider
+//						.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
+//				if (geopoints != null && geopoints.size() > 0) {
+//					for (PunchGeopoint punchGeopoint : geopoints) {
+//						punchProvider.deletePunchGeopoint(punchGeopoint);
+//					}
+//				}
+////				createPunchGeopoints(userId, cmd.getPunchGeoPoints(),
+////						cmd.getEnterpriseId());
+//			}
+//		}
 	}
 	
 	private void createPunchGeopoints(Long userId, List<PunchGeoPointDTO> punchGeoPoints,
-			Long enterpriseId) { 
+		String ownerType,	Long ownerId) { 
 		for (PunchGeoPointDTO punchGeopointDTO : punchGeoPoints) {
 			PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
-			punchGeopoint.setEnterpriseId(enterpriseId);
+			punchGeopoint.setOwnerType(ownerType);
+			punchGeopoint.setOwnerId(ownerId); 
 			punchGeopoint.setCreatorUid(userId);
 			punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			punchGeopoint.setGeohash(GeoHashUtils.encode(
@@ -1092,7 +1110,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 
-	private void convertTime(PunchRule punchRule, Long startEarlyTime,
+	private void convertTime(PunchTimeRule punchRule, Long startEarlyTime,
 			Long startLastTime, Long endEarlyTime) {
 		Time startEarly = convertTime(startEarlyTime);
 		punchRule.setStartEarlyTime(startEarly);
@@ -1140,25 +1158,25 @@ public class PunchServiceImpl implements PunchService {
 	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(
 			GetPunchRuleCommand cmd) {
 		GetPunchRuleCommandResponse response = new GetPunchRuleCommandResponse();
-		PunchRuleDTO dto = null;
-		checkCompanyIdIsNull(cmd.getEnterpriseId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
-				.getEnterpriseId());
-		if (punchRule != null) {
-			dto = ConvertHelper.convert(punchRule, PunchRuleDTO.class);
-			dto.setAfternoonArriveTime(punchRule.getAfternoonArriveTime().getTime());
-			dto.setNoonLeaveTime(punchRule.getNoonLeaveTime().getTime());
-			dto.setStartEarlyTime(punchRule.getStartEarlyTime().getTime());
-			dto.setStartLateTime(punchRule.getStartLateTime().getTime());
-			dto.setEndEarlyTime(punchRule.getStartEarlyTime().getTime() + punchRule.getWorkTime().getTime() +MILLISECONDGMT);
-			List<PunchGeopoint> geopoints = punchProvider
-					.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
-			dto.setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());
-			for (PunchGeopoint point : geopoints){
-				dto.getPunchGeoPoints().add(ConvertHelper.convert(point,PunchGeoPointDTO.class));
-			}
-		}
-		response.setPunchRuleDTO(dto);
+//		PunchRuleDTO dto = null;
+//		checkCompanyIdIsNull(cmd.getEnterpriseId());
+//		PunchTimeRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+//				.getEnterpriseId());
+//		if (punchRule != null) {
+//			dto = ConvertHelper.convert(punchRule, PunchRuleDTO.class);
+//			dto.setAfternoonArriveTime(punchRule.getAfternoonArriveTime().getTime());
+//			dto.setNoonLeaveTime(punchRule.getNoonLeaveTime().getTime());
+//			dto.setStartEarlyTime(punchRule.getStartEarlyTime().getTime());
+//			dto.setStartLateTime(punchRule.getStartLateTime().getTime());
+//			dto.setEndEarlyTime(punchRule.getStartEarlyTime().getTime() + punchRule.getWorkTime().getTime() +MILLISECONDGMT);
+//			List<PunchGeopoint> geopoints = punchProvider
+//					.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
+//			dto.setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());
+//			for (PunchGeopoint point : geopoints){
+//				dto.getPunchGeoPoints().add(ConvertHelper.convert(point,PunchGeoPointDTO.class));
+//			}
+//		}
+//		response.setPunchRuleDTO(dto);
 		return response;
 	}
 
@@ -1180,10 +1198,10 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void deletePunchRule(DeletePunchRuleCommand cmd) {
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
 				.getEnterpriseId());
 		if (punchRule != null) {
-			punchProvider.deletePunchRule(punchRule);
+			punchProvider.deletePunchTimeRule(punchRule);
 			List<PunchGeopoint> geopoints = punchProvider
 					.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
 			if (geopoints != null && geopoints.size() > 0) {
@@ -1250,7 +1268,7 @@ public class PunchServiceImpl implements PunchService {
 			return false;
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		// 如果属于周末调班 返回工作日
-		List<Date> workDates = getSpecialDay(DateStatus.WEEKENDWORK);
+		List<Date> workDates = getSpecialDay(DateStatus.WORKDAY);
 		if (null != workDates) {
 			for (Date workDate : workDates) {
 				if (dateSF.format(date1).equals(dateSF.format(workDate)))
@@ -1787,7 +1805,7 @@ public class PunchServiceImpl implements PunchService {
 		paramCommand.setPageSize(Integer.MAX_VALUE);
 		List<PunchStatisticsDTO>punchDayLogDTOList =  this.listPunchStatistics(paramCommand).getPunchList();
 		Map<Long, List<PunchStatisticsDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
-		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
+		PunchTimeRule rule = this.punchProvider.getPunchTimeRuleByCompanyId(cmd.getEnterpriseId());
 		Set<Long> userIds = map.keySet();
 		for (Long userId : userIds) {
 			List<PunchStatisticsDTO> list = map.get(userId);
@@ -2350,5 +2368,844 @@ public class PunchServiceImpl implements PunchService {
         }
         return response;
     }
+	@Override
+	public void addPunchTimeRule(AddPunchTimeRuleCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getPunchTimesPerDay() ) {
+			LOGGER.error("Invalid PunchTimesPerDay parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid PunchTimesPerDay parameter in the command");
+		}
+		List<PunchTimeRule> punchTimeRules = punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchTimeRules ){
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+		}
+		else{
+			PunchTimeRule punchTimeRule = ConvertHelper.convert(cmd, PunchTimeRule.class);
+ 			punchTimeRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
+			punchTimeRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
+			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
+			convertTime(punchTimeRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+			punchTimeRule.setCreatorUid(userId);
+			punchTimeRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			punchProvider.createPunchTimeRule(punchTimeRule);
+			 
+		}
+	}
+	@Override
+	public void updatePunchTimeRule(UpdatePunchTimeRuleCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getId()  ) {
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command");
+		}
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getPunchTimesPerDay() ) {
+			LOGGER.error("Invalid PunchTimesPerDay parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid PunchTimesPerDay parameter in the command");
+		}
+
+		List<PunchTimeRule> punchTimeRules = punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchTimeRules && (punchTimeRules.size()>1 || !punchTimeRules.get(0).getId().equals(cmd.getId())) ){
+			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		PunchTimeRule punchTimeRule = punchProvider.getPunchTimeRuleById(cmd.getId()) ; 
+		if(null ==punchTimeRule ){
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command:can not found rule");
+		}
+		else{
+			punchTimeRule.setName(cmd.getName()); 
+ 			punchTimeRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
+			punchTimeRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
+			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
+			convertTime(punchTimeRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+			punchTimeRule.setOperatorUid(userId);
+			punchTimeRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			punchProvider.updatePunchTimeRule(punchTimeRule);
+			 
+		}
+	}
+	@Override
+	public void deletePunchTimeRule(DeleteCommonCommand cmd) { 
+		List<PunchRule> punchRules = this.punchProvider.findPunchRules(null, null, cmd.getId(), null, null, null);
+		if(null == punchRules){
+			//验证是否有这个权限删除这个owner的rule
+			
+			//根据id和ownerid删除一条rule
+			this.punchProvider.deletePunchTimeRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId()); 
+		}
+		else{
+			//被使用的不删,报错
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_RULE_USING,
+ 					"delete rule is using ");
+			}
+	}
+	@Override
+	public listPunchTimeRuleListResponse listPunchTimeRuleList(ListPunchRulesCommonCommand cmd) {
+		listPunchTimeRuleListResponse response =new listPunchTimeRuleListResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<PunchTimeRule> results = this.punchProvider.queryPunchTimeRuleList(cmd.getOwnerType(),cmd.getOwnerId(), locator, pageSize + 1 );
+		if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setTimeRules(new ArrayList<PunchTimeRuleDTO>());
+		results.forEach((other) -> {
+			PunchTimeRuleDTO dto = ConvertHelper.convert(other, PunchTimeRuleDTO.class); 
+			dto.setAfternoonArriveTime(other.getAfternoonArriveTime().getTime());
+			dto.setNoonLeaveTime(other.getNoonLeaveTime().getTime());
+			dto.setStartEarlyTime(other.getStartEarlyTime().getTime());
+			dto.setStartLateTime(other.getStartLateTime().getTime());
+			dto.setEndEarlyTime(other.getStartEarlyTime().getTime() + other.getWorkTime().getTime() +MILLISECONDGMT);
+			response.getTimeRules().add(dto);
+		});
+		return response;
+	}
+	@Override
+	public void addPunchLocationRule(PunchLocationRuleDTO cmd) {
+		 
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+		List<PunchLocationRule> punchLocationRules = punchProvider.queryPunchLocationRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchLocationRules ){
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		else{
+			this.dbProvider.execute((TransactionStatus status) -> {
+				PunchLocationRule obj = ConvertHelper.convert(cmd, PunchLocationRule.class);
+				obj.setCreatorUid(userId);
+				obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchLocationRule(obj); 
+				if(null == cmd.getPunchGeoPoints())
+					return null;
+				for (PunchGeoPointDTO punchGeopointDTO : cmd.getPunchGeoPoints()) {
+					PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
+					punchGeopoint.setOwnerType(cmd.getOwnerType());
+					punchGeopoint.setOwnerId(cmd.getOwnerId()); 
+					punchGeopoint.setLocationRuleId(obj.getId());
+					punchGeopoint.setCreatorUid(userId);
+					punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					punchGeopoint.setGeohash(GeoHashUtils.encode(
+							punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+					punchProvider.createPunchGeopoint(punchGeopoint);
+				}
+				return null;
+			});
+		}
+	}
+	@Override
+	public void updatePunchLocationRule(PunchLocationRuleDTO cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getId()  ) {
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command");
+		}
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+
+		List<PunchWifiRule> punchLocationRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ;  
+		if(null!=punchLocationRules && (punchLocationRules.size()>1 || !punchLocationRules.get(0).getId().equals(cmd.getId())) ){
+			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		PunchLocationRule obj = this.punchProvider.getPunchLocationRuleById(cmd.getId());
+		if(null == obj ){
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command:can not found rule");
+		}else {
+			this.dbProvider.execute((TransactionStatus status) -> {
+				obj.setDescription(cmd.getDescription());
+				obj.setName(cmd.getName());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setOwnerId(cmd.getOwnerId()); 
+				this.punchProvider.updatePunchLocationRule(obj); 
+				this.punchProvider.deletePunchGeopointsByRuleId( cmd.getId());
+				if(null == cmd.getPunchGeoPoints())
+					return null;
+				for (PunchGeoPointDTO punchGeopointDTO : cmd.getPunchGeoPoints()) {
+					PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
+					punchGeopoint.setOwnerType(cmd.getOwnerType());
+					punchGeopoint.setOwnerId(cmd.getOwnerId()); 
+					punchGeopoint.setLocationRuleId(obj.getId());
+					punchGeopoint.setCreatorUid(userId);
+					punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					punchGeopoint.setGeohash(GeoHashUtils.encode(
+							punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+					punchProvider.createPunchGeopoint(punchGeopoint);
+				}
+				return null;
+			});
+		}
+	}
+	@Override
+	public void deletePunchLocationRule(DeleteCommonCommand cmd) {
+		List<PunchRule> punchRules = this.punchProvider.findPunchRules(null, null, null, cmd.getId(), null, null);
+		if(null == punchRules){
+			//验证是否有这个权限删除这个owner的rule
+			
+			
+
+			this.dbProvider.execute((TransactionStatus status) -> {
+				//根据id和ownerid删除一条rule
+				this.punchProvider.deletePunchLocationRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());  
+				this.punchProvider.deletePunchGeopointsByRuleId( cmd.getId());;
+				 
+				return null;
+			});
+		}
+		else{
+			//被使用的不删,报错
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_RULE_USING,
+ 					"delete rule is using ");
+			}
+	}
+	@Override
+	public QryPunchLocationRuleListResponse listPunchLocationRules(ListPunchRulesCommonCommand cmd) { 
+		QryPunchLocationRuleListResponse response = new QryPunchLocationRuleListResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<PunchLocationRule> results = this.punchProvider.queryPunchLocationRuleList(cmd.getOwnerType(),cmd.getOwnerId(), locator, pageSize + 1 );
+		if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setLocationRules(new ArrayList<PunchLocationRuleDTO>());
+		results.forEach((other) -> {
+			PunchLocationRuleDTO dto = ConvertHelper.convert(other, PunchLocationRuleDTO.class); 
+			response.getLocationRules().add(dto);
+			List<PunchGeopoint> geos = this.punchProvider.listPunchGeopointsByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
+			if(null != geos){
+				dto.setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());
+				for(PunchGeopoint geo : geos){
+					PunchGeoPointDTO geoDTO = ConvertHelper.convert(geo, PunchGeoPointDTO.class);
+					dto.getPunchGeoPoints().add(geoDTO);
+				} 
+			}
+		});
+		return response;
+	}
+	@Override
+	public void addPunchWiFiRule(PunchWiFiRuleDTO cmd) {
+
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+		List<PunchWifiRule> punchWiFiRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchWiFiRules ){
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		else{
+			this.dbProvider.execute((TransactionStatus status) -> {
+				PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
+				obj.setCreatorUid(userId);
+				obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchWifiRule(obj); 
+				if(null == cmd.getWifis())
+					return null;
+				for (PunchWiFiDTO dto : cmd.getWifis()) {
+					PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
+					punchWifi.setOwnerType(cmd.getOwnerType());
+					punchWifi.setOwnerId(cmd.getOwnerId());  
+					punchWifi.setCreatorUid(userId);
+					punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					punchWifi.setWifiRuleId(obj.getId());
+					punchProvider.createPunchWifi(punchWifi);
+				}
+				return null;
+			});
+		}
+	}
+	@Override
+	public void updatePunchWiFiRule(PunchWiFiRuleDTO cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getId()  ) {
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command");
+		}
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+		List<PunchWifiRule> punchWiFiRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ;  
+		if(null!=punchWiFiRules && (punchWiFiRules.size()>1 || !punchWiFiRules.get(0).getId().equals(cmd.getId())) ){
+			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		PunchWifiRule obj = this.punchProvider.getPunchWifiRuleById(cmd.getId());
+		if(null == obj ){
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command:can not found rule");
+		}else {
+			this.dbProvider.execute((TransactionStatus status) -> {
+				obj.setDescription(cmd.getDescription());
+				obj.setName(cmd.getName());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setOwnerId(cmd.getOwnerId()); 
+				this.punchProvider.updatePunchWifiRule(obj); 
+				this.punchProvider.deletePunchWifisByRuleId( cmd.getId());
+				if(null == cmd.getWifis())
+					return null;
+				for (PunchWiFiDTO dto : cmd.getWifis()) {
+					PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
+					punchWifi.setOwnerType(cmd.getOwnerType());
+					punchWifi.setOwnerId(cmd.getOwnerId());  
+					punchWifi.setCreatorUid(userId);
+					punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					punchWifi.setWifiRuleId(obj.getId());
+					punchProvider.createPunchWifi(punchWifi);
+				}
+				return null;
+			});
+		}
+	}
+	@Override
+	public void deletePunchWiFiRule(DeleteCommonCommand cmd) { 
+		List<PunchRule> punchRules = this.punchProvider.findPunchRules(null, null, null, null, cmd.getId(), null);
+		if(null == punchRules){
+			//验证是否有这个权限删除这个owner的rule
+			
+			
+
+			this.dbProvider.execute((TransactionStatus status) -> {
+				//根据id和ownerid删除一条rule
+				this.punchProvider.deletePunchWifiRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());  
+				this.punchProvider.deletePunchWifisByRuleId( cmd.getId());;
+				 
+				return null;
+			});
+		}
+		else{
+			//被使用的不删,报错
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_RULE_USING,
+ 					"delete rule is using ");
+			}
+
+	}
+	@Override
+	public ListPunchWiFiRuleListResponse listPunchWiFiRule(ListPunchRulesCommonCommand cmd) {
+		ListPunchWiFiRuleListResponse response = new ListPunchWiFiRuleListResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<PunchWifiRule> results = this.punchProvider.queryPunchWifiRuleList(cmd.getOwnerType(),cmd.getOwnerId(), locator, pageSize + 1 );
+		if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setWifiRules(new ArrayList<PunchWiFiRuleDTO>()); 
+		results.forEach((other) -> {
+			PunchWiFiRuleDTO dto = ConvertHelper.convert(other, PunchWiFiRuleDTO.class); 
+			response.getWifiRules().add(dto);
+			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
+			if(null != wifis){
+				dto.setWifis(new ArrayList<PunchWiFiDTO>()); 
+				for(PunchWifi geo : wifis){
+					PunchWiFiDTO wifiDTO = ConvertHelper.convert(geo, PunchWiFiDTO.class);
+					dto.getWifis().add(wifiDTO);
+				} 
+			}
+		});
+		return response;
+	}
+	@Override
+	public void addPunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
+
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+		List<PunchWorkdayRule> punchWorkdayRules = punchProvider.queryPunchWorkdayRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchWorkdayRules ){
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		else{
+			this.dbProvider.execute((TransactionStatus status) -> {
+				PunchWorkdayRule obj = converDTO2WorkdayRule(cmd);
+				
+				this.punchProvider.createPunchWorkdayRule(obj); 
+				if(null != cmd.getWorkdays()) {
+					for (Long date : cmd.getWorkdays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(userId);
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.WORKDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+								
+					}
+				}
+				if(null != cmd.getHolidays()) {
+					for (Long date : cmd.getHolidays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(userId);
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.HOLIDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+					}
+				}
+				return null;
+			});
+		}
+	}
+	private PunchWorkdayRule converDTO2WorkdayRule(PunchWorkdayRuleDTO dto) {
+		PunchWorkdayRule obj = ConvertHelper.convert(dto, PunchWorkdayRule.class);
+		if(null==dto.getWorkWeekDates()){
+			obj.setWorkWeekDates("0000000");
+		}else{
+			int openWorkdayInt=0;
+			for(Integer weekdayInteger : dto.getWorkWeekDates())
+				openWorkdayInt+=10^weekdayInteger;
+			String openWorkday=String.valueOf(openWorkdayInt);
+			for( ;openWorkday.length()<=7; ){
+				openWorkday ="0"+openWorkday;
+			}
+			obj.setWorkWeekDates(openWorkday);
+		}
+		obj.setCreatorUid(UserContext.current().getUser().getId());
+		obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		
+		return null;
+	}
+	@Override
+	public void updatePunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getId()  ) {
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command");
+		}
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+
+		List<PunchWorkdayRule> punchWorkdayRules = punchProvider.queryPunchWorkdayRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchWorkdayRules && (punchWorkdayRules.size()>1 || !punchWorkdayRules.get(0).getId().equals(cmd.getId())) ){
+			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		
+		PunchWorkdayRule old = this.punchProvider.getPunchWorkdayRuleById(cmd.getId());
+		if(null == old ){
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command:can not found rule");
+		}else {
+			this.dbProvider.execute((TransactionStatus status) -> {
+				PunchWorkdayRule obj = converDTO2WorkdayRule(cmd); 
+				obj.setCreateTime(old.getCreateTime());
+				obj.setCreatorUid(old.getCreatorUid()); 
+				this.punchProvider.updatePunchWorkdayRule(obj); 
+				this.punchProvider.deletePunchHolidayByRuleId(cmd.getId());
+				if(null != cmd.getWorkdays()) {
+					for (Long date : cmd.getWorkdays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(userId);
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.WORKDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+								
+					}
+				}
+				if(null != cmd.getHolidays()) {
+					for (Long date : cmd.getHolidays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(userId);
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.HOLIDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+					}
+				}
+				return null;
+			});
+		}
+	}
+	@Override
+	public void deletePunchWorkdayRule(DeleteCommonCommand cmd) {
+		List<PunchRule> punchRules = this.punchProvider.findPunchRules(null, null, null, null, null, cmd.getId());
+		if(null == punchRules){
+			//验证是否有这个权限删除这个owner的rule
+			
+			
+
+			this.dbProvider.execute((TransactionStatus status) -> {
+				//根据id和ownerid删除一条rule
+				this.punchProvider.deletePunchWorkdayRuleByOwnerAndId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());  
+				this.punchProvider.deletePunchHolidayByRuleId(cmd.getId()); 
+				 
+				return null;
+			});
+		}
+		else{
+			//被使用的不删,报错
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_RULE_USING,
+ 					"delete rule is using ");
+			}
+
+	}
+	@Override
+	public ListPunchWorkdayRuleListResponse listPunchWorkdayRule(ListPunchRulesCommonCommand cmd) {
+		ListPunchWorkdayRuleListResponse response = new ListPunchWorkdayRuleListResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<PunchWorkdayRule> results = this.punchProvider.queryPunchWorkdayRuleList(cmd.getOwnerType(),cmd.getOwnerId(), locator, pageSize + 1 );
+		if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setWorkdayRules(new ArrayList<PunchWorkdayRuleDTO>()); 
+		results.forEach((other) -> {
+			PunchWorkdayRuleDTO dto =ConvertPunchWiFiRule2DTO(other);
+			response.getWorkdayRules().add(dto);
+		});
+		return response;
+	}
+	
+	private PunchWorkdayRuleDTO ConvertPunchWiFiRule2DTO(PunchWorkdayRule other) {
+		PunchWorkdayRuleDTO dto  = ConvertHelper.convert(other, PunchWorkdayRuleDTO.class); 
+		int openWeekInt = Integer.valueOf(other.getWorkWeekDates());
+        for(int i=1;i<8;i++){
+        	if(openWeekInt%10 == 1)
+        		dto.getWorkWeekDates().add(i);
+        	openWeekInt = openWeekInt/10;
+        }
+        
+		List<PunchHoliday> holidays = this.punchProvider.listPunchHolidaysByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
+		if(null != holidays){
+			dto.setWorkdays(new ArrayList<Long>()); 
+			dto.setHolidays(new ArrayList<Long>()); 
+			for(PunchHoliday day : holidays){
+				if(DateStatus.HOLIDAY.equals(DateStatus.fromCode(day.getStatus())))
+					dto.getHolidays().add(day.getRuleDate().getTime());
+				if(DateStatus.WORKDAY.equals(DateStatus.fromCode(day.getStatus())))
+					dto.getWorkdays().add(day.getRuleDate().getTime());
+			} 
+		}
+		return dto;
+	}
+	@Override
+	public void addPunchRule(PunchRuleDTO cmd) {
+
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+		List<PunchRule> punchRules = punchProvider.queryPunchRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchRules ){
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		else{
+			PunchRule obj = ConvertHelper.convert(cmd, PunchRule.class);
+			this.punchProvider.createPunchRule(obj);
+			
+		}
+	}
+	@Override
+	public void updatePunchRule(PunchRuleDTO cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getId()  ) {
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command");
+		}
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getName() ) {
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid name parameter in the command");
+		}
+		List<PunchRule> punchRules = punchProvider.queryPunchRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ; 
+		if(null!=punchRules && (punchRules.size()>1 || !punchRules.get(0).getId().equals(cmd.getId())) ){
+			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
+			LOGGER.error("Invalid name parameter in the command");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,PunchServiceErrorCode.ERROR_NAME_REPEAT,
+					"name repeat");
+			
+		}
+		
+		PunchRule old = this.punchProvider.getPunchRuleById(cmd.getId());
+		if(null == old ){
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  Id parameter in the command:can not found rule");
+		}else {
+			PunchRule obj = ConvertHelper.convert(cmd, PunchRule.class);
+			obj.setCreateTime(old.getCreateTime());
+			obj.setCreatorUid(old.getCreatorUid());
+			obj.setOperatorUid(userId);
+			obj.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			this.punchProvider.createPunchRule(obj);
+		}
+	}
+	@Override
+	public void deletePunchRule(DeleteCommonCommand cmd) {
+		List<PunchRuleOwnerMap> punchRuleMaps = this.punchProvider.queryPunchRuleOwnerMapsByRuleId(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getId());
+		if(null == punchRuleMaps){
+			//验证是否有这个权限删除这个owner的rule
+			
+			
+
+			this.dbProvider.execute((TransactionStatus status) -> {
+				//根据id和ownerid删除一条rule
+				PunchRule obj = this.punchProvider.getPunchRuleById(cmd.getId());
+				if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
+					this.punchProvider.deletePunchRule(obj); 
+				 
+				return null;
+			});
+		}
+		else{
+			//被使用的不删,报错
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_RULE_USING,
+ 					"delete rule is using ");
+			}
+	}
+	@Override
+	public ListPunchRulesResponse listPunchRules(ListPunchRulesCommonCommand cmd) {
+		ListPunchRulesResponse response = new ListPunchRulesResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<PunchRule> results = this.punchProvider.queryPunchRuleList(cmd.getOwnerType(),cmd.getOwnerId(), locator, pageSize + 1 );
+		if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setPunchRuleDTOs (new ArrayList<PunchRuleDTO>()); 
+		results.forEach((other) -> {
+			PunchRuleDTO dto = ConvertHelper.convert(other, PunchRuleDTO.class);
+			PunchTimeRule timeRule = this.punchProvider.getPunchTimeRuleById(other.getTimeRuleId());
+			dto.setTimeRuleName(timeRule.getName());
+			PunchLocationRule locationRule = this.punchProvider.getPunchLocationRuleById(other.getLocationRuleId());
+			dto.setLocationRuleName(locationRule.getName());
+			PunchWifiRule wifiRule = this.punchProvider.getPunchWifiRuleById(other.getWifiRuleId());
+			dto.setWifiRuleName(wifiRule.getName());
+			PunchWorkdayRule workdayRule = this.punchProvider.getPunchWorkdayRuleById(other.getWorkdayRuleId());
+			dto.setWorkdayRuleName(workdayRule.getName());
+			response.getPunchRuleDTOs().add(dto);
+		});
+		return response;
+	}
+	@Override
+	public void addPunchRuleMap(PunchRuleMapDTO cmd) {
+
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getTargetId() ||null == cmd.getTargetType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid target type or  Id parameter in the command");
+		}
+		PunchRuleOwnerMap old = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),  cmd.getTargetType(), cmd.getTargetId());
+		PunchRuleOwnerMap obj = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
+		if( null == old ){
+			//如果没有就新建
+			obj.setCreatorUid(UserContext.current().getUser().getId());
+			obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			this.punchProvider.createPunchRuleOwnerMap(obj);
+		}else{
+			//有就更新
+			obj.setId(old.getId());
+			obj.setCreatorUid(old.getCreatorUid());
+			obj.setCreateTime(old.getCreateTime());
+			this.punchProvider.updatePunchRuleOwnerMap(obj);
+		}
+	}
+	@Override
+	public ListPunchRuleMapsResponse listPunchRuleMaps(ListPunchRuleMapsCommand cmd) {
+		ListPunchRuleMapsResponse response = new ListPunchRuleMapsResponse();
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(Long.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		 
+		List<PunchRuleOwnerMap> results = this.punchProvider.queryPunchRuleOwnerMapList(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getTargetType(),
+				cmd.getTargetId(),locator, pageSize + 1 );
+		if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
+		results.forEach((other) -> {
+			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
+			 
+			response.getPunchRuleMaps().add(dto);
+		});
+		return response;
+	}
+	
 	
 }

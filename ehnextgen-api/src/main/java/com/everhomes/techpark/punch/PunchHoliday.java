@@ -1,10 +1,9 @@
 package com.everhomes.techpark.punch;
 
-import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchHolidays;
 import com.everhomes.util.StringHelper;
 
-public class PunchRule extends EhPunchRules {
-
+public class PunchHoliday extends EhPunchHolidays {
 	/**
 	 * @author Wuhan
 	 */

@@ -1,10 +1,9 @@
 package com.everhomes.techpark.punch;
 
-import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
 import com.everhomes.util.StringHelper;
 
-public class PunchRule extends EhPunchRules {
-
+public class PunchLocationRule extends EhPunchLocationRules {
 	/**
 	 * @author Wuhan
 	 */
@@ -14,4 +13,5 @@ public class PunchRule extends EhPunchRules {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
 }
