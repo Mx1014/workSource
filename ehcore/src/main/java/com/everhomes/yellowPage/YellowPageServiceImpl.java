@@ -381,6 +381,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 		response = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
+		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
 	}
@@ -397,6 +398,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAllianceDTO response = null;
 		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 		response = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
+		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
 	}
@@ -432,7 +434,9 @@ public class YellowPageServiceImpl implements YellowPageService {
         for (YellowPage yellowPage : yellowPages){
         	populateYellowPage(yellowPage);
 			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-			response.getDtos().add( ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class) );
+			ServiceAllianceDTO dto = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
+			dto.setDisplayName(serviceAlliance.getNickName());
+			response.getDtos().add(dto);
 
         }
         return response;
@@ -451,7 +455,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		} else {
 			yp = yellowPageProvider.getYellowPageById(cmd.getId());
 			yp.setName(cmd.getName());
-			yp.setNickName(cmd.getNickName());
+			yp.setNickName(cmd.getDisplayName());
 			yp.setContact(cmd.getContact());
 			yp.setDescription(cmd.getDescription());
 			yp.setPosterUri(cmd.getPosterUri());
@@ -492,6 +496,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if(cmd.getId() == null) {
 			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
 			yp.setType(YellowPageType.SERVICEALLIANCE.getCode());
+			yp.setNickName(cmd.getDisplayName());
 			yp.setCreatorUid(UserContext.current().getUser().getId());
 			if(yp.getLatitude() != null && yp.getLongitude() != null) {
 				yp.setGeohash(GeoHashUtils.encode(yp.getLatitude(), yp.getLongitude()));
@@ -502,6 +507,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		} else {
 			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getId());
 			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
+			yp.setNickName(cmd.getDisplayName());
 			if(yp.getLatitude() != null && yp.getLongitude() != null) {
 				yp.setGeohash(GeoHashUtils.encode(yp.getLatitude(), yp.getLongitude()));
 			}

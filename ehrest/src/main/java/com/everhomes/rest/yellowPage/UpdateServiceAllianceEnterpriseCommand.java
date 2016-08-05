@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 拥有者类型：现在是comunity</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>name: 企业名称</li>
- *  <li>nickName: 简称</li>
+ *  <li>displayName: 简称</li>
  *  <li>address: 地址</li>
  *  <li>contact: 咨询电话</li>
  *  <li>description: 介绍</li>
@@ -42,7 +42,7 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	private String   name;
 	
-	private String   nickName;
+	private String   displayName;
 	
 	private String   address;
 	
@@ -111,12 +111,12 @@ public class UpdateServiceAllianceEnterpriseCommand {
 		this.name = name;
 	}
 
-	public String getNickName() {
-		return nickName;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public String getAddress() {

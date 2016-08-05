@@ -168,13 +168,13 @@ public class YellowPageController  extends ControllerBase {
     }
     
     /**
-   	 * <b>URL: /yellowPage/getServiceAllianceEnterpriseList</b>
+   	 * <b>URL: /yellowPage/ListServiceAllianceEnterprise</b>
    	 * <p> 服务联盟企业列表 </p>
    	 */
     @RequireAuthentication(false)
-    @RequestMapping("getServiceAllianceEnterpriseList")
+    @RequestMapping("ListServiceAllianceEnterprise")
     @RestReturn(value=ServiceAllianceListResponse.class)
-    public RestResponse getServiceAllianceEnterpriseList(@Valid GetServiceAllianceEnterpriseListCommand cmd) {
+    public RestResponse ListServiceAllianceEnterprise(@Valid GetServiceAllianceEnterpriseListCommand cmd) {
     	
     	ServiceAllianceListResponse res = this.yellowPageService.getServiceAllianceEnterpriseList(cmd);
     	 
