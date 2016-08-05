@@ -265,4 +265,29 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         }
         return yellowPages;
 	}
+
+
+	@Override
+	public YellowPage findYellowPageById(Long id, String ownerType, Long ownerId) {
+		
+		List<YellowPage> yellowPages = new ArrayList<YellowPage>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhYellowPagesRecord> query = context.selectQuery(Tables.EH_YELLOW_PAGES);
+ 
+    	query.addConditions(Tables.EH_YELLOW_PAGES.ID.eq(id));
+    	query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_ID.eq(ownerId));
+        
+        query.fetch().map((r) -> {
+        	yellowPages.add(ConvertHelper.convert(r, YellowPage.class));
+            return null;
+        });
+        
+        if(yellowPages == null || yellowPages.size() == 0) {
+        	return null;
+        }
+        
+        return yellowPages.get(0);
+	}
 }

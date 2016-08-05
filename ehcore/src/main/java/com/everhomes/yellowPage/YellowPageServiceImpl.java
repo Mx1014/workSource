@@ -374,7 +374,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceDTO getServiceAllianceEnterpriseDetail(
 			GetServiceAllianceEnterpriseDetailCommand cmd) {
-		YellowPage yellowPage = this.yellowPageProvider.getYellowPageById(cmd.getId());
+		YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		populateYellowPage(yellowPage);
 		ServiceAllianceDTO response = null;
@@ -453,7 +453,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			yp.setCreatorUid(UserContext.current().getUser().getId());
 			this.yellowPageProvider.createYellowPage(yp);
 		} else {
-			yp = yellowPageProvider.getYellowPageById(cmd.getId());
+			yp = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+			
 			yp.setName(cmd.getName());
 			yp.setNickName(cmd.getDisplayName());
 			yp.setContact(cmd.getContact());
@@ -464,14 +465,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		
 	}
-
-	@Override
-	public void deleteServiceAllianceEnterprise(
-			DeleteServiceAllianceEnterpriseCommand cmd) {
+	
+	private YellowPage verifyYellowPage(Long id, String ownerType, Long ownerId) {
 		
-		YellowPage yellowPage = this.yellowPageProvider.getYellowPageById(cmd.getId());
+		YellowPage yellowPage = this.yellowPageProvider.findYellowPageById(id, ownerType, ownerId);
 		if (null == yellowPage || YellowPageStatus.INACTIVE.equals(YellowPageStatus.fromCode(yellowPage.getStatus()))) {
-			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + cmd.getId() );
+			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + id );
 			 throw RuntimeErrorException
 				.errorWith(
 						YellowPageServiceErrorCode.SCOPE,
@@ -482,6 +481,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 								UserContext.current().getUser().getLocale(),
 								"YellowPage already deleted!"));
 		}
+
+		return yellowPage;
+	}
+
+	@Override
+	public void deleteServiceAllianceEnterprise(
+			DeleteServiceAllianceEnterpriseCommand cmd) {
+		
+		YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		yellowPage.setStatus(YellowPageStatus.INACTIVE.getCode());
 		this.yellowPageProvider.updateYellowPage(yellowPage);
@@ -505,7 +513,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			this.yellowPageProvider.createYellowPage(yp);
 			createYellowPageAttachments(cmd.getAttachments(),yp.getId());
 		} else {
-			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getId());
+			YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
 			yp.setNickName(cmd.getDisplayName());
 			if(yp.getLatitude() != null && yp.getLongitude() != null) {

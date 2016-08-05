@@ -41,5 +41,6 @@ public interface YellowPageProvider {
 	
 	List<YellowPage> getYellowPagesByCategoryId(Long categoryId);
 
+	YellowPage findYellowPageById(Long id, String ownerType, Long ownerId);
  
 }
