@@ -54,7 +54,8 @@ fi
 cp $prop_template_file $property_file
 
 if [ "$(uname)" == "Darwin" ]; then
-    sed -i\   "s/\(ehapp\.version=\).*/\1$TARGET_VERSION/g" $property_file 
+    sed -i .bak "s/\(ehapp\.version=\).*/\1$TARGET_VERSION/g" $property_file 
+    rm $property_file.bak
 else
     sed -i "s/\(ehapp\.version=\).*/\1$TARGET_VERSION/g" $property_file
 fi
