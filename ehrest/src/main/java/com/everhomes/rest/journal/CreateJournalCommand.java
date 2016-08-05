@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间</li>
  * <li>title: 主题</li>
- * <li>contentType: content类型 {@link com.everhomes.rest.journal.JournalContentType} </li>
+ * <li>contentType: content类型  1: 链接{@link com.everhomes.rest.journal.JournalContentType} </li>
  * <li>content: 链接</li>
  * <li>coverUri: 封面路径</li>
  * </ul>
