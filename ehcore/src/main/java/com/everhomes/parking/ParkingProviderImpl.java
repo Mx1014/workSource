@@ -564,12 +564,13 @@ public class ParkingProviderImpl implements ParkingProvider {
 	 public List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
 				Timestamp startDate, Timestamp endDate,List<Byte> statuses,
 				CrossShardListingLocator locator){
-		 List<ParkingRechargeOrder> results = new ArrayList<ParkingRechargeOrder>();
+ 		 List<ParkingRechargeOrder> results = new ArrayList<ParkingRechargeOrder>();
 		 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
 		 SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
 	        //带上逻辑删除条件
 		 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
-	        
+		 if(null != locator.getAnchor())
+			 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(locator.getAnchor()));
 		 if(null != startDate)
 			 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.ge(startDate));
 		 if(null != endDate)
