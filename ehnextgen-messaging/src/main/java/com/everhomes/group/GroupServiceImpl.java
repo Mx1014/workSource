@@ -3516,7 +3516,7 @@ public class GroupServiceImpl implements GroupService {
     public void deleteGroupByCreator(long groupId) {
         User user = UserContext.current().getUser();
         Group group = checkGroupParameter(groupId, user.getId(), "deleteGroup");
-        if(!user.getId().equals(group.getCreatorUid())) {
+        if(!user.getId().equals(group.getCreatorUid()) && !isAdmin(user.getId(), groupId)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Forbidden");
         }
@@ -3582,7 +3582,27 @@ public class GroupServiceImpl implements GroupService {
         sendNotifactionToMembers(members, nickName, group, locale);
     }
 
-    //管理员删除与创建者删除不一样。
+    private boolean isAdmin(Long userId, long groupId) {
+    	ListingLocator locator = new ListingLocator(groupId);
+		List<GroupMember> list = groupProvider.queryGroupMembers(locator, 10, (loc, query)->{
+									 Condition c1 = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode());
+									 Condition c2 = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+									 Condition c3 = Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.eq(RoleConstants.ResourceCreator);
+						             query.addConditions(c1, c2, c3);
+						             return query;
+								 });
+		if (list != null && list.size() > 0) {
+			for (GroupMember groupMember : list) {
+				if(groupMember.getMemberId().longValue() == userId.longValue()){
+					return true;
+				}
+			}
+		}
+    	
+		return false;
+	}
+
+	//管理员删除与创建者删除不一样。
 	@Override
 	public void deleteGroup(long groupId) {
 		User operator = UserContext.current().getUser();
