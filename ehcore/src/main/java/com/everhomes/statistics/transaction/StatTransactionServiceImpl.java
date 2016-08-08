@@ -277,9 +277,20 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 		
 		List<StatServiceSettlementResult> results = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
-		return results.stream().map(r ->{
+		
+		StatServiceSettlementResult total = statTransactionProvider.getStatServiceSettlementResultTotal(cond, sStartDate, sEndDate);
+		
+		List<StatServiceSettlementResultDTO> dtos = results.stream().map(r ->{
 			return this.convertStatServiceSettlementResultDTO(r);
 		}).collect(Collectors.toList());
+		
+		StatServiceSettlementResultDTO totalDTO = this.convertStatServiceSettlementResultDTO(total);
+		
+		totalDTO.setServiceName("总计");
+		
+		dtos.add(totalDTO);
+		
+		return dtos;
 	}
 	
 	@Override
@@ -309,17 +320,9 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
 		
-		List<StatServiceSettlementResult> statServiceSettlementResultDetails = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+		List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs = this.listStatServiceSettlementAmounts(cmd);
 		
-		List<StatServiceSettlementResultDTO> statServiceSettlementResultDetailDTOs = statServiceSettlementResultDetails.stream().map(r -> {
-			return this.convertStatServiceSettlementResultDTO(r);
-		}).collect(Collectors.toList());
-		
-		List<StatServiceSettlementResult> statServiceSettlementResults = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
-	
-		List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs = statServiceSettlementResults.stream().map(r -> {
-			return this.convertStatServiceSettlementResultDTO(r);
-		}).collect(Collectors.toList());
+		List<StatServiceSettlementResultDTO> statServiceSettlementResultDetailDTOs = this.listStatServiceSettlementAmountDetails(cmd);
 		
 		this.exportStatServiceSettlementAmountFile(statServiceSettlementResultDetailDTOs, statServiceSettlementResultsDTOs, response);
 	}
@@ -386,6 +389,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            row.createCell(7).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
 	            row.createCell(8).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
 			}
+	        
 	        
 	        HSSFRow row3 = sheet.createRow(rowNum);
 	        sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, 10));

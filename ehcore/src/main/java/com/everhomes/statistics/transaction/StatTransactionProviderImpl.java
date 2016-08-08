@@ -427,6 +427,47 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				});
 		return results;
 	}
+	
+	@Override
+	public StatServiceSettlementResult getStatServiceSettlementResultTotal(
+			Condition cond, String startDate, String endDate) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatServiceSettlementResult> results = new ArrayList<StatServiceSettlementResult>();
+		Condition condition = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE.ge(startDate);
+		condition = condition.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAID_DATE.le(endDate));
+		if(null != cond){
+			condition = condition.and(cond);
+		}
+		context.select(
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.WECHAT_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.WECHAT_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_PAID_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
+				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
+				.where(condition)
+				.fetch().map((r) -> {
+					StatServiceSettlementResult statServiceSettlementResult = new StatServiceSettlementResult();
+					statServiceSettlementResult.setAlipayPaidAmount(new BigDecimal(r.getValue(0).toString()));
+					statServiceSettlementResult.setAlipayRefundAmount(new BigDecimal(r.getValue(1).toString()));
+					statServiceSettlementResult.setWechatPaidAmount(new BigDecimal(r.getValue(2).toString()));
+					statServiceSettlementResult.setWechatRefundAmount(new BigDecimal(r.getValue(3).toString()));
+					statServiceSettlementResult.setPaymentCardPaidAmount(new BigDecimal(r.getValue(4).toString()));
+					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(r.getValue(5).toString()));
+					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(r.getValue(6).toString()));
+					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(r.getValue(7).toString()));
+					results.add(statServiceSettlementResult);
+					return null;
+				});
+		if(results.size() > 0){
+			return results.get(0);
+		}
+		
+		return null;
+	}
 
 	@Override
 	public void createStatTaskLog(StatTaskLog statTaskLog) {

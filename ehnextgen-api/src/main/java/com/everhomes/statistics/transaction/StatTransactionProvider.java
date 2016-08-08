@@ -80,4 +80,6 @@ public interface StatTransactionProvider {
 	
 	StatTaskLog findStatTaskLog(String date);
 	
+	StatServiceSettlementResult getStatServiceSettlementResultTotal(Condition cond, String startDate, String endDate);
+	
 }
