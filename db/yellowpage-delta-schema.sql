@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS `eh_rich_text`;
+DROP TABLE IF EXISTS `eh_rich_texts`;
 CREATE TABLE `eh_rich_texts` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER DEFAULT '0',
