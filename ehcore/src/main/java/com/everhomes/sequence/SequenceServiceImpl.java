@@ -704,7 +704,9 @@ public class SequenceServiceImpl implements SequenceService {
         	return dbContext.select(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.ID.max()).from(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS).fetchOne().value1(); 
         });
         
-        
+        syncTableSequence(null, EhRichTexts.class, Tables.EH_RICH_TEXTS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_RICH_TEXTS.ID.max()).from(Tables.EH_RICH_TEXTS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")
