@@ -126,7 +126,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(parkingLotId != null)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PARKING_LOT_ID.eq(parkingLotId));
         if(StringUtils.isNotBlank(cardType))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.RATE_NAME.eq(cardType));
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.CARD_TYPE.eq(cardType));
         
         List<ParkingRechargeRate> result = new ArrayList<ParkingRechargeRate>();
         

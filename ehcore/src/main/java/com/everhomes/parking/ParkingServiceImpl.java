@@ -72,9 +72,7 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
-import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
@@ -158,30 +156,8 @@ public class ParkingServiceImpl implements ParkingService {
     @Override
     public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
     	Long parkingLotId = cmd.getParkingLotId();
-//    	if(StringUtils.isBlank(cmd.getPlateNumber())) {
-//        	LOGGER.error("plateNumber cannot be null.");
-//        	throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_NULL,
-//					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-//							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
-//							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
-//        }
     	List<ParkingRechargeRateDTO> parkingRechargeRateList = null;
-    	if(StringUtils.isBlank(cmd.getPlateNumber())) {
-    		List<ParkingRechargeRate> list = parkingProvider.listParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId,null);
-    		
-    		parkingRechargeRateList = list.stream().map(r->{
-    			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-    			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
-    			dto.setRateName(dto.getMonthCount().intValue()+"个月");
-    			dto.setRateToken(r.getId().toString());
-    			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
-    			return dto;
-    		}
-    		).collect(Collectors.toList());
-    		return parkingRechargeRateList;
-    	}
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
-        
         
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
