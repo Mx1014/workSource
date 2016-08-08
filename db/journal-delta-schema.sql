@@ -34,5 +34,6 @@ CREATE TABLE `eh_journal_configs` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+-- 停车充值费率添加卡类型
+ALTER TABLE `eh_parking_recharge_rates` ADD COLUMN `card_type` VARCHAR(128);
 
