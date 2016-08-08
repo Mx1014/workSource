@@ -7,7 +7,8 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>namespaceId: 域空间Id</li>
  * <li>description: 须知</li>
- * <li>posterPath: banner路径</li>
+ * <li>posterPath: banner路径 uri</li>
+ * <li>posterPath: banner路径 url</li>
  * </ul>
  */
 public class JournalConfigDTO {
@@ -15,6 +16,7 @@ public class JournalConfigDTO {
 	private Integer namespaceId;
 	private String description;
 	private String posterPath;
+	private String posterPathUrl;
 	public Long getId() {
 		return id;
 	}
@@ -43,5 +45,11 @@ public class JournalConfigDTO {
 	}
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+	public String getPosterPathUrl() {
+		return posterPathUrl;
+	}
+	public void setPosterPathUrl(String posterPathUrl) {
+		this.posterPathUrl = posterPathUrl;
 	}
 }

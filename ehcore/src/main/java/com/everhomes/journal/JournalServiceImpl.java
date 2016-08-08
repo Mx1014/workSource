@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.journal.CreateJournalCommand;
 import com.everhomes.rest.journal.DeleteJournalCommand;
 import com.everhomes.rest.journal.GetJournalCommand;
@@ -41,6 +43,8 @@ public class JournalServiceImpl implements JournalService{
     private ConfigurationProvider configProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+    private ContentServerService contentServerService;
 	
 	@Override
 	public ListJournalsResponse listJournals(ListJournalsCommand cmd) {
@@ -59,6 +63,9 @@ public class JournalServiceImpl implements JournalService{
     			User user = userProvider.findUserById(userId);
     			JournalDTO dto = ConvertHelper.convert(r, JournalDTO.class);
     			dto.setCreatorName(user.getNickName());
+    			String coverUrl = getResourceUrlByUir(r.getCoverUri(), 
+    	                EntityType.USER.getCode(), r.getCreatorUid());
+    			dto.setCoverUrl(coverUrl);
     			return dto;
     		}).collect(Collectors.toList()));
     		if(pageSize != null && ret.size() != pageSize){
@@ -78,6 +85,9 @@ public class JournalServiceImpl implements JournalService{
 		User user = userProvider.findUserById(journal.getCreatorUid());
 		JournalDTO dto = ConvertHelper.convert(journal, JournalDTO.class);
 		dto.setCreatorName(user.getNickName());
+		String coverUrl = getResourceUrlByUir(journal.getCoverUri(), 
+                EntityType.USER.getCode(), journal.getCreatorUid());
+		dto.setCoverUrl(coverUrl);
 		return dto;
 	}
 
@@ -135,8 +145,26 @@ public class JournalServiceImpl implements JournalService{
     				"NamespaceId cannot be null.");
         }
 		JournalConfig ret = journalProvider.findJournalConfig(cmd.getNamespaceId());
-		return ConvertHelper.convert(ret, JournalConfigDTO.class);
+		long userId = UserContext.current().getUser().getId();
+		JournalConfigDTO dto = ConvertHelper.convert(ret, JournalConfigDTO.class);
+		String posterPathUrl = getResourceUrlByUir(ret.getPosterPath(), 
+                EntityType.USER.getCode(), ret.getCreatorUid());
+		dto.setPosterPathUrl(posterPathUrl);
+		return dto;
 	}
+	
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
 	 private void checkParam(Integer namespaceId, Long id){
 	    	if(id == null ) {
 	        	LOGGER.error("Id cannot be null.");

@@ -22,6 +22,7 @@ public class JournalDTO {
 	private Byte contentType;
 	private String content;
 	private String coverUri;
+	private String coverUrl;
 	private Long creatorUid;
 	private String creatorName;
 	private Timestamp createTime;
@@ -79,5 +80,11 @@ public class JournalDTO {
 	}
 	public void setContentType(Byte contentType) {
 		this.contentType = contentType;
+	}
+	public String getCoverUrl() {
+		return coverUrl;
+	}
+	public void setCoverUrl(String coverUrl) {
+		this.coverUrl = coverUrl;
 	}
 }
