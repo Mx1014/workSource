@@ -16,3 +16,9 @@ set @version_upgrade_rules_id = (SELECT MAX(id) FROM `eh_version_upgrade_rules`)
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES ((@version_upgrade_rules_id := @version_upgrade_rules_id + 1),49,'2100223.9','2100226','0','2.3.2','0',UTC_TIMESTAMP());
 set @version_urls_id = (SELECT MAX(id) FROM `eh_version_urls`);
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ((@version_urls_id := @version_urls_id + 1), '49', '2.3.2', 'https://biz.zuolin.com/nar/biz/web/app/dist/biz-2-3-2-tag.zip', 'https://biz.zuolin.com/nar/biz/web/app/dist/biz-2-3-2-tag.zip', '0');
+
+
+
+-- 修改文字  by sfyan 20160809
+UPDATE `eh_web_menus` SET `name` = '场所预订' WHERE `id` = 42000;
+UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 42300;
