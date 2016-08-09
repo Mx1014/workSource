@@ -249,6 +249,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         });
         
         for(WebSocketSession session : timeouts) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("timeout session id=" + session.getId());
+            }
             unregisterSession(session);
             this.sessionStatsMap.remove(session);
             try {
@@ -433,8 +436,13 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     
     private void updateSessionReceiveTick(WebSocketSession session) {
         SessionStats stats = this.sessionStatsMap.get(session);
-        if(stats != null)
-            stats.updatePeerReceiveTick();
+        if(stats != null) {
+            if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("update tick, session=" + session.getId());    
+            }
+            
+            stats.updatePeerReceiveTick();   
+        }
     }
     
     private void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
