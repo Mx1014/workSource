@@ -3294,6 +3294,10 @@ public class ForumServiceImpl implements ForumService {
 
         post.setCreatorNickName(creatorNickName);
         post.setCreatorAvatar(creatorAvatar);
+        /*解决web 帖子头像问题，当帖子创建者没有头像时，取默认头像   by sw */
+        if(StringUtils.isEmpty(creatorAvatar)) {
+        	creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+        }
         
         if(creatorAvatar != null && creatorAvatar.length() > 0) {
             String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, 
