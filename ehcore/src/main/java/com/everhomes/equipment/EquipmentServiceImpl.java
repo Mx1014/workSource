@@ -654,6 +654,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processRepeatSetting(standard);
 		equipmentStandardSearcher.feedDoc(standard);
 		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+		
+		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+		dto.setRepeat(rs);
 		return dto;
 	}
 	
@@ -825,6 +828,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processRepeatSetting(standard);
 		
 		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+		
+		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+		dto.setRepeat(rs);
+		
 		return dto;
 	}
 	

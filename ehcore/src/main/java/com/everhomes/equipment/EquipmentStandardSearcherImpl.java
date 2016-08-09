@@ -30,6 +30,7 @@ import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.SearchUtils;
@@ -159,6 +160,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         	processRepeatSetting(standard);
     		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
 
+    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+    		dto.setRepeat(rs);
     		eqStandards.add(dto);
         }
         
