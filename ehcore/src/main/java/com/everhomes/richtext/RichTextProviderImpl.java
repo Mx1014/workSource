@@ -7,6 +7,7 @@ import java.util.List;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -20,6 +21,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.mysql.jdbc.StringUtils;
 
+@Component
 public class RichTextProviderImpl implements RichTextProvider {
 	
 	@Autowired

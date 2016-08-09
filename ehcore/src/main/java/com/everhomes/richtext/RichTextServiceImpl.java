@@ -3,6 +3,7 @@ package com.everhomes.richtext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.richtext.GetRichTextByTokenCommand;
 import com.everhomes.rest.richtext.GetRichTextCommand;
@@ -14,6 +15,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.WebTokenGenerator;
 
+@Component
 public class RichTextServiceImpl implements RichTextService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RichTextServiceImpl.class);
 	

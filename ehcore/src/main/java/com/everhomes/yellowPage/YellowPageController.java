@@ -1,5 +1,8 @@
 package com.everhomes.yellowPage;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -8,10 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
@@ -30,16 +38,25 @@ import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.Tuple;
  
 
 @RestController
 @RequestMapping("/yellowPage")
 public class YellowPageController  extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageController.class);
+    
+    private static final String DEFAULT_SORT = "default_order";
 
     @Autowired
     private YellowPageService yellowPageService;
+
+	@Autowired
+	private CategoryProvider categoryProvider;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -136,6 +153,27 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
    }
+    
+    /**
+	 * <b>URL: /yellowPage/listServiceAllianceCategories</b> 
+	 * <p> 列出服务联盟类型 </p>
+	 */
+	@RequestMapping("listServiceAllianceCategories")
+	@RestReturn(value = CategoryDTO.class, collection = true)
+	public RestResponse listServiceAllianceCategories() {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
+		@SuppressWarnings("unchecked")
+		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, 
+				CategoryConstants.CATEGORY_ID_YELLOW_PAGE, CategoryAdminStatus.ACTIVE, orderBy);
+
+		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+			return ConvertHelper.convert(r, CategoryDTO.class);
+		}).collect(Collectors.toList());
+
+		return new RestResponse(dtoResultList);
+	}
     
     /**
    	 * <b>URL: /yellowPage/getServiceAllianceEnterpriseDetail</b>
