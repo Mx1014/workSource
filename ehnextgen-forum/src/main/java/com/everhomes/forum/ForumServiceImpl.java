@@ -1118,9 +1118,10 @@ public class ForumServiceImpl implements ForumService {
          Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
          List<Long> communityIdList = new ArrayList<Long>();
          if(null == communityId){
-        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-         	command.setOrganizationId(organization.getId());;
-         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+//        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+//         	command.setOrganizationId(organization.getId());;
+//         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+         	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
          	if(null != communities){
          		for (CommunityDTO communityDTO : communities) {
          			communityIdList.add(communityDTO.getId());
