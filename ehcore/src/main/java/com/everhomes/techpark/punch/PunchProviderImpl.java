@@ -1985,6 +1985,23 @@ long id = sequenceProvider.getNextSequence(key);
         });
 		return result;
 	}
+
+	@Override
+	public List<PunchHoliday> queryPunchHolidaysByStatus(String ownerType, Long ownerId, Long workdayRuleId, byte code) {
+
+		List<PunchHoliday> result = queryPunchHolidays(null, Integer.MAX_VALUE, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_PUNCH_HOLIDAYS.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_PUNCH_HOLIDAYS.OWNER_TYPE.eq(ownerType));   
+                query.addConditions(Tables.EH_PUNCH_HOLIDAYS.STATUS.eq(code)); 
+                return query;
+            }
+            
+        });
+		return result;
+	}
  
     
 }

@@ -235,6 +235,8 @@ public interface PunchProvider {
  
 	List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId,
 			CrossShardListingLocator locator, int i);
+
+	public List<PunchHoliday> queryPunchHolidaysByStatus(String ownerType, Long ownerId, Long workdayRuleId, byte code);
  
  
 }
