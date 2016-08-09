@@ -1224,7 +1224,9 @@ public class ForumServiceImpl implements ForumService {
         if(visibleCondition == null) {
             visibleCondition = orgCondition;
         } else {
-            visibleCondition = visibleCondition.or(orgCondition);
+        	if (orgCondition != null) {
+        		visibleCondition = visibleCondition.or(orgCondition);
+			}
         }
         
         Condition condition = forumCondition;
