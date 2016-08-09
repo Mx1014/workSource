@@ -4,6 +4,7 @@ package com.everhomes.forum;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -123,6 +124,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -806,6 +808,24 @@ public class ForumServiceImpl implements ForumService {
         
         Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
         
+        //加上全部，organization可能存在多级，update by tt, 20160809
+        Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode())
+				.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(communityId));
+        
+        List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+		if (list != null && list.size() > 0) {
+			Organization organization = organizationProvider.findOrganizationById(list.get(0).getOrganizationId());
+			if(organization != null && organization.getPath() != null){
+				List<Long> organizationsId = Arrays.asList(organization.getPath().trim().split("/"))
+												.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
+												.filter(f->f!=null).collect(Collectors.toList());
+				Condition orgCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode())
+											.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(organizationsId));
+				communityCondition = communityCondition.or(orgCondition);
+			}
+		}
+		final Condition allCondition = communityCondition;
+		
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
         locator.setAnchor(cmd.getPageAnchor());
@@ -813,8 +833,12 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
-            query.addConditions(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode()));
-            query.addConditions(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(communityId));
+//            query.addConditions(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode()));
+//            query.addConditions(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(communityId));
+            
+            //加上查全部，update by tt, 20160809
+            query.addConditions(allCondition);
+            
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
             }
