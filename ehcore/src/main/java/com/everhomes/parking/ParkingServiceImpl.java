@@ -60,6 +60,8 @@ import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
+import com.everhomes.rest.parking.ListCardTypeCommand;
+import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ListParkingCardsCommand;
@@ -151,6 +153,17 @@ public class ParkingServiceImpl implements ParkingService {
         List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
         
         return cardList;
+    }
+    
+    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+    	ListCardTypeResponse ret = null;
+    	Long parkingLotId = cmd.getParkingLotId();
+        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+        String venderName = parkingLot.getVendorName();
+        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        ret = handler.listCardType(cmd);
+    	return ret;
     }
     
     @Override

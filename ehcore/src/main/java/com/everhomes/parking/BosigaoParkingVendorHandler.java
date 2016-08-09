@@ -27,6 +27,8 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.ListCardTypeCommand;
+import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
@@ -39,6 +41,7 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateStatus;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
+import com.everhomes.rest.techpark.park.GetAllCardDescriptDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -118,6 +121,25 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         return resultList;
     }
 
+    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+    	ListCardTypeResponse ret = new ListCardTypeResponse();
+    	URL wsdlURL = Service1.WSDL_LOCATION;
+    	 
+		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
+        Service1Soap port = ss.getService1Soap12();
+        String json = port.getAllCardDescript();
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.debug("Card type from bosigao={}", json);
+        
+        GetAllCardDescriptDTO cardDescriptDTO = GsonUtil.fromJson(json, GetAllCardDescriptDTO.class);
+
+		if(cardDescriptDTO.isSuccess()){
+			ret.setCardTypes(cardDescriptDTO.getCardDescript());
+		}
+    	return ret;
+    }
+    
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
     	List<ParkingRechargeRate> parkingRechargeRateList = null;
@@ -197,6 +219,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     	parkingRechargeRate.setOwnerId(cmd.getOwnerId());
     	parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
     	parkingRechargeRate.setCardType(cmd.getCardType());
+    	/*费率 名称默认设置 by sw*/
     	Map<String, Object> map = new HashMap<String, Object>();
 	    map.put("count", cmd.getMonthCount().intValue());
 		String scope = ParkingNotificationTemplateCode.SCOPE;
