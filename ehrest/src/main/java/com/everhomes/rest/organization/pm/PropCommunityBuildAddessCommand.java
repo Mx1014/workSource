@@ -32,6 +32,8 @@ public class PropCommunityBuildAddessCommand {
     private String message;
     
     private String messageBodyType;
+    
+    private String imgUri;
    
     public PropCommunityBuildAddessCommand() {
     }
@@ -107,6 +109,17 @@ public class PropCommunityBuildAddessCommand {
 
 	public void setMessageBodyType(String messageBodyType) {
 		this.messageBodyType = messageBodyType;
+	}
+
+	
+
+	public String getImgUri() {
+		return imgUri;
+	}
+
+
+	public void setImgUri(String imgUri) {
+		this.imgUri = imgUri;
 	}
 
 

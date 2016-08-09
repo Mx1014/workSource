@@ -1222,12 +1222,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//PostEntityTag.USER
 		switch(targetTag){
 		case USER:
-			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
-				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+//			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
+//				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+//			}
+//			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
+//				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
+//			}
+			//update by tt, 20160804
+			if(!PostEntityTag.USER.getCode().equals(creatorTag.getCode()) && cmd.getVisibleRegionType() != null 
+					&& VisibleRegionType.REGION.getCode() == cmd.getVisibleRegionType().byteValue()){
+				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());
+			} else {
+				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());
 			}
-			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
-				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
-			}
+			break;
 		case PM:
 		case GARC:
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
@@ -6412,6 +6420,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Organization organization = organizationProvider.findOrganizationByGroupId(groupId);
 	    	if(null == organization){
 	    		return members;
+	    	}
+	    	
+	    	Integer namespaceId = UserContext.getCurrentNamespaceId(organization.getNamespaceId());
+	    	if(!namespaceId.equals(organization.getNamespaceId())) {
+	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Namespace error for group forward");
 	    	}
 	    	
 	    	List<OrganizationMember> organizationMember = organizationProvider.listOrganizationMembersByOrgId(organization.getId());

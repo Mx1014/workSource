@@ -26,3 +26,14 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
  VALUES('15083','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预订','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://beta.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
  VALUES('15084','999989','0','0','0','/home','Bizs','OFFICECUBICLE','工位预订','cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw','1','1','14','{\"url\":\"http://beta.zuolin.com/station-booking/index.html?hidenavigationbar=1#/station_booking#sign_suffix\"}','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin');
+ 
+-- 电商路径修改-离线模式%2Fnar%2Fbiz
+UPDATE `eh_launch_pad_items` set action_data = REPLACE(action_data,'biz-beta.zuolin.com%2Fweb%2Fapp','biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp') where action_data like '%biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%';
+UPDATE `eh_banners` set action_data = REPLACE(action_data,'biz-beta.zuolin.com%2Fweb%2Fapp','biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp') where action_data like '%biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%';
+update `eh_configurations` set `value`='http://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=http://biz-beta.zuolin.com' where name='prefix.url';
+update `eh_configurations` set `value`='%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%23%2Fstore%2Fadd#sign_suffix' where name='apply.shop.url';
+update `eh_configurations` set `value`='%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html#sign_suffix' where name='manage.shop.url';
+update `eh_configurations` set `value`='%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Forders%2F1%3F_k%3Dzlbiz#sign_suffix' where name='user.order.url';
+update `eh_configurations` set `value`='%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Froll%2F1%3F_k%3Dzlbiz#sign_suffix' where name='user.coupon.url';
+update `eh_configurations` set `value`='%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2Fspoint%3F_k%3Dzlbiz#sign_suffix' where name='business.detail.url';
+update `eh_configurations` set `value`='http://bizimg-beta.zuolin.com/imageService/' where name='business.image.url';
