@@ -9,6 +9,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -438,6 +439,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		if(null != cond){
 			condition = condition.and(cond);
 		}
+		
 		context.select(
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_PAID_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ALIPAY_REFUND_AMOUNT.sum(),
@@ -451,14 +453,14 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				.where(condition)
 				.fetch().map((r) -> {
 					StatServiceSettlementResult statServiceSettlementResult = new StatServiceSettlementResult();
-					statServiceSettlementResult.setAlipayPaidAmount(new BigDecimal(r.getValue(0).toString()));
-					statServiceSettlementResult.setAlipayRefundAmount(new BigDecimal(r.getValue(1).toString()));
-					statServiceSettlementResult.setWechatPaidAmount(new BigDecimal(r.getValue(2).toString()));
-					statServiceSettlementResult.setWechatRefundAmount(new BigDecimal(r.getValue(3).toString()));
-					statServiceSettlementResult.setPaymentCardPaidAmount(new BigDecimal(r.getValue(4).toString()));
-					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(r.getValue(5).toString()));
-					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(r.getValue(6).toString()));
-					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(r.getValue(7).toString()));
+					statServiceSettlementResult.setAlipayPaidAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(0), "0.00").toString()));
+					statServiceSettlementResult.setAlipayRefundAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(1), "0.00").toString()));
+					statServiceSettlementResult.setWechatPaidAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(2), "0.00").toString()));
+					statServiceSettlementResult.setWechatRefundAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(3), "0.00").toString()));
+					statServiceSettlementResult.setPaymentCardPaidAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(4), "0.00").toString()));
+					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(5), "0.00").toString()));
+					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(6), "0.00").toString()));
+					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(7), "0.00").toString()));
 					results.add(statServiceSettlementResult);
 					return null;
 				});

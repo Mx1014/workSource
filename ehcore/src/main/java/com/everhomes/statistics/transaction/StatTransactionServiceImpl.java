@@ -284,7 +284,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			return this.convertStatServiceSettlementResultDTO(r);
 		}).collect(Collectors.toList());
 		
-		StatServiceSettlementResultDTO totalDTO = this.convertStatServiceSettlementResultDTO(total);
+		StatServiceSettlementResultDTO totalDTO = new StatServiceSettlementResultDTO();
+		if(null != total){
+			totalDTO = this.convertStatServiceSettlementResultDTO(total);
+		}
 		
 		totalDTO.setServiceName("总计");
 		
