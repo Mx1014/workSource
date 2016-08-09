@@ -24,7 +24,6 @@ public class CreateParkingRechargeRateCommand {
     private Long ownerId;
 	@NotNull
     private Long parkingLotId;
-	@NotNull
     private String rateName;
 	@NotNull
 	private String cardType;
