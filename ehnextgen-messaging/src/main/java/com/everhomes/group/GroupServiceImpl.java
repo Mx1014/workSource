@@ -2417,13 +2417,20 @@ public class GroupServiceImpl implements GroupService {
                     }
                     result.setErrorDescription("Target user is already in the group");
                 } else {
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Target user is in the joining group process, operatorId=" + operator.getId() 
-                            + ", groupId=" + groupId + ", inviteeId=" + inviteeId);
-                    }
-                    result.setErrorScope(GroupServiceErrorCode.SCOPE);
-                    result.setErrorCode(GroupServiceErrorCode.ERROR_USER_IN_JOINING_GROUP_PROCESS);
-                    result.setErrorDescription("Target user is in the joining group process");
+//                    if(LOGGER.isInfoEnabled()) {
+//                        LOGGER.info("Target user is in the joining group process, operatorId=" + operator.getId() 
+//                            + ", groupId=" + groupId + ", inviteeId=" + inviteeId);
+//                    }
+//                    result.setErrorScope(GroupServiceErrorCode.SCOPE);
+//                    result.setErrorCode(GroupServiceErrorCode.ERROR_USER_IN_JOINING_GROUP_PROCESS);
+//                    result.setErrorDescription("Target user is in the joining group process");
+                	
+                	//A创建了群，邀请了B，A退出了群并把权限转移给了B，B再邀请A则邀请不了了， update by tt,20160809
+                	member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                	member.setMemberRole(RoleConstants.ResourceUser);
+                	groupProvider.updateGroupMember(member);
+                	result.setErrorCode(ErrorCodes.SUCCESS);
+                	result.setErrorDescription("OK");
                 }
             } else {
             	//群管理员群聊拉人显示 Insufficient privilege 所以注释掉 modified by xiongying 20160613
@@ -3582,6 +3589,9 @@ public class GroupServiceImpl implements GroupService {
         sendNotifactionToMembers(members, nickName, group, locale);
     }
 
+    /**
+     * 如果是转移权限的，则不是group表中的创建者
+     */
     private boolean isAdmin(Long userId, long groupId) {
     	ListingLocator locator = new ListingLocator(groupId);
 		List<GroupMember> list = groupProvider.queryGroupMembers(locator, 10, (loc, query)->{
