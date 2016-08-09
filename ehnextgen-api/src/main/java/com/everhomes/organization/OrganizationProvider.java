@@ -56,11 +56,12 @@ public interface OrganizationProvider {
     List<OrganizationCommunity> listOrganizationByCommunityId(Long communityId);
     
     int countOrganizations(String type, String name);
-    int countOrganizationMembers(Long organizationId, Long memberUid);
+    int countOrganizationMembers(Long organnizationId, Long memberUid);
     int countOrganizationCommunitys(Long organizationId);
 	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
 	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
+	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);

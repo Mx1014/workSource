@@ -34,6 +34,10 @@ import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
@@ -87,8 +91,8 @@ public interface PunchService {
 	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
 			ListMonthPunchLogsCommand cmd);
 
-	public HttpServletResponse exportPunchStatistics(
-			ExportPunchStatisticsCommand cmd,
+	public HttpServletResponse exportPunchDetails(
+			ListPunchDetailsCommand cmd,
 			 
 			  HttpServletResponse response );
 
@@ -135,4 +139,10 @@ public interface PunchService {
 	public void addPunchRuleMap(PunchRuleMapDTO cmd);
 
 	public ListPunchRuleMapsResponse listPunchRuleMaps(ListPunchRuleMapsCommand cmd);
+
+	public ListPunchMonthLogsResponse listPunchMonthLogs(ListPunchMonthLogsCommand cmd);
+
+	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd);
+
+	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
 }

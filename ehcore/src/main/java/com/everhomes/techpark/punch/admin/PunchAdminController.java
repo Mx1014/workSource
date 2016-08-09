@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch.admin;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -13,22 +14,29 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.techpark.punch.PunchService;
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
@@ -423,4 +431,80 @@ public class PunchAdminController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: punch/listPunchStatistics</b>
+	 * <p>
+	 * 查询公司考勤的统计结果
+	 * </p>
+	 */
+	@RequestMapping("listPunchStatistics")
+	@RestReturn(value = ListPunchCountCommandResponse.class)
+	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
+		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: punch/exportPunchStatistics</b>
+	 * <p>
+	 * 导出公司打卡的统计结果
+	 * </p>
+	 */
+	@RequestMapping("exportPunchStatistics")
+	public  HttpServletResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response );
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+		return commandResponse;
+	}
+	/**
+	 * <b>URL: punch/listPunchMonthLogs</b>
+	 * <p>
+	 * 查询公司某月的考勤明细-具体到每人每天
+	 * </p>
+	 */
+	@RequestMapping("listPunchMonthLogs")
+	@RestReturn(value = ListPunchMonthLogsResponse.class)
+	public RestResponse listPunchMonthLogs(@Valid ListPunchMonthLogsCommand cmd) {
+		ListPunchMonthLogsResponse commandResponse = punchService.listPunchMonthLogs(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
+	 * <b>URL: punch/listPunchDetails</b>
+	 * <p>
+	 * 查询 打卡详情
+	 * </p>
+	 */
+	@RequestMapping("listPunchDetails")
+	@RestReturn(value = ListPunchDetailsResponse.class)
+	public RestResponse listPunchDetails(@Valid ListPunchDetailsCommand cmd) {
+		ListPunchDetailsResponse commandResponse = punchService.listPunchDetails(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: punch/exportPunchDetails</b>
+	 * <p>
+	 * 导出公司打卡的详情
+	 * </p>
+	 */
+	@RequestMapping("exportPunchDetails")
+	public  HttpServletResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response );
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+		return commandResponse;
+	}
 }

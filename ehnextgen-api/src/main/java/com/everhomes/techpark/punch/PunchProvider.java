@@ -16,7 +16,7 @@ public interface PunchProvider {
 
 	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId, String queryDate,byte clockCode);
 
-	public PunchTimeRule getPunchTimeRuleByCompanyId(Long companyId);
+	public PunchTimeRule getPunchTimeRuleByCompanyId(String ownerType ,Long companyId);
 
 	public List<Date> listPunchLogsBwteenTwoDay(Long userId, Long companyId, String beginDate, String endDate);
 
@@ -235,5 +235,6 @@ public interface PunchProvider {
  
 	List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId,
 			CrossShardListingLocator locator, int i);
+ 
  
 }

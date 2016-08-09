@@ -216,13 +216,13 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 
 	@Override
-	public PunchTimeRule getPunchTimeRuleByCompanyId(Long companyId) {
+	public PunchTimeRule getPunchTimeRuleByCompanyId(String ownerType ,Long companyId) {
 	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_TIME_RULES);
-		Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(companyId);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(companyId).and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType));
 		step.where(condition);
 		List<PunchTimeRule> result = step.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.desc())
 				.fetch().map((r) -> {
@@ -1985,6 +1985,7 @@ long id = sequenceProvider.getNextSequence(key);
         });
 		return result;
 	}
+ 
     
 }
 
