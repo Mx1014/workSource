@@ -1,5 +1,5 @@
 -- 万科初始数据
-SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_community_geopoints`);
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
     VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'wanke.mashen.url', 'https://api.open.imasheng.com/openapi', 'the url for wanke.mashen', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
