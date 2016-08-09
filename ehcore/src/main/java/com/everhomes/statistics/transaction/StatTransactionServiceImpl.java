@@ -1,6 +1,7 @@
 package com.everhomes.statistics.transaction;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -27,13 +28,19 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+
+
+
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +48,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
+
+
+
 
 
 
@@ -331,21 +344,22 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	}
 	
 	private void exportStatServiceSettlementAmountFile(List<StatServiceSettlementResultDTO> statServiceSettlementResultDetailDTOs,List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs, HttpServletResponse response){
+		XSSFWorkbook wb = new XSSFWorkbook();
+		ByteArrayOutputStream out = null;
 		try {
 			String sheetName = "结算报表";
-			HSSFWorkbook wb = new HSSFWorkbook();
-			HSSFSheet sheet = wb.createSheet(sheetName);
+			XSSFSheet sheet = wb.createSheet(sheetName);
 			
 			// 创建单元格样式
-			HSSFCellStyle style = wb.createCellStyle();// 样式对象
-//			style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直  
-//	        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平 
+			XSSFCellStyle style = wb.createCellStyle();// 样式对象
+//			style.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直  
+//	        style.setAlignment(XSSFCellStyle.ALIGN_CENTER);// 水平 
 //	        
 //			// 设置边框
-//			style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-//			style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-//			style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-//			style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+//			style.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+//			style.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+//			style.setBorderRight(XSSFCellStyle.BORDER_THIN);
+//			style.setBorderTop(XSSFCellStyle.BORDER_THIN);
 			
 			//设置标题字体格式  
 	        Font font = wb.createFont();
@@ -354,19 +368,19 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        
 	        style.setFont(font);
 	        
-	        HSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+	        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
 	        titleStyle.setFont(font);
-	        titleStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER); 
+	        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER); 
 	        
 	        int rowNum = 0;
 	        
-	        HSSFRow row1 = sheet.createRow(rowNum ++);
+	        XSSFRow row1 = sheet.createRow(rowNum ++);
 	        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
-	        HSSFCell cell1 = row1.createCell(0);
+	        XSSFCell cell1 = row1.createCell(0);
 	        cell1.setCellStyle(titleStyle);  
 	        cell1.setCellValue("项目类型统计总表"); 
 	        
-	        HSSFRow row2 = sheet.createRow(rowNum ++);
+	        XSSFRow row2 = sheet.createRow(rowNum ++);
 	        row2.setRowStyle(style);
 	        row2.createCell(0).setCellValue("项目类型");
 	        row2.createCell(1).setCellValue("支付宝实收");
@@ -380,7 +394,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        
 	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultsDTOs) {
 	        	
-	        	HSSFRow row = sheet.createRow(rowNum ++);
+	        	XSSFRow row = sheet.createRow(rowNum ++);
 	        	row.setRowStyle(style);
 	        	row.createCell(0).setCellValue(statServiceSettlementResult.getServiceName());
 	        	row.createCell(1).setCellValue(statServiceSettlementResult.getAlipayPaidAmount());
@@ -394,13 +408,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 	        
 	        
-	        HSSFRow row3 = sheet.createRow(rowNum);
+	        XSSFRow row3 = sheet.createRow(rowNum);
 	        sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, 10));
-	        HSSFCell cell2 = row3.createCell(0);
+	        XSSFCell cell2 = row3.createCell(0);
 	        cell2.setCellStyle(titleStyle);
 	        cell2.setCellValue("具体项目统计表"); 
 	        rowNum ++;
-	        HSSFRow row4 = sheet.createRow(rowNum ++);
+	        XSSFRow row4 = sheet.createRow(rowNum ++);
 	        row4.setRowStyle(style);
 	        row4.createCell(0).setCellValue("项目类型");
 	        row4.createCell(1).setCellValue("社区名称");
@@ -416,7 +430,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        
 	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultDetailDTOs) {
 	        	
-	        	HSSFRow row = sheet.createRow(rowNum ++);
+	        	org.apache.poi.xssf.usermodel.XSSFRow row = sheet.createRow(rowNum ++);
 	        	row.setRowStyle(style);
 	        	row.createCell(0).setCellValue(statServiceSettlementResult.getServiceName());
 	        	row.createCell(1).setCellValue(statServiceSettlementResult.getCommunityName());
@@ -431,12 +445,18 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            row.createCell(10).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
 			}
 	        
-	        ByteArrayOutputStream out = new ByteArrayOutputStream();
+	        out = new ByteArrayOutputStream();
 			wb.write(out);
 			DownloadUtil.download(out, response);
-			
 		} catch (Exception e) {
 			LOGGER.error("export excel error", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("export excel error", e);
+			}
 		}
 		
 	}
