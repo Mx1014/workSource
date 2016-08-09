@@ -22,3 +22,5 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
 -- 修改文字  by sfyan 20160809
 UPDATE `eh_web_menus` SET `name` = '场所预订' WHERE `id` = 42000;
 UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 42300;
+UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 43430;
+
