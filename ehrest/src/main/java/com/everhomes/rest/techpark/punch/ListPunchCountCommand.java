@@ -7,49 +7,89 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>companyId：公司id</li>
+ * 
+ * <li>ownerType：查询类型organization/user</li>
+ * <li>ownerId：查询对象id(如果是全部部门就是总公司id)</li>  
+ * <li>userName：用户名搜索可为空</li>
  * <li>startDay: 开始时间</li>
  * <li>endDay：结束时间</li>
+ * <li>exceptionStatus：异常状态搜索,全部则不传 0-正常 1-异常{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li> 
+ * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageSize: 每页的数量</li>
  * </ul>
  */
 public class ListPunchCountCommand {
+
 	@NotNull
-	private Long    enterpriseId;
+	private String ownerType;
+	@NotNull
+	private Long ownerId;
 	
-	private String startDay;
+	private Long startDay;
 	
-	private String endDay;
-	
-	private Long enterpriseGroupId;
+	private Long endDay;
+
+	private Byte exceptionStatus;
+
+	private Long userName;
+
+	private Long pageAnchor;
+	private Integer pageSize;
 	
 	public ListPunchCountCommand() {
     } 
-	public String getStartDay() {
-		return startDay;
-	}
-	public void setStartDay(String startDay) {
-		this.startDay = startDay;
-	}
-	public String getEndDay() {
-		return endDay;
-	}
-	public void setEndDay(String endDay) {
-		this.endDay = endDay;
-	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Long getEnterpriseId() {
-		return enterpriseId;
+	public String getOwnerType() {
+		return ownerType;
 	}
-	public void setEnterpriseId(Long enterpriseId) {
-		this.enterpriseId = enterpriseId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
-	public Long getEnterpriseGroupId() {
-		return enterpriseGroupId;
+	public Long getOwnerId() {
+		return ownerId;
 	}
-	public void setEnterpriseGroupId(Long enterpriseGroupId) {
-		this.enterpriseGroupId = enterpriseGroupId;
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
+	public Long getStartDay() {
+		return startDay;
+	}
+	public void setStartDay(Long startDay) {
+		this.startDay = startDay;
+	}
+	public Long getEndDay() {
+		return endDay;
+	}
+	public void setEndDay(Long endDay) {
+		this.endDay = endDay;
+	}
+	public Byte getExceptionStatus() {
+		return exceptionStatus;
+	}
+	public void setExceptionStatus(Byte exceptionStatus) {
+		this.exceptionStatus = exceptionStatus;
+	}
+	public Long getUserName() {
+		return userName;
+	}
+	public void setUserName(Long userName) {
+		this.userName = userName;
+	}
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+	public Integer getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}  
+	
+	
 }

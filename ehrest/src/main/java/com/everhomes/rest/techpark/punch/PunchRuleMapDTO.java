@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>id：id</li>
  * <li>ownerType：所属对象类型organization/user</li>
  * <li>ownerId：所属对象id</li>
- * <li>ownerType：映射目标类型(规则是设置给谁的) organization/user</li>
+ * <li>targetType：映射目标类型(规则是设置给谁的) organization/user</li>
  * <li>targetId：映射目标 id</li>
  * <li>punchRuleId: 打卡规则id</li>
  * <li>reviewRuleId: 审批规则id</li>

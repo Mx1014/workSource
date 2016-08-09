@@ -7,23 +7,25 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 
- * <li>ownerType：所属对象类型organization/user</li>
- * <li>ownerId：所属对象id</li>
- * <li>targetType：映射目标类型(规则是设置给谁的) organization/user</li>
- * <li>targetId：映射目标 id</li>
+ * <li>ownerType：查询类型organization/user</li>
+ * <li>ownerId：查询对象id(如果是全部部门就是总公司id)</li> 
+ * <li>punchMonth：传查询月的任意一天时间戳</li>
+ * <li>userName：用户名搜索可为空</li>
+ * <li>exceptionStatus：异常状态搜索,全部则不传 0-正常 1-异常{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListPunchRuleMapsCommand {
+public class ListPunchMonthLogsCommand {
 
 	@NotNull
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
 	
-	private String targetType;
-	private Long targetId;
+	private Long punchMonth;
+	private Long userName;
+	private Byte exceptionStatus;
 
 	private Long pageAnchor;
 	private Integer pageSize;
@@ -65,20 +67,28 @@ public class ListPunchRuleMapsCommand {
 		this.pageSize = pageSize;
 	}
 
-	public String getTargetType() {
-		return targetType;
+	public Long getPunchMonth() {
+		return punchMonth;
 	}
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
+	public void setPunchMonth(Long punchMonth) {
+		this.punchMonth = punchMonth;
 	}
 
-	public Long getTargetId() {
-		return targetId;
+	public Long getUserName() {
+		return userName;
 	}
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setUserName(Long userName) {
+		this.userName = userName;
+	}
+
+	public Byte getExceptionStatus() {
+		return exceptionStatus;
+	}
+
+	public void setExceptionStatus(Byte exceptionStatus) {
+		this.exceptionStatus = exceptionStatus;
 	}
  
 

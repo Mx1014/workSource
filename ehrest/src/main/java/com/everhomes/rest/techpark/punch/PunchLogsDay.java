@@ -7,11 +7,16 @@ import com.everhomes.util.StringHelper;
 
  /**
  * <ul>  
- * <li>PunchDay：每一日的punchlist</li>
+ * <li>PunchDay：打卡日期String:YYYY-MM-DD </li>
  * <li>punchStatus：打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>morningPunchStatus：早上打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>afternoonPunchStatus：下午打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>approvalStatus：审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
- * <li>exceptionStatus：异常状态:异常正常 参考{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
- * <li>PunchLogs: 打卡记录list</li>
+ * <li>morningApprovalStatus：早上审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>afternoonApprovalStatus：下午审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>exceptionStatus：异常状态:1-异常0-正常 参考{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
+ * <li>PunchLogs: 打卡记录list {@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
+ * <li>workTime: 工作时长 Long</li>
  * </ul>
  */
 public class PunchLogsDay{
@@ -30,8 +35,7 @@ public class PunchLogsDay{
     private List<PunchLogDTO> punchLogs;
     @ItemType(PunchExceptionDTO.class)
     private List<PunchExceptionDTO> punchExceptionDTOs;
-    
-    
+    private Long workTime;
  
  
 
@@ -173,6 +177,18 @@ public class PunchLogsDay{
 
 	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
 		this.punchLogs = punchLogs;
+	}
+
+
+
+	public Long getWorkTime() {
+		return workTime;
+	}
+
+
+
+	public void setWorkTime(Long workTime) {
+		this.workTime = workTime;
 	}
 
 
