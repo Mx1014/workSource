@@ -582,7 +582,10 @@ public class UserController extends ControllerBase {
 	@RequestMapping("fetchPastToRecentMessages")
 	@RestReturn(FetchMessageCommandResponse.class)
 	public RestResponse fetchPastToRecentMessages(@Valid FetchPastToRecentMessageCommand cmd) {
+	    long startTime = System.currentTimeMillis();
 		FetchMessageCommandResponse cmdResponse = this.messagingService.fetchPastToRecentMessages(cmd);
+		long endTime = System.currentTimeMillis();
+		LOGGER.info("fetchPastToRecentMessages took=" + (endTime - startTime) + " milliseconds");
 
 		RestResponse response = new RestResponse(cmdResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
