@@ -32,3 +32,7 @@ set @eh_locale_templates_id = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'park.notification', '2', 'zh_CN', '停车充值默认费率', '${count}个月', '0');
 
+-- 园区电子报初始数据
+INSERT INTO `eh_journal_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `description`, `poster_path`, `creator_uid`, `create_time`) 
+VALUES ('1', '0', '', '0', '<p>fafa</p>', 'cs://1/image/aW1hZ2UvTVRwa05UZGtNV1pqTWpBMllUazNZekpoWVRBeU1ETXlOMk13WmpreE56YzNOUQ', '0', '2016-08-04 15:06:56');
+
