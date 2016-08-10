@@ -655,7 +655,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			punchDayLog.setArriveTime(getDAOTime(arriveCalendar.getTimeInMillis()));
 			punchDayLog.setLeaveTime(getDAOTime(leaveCalendar.getTimeInMillis() )); 
-			punchDayLog.setWorkTime(convertTime(realWorkTime));
+			punchDayLog.setWorkTime( convertTime(realWorkTime) );
 			// 打卡状态设置为正常或者迟到
 			if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
 				pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
@@ -1204,13 +1204,13 @@ public class PunchServiceImpl implements PunchService {
 		return null;
 	}
 	 
-//	private Long convertTimeToGMTMillisecond(Time time) {
-//		if (null != time) {
-//			//从8点开始计算
-//			return time.getTime()+MILLISECONDGMT;
-//		}
-//		return null;
-//	}
+	private Long convertTimeToGMTMillisecond(Time time) {
+		if (null != time) {
+			//从8点开始计算
+			return time.getTime()+MILLISECONDGMT;
+		}
+		return null;
+	}
 	
     private final Long MILLISECONDGMT=8*3600*1000L;
 	@Override
@@ -2514,7 +2514,7 @@ public class PunchServiceImpl implements PunchService {
 	public listPunchTimeRuleListResponse listPunchTimeRuleList(ListPunchRulesCommonCommand cmd) {
 		listPunchTimeRuleListResponse response =new listPunchTimeRuleListResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -2531,11 +2531,11 @@ public class PunchServiceImpl implements PunchService {
 		response.setTimeRules(new ArrayList<PunchTimeRuleDTO>());
 		results.forEach((other) -> {
 			PunchTimeRuleDTO dto = ConvertHelper.convert(other, PunchTimeRuleDTO.class); 
-			dto.setAfternoonArriveTime(other.getAfternoonArriveTime().getTime());
-			dto.setNoonLeaveTime(other.getNoonLeaveTime().getTime());
-			dto.setStartEarlyTime(other.getStartEarlyTime().getTime());
-			dto.setStartLateTime(other.getStartLateTime().getTime());
-			dto.setEndEarlyTime(other.getStartEarlyTime().getTime() + other.getWorkTime().getTime() +MILLISECONDGMT);
+			dto.setAfternoonArriveTime(convertTimeToGMTMillisecond(other.getAfternoonArriveTime()));
+			dto.setNoonLeaveTime(convertTimeToGMTMillisecond(other.getNoonLeaveTime()));
+			dto.setStartEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()));
+			dto.setStartLateTime(convertTimeToGMTMillisecond(other.getStartLateTime()));
+			dto.setEndEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()) + convertTimeToGMTMillisecond(other.getWorkTime()));
 			response.getTimeRules().add(dto);
 		});
 		return response;
@@ -2669,7 +2669,7 @@ public class PunchServiceImpl implements PunchService {
 	public QryPunchLocationRuleListResponse listPunchLocationRules(ListPunchRulesCommonCommand cmd) { 
 		QryPunchLocationRuleListResponse response = new QryPunchLocationRuleListResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -2823,7 +2823,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchWiFiRuleListResponse listPunchWiFiRule(ListPunchRulesCommonCommand cmd) {
 		ListPunchWiFiRuleListResponse response = new ListPunchWiFiRuleListResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -2916,9 +2916,9 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			int openWorkdayInt=0;
 			for(Integer weekdayInteger : dto.getWorkWeekDates())
-				openWorkdayInt+=10^weekdayInteger;
+				openWorkdayInt+=Math.pow(10,weekdayInteger);
 			String openWorkday=String.valueOf(openWorkdayInt);
-			for( ;openWorkday.length()<=7; ){
+			for( ;openWorkday.length()<7; ){
 				openWorkday ="0"+openWorkday;
 			}
 			obj.setWorkWeekDates(openWorkday);
@@ -2927,7 +2927,7 @@ public class PunchServiceImpl implements PunchService {
 		obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
 		
-		return null;
+		return obj;
 	}
 	@Override
 	public void updatePunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
@@ -3028,7 +3028,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchWorkdayRuleListResponse listPunchWorkdayRule(ListPunchRulesCommonCommand cmd) {
 		ListPunchWorkdayRuleListResponse response = new ListPunchWorkdayRuleListResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -3052,8 +3052,9 @@ public class PunchServiceImpl implements PunchService {
 	
 	private PunchWorkdayRuleDTO ConvertPunchWiFiRule2DTO(PunchWorkdayRule other) {
 		PunchWorkdayRuleDTO dto  = ConvertHelper.convert(other, PunchWorkdayRuleDTO.class); 
+		dto.setWorkWeekDates(new ArrayList<Integer>());
 		int openWeekInt = Integer.valueOf(other.getWorkWeekDates());
-        for(int i=1;i<8;i++){
+        for(int i=0;i<7;i++){
         	if(openWeekInt%10 == 1)
         		dto.getWorkWeekDates().add(i);
         	openWeekInt = openWeekInt/10;
@@ -3169,7 +3170,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchRulesResponse listPunchRules(ListPunchRulesCommonCommand cmd) {
 		ListPunchRulesResponse response = new ListPunchRulesResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -3231,7 +3232,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchRuleMapsResponse listPunchRuleMaps(ListPunchRuleMapsCommand cmd) {
 		ListPunchRuleMapsResponse response = new ListPunchRuleMapsResponse();
 		if (cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE);
+			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());

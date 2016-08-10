@@ -149,18 +149,20 @@ public class PunchProviderImpl implements PunchProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_PUNCH_RULES.ID.gt(locator.getAnchor()));
             }
-
+ 
+		query.addOrderBy(Tables.EH_PUNCH_RULES.ID.asc());
         query.addLimit(count);
         List<PunchRule> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchRule.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1232,9 +1234,10 @@ long id = sequenceProvider.getNextSequence(key);
 		if(null != ownerId)
 			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId)); 
 		if (null != locator && locator != null && locator.getAnchor() != null)
-			condition = condition.and(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.lt(locator.getAnchor()));
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.ID.gt(locator.getAnchor()));
 		query.addConditions(condition);
 		query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
 		List<PunchTimeRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
@@ -1302,17 +1305,19 @@ long id = sequenceProvider.getNextSequence(key);
             query.addConditions(Tables.EH_PUNCH_LOCATION_RULES.ID.gt(locator.getAnchor()));
             }
 
+		query.addOrderBy(Tables.EH_PUNCH_LOCATION_RULES.ID.asc());
         query.addLimit(count);
         List<PunchLocationRule> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchLocationRule.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1373,17 +1378,19 @@ long id = sequenceProvider.getNextSequence(key);
             query.addConditions(Tables.EH_PUNCH_WIFIS.ID.gt(locator.getAnchor()));
             }
 
+		query.addOrderBy(Tables.EH_PUNCH_WIFIS.ID.asc());
         query.addLimit(count);
         List<PunchWifi> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchWifi.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1457,17 +1464,19 @@ long id = sequenceProvider.getNextSequence(key);
             query.addConditions(Tables.EH_PUNCH_WIFI_RULES.ID.gt(locator.getAnchor()));
             }
 
+		query.addOrderBy(Tables.EH_PUNCH_WIFI_RULES.ID.asc());
         query.addLimit(count);
         List<PunchWifiRule> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchWifiRule.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1542,17 +1551,19 @@ long id = sequenceProvider.getNextSequence(key);
             query.addConditions(Tables.EH_PUNCH_HOLIDAYS.ID.gt(locator.getAnchor()));
             }
 
+		query.addOrderBy(Tables.EH_PUNCH_HOLIDAYS.ID.asc());
         query.addLimit(count);
         List<PunchHoliday> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchHoliday.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1627,17 +1638,19 @@ long id = sequenceProvider.getNextSequence(key);
             query.addConditions(Tables.EH_PUNCH_WORKDAY_RULES.ID.gt(locator.getAnchor()));
             }
 
+		query.addOrderBy(Tables.EH_PUNCH_WORKDAY_RULES.ID.asc());
         query.addLimit(count);
         List<PunchWorkdayRule> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchWorkdayRule.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1715,17 +1728,19 @@ long id = sequenceProvider.getNextSequence(key);
             query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.gt(locator.getAnchor()));
             }
 
+		query.addOrderBy(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.asc());
         query.addLimit(count);
         List<PunchRuleOwnerMap> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
         });
 
-        if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
-        } else {
-            locator.setAnchor(null);
-        }
-
+//        if(objs.size() >= count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getId());
+//        } else {
+//            locator.setAnchor(null);
+//        }
+        if(null == objs || objs.isEmpty())
+        	return null;
         return objs;
     }
 
@@ -1839,7 +1854,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.and( Tables.EH_PUNCH_WIFIS.OWNER_TYPE.eq(ownerType));
 		step.where(condition);
 		List<PunchWifi> result = step
-				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_WIFIS.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, PunchWifi.class);
 				});
@@ -1902,7 +1917,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.and( Tables.EH_PUNCH_HOLIDAYS.OWNER_TYPE.eq(ownerType));
 		step.where(condition);
 		List<PunchHoliday> result = step
-				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_HOLIDAYS.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, PunchHoliday.class);
 				});
@@ -1939,7 +1954,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.and( Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.eq(ownerType));
 		step.where(condition);
 		List<PunchRuleOwnerMap> result = step
-				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
 				});
