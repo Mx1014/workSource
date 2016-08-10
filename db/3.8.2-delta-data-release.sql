@@ -14,7 +14,7 @@ INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)V
 
 -- 结算菜单  by sfyan 20160810
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (49000,'结算管理',40000,null,'settlement_management',0,2,'/40000/49000','park',454);
+VALUES (49000,'结算管理',40000,null,'settlement_management',1,2,'/40000/49000','park',454);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (770,0,'结算管理','结算管理 全部功能',null);
