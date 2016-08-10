@@ -169,6 +169,7 @@ CREATE TABLE `eh_punch_rule_owner_map` (
 -- DROP TABLE IF EXISTS `eh_punch_statistics`;
 CREATE TABLE `eh_punch_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id',
+  `month` VARCHAR(8) COMMENT 'yyyymm',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
   `owner_id` BIGINT COMMENT 'owner resource(user/organization) id',
   `user_id` BIGINT COMMENT 'user id',
