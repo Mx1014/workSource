@@ -146,7 +146,7 @@ public class PunchProviderImpl implements PunchProvider {
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        if(locator.getAnchor() != null) {
+        if(locator != null && locator.getAnchor() != null)  {
             query.addConditions(Tables.EH_PUNCH_RULES.ID.gt(locator.getAnchor()));
             }
  

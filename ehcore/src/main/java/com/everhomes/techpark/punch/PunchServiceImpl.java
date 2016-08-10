@@ -736,22 +736,26 @@ public class PunchServiceImpl implements PunchService {
 			//分别计算morning和afternoon的状态
 			// 如果上午零次打卡记录
 			if (null == morningLogs || morningLogs.size() == 0) {
+				punchDayLog.setWorkTime(convertTime(0L)); 
 				pdl.setMorningPunchStatus(PunchStatus.UNPUNCH.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 
 			}
 			// 如果下午零次打卡记录
 			if (null == afternoonLogs || afternoonLogs.size() == 0) {
+				punchDayLog.setWorkTime(convertTime(0L));
 				pdl.setAfternoonPunchStatus(PunchStatus.UNPUNCH.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 	
 			}
  
 			// 如果上午1次打卡记录
 			if ( morningLogs.size() == 1) {
+				punchDayLog.setWorkTime(convertTime(0L));
 				pdl.setMorningPunchStatus(PunchStatus.FORGOT.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 
 			}
 			// 如果下午1次打卡记录
 			if ( afternoonLogs.size() == 1) {
+				punchDayLog.setWorkTime(convertTime(0L));
 				pdl.setAfternoonPunchStatus(PunchStatus.FORGOT.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 	
 			}
@@ -3096,6 +3100,10 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 			PunchRule obj = ConvertHelper.convert(cmd, PunchRule.class);
+			obj.setCreatorUid(UserContext.current().getUser().getId());
+			obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			
 			this.punchProvider.createPunchRule(obj);
 			
 		}
@@ -3139,7 +3147,7 @@ public class PunchServiceImpl implements PunchService {
 			obj.setOperatorUid(userId);
 			obj.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
-			this.punchProvider.createPunchRule(obj);
+			this.punchProvider.updatePunchRule(obj);
 		}
 	}
 	@Override
@@ -3279,7 +3287,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	/** 向上递归找规则*/
 	private PunchRuleOwnerMap getPunchRule( Long ownerId , Organization dept,int loopMax){
-		if(--loopMax <0)
+		if(--loopMax <0 || null == dept)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
