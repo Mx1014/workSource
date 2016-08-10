@@ -237,6 +237,20 @@ public interface PunchProvider {
 			CrossShardListingLocator locator, int i);
 
 	public List<PunchHoliday> queryPunchHolidaysByStatus(String ownerType, Long ownerId, Long workdayRuleId, byte code);
+
+	public List<Long> queryPunchOrganizationsFromRules();
+
+	List<PunchDayLog> listPunchDayLogs(Long userId, Long companyId, String startDay, String endDay);
+
+	List<PunchStatistic> queryPunchStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	PunchStatistic getPunchStatisticById(Long id);
+
+	void deletePunchStatistic(PunchStatistic obj);
+
+	void updatePunchStatistic(PunchStatistic obj);
+
+	Long createPunchStatistic(PunchStatistic obj);
  
  
 }

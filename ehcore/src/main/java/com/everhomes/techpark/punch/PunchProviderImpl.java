@@ -33,6 +33,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.TimeCompareFlag;
@@ -48,6 +49,7 @@ import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
@@ -61,6 +63,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchStatistics;
 import com.everhomes.server.schema.tables.pojos.EhPunchTimeRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
@@ -75,6 +78,7 @@ import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
@@ -999,6 +1003,35 @@ long id = sequenceProvider.getNextSequence(key);
 				.or(Tables.EH_PUNCH_DAY_LOGS.AFTERNOON_STATUS.in(ExceptionStatus)));
 		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG.eq(ViewFlags.NOTVIEW.getCode()) );
 		 
+		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+ 				.map(new EhPunchDayLogMapper());
+		
+		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchDayLog.class);
+        }).collect(Collectors.toList());
+		return result;
+	}
+
+	@Override
+	public List<PunchDayLog> listPunchDayLogs(Long userId,
+			Long companyId, String startDay, String endDay) {
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+//	 
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+		condition= condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		 
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		  
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
  				.map(new EhPunchDayLogMapper());
@@ -2017,7 +2050,89 @@ long id = sequenceProvider.getNextSequence(key);
         });
 		return result;
 	}
+
+	@Override
+	public List<Long> queryPunchOrganizationsFromRules() {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<Long>> step = context.selectDistinct(Tables.EH_PUNCH_RULES.OWNER_ID).from(
+				Tables.EH_PUNCH_RULES);
+		Condition condition = Tables.EH_PUNCH_RULES.OWNER_TYPE.equal(PunchOwnerType.ORGANIZATION.getCode());
+		step.where(condition);
+		List<Long> result = step
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r.value1(), Long.class);
+				});
+		return result;
+	}
  
-    
+
+    @Override
+    public Long createPunchStatistic(PunchStatistic obj) {
+        String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchStatistics.class);
+				long id = sequenceProvider.getNextSequence(key);
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+        obj.setId(id);
+        prepareObj(obj);
+        EhPunchStatisticsDao dao = new EhPunchStatisticsDao(context.configuration());
+        dao.insert(obj);
+        return id;
+    }
+
+    @Override
+    public void updatePunchStatistic(PunchStatistic obj) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPunchStatisticsDao dao = new EhPunchStatisticsDao(context.configuration());
+        dao.update(obj);
+    }
+
+    @Override
+    public void deletePunchStatistic(PunchStatistic obj) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPunchStatisticsDao dao = new EhPunchStatisticsDao(context.configuration());
+        dao.deleteById(obj.getId());
+    }
+
+    @Override
+    public PunchStatistic getPunchStatisticById(Long id) {
+        try {
+        PunchStatistic[] result = new PunchStatistic[1];
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        result[0] = context.select().from(Tables.EH_PUNCH_STATISTICS)
+            .where(Tables.EH_PUNCH_STATISTICS.ID.eq(id))
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, PunchStatistic.class);
+            });
+
+        return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+    }
+
+    @Override
+    public List<PunchStatistic> queryPunchStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhPunchStatisticsRecord> query = context.selectQuery(Tables.EH_PUNCH_STATISTICS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if(null != locator && locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_PUNCH_STATISTICS.ID.gt(locator.getAnchor()));
+            }
+
+        query.addLimit(count);
+        List<PunchStatistic> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, PunchStatistic.class);
+        });
+
+        return objs;
+    }
+
+    private void prepareObj(PunchStatistic obj) {
+    }
 }
 
