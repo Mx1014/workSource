@@ -24,3 +24,7 @@ UPDATE `eh_web_menus` SET `name` = '场所预订' WHERE `id` = 42000;
 UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 42300;
 UPDATE `eh_web_menus` SET `name` = '预订详情' WHERE `id` = 43430;
 
+-- 深业物业的organization details  by sfyan 20160809
+set @eh_organization_detail_id = (SELECT MAX(id) FROM `eh_organization_details`);
+INSERT INTO `eh_organization_details` (`id`, `organization_id`, `contact`, `address`, `longitude`, `latitude`, `display_name`, `contactor`, `post_uri`, `avatar`) 
+VALUES((@eh_organization_detail_id := @eh_organization_detail_id + 1), 1000750, '', '', null, null, '', '', '', '');	
