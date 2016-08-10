@@ -7,7 +7,7 @@ package com.everhomes.rest.wanke;
  * </ul>
  */
 public enum ActionType {
-      NONE((byte)0), URL((byte)1);
+      NONE((byte)0), PM_REPAIR((byte)1);
     private byte code;
     
     private ActionType(byte code) {
