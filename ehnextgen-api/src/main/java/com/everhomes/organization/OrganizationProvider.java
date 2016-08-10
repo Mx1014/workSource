@@ -3,6 +3,7 @@ package com.everhomes.organization;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import org.jooq.Condition;
 
@@ -199,4 +200,9 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
+  //根据第三方机构token获取organization
+    Organization findOrganizationByOrganizationToken(String organizationToken);
+	List<Organization> listOrganizationsByIds(List<Long> ids);
+	List<Organization> listOrganizationsByIds(Long... ids);
+	List<Organization> listOrganizationsByIds(Set<Long> ids);
 }

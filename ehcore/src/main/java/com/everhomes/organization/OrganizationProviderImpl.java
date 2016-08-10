@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jooq.Condition;
@@ -132,7 +133,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	}
 
-
+	@Override
+	public Organization findOrganizationByOrganizationToken(String organizationToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq(organizationToken));
+		return ConvertHelper.convert(query.fetchOne(), Organization.class);
+	}
 	@Override
 	public void updateOrganization(Organization department){
 		assert(department.getId() == null);
@@ -172,6 +179,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), Organization.class);
+	}
+	
+	@Override
+	public List<Organization> listOrganizationsByIds(Set<Long> ids) {
+		return listOrganizationsByIds(ids.toArray(new Long[ids.size()]));
+	}
+	
+	@Override
+	public List<Organization> listOrganizationsByIds(List<Long> ids) {
+		return listOrganizationsByIds(ids.toArray(new Long[ids.size()]));
+	}
+	
+	@Override
+	public List<Organization> listOrganizationsByIds(Long ... ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
+		return dao.fetchById(ids).stream().map(o->ConvertHelper.convert(o, Organization.class)).collect(Collectors.toList());
 	}
 
 	@Override

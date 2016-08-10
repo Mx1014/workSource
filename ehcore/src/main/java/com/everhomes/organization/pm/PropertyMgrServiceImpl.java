@@ -53,6 +53,8 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -62,6 +64,7 @@ import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyBillingAccount;
 import com.everhomes.family.FamilyBillingTransactions;
@@ -127,6 +130,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PropertyPostDTO;
+import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -348,6 +352,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private PromotionService promotionService;
+    
+    @Autowired
+    private ContentServerService contentServerService;
     
     private String queueName = "property-mgr-push";
 	
@@ -1457,7 +1464,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		LOGGER.debug("send message to organization member, members = {}", members);
 		
 		/** 推送消息 **/
-		this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), user);
+		this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
 	}
 
 	/**
@@ -1519,7 +1526,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	}
 
-	private void processSmsByMembers(List<OrganizationMember> members,String message,String messageBodyType, User user) {
+	private void processSmsByMembers(List<OrganizationMember> members,String message,String messageBodyType, String imgUri, User user) {
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
@@ -1533,6 +1540,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
+		if(MessageBodyType.fromCode(messageBodyType) == MessageBodyType.IMAGE){
+			if(StringUtils.isEmpty(imgUri)){
+				LOGGER.error("uri is null.");
+				return ;
+			}
+			ImageBody imageBody = contentServerService.parserImageBody(imgUri, EntityType.USER.getCode(), user.getId());
+			if(null == imageBody){
+				LOGGER.error("image data error image uri = {}.", imgUri);
+				return ;
+			}
+			
+			message = StringHelper.toJsonString(imageBody);
+		}
+		
 		/** 平台用户就推送消息  **/
 		for (Long userId : userIds) {
 			sendNoticeToUserById(userId, message, messageBodyType);
@@ -1579,7 +1600,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				members.add(member);
 			}
 			if(members.size() > 0)
-				this.processSmsByMembers(members, cmd.getMessage(),cmd.getMessageBodyType(), user);
+				this.processSmsByMembers(members, cmd.getMessage(),cmd.getMessageBodyType(), cmd.getImgUri(), user);
 		//按门牌地址发送：
 		}if(addressIds != null && addressIds.size()  > 0){
 			for (Long addressId : addressIds) {

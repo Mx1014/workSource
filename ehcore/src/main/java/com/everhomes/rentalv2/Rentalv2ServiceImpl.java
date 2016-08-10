@@ -1487,6 +1487,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//验证site订单是否超过了site数量，如果有，抛异常，回滚操作
 //			this.valiRentalBill(0.0, cmd.getRules());
 //			this.rentalProvider.updateRentalBill(rentalBill);
+//			billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
 			mappingRentalBillDTO(billDTO, rentalBill);
 			
 			return billDTO;
@@ -1753,6 +1754,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalOrder bill : billList) {
 			RentalResource rs = this.rentalProvider.getRentalSiteById(bill.getRentalResourceId());
+			// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
 			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 			mappingRentalBillDTO(dto, bill); 
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
@@ -1792,6 +1794,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			LOGGER.debug("RentalRule is null...getOwnerId  = " + bill.getOwnerId()+",and getOwnerType = "+bill.getOwnerType()+",and getSiteType = "+ bill.getSiteType());
 //			return ;
 //		}
+		
+		 
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
 		if(null == userIdentifier){
 			LOGGER.debug("userIdentifier is null...userId = " + bill.getRentalUid());
@@ -1882,7 +1886,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				.findRentalItemsBillBySiteBillId(bill.getId());
 		if(null!=ribs){
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
-			ribs.forEach((item)->{
+			//dto不是final的变量就改为for循环,不用foreach
+			for(RentalItemsOrder item : ribs){
 				SiteItemDTO siDTO = ConvertHelper.convert(item, SiteItemDTO.class);
 				siDTO.setImgUrl(this.contentServerService.parserUri(item.getImgUri(), EntityType.USER.getCode(), 
 						UserContext.current().getUser().getId()));
@@ -1890,7 +1895,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				siDTO.setCounts(item.getRentalCount());
 				siDTO.setItemType(item.getItemType());
 				dto.getSiteItems().add(siDTO);
-			});
+			}
 		} 
 		dto.setUseDetail(bill.getUseDetail()); 
 				
@@ -2689,7 +2694,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalOrder bill : bills) {
-			RentalBillDTO dto = new RentalBillDTO();
+			// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 			mappingRentalBillDTO(dto, bill);
 			List<RentalItemsOrder> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
@@ -3262,7 +3268,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalServiceErrorCode.ERROR_DID_NOT_PAY,
 							"did not pay for the bill ,can not confirm"); 
 		}
-		RentalBillDTO dto = new RentalBillDTO();
+		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 		mappingRentalBillDTO(dto, bill);
 		return dto;
 	}
@@ -3277,8 +3284,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} 
 		bill.setStatus(SiteBillStatus.COMPLETE.getCode());
 		rentalProvider.updateRentalBill(bill);
-	 
-		RentalBillDTO dto = new RentalBillDTO();
+		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 		mappingRentalBillDTO(dto, bill);
 		return dto;
 	}
@@ -3300,8 +3307,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		
 		rentalProvider.updateRentalBill(bill);
-	 
-		RentalBillDTO dto = new RentalBillDTO();
+		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 		mappingRentalBillDTO(dto, bill);
 		return dto;
 	}
@@ -3399,7 +3406,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		List<RentalBillDTO> dtos = new ArrayList<RentalBillDTO>();
 		for (RentalOrder bill : bills) {
-			RentalBillDTO dto = new RentalBillDTO();
+			// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 			mappingRentalBillDTO(dto, bill);
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsOrder> rentalSiteItems = rentalProvider
@@ -4135,8 +4143,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null==bill)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : bill id can not find bill");
-			
-		RentalBillDTO dto = new RentalBillDTO();
+		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 		mappingRentalBillDTO(dto, bill);
 		dto.setSiteItems(new ArrayList<SiteItemDTO>());
 		List<RentalItemsOrder> rentalSiteItems = rentalProvider

@@ -319,4 +319,5 @@ public interface OrganizationService {
     ListOrganizationsByNameResponse listOrganizationByName(ListOrganizationsByNameCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
+	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
 }

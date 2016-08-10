@@ -3,6 +3,8 @@ package com.everhomes.organization.pmsy;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 public interface PmsyProvider {
 	List<PmsyPayer> listPmPayers(Long id,Integer namespaceId);
 	
@@ -25,6 +27,8 @@ public interface PmsyProvider {
 	void createPmsyOrder(PmsyOrder pmsyOrder);
 	
 	List<PmsyOrder> searchBillingOrders(Integer pageSize ,Long communityId,Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact);
+	
+	List<PmsyOrder> listPmsyOrders(Integer pageSize,Timestamp startDate,Timestamp endDate,List<Byte> statuses, CrossShardListingLocator locator);
 	
 	PmsyOrder findPmsyOrderById(Long id);
 	
