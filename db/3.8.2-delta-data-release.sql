@@ -28,3 +28,7 @@ UPDATE eh_parking_recharge_rates SET rate_name='3个月', card_type = '普通月
 UPDATE eh_parking_recharge_rates SET rate_name='6个月', card_type = '普通月卡' where id = 10002;
 UPDATE eh_parking_recharge_rates SET rate_name='3个月', card_type = '固定车位卡' where id = 10003;
 UPDATE eh_parking_recharge_rates SET rate_name='6个月', card_type = '固定车位卡' where id = 10004;
+set @eh_locale_templates_id = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'park.notification', '2', 'zh_CN', '停车充值默认费率', '${count}个月', '0');
+
