@@ -102,5 +102,18 @@ public class JournalProviderImpl implements JournalProvider {
 		return ConvertHelper.convert(query.fetchOne(), JournalConfig.class);
 	}
 
+	@Override
+	public void createJournalConfig(JournalConfig journalConfig) {
+		Long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhJournalConfigs.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhJournalConfigsDao dao = new EhJournalConfigsDao(context.configuration());
+		journalConfig.setId(id);
+		dao.insert(journalConfig);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhJournalConfigs.class, null);
+		
+	}
+
 	
 }
