@@ -31,6 +31,7 @@ public class ParkingRechargeRateDTO {
     private BigDecimal monthCount;
     private BigDecimal price;
     private Timestamp createTime;
+    private String cardType;
     
     public ParkingRechargeRateDTO() {
     }
@@ -118,5 +119,13 @@ public class ParkingRechargeRateDTO {
 
 	public void setAreaId(Long areaId) {
 		this.areaId = areaId;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
 	}
 }
