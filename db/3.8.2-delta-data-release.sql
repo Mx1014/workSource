@@ -22,3 +22,9 @@ VALUES (770,0,'结算管理','结算管理 全部功能',null);
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),770,49000,'结算管理',0,1,'结算管理',349);
+
+-- 修改停车充值费率
+UPDATE eh_parking_recharge_rates SET rate_name='3个月', card_type = '普通月卡' where id = 10001;
+UPDATE eh_parking_recharge_rates SET rate_name='6个月', card_type = '普通月卡' where id = 10002;
+UPDATE eh_parking_recharge_rates SET rate_name='3个月', card_type = '固定车位卡' where id = 10003;
+UPDATE eh_parking_recharge_rates SET rate_name='6个月', card_type = '固定车位卡' where id = 10004;
