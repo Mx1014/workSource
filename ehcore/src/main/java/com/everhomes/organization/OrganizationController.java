@@ -36,6 +36,9 @@ import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
+import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
+import com.everhomes.rest.organization.CheckOfficalPrivilegeCommand;
+import com.everhomes.rest.organization.CheckOfficalPrivilegeResponse;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.rest.organization.CreateOrganizationContactCommand;
 import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
@@ -891,5 +894,33 @@ public class OrganizationController extends ControllerBase {
          res.setErrorDescription("OK");
          
          return res;
+      }
+      
+      /**
+       * <b>URL: /org/checkOfficalPrivilegeByScene</b>
+       * <p>检查是否具有官方的权限</p>
+       */
+      @RequestMapping("checkOfficalPrivilegeByScene")
+      @RestReturn(value=CheckOfficalPrivilegeResponse.class)
+      public RestResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd){
+    	  RestResponse res = new RestResponse(organizationService.checkOfficalPrivilegeByScene(cmd));
+          res.setErrorCode(ErrorCodes.SUCCESS);
+          res.setErrorDescription("OK");
+          
+          return res;
+      }
+      
+      /**
+       * <b>URL: /org/checkOfficalPrivilege</b>
+       * <p>检查是否具有官方的权限</p>
+       */
+      @RequestMapping("checkOfficalPrivilege")
+      @RestReturn(value=CheckOfficalPrivilegeResponse.class)
+      public RestResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd){
+    	  RestResponse res = new RestResponse(organizationService.checkOfficalPrivilege(cmd));
+          res.setErrorCode(ErrorCodes.SUCCESS);
+          res.setErrorDescription("OK");
+          
+          return res;
       }
 }

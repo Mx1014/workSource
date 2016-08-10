@@ -53,6 +53,8 @@
 
 @property(nonatomic, copy) NSString* mediaUrl;
 
+@property(nonatomic, copy) NSNumber* officialFlag;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

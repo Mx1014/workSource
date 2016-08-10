@@ -11,43 +11,37 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillPaybillMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1831339661;
+	private static final long serialVersionUID = -1597307609;
 
 	private java.lang.Long     id;
-	private java.lang.String   ownerType;
-	private java.lang.Long     ownerId;
-	private java.lang.String   siteType;
 	private java.lang.Long     rentalBillId;
 	private java.lang.Long     onlinePayBillId;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.String   vendorType;
 
 	public EhRentalBillPaybillMap() {}
 
 	public EhRentalBillPaybillMap(
 		java.lang.Long     id,
-		java.lang.String   ownerType,
-		java.lang.Long     ownerId,
-		java.lang.String   siteType,
 		java.lang.Long     rentalBillId,
 		java.lang.Long     onlinePayBillId,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.sql.Timestamp operateTime,
+		java.lang.String   vendorType
 	) {
 		this.id = id;
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.siteType = siteType;
 		this.rentalBillId = rentalBillId;
 		this.onlinePayBillId = onlinePayBillId;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.vendorType = vendorType;
 	}
 
 	public java.lang.Long getId() {
@@ -56,30 +50,6 @@ public class EhRentalBillPaybillMap implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
-	}
-
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public java.lang.String getSiteType() {
-		return this.siteType;
-	}
-
-	public void setSiteType(java.lang.String siteType) {
-		this.siteType = siteType;
 	}
 
 	public java.lang.Long getRentalBillId() {
@@ -128,5 +98,13 @@ public class EhRentalBillPaybillMap implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.String getVendorType() {
+		return this.vendorType;
+	}
+
+	public void setVendorType(java.lang.String vendorType) {
+		this.vendorType = vendorType;
 	}
 }

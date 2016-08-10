@@ -173,7 +173,7 @@ public interface OrganizationProvider {
 	
 	List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(Long orgId, String memberGroup);
 
-	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status);
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, Condition cond);
 	
 	List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,List<Long> organizationIds,Long targetId, String taskType, Byte taskStatus, Byte visibleRegionType, Long visibleRegionId, int pageSize);
 	
@@ -198,4 +198,7 @@ public interface OrganizationProvider {
 	Organization findOrganizationByGroupId(Long groupId);
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
+    List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
+  //根据第三方机构token获取organization
+    Organization findOrganizationByOrganizationToken(String organizationToken);
 }

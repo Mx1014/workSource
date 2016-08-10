@@ -2,7 +2,7 @@
 // EvhTechparkRentalAddRentalItemBillRestResponse.m
 //
 #import "EvhTechparkRentalAddRentalItemBillRestResponse.h"
-#import "EvhAddRentalBillItemCommandResponse.h"
+#import "EvhRentalAddRentalBillItemCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhTechparkRentalAddRentalItemBillRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhAddRentalBillItemCommandResponse new];
+        self.response = [EvhRentalAddRentalBillItemCommandResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

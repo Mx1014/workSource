@@ -14,6 +14,7 @@ public class AclinkLinglingQrCodeRequest {
     private Long endTime;
     private Long effecNumber;
     private String strKey;
+    private Long baseFloorId;
     
     public String getLingLingId() {
         return lingLingId;
@@ -68,6 +69,13 @@ public class AclinkLinglingQrCodeRequest {
     }
     public void setStrKey(String strKey) {
         this.strKey = strKey;
+    }
+
+    public Long getBaseFloorId() {
+        return baseFloorId;
+    }
+    public void setBaseFloorId(Long baseFloorId) {
+        this.baseFloorId = baseFloorId;
     }
     @Override
     public String toString() {

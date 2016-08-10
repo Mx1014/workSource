@@ -53,7 +53,13 @@ if [ -f $property_file ]; then
 fi
 cp $prop_template_file $property_file
 
-sed -i "s/\(ehapp\.version=\).*/\1$TARGET_VERSION/g" $property_file
+if [ "$(uname)" == "Darwin" ]; then
+    sed -i .bak "s/\(ehapp\.version=\).*/\1$TARGET_VERSION/g" $property_file 
+    rm $property_file.bak
+else
+    sed -i "s/\(ehapp\.version=\).*/\1$TARGET_VERSION/g" $property_file
+fi
+
 printf "[INFO] Replace ehapp.version to target version in pom.properties, path=$property_file\n"
 
-${JAVA_HOME}/bin/java -jar ${WORKSPACE_DIR}/tools/pom-sync-1.0.jar -R -e ${property_file} ${WORKSPACE_DIR}/
+"${JAVA_HOME}/bin/java" -jar ${WORKSPACE_DIR}/tools/pom-sync-1.0.jar -R -e ${property_file} ${WORKSPACE_DIR}/

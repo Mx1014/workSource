@@ -8,7 +8,7 @@
 //
 @interface EvhPmsyListAddressesRestResponse : EvhRestResponseBase
 
-// array of EvhAddressDTO* objects
+// array of EvhPmsyAddressDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;

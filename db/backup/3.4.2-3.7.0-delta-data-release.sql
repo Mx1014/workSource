@@ -374,3 +374,11 @@ UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvell6VmlZbU
 UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvell6VmlZbU14T0RabVpHRXlNVEpsWmpsa04yVmxObVV6T0dSaFlUWTVPQQ' WHERE `id`=10328 AND `namespace_id`=999999; -- 企业共享平台
 UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwbFpHTm1PV00wWmpFNFpHTTBNR1EwTVRjME1EZGtNamhsWldRNU5XUXhNUQ' WHERE `id`=10090 AND `namespace_id`=999999; -- 便捷生活
 UPDATE `eh_launch_pad_items` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwbFpHTm1PV00wWmpFNFpHTTBNR1EwTVRjME1EZGtNamhsWldRNU5XUXhNUQ' WHERE `id`=10329 AND `namespace_id`=999999; -- 便捷生活
+--版本信息 升级提示 by wuhan 2016-7-13
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES('36','34','1048575.9','3152896','0','3.7.0','0','2016-07-13 15:48:32','0');
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) VALUES('37','35','1048575.9','3152896','0','3.7.0','0','2016-07-13 15:48:32','0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES('11','35','3.7.0',NULL,'${homeurl}/web/download/apk/andriod-UFinePark-3-7-0.html','0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES('10','34','3.7.0','${homeurl}/web/download/apk/UFinePark-3.7.0.2016071202-release.apk','${homeurl}/web/download/apk/andriod-UFinePark-3-7-0.html','0');
+
+
+

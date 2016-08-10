@@ -16,7 +16,13 @@ public interface SmsTemplateCode {
     static final String KEY_PAYAMOUNT = "payAmount";
     static final String KEY_BALANCE = "balance";
     static final String KEY_DESCRIPTION = "description";
-    
+
+    static final String KEY_USERNAME = "userName";
+    static final String KEY_USERPHONE = "userPhone";
+    static final String KEY_APPLYTIME = "applyTime";
+    static final String KEY_LOCATION = "location";
+    static final String KEY_AREA = "area";
+    static final String KEY_ENTERPRISENAME = "enterpriseName"; 
 
     static final String KEY_PHONE = "phone";
     static final String KEY_TOPICTYPE = "topicType";
@@ -29,4 +35,5 @@ public interface SmsTemplateCode {
     static final int PM_TASK_PROCESS_MSG_CODE = 6; // 任务处理消息
     static final int PM_TASK_PUSH_MSG_CODE = 7; // 任务发布消息
     static final int ACLINK_VISITOR_MSG_CODE = 8; // 访客授权链接
+    static final int WEIXIN_APPLY_RENEW_CODE = 9; // 威新-看楼申请
 }

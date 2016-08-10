@@ -53,6 +53,8 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -62,6 +64,7 @@ import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyBillingAccount;
 import com.everhomes.family.FamilyBillingTransactions;
@@ -127,6 +130,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PropertyPostDTO;
+import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -348,6 +352,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private PromotionService promotionService;
+    
+    @Autowired
+    private ContentServerService contentServerService;
     
     private String queueName = "property-mgr-push";
 	
@@ -1259,33 +1266,33 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<String> phones = cmd.getMobilePhones();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
 		
-//		if(null != addressIds && 0 != addressIds.size()){
-//
-//			/** 根据楼栋Id获取要推送的企业  **/
-//		}else if(null != buildingIds && 0 != buildingIds.size()){
-//
-//			/** 根据楼栋名称获取要推送的企业**/
-//		}else if(null != buildingNames && 0 != buildingNames.size()){
-//
-//		/** 根据电话号码推送   **/
-//		}else if(null != phones && 0 != phones.size()){
-//			
-//		/** 根据小区获取要推送的企业  **/
-//		}else if(null != cmd.getCommunityId()){
-//			LOGGER.debug("All Park push message, cmd = {}", cmd);
-//			
-//			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
-//			Date now = new Date();
-//			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
-//			command.setScopeId(cmd.getCommunityId());
-//			command.setNamespaceId(namespaceId);
-//			command.setContent(cmd.getMessage());
-//			command.setStartTime(now.getTime());
-//			command.setEndTime(DateUtils.addDays(now, 1).getTime());
-//			promotionService.createRegionPushing(command);
-//			
-//			return;
-//		}
+		if(null != addressIds && 0 != addressIds.size()){
+
+			/** 根据楼栋Id获取要推送的企业  **/
+		}else if(null != buildingIds && 0 != buildingIds.size()){
+
+			/** 根据楼栋名称获取要推送的企业**/
+		}else if(null != buildingNames && 0 != buildingNames.size()){
+
+		/** 根据电话号码推送   **/
+		}else if(null != phones && 0 != phones.size()){
+			
+		/** 根据小区获取要推送的企业  **/
+		}else if(null != cmd.getCommunityId()){
+			LOGGER.debug("All Park push message, cmd = {}", cmd);
+			
+			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
+			Date now = new Date();
+			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
+			command.setScopeId(cmd.getCommunityId());
+			command.setNamespaceId(namespaceId);
+			command.setContent(cmd.getMessage());
+			command.setStartTime(now.getTime());
+			command.setEndTime(DateUtils.addDays(now, 1).getTime());
+			promotionService.createRegionPushing(command);
+			
+			return;
+		}
 		
 		LOGGER.debug("push message task scheduling, cmd = {}", cmd);
 		
@@ -1321,6 +1328,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		List<Long> enterpriseIds = new ArrayList<Long>();
 		List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
+		
+		//未设定消息提类型则默认文本 sfyan by 20160729
+		if (null == MessageBodyType.fromCode(cmd.getMessageBodyType())){
+			cmd.setMessageBodyType(MessageBodyType.TEXT.getCode());
+		}
 
 		//按园区发送: buildingNames 和 addressIds 为空。
 		if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.size() == 0)){
@@ -1377,7 +1389,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//			}
 		//		}
 
-		processCommunityEnterpriseContactor(communityId,contacts,cmd.getMessage());
+		processCommunityEnterpriseContactor(communityId,contacts,cmd.getMessage(), cmd.getMessageBodyType());
 	}
 
 	@Override
@@ -1452,7 +1464,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		LOGGER.debug("send message to organization member, members = {}", members);
 		
 		/** 推送消息 **/
-		this.processSmsByMembers(members, cmd.getMessage(), user);
+		this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
 	}
 
 	/**
@@ -1470,7 +1482,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return members;
 	}
 
-	private void processCommunityEnterpriseContactor(Long communityId,List<EnterpriseContact> contacts,String message) {
+	private void processCommunityEnterpriseContactor(Long communityId,List<EnterpriseContact> contacts,String message, String messageBodyType) {
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
@@ -1494,7 +1506,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//是user，发个人信息.
 		if(userIds != null && userIds.size() > 0){
 			for (Long userId : userIds) {
-				sendNoticeToUserById(userId, message);
+				sendNoticeToUserById(userId, message, messageBodyType);
 			}
 		}
 
@@ -1514,7 +1526,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	}
 
-	private void processSmsByMembers(List<OrganizationMember> members,String message, User user) {
+	private void processSmsByMembers(List<OrganizationMember> members,String message,String messageBodyType, String imgUri, User user) {
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
@@ -1528,9 +1540,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
+		if(MessageBodyType.fromCode(messageBodyType) == MessageBodyType.IMAGE){
+			if(StringUtils.isEmpty(imgUri)){
+				LOGGER.error("uri is null.");
+				return ;
+			}
+			ImageBody imageBody = contentServerService.parserImageBody(imgUri, EntityType.USER.getCode(), user.getId());
+			if(null == imageBody){
+				LOGGER.error("image data error image uri = {}.", imgUri);
+				return ;
+			}
+			
+			message = StringHelper.toJsonString(imageBody);
+		}
+		
 		/** 平台用户就推送消息  **/
 		for (Long userId : userIds) {
-			sendNoticeToUserById(userId, message);
+			sendNoticeToUserById(userId, message, messageBodyType);
 		}
 
 		/** 非平台用户就发短信  **/
@@ -1574,7 +1600,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				members.add(member);
 			}
 			if(members.size() > 0)
-				this.processSmsByMembers(members, cmd.getMessage(), user);
+				this.processSmsByMembers(members, cmd.getMessage(),cmd.getMessageBodyType(), cmd.getImgUri(), user);
 		//按门牌地址发送：
 		}if(addressIds != null && addressIds.size()  > 0){
 			for (Long addressId : addressIds) {
@@ -1630,7 +1656,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-不是user，发短信。  4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
 		if(null != owners && owners.size() > 0)
-			processCommunityPmOwner(communityId,owners,cmd.getMessage(), user);
+			processCommunityPmOwner(communityId,owners,cmd.getMessage(), cmd.getMessageBodyType(), user);
 	}
 
 	public void sendNoticeToFamilyById(Long familyId,String message){
@@ -1649,12 +1675,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
-	public void sendNoticeToUserById(Long userId,String message){
+	public void sendNoticeToUserById(Long userId,String message, String messageBodyType){
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(userId)));
 		messageDto.setSenderUid(User.SYSTEM_UID);
-		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBodyType(messageBodyType);
 		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
@@ -1669,7 +1695,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<CommunityPmMember> memberList = propertyMgrProvider.listCommunityPmMembers(organizationId);
 		if(memberList != null && memberList.size() > 0){
 			for (CommunityPmMember communityPmMember : memberList) {
-				sendNoticeToUserById(communityPmMember.getTargetId(), cmd.getMessage());
+				sendNoticeToUserById(communityPmMember.getTargetId(), cmd.getMessage(), MessageBodyType.TEXT.getCode());
 			}
 		}
 	}
@@ -2343,7 +2369,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return bills;
 	}
 
-	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message, User user) {
+	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message,String messageBodyType, User user) {
 		User operator = user;
 		Integer namespaceId = operator.getNamespaceId();
 
@@ -2375,7 +2401,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//是user，还未加入家庭，发个人信息.
 		if(userIds != null && userIds.size() > 0){
 			for (Long userId : userIds) {
-				sendNoticeToUserById(userId, message);
+				sendNoticeToUserById(userId, message, messageBodyType);
 			}
 		}
 

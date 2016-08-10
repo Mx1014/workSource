@@ -20,6 +20,7 @@ import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.rest.hotTag.HotTagStatus;
+import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
@@ -86,6 +87,13 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
+        
+        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
+			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
+			post.setOfficialFlag(OfficialFlag.NO.getCode());
+		}else {
+			post.setOfficialFlag(cmd.getOfficialFlag());
+		}
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         

@@ -36,6 +36,7 @@ import com.everhomes.rest.group.ListMemberInStatusCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
 import com.everhomes.rest.group.RejectAdminRoleCommand;
 import com.everhomes.rest.group.RejectJoinGroupInvitation;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -149,4 +150,5 @@ public interface GroupService {
     void deleteGroupByCreator(long groupId);
     ListGroupCommandResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd);
     ListNearbyGroupCommandResponse listNearbyGroupsByScene(ListNearbyGroupBySceneCommand cmd);
+	void quitAndTransferPrivilege(QuitAndTransferPrivilegeCommand cmd);
 }

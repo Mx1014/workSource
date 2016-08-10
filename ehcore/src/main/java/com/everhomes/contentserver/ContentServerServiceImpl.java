@@ -15,12 +15,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.contentserver.AddConfigItemCommand;
 import com.everhomes.rest.contentserver.AddContentServerCommand;
 import com.everhomes.rest.contentserver.ContentServerDTO;
 import com.everhomes.rest.contentserver.ContentServerErrorCode;
 import com.everhomes.rest.contentserver.UpdateContentServerCommand;
 import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -256,4 +258,49 @@ public class ContentServerServiceImpl implements ContentServerService {
         return contentServerProvider.findByResourceId(resourceId);
     }
     
+    @Override
+    public ImageBody parserImageBody(String uri, String ownerType, Long ownerId){
+    	if (StringUtils.isEmpty(uri)) {
+    		LOGGER.error("uri is null.");
+            return null;
+        }
+    	
+    	ImageBody imageBody = new ImageBody();
+		ContentServerResource contentServerResource = this.findResourceByUri(uri);
+		
+		if(null == contentServerResource){
+			LOGGER.error("cannot find image uri.");
+			return null;
+		}
+		imageBody.setUri(uri);
+		String fileName = contentServerResource.getResourceName();
+		imageBody.setFilename(fileName);
+		String[] arr = fileName.split(".");
+		String format = "image/jpeg";
+		if(arr.length > 1){
+			format = "image/" + arr[1];
+		}
+		imageBody.setFormat(format);
+		Integer fileSize = contentServerResource.getResourceSize();
+		imageBody.setFileSize(Long.valueOf(fileSize));
+		String meta = contentServerResource.getMetadata();
+		if(null != meta){
+			Map<String, Object> m = (Map<String, Object>) StringHelper.fromJsonString(meta, Map.class);
+			if(null != m){
+				if(null == m.get("height")){
+					imageBody.setHeight(Integer.valueOf(m.get("height").toString()));
+				}
+				
+				if(null == m.get("width")){
+					imageBody.setWidth(Integer.valueOf(m.get("width").toString()));
+				}
+			}
+		}
+		
+		String url = this.parserUri(uri, ownerType, ownerId);
+		
+		imageBody.setUrl(url);
+		
+		return imageBody;
+    }
 }

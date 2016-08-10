@@ -40,6 +40,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.ui.forum.MediaDisplayFlag;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.sequence.SequenceProvider;
@@ -223,6 +225,14 @@ public class ForumProviderImpl implements ForumProvider {
         if(post.getUpdateTime() == null) {
             post.setUpdateTime(post.getCreateTime());
         }
+        // 添加帖子要默认为非官方，否则由于查询里有排除官方的帖子的条件，而该字段为NULL导致查不出所有新帖子 by lqs 20160723
+        if(post.getOfficialFlag() == null) {
+            post.setOfficialFlag(OfficialFlag.NO.getCode());
+        }
+        
+        if (post.getMediaDisplayFlag() == null) {
+			post.setMediaDisplayFlag(MediaDisplayFlag.YES.getCode());
+		}
         
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {

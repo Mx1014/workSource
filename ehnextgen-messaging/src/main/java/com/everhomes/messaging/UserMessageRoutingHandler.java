@@ -21,6 +21,7 @@ import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.rest.rpc.client.RealtimeMessageIndicationPdu;
 import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
+import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
@@ -119,8 +120,12 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                     + ", loginId=" + login.getLoginId());
                 return false;
             }
+            
+            if(login.getDeviceIdentifier() == null || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+                return false;
+            }
 
-            return true;
+            return context.checkAndAdd(login.getUserId());
         }).forEach((UserLogin login) -> {
             routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, shadowCloneFinal, deliveryOption);
         });

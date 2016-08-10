@@ -15,7 +15,12 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -31,7 +36,15 @@ import org.springframework.transaction.TransactionStatus;
 
 
 
+
+
+
+
 import ch.hsr.geohash.GeoHash;
+
+
+
+
 
 
 
@@ -130,6 +143,9 @@ import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemTargetType;
 import com.everhomes.rest.launchpad.ScaleType;
+import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
+import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
@@ -1096,7 +1112,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public List<BusinessDTO> getBusinessesByScope(GetBusinessesByScopeCommand cmd) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -1255,7 +1271,7 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter userId,userId is not found");
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
-			this.userActivityService.cancelShop(user.getId());
+			//this.userActivityService.cancelShop(user.getId());
 			if(business != null){
 				this.businessProvider.deleteBusiness(business.getId());
 				//删除服务市场item
@@ -2045,6 +2061,72 @@ public class BusinessServiceImpl implements BusinessService {
 				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, baseScene);
 		}
 	
+	}
+
+	@Override
+	public Integer findUserCouponCount(UserCouponsCommand cmd) {
+		if(cmd.getUserId()==null){
+			LOGGER.error("Invalid parameter,userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId is null");
+		}
+		UserProfileDTO profile = userActivityService.findUserProfileBySpecialKey(cmd.getUserId(),UserProfileContstant.RECEIVED_COUPON_COUNT);
+		if(profile==null)
+			return 0;
+		return NumberUtils.toInt(profile.getItemValue(), 0);
+	}
+
+	@Override
+	public void updateUserCouponCount(UpdateUserCouponCountCommand cmd) {
+		if(cmd.getUserId()==null||cmd.getCouponCount()==null){
+			LOGGER.error("Invalid parameter,userId or coupon is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId or coupon is null");
+		}
+		userActivityService.updateUserProfile(cmd.getUserId(), UserProfileContstant.RECEIVED_COUPON_COUNT, cmd.getCouponCount()+"");
+	}
+
+	@Override
+	public void addUserOrderCount(Long userId) {
+		if(userId==null){
+			LOGGER.error("Invalid parameter,userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId is null");
+		}
+		userActivityService.updateProfileIfNotExist(userId,UserProfileContstant.RECEIVED_ORDER_COUNT,1);
+	}
+
+	@Override
+	public void reduceUserOrderCount(Long userId) {
+		if(userId==null){
+			LOGGER.error("Invalid parameter,userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId is null");
+		}
+		userActivityService.updateProfileIfNotExist(userId,UserProfileContstant.RECEIVED_ORDER_COUNT,-1);
+	}
+
+	@Override
+	public Integer findUserOrderCount(UserCouponsCommand cmd) {
+		if(cmd.getUserId()==null){
+			LOGGER.error("Invalid parameter,userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId is null");
+		}
+		UserProfileDTO profile = userActivityService.findUserProfileBySpecialKey(cmd.getUserId(),UserProfileContstant.RECEIVED_ORDER_COUNT);
+		if(profile==null)
+			return 0;
+		return NumberUtils.toInt(profile.getItemValue(), 0);
+	}
+
+	@Override
+	public void updateUserOrderCount(UpdateUserOrderCountCommand cmd) {
+		if(cmd.getUserId()==null||cmd.getOrderCount()==null){
+			LOGGER.error("Invalid parameter,userId or orderCount is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId or orderCount is null");
+		}
+		userActivityService.updateUserProfile(cmd.getUserId(), UserProfileContstant.RECEIVED_ORDER_COUNT, cmd.getOrderCount()+"");
 	}
 
 }

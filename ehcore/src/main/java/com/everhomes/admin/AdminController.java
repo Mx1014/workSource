@@ -5,6 +5,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,12 +43,12 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.codegen.CodeGenContext;
 import com.everhomes.codegen.GeneratorContext;
 import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.ItemType;
 import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
@@ -64,6 +66,7 @@ import com.everhomes.rest.border.BorderDTO;
 import com.everhomes.rest.border.UpdateBorderCommand;
 import com.everhomes.rest.persist.server.AddPersistServerCommand;
 import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
@@ -226,6 +229,9 @@ public class AdminController extends ControllerBase {
         context.setSourceFileExtention(this.sourceFileExtention);
         context.setRestResponseBase(restResponseBase);
         context.setContextParam("dest.dir.java", StringHelper.interpolate(this.destinationJavaDir));
+        LOGGER.info("Set destination of generating java, path={}", this.destinationJavaDir);
+        
+        checkItemTypeTest();
         
         if(language.equalsIgnoreCase("objc")) {
             ObjectiveCGenerator generator = new ObjectiveCGenerator();
@@ -234,6 +240,7 @@ public class AdminController extends ControllerBase {
             // generate REST POJO objects
             jars.stream().forEach((jar)-> {
                 try {
+                    LOGGER.info("Load classes in jar, jarPath={}", jar);
                     Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(StringHelper.interpolate(jar));
                     
                     for(Class<?> clz: classes) {
@@ -282,15 +289,39 @@ public class AdminController extends ControllerBase {
             generator.generateApiConstants(apiMethods, context);
         }
         
-        List<String> errorList = CodeGenContext.current().getErrorMessages();
-        CodeGenContext.clear();
-        if(errorList == null || errorList.size() == 0) {
-            return new RestResponse("OK");
+//        List<String> errorList = CodeGenContext.current().getErrorMessages();
+//        CodeGenContext.clear();
+//        if(errorList == null || errorList.size() == 0) {
+//            return new RestResponse("OK");
+//        } else {
+//            RestResponse response = new RestResponse(errorList);
+//            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
+//            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+//            return response;
+//        }
+        return new RestResponse("OK");
+    }
+    
+    private void checkItemTypeTest() {
+        Field[] fields = ExpressionDTO.class.getDeclaredFields();
+    
+        if(fields != null) {
+            for(Field field : fields) {
+                LOGGER.debug("Find field for ExpressionDTO, fieldName={}", field.getName());
+                if("expression".equals(field.getName())) {
+                    ItemType itemType = field.getAnnotation(ItemType.class);
+                    if(itemType != null) {
+                        Class<?> itemClz = itemType.value();
+                        String clsName = null;
+                        if(itemClz != null) {
+                            clsName = itemClz.getName();
+                        }
+                        LOGGER.debug("Find item type, clsName={}", clsName);
+                    }
+                } 
+            }
         } else {
-            RestResponse response = new RestResponse(errorList);
-            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
-            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-            return response;
+            LOGGER.debug("No field found for ExpressionDTO");
         }
     }
     

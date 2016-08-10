@@ -1,6 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
@@ -57,17 +59,25 @@ import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
-    
+
+	@Autowired
+	private SmsProvider smsProvider;
+	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	
@@ -86,7 +96,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private CommunityProvider communityProvider;
 	
-
+	@Autowired
+	private UserProvider userProvider;
+	
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
 			ListEnterpriseDetailCommand cmd) {
@@ -254,9 +266,53 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
+		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
+		String phoneNumber = null;
+		if(rentType != null) {
+			switch(rentType) {
+			case ORDINARY:
+				phoneNumber = lp.getContactPhone();
+				break;
+			case BUILDING:
+				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
+				if(null != identifier)
+					phoneNumber = identifier.getIdentifierToken();
+				break;
+			default:
+				break;
+				
+			}
+		} 
+
+		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+		sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+				lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
 		return true;
 	}
-
+	/**
+	 * 用户{userName}（手机号：{userPhone}）于{applyTime}提交了预约看楼申请：
+ 	 * 参观位置：{location}
+ 	 * 面积需求：{area}
+	 * 公司名称：{enterpriseName}
+	 * 备注：{description}
+	 * */
+	private void sendApplyEntrySmsToManager(String phoneNumber,String userName,String userPhone,String applyTime,String location
+			,String area,String enterpriseName,String description , Integer namespaceId){
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_USERNAME, userName);
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_USERPHONE, userPhone); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTIME, applyTime); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_LOCATION, location); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_AREA, area); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_ENTERPRISENAME, enterpriseName); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_DESCRIPTION, description);  
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.WEIXIN_APPLY_RENEW_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+	}
+	
 	@Override
 	public boolean applyRenew(EnterpriseApplyRenewCommand cmd) {
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getId(), UserContext.current().getUser().getId());
