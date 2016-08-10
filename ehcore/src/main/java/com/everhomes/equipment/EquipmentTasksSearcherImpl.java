@@ -32,6 +32,7 @@ import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
+import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.search.SearchUtils;
@@ -125,12 +126,12 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
         if(cmd.getTargetType() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", cmd.getTargetType())); 
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode())); 
         
        // startTime  endTime  status  reviewStatus  taskType  
         if(cmd.getStartTime() != null) {

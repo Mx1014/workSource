@@ -34,6 +34,7 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentsResponse;
+import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentSearcher;
 import com.everhomes.search.SearchUtils;
@@ -129,12 +130,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
         if(cmd.getTargetType() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", cmd.getTargetType()));
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
         
         if(cmd.getStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
