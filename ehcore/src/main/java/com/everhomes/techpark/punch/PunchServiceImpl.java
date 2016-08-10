@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -1324,31 +1325,36 @@ public class PunchServiceImpl implements PunchService {
 		if (date1 == null)
 			return false;
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		// 如果属于周末调班 返回工作日
-		List<PunchHoliday> workDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
-				punchRule.getWorkdayRuleId(),DateStatus.WORKDAY.getCode());
-		if (null != workDates) {
-			for (PunchHoliday workDate : workDates) {
-				if (dateSF.format(date1).equals(dateSF.format(workDate.getRuleDate())))
-					return true;
+		int openWeekInt = 111110;
+		if(null != punchRule.getWorkdayRuleId()){
+			// 如果属于周末调班 返回工作日
+			List<PunchHoliday> workDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
+					punchRule.getWorkdayRuleId(),DateStatus.WORKDAY.getCode());
+			if (null != workDates) {
+				for (PunchHoliday workDate : workDates) {
+					if (dateSF.format(date1).equals(dateSF.format(workDate.getRuleDate())))
+						return true;
+				}
 			}
-		}
-		// 如果属于工作日休假 返回非工作日
-		List<PunchHoliday> weekenDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
-				punchRule.getWorkdayRuleId(),DateStatus.HOLIDAY.getCode());
-		if (null != weekenDates) {
-			for (PunchHoliday weekenDate : weekenDates) {
-				if (dateSF.format(date1).equals(dateSF.format(weekenDate.getRuleDate())))
-					return false;
+			// 如果属于工作日休假 返回非工作日
+			List<PunchHoliday> weekenDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
+					punchRule.getWorkdayRuleId(),DateStatus.HOLIDAY.getCode());
+			if (null != weekenDates) {
+				for (PunchHoliday weekenDate : weekenDates) {
+					if (dateSF.format(date1).equals(dateSF.format(weekenDate.getRuleDate())))
+						return false;
+				}
 			}
+			PunchWorkdayRule workdayRule = this.punchProvider.getPunchWorkdayRuleById(punchRule.getWorkdayRuleId());
+			openWeekInt = Integer.valueOf(workdayRule.getWorkWeekDates())-1;
 		}
-		PunchWorkdayRule workdayRule = this.punchProvider.getPunchWorkdayRuleById(punchRule.getWorkdayRuleId());
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date1);
 		 // 获取日期周几
+//		Locale.setDefault(Locale.US);
 		Integer weekDay = calendar.get(Calendar.DAY_OF_WEEK);
 		//将七位0111110这样的代码转换成一个存储星期几的list
-		int openWeekInt = Integer.valueOf(workdayRule.getWorkWeekDates());
+		
 		List<Integer> workDays=new ArrayList<Integer>();
         for(int i=0;i<7;i++){
         	if(openWeekInt%10 == 1)
