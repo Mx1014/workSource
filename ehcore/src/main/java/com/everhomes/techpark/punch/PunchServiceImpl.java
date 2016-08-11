@@ -3328,6 +3328,9 @@ public class PunchServiceImpl implements PunchService {
 		if(organizationMembers == null || organizationMembers.isEmpty())
 			return null;
 		for(OrganizationMember member : organizationMembers){
+			//groupid == 0 话直接返回总公司
+			if(member.getGroupId().equals(0L))
+				return this.organizationProvider.getOrganizationByGoupId(member.getOrganizationId());
 			if(result == null)
 				result = this.organizationProvider.findOrganizationById(member.getGroupId());
 			else{
