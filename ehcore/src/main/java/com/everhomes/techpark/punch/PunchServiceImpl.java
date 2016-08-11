@@ -3330,7 +3330,7 @@ public class PunchServiceImpl implements PunchService {
 		for(OrganizationMember member : organizationMembers){
 			//groupid == 0 话直接返回总公司
 			if(member.getGroupId().equals(0L))
-				return this.organizationProvider.getOrganizationByGoupId(member.getOrganizationId());
+				return this.organizationProvider.findOrganizationById(member.getOrganizationId());
 			if(result == null)
 				result = this.organizationProvider.findOrganizationById(member.getGroupId());
 			else{
