@@ -3230,13 +3230,17 @@ public class PunchServiceImpl implements PunchService {
 		results.forEach((other) -> {
 			PunchRuleDTO dto = ConvertHelper.convert(other, PunchRuleDTO.class);
 			PunchTimeRule timeRule = this.punchProvider.getPunchTimeRuleById(other.getTimeRuleId());
-			dto.setTimeRuleName(timeRule.getName());
+			if(null != timeRule)
+				dto.setTimeRuleName(timeRule.getName());
 			PunchLocationRule locationRule = this.punchProvider.getPunchLocationRuleById(other.getLocationRuleId());
-			dto.setLocationRuleName(locationRule.getName());
+			if(null != locationRule)
+				dto.setLocationRuleName(locationRule.getName());
 			PunchWifiRule wifiRule = this.punchProvider.getPunchWifiRuleById(other.getWifiRuleId());
-			dto.setWifiRuleName(wifiRule.getName());
+			if(null != wifiRule)
+				dto.setWifiRuleName(wifiRule.getName());
 			PunchWorkdayRule workdayRule = this.punchProvider.getPunchWorkdayRuleById(other.getWorkdayRuleId());
-			dto.setWorkdayRuleName(workdayRule.getName());
+			if(null != workdayRule)
+				dto.setWorkdayRuleName(workdayRule.getName());
 			response.getPunchRuleDTOs().add(dto);
 		});
 		return response;
