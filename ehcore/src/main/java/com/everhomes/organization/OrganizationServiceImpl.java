@@ -307,6 +307,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd) {
+		
+		if(null == OrganizationGroupType.fromCode(cmd.getGroupType())){
+			LOGGER.error("organization group type error. cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ASSIGNMENT_EXISTS,
+					"organization group type error");
+		}
 
 		Organization organization  = ConvertHelper.convert(cmd, Organization.class);
 		
@@ -4366,10 +4372,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationAdministratorCommand cmd){
+	public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd){
 		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 		command.setOrganizationId(cmd.getOrganizationId());
 		command.setPageSize(100000);
+		command.setKeywords(cmd.getKeywords());
 		ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnels(command, false);
 		
 		List<OrganizationMemberDTO> roleMembers = new ArrayList<OrganizationMemberDTO>();

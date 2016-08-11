@@ -71,6 +71,7 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
 import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
 import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
@@ -241,7 +242,7 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
 			ListOrganizationContactCommand cmd, boolean pinyinFlag);
-	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationAdministratorCommand cmd);
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
 	ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);

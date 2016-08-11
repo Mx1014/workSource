@@ -35,5 +35,10 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_ORG_EXIST = 500001; //公司已存在
     
     static final int ERROR_ORG_TYPE = 500002; //公司类型错误
+
+    static final int ERROR_CONNOT_DELETE_ADMIN = 400003;
+    
+    static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
+    
    
 }

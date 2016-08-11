@@ -29,12 +29,15 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteUserRoleAdminCommand;
+import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
 import com.everhomes.rest.acl.admin.ListWebMenuCommand;
@@ -43,6 +46,7 @@ import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
 import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
@@ -377,4 +381,88 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/acl/deleteAclRoleAssignment</b>
+     * <p>删除角色人员</p>
+     */
+    @RequestMapping("deleteAclRoleAssignment")
+    @RestReturn(value=String.class)
+    public RestResponse deleteAclRoleAssignment(@Valid DeleteAclRoleAssignmentCommand cmd) {
+    	rolePrivilegeService.deleteAclRoleAssignment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/addAclRoleAssignment</b>
+     * <p>添加角色人员</p>
+     */
+    @RequestMapping("addAclRoleAssignment")
+    @RestReturn(value=String.class)
+    public RestResponse addAclRoleAssignment(@Valid AddAclRoleAssignmentCommand cmd) {
+    	rolePrivilegeService.addAclRoleAssignment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/batchAddTargetRoles</b>
+     * <p>设置角色人员</p>
+     */
+    @RequestMapping("batchAddTargetRoles")
+    @RestReturn(value=String.class)
+    public RestResponse batchAddTargetRoles(@Valid BatchAddTargetRoleCommand cmd) {
+    	rolePrivilegeService.batchAddTargetRoles(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/exportAclRoleAssignment</b>
+     * <p>导出角色人员</p>
+     */
+    @RequestMapping("exportAclRoleAssignment")
+    @RestReturn(value=String.class)
+    public RestResponse exportAclRoleAssignment(@Valid AddAclRoleAssignmentCommand cmd) {
+    	rolePrivilegeService.addAclRoleAssignment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/exportRoleAssignmentPersonnelXls</b>
+     * <p>导出角色人员</p>
+     */
+    @RequestMapping("exportRoleAssignmentPersonnelXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/importRoleAssignmentPersonnelXls</b>
+     * <p>导入角色人员</p>
+     */
+    @RequestMapping("importRoleAssignmentPersonnelXls")
+    @RestReturn(value=String.class)
+    public RestResponse importRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }
