@@ -21,6 +21,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -40,6 +41,7 @@ import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 
+@Component
 public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwnerSearcher {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PMOwnerSearcherImpl.class);
