@@ -36,12 +36,26 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
+
+
+
+
 
 
 
@@ -86,8 +100,10 @@ import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuType;
+import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
@@ -97,17 +113,18 @@ import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
 import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -485,6 +502,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			roles.add(RoleConstants.PM_SUPER_ADMIN);
 		}
 		
+		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
+		command.setOrganizationId(cmd.getOrganizationId());
+		command.setRoleIds(roles);
+		
+		ListOrganizationMemberCommandResponse res =  organizationService.listOrganizationPersonnelsByRoleIds(command);
+		
+		if(1 == res.getMembers().size()){
+			LOGGER.error("Keep at least one administrator, organizationId = {}", cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONNOT_DELETE_ADMIN,
+					"Keep at least one administrator.");
+		}
+		
 		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId());
 		
 		/**
@@ -513,9 +542,102 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		cmd.setRoleIds(roles);
 		
-		return organizationService.listOrganizationPersonnelsByRoleIds(cmd);
+		return organizationService.listOrganizationPersonnelsByRoleIds(ConvertHelper.convert(cmd, ListOrganizationPersonnelByRoleIdsCommand.class));
 	}
 	
+	@Override
+	public void deleteAclRoleAssignment(DeleteAclRoleAssignmentCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
+			LOGGER.error("delete acl role assignment error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"delete acl role assignment error.");
+		}
+		
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		if(null != roleAssignments && 0 < roleAssignments.size()){
+			for (RoleAssignment assignment : roleAssignments) {
+				if(assignment.getRoleId().equals(cmd.getRoleId())){
+					aclProvider.deleteRoleAssignment(assignment.getId());
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void addAclRoleAssignment(AddAclRoleAssignmentCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
+			LOGGER.error("add acl role assignment error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"add acl role assignment error.");
+		}
+		
+		RoleAssignment roleAssignment = new RoleAssignment();
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		if(null != roleAssignments && 0 < roleAssignments.size()){
+			for (RoleAssignment assignment : roleAssignments) {
+				if(assignment.getRoleId().equals(cmd.getRoleId())){
+					LOGGER.error("role personnel already exist, cmd = {}", cmd);
+					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ASSIGNMENT_EXISTS,
+							"role personnel already exist.");
+				}
+			}
+		}
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			roleAssignment.setRoleId(cmd.getRoleId());
+			roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			roleAssignment.setOwnerId(cmd.getOrganizationId());
+			roleAssignment.setTargetType(cmd.getTargetType());
+			roleAssignment.setTargetId(cmd.getTargetId());
+			roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+			aclProvider.createRoleAssignment(roleAssignment);
+			return null;
+		});
+	}
+	
+	
+	@Override
+	public void batchAddTargetRoles(BatchAddTargetRoleCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleIds() || 0 == cmd.getRoleIds().size()){
+			LOGGER.error("set target role error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"set target role error.");
+		}
+		
+		RoleAssignment roleAssignment = new RoleAssignment();
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		List<Long> roleIds = cmd.getRoleIds();
+		dbProvider.execute((TransactionStatus status) -> {
+
+			for (Long roleId : roleIds) {
+				boolean flag = true;
+				if(null != roleAssignments && 0 < roleAssignments.size()){
+					for (RoleAssignment assignment : roleAssignments) {
+						if(assignment.getRoleId().equals(roleId)){
+							flag = false;
+							break;
+						}
+					}
+				}
+				
+				if(flag){
+					roleAssignment.setRoleId(roleId);
+					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+					roleAssignment.setOwnerId(cmd.getOrganizationId());
+					roleAssignment.setTargetType(cmd.getTargetType());
+					roleAssignment.setTargetId(cmd.getTargetId());
+					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+					aclProvider.createRoleAssignment(roleAssignment);
+				}
+				
+			}
+			
+			return null;
+		});
+	}
 	
 	
 	 /**

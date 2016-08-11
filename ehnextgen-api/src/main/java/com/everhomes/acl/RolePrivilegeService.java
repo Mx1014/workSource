@@ -5,8 +5,11 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
+import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
@@ -128,4 +131,22 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 */
 	void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
+	
+	/**
+	 * 删除角色人员
+	 * @param cmd
+	 */
+	void deleteAclRoleAssignment(DeleteAclRoleAssignmentCommand cmd);
+	
+	/**
+	 * 添加角色人员
+	 * @param cmd
+	 */
+	void addAclRoleAssignment(AddAclRoleAssignmentCommand cmd);
+	
+	/**
+	 * 添加人员多个角色
+	 * @param cmd
+	 */
+	void batchAddTargetRoles(BatchAddTargetRoleCommand cmd);
 }

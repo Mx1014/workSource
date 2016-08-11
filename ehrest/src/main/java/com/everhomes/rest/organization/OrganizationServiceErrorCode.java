@@ -31,5 +31,10 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_PARAMETER_NOT_EXIST = 400001;
     
     static final int ERROR_OBJECT_NOT_EXIST = 400002;
+    
+    static final int ERROR_CONNOT_DELETE_ADMIN = 400003;
+    
+    static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
+    
    
 }

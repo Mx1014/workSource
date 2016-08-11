@@ -549,6 +549,20 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/org/createChildrenOrganization</b>
+     * <p>创建子机构</p>
+     */
+    @RequestMapping("createChildrenOrganization")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse createChildrenOrganization(@Valid CreateOrganizationCommand cmd) {
+    	organizationService.createChildrenOrganization(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/org/createChildrenDepartment</b>
      * <p>创建部门</p>
      */
