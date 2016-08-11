@@ -4736,13 +4736,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
-				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_OBJECT_NOT_EXIST,
-						"organization detail is null.");
+			}else{
+				detail.setContactor(cmd.getAccountName());
+				detail.setContact(cmd.getAccountPhone());
+				organizationProvider.updateOrganizationDetail(detail);
 			}
-			
-			detail.setContactor(cmd.getAccountName());
-			detail.setContact(cmd.getAccountPhone());
-			organizationProvider.updateOrganizationDetail(detail);
 			return null;
 		});
 	}
