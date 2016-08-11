@@ -19,7 +19,8 @@ public enum CoordinationLocks {
     CREATE_QUALITY_TASK("quality.task.create"),
     PAYMENT_CARD("payment.card"),
 	UPDATE_NEWS("news.update"),
-	WANKE_LOGIN("wanke.login");
+	WANKE_LOGIN("wanke.login"),
+    STAT_SETTLEMENT("stat.settlement");
     
 
     private String code;
