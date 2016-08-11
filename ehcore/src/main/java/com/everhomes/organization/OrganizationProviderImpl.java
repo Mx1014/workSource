@@ -1420,7 +1420,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes,String userName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		 
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		Condition cond = Tables.EH_ORGANIZATIONS.PATH.like(superiorPath + "/%")
+				.or(Tables.EH_ORGANIZATIONS.PATH.eq(superiorPath));
+		if(null != groupTypes){
+			cond = cond.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addConditions(
+				Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(
+						context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+						.where(cond)));
+		if(!StringUtils.isEmpty(userName))
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+userName+"%"));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		 
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		 
+		if(result != null && !result.isEmpty())
+			return result;
+		return null;
+	}
 	@Override
 	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

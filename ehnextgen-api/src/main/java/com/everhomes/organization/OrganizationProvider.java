@@ -200,4 +200,5 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
+	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
 }

@@ -145,4 +145,6 @@ public interface PunchService {
 	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd);
 
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
+
+	void dayRefreshLogScheduled();
 }

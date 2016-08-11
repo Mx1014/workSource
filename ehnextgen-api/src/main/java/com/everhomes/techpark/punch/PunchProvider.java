@@ -251,6 +251,9 @@ public interface PunchProvider {
 	void updatePunchStatistic(PunchStatistic obj);
 
 	Long createPunchStatistic(PunchStatistic obj);
+
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+			List<Long> userIds, CrossShardListingLocator locator, int i);
  
  
 }

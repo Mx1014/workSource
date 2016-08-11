@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
  /**
  * <ul>  
- * <li>PunchDay：打卡日期String:YYYY-MM-DD </li>
+ * <li>PunchDay：打卡日期DD(1到31) </li>
  * <li>punchStatus：打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>morningPunchStatus：早上打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>afternoonPunchStatus：下午打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>

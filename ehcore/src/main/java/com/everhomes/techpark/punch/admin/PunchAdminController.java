@@ -431,6 +431,8 @@ public class PunchAdminController extends ControllerBase {
 		return response;
 	}
 	
+	//统计
+	
 	/**
 	 * <b>URL: punch/listPunchStatistics</b>
 	 * <p>
@@ -455,10 +457,7 @@ public class PunchAdminController extends ControllerBase {
 	 */
 	@RequestMapping("exportPunchStatistics")
 	public  HttpServletResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response );
-//		RestResponse response = new RestResponse(commandResponse);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
+		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response ); 
 		return commandResponse;
 	}
 	/**

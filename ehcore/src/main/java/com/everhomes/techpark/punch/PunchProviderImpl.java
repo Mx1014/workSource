@@ -2129,10 +2129,34 @@ long id = sequenceProvider.getNextSequence(key);
             return ConvertHelper.convert(r, PunchStatistic.class);
         });
 
-        return objs;
+		if (null != objs && objs.size() > 0)
+			return objs ;
+		return null;
     }
 
     private void prepareObj(PunchStatistic obj) {
     }
+
+	@Override
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+			List<Long> userIds, CrossShardListingLocator locator, int i) {
+		List<PunchStatistic> result = queryPunchStatistics(locator,  i, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));   
+                if(null != exceptionStatus)
+                	query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));   
+                if(null != userIds )
+                	query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));   
+                 
+                	
+                return query;
+            }
+            
+        });
+		return result;
+	}
 }
 
