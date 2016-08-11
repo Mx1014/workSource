@@ -3114,7 +3114,21 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void addPunchRule(PunchRuleDTO cmd) {
 
-		Long userId = UserContext.current().getUser().getId();
+		if (null == cmd.getTimeRuleId()) {
+			LOGGER.error("Invalid TimeRuleId parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid TimeRuleId parameter in the command");
+		}
+		if (null == cmd.getWorkdayRuleId()) {
+			LOGGER.error("Invalid  WorkdayRuleId parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid  WorkdayRuleId parameter in the command");
+		}
+		if (null == cmd.getWifiRuleId() || null == cmd.getLocationRuleId()) {
+			LOGGER.error("wifi and location can not be both null ");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"wifi and location can not be both null ");
+		}
 		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3296,7 +3310,12 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
 		results.forEach((other) -> {
 			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
-			 
+			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
+			if(pr == null)
+				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+						"have no punch rule");
+			dto.setPunchRuleName(pr.getName());
 			response.getPunchRuleMaps().add(dto);
 		});
 		return response;
