@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
 public class PunchLogListTest extends BaseLoginAuthTestCase {
 	Integer namespaceId = 0;
 	String userIdentifier = "10001";
+	String userIdentifier2 = "10002";
 	String plainTexPassword = "123456";
 	String ownerType = PunchOwnerType.ORGANIZATION.getCode();
 	Long ownerId = 100600L;
@@ -68,6 +69,10 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 		return null;
 	}
 
+	 /**测试点:
+	  * 1.四次打卡的状态
+	  * 2.给上层设置规则,下层部门没有规则自动找上层的规则
+	  * */
 	@Test
 	public void listMonthPunchLogsTest() {
 		logon(null, userIdentifier, plainTexPassword);
@@ -105,6 +110,65 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			if (dayLog.getPunchDay().equals("5")) {
 				assertEquals(PunchStatus.OVERTIME, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
 				assertEquals(PunchStatus.OVERTIME, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+			// 8月4 上午 早退且迟到 下午 早退且迟到
+			if (dayLog.getPunchDay().equals("4")) {
+				assertEquals(PunchStatus.BLANDLE, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.BLANDLE, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+			// 8月3 正常 正常
+			if (dayLog.getPunchDay().equals("3")) {
+				assertEquals(PunchStatus.NORMAL, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.NORMAL, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+			// 8月2 正常 早退
+			if (dayLog.getPunchDay().equals("2")) {
+				assertEquals(PunchStatus.NORMAL, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.LEAVEEARLY, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+		}
+		listMonthPunchLogsTest2();
+	}
+	 /**测试点:
+	  * 1.没有workday的规则默认是周一到周五
+	  * 2.给个人设置规则映射
+	  * */
+	public void listMonthPunchLogsTest2() {
+		logon(null, userIdentifier2, plainTexPassword);
+
+		String commandRelativeUri = "/techpark/punch/listMonthPunchLogs";
+
+		ListMonthPunchLogsCommand cmd = new ListMonthPunchLogsCommand();
+		cmd.setEnterpriseId(ownerId);
+		// 查8月
+		cmd.setQueryTime(1470672000000L);
+		PunchListMonthPunchLogsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd,
+				PunchListMonthPunchLogsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		for (PunchLogsDay dayLog : response.getResponse().getPunchLogsMonthList().get(0).getPunchLogsDayList()) {
+
+			// 8月10 上午缺勤 下午忘打卡
+			if (dayLog.getPunchDay().equals("10")) {
+				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+			// 8月9 上午早退 下午迟到
+			else if (dayLog.getPunchDay().equals("9")) {
+				assertEquals(PunchStatus.LEAVEEARLY, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.BELATE, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+			// 8月8 上午迟到 下午正常
+			if (dayLog.getPunchDay().equals("8")) {
+				assertEquals(PunchStatus.BELATE, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.NORMAL, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+			}
+			// 8月5 加班 加班
+			if (dayLog.getPunchDay().equals("5")) {
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
 			}
 			// 8月4 上午 早退且迟到 下午 早退且迟到
 			if (dayLog.getPunchDay().equals("4")) {

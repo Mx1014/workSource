@@ -16,8 +16,7 @@
             "owner_id": 100600,
             "name": "规则3",
             "time_rule_id": 2, 
-            "wifi_rule_id": 3,
-            "workday_rule_id": 2 
+            "wifi_rule_id": 3 
         }
     ]
 }

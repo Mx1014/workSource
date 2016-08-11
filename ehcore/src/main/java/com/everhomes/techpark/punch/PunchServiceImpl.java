@@ -1089,6 +1089,11 @@ public class PunchServiceImpl implements PunchService {
 				// 如果找到了一个就跳出
 				return ClockCode.SUCESS; 
 			}
+			else {
+
+				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+	 					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
+			}
 		}
 
 		return code;
@@ -3272,6 +3277,12 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid target type or  Id parameter in the command");
 		}
+		if(null == cmd.getPunchRuleId()){
+			LOGGER.error("Invalid PunchRuleId parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid PunchRuleId parameter in the command");
+		}
+			
 		PunchRuleOwnerMap old = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),  cmd.getTargetType(), cmd.getTargetId());
 		PunchRuleOwnerMap obj = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
 		if( null == old ){
