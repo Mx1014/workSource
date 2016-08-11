@@ -1090,9 +1090,12 @@ public class PunchServiceImpl implements PunchService {
 				return ClockCode.SUCESS; 
 			}
 			else {
-
-				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-	 					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
+				if(null == pr.getWifiRuleId())
+					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+		 					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
+				else
+					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+	 					PunchServiceErrorCode.ERROR_NOT_IN_AREA_AND_WIFI,"not in punch area and not in wifi");
 			}
 		}
 

@@ -60,7 +60,7 @@ public class PunchClockTest extends BaseLoginAuthTestCase {
 	}
 	/**
 	 * 测试:wifi打卡的正常/wifi错误/wifi空 的情况
-	 * 测试:wifi加地址打卡的 wifi正确/wifi错误/wifi为空 地址正确/wifi和地址空 /wifi为空 且 地址错误
+	 * 测试:wifi加地址打卡的 wifi正确/wifi错误/wifi为空 地址正确/wifi和地址空 /wifi 错误 地址正确/wifi为空 且 地址错误
 	 * */
 	@Test
 	public void testWIFIPunch(){
@@ -75,6 +75,7 @@ public class PunchClockTest extends BaseLoginAuthTestCase {
 		PunchClockTest5();
 		PunchClockTest6();
 		PunchClockTest7(); 
+		PunchClockTest8();
 		PunchClockTest9();
 	}
 	/**wifi正确*/
@@ -145,7 +146,7 @@ public class PunchClockTest extends BaseLoginAuthTestCase {
 				httpClientService.isReponseSuccess(response));
 
 	}
-	
+
 
 	/**wifi为空地址错误*/
 	public void PunchClockTest5() {
@@ -160,7 +161,7 @@ public class PunchClockTest extends BaseLoginAuthTestCase {
 		RestResponse response = httpClientService.restGet(commandRelativeUri, cmd, RestResponse.class, context);
 
 		assertNotNull("The reponse of may not be null", response);
-		assertTrue( response.getErrorCode().equals(10001));
+		assertTrue( response.getErrorCode().equals(10008));
 
 	}
 
@@ -179,13 +180,32 @@ public class PunchClockTest extends BaseLoginAuthTestCase {
 		RestResponse response = httpClientService.restGet(commandRelativeUri, cmd, RestResponse.class, context);
 
 		assertNotNull("The reponse of may not be null", response);
-		assertTrue( response.getErrorCode().equals(10001));
+		assertTrue( response.getErrorCode().equals(10008));
 
 	}
 	
 
-	/**只有wifi wifi错误*/
+	/**wifi错误 地址正确*/
 	public void PunchClockTest7() {
+		logon(null, userIdentifier, plainTexPassword);
+
+		String commandRelativeUri = "/techpark/punch/punchClock";
+
+		PunchClockCommand cmd = new PunchClockCommand();
+		cmd.setWifiMac("fanzhengcuo le ");
+		cmd.setLatitude(22.536289);
+		cmd.setLongitude(113.951335);
+		cmd.setEnterpriseId(ownerId); 
+		RestResponse response = httpClientService.restGet(commandRelativeUri, cmd, RestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+
+	}
+	/**只有wifi wifi错误*/
+	public void PunchClockTest8() {
 		logon(null, userIdentifier2, plainTexPassword);
 
 		String commandRelativeUri = "/techpark/punch/punchClock";
@@ -202,14 +222,13 @@ public class PunchClockTest extends BaseLoginAuthTestCase {
 
 	}
 
-	/**只有wifi wifi错误*/
+	/**只有wifi wifi为空*/
 	public void PunchClockTest9() {
 		logon(null, userIdentifier2, plainTexPassword);
 
 		String commandRelativeUri = "/techpark/punch/punchClock";
 
-		PunchClockCommand cmd = new PunchClockCommand();
-		cmd.setWifiMac("mac-address-02"); 
+		PunchClockCommand cmd = new PunchClockCommand(); 
 		cmd.setLatitude(24.0);
 		cmd.setLongitude(111.0);
 		cmd.setEnterpriseId(ownerId); 
