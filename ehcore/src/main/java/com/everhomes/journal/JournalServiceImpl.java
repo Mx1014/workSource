@@ -159,13 +159,21 @@ public class JournalServiceImpl implements JournalService{
 		JournalConfig ret = journalProvider.findJournalConfig(cmd.getNamespaceId());
 		JournalConfigDTO dto = ConvertHelper.convert(ret, JournalConfigDTO.class);
 		if(null != dto) {
-			long userId = UserContext.current().getUser().getId();
+			
 			String posterPath = ret.getPosterPath();
 			if(StringUtils.isBlank(ret.getPosterPath())){
 				posterPath = configProvider.getValue("journal.posterPath", "");
 			}
 			String posterPathUrl = getResourceUrlByUir(posterPath, 
 	                EntityType.USER.getCode(), ret.getCreatorUid());
+			dto.setPosterPath(posterPath);
+			dto.setPosterPathUrl(posterPathUrl);
+        }else{
+        	dto = new JournalConfigDTO();
+        	long userId = UserContext.current().getUser().getId();
+        	String posterPath = configProvider.getValue("journal.posterPath", "");
+			String posterPathUrl = getResourceUrlByUir(posterPath, 
+	                EntityType.USER.getCode(), userId);
 			dto.setPosterPath(posterPath);
 			dto.setPosterPathUrl(posterPathUrl);
         }
