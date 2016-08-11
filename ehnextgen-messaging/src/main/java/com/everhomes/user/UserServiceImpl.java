@@ -84,6 +84,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
@@ -287,6 +288,10 @@ public class UserServiceImpl implements UserService {
 	
     @Autowired
     private LocaleStringService localeStringService;
+    
+    @Autowired
+    private PropertyMgrService propertyMgrService;
+    
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -556,6 +561,9 @@ public class UserServiceImpl implements UserService {
 			
 			// 刷新企业通讯录
 	        organizationService.processUserForMember(identifier);
+	        
+	        //刷新地址信息
+	        propertyMgrService.processUserForOwner(identifier);
 	        
 			return rLogin;
 		}

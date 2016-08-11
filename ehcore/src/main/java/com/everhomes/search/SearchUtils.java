@@ -25,6 +25,8 @@ public class SearchUtils {
 
     public static final String NEWS = "news";
     
+    public static final String PMOWNERINDEXTYPE = "pmowner";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";
