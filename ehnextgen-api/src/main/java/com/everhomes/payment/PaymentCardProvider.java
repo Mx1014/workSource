@@ -3,6 +3,8 @@ package com.everhomes.payment;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 public interface PaymentCardProvider {
 	List<PaymentCardIssuerCommunity> listPaymentCardIssuerCommunity(Long ownerId,String ownerType);
 	
@@ -43,4 +45,12 @@ public interface PaymentCardProvider {
 	Integer countPaymentCard(Long ownerId,String ownerType,Long userId);
 	
 	PaymentCardTransaction findPaymentCardTransactionByCondition(String token,String cardNo);
+	
+	List<PaymentCardTransaction> listCardTransactions(Integer pageSize,
+			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
+			CrossShardListingLocator locator);
+	
+	List<PaymentCardRechargeOrder> listPaymentCardRechargeOrders(Integer pageSize,
+			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
+			CrossShardListingLocator locator);
 }

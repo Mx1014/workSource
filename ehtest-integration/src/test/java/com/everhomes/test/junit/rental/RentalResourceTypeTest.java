@@ -14,7 +14,7 @@ import com.everhomes.rest.rentalv2.admin.AdminGetResourceTypeListRestResponse;
 import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhRentalResourceTypes;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -69,15 +69,15 @@ public class RentalResourceTypeTest extends BaseLoginAuthTestCase {
 				httpClientService.isReponseSuccess(response));
 		
 		DSLContext dslContext = dbProvider.getDslContext();
-		List<EhRentalResourceTypes> resultBill = new ArrayList<EhRentalResourceTypes>();
+		List<EhRentalv2ResourceTypes> resultBill = new ArrayList<EhRentalv2ResourceTypes>();
 		dslContext
 				.select()
-				.from(Tables.EH_RENTAL_RESOURCE_TYPES)
-//				.where(Tables.EH_RENTAL_RESOURCE_TYPES.ID.eq( cmd.getRentalBillId()))
+				.from(Tables.EH_RENTALV2_RESOURCE_TYPES)
+//				.where(Tables.EH_RENTALV2_RESOURCE_TYPES.ID.eq( cmd.getRentalBillId()))
 				.fetch()
 				.map((r) -> {
 					resultBill.add(ConvertHelper.convert(r,
-							EhRentalResourceTypes.class));
+							EhRentalv2ResourceTypes.class));
 					return null;
 				});
 		assertEquals(1, resultBill.size());

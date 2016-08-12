@@ -26,7 +26,7 @@ public class DownloadUtil{
             response.addHeader("Content-Disposition", "attachment;filename=" + System.currentTimeMillis()+".xlsx");
             //response.addHeader("Content-Length", "" + out.);
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
+            response.setContentType("application/msexcel");
             toClient.write(out.toByteArray());
             toClient.flush();
             toClient.close();

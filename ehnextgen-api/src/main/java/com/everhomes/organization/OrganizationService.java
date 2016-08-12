@@ -7,6 +7,7 @@ import java.util.Map;
 
 
 
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.entity.EntityType;
@@ -317,6 +318,14 @@ public interface OrganizationService {
 	 */
 	List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId);
     ListOrganizationsByNameResponse listOrganizationByName(ListOrganizationsByNameCommand cmd);
+    
+    /** 不带menu格式的所有子机构 */
+    List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag);
+
 	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
+
+	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
+
 }
