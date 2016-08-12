@@ -25,6 +25,7 @@ ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_type` VARCHAR(12
 
 -- 结算表  by sfyan 2016010
 -- 订单交易流水表
+-- DROP TABLE IF EXISTS `eh_stat_orders`;
 CREATE TABLE `eh_stat_orders` (
   `id` BIGINT(20) NOT NULL,
   `community_id` BIGINT(20) DEFAULT 0,
@@ -46,6 +47,7 @@ CREATE TABLE `eh_stat_orders` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算交易流水表
+-- DROP TABLE IF EXISTS `eh_stat_transactions`;
 CREATE TABLE `eh_stat_transactions` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT 0,
@@ -76,6 +78,7 @@ CREATE TABLE `eh_stat_transactions` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算退款流水表
+-- DROP TABLE IF EXISTS `eh_stat_refunds`;
 CREATE TABLE `eh_stat_refunds` (
   `id` BIGINT(20) NOT NULL,
   `community_id` BIGINT(20) DEFAULT 0,
@@ -101,6 +104,7 @@ CREATE TABLE `eh_stat_refunds` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
+-- DROP TABLE IF EXISTS `eh_stat_settlements`;
 CREATE TABLE `eh_stat_settlements` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT 0,
@@ -127,6 +131,7 @@ CREATE TABLE `eh_stat_settlements` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算統計結果表
+-- DROP TABLE IF EXISTS `eh_stat_service_settlement_results`;
 CREATE TABLE `eh_stat_service_settlement_results` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT 0,
@@ -148,6 +153,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- DROP TABLE IF EXISTS `eh_stat_task_logs`;
 CREATE TABLE `eh_stat_task_logs` (
   `id` BIGINT(20) NOT NULL,
   `task_no` VARCHAR(20) NOT NULL,
@@ -158,8 +164,9 @@ CREATE TABLE `eh_stat_task_logs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `task_no` (`task_no`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 -- 园区电子报表
-DROP TABLE IF EXISTS `eh_journals`;
+-- DROP TABLE IF EXISTS `eh_journals`;
 CREATE TABLE `eh_journals` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -180,7 +187,7 @@ CREATE TABLE `eh_journals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_journal_configs`;
+-- DROP TABLE IF EXISTS `eh_journal_configs`;
 CREATE TABLE `eh_journal_configs` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -195,6 +202,7 @@ CREATE TABLE `eh_journal_configs` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 -- 停车充值费率添加卡类型
 ALTER TABLE `eh_parking_recharge_rates` ADD COLUMN `card_type` VARCHAR(128);
  
@@ -225,7 +233,6 @@ CREATE TABLE `eh_punch_time_rules` (
 -- 
 -- 具体打卡地点
 -- 
-
 ALTER TABLE `eh_punch_geopoints` ADD COLUMN `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type';
 ALTER TABLE `eh_punch_geopoints` ADD COLUMN `owner_id` BIGINT COMMENT 'owner resource(user/organization) id';
 ALTER TABLE `eh_punch_geopoints` ADD COLUMN `location_rule_id` BIGINT COMMENT 'fk:eh_punch_geopoints id'; 
@@ -322,7 +329,7 @@ CREATE TABLE `eh_punch_workday_rules` (
 -- 
 -- 打卡总规则表
 -- 
-DROP TABLE IF EXISTS `eh_punch_rules`;
+-- DROP TABLE IF EXISTS `eh_punch_rules`;
 CREATE TABLE `eh_punch_rules` (
   `id` BIGINT NOT NULL COMMENT 'id', 
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -404,7 +411,7 @@ ALTER TABLE `eh_punch_day_logs` ADD COLUMN `exception_status` TINYINT COMMENT '�
  
 -- 设备巡检表结构 add by xiongying 20160812
 -- 1、参考标准表：
-DROP TABLE IF EXISTS `eh_equipment_inspection_standards`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_standards`;
 CREATE TABLE `eh_equipment_inspection_standards` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, enterprise, etc',
@@ -423,11 +430,12 @@ CREATE TABLE `eh_equipment_inspection_standards` (
   `update_time` DATETIME,
   `deleter_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'deleter id',
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 2、设备表：
-DROP TABLE IF EXISTS `eh_equipment_inspection_equipments`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_equipments`;
 CREATE TABLE `eh_equipment_inspection_equipments` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the equipment, enterprise, etc',
@@ -462,11 +470,12 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `review_result` TINYINT NOT NULL DEFAULT '0' COMMENT '0:none, 1: qualified, 2: unqualified',
   `reviewer_uid` BIGINT NOT NULL DEFAULT '0',
   `review_time` DATETIME,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 3、备品备件表：
-DROP TABLE IF EXISTS `eh_equipment_inspection_accessories`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_accessories`;
 CREATE TABLE `eh_equipment_inspection_accessories` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the spare parts, enterprise, etc',
@@ -479,90 +488,96 @@ CREATE TABLE `eh_equipment_inspection_accessories` (
   `specification` VARCHAR(1024),
   `location` VARCHAR(1024),
   `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 4、设备-备件 关联表：equipment_id和accessory_id共同确立一条记录
-DROP TABLE IF EXISTS `eh_equipment_inspection_accessory_map`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_accessory_map`;
 CREATE TABLE `eh_equipment_inspection_accessory_map` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `equipment_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
   `accessory_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_accessories',
   `quantity` INTEGER NOT NULL DEFAULT '0', 
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 5、设备参数表
-DROP TABLE IF EXISTS `eh_equipment_inspection_equipment_parameters`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_equipment_parameters`;
 CREATE TABLE `eh_equipment_inspection_equipment_parameters` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `equipment_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
   `parameter_name` VARCHAR(128),
   `parameter_unit` VARCHAR(128),
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 6、设备操作图示表 attachments 及说明书  type区分
-DROP TABLE IF EXISTS `eh_equipment_inspection_equipment_attachments`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_equipment_attachments`;
 CREATE TABLE `eh_equipment_inspection_equipment_attachments` (
-     `id` BIGINT NOT NULL COMMENT 'id of the record',
-     `equipment_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
-     `attachment_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: tu shi, 2: shuo ming shu',
-     `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
-     `content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
-     `creator_uid` BIGINT NOT NULL DEFAULT 0,
-     `create_time` DATETIME,
-     PRIMARY KEY (`id`)
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `equipment_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
+  `attachment_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: none, 1: tu shi, 2: shuo ming shu',
+  `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+	 
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 7、任务表
-DROP TABLE IF EXISTS `eh_equipment_inspection_tasks`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_tasks`;
 CREATE TABLE `eh_equipment_inspection_tasks` (
-     `id` BIGINT NOT NULL COMMENT 'id',
-     `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, organization, etc',
-     `owner_id` BIGINT NOT NULL DEFAULT 0,
-     `standard_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_quality_inspection_standards',
-     `equipment_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
-     `task_number` VARCHAR(128),
-     `task_name` VARCHAR(1024),
-     `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT '0: parent task, others children-task',
-     `child_count` BIGINT NOT NULL DEFAULT 0,
-     `executive_group_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc',
-     `executive_group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
-     `executive_start_time` DATETIME,
-     `executive_expire_time` DATETIME,
-     `executive_time` DATETIME,
-     `executor_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who executes the task, organization, etc',
-     `executor_id` BIGINT NOT NULL DEFAULT 0,
-     `operator_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who executes the task, organization, etc',
-     `operator_id` BIGINT NOT NULL DEFAULT 0,
-     `process_expire_time` DATETIME,
-     `process_time` DATETIME,
-     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: waiting for executing, 2: waiting for maintenance, 3: in maintenance, 4: closed',
-     `result` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: complete ok, 2: complete delay, 3: need maintenance ok, 4: need maintenance delay, 5：need maintenance ok complete ok, 6: need maintenance ok complete delay, 7: need maintenance delay complete ok, 8: need maintenance delay complete delay',
-     `reviewer_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who review the task, organization, etc',
-     `reviewer_id`  BIGINT NOT NULL DEFAULT 0,
-     `review_result` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: qualified, 2: unqualified',
-     `review_time` DATETIME,
-     `create_time` DATETIME,
-     PRIMARY KEY (`id`)
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, organization, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `standard_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_quality_inspection_standards',
+  `equipment_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_equipment',
+  `task_number` VARCHAR(128),
+  `task_name` VARCHAR(1024),
+  `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT '0: parent task, others children-task',
+  `child_count` BIGINT NOT NULL DEFAULT 0,
+  `executive_group_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc',
+  `executive_group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
+  `executive_start_time` DATETIME,
+  `executive_expire_time` DATETIME,
+  `executive_time` DATETIME,
+  `executor_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who executes the task, organization, etc',
+  `executor_id` BIGINT NOT NULL DEFAULT 0,
+  `operator_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who executes the task, organization, etc',
+  `operator_id` BIGINT NOT NULL DEFAULT 0,
+  `process_expire_time` DATETIME,
+  `process_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: waiting for executing, 2: waiting for maintenance, 3: in maintenance, 4: closed',
+  `result` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: complete ok, 2: complete delay, 3: need maintenance ok, 4: need maintenance delay, 5：need maintenance ok complete ok, 6: need maintenance ok complete delay, 7: need maintenance delay complete ok, 8: need maintenance delay complete delay',
+  `reviewer_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who review the task, organization, etc',
+  `reviewer_id`  BIGINT NOT NULL DEFAULT 0,
+  `review_result` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: qualified, 2: unqualified',
+  `review_time` DATETIME,
+  `create_time` DATETIME,
+	 
+  PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
     
 -- 8、任务attachments表
-DROP TABLE IF EXISTS `eh_equipment_inspection_task_attachments`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_task_attachments`;
 CREATE TABLE `eh_equipment_inspection_task_attachments` (
-     `id` BIGINT NOT NULL COMMENT 'id',
-     `log_id` BIGINT NOT NULL COMMENT 'id of the eh_equipment_inspection_task_logs',
-     `task_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_tasks',
-     `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
-     `content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
-     `creator_uid` BIGINT NOT NULL DEFAULT 0,
-     `create_time` DATETIME,
-     PRIMARY KEY (`id`)
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `log_id` BIGINT NOT NULL COMMENT 'id of the eh_equipment_inspection_task_logs',
+  `task_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_tasks',
+  `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+	 
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 9、记录表
-DROP TABLE IF EXISTS `eh_equipment_inspection_task_logs`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_task_logs`;
 CREATE TABLE `eh_equipment_inspection_task_logs` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `task_id` BIGINT NOT NULL DEFAULT '0',
@@ -577,6 +592,7 @@ CREATE TABLE `eh_equipment_inspection_task_logs` (
   `parameter_value` VARCHAR(1024),
   `process_time` DATETIME DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
