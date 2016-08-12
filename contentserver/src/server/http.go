@@ -884,6 +884,6 @@ func StartServer(c *ServerContext) {
 	//Now load image config
 	c.LoadImageConfig()
 
-	c.Logger.Info("server start run :  %s", addr)
+	c.Logger.Info("server version: 3.8.2\n start run :  %s", addr)
 	http.ListenAndServe(addr, router)
 }
