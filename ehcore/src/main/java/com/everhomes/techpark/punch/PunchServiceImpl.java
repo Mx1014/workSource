@@ -1900,7 +1900,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 			processForthPunchListCount(list, statistic);
-		}
+		} 
+		this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth(),statistic.getUserId());
 		this.punchProvider.createPunchStatistic(statistic);
 		
 	}
