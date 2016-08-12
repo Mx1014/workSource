@@ -1056,7 +1056,7 @@ public class PunchServiceImpl implements PunchService {
 			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
 			if(null != wifis){
 				for(PunchWifi wifi : wifis){
-					if(wifi.getMacAddress().equals(cmd.getWifiMac()))
+					if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
 						return ClockCode.SUCESS;
 				}
 				
