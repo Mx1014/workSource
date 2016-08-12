@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.util.StringHelper;
 
 public class ListCommunityResponse {
 	private Long nextPageAnchor;
 	private Long userId;
-	
+    private String contentServer;
+
 	@ItemType(CommunityDTO.class)
     private List<CommunityDTO> communities;
 	
@@ -42,4 +42,11 @@ public class ListCommunityResponse {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
+	public String getContentServer() {
+		return contentServer;
+	}
+	public void setContentServer(String contentServer) {
+		this.contentServer = contentServer;
+	}
+	
 }
