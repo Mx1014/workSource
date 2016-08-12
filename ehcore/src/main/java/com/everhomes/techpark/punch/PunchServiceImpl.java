@@ -3330,12 +3330,19 @@ public class PunchServiceImpl implements PunchService {
 						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 						"have no punch rule");
 			dto.setPunchRuleName(pr.getName());
+			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
+				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
+				dto.setTargetName(member.getContactName());
+				Organization dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
+				dto.setTargetDept(dept.getName());
+				
+			}
 			response.getPunchRuleMaps().add(dto);
 		});
 		return response;
 	}
 	/**找到用户的部门-多部门取最上级第一个*/
-	private Organization findUserOrganization(Long userId, Long organizationId){
+	private Organization findUserDepartment(Long userId, Long organizationId){
 		// 多部门找顶级部门
 		List<OrganizationMember> organizationMembers = this.organizationProvider.findOrganizationMembersByOrgIdAndUId( userId,  organizationId);
 		Organization result = null;
@@ -3389,7 +3396,7 @@ public class PunchServiceImpl implements PunchService {
 				return null;
 			//加循环限制
 			int loopMax = 10;
-			Organization dept = findUserOrganization(userId, ownerId);
+			Organization dept = findUserDepartment(userId, ownerId);
 			map = getPunchRule(ownerId ,dept,loopMax);
 		}
 		return this.punchProvider.getPunchRuleById(map.getPunchRuleId());

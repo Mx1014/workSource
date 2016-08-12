@@ -805,7 +805,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		cmd.setLocationRuleId(2L);
 		cmd.setTimeRuleId(2L);
 		cmd.setWifiRuleId(2L);
-		
+		cmd.setWorkdayRuleId(2L);
 		
 		RestResponse  response = httpClientService.restGet(
 				commandRelativeUri, cmd, RestResponse.class,
@@ -852,8 +852,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		PunchRuleDTO cmd = new PunchRuleDTO();
 		cmd.setOwnerType(this.ownerType);
 		cmd.setOwnerId(ownerId); 
-		cmd.setName("wifi");
-		cmd.setLocationRuleId(2L);
+		cmd.setName("wifi"); 
 		cmd.setTimeRuleId(2L);
 		cmd.setWifiRuleId(2L);
 		cmd.setWorkdayRuleId(2L);

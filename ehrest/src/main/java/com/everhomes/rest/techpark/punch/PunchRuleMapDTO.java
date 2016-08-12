@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：所属对象id</li>
  * <li>targetType：映射目标类型(规则是设置给谁的) organization/user</li>
  * <li>targetId：映射目标 id</li>
+ * <li>targetName：映射目标 姓名(当targetType为user)</li>
+ * <li>targetDept：映射目标 部门(当targetType为user)</li> 
  * <li>punchRuleId: 打卡规则id</li>
  * <li>punchRuleName: 打卡规则name</li>
  * <li>reviewRuleId: 审批规则id</li>
@@ -21,6 +23,8 @@ public class PunchRuleMapDTO {
 	private Long ownerId;
 	private String targetType;
 	private Long targetId;
+	private String targetName;
+	private String targetDept;
 	private Long punchRuleId;
 	private String punchRuleName;
 	private Long reviewRuleId;
@@ -102,5 +106,23 @@ public class PunchRuleMapDTO {
 	public void setPunchRuleName(String punchRuleName) {
 		this.punchRuleName = punchRuleName;
 	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
+
+	public String getTargetDept() {
+		return targetDept;
+	}
+
+	public void setTargetDept(String targetDept) {
+		this.targetDept = targetDept;
+	}
+
+	 
 
 }
