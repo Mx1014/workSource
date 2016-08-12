@@ -39,6 +39,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.videoconf.ConfOrders;
+import com.mysql.jdbc.StringUtils;
 
 @Component
 public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements EquipmentTasksSearcher {
@@ -130,7 +131,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
-        if(cmd.getTargetType() != null)
+        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode())); 
         
        // startTime  endTime  status  reviewStatus  taskType  
@@ -148,13 +149,13 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         
         
         if(cmd.getStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getTargetType())); 
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus())); 
         
         if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getTargetType())); 
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus())); 
 
         if(cmd.getTaskType() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("taskType", cmd.getTargetType())); 
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("taskType", cmd.getTaskType())); 
         
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
