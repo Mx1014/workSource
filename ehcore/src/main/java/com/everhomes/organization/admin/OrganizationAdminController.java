@@ -763,8 +763,6 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganizationPersonnel")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

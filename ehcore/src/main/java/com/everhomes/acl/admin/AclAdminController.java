@@ -425,20 +425,6 @@ public class AclAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/acl/exportAclRoleAssignment</b>
-     * <p>导出角色人员</p>
-     */
-    @RequestMapping("exportAclRoleAssignment")
-    @RestReturn(value=String.class)
-    public RestResponse exportAclRoleAssignment(@Valid AddAclRoleAssignmentCommand cmd) {
-    	rolePrivilegeService.addAclRoleAssignment(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
      * <b>URL: /admin/acl/exportRoleAssignmentPersonnelXls</b>
      * <p>导出角色人员</p>
      */

@@ -288,19 +288,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public void createOrganizationMember(OrganizationMember departmentMember) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-		departmentMember.setNamespaceId(namespaceId);
+	public void createOrganizationMember(OrganizationMember organizationMember) {
+		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationMembersRecord record = ConvertHelper.convert(departmentMember, EhOrganizationMembersRecord.class);
+		EhOrganizationMembersRecord record = ConvertHelper.convert(organizationMember, EhOrganizationMembersRecord.class);
 		InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.setRecord(record);
 		query.setReturning(Tables.EH_ORGANIZATION_MEMBERS.ID);
 		query.execute();
-
-		departmentMember.setId(query.getReturnedRecord().getId());
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, null); 
-
+		organizationMember.setId(query.getReturnedRecord().getId());
+		
+		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+			DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, organizationMember.getId());
+		}
 	}
 
 
@@ -1381,7 +1382,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		Condition cond = Tables.EH_ORGANIZATIONS.PATH.like(superiorPath + "/%")
-				.or(Tables.EH_ORGANIZATIONS.PATH.eq(superiorPath));
+				.or(Tables.EH_ORGANIZATIONS.PATH.eq(superiorPath)).and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		if(null != groupTypes){
 			cond = cond.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 		}
@@ -1413,12 +1414,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		pageSize = pageSize + 1;
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		Condition cond = null;
-		if(orgCommoand.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()))
-			cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID.eq(orgCommoand.getId());
-		else
-			cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgCommoand.getId());
-		
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgCommoand.getId());
 		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(orgCommoand.getStatus()));
 		
 		if(!StringUtils.isEmpty(keywords)){
@@ -1473,6 +1469,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, OrganizationMember.class);
 		return null;
 	}
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByTokens(String contactPhone, List<Long> organizationIds) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactPhone);
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(organizationIds));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(condition);
+		query.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
+	
 	
 	@Override
 	public List<Organization> listOrganizationByGroupTypes(String superiorPath,

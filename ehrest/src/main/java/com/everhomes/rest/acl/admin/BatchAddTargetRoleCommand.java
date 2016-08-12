@@ -3,6 +3,7 @@ package com.everhomes.rest.acl.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,6 +18,7 @@ public class BatchAddTargetRoleCommand {
 	
 	private Long organizationId;
 	
+	@ItemType(Long.class)
 	private List<Long> roleIds;
 	
 	private String targetType;
