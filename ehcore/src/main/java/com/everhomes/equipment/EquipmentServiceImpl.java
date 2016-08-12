@@ -134,7 +134,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -263,6 +265,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -831,6 +834,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
 		dto.setRepeat(rs);
+		
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(), 
+				standard.getOwnerId());
+		if(null != member) {
+			dto.setOperatorName(member.getContactName());
+		}
 		
 		return dto;
 	}
@@ -2510,6 +2519,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 		response.setTasks(dtos);
 				
 		return response;
+	}
+
+	@Override
+	public EquipmentAccessoriesDTO findEquipmentAccessoriesById(
+			DeleteEquipmentAccessoriesCommand cmd) {
+
+		EquipmentInspectionAccessories accessory = verifyEquipmentAccessories(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(accessory.getStatus() == 0) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_ACCESSORY_ALREADY_DELETED,
+ 				"备品备件已失效");
+		}
+		
+		EquipmentAccessoriesDTO dto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
+		return dto;
 	}
 
 }

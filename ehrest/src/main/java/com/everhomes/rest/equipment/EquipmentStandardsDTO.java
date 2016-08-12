@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  *  <li>creatorUid: 创建该标准的用户id</li>
  *  <li>createTime: 创建该标准的时间</li>
  *  <li>operatorUid: 最后对该标准进行修改的用户id</li>
+ *  <li>operatorName: 最后对该标准进行修改的用户姓名</li>
  *  <li>updateTime: 更新该标准的时间</li>
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
@@ -60,6 +61,8 @@ public class EquipmentStandardsDTO {
 	private Timestamp createTime;
 	
 	private Long operatorUid;
+	
+	private String operatorName;
 	
 	private Timestamp updateTime;
 	
@@ -185,6 +188,14 @@ public class EquipmentStandardsDTO {
 
 	public void setOperatorUid(Long operatorUid) {
 		this.operatorUid = operatorUid;
+	}
+
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
 	}
 
 	public Long getDeleterUid() {

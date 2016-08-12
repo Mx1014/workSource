@@ -430,6 +430,22 @@ public class EquipmentController extends ControllerBase {
 	}
 	
 	/**
+	 * <b>URL: /equipment/findEquipmentAccessoriesById</b>
+	 * <p>根据id查询备品备件</p>
+	 */
+	@RequestMapping("findEquipmentAccessoriesById")
+	@RestReturn(value = EquipmentAccessoriesDTO.class)
+	public RestResponse findEquipmentAccessoriesById(DeleteEquipmentAccessoriesCommand cmd) {
+		
+		EquipmentAccessoriesDTO accessory = equipmentService.findEquipmentAccessoriesById(cmd);
+		
+		RestResponse response = new RestResponse(accessory);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /equipment/searchEquipmentAccessories</b>
 	 * <p>查看备品备件</p>
 	 */
