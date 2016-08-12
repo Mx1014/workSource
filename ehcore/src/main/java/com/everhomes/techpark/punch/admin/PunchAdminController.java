@@ -506,4 +506,21 @@ public class PunchAdminController extends ControllerBase {
 //		response.setErrorDescription("OK");
 		return commandResponse;
 	}
+
+	/**
+	 * <b>URL: /punch/refreshDayStatistics</b>
+	 * <p>
+	 * 刷新统计结果 前一天的
+	 * </p>
+	 */
+	@RequestMapping("refreshDayStatistics")
+	@RestReturn(value = String.class)
+	public RestResponse refreshDayStatistics() {
+		punchService.dayRefreshLogScheduled();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }
