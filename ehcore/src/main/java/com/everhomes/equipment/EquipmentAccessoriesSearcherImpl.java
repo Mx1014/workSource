@@ -33,6 +33,7 @@ import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
+import com.mysql.jdbc.StringUtils;
 
 @Component
 public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch implements
@@ -126,7 +127,7 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
-        if(cmd.getTargetType() != null)
+        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode())); 
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

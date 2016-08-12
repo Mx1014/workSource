@@ -41,6 +41,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.videoconf.ConfOrders;
+import com.mysql.jdbc.StringUtils;
 
 @Component
 public class EquipmentSearcherImpl extends AbstractElasticSearch implements EquipmentSearcher{
@@ -134,7 +135,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
-        if(cmd.getTargetType() != null)
+        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
         
         if(cmd.getStatus() != null)
