@@ -2059,9 +2059,10 @@ long id = sequenceProvider.getNextSequence(key);
 				Tables.EH_PUNCH_RULES);
 		Condition condition = Tables.EH_PUNCH_RULES.OWNER_TYPE.equal(PunchOwnerType.ORGANIZATION.getCode());
 		step.where(condition);
-		List<Long> result = step
-				.fetch().map((r) -> {
-					return ConvertHelper.convert(r.value1(), Long.class);
+		List<Long> result = new ArrayList<Long>();
+		step.fetch().map((r) -> {
+					result.add(r.value1());
+					return null;
 				});
 		return result;
 	}
