@@ -1,0 +1,129 @@
+{
+    "eh_punch_location_rules": [
+        {
+            "id": 2,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "name": "地点随便来吧2",
+            "description": "武汉大学深圳产学研大楼 ",
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:27"
+        }
+    ],
+    "eh_punch_geopoints": [
+        {
+            "id": 3, 
+            "description": "武汉大学深圳产学研大楼(南山区科苑南路武汉大学A202)",
+            "longitude": 113.951336,
+            "latitude": 22.536287,
+            "geohash": "ws101n8g6s6s",
+            "distance": 200,
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:28",
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "location_rule_id": 2
+        }
+    ],
+    "eh_punch_workday_rules": [
+        {
+            "id": 2,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "name": "排班时间",
+            "description": "每周只上一二三四班",
+            "work_week_dates": "0011110",
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:30"
+        }
+    ],
+    "eh_punch_holidays": [
+        {
+            "id": 4,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "workday_rule_id": 2,
+            "status": 0,
+            "rule_date": "2016/7/28",
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:30"
+        },
+        {
+            "id": 5,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "workday_rule_id": 2,
+            "status": 1,
+            "rule_date": "2016/7/27",
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:30"
+        }
+    ],
+    "eh_punch_time_rules": [
+        {
+            "id": 2,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "name": "上班9-10,中午11-14,下班18-19",
+            "start_early_time": "9:00:00",
+            "start_late_time": "10:00:00",
+            "work_time": "09:00:00",
+            "noon_leave_time": "12:00:00",
+            "afternoon_arrive_time": "14:00:00",
+            "punch_times_per_day": 4,
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:25",
+            "operator_uid": 10001,
+            "operate_time": "2016/8/10 14:03:26"
+        }
+    ],
+    "eh_punch_wifi_rules": [
+        {
+            "id": 2,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "name": "wifi-01-03",
+            "description": "打卡wifi",
+            "creator_uid": 10001,
+            "create_time": "2016/8/10 14:03:28"
+        },
+        {
+            "id": 3,
+            "owner_type": "organization",
+            "owner_id": 100600,
+            "name": "wifi-01",
+            "description": "打卡wifi",
+            "creator_uid": 10001
+        }
+    ],
+    "eh_punch_wifis": [
+	    {
+	        "id": 2,
+	        "owner_type": "organization",
+	        "owner_id": 100600,
+	        "wifi_rule_id": 2, 
+	        "mac_address": "mac-address-01",
+	        "creator_uid": 10001,
+	        "create_time": "2016\/8\/10 14:03:29"
+	    },
+	    {
+	        "id": 3,
+	        "owner_type": "organization",
+	        "owner_id": 100600,
+	        "wifi_rule_id": 2, 
+	        "mac_address": "mac-address-03",
+	        "creator_uid": 10001,
+	        "create_time": "2016\/8\/10 14:03:29"
+	    },
+	    {
+	        "id": 4,
+	        "owner_type": "organization",
+	        "owner_id": 100600,
+	        "wifi_rule_id": 3, 
+	        "mac_address": "mac-address-03",
+	        "creator_uid": 10001,
+	        "create_time": "2016\/8\/10 14:03:29"
+	    }
+	]
+    
+}

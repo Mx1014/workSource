@@ -314,18 +314,18 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /techpark/punch/exportPunchStatistics</b>
-	 * <p>
-	 * 导出公司打卡的统计结果
-	 * </p>
-	 */
-	@RequestMapping("exportPunchStatistics")
-	public  HttpServletResponse exportPunchStatistics(@Valid ExportPunchStatisticsCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response );
-//		RestResponse response = new RestResponse(commandResponse);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-		return commandResponse;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/exportPunchStatistics</b>
+//	 * <p>
+//	 * 导出公司打卡的统计结果
+//	 * </p>
+//	 */
+//	@RequestMapping("exportPunchStatistics")
+//	public  HttpServletResponse exportPunchStatistics(@Valid ExportPunchStatisticsCommand cmd,HttpServletResponse response ) {
+//		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response );
+////		RestResponse response = new RestResponse(commandResponse);
+////		response.setErrorCode(ErrorCodes.SUCCESS);
+////		response.setErrorDescription("OK");
+//		return commandResponse;
+//	}
 }

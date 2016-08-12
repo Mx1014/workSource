@@ -7,7 +7,7 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum DateStatus {
-    WEEKENDWORK((byte)0),HOLIDAY((byte)1);
+    WORKDAY((byte)0),HOLIDAY((byte)1);
     
     private byte code;
     private DateStatus(byte code) {

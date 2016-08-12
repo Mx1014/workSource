@@ -970,6 +970,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),781,49520,'约稿须知',1,1,'约稿须知 全部权限',347);
 
 
+<<<<<<< HEAD
 -- 考勤管理 by sfyan 20160811
 DELETE FROM `eh_acl_privileges` WHERE `id` IN (544, 545, 546, 547);
 DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (62, 63, 64, 65);
@@ -1029,3 +1030,5 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),796,43470,'个人
 
 
 
+=======
+>>>>>>> 8b44a749d5ec56cffc4ce5b6ee135e747db5f51c
