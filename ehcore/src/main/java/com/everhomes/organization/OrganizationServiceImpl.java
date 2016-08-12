@@ -4366,7 +4366,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		response.setNextPageAnchor(locator.getAnchor());
 		
-		response.setMembers(this.convertDTO(organizationMembers, org, null));
+		response.setMembers(this.convertDTO(organizationMembers, org));
 		
 		return response;
 	}
@@ -4456,7 +4456,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), groupTypes, locator, pageSize);
 		response.setNextPageAnchor(locator.getAnchor());
 		
-		response.setMembers(this.convertDTO(organizationMembers, org, groupTypes));
+		response.setMembers(this.convertDTO(organizationMembers, org));
 		
 		return response;
 	}
@@ -4515,43 +4515,71 @@ public class OrganizationServiceImpl implements OrganizationService {
 			CreateOrganizationMemberCommand cmd) {
 		User user = UserContext.current().getUser();
 		
+		
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), org.getId());
-		if(null != desOrgMember){
-			LOGGER.error("phone number already exists.");
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
-					"phone number already exists.");
-		}
-		
+//		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), org.getId());
+//		if(null != desOrgMember){
+//			LOGGER.error("phone number already exists.");
+//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+//					"phone number already exists.");
+//		}
+//		
 		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 		organizationMember.setContactType(IdentifierType.MOBILE.getCode());
-		
-		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-			organizationMember.setGroupId(org.getId());
-			organizationMember.setGroupPath(org.getPath());
-			organizationMember.setOrganizationId(org.getDirectlyEnterpriseId());
-		}else if(null != organizationMember.getGroupId() && 0 != organizationMember.getGroupId()){
-			Organization group = checkOrganization(organizationMember.getGroupId());
-			organizationMember.setGroupPath(group.getPath());
-		}
-		
+		organizationMember.setCreatorUid(user.getId());
+		organizationMember.setNamespaceId(namespaceId);
+		organizationMember.setGroupId(0l);
 		if(StringUtils.isEmpty(organizationMember.getTargetId())){
 			organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
 			organizationMember.setTargetId(0l);
 		}
-		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organizationMember.setCreatorUid(user.getId());
-		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, organizationMember.getId());
-		}
-		organizationMember.setNamespaceId(namespaceId);
-		organizationProvider.createOrganizationMember(organizationMember);
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			
+			Long organizationId = cmd.getOrganizationId();
+			Long groupId = cmd.getGroupId();
+			
+			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				if(null == groupId || 0 == groupId){
+					OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
+					if(null != desOrgMember){
+						LOGGER.error("phone number already exists. organizationId = {}", organizationId);
+						throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+								"phone number already exists.");
+					}
+					organizationProvider.createOrganizationMember(organizationMember);
+					return null;
+				}
+				
+			}else{
+				groupId = cmd.getOrganizationId();
+				organizationId = org.getDirectlyEnterpriseId();
+			}
+			
+			OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
+			if(null == desOrgMember){
+				organizationMember.setOrganizationId(organizationId);
+				organizationProvider.createOrganizationMember(organizationMember);
+			}
+			Organization group = checkOrganization(groupId);
+			organizationMember.setGroupPath(group.getPath());
+			OrganizationMember groupMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), groupId);
+			if(null != groupMember){
+				LOGGER.error("phone number already exists. organizationId = {}", groupId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+						"phone number already exists.");
+			}
+			organizationMember.setOrganizationId(groupId);
+			organizationProvider.createOrganizationMember(organizationMember);
+			
+			return null;
+		});
+		
 		userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
@@ -5118,7 +5146,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param depts
 	 * @return
 	 */
-	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org, List<String> groupTypes){
+	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
@@ -5127,17 +5155,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
 		
 		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
-		
-		if(null == groupTypes){
-			groupTypes = new ArrayList<String>();
+
+		List<Long> deptIds = new ArrayList<Long>();
+		for (Organization organization : depts) {
+			deptIds.add(organization.getId());
 		}
-		
-		if(OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE){
-			depts.add(org);
-			groupTypes.add(org.getGroupType());
-		}
-		
-		List<String> types = groupTypes;
 		
 		Long orgId = null;
 
@@ -5155,7 +5177,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 		Long ownerId = orgId;
 	    
-		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
 			Long organizationId = ownerId;
 			if(!StringUtils.isEmpty(c.getInitial())){
@@ -5163,25 +5184,46 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
-			Organization organization = deptMaps.get(c.getOrganizationId());
-			if(null != organization)
-				dto.setOrganizationName(organization.getName());
 			
-			Organization group = null;
+			List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>(); 
+			List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>(); 
+			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(c.getContactToken(), deptIds);
 			
-			if(types.contains(OrganizationGroupType.GROUP.getCode())){
-				group = deptMaps.get(c.getOrganizationId());
-			}else{
-				group = deptMaps.get(c.getGroupId());
-			}
-			 
-			if(null != group){
-				dto.setGroupName(group.getName());
-				if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
-					organizationId = group.getId();
+			for (OrganizationMember member : members) {
+				Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
+				if(null != group){
+					if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+						if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.DEPARTMENT){
+							departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+						}
+						
+						if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
+							groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
+						}
+					}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
+						if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
+							groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
+						}
+					}
 				}
 			}
-				
+			
+			dto.setGroups(groups);
+			dto.setDepartments(departments);
+//			Organization group = null;
+//			
+//			if(types.contains(OrganizationGroupType.GROUP.getCode())){
+//				group = deptMaps.get(c.getOrganizationId());
+//			}else{
+//				group = deptMaps.get(c.getGroupId());
+//			}
+//			 
+//			if(null != group){
+//				dto.setGroupName(group.getName());
+//				if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
+//					organizationId = group.getId();
+//				}
+//			}
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
 				User user = userProvider.findUserById(dto.getTargetId());
