@@ -3,7 +3,6 @@ package server
 import (
 	"container/list"
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 )
@@ -145,7 +144,7 @@ func (bus *MessageBus) Run() {
 			}
 
 			if 0 == l.Len() {
-				log.Println("bus all zero")
+				//log.Println("bus all zero")
 				bus.nextTick = time.Now().Add(maxBusDuration)
 				bus.timer.Reset(bus.nextTick.Sub(now))
 			}

@@ -1,6 +1,6 @@
 package server
 
-import "github.com/gographics/imagick/imagick"
+import "gopkg.in/gographics/imagick.v2/imagick"
 
 type ContentImage struct {
 	MW *imagick.MagickWand

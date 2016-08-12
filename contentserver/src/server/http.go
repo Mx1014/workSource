@@ -3,10 +3,12 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -17,6 +19,7 @@ type ServerHttpd struct {
 	context      *ServerContext
 	imageStorage ImageStorage
 	audioStorage AudioStorage
+	fileStorage  FileStorage
 	auth         Auth
 	contentTypes map[string]string
 }
@@ -75,7 +78,7 @@ func serveHome(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (int, err
 func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (int, error) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == "OPTIONS" {
-		fmt.Printf("options")
+		//fmt.Printf("options")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept,X-Requested-With, X_Requested_With")
 		return 200, nil
@@ -103,6 +106,8 @@ func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	if err != nil {
 		return 500, err
 	}
+
+	s.context.Logger.Info("serve image data:%d", len(data))
 
 	info, err := s.imageStorage.InfoImageFromData(data)
 	if err != nil {
@@ -718,6 +723,116 @@ func serveObjectChunk(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	return 200, nil
 }
 
+func serveFileUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (int, error) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == "OPTIONS" {
+		//fmt.Printf("options")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept,X-Requested-With, X_Requested_With")
+		return 200, nil
+	}
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+
+	obj := &ObjectInfo{ObjType: "file", Format: "", Meta: make(map[string]string)}
+	rsp, errcode, err := s.auth.Creating(s, r, obj)
+	if err != nil {
+		return errcode, err
+	}
+
+	if err := r.ParseMultipartForm(CACHE_MAX_SIZE); err != nil {
+		s.context.Logger.Error(err.Error())
+		return http.StatusForbidden, fmt.Errorf("parse multi part error")
+	}
+
+	file, header, err := r.FormFile("upload_file")
+	if err != nil {
+		return 500, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return 500, err
+	}
+
+	md5 := gen_md5_str(data)
+	meta := make(map[string]string)
+	meta["filename"] = header.Filename
+	obj.Format = filepath.Ext(header.Filename)
+	obj.Md5, err = s.fileStorage.SaveFile(md5, data, len(data), len(data), meta)
+	if err != nil {
+		return http.StatusForbidden, err
+	}
+	rsp, errcode, err = s.auth.Created(s, obj)
+	if err != nil {
+		return errcode, err
+	}
+
+	respStr := genClientResp(0, "Uploaded", &ClientResp{rsp.ObjectId, rsp.Url})
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, respStr)
+	return 200, nil
+}
+
+func serveFileGet(s *ServerHttpd, writer http.ResponseWriter, r *http.Request) (int, error) {
+	params := mux.Vars(r)
+	id := params["md5"]
+	if len(id) <= 0 {
+		return 404, errors.New("Image not found!")
+	}
+
+	obj := &ObjectInfo{ObjType: "file", ObjId: id, Meta: make(map[string]string)}
+	rsp, errcode, err := s.auth.Lookup(s, r, obj)
+	if err != nil {
+		return errcode, err
+	}
+
+	md5 := rsp.Md5
+	datach, _, meta, err := s.fileStorage.GetFile(md5)
+	if err != nil {
+		s.context.Logger.Debug("got file error, %v\n", err)
+		return 400, err
+	}
+	//TODO for range datas
+	data := <-datach
+
+	headers := s.context.Config.System.Headers
+	if len(headers) > 0 {
+		arr := strings.Split(headers, ",")
+		for i := 0; i < len(arr); i++ {
+			header := arr[i]
+			kvs := strings.Split(header, ":")
+			writer.Header().Set(kvs[0], kvs[1])
+		}
+	}
+
+	s.context.Logger.Debug("got file meta %v\n", meta)
+
+	if filename, ok := meta["filename"]; ok {
+		writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	}
+	writer.Header().Set("Content-Type", "application/octet-stream")
+
+	writer.Header().Set("Accept-Ranges", "bytes")
+	if writer.Header().Get("Content-Encoding") == "" {
+		writer.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	}
+
+	//Resume download support
+	start, end, isRangeOk := parseRange(r, len(data)-1)
+	if isRangeOk {
+		writer.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, len(data)))
+		io.Copy(writer, bytes.NewReader(data[start:end+1]))
+		if (end + 1) >= len(data) {
+			return 200, nil
+		}
+		return 206, nil
+	} else {
+		io.Copy(writer, bytes.NewReader(data))
+		return 200, nil
+	}
+}
+
 var httpdGlobal *ServerHttpd
 
 func GetHttpdGlobal() *ServerHttpd {
@@ -736,7 +851,13 @@ func StartServer(c *ServerContext) {
 	} else {
 		storage = NewRedisdbStorage(c)
 	}
-	httpd := &ServerHttpd{context: c, imageStorage: storage, audioStorage: storage, contentTypes: getContentTypes(), auth: NewAuth(c.Config.System.Auth)}
+	httpd := &ServerHttpd{
+		context:      c,
+		imageStorage: storage,
+		audioStorage: storage,
+		fileStorage:  storage,
+		contentTypes: getContentTypes(),
+		auth:         NewAuth(c.Config.System.Auth)}
 	httpdGlobal = httpd
 
 	go c.LocalCache.run(httpd)
@@ -748,6 +869,8 @@ func StartServer(c *ServerContext) {
 	router.Handle("/image/{md5}", appHandler{httpd, serveImageGet}).Methods("GET")
 	router.Handle("/audio/{md5}", appHandler{httpd, serveAudioGet}).Methods("GET")
 	router.Handle("/image/{md5}/{config}", appHandler{httpd, serveImageConfigGet}).Methods("GET")
+	router.Handle("/upload/file", appHandler{httpd, serveFileUpload})
+	router.Handle("/file/{md5}", appHandler{httpd, serveFileGet}).Methods("GET")
 
 	router.Handle("/object/create/{md5}", appHandler{httpd, serveObjectCreate})
 	//router.Handle("/object/thunbnail/{md5}", appHandler{httpd, serveObjectThumbnail})
