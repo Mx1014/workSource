@@ -718,7 +718,34 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhNewsComment.class, Tables.EH_NEWS_COMMENT.getName(), (dbContext) -> { 
         	return dbContext.select(Tables.EH_NEWS_COMMENT.ID.max()).from(Tables.EH_NEWS_COMMENT).fetchOne().value1(); 
         });
-        
+
+        syncTableSequence(null, EhEquipmentInspectionStandards.class, Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionEquipments.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionAccessories.class, Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionAccessoryMap.class, Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionEquipmentParameters.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PARAMETERS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PARAMETERS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_PARAMETERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionEquipmentAttachments.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionTasks.class, Tables.EH_EQUIPMENT_INSPECTION_TASKS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASKS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionTaskAttachments.class, Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhEquipmentInspectionTaskLogs.class, Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS).fetchOne().value1(); 
+        });  
 
         syncTableSequence(null, EhOfficeCubicleOrders.class, Tables.EH_OFFICE_CUBICLE_ORDERS.getName(), (dbContext) -> { 
         	return dbContext.select(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.max()).from(Tables.EH_OFFICE_CUBICLE_ORDERS).fetchOne().value1(); 

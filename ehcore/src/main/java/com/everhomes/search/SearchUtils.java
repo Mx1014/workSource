@@ -25,6 +25,14 @@ public class SearchUtils {
 
     public static final String NEWS = "news";
     
+    public static final String EQUIPMENTTASKINDEXTYPE = "equipmentTask";
+    
+    public static final String EQUIPMENTACCESSORYINDEXTYPE = "equipmentAccessory";
+    
+    public static final String EQUIPMENTINDEXTYPE = "equipment";
+    
+    public static final String EQUIPMENTSTANDARDINDEXTYPE = "equipmentStandard";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

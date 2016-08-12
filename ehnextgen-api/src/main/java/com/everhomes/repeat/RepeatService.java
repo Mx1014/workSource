@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.repeat.RepeatExpressionDTO;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 
 public interface RepeatService {
@@ -20,4 +21,8 @@ public interface RepeatService {
 	List<RepeatExpressionDTO> test();
 	
 	boolean isRepeatSettingActive(Long repeatSettingId);
+	
+	String getExecutionFrequency(RepeatSettingsDTO rs);
+	String getExecuteStartTime(RepeatSettingsDTO rs);
+	String getlimitTime(RepeatSettingsDTO rs);
 }
