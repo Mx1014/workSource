@@ -3132,7 +3132,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid  WorkdayRuleId parameter in the command");
 		}
-		if (null == cmd.getWifiRuleId() || null == cmd.getLocationRuleId()) {
+		if (null == cmd.getWifiRuleId() && null == cmd.getLocationRuleId()) {
 			LOGGER.error("wifi and location can not be both null ");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"wifi and location can not be both null ");
