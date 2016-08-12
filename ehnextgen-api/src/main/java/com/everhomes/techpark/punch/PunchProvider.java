@@ -4,6 +4,9 @@ import java.sql.Date;
 import java.util.Calendar;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
@@ -13,7 +16,7 @@ public interface PunchProvider {
 
 	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId, String queryDate,byte clockCode);
 
-	public PunchRule getPunchRuleByCompanyId(Long companyId);
+	public PunchTimeRule getPunchTimeRuleByCompanyId(String ownerType ,Long companyId);
 
 	public List<Date> listPunchLogsBwteenTwoDay(Long userId, Long companyId, String beginDate, String endDate);
 
@@ -22,12 +25,12 @@ public interface PunchProvider {
 	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId);
 
 
-	public void createPunchRule(PunchRule punchRule);
-	public void updatePunchRule(PunchRule punchRule);
-	public void deletePunchRule(PunchRule punchRule);
-	public void deletePunchRuleById(Long id);
-	public PunchRule findPunchRuleById(Long id);
-	public PunchRule findPunchRuleByCompanyId(Long companyId);
+	public void createPunchTimeRule(PunchTimeRule punchRule);
+	public void updatePunchTimeRule(PunchTimeRule punchRule);
+	public void deletePunchTimeRule(PunchTimeRule punchRule);
+	public void deletePunchTimeRuleById(Long id);
+	public PunchTimeRule findPunchTimeRuleById(Long id);
+	public PunchTimeRule findPunchTimeRuleByCompanyId(Long companyId);
 	
 	public void createPunchGeopoint(PunchGeopoint punchGeopoint);
 	public void updatePunchGeopoint(PunchGeopoint punchGeopoint);
@@ -106,5 +109,151 @@ public interface PunchProvider {
 	public List<UserPunchStatusCount> listUserApprovalStatusPunch(Long companyId, String startDay,String endDay);
  
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay);
+
+	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId, String name);
+
+	PunchTimeRule getPunchTimeRuleById(Long id);
+
+	public List<PunchRule> findPunchRules(String ownerType, Long ownerId,Long timeRuleId,Long locationRuleId,Long wifiRuleId,Long workdayRuleId   );
+
+	public List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, CrossShardListingLocator locator, int i);
+
+	List<PunchLocationRule> queryPunchLocationRules(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long createPunchLocationRule(PunchLocationRule obj);
+
+	void updatePunchLocationRule(PunchLocationRule obj);
+
+	void deletePunchLocationRule(PunchLocationRule obj);
+
+	PunchLocationRule getPunchLocationRuleById(Long id);
+
+	void updatePunchWifi(PunchWifi obj);
+
+	void deletePunchWifi(PunchWifi obj);
+
+	PunchWifi getPunchWifiById(Long id);
+
+	List<PunchWifi> queryPunchWifis(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long createPunchWifiRule(PunchWifiRule obj);
+
+	void updatePunchWifiRule(PunchWifiRule obj);
+
+	void deletePunchWifiRule(PunchWifiRule obj);
+
+	PunchWifiRule getPunchWifiRuleById(Long id);
+
+	List<PunchWifiRule> queryPunchWifiRules(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long createPunchHoliday(PunchHoliday obj);
+
+	void updatePunchHoliday(PunchHoliday obj);
+
+	void deletePunchHoliday(PunchHoliday obj);
+
+	PunchHoliday getPunchHolidayById(Long id);
+
+	List<PunchHoliday> queryPunchHolidays(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long createPunchWorkdayRule(PunchWorkdayRule obj);
+
+	void updatePunchWorkdayRule(PunchWorkdayRule obj);
+
+	void deletePunchWorkdayRule(PunchWorkdayRule obj);
+
+	PunchWorkdayRule getPunchWorkdayRuleById(Long id);
+
+	List<PunchWorkdayRule> queryPunchWorkdayRules(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long createPunchRuleOwnerMap(PunchRuleOwnerMap obj);
+
+	void updatePunchRuleOwnerMap(PunchRuleOwnerMap obj);
+
+	void deletePunchRuleOwnerMap(PunchRuleOwnerMap obj);
+
+	PunchRuleOwnerMap getPunchRuleOwnerMapByOwnerAndTarget(String ownerType , Long ownerId,String targetType , Long targetId);
+
+	List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long createPunchWifi(PunchWifi obj);
+
+	void deletePunchTimeRuleByOwnerAndId(String ownerType, Long ownerId, Long id);
+
+	void deletePunchRuleOwnerMapByOwnerAndId(String ownerType, Long ownerId, Long id);
+
+	void deletePunchWorkdayRuleByOwnerAndId(String ownerType, Long ownerId, Long id);
+
+	void deletePunchHolidayByOwnerAndId(String ownerType, Long ownerId, Long id);
+
+	void deletePunchWifiRuleByOwnerAndId(String ownerType, Long ownerId, Long id);
+ 
+
+	public List<PunchLocationRule> queryPunchLocationRulesByName(String ownerType, Long ownerId, String name);
+
+	 
+	void deletePunchGeopointsByRuleId(  Long ruleId);
+
+	public void deletePunchLocationRuleByOwnerAndId(String ownerType, Long ownerId, Long id);
+
+	public List<PunchLocationRule> queryPunchLocationRuleList(String ownerType, Long ownerId, CrossShardListingLocator locator, int i);
+
+ 
+	List<PunchGeopoint> listPunchGeopointsByRuleId(String ownerType, Long ownerId, Long ruleId);
+
+	public List<PunchWifiRule> queryPunchWiFiRulesByName(String ownerType, Long ownerId, String name);
+
+	public void deletePunchWifisByRuleId(Long id);
+
+	public List<PunchWifiRule> queryPunchWifiRuleList(String ownerType, Long ownerId, CrossShardListingLocator locator, int i);
+
+	public List<PunchWifi> listPunchWifisByRuleId(String ownerType, Long ownerId, Long id);
+
+	public List<PunchWorkdayRule> queryPunchWorkdayRulesByName(String ownerType, Long ownerId, String name);
+
+	public void deletePunchHolidayByRuleId(Long id);
+
+	public List<PunchWorkdayRule> queryPunchWorkdayRuleList(String ownerType, Long ownerId, CrossShardListingLocator locator, int i);
+
+	public List<PunchHoliday> listPunchHolidaysByRuleId(String ownerType, Long ownerId, Long id);
+
+	public List<PunchRule> queryPunchRulesByName(String ownerType, Long ownerId, String name);
+
+	List<PunchRule> queryPunchRules(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	PunchRule getPunchRuleById(Long id);
+
+	void deletePunchRule(PunchRule obj);
+
+	void updatePunchRule(PunchRule obj);
+
+	Long createPunchRule(PunchRule obj);
+
+	public List<PunchRuleOwnerMap> queryPunchRuleOwnerMapsByRuleId(String ownerType, Long ownerId, Long id);
+
+	public List<PunchRule> queryPunchRuleList(String ownerType, Long ownerId, CrossShardListingLocator locator, int i);
+ 
+	List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId,
+			CrossShardListingLocator locator, int i);
+
+	public List<PunchHoliday> queryPunchHolidaysByStatus(String ownerType, Long ownerId, Long workdayRuleId, byte code);
+
+	public List<Long> queryPunchOrganizationsFromRules();
+
+	List<PunchDayLog> listPunchDayLogs(Long userId, Long companyId, String startDay, String endDay);
+
+	List<PunchStatistic> queryPunchStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+	PunchStatistic getPunchStatisticById(Long id);
+
+	void deletePunchStatistic(PunchStatistic obj);
+
+	void updatePunchStatistic(PunchStatistic obj);
+
+	Long createPunchStatistic(PunchStatistic obj);
+
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+			List<Long> userIds, CrossShardListingLocator locator, int i);
+ 
  
 }

@@ -7,4 +7,5 @@ public interface MessagingLocalStringCode {
     static final int NEW_MESSAGE_AUDIO_ALERT = 2;
     static final int NEW_MESSAGE_IMAGE_ALERT = 3;
     static final int NEW_MESSAGE_VIDEO_ALERT = 4;
+    static final int KICK_OFF_ALERT = 5;
 }

@@ -20,7 +20,9 @@ public enum CoordinationLocks {
     PAYMENT_CARD("payment.card"),
 	UPDATE_NEWS("news.update"),
 	SCHEDULE_EQUIPMENT_TASK("equipment.task.schedule"),
-    CREATE_EQUIPMENT_TASK("equipment.task.create"),;
+    CREATE_EQUIPMENT_TASK("equipment.task.create"),
+	WANKE_LOGIN("wanke.login"),
+    STAT_SETTLEMENT("stat.settlement");
     
 
     private String code;

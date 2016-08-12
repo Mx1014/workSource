@@ -77,5 +77,23 @@
       "member_id": "1000760",
       "member_status": "3"
     }
+  ],
+   "eh_organization_communities": [
+    {
+      "id": "1",
+      "community_id": "24210090697425925",
+      "organization_id": "1000750"
+    }
+  ],
+    "eh_organization_task_targets": [
+    {
+      "id": "1",
+      "owner_type": "EhCommunities",
+      "owner_id": "24210090697425925",
+      "target_type": "EhUsers",
+      "target_id": "10001",
+      "task_type": "REPAIRS",
+      "message_type": "push"
+    }
   ]
 }

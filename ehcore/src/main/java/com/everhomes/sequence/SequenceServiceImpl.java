@@ -289,7 +289,37 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_PUNCH_WORKDAY.ID.max()).from(Tables.EH_PUNCH_WORKDAY).fetchOne().value1(); 
         });
 
+        syncTableSequence(null, EhPunchTimeRules.class, Tables.EH_PUNCH_TIME_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_TIME_RULES.ID.max()).from(Tables.EH_PUNCH_TIME_RULES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPunchLocationRules.class, Tables.EH_PUNCH_LOCATION_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_LOCATION_RULES.ID.max()).from(Tables.EH_PUNCH_LOCATION_RULES).fetchOne().value1();
+        });
 
+        syncTableSequence(null, EhPunchWifis.class, Tables.EH_PUNCH_WIFIS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_WIFIS.ID.max()).from(Tables.EH_PUNCH_WIFIS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPunchWifiRules.class, Tables.EH_PUNCH_WIFI_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_WIFI_RULES.ID.max()).from(Tables.EH_PUNCH_WIFI_RULES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPunchHolidays.class, Tables.EH_PUNCH_HOLIDAYS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_HOLIDAYS.ID.max()).from(Tables.EH_PUNCH_HOLIDAYS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPunchWorkdayRules.class, Tables.EH_PUNCH_WORKDAY_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_WORKDAY_RULES.ID.max()).from(Tables.EH_PUNCH_WORKDAY_RULES).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhPunchRuleOwnerMap.class, Tables.EH_PUNCH_RULE_OWNER_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.max()).from(Tables.EH_PUNCH_RULE_OWNER_MAP).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhPunchStatistics.class, Tables.EH_PUNCH_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_STATISTICS.ID.max()).from(Tables.EH_PUNCH_STATISTICS).fetchOne().value1();
+        });
+    
         syncTableSequence(EhGroups.class, EhRentalBillAttachments.class, Tables.EH_RENTAL_BILL_ATTACHMENTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_RENTAL_BILL_ATTACHMENTS.ID.max()).from(Tables.EH_RENTAL_BILL_ATTACHMENTS).fetchOne().value1(); 
         });
@@ -731,6 +761,12 @@ public class SequenceServiceImpl implements SequenceService {
         	return dbContext.select(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS.ID.max()).from(Tables.EH_OFFICE_CUBICLE_ATTACHMENTS).fetchOne().value1(); 
         });
         
+        syncTableSequence(null, EhJournals.class, Tables.EH_JOURNALS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_JOURNALS.ID.max()).from(Tables.EH_JOURNALS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhJournalConfigs.class, Tables.EH_JOURNAL_CONFIGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_JOURNAL_CONFIGS.ID.max()).from(Tables.EH_JOURNAL_CONFIGS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")

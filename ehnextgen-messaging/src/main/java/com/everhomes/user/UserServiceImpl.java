@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +68,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
@@ -107,6 +109,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagePopupFlag;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MessagingLocalStringCode;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.point.AddUserPointCommand;
@@ -122,6 +125,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
@@ -280,6 +284,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private BorderProvider borderProvider;
+	
+    @Autowired
+    private LocaleStringService localeStringService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -835,6 +842,8 @@ public class UserServiceImpl implements UserService {
 		Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
 		UserLogin foundLogin = null;
 		int nextLoginId = 1;
+		int foundIndex = 0xFFFFFF;
+		String oldDeviceId = "";
 
 		if(maxLoginId != null) {
 			for(int i = 1; i <= maxLoginId.intValue(); i++) {
@@ -854,15 +863,39 @@ public class UserServiceImpl implements UserService {
 							}
 							break;
 						} else if(login.getDeviceIdentifier() != null && deviceIdentifier != null) {
-							if(login.getDeviceIdentifier().equals(deviceIdentifier)) {
+							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
 								foundLogin = login;
 								break;
+							} else {
+							    if(foundLogin == null) {
+							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
+							            login.setStatus(UserLoginStatus.LOGGED_OFF);
+							            oldDeviceId = login.getDeviceIdentifier();
+			                        login.setDeviceIdentifier(deviceIdentifier);
+							        }
+							       
+                            foundLogin = login;
+                            foundIndex = i+2;
+							    } else {
+							        //found twice, delete all logins
+							        accessor.getTemplate().delete(accessor.getBucketName());
+							        foundLogin = null;
+							        nextLoginId = 1;
+							        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+							        oldDeviceId = "";
+							        break;   
+							    }
 							}
 						}
 					}
 
-					if(login.getLoginId() >= nextLoginId)
+					if(foundLogin == null && login.getLoginId() >= nextLoginId)
 						nextLoginId = login.getLoginId() + 1;
+					
+					if(i > foundIndex && foundLogin != null) {
+					    //already found
+					    break;
+					}
 				}
 			}
 		}
@@ -884,6 +917,21 @@ public class UserServiceImpl implements UserService {
 		if(isNew) {
 			//Kickoff other login in this devices
 			kickoffLoginByDevice(foundLogin);
+		}
+		
+		if(!oldDeviceId.isEmpty()) {
+	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
+	            locale = user.getLocale(); 
+	        }
+	        
+	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
+		    String msg = this.localeStringService.getLocalizedString(
+	                MessagingLocalStringCode.SCOPE,
+	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
+	                locale,
+	                "kickoff other devices");
+		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
 		}
 
 		return foundLogin;
@@ -2758,21 +2806,25 @@ public class UserServiceImpl implements UserService {
         return resp;
     }
     
-    @Override
-    public String sendMessageTest(SendMessageTestCommand cmd) {
+    private void sendMessageToUser(Long userId, String body, MessagingConstants flag) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), cmd.getUserId().toString()), 
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
                 new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody("test message " + Double.valueOf(Math.random()));
+        messageDto.setBody(body);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-                cmd.getUserId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
-        
-        return messageDto.getBody();
+                userId.toString(), messageDto, flag.getCode());        
+    }
+    
+    @Override
+    public String sendMessageTest(SendMessageTestCommand cmd) {
+        String body = "test message " + Double.valueOf(Math.random());
+        sendMessageToUser(cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
+        return body;
     }
     
     @Override

@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 * <li>companyId：企业Id</li>
 * <li>latitude: 坐标纬度</li>
 * <li>longitude： 坐标经度</li>
+* <li>wifiMac： wifiMac地址信息</li>
 * </ul>
 */
 public class PunchClockCommand {
@@ -16,7 +17,7 @@ public class PunchClockCommand {
     private String identification;
     private Double latitude;
     private Double longitude;
-    
+    private String wifiMac;
      @Override
      public String toString() {
          return StringHelper.toJsonString(this);
@@ -52,6 +53,14 @@ public class PunchClockCommand {
 
 	public void setEnterpriseId(Long enterpriseId) {
 		this.enterpriseId = enterpriseId;
+	}
+
+	public String getWifiMac() {
+		return wifiMac;
+	}
+
+	public void setWifiMac(String wifiMac) {
+		this.wifiMac = wifiMac;
 	}
 
  }

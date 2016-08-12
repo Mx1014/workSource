@@ -23,6 +23,8 @@ import com.everhomes.parking.etcp.ETCPJsonRsult;
 import com.everhomes.parking.etcp.ETCPLocation;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.ListCardTypeCommand;
+import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
@@ -196,6 +198,12 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 		//location.setAreaId(areaId);
 		String locations = "";
 		
+		return null;
+	}
+
+	@Override
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

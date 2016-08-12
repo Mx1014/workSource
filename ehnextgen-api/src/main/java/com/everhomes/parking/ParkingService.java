@@ -13,6 +13,8 @@ import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
+import com.everhomes.rest.parking.ListCardTypeCommand;
+import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ListParkingCardsCommand;
@@ -73,4 +75,6 @@ public interface ParkingService {
     		HttpServletResponse response);
     
     void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd);
+    
+    ListCardTypeResponse listCardType(ListCardTypeCommand cmd);
 }
