@@ -1,40 +1,38 @@
 // @formatter:off
 package com.everhomes.rest.organization.pm;
 
-import java.sql.Timestamp;
 
-import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 主键id</li>
- * <li>communityId: 小区名称</li>
+ * <li>organizationId: 机构id</li>
+ * <li>communityId: 小区id</li>
  * <li>contactName：业主名称</li>
- * <li>contactType：业主类型：0-手机，1-邮箱</li>
+ * <li>contactType：业主标识类型：0-手机，1-邮箱</li>
  * <li>contactToken：业主标识</li>
- * <li>creatorUid：创建者id</li>
- * <li>createTime：创建时间</li>
+ * <li>addressIds：门牌号列表</li>
  * </ul>
  */
-public class UpdatePropOwnerCommand {
-    @NotNull
-    private Long     id;
+public class CreatePropOwnerCommand {
+
+	private Long     organizationId;
 	private Long     communityId;
 	private String   contactName;
 	private Byte     contactType;
 	private String   contactToken;
-	private Long     creatorUid;
-	private String createTime;
+	@ItemType(Long.class)
+	private List<Long> addressIds;
 	
-	public UpdatePropOwnerCommand() {
+	public Long getOrganizationId() {
+		return organizationId;
 	}
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 	public Long getCommunityId() {
 		return communityId;
@@ -60,19 +58,13 @@ public class UpdatePropOwnerCommand {
 	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
 	}
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-	public String getCreateTime() {
-		return createTime;
-	}
-	public void setCreateTime(String createTime) {
-		this.createTime = createTime;
-	}
 	
+	public List<Long> getAddressIds() {
+		return addressIds;
+	}
+	public void setAddressIds(List<Long> addressIds) {
+		this.addressIds = addressIds;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

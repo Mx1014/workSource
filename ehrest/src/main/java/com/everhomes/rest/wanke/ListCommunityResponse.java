@@ -10,7 +10,10 @@ public class ListCommunityResponse {
 	private Long nextPageAnchor;
 	private Long userId;
     private String contentServer;
-
+    private String loginToken;
+    @ItemType(String.class)
+    private List<String> accessPoints;
+    
 	@ItemType(CommunityDTO.class)
     private List<CommunityDTO> communities;
 	
@@ -47,6 +50,22 @@ public class ListCommunityResponse {
 	}
 	public void setContentServer(String contentServer) {
 		this.contentServer = contentServer;
+	}
+
+	public String getLoginToken() {
+		return loginToken;
+	}
+
+	public void setLoginToken(String loginToken) {
+		this.loginToken = loginToken;
+	}
+
+	public List<String> getAccessPoints() {
+		return accessPoints;
+	}
+
+	public void setAccessPoints(List<String> accessPoints) {
+		this.accessPoints = accessPoints;
 	}
 	
 }
