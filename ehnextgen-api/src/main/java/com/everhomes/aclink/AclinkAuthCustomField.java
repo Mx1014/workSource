@@ -19,6 +19,8 @@ public enum AclinkAuthCustomField {
     AUTH_LINGLING_ID("string_tag1", "stringTag1", Tables.EH_DOOR_AUTH.STRING_TAG1),
     AUTH_LINGLING_SDK_KEY("string_tag2", "stringTag2", Tables.EH_DOOR_AUTH.STRING_TAG2),
     AUTH_LINGLING_UUID("string_tag3", "stringTag3", Tables.EH_DOOR_AUTH.STRING_TAG3),
+    //authMethod
+    AUTH_METHOD("string_tag4", "stringTag4", Tables.EH_DOOR_AUTH.STRING_TAG4),
     
     AUTH_APPLY_USERNAME("string_tag1", "stringTag1", Tables.EH_DOOR_AUTH.STRING_TAG1),
     AUTH_VISITOR_EVENT("string_tag2", "stringTag2", Tables.EH_DOOR_AUTH.STRING_TAG2),
