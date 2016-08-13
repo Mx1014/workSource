@@ -121,6 +121,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("listAclinkUsers")
     @RestReturn(value=AclinkUserResponse.class)
     public RestResponse listAclinkUsers(@Valid ListAclinkUserCommand cmd) {
+        cmd.setIsOpenAuth((byte)0);
         RestResponse response = new RestResponse(doorAccessService.listAclinkUsers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

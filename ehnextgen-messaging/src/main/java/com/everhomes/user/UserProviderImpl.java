@@ -957,8 +957,7 @@ public class UserProviderImpl implements UserProvider {
                         .where(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
                                 .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))).getQuery();
                         
-                        select = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID))
-                        .where(cond.and(Tables.EH_USERS.ID.notIn(subQuery)));
+                        select = onQuery.where(cond.and(Tables.EH_USERS.ID.notIn(subQuery)));
                     }
                     
                 } else {
