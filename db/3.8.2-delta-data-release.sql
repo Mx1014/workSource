@@ -188,7 +188,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 -- 考勤管理 by sfyan 20160811
 DELETE FROM `eh_acl_privileges` WHERE `id` IN (544, 545, 546, 547);
 DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (62, 63, 64, 65);
-DELETE FROM `eh_web_menus` WHERE `id` IN (56000, 56100, 56110, 56120, 56130, 56140);
+DELETE FROM `eh_web_menus` WHERE `id` IN (56100, 56110, 56120, 56130, 56140);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56100,'考勤管理',56000,null,null,1,2,'/50000/56000/56100','park',561);
@@ -208,6 +208,7 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (56160,'通用设置',56105,null,'punch_setting',0,2,'/50000/56000/56100/56105/56160','park',569);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56170,'个人设置',56105,null,'punch_personal_setting',0,2,'/50000/56000/56100/56105/56170','park',570);
+
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (790,0,'规则管理','规则管理',null);
@@ -232,13 +233,13 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),791,56120,'时间
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),792,56130,'地点管理',1,1,'地点管理 全部权限',572);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),793,43440,'wifi管理',1,1,'wifi管理 全部权限',573);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),793,56140,'wifi管理',1,1,'wifi管理 全部权限',573);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),794,56150,'排班管理',1,1,'排班管理 全部权限',574);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),795,43460,'通用设置',1,1,'通用设置 全部权限',575);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),795,56160,'通用设置',1,1,'通用设置 全部权限',575);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),796,43470,'个人设置',1,1,'个人设置 全部权限',576);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),796,56170,'个人设置',1,1,'个人设置 全部权限',576);
 
 -- 除了深业 其他屏蔽
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -260,3 +261,12 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 56100,'', 'EhNamespaces', 999990 , 0);
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999990,0  FROM `eh_web_menus` WHERE `path` LIKE '%56100/%';
 
+
+-- 添加业主自动关联
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (36000,'业主管理',30000,null,'apartment_info',0,2,'/30000/36000','park',360);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (411,0,'业主管理','业主管理',null);
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),411,36000,'业主管理',1,1,'业主管理 全部权限',167);
