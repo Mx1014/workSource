@@ -4359,7 +4359,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationMembers = convertPinyin(organizationMembers);
 		}
 		
-		
 		if(0 == organizationMembers.size()){
 			return response;
 		}
@@ -4440,16 +4439,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(
+	public ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(
 			ListOrganizationMemberCommand cmd) {
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+		
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
-		if(null == org)
-			return response;
+		List<String> groupTypes = cmd.getGroupTypes();
+		if(null == groupTypes || 0 == groupTypes.size()){
+			LOGGER.error("groupTypes is null, groupTypes = {}", groupTypes);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"groupTypes is null.");
+		}
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
-		List<String> groupTypes = cmd.getGroupTypes();
+		if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+			groupTypes.remove(OrganizationGroupType.DEPARTMENT.getCode());
+		}
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -4520,13 +4526,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-//		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), org.getId());
-//		if(null != desOrgMember){
-//			LOGGER.error("phone number already exists.");
-//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
-//					"phone number already exists.");
-//		}
-//		
 		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
@@ -4556,16 +4555,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 					return null;
 				}
 				
-			}else{
+			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
 				groupId = cmd.getOrganizationId();
 				organizationId = org.getDirectlyEnterpriseId();
+				OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
+				if(null == desOrgMember){
+					organizationMember.setOrganizationId(organizationId);
+					organizationProvider.createOrganizationMember(organizationMember);
+				}
+			}else{
+				groupId = cmd.getOrganizationId();
 			}
 			
-			OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
-			if(null == desOrgMember){
-				organizationMember.setOrganizationId(organizationId);
-				organizationProvider.createOrganizationMember(organizationMember);
-			}
 			Organization group = checkOrganization(groupId);
 			organizationMember.setGroupPath(group.getPath());
 			OrganizationMember groupMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), groupId);
@@ -4580,7 +4581,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return null;
 		});
 		
-		userSearcher.feedDoc(organizationMember);
+		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+			userSearcher.feedDoc(organizationMember);
+		}
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
@@ -5150,17 +5153,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
-		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-		
-		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
-
-		List<Long> deptIds = new ArrayList<Long>();
-		for (Organization organization : depts) {
-			deptIds.add(organization.getId());
-		}
-		
 		Long orgId = null;
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
@@ -5185,45 +5177,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
 			
-			List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>(); 
-			List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>(); 
-			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(c.getContactToken(), deptIds);
-			
-			for (OrganizationMember member : members) {
-				Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
-				if(null != group){
-					if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-						if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.DEPARTMENT){
-							departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
-						}
-						
-						if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
-							groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-						}
-					}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
-						if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
-							groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-						}
-					}
-				}
+			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				dto.setDepartments(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
+				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
 			}
-			
-			dto.setGroups(groups);
-			dto.setDepartments(departments);
-//			Organization group = null;
-//			
-//			if(types.contains(OrganizationGroupType.GROUP.getCode())){
-//				group = deptMaps.get(c.getOrganizationId());
-//			}else{
-//				group = deptMaps.get(c.getGroupId());
-//			}
-//			 
-//			if(null != group){
-//				dto.setGroupName(group.getName());
-//				if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
-//					organizationId = group.getId();
-//				}
-//			}
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
 				User user = userProvider.findUserById(dto.getTargetId());
@@ -5255,8 +5214,35 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return dto;
 		}).collect(Collectors.toList());
 	}
-	
-	
+
+	@Override
+	public List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath){
+		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>(); 
+		
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypeList);
+
+		List<Long> deptIds = new ArrayList<Long>();
+		for (Organization organization : depts) {
+			deptIds.add(organization.getId());
+		}
+		
+		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(token, deptIds);
+		
+		for (OrganizationMember member : members) {
+			Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(null != group){
+				if(OrganizationGroupType.fromCode(group.getGroupType()) == organizationGroupType){
+					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
+			}
+		}
+		
+		return groups;
+	}
 	
 	@Override
 	public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
