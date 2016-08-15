@@ -401,15 +401,21 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 -- 其它登录设备已经被踢出提示 by Janson
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
 
--- 打卡推送模板
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 1, 'zh_CN', '在开始前给预定用户发送推送提醒', '您预约的${resourceName}已临近使用时间，使用时间为${startTime}');
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 2, 'zh_CN', '预定成功给管理员发推送', '${userName}预约了${resourceName}\n使用详情：${useDetail}\n预约数：${rentalCount}');
 
 -- 设备巡检服务广场icon by xiongying
-set @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'EquipmentInspection', '设备巡检', 'cs://1/image/aW1hZ2UvTVRwaU5tRTRZalZqTlRJNE5XUTVNelZoT1ROak9UWXlabUk1TURRMVpEZzROUQ', '1', '1', '14', '{\"url\":\"https://core.zuolin.com/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}', '0', '0', '1', '1', '', '0', '', '', NULL, '1', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'EquipmentInspection', '设备巡检', 'cs://1/image/aW1hZ2UvTVRwaU5tRTRZalZqTlRJNE5XUTVNelZoT1ROak9UWXlabUk1TURRMVpEZzROUQ', '1', '1', '14', '{\"url\":\"https://core.zuolin.com/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}', '0', '0', '1', '1', '', '0', '', '', NULL, '1', 'park_tourist');
 
 -- 创客空间论坛 by lqs 20160815
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
   VALUES ((@configuration_id := @configuration_id + 1), 'makerzone.forum_id', '177000', '创客空间论坛ID', '0', '创客空间论坛');
+  
+ -- 打卡推送模板
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 1, 'zh_CN', '在开始前给预定用户发送推送提醒', '您预约的${resourceName}已临近使用时间，使用时间为${startTime}');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 2, 'zh_CN', '预定成功给管理员发推送', '${userName}预约了${resourceName}\n使用详情：${useDetail}\n预约数：${rentalCount}');
+  
+-- 打卡文字
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental.notification', '0', 'zh_CN', '早上');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental.notification', '1', 'zh_CN', '下午');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental.notification', '2', 'zh_CN', '晚上');

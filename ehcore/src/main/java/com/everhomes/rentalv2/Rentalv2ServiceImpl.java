@@ -62,7 +62,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -75,13 +74,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.forum.ForumNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -280,6 +279,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	Rentalv2Provider rentalProvider;
+	@Autowired
+	LocaleStringService localeStringService;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -1370,11 +1371,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //					useDetailSB.append("使用时间:");
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
-						useDetailSB.append("早上 ");
+						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.AM.getCode(), PunchNotificationTemplateCode.locale, "morning"));
 					if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
-						useDetailSB.append("下午 ");
+						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.PM.getCode(), PunchNotificationTemplateCode.locale, "afternoon"));
 					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
-						useDetailSB.append("晚上 ");
+						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.NIGHT.getCode(), PunchNotificationTemplateCode.locale, "night"));
 				}
 				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				//独占资源 只有时间				 
