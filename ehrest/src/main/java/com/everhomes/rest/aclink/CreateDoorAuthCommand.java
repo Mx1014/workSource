@@ -40,6 +40,7 @@ public class CreateDoorAuthCommand {
     private String description;
     private Long namespaceId;
     private String phone;
+    private String authMethod;
     
     
     public Long getUserId() {
@@ -121,6 +122,13 @@ public class CreateDoorAuthCommand {
     }
     public void setRightRemote(Byte rightRemote) {
         this.rightRemote = rightRemote;
+    }
+
+    public String getAuthMethod() {
+        return authMethod;
+    }
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
     }
     @Override
     public String toString() {

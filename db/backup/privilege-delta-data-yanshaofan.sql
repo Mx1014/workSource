@@ -1,7 +1,7 @@
-#
-#检查目前最大的id，然后设置@acl_id
-#SELECT MAX(id) FROM `eh_acls`;
-#
+-- 
+-- 检查目前最大的id，然后设置@acl_id
+-- SELECT MAX(id) FROM `eh_acls`;
+-- 
 
 set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 

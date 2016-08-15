@@ -13,5 +13,6 @@ public interface PropertyServiceErrorCode {
     static final int ERROR_INVALID_COMMENT = 12002;
     static final int ERROR_INVALID_TASK = 12003;
     static final int ERROR_INVALID_TASK_STATUS = 12004;
+    static final int ERROR_OWNER_COMMUNITY = 13001;
    
 }

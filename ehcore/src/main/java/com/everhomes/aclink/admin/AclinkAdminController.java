@@ -14,6 +14,7 @@ import com.everhomes.aclink.AesUserKey;
 import com.everhomes.aclink.DoorAccess;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
+import com.everhomes.aclink.DoorAuthMethodType;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -120,6 +121,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("listAclinkUsers")
     @RestReturn(value=AclinkUserResponse.class)
     public RestResponse listAclinkUsers(@Valid ListAclinkUserCommand cmd) {
+//        cmd.setIsOpenAuth((byte)0);
         RestResponse response = new RestResponse(doorAccessService.listAclinkUsers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -259,6 +261,10 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("createLingingVistor")
     @RestReturn(value=DoorAuthDTO.class)
     public RestResponse createLingingVistor(@Valid CreateDoorVisitorCommand cmd) {
+        if(cmd.getAuthMethod() == null) {
+            cmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());    
+        }
+        
         RestResponse response = new RestResponse(doorAccessService.createDoorVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
