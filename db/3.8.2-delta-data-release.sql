@@ -34,7 +34,7 @@ VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'park.notifica
 
 -- 园区电子报初始数据
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-VALUES ((@configuration_id := @configuration_id + 1), 'journal.posterPath', 'cs://1/image/aW1hZ2UvTVRveU4yRXpNbVEzWXpCaU16azFaVE5pT0RBNFkyVmxNRFkzTmpRNE5EVm1aZw', NULL, '0', NULL);
+VALUES ((@configuration_id := @configuration_id + 1), 'journal.posterPath', 'cs://1/image/aW1hZ2UvTVRvNVpUYzNNREJpWW1SbE5HRTJaRFF6T1RRMU1qSTJaV1JrTmpoaU5EYzVZZw', NULL, '0', NULL);
 
 SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -185,6 +185,15 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'equipment.notification', 5, 'zh_CN', '设备-标准关联审阅合格通知','设备“${equipmentName}”已审批合格，可生成巡检/保养任务');
 
 
+
+-- 威新Link服务广场
+UPDATE eh_communities SET name = '深圳威新' WHERE id = 240111044331053517;
+UPDATE eh_groups SET name = '深圳威新', display_name = '深圳威新' where id = 1003093;
+UPDATE eh_forums SET name = '深圳威新' WHERE id = 180772;
+UPDATE eh_forums SET name = '深圳威新论坛' WHERE id = 180773;
+UPDATE eh_forums SET name = '深圳威新意见反馈论坛' WHERE id = 180774;
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXRmtObUkzWWprd05tTXhaREV4WlRJMU1EQmlaVEU1TjJObE9ESXpZZw' WHERE id in (109995, 110005);
+
 -- 考勤管理 by sfyan 20160811
 DELETE FROM `eh_acl_privileges` WHERE `id` IN (544, 545, 546, 547);
 DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (62, 63, 64, 65);
@@ -270,3 +279,4 @@ INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
   VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),411,36000,'业主管理',1,1,'业主管理 全部权限',167);
+
