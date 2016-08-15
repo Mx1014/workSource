@@ -29,7 +29,7 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 
      
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES( 240111044331053517, UUID(), 14978, '深圳市',  14979, '南山区', '深圳威新软件园', '深圳威新', '深圳市南山区高新南九道', NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 113, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 180773, 180774, UTC_TIMESTAMP(), 999991);
+	VALUES( 240111044331053517, UUID(), 14978, '深圳市',  14979, '南山区', '深圳威新', '深圳威新', '深圳市南山区高新南九道', NULL, '高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 113, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 180773, 180774, UTC_TIMESTAMP(), 999991);
 SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`);
 
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
@@ -40,13 +40,13 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 
     
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(1003093, UUID(), '深圳威新软件园', '深圳威新软件园', 1, 1, 1002757, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180772, 1, 999991); 
+	VALUES(1003093, UUID(), '深圳威新', '深圳威新', 1, 1, 1002757, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180772, 1, 999991); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(180772, UUID(), 999991, 2, 'EhGroups', 1003093,'深圳威新软件园','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(180772, UUID(), 999991, 2, 'EhGroups', 1003093,'深圳威新','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(180773, UUID(), 999991, 2, 'EhGroups', 0,'深圳威新软件园论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(180773, UUID(), 999991, 2, 'EhGroups', 0,'深圳威新论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(180774, UUID(), 999991, 2, 'EhGroups', 0,'深圳威新软件园意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());    
+	VALUES(180774, UUID(), 999991, 2, 'EhGroups', 0,'深圳威新意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());    
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
 	VALUES(1002757, 0, 'PM', '深圳威新', '', '/1002757', 1, 2, 'ENTERPRISE', 999991, 1003093);
@@ -212,7 +212,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('2','场地预约','0',NULL,'0','999991');
 
 INSERT INTO `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
-	VALUES(200219, 0,'community','240111044331053517','创智联盟','威新软件园创智联盟','1','深圳市南山区高新南九道','075526716888','“创智联盟”是原点空间创立的品牌联盟，为进驻的个人及团队提供包括公司注册、招聘、财务、法律、咨询等全方位服务，服务合作方涵括商务类、成长类、社交类以及生活类的数十个不同领域的领头品牌。','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','2',NULL,'113.955397','22.536039','',NULL,NULL,NULL,NULL,NULL,'苏娇娇','13760240661',NULL,NULL,NULL,NULL,NULL);
+	VALUES(200219, 0,'community','240111044331053517','创客空间','创客空间','1','深圳市南山区高新南九道','075526716888','高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','2',NULL, 113.956081, 22.533245,'',NULL,NULL,NULL,NULL,NULL,'苏娇娇','13760240661',NULL,NULL,NULL,NULL,NULL);
 INSERT INTO `eh_yellow_page_attachments` (`id`, `owner_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) 
 	VALUES(131, 200219,'image','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','0',UTC_TIMESTAMP());
 

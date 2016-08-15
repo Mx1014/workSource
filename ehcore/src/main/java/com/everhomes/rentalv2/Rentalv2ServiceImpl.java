@@ -1162,7 +1162,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<RentalCell> rentalSiteRules = new ArrayList<RentalCell>();
 
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
-			rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
+			if(null== rs.getCancelTime())
+				rentalBill.setCancelTime(new Timestamp(0));
+			else
+				rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
 			rentalBill.setResourceName(rs.getResourceName());
 			rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
@@ -1999,6 +2002,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setRentalEndTime(cmd.getRentalEndTime());
 			rs.setRentalStartTime(cmd.getRentalStartTime());
 			rs.setTimeStep(cmd.getTimeStep());
+			if(null == cmd.getCancelTime())
+				cmd.setCancelTime(0L);
 			rs.setCancelTime(cmd.getCancelTime());
 			rs.setRefundFlag(cmd.getRefundFlag());
 			rs.setRefundRatio(cmd.getRefundRatio());
