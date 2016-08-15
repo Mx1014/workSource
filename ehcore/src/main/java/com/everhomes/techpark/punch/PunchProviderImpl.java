@@ -394,7 +394,9 @@ long id = sequenceProvider.getNextSequence(NameMapper
 		SelectQuery<EhPunchTimeRulesRecord> query = context
 				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
-
+		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		
 		List<PunchTimeRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
@@ -2171,6 +2173,25 @@ long id = sequenceProvider.getNextSequence(key);
 				.and(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.equal(ownerType)) ; 
 		step.where(condition);
 		step.execute();
+	}
+
+	@Override
+	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id) {
+	      try {
+	    	  PunchRuleOwnerMap[] result = new PunchRuleOwnerMap[1];
+	          DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+	          result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
+	              .where(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.eq(id))
+	              .fetchAny().map((r) -> {
+	                  return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
+	              });
+
+	          return result[0];
+	          } catch (Exception ex) {
+	              //fetchAny() maybe return null
+	              return null;
+	          }
 	}
 }
 

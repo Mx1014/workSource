@@ -256,6 +256,8 @@ public interface PunchProvider {
 			List<Long> userIds, CrossShardListingLocator locator, int i);
   
 	public void deletePunchStatisticByUser(String ownerType, Long ownerId, String punchMonth, Long userId);
+
+	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
  
  
 }
