@@ -193,6 +193,12 @@ UPDATE eh_forums SET name = '深圳威新' WHERE id = 180772;
 UPDATE eh_forums SET name = '深圳威新论坛' WHERE id = 180773;
 UPDATE eh_forums SET name = '深圳威新意见反馈论坛' WHERE id = 180774;
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXRmtObUkzWWprd05tTXhaREV4WlRJMU1EQmlaVEU1TjJObE9ESXpZZw' WHERE id in (109995, 110005);
+DELETE FROM eh_yellow_pages WHERE id = 200219;
+INSERT INTO `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+	VALUES(200219, 0,'community','240111044331053517','创客空间','创客空间','1','深圳市南山区高新南九道','075526716888','高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','2',NULL, 113.956081, 22.533245,'',NULL,NULL,NULL,NULL,NULL,'苏娇娇','13760240661',NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `eh_yellow_page_attachments` (`id`, `owner_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) 
+	VALUES(131, 200219,'image','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','0',UTC_TIMESTAMP());
+
 
 -- 考勤管理 by sfyan 20160811
 DELETE FROM `eh_acl_privileges` WHERE `id` IN (544, 545, 546, 547);
