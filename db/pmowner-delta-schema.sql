@@ -1,4 +1,4 @@
--- DROP TABLE IF EXISTS `eh_community_services`;
+DROP TABLE IF EXISTS `eh_community_services`;
 CREATE TABLE `eh_community_services` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -25,7 +25,7 @@ ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_type` VARCHAR(12
 
 -- 结算表  by sfyan 2016010
 -- 订单交易流水表
--- DROP TABLE IF EXISTS `eh_stat_orders`;
+DROP TABLE IF EXISTS `eh_stat_orders`;
 CREATE TABLE `eh_stat_orders` (
   `id` BIGINT(20) NOT NULL,
   `community_id` BIGINT(20) DEFAULT 0,
@@ -47,7 +47,7 @@ CREATE TABLE `eh_stat_orders` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算交易流水表
--- DROP TABLE IF EXISTS `eh_stat_transactions`;
+DROP TABLE IF EXISTS `eh_stat_transactions`;
 CREATE TABLE `eh_stat_transactions` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT 0,
@@ -78,7 +78,7 @@ CREATE TABLE `eh_stat_transactions` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算退款流水表
--- DROP TABLE IF EXISTS `eh_stat_refunds`;
+DROP TABLE IF EXISTS `eh_stat_refunds`;
 CREATE TABLE `eh_stat_refunds` (
   `id` BIGINT(20) NOT NULL,
   `community_id` BIGINT(20) DEFAULT 0,
@@ -104,7 +104,7 @@ CREATE TABLE `eh_stat_refunds` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
--- DROP TABLE IF EXISTS `eh_stat_settlements`;
+DROP TABLE IF EXISTS `eh_stat_settlements`;
 CREATE TABLE `eh_stat_settlements` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT 0,
@@ -131,7 +131,7 @@ CREATE TABLE `eh_stat_settlements` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 结算統計結果表
--- DROP TABLE IF EXISTS `eh_stat_service_settlement_results`;
+DROP TABLE IF EXISTS `eh_stat_service_settlement_results`;
 CREATE TABLE `eh_stat_service_settlement_results` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT 0,
@@ -153,7 +153,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_stat_task_logs`;
+DROP TABLE IF EXISTS `eh_stat_task_logs`;
 CREATE TABLE `eh_stat_task_logs` (
   `id` BIGINT(20) NOT NULL,
   `task_no` VARCHAR(20) NOT NULL,
@@ -166,7 +166,7 @@ CREATE TABLE `eh_stat_task_logs` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 园区电子报表
--- DROP TABLE IF EXISTS `eh_journals`;
+DROP TABLE IF EXISTS `eh_journals`;
 CREATE TABLE `eh_journals` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -187,7 +187,7 @@ CREATE TABLE `eh_journals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_journal_configs`;
+DROP TABLE IF EXISTS `eh_journal_configs`;
 CREATE TABLE `eh_journal_configs` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -209,7 +209,7 @@ ALTER TABLE `eh_parking_recharge_rates` ADD COLUMN `card_type` VARCHAR(128);
 -- 
 -- 考勤时间管理
 -- 
--- DROP TABLE IF EXISTS `eh_punch_time_rules`;
+DROP TABLE IF EXISTS `eh_punch_time_rules`;
 CREATE TABLE `eh_punch_time_rules` (
   `id` BIGINT COMMENT 'id',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -241,7 +241,7 @@ ALTER TABLE `eh_punch_geopoints` ADD COLUMN `location_rule_id` BIGINT COMMENT 'f
 -- 
 -- 考勤地点表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_location_rules`;
+DROP TABLE IF EXISTS `eh_punch_location_rules`;
 CREATE TABLE `eh_punch_location_rules` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -258,7 +258,7 @@ CREATE TABLE `eh_punch_location_rules` (
 -- 
 -- 具体wifi列表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_wifis`;
+DROP TABLE IF EXISTS `eh_punch_wifis`;
 CREATE TABLE `eh_punch_wifis` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -276,7 +276,7 @@ CREATE TABLE `eh_punch_wifis` (
 -- 
 -- 考勤wifi表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_wifi_rules`;
+DROP TABLE IF EXISTS `eh_punch_wifi_rules`;
 CREATE TABLE `eh_punch_wifi_rules` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -293,7 +293,7 @@ CREATE TABLE `eh_punch_wifi_rules` (
 -- 
 -- 假期表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_holidays`;
+DROP TABLE IF EXISTS `eh_punch_holidays`;
 CREATE TABLE `eh_punch_holidays` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -311,7 +311,7 @@ CREATE TABLE `eh_punch_holidays` (
 -- 
 -- 打卡排班表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_workday_rules`;
+DROP TABLE IF EXISTS `eh_punch_workday_rules`;
 CREATE TABLE `eh_punch_workday_rules` (
   `id` BIGINT NOT NULL COMMENT 'id', 
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -329,7 +329,7 @@ CREATE TABLE `eh_punch_workday_rules` (
 -- 
 -- 打卡总规则表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_rules`;
+DROP TABLE IF EXISTS `eh_punch_rules`;
 CREATE TABLE `eh_punch_rules` (
   `id` BIGINT NOT NULL COMMENT 'id', 
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -351,7 +351,7 @@ CREATE TABLE `eh_punch_rules` (
 -- 
 -- 打卡规则和owner的映射表
 -- 
--- DROP TABLE IF EXISTS `eh_punch_rule_owner_map`;
+DROP TABLE IF EXISTS `eh_punch_rule_owner_map`;
 CREATE TABLE `eh_punch_rule_owner_map` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
@@ -373,7 +373,7 @@ CREATE TABLE `eh_punch_rule_owner_map` (
 -- 
 -- 打卡统计表-个人报表-每日生成
 -- 
--- DROP TABLE IF EXISTS `eh_punch_statistics`;
+DROP TABLE IF EXISTS `eh_punch_statistics`;
 CREATE TABLE `eh_punch_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `punch_month` VARCHAR(8) COMMENT 'yyyymm',

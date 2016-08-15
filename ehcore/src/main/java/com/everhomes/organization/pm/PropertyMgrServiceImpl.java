@@ -1078,11 +1078,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(organizationId);
 		if(contactList != null && contactList.size() > 0) {
-			long addressId = 0;
 			for (CommunityPmOwner contact : contactList) {
+				long addressId = 0;
 				if(mappingList != null && mappingList.size() > 0) {
 					for (CommunityAddressMapping mapping : mappingList) {
-						if(contact != null && contact.getAddress().equals(mapping.getOrganizationAddress())) {
+						if(contact != null && contact.getAddress() != null && contact.getAddress().equals(mapping.getOrganizationAddress())) {
 							addressId = mapping.getAddressId();
 							break;
 						}
