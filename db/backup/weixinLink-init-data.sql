@@ -674,3 +674,50 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101659, '园区二期-9号楼1至2层', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), 1002757, 240111044331053517, 239825274387101660, '园区二期-9号楼3层', '0');
+
+
+-- 更新服务市场所有图片
+-- 形象banner.jpg
+UPDATE eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvelkyWTFZMll6Tmpjd05qVTJZVEkyTTJFNFlXTmtOakUxWmpVM04yTXlOUQ' WHERE id=10559 and namespace_id=999991;
+UPDATE eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvelkyWTFZMll6Tmpjd05qVTJZVEkyTTJFNFlXTmtOakUxWmpVM04yTXlOUQ' WHERE id=10560 and namespace_id=999991;
+-- 物业维修banner.jpg
+UPDATE eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvek5XSTVNell4TTJRME0yTXlaRFZsT1RZeE1HTTBOVGxrWWpJeFpHTmpNUQ' WHERE id=10561 and namespace_id=999991;
+UPDATE eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRvek5XSTVNell4TTJRME0yTXlaRFZsT1RZeE1HTTBOVGxrWWpJeFpHTmpNUQ' WHERE id=10562 and namespace_id=999991;
+
+-- 创客空间.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRveVlUUmhaV0V4WkdabE5qa3lNV1V6TWpSa05UTTRaV05tWlRVeVl6VmhaZw' WHERE id=109993 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRveVlUUmhaV0V4WkdabE5qa3lNV1V6TWpSa05UTTRaV05tWlRVeVl6VmhaZw' WHERE id=110003 and namespace_id=999991;
+-- 物业报修.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNU9UUTVNamcwWVRSbVlXWTJNVGsyTnpWbE5qSXlZV0kyTVdabVpHSmhNQQ' WHERE id=109986 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNU9UUTVNamcwWVRSbVlXWTJNVGsyTnpWbE5qSXlZV0kyTVdabVpHSmhNQQ' WHERE id=109996 and namespace_id=999991;
+-- 外卖点送_urban-table.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRwa056RTFZelV4WXpjMU1URmtaamhsTVdRMlpUQTRaV0U0T1RneVpHTTFPQQ' WHERE id=110008 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRwa056RTFZelV4WXpjMU1URmtaamhsTVdRMlpUQTRaV0U0T1RneVpHTTFPQQ' WHERE id=110011 and namespace_id=999991;
+-- 今日食堂.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvMk1EUTBabVV5WlRoa05UZ3dOR1ZqWVdGbE56VXdORGsyWXpneU0yTTFaUQ' WHERE id=109990 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvMk1EUTBabVV5WlRoa05UZ3dOR1ZqWVdGbE56VXdORGsyWXpneU0yTTFaUQ' WHERE id=110000 and namespace_id=999991;
+-- 办公租赁.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvMk5qSTNZVFZqTVROaE1EbGhZMlF6TWpSaU1UUmpOekJrWWpZd01UTmhZdw' WHERE id=109992 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvMk5qSTNZVFZqTVROaE1EbGhZMlF6TWpSaU1UUmpOekJrWWpZd01UTmhZdw' WHERE id=110002 and namespace_id=999991;
+-- 场地预约.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNU1HRTJNVFExWldObU16STFaRE0xWlROa01UYzFNbU5qWWpJeVpETm1aZw' WHERE id=109987 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNU1HRTJNVFExWldObU16STFaRE0xWlROa01UYzFNbU5qWWpJeVpETm1aZw' WHERE id=109997 and namespace_id=999991;
+-- 外卖点送_够咖啡.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRveU56UmhZV05rWVRneVlqSTJNalF5TkdZek9XTXpaRGs0Tm1ZeU5qaGlaQQ' WHERE id=110007 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRveU56UmhZV05rWVRneVlqSTJNalF5TkdZek9XTXpaRGs0Tm1ZeU5qaGlaQQ' WHERE id=110010 and namespace_id=999991;
+-- 爱车管家.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRwa09UQm1OekJsT0RjNU0yRmlaVGc1TW1Oa01EazRNVEUxTmpSa09UZG1NUQ' WHERE id=109991 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRwa09UQm1OekJsT0RjNU0yRmlaVGc1TW1Oa01EazRNVEUxTmpSa09UZG1NUQ' WHERE id=110001 and namespace_id=999991;
+-- 物品租赁.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNE0yTmtPR05oTXpVd09EYzRPVGczTmpReFlURTNZekUyWkRGaE5UY3lZZw' WHERE id=109988 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNE0yTmtPR05oTXpVd09EYzRPVGczTmpReFlURTNZekUyWkRGaE5UY3lZZw' WHERE id=109998 and namespace_id=999991;
+-- 租车预约.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvMFltWmlabUpqTW1JMk5tTTBaR05qTldRNE9XVmxaVFZpWXpCbE4ySTNaUQ' WHERE id=109994 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvMFltWmlabUpqTW1JMk5tTTBaR05qTldRNE9XVmxaVFZpWXpCbE4ySTNaUQ' WHERE id=110004 and namespace_id=999991;
+-- 外卖点送_说粉.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvellqRTBaR1kyWTJNd05HWTJORGMxT0dSak56QXlabVJrT1dSa01XVXdaZw' WHERE id=110006 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvellqRTBaR1kyWTJNd05HWTJORGMxT0dSak56QXlabVJrT1dSa01XVXdaZw' WHERE id=110009 and namespace_id=999991;
+-- 迎宾接待.png
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNVlUZzVOV1kwWW1ZeE9XWmlOelUzWWpFMk1XWmxOV1l4T0dRMk1XRmhZZw' WHERE id=109989 and namespace_id=999991;
+UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNVlUZzVOV1kwWW1ZeE9XWmlOelUzWWpFMk1XWmxOV1l4T0dRMk1XRmhZZw' WHERE id=109999 and namespace_id=999991;	
+	

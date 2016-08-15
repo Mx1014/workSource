@@ -27,6 +27,7 @@ public class CreateDoorVisitorCommand {
     private String organization;
     private String description;
     private Long doorNumber;
+    private String authMethod;
     
     public String getPhone() {
         return phone;
@@ -76,7 +77,13 @@ public class CreateDoorVisitorCommand {
     public void setDoorNumber(Long doorNumber) {
         this.doorNumber = doorNumber;
     }
-    
+
+    public String getAuthMethod() {
+        return authMethod;
+    }
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

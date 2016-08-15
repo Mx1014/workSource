@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gographics/imagick/imagick"
+	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 type SdbStorage struct {
@@ -254,6 +255,84 @@ func (s *SdbStorage) GetAudio(md5 string, format string) ([]byte, error) {
 	} else {
 		return nil, fmt.Errorf("Format not support")
 	}
+}
+
+func (s *SdbStorage) SaveFile(md5Key string, data []byte, frag int, total int, meta map[string]string) (string, error) {
+	md5 := gen_file_md5(md5Key)
+	s.context.Logger.Info("got md5:%s\n", md5)
+
+	if frag == total && len(data) != frag {
+		return "", errors.New("frag error")
+	} else if len(data) > total {
+		return "", errors.New("total size error")
+	}
+
+	if s.db.Exist(md5) {
+		return md5, nil
+	}
+
+	if filename, ok := meta["filename"]; ok {
+		s.context.Logger.Info("md5 not found: " + md5Key + " , begin to save, filename=" + filename)
+	}
+	if headerdata, err := fileMetaCreate(frag, total, meta); err != nil {
+		return "", err
+	} else {
+		err = s.db.SetBytes(md5, append(headerdata, data...))
+		if err != nil {
+			return "", err
+		}
+
+		return md5, nil
+	}
+}
+
+//TODO for range download
+func (s *SdbStorage) GetFile(md5 string) (datach chan []byte, header *MetaHeader, meta map[string]string, err error) {
+	data, err := s.db.GetBytes(md5)
+	if err != nil || data == nil {
+		return nil, nil, nil, fmt.Errorf("Image %s is not existed.", md5)
+	}
+
+	header, meta, err = fileMetaGet(data)
+	if err != nil {
+		return
+	}
+
+	datach = make(chan []byte)
+	go func(header *MetaHeader, data []byte) {
+		if header.fragSize == header.totalSize {
+			datach <- data[header.metaLen+META_HEADER_LEN:]
+		} else {
+			datach <- data[header.metaLen+META_HEADER_LEN:]
+			n := (header.totalSize / header.fragSize)
+			for i := 1; i < n; i++ {
+				key := fmt.Sprintf("%s:%d", md5, n)
+				data, err = s.db.GetBytes(key)
+				if err != nil || data == nil {
+					break
+				}
+
+				datach <- data
+			}
+		}
+		close(datach)
+	}(header, data)
+
+	return
+}
+
+func (s *SdbStorage) GetFileMeta(md5 string) (map[string]string, error) {
+	data, err := s.db.GetBytes(md5)
+	if err != nil || data == nil {
+		return nil, fmt.Errorf("Image %s is not existed.", md5)
+	}
+
+	_, meta, err := fileMetaGet(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return meta, err
 }
 
 func populateStdin(file []byte) func(io.WriteCloser) {

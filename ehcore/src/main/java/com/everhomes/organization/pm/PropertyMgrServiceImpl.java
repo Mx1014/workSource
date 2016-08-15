@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,11 +71,13 @@ import com.everhomes.family.FamilyBillingAccount;
 import com.everhomes.family.FamilyBillingTransactions;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.family.FamilyUtils;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -102,6 +105,7 @@ import com.everhomes.pusher.PusherAction;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
@@ -115,6 +119,7 @@ import com.everhomes.rest.family.ApproveMemberCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.RejectMemberCommand;
 import com.everhomes.rest.family.RevokeMemberCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -159,9 +164,13 @@ import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
 import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
 import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
 import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerCommand;
 import com.everhomes.rest.organization.pm.DeletePmBillCommand;
 import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
 import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerCommand;
 import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
 import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
 import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
@@ -245,6 +254,7 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -355,6 +365,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private ContentServerService contentServerService;
+    
+	@Autowired
+	private PMOwnerSearcher pmOwnerSearcher;
     
     private String queueName = "property-mgr-push";
 	
@@ -1078,7 +1091,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				if(addressId == 0)	continue;
 				contact.setOrganizationId(organizationId);
 				contact.setAddressId(addressId);
-				propertyMgrProvider.createPropOwner(contact);
+				
+				Address address = addressProvider.findAddressById(addressId);
+				this.dbProvider.execute((TransactionStatus status) -> {
+					propertyMgrProvider.createPropOwner(contact);
+					pmOwnerSearcher.feedDoc(contact);
+					//jiarujiating
+					if(null != address) {
+						getIntoFamily(address, contact.getContactToken(), contact.getNamespaceId());
+					}
+					
+					return null;
+				});
 			}
 		}
 	}
@@ -3990,6 +4014,164 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}catch (Exception e){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					e.getMessage());
+		}
+	}
+
+	@Override
+	public void createPMPropertyOwnerInfo(CreatePropOwnerCommand cmd) {
+		if(null != cmd.getAddressIds() && cmd.getAddressIds().size() > 0) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			
+			CommunityPmOwner owner = new CommunityPmOwner();
+			owner.setCommunityId(cmd.getCommunityId());
+			owner.setContactName(cmd.getContactName());
+			owner.setContactToken(cmd.getContactToken());
+			owner.setContactType(cmd.getContactType());
+			owner.setOrganizationId(cmd.getOrganizationId());
+			owner.setNamespaceId(namespaceId);
+			
+			for(Long addressId : cmd.getAddressIds()) {
+				Address address = addressProvider.findAddressById(addressId);
+				if(null != address) {
+					owner.setAddressId(address.getId());
+					owner.setAddress(address.getAddress());
+					
+					this.dbProvider.execute((TransactionStatus status) -> {
+						propertyMgrProvider.createPropOwner(owner);
+						pmOwnerSearcher.feedDoc(owner);
+						//jiarujiating
+						getIntoFamily(address, cmd.getContactToken(), namespaceId);
+						
+						return null;
+					});
+					
+				} else {
+					LOGGER.error("createPMPropertyOwnerInfo: address id is wrong! addressId = " + addressId);
+				}
+				
+			}
+		}
+	}
+
+	@Override
+	public void deletePMPropertyOwnerInfo(DeletePropOwnerCommand cmd) {
+		List<CommunityPmOwner> owners =  propertyMgrProvider.listCommunityPmOwnersByToken(cmd.getCommunityId(), cmd.getContactToken());
+		
+		if(null != owners && owners.size() > 0) {
+			for(CommunityPmOwner owner : owners) {
+				this.dbProvider.execute((TransactionStatus status) -> {
+					propertyMgrProvider.deletePropOwner(owner);
+					pmOwnerSearcher.deleteById(owner.getId());
+					//tuichujiating
+					leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+				
+					return null;
+				});
+			}
+		}
+		
+	}
+
+	@Override
+	public void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd) {
+		CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
+		if(owner.getCommunityId() == cmd.getCommunityId()) {
+			this.dbProvider.execute((TransactionStatus status) -> {
+				propertyMgrProvider.deletePropOwner(owner);
+				pmOwnerSearcher.deleteById(owner.getId());
+				//tuichujiating
+				leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+			
+				return null;
+			});
+		} else {
+			LOGGER.error("deletePMPropertyOwnerAddress: id is not in the community! id = " + cmd.getId() + ", communityId = " + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE,PropertyServiceErrorCode.ERROR_OWNER_COMMUNITY, 
+					"id is not in the community!"); 
+		}
+		
+	}
+
+	@Override
+	public void createPMPropertyOwnerAddress(CreatePropOwnerAddressCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		CommunityPmOwner owner = new CommunityPmOwner();
+		owner.setCommunityId(cmd.getCommunityId());
+		owner.setContactName(cmd.getContactName());
+		owner.setContactToken(cmd.getContactToken());
+		owner.setContactType(cmd.getContactType());
+		owner.setOrganizationId(cmd.getOrganizationId());
+		owner.setNamespaceId(namespaceId);
+		
+		Address address = addressProvider.findAddressById(cmd.getAddressId());
+		if(null != address) {
+			owner.setAddressId(address.getId());
+			owner.setAddress(address.getAddress());
+			
+			this.dbProvider.execute((TransactionStatus status) -> {
+				propertyMgrProvider.createPropOwner(owner);
+				pmOwnerSearcher.feedDoc(owner);
+				//jiarujiating
+				getIntoFamily(address, cmd.getContactToken(), namespaceId);
+				
+				return null;
+			});
+			
+		} else {
+			LOGGER.error("createPMPropertyOwnerInfo: address id is wrong! addressId = " + cmd.getAddressId());
+		}
+		
+	}
+	
+	private void getIntoFamily(Address address, String contactToken, Integer namespaceId) {
+		
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
+		if(null != userIdentifier) {
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			if(null != user) {
+				address.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+				familySerivce.getOrCreatefamily(address, user);
+			}
+		}
+	}
+	
+	private void leaveFamily(Long addressId, String contactToken, Integer namespaceId) {
+		if(null == addressId){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid addressId parameter");
+        }
+        Address address = this.addressProvider.findAddressById(addressId);
+        if(null == address){
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
+                    "Invalid addressId parameter,address is not found");
+        }
+
+        Family family = this.familyProvider.findFamilyByAddressId(addressId);
+        if(null != family){
+        	LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
+            leaveCmd.setId(family.getId());
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
+    		if(null != userIdentifier) {
+    			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+    			if(null != user) {
+    				familySerivce.leave(leaveCmd, user);
+    			}
+    		}
+        }
+	}
+
+	@Override
+	public void processUserForOwner(UserIdentifier identifier) {
+		// TODO Auto-generated method stub
+		List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
+				identifier.getNamespaceId(), identifier.getIdentifierToken());
+		if(null != owners && owners.size() > 0) {
+			for(CommunityPmOwner owner : owners) {
+				Address address = addressProvider.findAddressById(owner.getAddressId());
+				//jiarujiating
+				getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+			}
 		}
 	}
 

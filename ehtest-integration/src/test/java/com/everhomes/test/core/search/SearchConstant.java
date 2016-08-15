@@ -23,6 +23,8 @@ public interface SearchConstant {
     
     public static final String NEWS = "news";
     
+    public static final String PMOWNERINDEXTYPE = "pmowner";
+
     public static final String EQUIPMENTTASKINDEXTYPE = "equipmentTask";
     
     public static final String EQUIPMENTACCESSORYINDEXTYPE = "equipmentAccessory";
@@ -30,4 +32,5 @@ public interface SearchConstant {
     public static final String EQUIPMENTINDEXTYPE = "equipment";
     
     public static final String EQUIPMENTSTANDARDINDEXTYPE = "equipmentStandard";
+
 }
