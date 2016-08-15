@@ -2172,5 +2172,24 @@ long id = sequenceProvider.getNextSequence(key);
 		step.where(condition);
 		step.execute();
 	}
+
+	@Override
+	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id) {
+	      try {
+	    	  PunchRuleOwnerMap[] result = new PunchRuleOwnerMap[1];
+	          DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+	          result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
+	              .where(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.eq(id))
+	              .fetchAny().map((r) -> {
+	                  return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
+	              });
+
+	          return result[0];
+	          } catch (Exception ex) {
+	              //fetchAny() maybe return null
+	              return null;
+	          }
+	}
 }
 

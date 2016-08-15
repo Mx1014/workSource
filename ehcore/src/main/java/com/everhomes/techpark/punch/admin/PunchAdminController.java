@@ -14,13 +14,13 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
@@ -407,8 +407,8 @@ public class PunchAdminController extends ControllerBase {
 	 */
 	@RequestMapping("deletePunchRuleMap")
 	@RestReturn(value = String.class)
-	public RestResponse deletePunchRuleMap(@Valid DeleteCommonCommand cmd) {
-//		punchService.deletePunchRuleMap(cmd);
+	public RestResponse deletePunchRuleMap(@Valid DeletePunchRuleMapCommand cmd) {
+		punchService.deletePunchRuleMap(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
