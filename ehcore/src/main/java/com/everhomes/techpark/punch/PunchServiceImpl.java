@@ -3623,17 +3623,32 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid owner type or  Id parameter in the command");
 		} 
 		if (null == cmd.getId() ) {
-			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			LOGGER.error("Invalid   Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid   Id parameter in the command");
 		}
 		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
-			if(null != cmd.getTargetId() && null != cmd.getTargetType())
+			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
 				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType()))
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
+				else{
+ 
+					LOGGER.error("Invalid target type or  Id parameter in the command");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Invalid   target type or  Id parameter in the command");
+				 
+				}
+			}
 			else
 				this.punchProvider.deletePunchRuleOwnerMap(obj);
+		else{
+
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+	
 
 	}
 	
