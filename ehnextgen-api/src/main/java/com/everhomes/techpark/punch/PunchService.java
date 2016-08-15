@@ -34,6 +34,7 @@ import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
@@ -147,4 +148,6 @@ public interface PunchService {
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
 
 	void dayRefreshLogScheduled();
+
+	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 }

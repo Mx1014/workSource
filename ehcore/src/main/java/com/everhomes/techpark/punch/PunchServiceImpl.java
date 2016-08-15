@@ -103,6 +103,7 @@ import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
@@ -2651,7 +2652,7 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid name parameter in the command");
 		}
 
-		List<PunchWifiRule> punchLocationRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ;  
+		List<PunchLocationRule> punchLocationRules = punchProvider.queryPunchLocationRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ;  
 		if(null!=punchLocationRules && (punchLocationRules.size()>1 || !punchLocationRules.get(0).getId().equals(cmd.getId())) ){
 			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
 			LOGGER.error("Invalid name parameter in the command");
@@ -3613,6 +3614,42 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
+	}
+	@Override
+	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		} 
+		if (null == cmd.getId() ) {
+			LOGGER.error("Invalid   Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid   Id parameter in the command");
+		}
+		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
+		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
+			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
+				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType()))
+					this.punchProvider.deletePunchRuleOwnerMap(obj);
+				else{
+ 
+					LOGGER.error("Invalid target type or  Id parameter in the command");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Invalid   target type or  Id parameter in the command");
+				 
+				}
+			}
+			else
+				this.punchProvider.deletePunchRuleOwnerMap(obj);
+		else{
+
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+	
+
 	}
 	
 }
