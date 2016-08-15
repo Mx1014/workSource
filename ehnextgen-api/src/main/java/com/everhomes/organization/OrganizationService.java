@@ -8,6 +8,9 @@ import java.util.Map;
 
 
 
+
+
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.entity.EntityType;
@@ -244,7 +247,7 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
-	ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
+	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
 	void leaveForEnterpriseContact(LeaveEnterpriseCommand cmd);
@@ -321,4 +324,13 @@ public interface OrganizationService {
     ListOrganizationsByNameResponse listOrganizationByName(ListOrganizationsByNameCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
+	
+	/**
+	 * 获取通讯录的部门或者群组
+	 * @param organizationGroupType
+	 * @param token
+	 * @param orgPath
+	 * @return
+	 */
+	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath);
 }

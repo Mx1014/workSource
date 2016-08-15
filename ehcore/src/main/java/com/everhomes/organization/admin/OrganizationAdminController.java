@@ -749,7 +749,7 @@ public class OrganizationAdminController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
        // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-        ListOrganizationMemberCommandResponse commandResponse = organizationService.ListParentOrganizationPersonnels(cmd);
+        ListOrganizationMemberCommandResponse commandResponse = organizationService.listParentOrganizationPersonnels(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
