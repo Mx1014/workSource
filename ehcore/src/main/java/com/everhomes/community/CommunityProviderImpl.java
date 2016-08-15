@@ -363,7 +363,7 @@ public class CommunityProviderImpl implements CommunityProvider {
             for(Community community : results) {
                 ids.add(community.getId());
             }
-            LOGGER.debug("Calculate nearby communities, communityId=" + communityId + ", nearbyCommunities=" + ids);
+            LOGGER.debug("Calculate nearby communities 20160815, communityId=" + communityId + ", nearbyCommunities=" + ids);
         }
         
         long endTime = System.currentTimeMillis();
