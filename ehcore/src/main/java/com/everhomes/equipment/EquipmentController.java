@@ -28,6 +28,7 @@ import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
+import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -549,6 +550,22 @@ public class EquipmentController extends ControllerBase {
 		ListEquipmentTasksResponse tasks = equipmentService.listTasksByEquipmentId(cmd);
 		
 		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listTaskById</b>
+	 * <p>根据id查看任务</p>
+	 */
+	@RequestMapping("listTaskById")
+	@RestReturn(value = EquipmentTaskDTO.class)
+	public RestResponse listTaskById(ListTaskByIdCommand cmd) {
+		
+		EquipmentTaskDTO task = equipmentService.listTaskById(cmd);
+		
+		RestResponse response = new RestResponse(task);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

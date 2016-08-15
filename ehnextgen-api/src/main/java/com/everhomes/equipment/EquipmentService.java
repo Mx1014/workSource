@@ -17,6 +17,7 @@ import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
+import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -79,4 +80,5 @@ public interface EquipmentService {
 	
 	ListEquipmentTasksResponse listTasksByEquipmentId(ListTasksByEquipmentIdCommand cmd);
 	EquipmentAccessoriesDTO findEquipmentAccessoriesById(DeleteEquipmentAccessoriesCommand cmd);
+	EquipmentTaskDTO listTaskById(ListTaskByIdCommand cmd);
 }

@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public enum EquipmentReviewStatus {
-	INACTIVE((byte)0, "已失效"), WAITING_FOR_APPROVAL((byte)1, "待审核"), REVIEWED((byte)2, "已审核"), DELETE((byte)2, "已删除");
+	INACTIVE((byte)0, "已失效"), WAITING_FOR_APPROVAL((byte)1, "待审核"), REVIEWED((byte)2, "已审核"), DELETE((byte)3, "已删除");
 	
 	private byte code;
 	private String name;
