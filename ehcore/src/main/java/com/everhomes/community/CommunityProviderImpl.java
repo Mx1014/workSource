@@ -275,7 +275,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
         List<Community> results = self.findFixNearbyCommunityById(namespaceId, communityId);
         if(results == null || results.size() == 0) {
-            results = self.calculateNearbyCommunityByGeoPoints(communityId);
+            results = self.calculateNearbyCommunityByGeoPoints(communityId, namespaceId);
         }
         long endTime = System.currentTimeMillis();
         LOGGER.info("Find nearby community elapse=" + (endTime - startTime));
@@ -337,7 +337,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Cacheable(value="calNearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
     @Override
-    public List<Community> calculateNearbyCommunityByGeoPoints(Long communityId) {
+    public List<Community> calculateNearbyCommunityByGeoPoints(Long communityId, Integer namespaceId) {
         long startTime = System.currentTimeMillis();
         List<Community> results = new ArrayList<Community>();
         
@@ -352,10 +352,9 @@ public class CommunityProviderImpl implements CommunityProvider {
                     communityIds.add(p.getCommunityId());
             }
         }
-        
         communityIds.forEach((Long id) ->{
             Community community = self.findCommunityById(id);
-            if(community != null)
+            if(community != null && community.getNamespaceId().equals(namespaceId))
                 results.add(community);
         });
         
