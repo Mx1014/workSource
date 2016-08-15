@@ -29,17 +29,17 @@ UPDATE eh_parking_recharge_rates SET rate_name='6个月', card_type = '普通月
 UPDATE eh_parking_recharge_rates SET rate_name='3个月', card_type = '固定车位卡' WHERE id = 10003;
 UPDATE eh_parking_recharge_rates SET rate_name='6个月', card_type = '固定车位卡' WHERE id = 10004;
 SET @eh_locale_templates_id = (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'park.notification', '2', 'zh_CN', '停车充值默认费率', '${count}个月', '0');
 
 -- 园区电子报初始数据
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 VALUES ((@configuration_id := @configuration_id + 1), 'journal.posterPath', 'cs://1/image/aW1hZ2UvTVRvNVpUYzNNREJpWW1SbE5HRTJaRFF6T1RRMU1qSTJaV1JrTmpoaU5EYzVZZw', NULL, '0', NULL);
 
 SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
 	VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999991, 0, 0, 0, '/home', 'Bizs', '威新视界', '威新视界', 'cs://1/image/aW1hZ2UvTVRwbU1qYzFObUptTm1JNU5EUXhOalJsTldVMU9UZG1NR1UxTm1NNVlqSXhZUQ', 1, 1, 14, '{"url":"http://core.zuolin.com/park-paper/index.html?hideNavigationBar=1#/epaper_index#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '1', 'park_tourist');
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
 	VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999991, 0, 0, 0, '/home', 'Bizs', '威新视界', '威新视界', 'cs://1/image/aW1hZ2UvTVRwbU1qYzFObUptTm1JNU5EUXhOalJsTldVMU9UZG1NR1UxTm1NNVlqSXhZUQ', 1, 1, 14, '{"url":"http://core.zuolin.com/park-paper/index.html?hideNavigationBar=1#/epaper_index#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, '1', 'pm_admin');
 
 -- 园区报 by sfyan 20160811
@@ -110,8 +110,8 @@ INSERT INTO `eh_punch_location_rules` (`id`, `owner_type`, `owner_id`, `name`, `
 INSERT INTO `eh_punch_location_rules` (`id`, `owner_type`, `owner_id`, `name`, `description`, `creator_uid`, `create_time`) VALUES('6','organization','1001706','地点规则','地点规则','222990','2016-08-12 14:11:58');
 
 -- 更新 具体地点表
- 
-UPDATE `eh_punch_geopoints`  SET owner_type = 'organization' ,owner_id = enterprise_id , location_rule_id =1 WHERE enterprise_id=178395; 
+
+UPDATE `eh_punch_geopoints`  SET owner_type = 'organization' ,owner_id = enterprise_id , location_rule_id =1 WHERE enterprise_id=178395;
 UPDATE `eh_punch_geopoints`  SET owner_type = 'organization' ,owner_id = enterprise_id , location_rule_id =2 WHERE enterprise_id=178945;
 UPDATE `eh_punch_geopoints`  SET owner_type = 'organization' ,owner_id = enterprise_id , location_rule_id =3 WHERE enterprise_id=1000001;
 UPDATE `eh_punch_geopoints`  SET owner_type = 'organization' ,owner_id = enterprise_id , location_rule_id =4 WHERE enterprise_id=180041;
@@ -145,19 +145,19 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch', '10006', 'zh_CN', '没有获取到您的WIFI，请检测您是否连上WIFI');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch', '10007', 'zh_CN', '您没有连上指定的WIFI');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch', '10008', 'zh_CN', '您没有连上指定WIFI，也不在打卡范围，打卡失败');
- 
+
 -- 设备巡检 add by xiongying 20160812
-INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 VALUES(7,0,'0','设备类型','设备类型','0','2',UTC_TIMESTAMP(),NULL,NULL,NULL,'0');
 
 SET @category_id = (SELECT MAX(id) FROM `eh_categories`);
-INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 VALUES((@category_id := @category_id + 1),7,'0','消防','设备类型/消防','0','2',UTC_TIMESTAMP(),NULL,NULL,NULL,'0');
-INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 VALUES((@category_id := @category_id + 1),7,'0','强电','设备类型/强电','0','2',UTC_TIMESTAMP(),NULL,NULL,NULL,'0');
-INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 VALUES((@category_id := @category_id + 1),7,'0','弱电','设备类型/弱电','0','2',UTC_TIMESTAMP(),NULL,NULL,NULL,'0');
-INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 VALUES((@category_id := @category_id + 1),7,'0','其他','设备类型/其他','0','2',UTC_TIMESTAMP(),NULL,NULL,NULL,'0');
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('equipment', '10001', 'zh_CN', '设备不存在');
@@ -194,9 +194,9 @@ UPDATE eh_forums SET name = '深圳威新论坛' WHERE id = 180773;
 UPDATE eh_forums SET name = '深圳威新意见反馈论坛' WHERE id = 180774;
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXRmtObUkzWWprd05tTXhaREV4WlRJMU1EQmlaVEU1TjJObE9ESXpZZw' WHERE id in (109995, 110005);
 DELETE FROM eh_yellow_pages WHERE id = 200219;
-INSERT INTO `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+INSERT INTO `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
 	VALUES(200219, 0,'community','240111044331053517','创客空间','创客空间','1','深圳市南山区高新南九道','075526716888','高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','2',NULL, 113.956081, 22.533245,'',NULL,NULL,NULL,NULL,NULL,'苏娇娇','13760240661',NULL,NULL,NULL,NULL,NULL);
-INSERT INTO `eh_yellow_page_attachments` (`id`, `owner_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) 
+INSERT INTO `eh_yellow_page_attachments` (`id`, `owner_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`)
 	VALUES(131, 200219,'image','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','0',UTC_TIMESTAMP());
 
 
@@ -287,7 +287,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
   VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),411,36000,'业主管理',1,1,'业主管理 全部权限',167);
 
 -- 威新Link 添加namspace_detail
-INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`)
 VALUES ('1013', '999991', 'community_commercial', UTC_TIMESTAMP());
 
 
@@ -398,6 +398,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 44000,'', 'EhNamespaces', 999993 , 0);
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999993,0  FROM `eh_web_menus` WHERE `path` LIKE '%44000/%';
 
-
-
+-- 其它登录设备已经被踢出提示 by Janson
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
 
