@@ -187,12 +187,12 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 
 -- 威新Link服务广场
-UPDATE eh_communities SET name = '深圳威新' WHERE id = 240111044331053517;
-UPDATE eh_groups SET name = '深圳威新', display_name = '深圳威新' where id = 1003093;
-UPDATE eh_forums SET name = '深圳威新' WHERE id = 180772;
-UPDATE eh_forums SET name = '深圳威新论坛' WHERE id = 180773;
-UPDATE eh_forums SET name = '深圳威新意见反馈论坛' WHERE id = 180774;
-UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXRmtObUkzWWprd05tTXhaREV4WlRJMU1EQmlaVEU1TjJObE9ESXpZZw' WHERE id in (109995, 110005);
+UPDATE eh_communities SET NAME = '深圳威新' WHERE id = 240111044331053517;
+UPDATE eh_groups SET NAME = '深圳威新', display_name = '深圳威新' WHERE id = 1003093;
+UPDATE eh_forums SET NAME = '深圳威新' WHERE id = 180772;
+UPDATE eh_forums SET NAME = '深圳威新论坛' WHERE id = 180773;
+UPDATE eh_forums SET NAME = '深圳威新意见反馈论坛' WHERE id = 180774;
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXRmtObUkzWWprd05tTXhaREV4WlRJMU1EQmlaVEU1TjJObE9ESXpZZw' WHERE id IN (109995, 110005);
 DELETE FROM eh_yellow_pages WHERE id = 200219;
 INSERT INTO `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
 	VALUES(200219, 0,'community','240111044331053517','创客空间','创客空间','1','深圳市南山区高新南九道','075526716888','高新区里程碑式的研发办公建筑，企业总部基地。运用科技和设计，打造甲级品质的节能、低耗、绿色生态商务空间，塑造立体的艺术、活力、科技体验生活方式中心，为高新园区产业升级提供了宝贵的空间载体。','cs://1/image/aW1hZ2UvTVRvek1qQXpNbVZpTmpVMU5tSXhNekZqTWpOaE5USmpNVFprTXpWaFlqazFNQQ','2',NULL, 113.956081, 22.533245,'',NULL,NULL,NULL,NULL,NULL,'苏娇娇','13760240661',NULL,NULL,NULL,NULL,NULL);
@@ -206,41 +206,41 @@ DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (62, 63, 64, 65);
 DELETE FROM `eh_web_menus` WHERE `id` IN (56100, 56110, 56120, 56130, 56140);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56100,'考勤管理',56000,null,null,1,2,'/50000/56000/56100','park',561);
+VALUES (56100,'考勤管理',56000,NULL,NULL,1,2,'/50000/56000/56100','park',561);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56105,'考勤规则',56100,null,null,1,2,'/50000/56000/56100/56105','park',561);
+VALUES (56105,'考勤规则',56100,NULL,NULL,1,2,'/50000/56000/56100/56105','park',561);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56110,'规则管理',56105,null,'punch_rule',0,2,'/50000/56000/56100/56105/56110','park',563);
+VALUES (56110,'规则管理',56105,NULL,'punch_rule',0,2,'/50000/56000/56100/56105/56110','park',563);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56120,'时间管理',56105,null,'punch_time',0,2,'/50000/56000/56100/56105/56120','park',564);
+VALUES (56120,'时间管理',56105,NULL,'punch_time',0,2,'/50000/56000/56100/56105/56120','park',564);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56130,'地点管理',56105,null,'punch_location',0,2,'/50000/56000/56100/56105/56130','park',565);
+VALUES (56130,'地点管理',56105,NULL,'punch_location',0,2,'/50000/56000/56100/56105/56130','park',565);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56140,'wifi管理',56105,null,'punch_wifi',0,2,'/50000/56000/56100/56105/56140','park',567);
+VALUES (56140,'wifi管理',56105,NULL,'punch_wifi',0,2,'/50000/56000/56100/56105/56140','park',567);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56150,'排班管理',56105,null,'punch_scheduling',0,2,'/50000/56000/56100/56105/56150','park',568);
+VALUES (56150,'排班管理',56105,NULL,'punch_scheduling',0,2,'/50000/56000/56100/56105/56150','park',568);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56160,'通用设置',56105,null,'punch_setting',0,2,'/50000/56000/56100/56105/56160','park',569);
+VALUES (56160,'通用设置',56105,NULL,'punch_setting',0,2,'/50000/56000/56100/56105/56160','park',569);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56170,'个人设置',56105,null,'punch_personal_setting',0,2,'/50000/56000/56100/56105/56170','park',570);
+VALUES (56170,'个人设置',56105,NULL,'punch_personal_setting',0,2,'/50000/56000/56100/56105/56170','park',570);
 
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (790,0,'规则管理','规则管理',null);
+VALUES (790,0,'规则管理','规则管理',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (791,0,'时间管理','时间管理',null);
+VALUES (791,0,'时间管理','时间管理',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (792,0,'地点管理','地点管理',null);
+VALUES (792,0,'地点管理','地点管理',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (793,0,'wifi管理','wifi管理',null);
+VALUES (793,0,'wifi管理','wifi管理',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (794,0,'排班管理','排班管理',null);
+VALUES (794,0,'排班管理','排班管理',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (795,0,'通用设置','通用设置',null);
+VALUES (795,0,'通用设置','通用设置',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (796,0,'个人设置','个人设置',null);
+VALUES (796,0,'个人设置','个人设置',NULL);
 
-set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),790,56110,'规则管理',1,1,'规则管理  全部权限',570);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
@@ -279,10 +279,10 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 
 -- 添加业主自动关联
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-  VALUES (36000,'业主管理',30000,null,'apartment_info',0,2,'/30000/36000','park',360);
+  VALUES (36000,'业主管理',30000,NULL,'apartment_info',0,2,'/30000/36000','park',360);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-  VALUES (411,0,'业主管理','业主管理',null);
-set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+  VALUES (411,0,'业主管理','业主管理',NULL);
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
   VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),411,36000,'业主管理',1,1,'业主管理 全部权限',167);
 
@@ -302,40 +302,40 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`owner_type`,`owner_id`,`apply_
 
 -- 深业物业的设备巡检
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58200,'后台',58000,null,null,1,2,'/50000/58000/58200','park',800);
+VALUES (58200,'后台',58000,NULL,NULL,1,2,'/50000/58000/58200','park',800);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58210,'参考标准',58200,null,null,1,2,'/50000/58000/58200/58210','park',802);
+VALUES (58210,'参考标准',58200,NULL,NULL,1,2,'/50000/58000/58200/58210','park',802);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58211,'标准列表',58210,null,'equipment_inspection_standard_list',0,2,'/50000/58000/58200/58210/58211','park',804);
+VALUES (58211,'标准列表',58210,NULL,'equipment_inspection_standard_list',0,2,'/50000/58000/58200/58210/58211','park',804);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58212,'设备关联审批',58210,null,'equipment_inspection_check_attachment',0,2,'/50000/58000/58200/58210/58212','park',806);
+VALUES (58212,'设备关联审批',58210,NULL,'equipment_inspection_check_attachment',0,2,'/50000/58000/58200/58210/58212','park',806);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58220,'设备台帐',58200,null,null,1,2,'/50000/58000/58200/58220','park',820);
+VALUES (58220,'设备台帐',58200,NULL,NULL,1,2,'/50000/58000/58200/58220','park',820);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58221,'设备列表',58220,null,'equipment_inspection_equipment_list',0,2,'/50000/58000/58200/58220/58221','park',822);
+VALUES (58221,'设备列表',58220,NULL,'equipment_inspection_equipment_list',0,2,'/50000/58000/58200/58220/58221','park',822);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58222,'备品备件',58220,null,'equipment_inspection_sparepart_list',0,2,'/50000/58000/58200/58220/58222','park',824);
+VALUES (58222,'备品备件',58220,NULL,'equipment_inspection_sparepart_list',0,2,'/50000/58000/58200/58220/58222','park',824);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58230,'任务列表',58200,null,null,1,2,'/50000/58000/58200/58230','park',830);
+VALUES (58230,'任务列表',58200,NULL,NULL,1,2,'/50000/58000/58200/58230','park',830);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58231,'任务列表',58230,null,'equipment_inspection_task_list',0,2,'/50000/58000/58200/58230/58231','park',832);
+VALUES (58231,'任务列表',58230,NULL,'equipment_inspection_task_list',0,2,'/50000/58000/58200/58230/58231','park',832);
 
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (800,0,'标准列表','标准列表',null);
+VALUES (800,0,'标准列表','标准列表',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (801,0,'设备关联审批','设备关联审批',null);
+VALUES (801,0,'设备关联审批','设备关联审批',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (802,0,'设备列表','设备列表',null);
+VALUES (802,0,'设备列表','设备列表',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (803,0,'备品备件','备品备件',null);
+VALUES (803,0,'备品备件','备品备件',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (804,0,'设备 任务列表','设备 任务列表',null);
+VALUES (804,0,'设备 任务列表','设备 任务列表',NULL);
 
 
-set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),800,58211,'标准列表',1,1,'标准列表  全部权限',600);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
@@ -369,20 +369,20 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 
 -- 更新服务联盟的菜单
 DELETE FROM `eh_web_menus` WHERE `id` = 44000;
-DELETE FROM `eh_acl_privileges` WHERE `id` in (540, 541);
-DELETE FROM `eh_web_menu_privileges` WHERE `id` in (40, 41);
+DELETE FROM `eh_acl_privileges` WHERE `id` IN (540, 541);
+DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (40, 41);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (44000,'服务联盟',40000,null,null,1,2,'/40000/44000','park',455);
+VALUES (44000,'服务联盟',40000,NULL,NULL,1,2,'/40000/44000','park',455);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (44100,'类型管理',44000,null,'service_type_management',0,2,'/40000/44000/44100','park',456);
+VALUES (44100,'类型管理',44000,NULL,'service_type_management',0,2,'/40000/44000/44100','park',456);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (44200,'机构管理',44000,null,'service_alliance',0,2,'/40000/44000/44200','park',457);
+VALUES (44200,'机构管理',44000,NULL,'service_alliance',0,2,'/40000/44000/44200','park',457);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (540,0,'服务联盟 类型管理','服务联盟 类型管理 全部权限',null);
+VALUES (540,0,'服务联盟 类型管理','服务联盟 类型管理 全部权限',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (541,0,'服务联盟 机构管理','服务联盟 机构管理 全部权限',null);
+VALUES (541,0,'服务联盟 机构管理','服务联盟 机构管理 全部权限',NULL);
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),540,44100,'类型管理',1,1,'备品备件 全部权限',603);
@@ -399,5 +399,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999993,0  FROM `eh_web_menus` WHERE `path` LIKE '%44000/%';
 
 
+-- 打卡推送模板
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 1, 'zh_CN', '在开始前给预定用户发送推送提醒', '您预约的${resourceName}已临近使用时间，使用时间为${startTime}');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 2, 'zh_CN', '预定成功给管理员发推送', '${userName}预约了${resourceName}\n使用详情：${useDetail}\n预约数：${rentalCount}');
 
 
