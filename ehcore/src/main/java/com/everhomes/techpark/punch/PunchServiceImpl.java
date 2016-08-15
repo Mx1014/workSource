@@ -2652,7 +2652,7 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid name parameter in the command");
 		}
 
-		List<PunchWifiRule> punchLocationRules = punchProvider.queryPunchWiFiRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ;  
+		List<PunchLocationRule> punchLocationRules = punchProvider.queryPunchLocationRulesByName(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName()) ;  
 		if(null!=punchLocationRules && (punchLocationRules.size()>1 || !punchLocationRules.get(0).getId().equals(cmd.getId())) ){
 			//有两个同名rules(正常业务不可能) 或者 同名rule的id不等于修改的id 则重名错误
 			LOGGER.error("Invalid name parameter in the command");

@@ -394,7 +394,9 @@ long id = sequenceProvider.getNextSequence(NameMapper
 		SelectQuery<EhPunchTimeRulesRecord> query = context
 				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
-
+		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		
 		List<PunchTimeRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
