@@ -280,3 +280,6 @@ set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
   VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),411,36000,'业主管理',1,1,'业主管理 全部权限',167);
 
+-- 威新Link 添加namspace_detail
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+VALUES ('1013', '999991', 'community_commercial', UTC_TIMESTAMP());
