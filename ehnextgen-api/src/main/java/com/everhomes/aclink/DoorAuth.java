@@ -83,6 +83,14 @@ public class DoorAuth extends EhDoorAuth {
         AclinkAuthCustomField.AUTH_QR_KEY.setStringValue(this, key);
     }
     
+    public String getAuthMethod() {
+        return AclinkAuthCustomField.AUTH_METHOD.getStringValue(this);
+    }
+    
+    public void setAuthMethod(String authMethod) {
+        AclinkAuthCustomField.AUTH_METHOD.setStringValue(this, authMethod);
+    }
+    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

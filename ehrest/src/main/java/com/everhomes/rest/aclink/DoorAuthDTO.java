@@ -1,6 +1,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
@@ -26,6 +27,7 @@ public class DoorAuthDTO {
     private String   organization;
     private String   description;
     private String address;
+    private String authMethod;
 
 
     public String getAddress() {
@@ -219,6 +221,16 @@ public class DoorAuthDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+
+    public String getAuthMethod() {
+        return authMethod;
+    }
+
+
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
     }
 
 

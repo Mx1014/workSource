@@ -135,7 +135,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -382,6 +384,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
@@ -447,6 +450,7 @@ import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
+import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
@@ -2533,6 +2537,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		EquipmentAccessoriesDTO dto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
+		return dto;
+	}
+
+	@Override
+	public EquipmentTaskDTO listTaskById(ListTaskByIdCommand cmd) {
+		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
+		
 		return dto;
 	}
 

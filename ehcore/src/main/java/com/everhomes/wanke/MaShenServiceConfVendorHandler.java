@@ -188,6 +188,8 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 		listCommunityResponse.setCommunities(listOrganizationCommunityV2CommandResponse.getCommunities());
 		listCommunityResponse.setUserId(identifier.getOwnerUid());
 		listCommunityResponse.setContentServer(logonCommandResponse.getContentServer());
+		listCommunityResponse.setLoginToken(logonCommandResponse.getLoginToken());
+		listCommunityResponse.setAccessPoints(logonCommandResponse.getAccessPoints());
 		
 		return listCommunityResponse;
 	}

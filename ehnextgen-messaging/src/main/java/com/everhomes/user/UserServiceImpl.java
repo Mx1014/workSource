@@ -877,8 +877,12 @@ public class UserServiceImpl implements UserService {
 							} else {
 							    if(foundLogin == null) {
 							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
-							            login.setStatus(UserLoginStatus.LOGGED_OFF);
-							            oldDeviceId = login.getDeviceIdentifier();
+							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+							                //kickoff this login
+							                oldDeviceId = login.getDeviceIdentifier();
+							                login.setStatus(UserLoginStatus.LOGGED_OFF);          
+							            }
+	                              
 			                        login.setDeviceIdentifier(deviceIdentifier);
 							        }
 							       
