@@ -96,6 +96,7 @@
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | 
         eh_journals | eh_journal_configs
 		eh_community_services |
+		eh_community_tasks | eh_community_task_logs | eh_community_task_attachments |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
