@@ -367,7 +367,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         
         long endTime = System.currentTimeMillis();
-        LOGGER.info("Calculate nearby communities, communityId=" + communityId + ", elapse=" + (endTime - startTime));
+        LOGGER.info("Calculate nearby communities 20160815, communityId=" + communityId + ", elapse=" + (endTime - startTime));
         
         return results;
     }
