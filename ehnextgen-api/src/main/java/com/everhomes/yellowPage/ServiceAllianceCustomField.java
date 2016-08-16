@@ -14,7 +14,11 @@ import com.everhomes.util.StringHelper;
 public enum ServiceAllianceCustomField {
     CONTACTNAME("string_tag1", "stringTag1", Tables.EH_YELLOW_PAGES.STRING_TAG1),
     CONTACTMOBILE("string_tag2", "stringTag2", Tables.EH_YELLOW_PAGES.STRING_TAG2),
-    SERVICETYPE("string_tag3", "stringTag3", Tables.EH_YELLOW_PAGES.STRING_TAG3);
+    SERVICETYPE("string_tag3", "stringTag3", Tables.EH_YELLOW_PAGES.STRING_TAG3),
+    SERVICEURL("string_tag4", "stringTag4", Tables.EH_YELLOW_PAGES.STRING_TAG4),
+    DISCOUNTDESC("string_tag5", "stringTag5", Tables.EH_YELLOW_PAGES.STRING_TAG5),
+    DISCOUNT("integral_tag1", "integralTag1", Tables.EH_YELLOW_PAGES.INTEGRAL_TAG1),
+    CATEGORYID("integral_tag2", "integralTag2", Tables.EH_YELLOW_PAGES.INTEGRAL_TAG2);
     
     private String fieldName;
     private String propertyName;

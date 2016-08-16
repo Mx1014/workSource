@@ -25,11 +25,15 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
@@ -43,6 +47,9 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+	private SequenceProvider sequenceProvider;
+    
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
@@ -51,16 +58,20 @@ public class CategoryProviderImpl implements CategoryProvider {
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
-        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
-        query.setRecord(record);
-        query.setReturning(Tables.EH_CATEGORIES.ID);
-        query.execute();
+//        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
+//        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
+//        query.setRecord(record);
+//        query.setReturning(Tables.EH_CATEGORIES.ID);
+//        query.execute();
+//        
+//        category.setId(query.getReturnedRecord().getId());
         
-        category.setId(query.getReturnedRecord().getId());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCategories.class));
+		
+        category.setId(id);
         
-//        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
-//        dao.insert(category);
+        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
+        dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }
