@@ -294,20 +294,21 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         String phoneNumber = null;
         String location = null;
         ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(cmd.getSourceType());
-        LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
-        if(lp == null)   {
-            if(LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Lease promotion not found, promotionId={}, cmd={}", cmd.getSourceId(), cmd);
-            }
-        }
         if(sourceType != null && cmd.getSourceId() != null) {
             switch(sourceType) {
             case FOR_RENT:
-                phoneNumber = lp.getContactPhone();
-                location = lp.getRentPosition();
+                LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+                if(lp != null) {
+                    phoneNumber = lp.getContactPhone();
+                    location = lp.getRentPosition();
+                } else {
+                    if(LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Lease promotion not found, promotionId={}, cmd={}", cmd.getSourceId(), cmd);
+                    }
+                }
                 break;
             case BUILDING:
-                Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+                Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
                 if(building != null) {
                     UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
                     if(null != identifier) {
