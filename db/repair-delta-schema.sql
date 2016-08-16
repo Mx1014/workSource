@@ -63,7 +63,6 @@ CREATE TABLE `eh_community_task_attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-
 -- DROP TABLE IF EXISTS `eh_community_services`;
 CREATE TABLE `eh_community_services` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
@@ -224,7 +223,3 @@ CREATE TABLE `eh_stat_task_logs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `task_no` (`task_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
-
-
