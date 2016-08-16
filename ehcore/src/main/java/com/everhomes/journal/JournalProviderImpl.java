@@ -81,7 +81,7 @@ public class JournalProviderImpl implements JournalProvider {
 		if(namespaceId != null)
 			query.addConditions(Tables.EH_JOURNALS.NAMESPACE_ID.eq(namespaceId));
 		if(StringUtils.isNotBlank(keyword))
-			query.addConditions(Tables.EH_JOURNALS.TITLE.eq(keyword));
+			query.addConditions(Tables.EH_JOURNALS.TITLE.like("%" + keyword + "%"));
 		if(pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_JOURNALS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		query.addConditions(Tables.EH_JOURNALS.STATUS.eq(JournalStatus.ACTIVE.getCode()));
