@@ -3586,8 +3586,7 @@ public class PunchServiceImpl implements PunchService {
 		punCalendar.add(Calendar.DATE, -1);
 		//取所有设置了rule的公司
 		Calendar startCalendar =Calendar.getInstance();
-		startCalendar.setTime(punCalendar.getTime());
-		startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+
  
 		
 		List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
@@ -3599,6 +3598,13 @@ public class PunchServiceImpl implements PunchService {
 					try {
 						//刷新 daylog
 						this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
+						//刷月报
+						
+						//从计算日的月初计算到计算日当天
+						startCalendar.setTime(punCalendar.getTime());
+						startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+						
+						addPunchStatistics(member, orgId, startCalendar, punCalendar);
 					} catch (Exception e) {
 						LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
 								+"] organization id :["+orgId+"] ");
@@ -3606,9 +3612,6 @@ public class PunchServiceImpl implements PunchService {
 						 
 						e.printStackTrace();
 					}
-					//刷月报
-					//从计算日的月初计算到计算日当天
-					addPunchStatistics(member, orgId, startCalendar, punCalendar);
 				}
 			}
 		}
