@@ -30,6 +30,8 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -77,7 +79,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Autowired
 	private SmsProvider smsProvider;
-	
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	
@@ -310,11 +315,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             case BUILDING:
                 Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
                 if(building != null) {
-                    UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
-                    if(null != identifier) {
-                        phoneNumber = identifier.getIdentifierToken();
-                        location = building.getName();
+                	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+
+                    if(null != member) {
+                        phoneNumber = member.getContactToken();
                     }
+                    location = building.getName();
                 } else {
                     if(LOGGER.isWarnEnabled()) {
                         LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
@@ -343,19 +349,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	 * */
 	private void sendApplyEntrySmsToManager(String phoneNumber,String userName,String userPhone,String applyTime,String location
 			,String area,String enterpriseName,String description , Integer namespaceId){
-		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_USERNAME, userName);
-		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_USERPHONE, userPhone); 
-		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTIME, applyTime); 
-		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_LOCATION, location); 
-		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_AREA, area); 
-		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_ENTERPRISENAME, enterpriseName); 
-		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_DESCRIPTION, description);  
+		
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_USERNAME, processNull(userName));
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_USERPHONE, processNull(userPhone)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTIME, processNull(applyTime)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_LOCATION, processNull(location)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_AREA, processNull(area)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_ENTERPRISENAME, processNull(enterpriseName)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_DESCRIPTION, processNull(description));  
 	    String templateScope = SmsTemplateCode.SCOPE;
 	    int templateId = SmsTemplateCode.WEIXIN_APPLY_RENEW_CODE;
 	    String templateLocale = UserContext.current().getUser().getLocale();
 	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 	}
-	
+	public String processNull(String variable){
+		if(org.apache.commons.lang.StringUtils.isBlank(variable) )
+			return "无";
+		else
+			return variable;
+	}
 	@Override
 	public boolean applyRenew(EnterpriseApplyRenewCommand cmd) {
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getId(), UserContext.current().getUser().getId());

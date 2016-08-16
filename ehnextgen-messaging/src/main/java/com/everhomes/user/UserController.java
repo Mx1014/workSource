@@ -400,6 +400,10 @@ public class UserController extends ControllerBase {
 		if(loginToken == null)
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN, "Invalid login token");
 
+		if(cmd.getNamespaceId() != null) {
+		    UserContext.current().setNamespaceId(cmd.getNamespaceId());    
+		}
+		
 		UserLogin login = this.userService.logonByToken(loginToken);
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
@@ -718,6 +722,14 @@ public class UserController extends ControllerBase {
 	@RestReturn(AppIdStatusResponse.class)
 	public RestResponse getAppIdStatus(@Valid AppIdStatusCommand cmd) {
 		AppIdStatusResponse cmdResponse = new AppIdStatusResponse();
+		
+		RestResponse response = new RestResponse(cmdResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		if(UserContext.current().getLogin() == null) {
+		    //check user first
+		    return response;
+		}
 
 		for(Long appId : cmd.getAppIds()) {
 			FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
@@ -733,9 +745,6 @@ public class UserController extends ControllerBase {
 			}
 		}
 
-		RestResponse response = new RestResponse(cmdResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
 		return response;
 	}
 

@@ -2011,12 +2011,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(dto.getTaskName());
 		row.createCell(++i).setCellValue((StandardType.fromStatus(dto.getTaskType()).getName()));
 		row.createCell(++i).setCellValue(dto.getEquipmentName());
-		
-		row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
+		if(null != dto.getExecutiveStartTime())
+			row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
 		if(dto.getProcessExpireTime() != null) {
 			row.createCell(++i).setCellValue(dto.getProcessExpireTime().toString());
 		} else {
-			row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
+			if(null != dto.getExecutiveExpireTime())
+				row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
 		}
 		
 		row.createCell(++i).setCellValue(dto.getEquipmentLocation());
@@ -2034,7 +2035,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
 			row.createCell(++i).setCellValue(dto.getOperatorName());
 		} else {
-			row.createCell(++i).setCellValue(dto.getExecutiveTime().toString());
+			if(null != dto.getExecutiveTime())
+				row.createCell(++i).setCellValue(dto.getExecutiveTime().toString());
 			row.createCell(++i).setCellValue(dto.getExecutorName());
 		}
 		
