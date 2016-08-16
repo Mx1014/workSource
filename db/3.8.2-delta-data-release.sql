@@ -411,11 +411,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
   VALUES ((@configuration_id := @configuration_id + 1), 'makerzone.forum_id', '177000', '创客空间论坛ID', '0', '创客空间论坛');
   
- -- 打卡推送模板
+-- 资源预订推送模板 by wuhan 20160815
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 1, 'zh_CN', '在开始前给预定用户发送推送提醒', '您预约的${resourceName}已临近使用时间，使用时间为${startTime}');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'rental.notification', 2, 'zh_CN', '预定成功给管理员发推送', '${userName}预约了${resourceName}\n使用详情：${useDetail}\n预约数：${rentalCount}');
   
--- 打卡文字
+-- 资源预订文字 by wuhan 20160815
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental.notification', '0', 'zh_CN', '早上');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental.notification', '1', 'zh_CN', '下午');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental.notification', '2', 'zh_CN', '晚上');
