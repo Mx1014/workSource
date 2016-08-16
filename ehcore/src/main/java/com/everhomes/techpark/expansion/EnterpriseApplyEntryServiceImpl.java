@@ -30,6 +30,8 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -77,7 +79,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Autowired
 	private SmsProvider smsProvider;
-	
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	
@@ -310,11 +315,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             case BUILDING:
                 Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
                 if(building != null) {
-                    UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
-                    if(null != identifier) {
-                        phoneNumber = identifier.getIdentifierToken();
-                        location = building.getName();
+                	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+
+                    if(null != member) {
+                        phoneNumber = member.getContactToken();
                     }
+                    location = building.getName();
                 } else {
                     if(LOGGER.isWarnEnabled()) {
                         LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
