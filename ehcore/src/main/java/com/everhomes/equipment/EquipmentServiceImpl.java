@@ -763,12 +763,12 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 	
 	public void createEquipmentStandardsBook(String path,List<EquipmentStandardsDTO> dtos) {
-		if (null == dtos || dtos.size() == 0)
-			return;
+		
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("equipmentStandards");
 		
 		this.createEquipmentStandardsBookSheetHead(sheet);
+		
 		for (EquipmentStandardsDTO dto : dtos ) {
 			this.setNewEquipmentStandardsBookRow(sheet, dto);
 		}
@@ -813,7 +813,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(repeatService.getExecutionFrequency(dto.getRepeat()));
 		row.createCell(++i).setCellValue(repeatService.getExecuteStartTime(dto.getRepeat()));
 		row.createCell(++i).setCellValue(repeatService.getlimitTime(dto.getRepeat()));
-		row.createCell(++i).setCellValue(dto.getUpdateTime());
+		row.createCell(++i).setCellValue(dto.getUpdateTime().toString());
 		row.createCell(++i).setCellValue(dto.getStandardSource());
 		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.INACTIVE)
 			row.createCell(++i).setCellValue("已失效");
@@ -1168,8 +1168,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	public void createEquipmentsBook(String path,List<EquipmentsDTO> dtos) {
-		if (null == dtos || dtos.size() == 0)
-			return;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("equipments");
 		
@@ -1302,8 +1300,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	public void createEquipmentAccessoriesBook(String path,List<EquipmentAccessoriesDTO> dtos) {
-		if (null == dtos || dtos.size() == 0)
-			return;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("equipmentAccessories");
 		
@@ -1968,8 +1964,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	public void createEquipmentTasksBook(String path,List<EquipmentTaskDTO> dtos) {
-		if (null == dtos || dtos.size() == 0)
-			return;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("equipmentTasks");
 		
@@ -2018,11 +2012,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue((StandardType.fromStatus(dto.getTaskType()).getName()));
 		row.createCell(++i).setCellValue(dto.getEquipmentName());
 		
-		row.createCell(++i).setCellValue(dto.getExecutiveStartTime());
+		row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
 		if(dto.getProcessExpireTime() != null) {
-			row.createCell(++i).setCellValue(dto.getProcessExpireTime());
+			row.createCell(++i).setCellValue(dto.getProcessExpireTime().toString());
 		} else {
-			row.createCell(++i).setCellValue(dto.getExecutiveExpireTime());
+			row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
 		}
 		
 		row.createCell(++i).setCellValue(dto.getEquipmentLocation());
@@ -2037,10 +2031,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
 		
 		if(dto.getProcessExpireTime() != null) {
-			row.createCell(++i).setCellValue(dto.getProcessTime());
+			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
 			row.createCell(++i).setCellValue(dto.getOperatorName());
 		} else {
-			row.createCell(++i).setCellValue(dto.getExecutiveTime());
+			row.createCell(++i).setCellValue(dto.getExecutiveTime().toString());
 			row.createCell(++i).setCellValue(dto.getExecutorName());
 		}
 		
