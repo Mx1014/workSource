@@ -485,3 +485,5 @@ INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `targe
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
     VALUES(1111264,240111044331051380, 'organization', 1002797, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
+
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('1010', '32', '设备巡检', '设备巡检', NULL, '999992', 'EhOrganizations', '1000750');
