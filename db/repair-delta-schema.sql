@@ -1,5 +1,5 @@
 
-DROP TABLE IF EXISTS `eh_community_tasks`;
+-- DROP TABLE IF EXISTS `eh_community_tasks`;
 CREATE TABLE `eh_community_tasks` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -11,7 +11,7 @@ CREATE TABLE `eh_community_tasks` (
 	`category_id` BIGINT NOT NULL DEFAULT 0,
 	`category_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of category',
 	`address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
-	`content` TEXT NOT NULL DEFAULT '' COMMENT 'content data,
+	`content` TEXT NOT NULL COMMENT 'content data',
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
 	`evaluate_score` BIGINT COMMENT 'evaluate score',
 
@@ -29,28 +29,28 @@ CREATE TABLE `eh_community_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-DROP TABLE IF EXISTS `eh_community_task_logs`;
+-- DROP TABLE IF EXISTS `eh_community_task_logs`;
 CREATE TABLE `eh_community_task_logs` (
-	`id` BIGINT NOT NULL COMMENT 'id of the record',
-	`namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
-	`owner_id` BIGINT NOT NULL DEFAULT 0,
- 	`repair_id` BIGINT NOT NULL,
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `repair_id` BIGINT NOT NULL,
 
-	`content` TEXT NOT NULL DEFAULT '' COMMENT 'content data,
-	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
-  	`target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
+  `content` TEXT NOT NULL  COMMENT 'content data',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
+    `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
 
-	`operator_uid` BIGINT NOT NULL DEFAULT 0,
+  `operator_uid` BIGINT NOT NULL DEFAULT 0,
     `operator_time` DATETIME,
 
-	`creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_community_task_attachments`;
+-- DROP TABLE IF EXISTS `eh_community_task_attachments`;
 CREATE TABLE `eh_community_task_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g comment_id',
@@ -80,13 +80,6 @@ CREATE TABLE `eh_community_services` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE eh_users ADD COLUMN `namespace_user_type` varchar(128) DEFAULT NULL COMMENT 'the type of user';
-
-ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_token` varchar(256) DEFAULT NULL COMMENT 'the token from third party';
-
-ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_type` varchar(128) DEFAULT NULL COMMENT 'the type of organization';
-
 
 -- 结算表  by sfyan 2016010
 -- 订单交易流水表
