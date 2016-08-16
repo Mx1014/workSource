@@ -6,8 +6,8 @@ CREATE TABLE `eh_community_tasks` (
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
 
-	`service_category_id` BIGINT NOT NULL DEFAULT 0,
-	`service_category_name` VARCHAR(128) NOT NULL DEFAULT '',
+	`category_id` BIGINT NOT NULL DEFAULT 0,
+	`category_name` VARCHAR(128) NOT NULL DEFAULT '',
 	`child_category_id` BIGINT NOT NULL DEFAULT 0,
 	`child_category_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of category',
 	`address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
@@ -35,7 +35,7 @@ CREATE TABLE `eh_community_task_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `repair_id` BIGINT NOT NULL,
+  `task_id` BIGINT NOT NULL,
 
   `content` TEXT NOT NULL  COMMENT 'content data',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
