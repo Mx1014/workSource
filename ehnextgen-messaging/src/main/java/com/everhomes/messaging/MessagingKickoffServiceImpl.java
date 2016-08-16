@@ -43,14 +43,20 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
     
     @Override
     public boolean isKickoff(Integer namespaceId, LoginToken loginToken) {
-        String key = getKickoffMessageKey(namespaceId, loginToken);
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Object o = redisTemplate.opsForValue().get(key);
-        if(o == null) {
-            return false;
+        try {
+            String key = getKickoffMessageKey(namespaceId, loginToken);
+            Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+            Object o = redisTemplate.opsForValue().get(key);
+            if(o == null) {
+                return false;
+            }
+            
+            return true;            
+        } catch(Exception ex) {
+            LOGGER.info("kickoff error, loginToken error? " + ex.getMessage());   
         }
-        
-        return true;
+
+        return false;
     }
 }
