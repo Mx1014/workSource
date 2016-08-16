@@ -1312,13 +1312,14 @@ public class PunchServiceImpl implements PunchService {
 	// 计算两个日期间工作日天数，不包含结束时间
 	private Integer countWorkDayCount(Calendar startCalendar, Calendar endCalendar ,PunchRule pr) {
 		Integer workDayCount = 0;
-	 
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startCalendar.getTime());
 		while (true) {
-			if (isWorkDay(startCalendar.getTime(),pr)) {
+			if (isWorkDay(calendar.getTime(),pr)) {
 				workDayCount++;
 			}
-			startCalendar.add(Calendar.DAY_OF_MONTH, 1);
-			if (startCalendar.after(endCalendar)) {
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
+			if (calendar.after(endCalendar)) {
 				return workDayCount;
 			}
 		} 
