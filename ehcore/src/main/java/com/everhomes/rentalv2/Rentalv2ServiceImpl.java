@@ -62,7 +62,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -75,6 +74,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -234,7 +235,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		return null;
 	}
-	
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+    
     private final Long MILLISECONDGMT=8*3600*1000L;
 	// N分钟后取消
 	private Long cancelTime = 15 * 60 * 1000L;
@@ -275,6 +279,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	Rentalv2Provider rentalProvider;
+	@Autowired
+	LocaleStringService localeStringService;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -1365,11 +1371,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //					useDetailSB.append("使用时间:");
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
-						useDetailSB.append("早上 ");
+						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.AM.getCode(), PunchNotificationTemplateCode.locale, "morning"));
 					if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
-						useDetailSB.append("下午 ");
+						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.PM.getCode(), PunchNotificationTemplateCode.locale, "afternoon"));
 					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
-						useDetailSB.append("晚上 ");
+						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
+								""+AmorpmFlag.NIGHT.getCode(), PunchNotificationTemplateCode.locale, "night"));
 				}
 				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				//独占资源 只有时间				 
@@ -1505,19 +1514,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void addOrderSendMessage(RentalOrder rentalBill ){
 		//消息推送
 		//定时任务给用户推送
-		SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
-		StringBuffer content = new StringBuffer();
-		content.append("您预约的");
-		content.append(rentalBill.getResourceName());
-		content.append("已临近使用时间，使用时间为");
-		content.append("已临近使用时间，使用时间为"+bigentimeSF.format(rentalBill.getStartTime()));
+		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
+		if (null == user )
+			return; 
+		SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm"); 
+		Map<String, String> map = new HashMap<String, String>();  
+        map.put("resourceName", rentalBill.getResourceName());
+        map.put("startTime", ""+bigentimeSF.format(rentalBill.getStartTime())); 
+		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(PunchNotificationTemplateCode.SCOPE, 
+				PunchNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, PunchNotificationTemplateCode.locale, map, "");
 		RentalResource rs = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 		if(null == rs)
 			return;
 		RentalType rentalType = RentalType.fromCode(rs.getRentalType());
 		final Job job3 = new Job(
 				SendMessageAction.class.getName(),
-				new Object[] {rentalBill.getRentalUid(), content.toString()});
+				new Object[] {rentalBill.getRentalUid(),notifyTextForOther});
 		if(rentalType != null) {
 			switch(rentalType) {
 			case HOUR:
@@ -1538,23 +1550,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				break;
 				
 			}
-		} 
-		//给负责人推送
-		StringBuffer managerContent = new StringBuffer();
-		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
-		if (null == user )
-			return;
-		managerContent.append(user.getNickName());
-		managerContent.append("预约了");
-		managerContent.append(rentalBill.getResourceName());
-		managerContent.append("\n使用详情：");
-		managerContent.append(rentalBill.getUseDetail());
-		if(null != rentalBill.getRentalCount() ){
-			managerContent.append("\n预约数：");
-			managerContent.append(rentalBill.getRentalCount());
-		}
-		sendMessageToUser(rs.getChargeUid(), managerContent.toString());
+		}  
+	  map = new HashMap<String, String>(); 
+      map.put("userName", user.getNickName());
+      map.put("resourceName", rentalBill.getResourceName());
+      map.put("useDetail", rentalBill.getUseDetail());
+      map.put("rentalCount", ""+rentalBill.getRentalCount());  
+//      sendMessageCode(rs.getChargeUid(),  PunchNotificationTemplateCode.locale, map, PunchNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
 	}
+	
+
+    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+        String scope = PunchNotificationTemplateCode.SCOPE;
+        
+        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(uid, notifyTextForOther);
+    }
+    
 	private void sendMessageToUser(Long userId, String content) {
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);

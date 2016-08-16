@@ -1049,7 +1049,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private ClockCode verifyPunchClock(PunchClockCommand cmd) {
 		//获取打卡规则
-		ClockCode code = ClockCode.FAIL;
+		ClockCode code = ClockCode.SUCESS;
 		Long userId = UserContext.current().getUser().getId(); 
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		//是否有wifi打卡,如果是判断wifi是否符合
@@ -1089,18 +1089,16 @@ public class PunchServiceImpl implements PunchService {
 					.getDistance()) {
 				// 如果找到了一个就跳出
 				return ClockCode.SUCESS; 
-			}
-			else {
-				if(null == pr.getWifiRuleId())
-					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-		 					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
-				else
-					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-	 					PunchServiceErrorCode.ERROR_NOT_IN_AREA_AND_WIFI,"not in punch area and not in wifi");
-			}
+			} 
+		 
 		}
-
-		return code;
+		if(null == pr.getWifiRuleId())
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
+		else
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_NOT_IN_AREA_AND_WIFI,"not in punch area and not in wifi");
+ 
 	}
 
 	/*** return 两个坐标之间的距离 单位 米 */
