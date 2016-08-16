@@ -527,3 +527,6 @@ UPDATE `eh_communities` SET `name` = 'ibase北京金地中心', `alias_name` = '
 UPDATE `eh_communities` SET `name` = 'ibase深圳龙井问山', `alias_name` = 'ibase深圳龙井问山' where `id` = 240111044331052506;
 UPDATE `eh_communities` SET `name` = 'ibase深圳威新中心', `alias_name` = 'ibase深圳威新中心' where `id` = 240111044331052507;
 UPDATE `eh_communities` SET `name` = 'ibase深圳园博园创意集群社', `alias_name` = 'ibase深圳园博园创意集群社' where `id` = 240111044331052508;
+
+UPDATE `eh_web_menus` SET `name` = '设备巡检' where `id` = 58200;
+
