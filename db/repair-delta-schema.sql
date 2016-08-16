@@ -8,12 +8,12 @@ CREATE TABLE `eh_community_tasks` (
 
 	`service_category_id` BIGINT NOT NULL DEFAULT 0,
 	`service_category_name` VARCHAR(128) NOT NULL DEFAULT '',
-	`category_id` BIGINT NOT NULL DEFAULT 0,
-	`category_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of category',
+	`child_category_id` BIGINT NOT NULL DEFAULT 0,
+	`child_category_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of category',
 	`address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
 	`content` TEXT NOT NULL COMMENT 'content data',
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
-	`evaluate_score` BIGINT COMMENT 'evaluate score',
+	`evaluate_score` INT COMMENT 'evaluate score',
 
 	`unprocessed_time` DATETIME,
 	`processing_time` DATETIME,
@@ -43,9 +43,6 @@ CREATE TABLE `eh_community_task_logs` (
 
   `operator_uid` BIGINT NOT NULL DEFAULT 0,
     `operator_time` DATETIME,
-
-  `creator_uid` BIGINT NOT NULL DEFAULT 0,
-    `create_time` DATETIME,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
