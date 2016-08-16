@@ -1103,3 +1103,5 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),540,44100,'类型管理',1,1,'备品备件 全部权限',603);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),541,44200,'机构管理',1,1,'任务列表 全部权限',604);
+
+UPDATE `eh_web_menus` SET `name` = '设备巡检' where `id` = 58200;
