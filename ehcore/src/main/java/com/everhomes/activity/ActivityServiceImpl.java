@@ -932,6 +932,7 @@ public class ActivityServiceImpl implements ActivityService {
         {
             put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
             put("reason",cmd.getReason());
+            put("subject", activity.getSubject());
         }}, ""));
 //        forumProvider.createPost(comment);
         
