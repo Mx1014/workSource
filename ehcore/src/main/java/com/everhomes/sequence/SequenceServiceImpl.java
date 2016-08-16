@@ -762,6 +762,7 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhRichTexts.class, Tables.EH_RICH_TEXTS.getName(), (dbContext) -> { 
         	return dbContext.select(Tables.EH_RICH_TEXTS.ID.max()).from(Tables.EH_RICH_TEXTS).fetchOne().value1(); 
+        });
         syncTableSequence(null, EhJournals.class, Tables.EH_JOURNALS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_JOURNALS.ID.max()).from(Tables.EH_JOURNALS).fetchOne().value1(); 
         });
