@@ -6,6 +6,7 @@ import com.everhomes.rest.contentserver.AddConfigItemCommand;
 import com.everhomes.rest.contentserver.AddContentServerCommand;
 import com.everhomes.rest.contentserver.ContentServerDTO;
 import com.everhomes.rest.contentserver.UpdateContentServerCommand;
+import com.everhomes.rest.messaging.ImageBody;
 
 public interface ContentServerService {
 
@@ -26,4 +27,6 @@ public interface ContentServerService {
     String parserUri(String uri, String ownerType, Long ownerId);
 
     ContentServerResource findResourceByUri(String uri);
+    
+    ImageBody parserImageBody(String uri, String ownerType, Long ownerId);
 }

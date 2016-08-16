@@ -2,11 +2,9 @@ package com.everhomes.techpark.punch;
 
 import java.text.ParseException;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -31,7 +29,28 @@ import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
+import com.everhomes.rest.techpark.punch.PunchRuleDTO;
+import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 
 public interface PunchService {
 	 
@@ -73,8 +92,62 @@ public interface PunchService {
 	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
 			ListMonthPunchLogsCommand cmd);
 
-	public HttpServletResponse exportPunchStatistics(
-			ExportPunchStatisticsCommand cmd,
+	public HttpServletResponse exportPunchDetails(
+			ListPunchDetailsCommand cmd,
 			 
 			  HttpServletResponse response );
+
+	public void addPunchTimeRule(AddPunchTimeRuleCommand cmd);
+
+	public void updatePunchTimeRule(UpdatePunchTimeRuleCommand cmd);
+
+	public void deletePunchTimeRule(DeleteCommonCommand cmd);
+
+	public listPunchTimeRuleListResponse listPunchTimeRuleList(ListPunchRulesCommonCommand cmd);
+
+	public void addPunchLocationRule(PunchLocationRuleDTO cmd);
+
+	public void updatePunchLocationRule(PunchLocationRuleDTO cmd);
+
+	public void deletePunchLocationRule(DeleteCommonCommand cmd);
+
+	public QryPunchLocationRuleListResponse listPunchLocationRules(ListPunchRulesCommonCommand cmd);
+
+	public void addPunchWiFiRule(PunchWiFiRuleDTO cmd);
+
+	public void updatePunchWiFiRule(PunchWiFiRuleDTO cmd);
+
+	public void deletePunchWiFiRule(DeleteCommonCommand cmd);
+
+	public ListPunchWiFiRuleListResponse listPunchWiFiRule(ListPunchRulesCommonCommand cmd);
+
+	public void addPunchWorkdayRule(PunchWorkdayRuleDTO cmd);
+
+	public void updatePunchWorkdayRule(PunchWorkdayRuleDTO cmd);
+
+	public void deletePunchWorkdayRule(DeleteCommonCommand cmd);
+
+	public ListPunchWorkdayRuleListResponse listPunchWorkdayRule(ListPunchRulesCommonCommand cmd);
+
+	public void addPunchRule(PunchRuleDTO cmd);
+
+	public void updatePunchRule(PunchRuleDTO cmd);
+
+	public void deletePunchRule(DeleteCommonCommand cmd);
+
+	public ListPunchRulesResponse listPunchRules(ListPunchRulesCommonCommand cmd);
+
+	public void addPunchRuleMap(PunchRuleMapDTO cmd);
+
+	public ListPunchRuleMapsResponse listPunchRuleMaps(ListPunchRuleMapsCommand cmd);
+
+	public ListPunchMonthLogsResponse listPunchMonthLogs(ListPunchMonthLogsCommand cmd);
+
+	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd);
+
+	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
+
+	void dayRefreshLogScheduled();
+
+	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 }

@@ -100,6 +100,7 @@ public class ReorderLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
 				flag = true;
 			}else{
 				flag = false;
+				break;
 			}
 		}
         

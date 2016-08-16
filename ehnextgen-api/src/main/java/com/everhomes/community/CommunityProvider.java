@@ -26,7 +26,7 @@ public interface CommunityProvider {
     List<Community> findNearyByCommunityById(Integer namespaceId, long communityId);
     List<NearbyCommunityMap> findNearbyCommunityMap(Integer namespaceId, Long communityId);
     List<Community> findFixNearbyCommunityById(Integer namespaceId, Long communityId);
-    List<Community> calculateNearbyCommunityByGeoPoints(Long communityId);
+    List<Community> calculateNearbyCommunityByGeoPoints(Long communityId, Integer namespaceId);
     List<Community> listCommunitiesByStatus(ListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback);
     

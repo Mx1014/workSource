@@ -1,5 +1,7 @@
 package com.everhomes.rest.promotion;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>keyword: title/description/id</li>
@@ -34,5 +36,10 @@ public class OpPromotionSearchCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

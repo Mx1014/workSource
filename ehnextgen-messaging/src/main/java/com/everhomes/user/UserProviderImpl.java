@@ -16,6 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectOnConditionStep;
@@ -69,6 +70,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserLikes;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
+import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -945,6 +947,17 @@ public class UserProviderImpl implements UserProvider {
                                 cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
                                         .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))
                                         ));   
+                    } else {
+//                        SelectQuery<EhUsersRecord> subQuery = context.selectQuery(Tables.EH_USERS);
+//                        subQuery.addJoin(Tables.EH_DOOR_AUTH, Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
+//                        subQuery.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+//                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())));
+                        
+                        SelectQuery<Record1<Long>> subQuery = context.select(Tables.EH_USERS.ID).from(Tables.EH_DOOR_AUTH).join(Tables.EH_USERS).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID))
+                        .where(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))).getQuery();
+                        
+                        select = onQuery.where(cond.and(Tables.EH_USERS.ID.notIn(subQuery)));
                     }
                     
                 } else {
@@ -1004,7 +1017,7 @@ public class UserProviderImpl implements UserProvider {
 	public User findUserByNamespace(Integer namespaceId, String namespaceUserToken) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return ConvertHelper.convert(context.select().from(Tables.EH_USERS)
-				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).fetchOne(),
+				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).limit(1).fetchOne(),
 				User.class);
 	}
 	

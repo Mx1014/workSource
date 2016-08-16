@@ -621,7 +621,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.TOPIC.getCode(), locator, pageSize + 1);
         
         if (CollectionUtils.isEmpty(result)) {
-            return null;
+        	ListPostResponse response = new ListPostResponse();
+            response.setPostDtos(new ArrayList<PostDTO>());
+            return response;
         }
         
         if(result.size() > pageSize) {
@@ -1012,7 +1014,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.ACTIVITY.getCode(), locator, pageSize + 1);
         
         if (CollectionUtils.isEmpty(result)) {
-            return null;
+            return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
         }
         
         if(result.size() > pageSize) {
@@ -1053,7 +1055,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1);
         
         if (CollectionUtils.isEmpty(result)) {
-            return null;
+            return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
         }
         
         if(result.size() > pageSize) {

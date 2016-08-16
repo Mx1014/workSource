@@ -54,16 +54,22 @@ public class ThirdUserOpenController extends ControllerBase {
 	@RequestMapping("initCoupon")
 	@RestReturn(String.class)
 	public RestResponse initCoupon(@Valid SynThridUserCommand cmd,HttpServletRequest request, HttpServletResponse response) {
-		this.checkIsNull(cmd);
-		this.checkInnerOauth(cmd);
-		UserLogin login = this.userService.synThridUser(cmd);
+		try {
+	       this.checkIsNull(cmd);
+          this.checkInnerOauth(cmd);
 
-		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
-		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+		    UserLogin login = this.userService.synThridUser(cmd);
 
-		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
-		setCookieInResponse("token", tokenString, request, response);
+	        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+	        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
+	        LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+	        setCookieInResponse("token", tokenString, request, response);
+    
+		} catch (Exception ex) {
+		    LOGGER.error("initCoupon error", ex);
+		}
+		
 		RestResponse result =  new RestResponse();
 		result.setErrorCode(ErrorCodes.SUCCESS);
 		result.setErrorDescription("OK");

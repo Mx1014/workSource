@@ -27,9 +27,13 @@ import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
 import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
 import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
 import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerCommand;
 import com.everhomes.rest.organization.pm.DeletePmBillCommand;
 import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
 import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerCommand;
 import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
 import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
 import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
@@ -92,6 +96,7 @@ import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.Tuple;
 
 public interface PropertyMgrService {
@@ -215,4 +220,14 @@ public interface PropertyMgrService {
 	CommonOrderDTO createPmBillOrderDemo(CreatePmBillOrderCommand cmd);
 	
 	void pushMessage(PropCommunityBuildAddessCommand cmd,User user);
+	
+	void createPMPropertyOwnerInfo(CreatePropOwnerCommand cmd);
+	
+	void deletePMPropertyOwnerInfo(DeletePropOwnerCommand cmd);
+	
+	void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd);
+	
+	void createPMPropertyOwnerAddress(CreatePropOwnerAddressCommand cmd);
+	
+	void processUserForOwner(UserIdentifier identifier);
 }

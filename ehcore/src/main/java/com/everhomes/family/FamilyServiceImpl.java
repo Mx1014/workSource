@@ -216,6 +216,9 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.info("find family in the lock,elapse=" + (lqEndTime - lqStartTime));
             
             long lcStartTime = System.currentTimeMillis(); 
+            if(null == address.getMemberStatus()){
+            	address.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+            }
             if(family == null) {
                 family = this.dbProvider.execute((TransactionStatus status) -> {
                     Family f = new Family();
@@ -239,9 +242,6 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberAvatar(user.getAvatar());
                     m.setMemberRole(Role.ResourceCreator);
                     
-                    if(null == address.getMemberStatus()){
-                    	address.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-                    }
                     m.setMemberStatus(address.getMemberStatus());
                     m.setCreatorUid(uid);
                     m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -280,7 +280,8 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
                     m.setMemberAvatar(user.getAvatar());
                     m.setMemberRole(Role.ResourceUser);
-                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    m.setMemberStatus(address.getMemberStatus());
                     m.setCreatorUid(uid);
                     m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     this.groupProvider.createGroupMember(m);
@@ -292,7 +293,8 @@ public class FamilyServiceImpl implements FamilyService {
                     userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                     userGroup.setRegionScopeId(community.getId());
                     userGroup.setMemberRole(Role.ResourceUser);
-                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    userGroup.setMemberStatus(address.getMemberStatus());
                     this.userProvider.createUserGroup(userGroup);
                     
                     sendFamilyNotificationForReqJoinFamily(address,f,m);
@@ -619,8 +621,12 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public void leave(LeaveFamilyCommand cmd, User u) {
-        User user = UserContext.current().getUser();
-        Long userId = user.getId();
+    	if(null == u){
+    		u = UserContext.current().getUser();
+    	}
+    	
+    	final User user = u;
+        long userId = user.getId();
         long familyId = cmd.getId();
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         Group group = this.groupProvider.findGroupById(familyId);

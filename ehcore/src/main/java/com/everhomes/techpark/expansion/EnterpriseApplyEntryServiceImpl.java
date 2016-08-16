@@ -266,29 +266,71 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
-		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
-		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
-		String phoneNumber = null;
-		if(rentType != null) {
-			switch(rentType) {
-			case ORDINARY:
-				phoneNumber = lp.getContactPhone();
-				break;
-			case BUILDING:
-				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
-				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
-				if(null != identifier)
-					phoneNumber = identifier.getIdentifierToken();
-				break;
-			default:
-				break;
-				
-			}
-		} 
+		
+		// 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
+//		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+//		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
+//		String phoneNumber = null;
+//		if(rentType != null) {
+//			switch(rentType) {
+//			case ORDINARY:
+//				phoneNumber = lp.getContactPhone();
+//				break;
+//			case BUILDING:
+//				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+//				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
+//				if(null != identifier)
+//					phoneNumber = identifier.getIdentifierToken();
+//				break;
+//			default:
+//				break;
+//				
+//			}
+//		} 
+//		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+//        sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+//                lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+        // 根据source type来区分
+        String phoneNumber = null;
+        String location = null;
+        ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(cmd.getSourceType());
+        LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+        if(lp == null)   {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Lease promotion not found, promotionId={}, cmd={}", cmd.getSourceId(), cmd);
+            }
+        }
+        if(sourceType != null && cmd.getSourceId() != null) {
+            switch(sourceType) {
+            case FOR_RENT:
+                phoneNumber = lp.getContactPhone();
+                location = lp.getRentPosition();
+                break;
+            case BUILDING:
+                Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+                if(building != null) {
+                    UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
+                    if(null != identifier) {
+                        phoneNumber = identifier.getIdentifierToken();
+                        location = building.getName();
+                    }
+                } else {
+                    if(LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
+                    }
+                }
+                break;
+            default:
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Apply entry source type not supported, sourceType={}, cmd={}", sourceType, cmd);
+                }
+                break;
+            }
+        }
 
 		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
 		sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-				lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
 		return true;
 	}
 	/**

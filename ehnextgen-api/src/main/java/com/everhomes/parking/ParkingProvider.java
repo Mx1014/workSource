@@ -4,6 +4,7 @@ package com.everhomes.parking;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.parking.ParkingLotVendor;
 
 public interface ParkingProvider {
@@ -69,4 +70,8 @@ public interface ParkingProvider {
     ParkingActivity getParkingActivity(String ownerType,Long ownerId,Long parkingLotId);
     
     void deleteParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
+    
+    List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
+			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
+			CrossShardListingLocator locator);
 }

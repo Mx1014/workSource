@@ -659,7 +659,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			tempRow.createCell(5).setCellValue(transaction.getOrderNo());
 			tempRow.createCell(6).setCellValue(datetimeSF.format(transaction.getTransactionTime()));
 			tempRow.createCell(7).setCellValue(transaction.getAmount().doubleValue());
-			tempRow.createCell(8).setCellValue(CardTransactionStatus.fromCode(transaction.getStatus()).toString());
+			tempRow.createCell(8).setCellValue(convertTransactionStatus(CardTransactionStatus.fromCode(transaction.getStatus()).getCode()));
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -667,13 +667,30 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			wb.write(out);
 			DownloadUtil.download(out, response);
 		} catch (IOException e) {
-			LOGGER.error("exportCardUsers is fail.",e);
+			LOGGER.error("ExportCardTransactions failed",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"exportCardUsers is fail.");
+					"ExportCardTransactions failed");
 		}
 		
 	}
     
+	private String convertTransactionStatus(Byte b){
+		switch (b) {
+		case 0:
+			return "失败";
+		case 1:
+			return "过期";
+		case 2:
+			return "已撤销";
+		case 3:
+			return "支付成功";
+		case 4:
+			return "未支付";
+		default:
+			return "";
+		}
+	}
+	
     @Override
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
     	NotifyEntityDTO dto = new NotifyEntityDTO();
