@@ -2575,17 +2575,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //	
 //			}
 			 
-			Long orderNo = null;
+			Long orderNo =  onlinePayService.createBillId(DateHelper
+					.currentGMTTime().getTime());
 			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-				orderNo = onlinePayService.createBillId(DateHelper
-						.currentGMTTime().getTime());
 				response.setAmount(bill.getReserveMoney());
 				response.setOrderNo(String.valueOf(orderNo));
 				
 			} else if (bill.getStatus()
 					.equals(SiteBillStatus.PAYINGFINAL.getCode())) {
-				orderNo = onlinePayService.createBillId(DateHelper
-						.currentGMTTime().getTime());
 				response.setAmount(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
 				response.setOrderNo(String.valueOf(orderNo));
 			} else {
