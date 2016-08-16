@@ -81,6 +81,13 @@ CREATE TABLE `eh_community_services` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE eh_users ADD COLUMN `namespace_user_type` VARCHAR(128) DEFAULT NULL COMMENT 'the type of user';
+
+ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_token` VARCHAR(256) DEFAULT NULL COMMENT 'the token from third party';
+
+ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_type` VARCHAR(128) DEFAULT NULL COMMENT 'the type of organization';
+
+
 -- 结算表  by sfyan 2016010
 -- 订单交易流水表
 CREATE TABLE `eh_stat_orders` (
