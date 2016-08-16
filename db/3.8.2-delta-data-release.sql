@@ -406,3 +406,22 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messa
 set @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'EquipmentInspection', '设备巡检', 'cs://1/image/aW1hZ2UvTVRwaU5tRTRZalZqTlRJNE5XUTVNelZoT1ROak9UWXlabUk1TURRMVpEZzROUQ', '1', '1', '14', '{\"url\":\"https://core.zuolin.com/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}', '0', '0', '1', '1', '', '0', '', '', NULL, '1', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'EquipmentInspection', '设备巡检', 'cs://1/image/aW1hZ2UvTVRwaU5tRTRZalZqTlRJNE5XUTVNelZoT1ROak9UWXlabUk1TURRMVpEZzROUQ', '1', '1', '14', '{\"url\":\"https://core.zuolin.com/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix\"}', '0', '0', '1', '1', '', '0', '', '', NULL, '1', 'park_tourist');
+
+
+-- 左邻域下新增企业:深圳市嘉宏达建材有限公司
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1003199, UUID(), '深圳市嘉宏达建材有限公司', '深圳市嘉宏达建材有限公司', 1, 0, 0, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180855, 1, 0);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(180855, UUID(), 0, 2, 'EhGroups', 1003199,'深圳市嘉宏达建材有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	
+INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `group_id`,  `region_scope`,  `region_scope_id`,  `member_role`,  `member_status`,  `create_time`)
+	VALUES (318492, 227276, 'enterprise', 1002797, 0, 0, 7, 3, UTC_TIMESTAMP());
+	
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`,`level`, `status`, `group_type`, `group_id`, `namespace_id`)
+	VALUES(1002797, 0, 'ENTERPRISE', '深圳市嘉宏达建材有限公司', 0, NULL, '/1002797', 1, 2, 'ENTERPRISE', 1003199, 0);
+INSERT INTO `eh_organization_members` (`id`,  `organization_id`,  `target_type`,  `target_id`,  `member_group`,  `contact_name`,  `contact_type`,  `contact_token`,  `contact_description`,  `status`)
+	VALUES (2105690, 1002797, 'USER', 227276, 'manager', '钱立维', 0, '13392803588', NULL, 3);
+INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `target_type`,  `target_id`,  `role_id`,  `creator_uid`,  `create_time`)
+	VALUES (11068, 'EhOrganizations', 1002797, 'EhUsers', 227276, 1005, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
+    VALUES(1111264,240111044331051380, 'organization', 1002797, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
