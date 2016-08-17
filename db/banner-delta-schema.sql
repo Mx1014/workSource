@@ -604,3 +604,7 @@ CREATE TABLE `eh_rich_texts` (
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- banner表增加更新时间字段
+ALTER TABLE `eh_banners`
+ADD COLUMN `update_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP AFTER `create_time`;
