@@ -489,7 +489,6 @@ INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_t
 INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('1010', '32', '设备巡检', '设备巡检', NULL, '999992', 'EhOrganizations', '1000750');
 
 -- 活动消息修改  by sfyan 20160816
-UPDATE `eh_locale_templates` SET `text` = '您报名的活动【${subject}】已被拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
 UPDATE `eh_locale_templates` SET `text` = '${userName}报名参加了您发起的活动【${postName}】' WHERE `scope` = 'activity.notification' AND `code` = 1;
 UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活动【${postName}】报名' WHERE `scope` = 'activity.notification' AND `code` = 2;
 
@@ -564,3 +563,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999992, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-深业', '28068');  
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999990, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-储能', '28069');  
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999989, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-Ibase', '28070');   
+
+
+-- 活动消息修改  by sfyan 20160817
+UPDATE `eh_locale_strings` SET `text` = '您报名的活动【${subject}】已被拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
