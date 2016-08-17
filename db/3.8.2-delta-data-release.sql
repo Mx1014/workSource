@@ -571,7 +571,7 @@ UPDATE `eh_locale_templates` SET `text` = '${userName}报名参加了您发起�
 UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活动[${postName}]报名' WHERE `scope` = 'activity.notification' AND `code` = 2;
 UPDATE `eh_locale_templates` SET `text` = '您报名参加的活动“${postName}”已被管理员通过' WHERE `scope` = 'activity.notification' AND `code` = 3;
 
--- 发帖物业保修要收到短信配置
+-- 发帖物业报修要收到短信配置
 SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052506,'EhUsers',222503,'REPAIRS','sms');
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',222502,'REPAIRS','sms');
@@ -581,14 +581,14 @@ INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target
 
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',221616,'REPAIRS','sms');
 
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(1,'EhCommunities',240111044331052505,'EhUsers',222568,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(2,'EhCommunities',240111044331052505,'EhUsers',222569,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(3,'EhCommunities',240111044331052506,'EhUsers',222568,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(4,'EhCommunities',240111044331052506,'EhUsers',222569,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(5,'EhCommunities',240111044331052507,'EhUsers',222568,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(6,'EhCommunities',240111044331052507,'EhUsers',222569,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(7,'EhCommunities',240111044331052508,'EhUsers',222568,'REPAIRS','sms');
-INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES(8,'EhCommunities',240111044331052508,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052505,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052505,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052506,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052506,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052508,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052508,'EhUsers',222569,'REPAIRS','sms');
 
 -- 科技园的不屏蔽 by sfyan 20160817 
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 58200 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
