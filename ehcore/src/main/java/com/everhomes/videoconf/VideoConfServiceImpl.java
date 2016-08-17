@@ -63,7 +63,9 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.videoconf.AccountType;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
+import com.everhomes.rest.videoconf.BizConfDTO;
 import com.everhomes.rest.videoconf.BizConfHolder;
+import com.everhomes.rest.videoconf.BizConfStatus;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.ConfCapacity;
@@ -86,6 +88,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
+import com.everhomes.rest.videoconf.GetBizConfHolder;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
@@ -163,6 +166,8 @@ import com.mysql.jdbc.StringUtils;
 public class VideoConfServiceImpl implements VideoConfService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfServiceImpl.class);
+	
+	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
 	
 	@Autowired
 	private VideoConfProvider vcProvider;
@@ -1226,6 +1231,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return newPeriod;
 	}
 	
+	private Timestamp addDay(Timestamp lastUpdate, int days) {
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(lastUpdate);
+		calendar.add(Calendar.DATE, days);
+		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
+		
+		return newPeriod;
+	}
+	
 	@Override
 	public void assignVideoConfAccount(
 			AssignVideoConfAccountCommand cmd) {
@@ -1241,12 +1256,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-		if(now.before(addMonth(account.getOwnTime(), 3))) {
-			LOGGER.error("account has assigned in last 3 month!");
+		if(now.before(addDay(account.getOwnTime(), 7))) {
+			LOGGER.error("account has assigned in last 7 day!");
 		throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ASSIGN,
 				localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
 						String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ASSIGN),
-						UserContext.current().getUser().getLocale(),"account has assigned in last 3 month!"));
+						UserContext.current().getUser().getLocale(),"account has assigned in last 7 days!"));
 		}
 		account.setOwnerId(cmd.getUserId());
 		account.setUpdateTime(now);
@@ -1395,6 +1410,50 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return time;
 	}
 	
+	private int getConfStatus(String sourceAccountName, Long conferenceId) {
+		String path = BIZCONFPATH + "/getConf";
+		Long timestamp = DateHelper.currentGMTTime().getTime();
+		String tokenString = sourceAccountName + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
+		String token = DigestUtils.md5Hex(tokenString);
+		
+		
+		Map<String, String> sPara = new HashMap<String, String>() ;
+	    sPara.put("loginName", sourceAccountName); 
+	    sPara.put("timeStamp", timestamp.toString());
+	    sPara.put("token", token); 
+	    sPara.put("confId", conferenceId + "");
+	    
+	    NameValuePair[] param = generatNameValuePair(sPara);
+	    if(LOGGER.isDebugEnabled())
+			LOGGER.info("getConfStatus, sourceAccountName=" + sourceAccountName + ", conferenceId="+ conferenceId + ", restUrl="+path+", param="+sPara);
+	    try {
+	    	HttpClient httpClient = new HttpClient();  
+	    	HttpMethod method;
+			method = postMethod(path, param);
+			httpClient.executeMethod(method);  
+	          
+	        String result = method.getResponseBodyAsString();  
+	        System.out.println(result);  
+			String json = strDecode(result);
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("getConfStatus,json="+json);
+			
+			GetBizConfHolder resultHolder = GsonUtil.fromJson(json, GetBizConfHolder.class);
+			
+			if(resultHolder.getStatus() == 100){
+				//confStatus: 0: 预约成功; 2: 正在召开; 3: 已结束; 9: 取消的会议
+				BizConfStatus status = resultHolder.getData();
+				return status.getConfStatus();
+			}
+			
+			
+		} catch (IOException e) {
+			LOGGER.error("getConfStatus-error.sourceAccount="+sourceAccountName, e);
+		}  
+	    
+	    return -1;
+	}
+	
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 		
@@ -1409,37 +1468,21 @@ public class VideoConfServiceImpl implements VideoConfService {
 			return ;
 		}
 		
-		String path = "http://api.confcloud.cn/openapi/cancelConf";
-		Long timestamp = DateHelper.currentGMTTime().getTime();
-		String tokenString = source.getAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
-		String token = DigestUtils.md5Hex(tokenString);
-		
-		
-		Map<String, String> sPara = new HashMap<String, String>() ;
-	    sPara.put("loginName", source.getAccountName()); 
-	    sPara.put("timeStamp", timestamp.toString());
-	    sPara.put("token", token); 
-	    sPara.put("confId", conf.getConferenceId() + "");
-	    
-	    NameValuePair[] param = generatNameValuePair(sPara);
-	    if(LOGGER.isDebugEnabled())
-			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", restUrl="+path+", param="+sPara);
-	    try {
-	    	HttpClient httpClient = new HttpClient();  
-	    	HttpMethod method;
-			method = postMethod(path, param);
-			httpClient.executeMethod(method);  
-	          
-	        String result = method.getResponseBodyAsString();  
-	        System.out.println(result);  
-			String json = strDecode(result);
+		boolean flag=true;
+		while(flag){
+			int status = getConfStatus(source.getAccountName(), conf.getConferenceId());
+			if(3 == status) {
+				flag = false;
+			} else {
+				//睡眠5秒钟
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("cancelVideoConf,json="+json);
-		} catch (IOException e) {
-			LOGGER.error("cancelVideoConf-error.sourceAccount="+source.getAccountName(), e);
-		}  
-          
+		}
 		
 		if(conf != null && conf.getStatus() != null && conf.getStatus() != 0) {
 			conf.setStatus((byte) 0);
@@ -1479,17 +1522,17 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		
-		String path = "http://api.confcloud.cn/openapi/confReservation";
+		String path = BIZCONFPATH + "/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
-			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
-				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
-				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-				if(conf != null)
-					cancelCmd.setConfId(conf.getMeetingNo());
-				
-				cancelVideoConf(cancelCmd);
-			}
+//			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
+//				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
+//				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+//				if(conf != null)
+//					cancelCmd.setConfId(conf.getMeetingNo());
+//				
+//				cancelVideoConf(cancelCmd);
+//			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			List<Long> accountCategories = vcProvider.findAccountCategoriesByConfType(category.getConfType());
 			ConfSourceAccounts sourceAccount = vcProvider.findSpareAccount(accountCategories);
@@ -1542,33 +1585,38 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		
 					if(resultHolder.getStatus() == 100){
-						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+//						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+						BizConfDTO data = resultHolder.getData();
 						
-						response.setConfHostId(String.valueOf(data.get("userId")));
-						response.setToken(String.valueOf(data.get("token")));
+//						response.setConfHostId(String.valueOf(data.get("userId")));
+//						response.setToken(String.valueOf(data.get("token")));
 						response.setConfHostName(UserContext.current().getUser().getNickName());
-						response.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
-						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
+//						response.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
+//						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
 						
+						response.setMaxCount(data.getMaxCount());
+						response.setMeetingNo(data.getMeetingNo());
+						response.setConfHostId(data.getUserId());
+						response.setToken(data.getToken());
 						ConfConferences conf = new ConfConferences();
 						
-						String conferenceId = String.valueOf(data.get("id"));
-						int index = conferenceId.indexOf(".");
-						conferenceId = conferenceId.substring(0, index);
+						String conferenceId = data.getId();
+//						int index = conferenceId.indexOf(".");
+//						conferenceId = conferenceId.substring(0, index);
 						conf.setConferenceId(Long.valueOf(conferenceId));
-						conf.setMeetingNo(Long.valueOf(String.valueOf(data.get("meetingNo"))));
-						conf.setSubject(String.valueOf(data.get("meetingName")));
+						conf.setMeetingNo(Long.valueOf(data.getMeetingNo()));
+						conf.setSubject(data.getMeetingName());
 						conf.setStartTime(new Timestamp(timestamp));
 						conf.setExpectDuration(cmd.getDuration());
-						conf.setConfHostKey(String.valueOf(data.get("hostKey")));
+						conf.setConfHostKey(data.getHostKey());
 						conf.setJoinPolicy(1);
 						conf.setSourceAccountId(sourceAccount.getId());
 						conf.setConfAccountId(cmd.getAccountId());
 						conf.setCreatorUid(UserContext.current().getUser().getId());
 						conf.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						conf.setConfHostId(String.valueOf(data.get("userId")));
+						conf.setConfHostId(data.getUserId());
 //						conf.setConfHostName(confHostName);
-						conf.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
+						conf.setMaxCount(data.getMaxCount());
 						String joinUrl = "cfcloud://www.confcloud.cn/join?confno={" + conf.getMeetingNo() + "}";
 						conf.setJoinUrl(joinUrl);
 						conf.setStatus((byte) 1);
@@ -1761,7 +1809,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				Long nextPageAnchor = null;
 				if(reservations != null && reservations.size() > pageSize) {
 					reservations.remove(reservations.size() - 1);
-					nextPageAnchor = reservations.get(reservations.size() -1).getId();
+					nextPageAnchor = reservations.get(reservations.size() - 1).getCreateTime().getTime();
 				}
 				response.setNextPageAnchor(nextPageAnchor);
 				
@@ -2118,12 +2166,22 @@ public class VideoConfServiceImpl implements VideoConfService {
 				&& order.getAccountCategoryId() != null && order.getAccountCategoryId() != 0) {
 			List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
 			
+			//6方的为试用账号
+			ConfAccountCategories category =  vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+			
 			for(int i = 0; i < order.getQuantity(); i++) {
+				
 				ConfAccounts account = new ConfAccounts();
 				account.setStatus((byte) 1);
 				account.setEnterpriseId(order.getOwnerId());
 				account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
 				account.setAccountCategoryId(order.getAccountCategoryId());
+				if(null != category && null != category.getConfType() && category.getConfType() == 4) {
+					account.setAccountType((byte) 1);
+				} else {
+					account.setAccountType((byte) 2);
+				}
+				
 				account.setNamespaceId(namespaceId);
 				vcProvider.createConfAccounts(account);
 				
@@ -2143,6 +2201,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setBuyChannel(order.getOnlineFlag());
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
+			if(null != category && null != category.getConfType() && category.getConfType() == 4) {
+				enterprise.setTrialAccountAmount(enterprise.getTrialAccountAmount()+order.getQuantity());
+			} 
 			vcProvider.updateConfEnterprises(enterprise);
 			
 			sendConfInvoiceEmail(order.getEmail());
@@ -2154,19 +2215,34 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(maps != null && maps.size() > 0) {
 				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 				int toActive = 0;
+				int toTrail = 0;
 				for(ConfOrderAccountMap map : maps) {
 					
 					ConfAccounts account = vcProvider.findVideoconfAccountById(map.getConfAccountId());
+					//6方的为试用账号
+					ConfAccountCategories category =  vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 					
 					//0-inactive 1-active 2-locked
 					if(account.getStatus() == 0) {
 						account.setExpiredDate(addMonth(now, order.getPeriod()));
 						account.setStatus((byte) 1);
-						
 						toActive++;
+						
+						if(null != category && null != category.getConfType() && category.getConfType() == 4) {
+							toTrail++;
+							account.setAccountType((byte) 1);
+						} else {
+							account.setAccountType((byte) 2);
+						}
 					}
 					else {
 						account.setExpiredDate(addMonth(account.getExpiredDate(), order.getPeriod()));
+						
+						if(null != category && null != category.getConfType() && category.getConfType() == 4) {
+							account.setAccountType((byte) 1);
+						} else {
+							account.setAccountType((byte) 2);
+						}
 					}
 					
 					vcProvider.updateConfAccounts(account);
@@ -2176,6 +2252,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				
 				enterprise.setBuyChannel(order.getOnlineFlag());
 				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
+				enterprise.setTrialAccountAmount(enterprise.getTrialAccountAmount()+toTrail);
 				vcProvider.updateConfEnterprises(enterprise);
 				
 				sendConfInvoiceEmail(order.getEmail());

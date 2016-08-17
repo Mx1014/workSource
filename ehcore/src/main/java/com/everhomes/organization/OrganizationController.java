@@ -34,6 +34,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
@@ -918,6 +919,21 @@ public class OrganizationController extends ControllerBase {
       @RestReturn(value=CheckOfficalPrivilegeResponse.class)
       public RestResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd){
     	  RestResponse res = new RestResponse(organizationService.checkOfficalPrivilege(cmd));
+          res.setErrorCode(ErrorCodes.SUCCESS);
+          res.setErrorDescription("OK");
+          
+          return res;
+      }
+      
+      /**
+       * <b>URL: /org/addNewOrganizationInZuolin</b>
+       * <p>左邻域下新增公司</p>
+       */
+      @RequestMapping("addNewOrganizationInZuolin")
+      @RestReturn(value=String.class)
+      public RestResponse addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd){
+    	  organizationService.addNewOrganizationInZuolin(cmd);
+    	  RestResponse res = new RestResponse();
           res.setErrorCode(ErrorCodes.SUCCESS);
           res.setErrorDescription("OK");
           

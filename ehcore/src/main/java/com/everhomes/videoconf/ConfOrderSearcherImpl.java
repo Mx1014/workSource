@@ -15,6 +15,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,9 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
+import com.everhomes.rest.videoconf.ConfType;
 import com.everhomes.rest.videoconf.ListVideoConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.ListVideoConfAccountOrderResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -119,17 +122,45 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("enterpriseName", 5.0f)
-                    .field("enterpriseName.pinyin_prefix", 2.0f)
-                    .field("enterpriseName.pinyin_gram", 1.0f);
+                    .field("contactor", 2.0f)
+                    .field("mobile", 1.0f);
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("enterpriseName");
+            builder.addHighlightedField("enterpriseName").addHighlightedField("contactor").addHighlightedField("mobile");
 
         }
 
         FilterBuilder fb = null;
         if(cmd.getEnterpriseId() != null)
         	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        
+        if(cmd.getConfCapacity() != null) {
+        	if(null != fb)
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("confCapacity", cmd.getConfCapacity())); 
+        	else {
+        		fb = FilterBuilders.termFilter("confCapacity", cmd.getConfCapacity());
+        	}
+        }
+        
+        if(cmd.getConfType() != null) {
+        	if(null != fb)
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("confType", cmd.getConfType())); 
+        	else {
+        		fb = FilterBuilders.termFilter("confType", cmd.getConfType());
+        	}
+        }
+        
+        if(cmd.getStartTime() != null) {
+        	RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
+        	rf.gt(cmd.getStartTime());
+        	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+        
+        if(cmd.getEndTime() != null) {
+        	RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
+        	rf.lt(cmd.getEndTime());
+        	fb = FilterBuilders.andFilter(fb, rf); 
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -175,6 +206,50 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("enterpriseId", order.getOwnerId());
+            b.field("createTime", order.getCreateTime());
+            
+            ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+            if(null != category) {
+            	//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+            	if(0 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_25.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_VIDEO_ONLY.getStatus());
+            	}
+            	
+            	if(1 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_25.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_PHONE_SUPPORT.getStatus());
+            	}
+            	
+            	if(2 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_100.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_VIDEO_ONLY.getStatus());
+            	}
+            	
+            	if(3 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_100.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_PHONE_SUPPORT.getStatus());
+            	}
+            	
+            	if(4 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_6.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_VIDEO_ONLY.getStatus());
+            	}
+            	
+            	if(5 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_50.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_VIDEO_ONLY.getStatus());
+            	}
+            	
+            	if(6 == category.getConfType()) {
+            		b.field("confCapacity", ConfCapacity.CONF_CAPACITY_50.getStatus());
+                    b.field("confType", ConfType.CONF_TYPE_PHONE_SUPPORT.getStatus());
+            	}
+            	
+            } else {
+            	b.field("confCapacity", "");
+                b.field("confType", "");
+            }
 
             Organization org = organizationProvider.findOrganizationById(order.getOwnerId());
             if(null != org) {
@@ -182,6 +257,17 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
             } else {
                 b.field("enterpriseName", "");
             }
+            
+            ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(order.getOwnerId());
+    		if(null != enterpriseContact) {
+    			b.field("contactor", enterpriseContact.getContactName());
+    			b.field("mobile", enterpriseContact.getContact());
+    		} else {
+                b.field("contactor", "");
+                b.field("mobile", "");
+            }
+    		
+    		
             
             b.endObject();
             return b;
@@ -200,13 +286,56 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
 		if(org != null)
 			dto.setEnterpriseName(org.getName());
 
-		ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(order.getOwnerId());
-		if(enterpriseContact != null) {
-			dto.setContactor(enterpriseContact.getContactName());
-			dto.setMobile(enterpriseContact.getContact());
+		dto.setContactor(order.getBuyerName());
+		dto.setMobile(order.getBuyerContact());
+		
+		if(null == dto.getContactor()) {
+			ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(order.getOwnerId());
+			if(enterpriseContact != null) {
+				dto.setContactor(enterpriseContact.getContactName());
+				dto.setMobile(enterpriseContact.getContact());
+			}
 		}
 		
-//		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+		if(null != category) {
+        	//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+        	if(0 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_25.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+        	}
+        	
+        	if(1 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_25.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+        	}
+        	
+        	if(2 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_100.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+        	}
+        	
+        	if(3 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_100.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+        	}
+        	
+        	if(4 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_6.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+        	}
+        	
+        	if(5 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_50.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+        	}
+        	
+        	if(6 == category.getConfType()) {
+        		dto.setConfCapacity(ConfCapacity.CONF_CAPACITY_50.getCode());
+        		dto.setConfType(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+        	}
+        	
+        }
 //		if(category != null)
 //			dto.setAccountChannelType(category.getChannelType());
 		dto.setCreateTime(order.getCreateTime());

@@ -26,6 +26,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
@@ -64,6 +66,9 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	
 	@Autowired
     private RolePrivilegeService rolePrivilegeService;
+	
+	@Autowired
+    private NamespaceProvider nsProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -175,6 +180,11 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
         	ConfEnterprises confEnterprise = vcProvider.findConfEnterpriseById(id);
         	dto.setId(confEnterprise.getId());
 	    	dto.setEnterpriseId(confEnterprise.getEnterpriseId());
+	    	dto.setNamespaceId(confEnterprise.getNamespaceId());
+	    	Namespace ns = nsProvider.findNamespaceById(confEnterprise.getNamespaceId());
+			if(ns != null)
+				dto.setNamespaceName(ns.getName());
+			
 //	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
 	    	Organization org = organizationProvider.findOrganizationById(confEnterprise.getEnterpriseId());
 	    	

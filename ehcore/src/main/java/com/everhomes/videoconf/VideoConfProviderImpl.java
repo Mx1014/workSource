@@ -772,13 +772,14 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             SelectQuery<EhConfReservationsRecord> query = context.selectQuery(Tables.EH_CONF_RESERVATIONS);
             query.addConditions(Tables.EH_CONF_RESERVATIONS.STATUS.eq((byte) 1));
             query.addConditions(Tables.EH_CONF_RESERVATIONS.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(Tables.EH_CONF_RESERVATIONS.START_TIME.gt(new Timestamp(DateHelper.currentGMTTime().getTime())));
             if(locator.getAnchor() != null)
-            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.lt(locator.getAnchor()));
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.START_TIME.gt(new Timestamp(locator.getAnchor())));
             
             if(accountId != null)
             	query.addConditions(Tables.EH_CONF_RESERVATIONS.CONF_ACCOUNT_ID.eq(accountId));
            
-            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.ID.desc());
+            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.START_TIME.asc());
             query.addLimit(pageSize - reservations.size());
             
             query.fetch().map((r) -> {
@@ -788,7 +789,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             });
 
             if (reservations.size() >= pageSize) {
-                locator.setAnchor(reservations.get(reservations.size() - 1).getId());
+            	locator.setAnchor(reservations.get(reservations.size() - 1).getCreateTime().getTime());
+ //               locator.setAnchor(reservations.get(reservations.size() - 1).getId());
                 return AfterAction.done;
             }
             return AfterAction.next;
