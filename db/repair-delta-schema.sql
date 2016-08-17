@@ -37,7 +37,7 @@ CREATE TABLE `eh_pm_task_logs` (
 
   `content` TEXT NOT NULL  COMMENT 'content data',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
-  `task_type` VARCHAR(32) COMMENT 'task type assigned by organization',
+  `target_type` VARCHAR(32) COMMENT 'user',
   `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'target user id if target_type is a user',
 
   `operator_uid` BIGINT NOT NULL DEFAULT 0,

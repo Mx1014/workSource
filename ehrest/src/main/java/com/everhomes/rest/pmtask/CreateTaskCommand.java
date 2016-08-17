@@ -8,18 +8,16 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>serviceCategoryId: 服务类型ID</li>
- * <li>childCategoryId: 子类型ID</li>
+ * <li>categoryId: 子类型ID</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
  * <li>attachments: 图片列表</li>
  * </ul>
  */
-public class CreateNewTaskCommand {
+public class CreateTaskCommand {
 	private String ownerType;
     private Long ownerId;
-	private Long serviceCategoryId;
-	private Long childCategoryId;
+	private Long categoryId;
 	private String address;
 	private String content;
 	private List<String> attachments;
@@ -35,18 +33,12 @@ public class CreateNewTaskCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Long getServiceCategoryId() {
-		return serviceCategoryId;
-	}
-	public void setServiceCategoryId(Long serviceCategoryId) {
-		this.serviceCategoryId = serviceCategoryId;
-	}
 	
-	public Long getChildCategoryId() {
-		return childCategoryId;
+	public Long getCategoryId() {
+		return categoryId;
 	}
-	public void setChildCategoryId(Long childCategoryId) {
-		this.childCategoryId = childCategoryId;
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 	public String getAddress() {
 		return address;

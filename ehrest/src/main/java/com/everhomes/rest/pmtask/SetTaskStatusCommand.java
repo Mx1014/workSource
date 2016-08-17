@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>id: 任务ID</li>
- * <li>status: 被分配者ID</li>
+ * <li>status: 被分配者ID 1: 未处理  2: 处理中 3: 已完成  4: 已关闭{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
  * </ul>
  */
 public class SetTaskStatusCommand {

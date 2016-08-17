@@ -1,9 +1,9 @@
 package com.everhomes.pmtask;
 
-import com.everhomes.server.schema.tables.pojos.EhCommunityTaskLogs;
+import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.util.StringHelper;
 
-public class CommunityTaskLog extends EhCommunityTaskLogs{
+public class PmTask extends EhPmTasks{
 
 	/**
 	 * 
@@ -13,5 +13,5 @@ public class CommunityTaskLog extends EhCommunityTaskLogs{
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	}
+	} 
 }

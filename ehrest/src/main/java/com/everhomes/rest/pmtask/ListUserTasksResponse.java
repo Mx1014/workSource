@@ -5,7 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class SearchTasksResponse {
+public class ListUserTasksResponse {
 	private Long nextPageAnchor;
 	@ItemType(PmTaskDTO.class)
 	private List<PmTaskDTO> requests;

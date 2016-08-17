@@ -2,7 +2,16 @@ package com.everhomes.rest.pmtask;
 
 import com.everhomes.util.StringHelper;
 
-public class ListMyTasksCommand {
+/**
+ * <ul>
+ * <li>ownerType: 归属的类型</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>status: 0: 未处理  1: 已处理 {@link com.everhomes.rest.pmtask.PmTaskProcessStatus}</li>
+ * <li>pageAnchor: 分页瞄</li>
+ * <li>pageSize: 每页条数</li>
+ * </ul>
+ */
+public class ListUserTasksCommand {
 	private String ownerType;
     private Long ownerId;
 	private Byte status;

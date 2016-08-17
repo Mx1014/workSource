@@ -2,6 +2,12 @@ package com.everhomes.rest.pmtask;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>namspaceId: 域空间</li>
+ * <li>id: 类型id</li>
+ * </ul>
+ */
 public class DeleteTaskCategoryCommand {
 	private Long id;
     private Integer namespaceId;

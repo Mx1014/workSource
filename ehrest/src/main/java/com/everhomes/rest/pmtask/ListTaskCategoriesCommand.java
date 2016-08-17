@@ -5,10 +5,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namspaceId: 域空间</li>
+ * <li>parentId: 父类型Id</li>
  * </ul>
  */
 public class ListTaskCategoriesCommand {
 	private Integer namspaceId;
+	private Long parentId;
 
 	public Integer getNamspaceId() {
 		return namspaceId;
@@ -21,5 +23,13 @@ public class ListTaskCategoriesCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 }

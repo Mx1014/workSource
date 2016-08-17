@@ -2,6 +2,13 @@ package com.everhomes.rest.pmtask;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>ownerType: 归属的类型</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>id: 任务ID</li>
+ * </ul>
+ */
 public class GetTaskDetailCommand {
 	private String ownerType;
     private Long ownerId;

@@ -6,21 +6,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
-import com.everhomes.rest.pmtask.CommunityTaskDTO;
-import com.everhomes.rest.pmtask.CreateCategoryCommand;
-import com.everhomes.rest.pmtask.CreateNewTaskCommand;
+import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
-import com.everhomes.rest.pmtask.DeleteCategoryCommand;
 import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
 import com.everhomes.rest.pmtask.EvaluateTaskCommand;
+import com.everhomes.rest.pmtask.GetStatisticsCommand;
+import com.everhomes.rest.pmtask.GetStatisticsResponse;
 import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListCategoriesCommand;
-import com.everhomes.rest.pmtask.ListCategoriesResponse;
-import com.everhomes.rest.pmtask.ListMyTasksCommand;
-import com.everhomes.rest.pmtask.ListMyTasksResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.PmTaskLogDTO;
+import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
+import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.SetTaskStatusCommand;
@@ -37,7 +40,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public ListMyTasksResponse listMyTasks(ListMyTasksCommand cmd) {
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -61,31 +64,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public CommunityTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void createNewTask(CreateNewTaskCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void deleteCategory(DeleteCategoryCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void createCategory(CreateCategoryCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public ListCategoriesResponse listCategories(ListCategoriesCommand cmd) {
+	public PmTaskDTO createTask(CreateTaskCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -97,9 +82,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public void createTaskCategory(CreateTaskCategoryCommand cmd) {
+	public CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
@@ -114,6 +99,25 @@ public class PmTaskServiceImpl implements PmTaskService {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
+	@Override
+	public SearchTaskStatisticsResponse searchTaskStatistics(
+			SearchTaskStatisticsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public GetStatisticsResponse getStatistics(GetStatisticsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

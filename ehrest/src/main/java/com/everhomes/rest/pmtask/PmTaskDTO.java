@@ -6,27 +6,44 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class CommunityTaskDTO {
+/**
+ * <ul>
+ * <li>id: 任务log Id</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>ownerType: 归属的类型</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>categoryId: 子类型id</li>
+ * <li>address: 服务地点</li>
+ * <li>content: 内容</li>
+ * <li>status: 状态 1: 未处理  2: 处理中 3: 已完成  4: 已关闭{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
+ * <li>star: 评价分数</li>
+ * <li>unprocessedTime: 未处理</li>
+ * <li>processingTime: 处理中时间</li>
+ * <li>processedTime: 完成时间</li>
+ * <li>closedTime: 关闭时间</li>
+ * <li>creatorUid: 创建人id</li>
+ * <li>createTime: 创建时间</li>
+ * </ul>
+ */
+public class PmTaskDTO {
 	private Long id;
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long serviceCategoryId;
-	private String serviceCategoryName;
 	private Long categoryId;
-	private String categoryName;
 	private String address;
 	private String content;
 	private Byte status;
-	private Long evaluateScore;
+	private Byte star;
 	private Timestamp unprocessedTime;
 	private Timestamp processingTime;
 	private Timestamp processedTime;
 	private Timestamp closedTime;
 	private Long creatorUid;
 	private Timestamp createTime;
-	@ItemType(CommunityTaskLogDTO.class)
-	private List<CommunityTaskLogDTO> taskLogs;
+	
+	@ItemType(PmTaskLogDTO.class)
+	private List<PmTaskLogDTO> taskLogs;
 	public Long getId() {
 		return id;
 	}
@@ -51,29 +68,12 @@ public class CommunityTaskDTO {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Long getServiceCategoryId() {
-		return serviceCategoryId;
-	}
-	public void setServiceCategoryId(Long serviceCategoryId) {
-		this.serviceCategoryId = serviceCategoryId;
-	}
-	public String getServiceCategoryName() {
-		return serviceCategoryName;
-	}
-	public void setServiceCategoryName(String serviceCategoryName) {
-		this.serviceCategoryName = serviceCategoryName;
-	}
+	
 	public Long getCategoryId() {
 		return categoryId;
 	}
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
-	}
-	public String getCategoryName() {
-		return categoryName;
-	}
-	public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
 	}
 	public String getAddress() {
 		return address;
@@ -93,11 +93,12 @@ public class CommunityTaskDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
-	public Long getEvaluateScore() {
-		return evaluateScore;
+	
+	public Byte getStar() {
+		return star;
 	}
-	public void setEvaluateScore(Long evaluateScore) {
-		this.evaluateScore = evaluateScore;
+	public void setStar(Byte star) {
+		this.star = star;
 	}
 	public Timestamp getUnprocessedTime() {
 		return unprocessedTime;
@@ -135,10 +136,10 @@ public class CommunityTaskDTO {
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
-	public List<CommunityTaskLogDTO> getTaskLogs() {
+	public List<PmTaskLogDTO> getTaskLogs() {
 		return taskLogs;
 	}
-	public void setTaskLogs(List<CommunityTaskLogDTO> taskLogs) {
+	public void setTaskLogs(List<PmTaskLogDTO> taskLogs) {
 		this.taskLogs = taskLogs;
 	}
 	
