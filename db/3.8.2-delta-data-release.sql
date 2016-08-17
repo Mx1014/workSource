@@ -591,8 +591,8 @@ INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052508,'EhUsers',222569,'REPAIRS','sms');
 
 -- 科技园的不屏蔽 by sfyan 20160817 
-DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 58200 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
-DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` in (SELECT `id` FROM `eh_web_menus` WHERE `path` LIKE '%58200/%') AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 56100 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` in (SELECT `id` FROM `eh_web_menus` WHERE `path` LIKE '%56100/%') AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
 
 
 
