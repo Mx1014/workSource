@@ -566,4 +566,8 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 
 
 -- 活动消息修改  by sfyan 20160817
-UPDATE `eh_locale_strings` SET `text` = '您报名的活动【${subject}】已被拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
+UPDATE `eh_locale_strings` SET `text` = '您报名的活动[${subject}]已被拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
+UPDATE `eh_locale_templates` SET `text` = '${userName}报名参加了您发起的活动[${postName}]' WHERE `scope` = 'activity.notification' AND `code` = 1;
+UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活动[${postName}]报名' WHERE `scope` = 'activity.notification' AND `code` = 2;
+
+
