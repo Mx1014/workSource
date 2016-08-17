@@ -326,7 +326,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                 break;
             case EXPANSION:
             	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"扩租");
+    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
                 break;
             default:
                 if(LOGGER.isWarnEnabled()) {
