@@ -3,6 +3,7 @@ package com.everhomes.version;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,10 @@ import org.springframework.stereotype.Component;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.version.CreateVersionRealmCommand;
+import com.everhomes.rest.version.CreateVersionRealmResponse;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionDTO;
 import com.everhomes.rest.version.VersionRequestCommand;
@@ -21,6 +26,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
+import com.everhomes.util.VersionRange;
 
 @Component
 public class VersionServiceImpl implements VersionService {
@@ -31,6 +37,12 @@ public class VersionServiceImpl implements VersionService {
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private NamespaceProvider namespaceProvider;
+    
+    @Autowired
+    private DbProvider dbProvider;
     
     @Override
     public UpgradeInfoResponse getUpgradeInfo(VersionRequestCommand cmd) {
@@ -167,5 +179,41 @@ public class VersionServiceImpl implements VersionService {
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
         return response;
         	
+	}
+
+	@Override
+	public CreateVersionRealmResponse createVersionRealm(CreateVersionRealmCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getRealm()) || cmd.getNamespaceId() == null || StringUtils.isEmpty(cmd.getTargetVersion())
+				|| StringUtils.isEmpty(cmd.getVersionRange()) || cmd.getForceUpgrade() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: "+cmd);
+		}
+		
+		if (namespaceProvider.findNamespaceById(cmd.getNamespaceId()) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"namespace not exist: "+cmd.getNamespaceId());
+		}
+		
+		dbProvider.execute(s->{
+			VersionRealm versionRealm = new VersionRealm();
+			versionRealm.setRealm(cmd.getRealm());
+			versionRealm.setDescription(cmd.getDescription());
+			//persist中无namespaceId，大师说不用管，add by tt， 20160817
+			versionProvider.createVersionRealm(versionRealm);
+			
+			VersionUpgradeRule rule = new VersionUpgradeRule();
+	        rule.setRealmId(versionRealm.getId());
+	        rule.setForceUpgrade(cmd.getForceUpgrade());
+	        rule.setTargetVersion(cmd.getTargetVersion());
+	        rule.setOrder(0);
+	        VersionRange range = new VersionRange(cmd.getVersionRange());
+	        rule.setMatchingLowerBound(range.getLowerBound());
+	        rule.setMatchingUpperBound(range.getUpperBound());
+	        versionProvider.createVersionUpgradeRule(rule);
+	        
+	        return true;
+		});
+		
+		return ConvertHelper.convert(cmd, CreateVersionRealmResponse.class);
 	}
 }

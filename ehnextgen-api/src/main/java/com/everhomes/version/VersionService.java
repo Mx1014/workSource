@@ -1,5 +1,7 @@
 package com.everhomes.version;
 
+import com.everhomes.rest.version.CreateVersionRealmCommand;
+import com.everhomes.rest.version.CreateVersionRealmResponse;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
@@ -11,6 +13,7 @@ public interface VersionService {
     VersionUrlResponse getVersionUrls(VersionRequestCommand cmd);
     
     VersionUrlResponse getVersionUrlsWithoutCurrentVersion(WithoutCurrentVersionRequestCommand cmd);
+	CreateVersionRealmResponse createVersionRealm(CreateVersionRealmCommand cmd);
     
     
 }

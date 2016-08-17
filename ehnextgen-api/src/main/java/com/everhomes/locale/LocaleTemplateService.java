@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.locale;
 
+import com.everhomes.rest.locale.CreateLocaleTemplateCommand;
+import com.everhomes.rest.locale.CreateLocaleTemplateResponse;
+
 public interface LocaleTemplateService {
     LocaleTemplate getLocalizedTemplate(Integer namespaceId, String scope, int code, String locale);
     
@@ -13,4 +16,6 @@ public interface LocaleTemplateService {
     void deleteLocaleTemplate(Integer namespaceId, long id);
     
     void clearLocaleTemplateCache();
+
+	CreateLocaleTemplateResponse createLocaleTemplate(CreateLocaleTemplateCommand cmd);
 }

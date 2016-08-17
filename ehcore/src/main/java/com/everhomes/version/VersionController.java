@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.version.CreateVersionRealmCommand;
+import com.everhomes.rest.version.CreateVersionRealmResponse;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
@@ -56,4 +58,16 @@ public class VersionController extends ControllerBase {
         VersionUrlResponse cmdResponse = this.versionService.getVersionUrlsWithoutCurrentVersion(cmd);
         return new RestResponse(cmdResponse);
     }
+    
+    /**
+     * 
+     * <b>URL: /version/createVersionRealm</b>
+     * <p>创建一条version</p>
+     */
+    @RequestMapping("createVersionRealm")
+    @RestReturn(CreateVersionRealmResponse.class)
+    public RestResponse createVersionRealm(CreateVersionRealmCommand cmd){
+    	return new RestResponse(versionService.createVersionRealm(cmd));
+    }
+    
 }

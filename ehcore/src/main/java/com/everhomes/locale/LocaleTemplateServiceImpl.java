@@ -2,6 +2,9 @@ package com.everhomes.locale;
 
 import java.io.IOException;
 
+import javax.validation.constraints.Null;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +13,11 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.locale.CreateLocaleTemplateCommand;
+import com.everhomes.rest.locale.CreateLocaleTemplateResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import freemarker.cache.StringTemplateLoader;
@@ -142,4 +148,19 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
         
         return strBuilder.toString();
     }
+
+	@Override
+	public CreateLocaleTemplateResponse createLocaleTemplate(CreateLocaleTemplateCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getDescription()) || StringUtils.isEmpty(cmd.getLocale())
+				|| StringUtils.isEmpty(cmd.getScope()) || StringUtils.isEmpty(cmd.getText())
+				|| cmd.getCode() == null || cmd.getNamespaceId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: "+cmd);
+		}
+		
+		LocaleTemplate localeTemplate = ConvertHelper.convert(cmd, LocaleTemplate.class);
+		provider.createLocaleTemplate(localeTemplate);
+		
+		return ConvertHelper.convert(localeTemplate, CreateLocaleTemplateResponse.class);
+	}
 }
