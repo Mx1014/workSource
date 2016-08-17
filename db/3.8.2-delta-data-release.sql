@@ -596,11 +596,11 @@ DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` in (SELECT `id` FROM `eh_web_me
 
 -- 把打卡考勤的老功能重新开放  by sfyan 20160817  
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56172,'打卡详情',56105,null,'-- ',0,2,'/50000/56000/56100/56105/56172','park',571);
+VALUES (56172,'打卡详情',56105,null,'attendance_record',0,2,'/50000/56000/56100/56105/56172','park',571);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56174,'异常统计',56105,null,'-- ',0,2,'/50000/56000/56100/56105/56174','park',572);
+VALUES (56174,'异常统计',56105,null,'attendance_result',0,2,'/50000/56000/56100/56105/56174','park',572);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56176,'异常处理',56105,null,'-- ',0,2,'/50000/56000/56100/56105/56176','park',573);
+VALUES (56176,'异常处理',56105,null,'attendance_manage',0,2,'/50000/56000/56100/56105/56176','park',573);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (797,0,'打卡详情','打卡详情',NULL);
