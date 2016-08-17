@@ -902,7 +902,7 @@ public class UserProviderImpl implements UserProvider {
                 Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
                 if(!StringUtils.isEmpty(keyword)){
                      Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
-                     cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
+                     cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword+"%"));
                      cond = cond.and(cond1);
                 }
                 

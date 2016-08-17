@@ -884,6 +884,9 @@ public class UserServiceImpl implements UserService {
 							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
 								foundLogin = login;
 								break;
+							} else if(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+							    //Inner login not found
+							    continue;
 							} else {
 							    if(foundLogin == null) {
 							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
@@ -937,8 +940,8 @@ public class UserServiceImpl implements UserService {
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
-		if(isNew) {
-			//Kickoff other login in this devices
+		if(isNew && !(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) ) {
+			//Kickoff other login in this devices which is not inner login
 			kickoffLoginByDevice(foundLogin);
 		}
 		
