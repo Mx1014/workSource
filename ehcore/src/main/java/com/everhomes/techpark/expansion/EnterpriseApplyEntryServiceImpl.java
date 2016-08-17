@@ -300,59 +300,75 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         String location = null;
         ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(cmd.getSourceType());
         if(sourceType != null && cmd.getSourceId() != null) {
-            switch(sourceType) {
-            case FOR_RENT:
-                LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
-                if(lp != null) {
-                    phoneNumber = lp.getContactPhone();
-                    location = lp.getRentPosition();
-                } else {
-                    if(LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Lease promotion not found, promotionId={}, cmd={}", cmd.getSourceId(), cmd);
-                    }
-                }
-                break;
-            case BUILDING:
-                Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
-                if(building != null) {
-                	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+        	//modify by wuhan 2016-8-17 园区入驻2.2全部变成了给管理员发短信(其实是没有for_rent的类型了)
+          Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
+          if(building != null) {
+          	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
 
-                    if(null != member) {
-                        phoneNumber = member.getContactToken();
-                    }
-                    location = building.getName();
-                } else {
-                    if(LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
-                    }
-                }
-                break;
-            default:
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Apply entry source type not supported, sourceType={}, cmd={}", sourceType, cmd);
-                }
-                break;
-            }
+              if(null != member) {
+                  phoneNumber = member.getContactToken();
+              }
+              location = building.getName();
+          } else {
+              if(LOGGER.isWarnEnabled()) {
+                  LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
+              }
+          }
+//            switch(sourceType) {
+//            case FOR_RENT:
+//                LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+//                if(lp != null) {
+//                    phoneNumber = lp.getContactPhone();
+//                    location = lp.getRentPosition();
+//                } else {
+//                    if(LOGGER.isWarnEnabled()) {
+//                        LOGGER.warn("Lease promotion not found, promotionId={}, cmd={}", cmd.getSourceId(), cmd);
+//                    }
+//                }
+//                break;
+//            case BUILDING:
+//                Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
+//                if(building != null) {
+//                	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+//
+//                    if(null != member) {
+//                        phoneNumber = member.getContactToken();
+//                    }
+//                    location = building.getName();
+//                } else {
+//                    if(LOGGER.isWarnEnabled()) {
+//                        LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
+//                    }
+//                }
+//                break;
+//            default:
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Apply entry source type not supported, sourceType={}, cmd={}", sourceType, cmd);
+//                }
+//                break;
+//            }
+
+	  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+	  		sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
         }
 
-		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-		sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
 		return true;
 	}
 	/**
-	 * 用户{userName}（手机号：{userPhone}）于{applyTime}提交了预约看楼申请：
+	 * 用户{userName}（手机号：{userPhone}）于{applyTime}提交了预约{applyType}申请：
  	 * 参观位置：{location}
  	 * 面积需求：{area}
 	 * 公司名称：{enterpriseName}
 	 * 备注：{description}
 	 * */
 	private void sendApplyEntrySmsToManager(String phoneNumber,String userName,String userPhone,String applyTime,String location
-			,String area,String enterpriseName,String description , Integer namespaceId){
+			,String area,String enterpriseName,String description , Integer namespaceId,String applyType){
 		
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_USERNAME, processNull(userName));
 		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_USERPHONE, processNull(userPhone)); 
 		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTIME, processNull(applyTime)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTYPE, processNull(applyType)); 
 		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_LOCATION, processNull(location)); 
 		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_AREA, processNull(area)); 
 		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_ENTERPRISENAME, processNull(enterpriseName)); 
@@ -381,6 +397,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setApplyType(ApplyEntryApplyType.RENEW.getCode());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
+        String phoneNumber = null;
+        String location = null;
+		//续租的时候给楼栋管理员发续租申请短信
+        Building building = this.communityProvider.findBuildingById(request.getSourceId());
+        if(building != null) {
+        	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+
+            if(null != member) {
+                phoneNumber = member.getContactToken();
+            }
+            location = building.getName();
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Building not found, builingId={}, cmd={}", request.getSourceId(), cmd);
+            }
+        } 
+
+  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+  		sendApplyEntrySmsToManager(phoneNumber, request.getApplyUserName(),request.getApplyContact(), datetimeSF.format(new Date()), 
+  				location, request.getAreaSize()+"平米", request.getEnterpriseName(), request.getDescription(), request.getNamespaceId(),"续租");
 		return true;
 	}
 	
