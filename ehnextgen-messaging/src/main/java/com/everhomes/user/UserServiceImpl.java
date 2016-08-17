@@ -886,8 +886,9 @@ public class UserServiceImpl implements UserService {
 								break;
 							} else if(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
 							    //Inner login not found
-							    continue;
+							    //Do nothing
 							} else {
+							    //Not inner login, not web login
 							    if(foundLogin == null) {
 							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
 							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
@@ -902,6 +903,9 @@ public class UserServiceImpl implements UserService {
 							       
                             foundLogin = login;
                             foundIndex = i+2;
+							    } else if(login.getDeviceIdentifier() == null || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+							        //the next login is not web login and inner login
+							        foundIndex = i+2;
 							    } else {
 							        //found twice, delete all logins
 							        accessor.getTemplate().delete(accessor.getBucketName());
