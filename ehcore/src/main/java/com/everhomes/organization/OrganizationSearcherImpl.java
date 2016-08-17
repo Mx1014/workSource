@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -46,6 +47,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     
     @Autowired
     private ConfigurationProvider  configProvider;
+	
+	@Autowired
+    private NamespaceProvider nsProvider;
 
     @Override
     public String getIndexType() {
@@ -292,6 +296,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             	dto.setName(String.valueOf(source.get("name")));
             	dto.setCommunityId(SearchUtils.getLongField(source.get("communityId")));
             	dto.setDescription(String.valueOf(source.get("description")));
+            	dto.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+            	
+            	Namespace ns = nsProvider.findNamespaceById(dto.getNamespaceId());
+    			if(ns != null)
+    				dto.setNamespaceName(ns.getName());
+    			
             	dtos.add(dto);
             	
             }

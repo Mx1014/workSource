@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>公司已经和机构合并(201604)，故在概念上它们是一个；公司分为物业公司、政府相关的公司（工作站、公安等），以及普通公司；
  * <li>namespaceId：域空间id</li>
+ * <li>namespaceName：域空间名称</li>
  * <li>id：主键id</li>
  * <li>parentId：父机构id。没有填0</li>
  * <li>parentName：父机构名称</li>
@@ -42,6 +43,7 @@ import com.everhomes.util.StringHelper;
  */
 public class OrganizationDTO {
 	private Integer namespaceId;
+	private String namespaceName;
 	private Long    id;
     private Long    parentId;
     private String parentName;
@@ -88,7 +90,15 @@ public class OrganizationDTO {
         this.namespaceId = namespaceId;
     }
 
-    public Long getCommunityId() {
+    public String getNamespaceName() {
+		return namespaceName;
+	}
+
+	public void setNamespaceName(String namespaceName) {
+		this.namespaceName = namespaceName;
+	}
+
+	public Long getCommunityId() {
 		return communityId;
 	}
 

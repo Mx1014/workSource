@@ -70,6 +70,7 @@ import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfCategoryDTO;
+import com.everhomes.rest.videoconf.ConfEnterprisesBuyChannel;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
 import com.everhomes.rest.videoconf.ConfRecordDTO;
@@ -2250,7 +2251,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 					confAccountSearcher.feedDoc(account);
 				}
 				
-				enterprise.setBuyChannel(order.getOnlineFlag());
+				if(null == enterprise.getBuyChannel()) {
+					enterprise.setBuyChannel(order.getOnlineFlag());
+				} else {
+					if(enterprise.getBuyChannel().equals(order.getOnlineFlag())) {
+						enterprise.setBuyChannel(order.getOnlineFlag());
+					} else {
+						enterprise.setBuyChannel(ConfEnterprisesBuyChannel.BOTH.getCode());
+					}
+				}
+					
 				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
 				enterprise.setTrialAccountAmount(enterprise.getTrialAccountAmount()+toTrail);
 				vcProvider.updateConfEnterprises(enterprise);
