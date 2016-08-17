@@ -489,7 +489,6 @@ INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_t
 INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('1010', '32', '设备巡检', '设备巡检', NULL, '999992', 'EhOrganizations', '1000750');
 
 -- 活动消息修改  by sfyan 20160816
-UPDATE `eh_locale_templates` SET `text` = '您报名的活动【${subject}】已被拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
 UPDATE `eh_locale_templates` SET `text` = '${userName}报名参加了您发起的活动【${postName}】' WHERE `scope` = 'activity.notification' AND `code` = 1;
 UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活动【${postName}】报名' WHERE `scope` = 'activity.notification' AND `code` = 2;
 
@@ -497,20 +496,18 @@ UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活�
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 33000 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 0;
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 44000,'', 'EhNamespaces', 999992 , 0);
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhOrganizations',1002756,0  FROM `eh_web_menus` WHERE `path` LIKE '%44000/%';
 
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 49500,'', 'EhNamespaces', 999992 , 0);
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhOrganizations',1002756,0  FROM `eh_web_menus` WHERE `path` LIKE '%49500/%';
 
 -- 增加固定角色
-set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58210;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,NOW() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58210;
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58220;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,NOW() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58220;
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58230;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,NOW() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58230;
 
 -- 发帖要收到消息的配置
 SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
@@ -523,12 +520,131 @@ INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',221616,'REPAIRS','push');
 
 -- 修改园区 名称
-UPDATE `eh_communities` SET `name` = 'ibase北京金地中心', `alias_name` = 'ibase北京金地中心' where `id` = 240111044331052505;
-UPDATE `eh_communities` SET `name` = 'ibase深圳龙井问山', `alias_name` = 'ibase深圳龙井问山' where `id` = 240111044331052506;
-UPDATE `eh_communities` SET `name` = 'ibase深圳威新中心', `alias_name` = 'ibase深圳威新中心' where `id` = 240111044331052507;
-UPDATE `eh_communities` SET `name` = 'ibase深圳园博园创意集群社', `alias_name` = 'ibase深圳园博园创意集群社' where `id` = 240111044331052508;
+UPDATE `eh_communities` SET `name` = 'ibase北京金地中心', `alias_name` = 'ibase北京金地中心' WHERE `id` = 240111044331052505;
+UPDATE `eh_communities` SET `name` = 'ibase深圳龙井问山', `alias_name` = 'ibase深圳龙井问山' WHERE `id` = 240111044331052506;
+UPDATE `eh_communities` SET `name` = 'ibase深圳威新中心', `alias_name` = 'ibase深圳威新中心' WHERE `id` = 240111044331052507;
+UPDATE `eh_communities` SET `name` = 'ibase深圳园博园创意集群社', `alias_name` = 'ibase深圳园博园创意集群社' WHERE `id` = 240111044331052508;
 
-UPDATE `eh_web_menus` SET `name` = '设备巡检' where `id` = 58200;
+UPDATE `eh_web_menus` SET `name` = '设备巡检' WHERE `id` = 58200;
 
 -- kickof message
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'user', '100018', 'zh_CN', '你已被其它登录设备踢出');
+
+-- 去掉东方建富的服务联盟和园区报 by lqs 20160816
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 49500,'', 'EhOrganizations', 1002756 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 44000,'', 'EhOrganizations', 1002756 , 0);
+
+-- 只给深业留 业主管理 by lqs 20160816
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 1000000 , 0);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',1000000,0  FROM `eh_web_menus` WHERE `path` LIKE '%58200/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 999999 , 0);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999999,0  FROM `eh_web_menus` WHERE `path` LIKE '%36000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 999989 , 0);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999989,0  FROM `eh_web_menus` WHERE `path` LIKE '%36000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 999991 , 0);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999991,0  FROM `eh_web_menus` WHERE `path` LIKE '%36000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 999993 , 0);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999993,0  FROM `eh_web_menus` WHERE `path` LIKE '%36000/%';
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999990,0  FROM `eh_web_menus` WHERE `path` LIKE '%36000/%';
+
+-- 园区入驻发短信模板给威新之外的添加 by wuhan 20160817
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-左邻', '28063');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1000000, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-科技园', '28064');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999999, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-讯美', '28065');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-金隅', '28066');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999993, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-海岸', '28067');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999992, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-深业', '28068');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999990, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-储能', '28069');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999989, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-Ibase', '28070');   
+
+
+-- 活动消息修改  by sfyan 20160817
+UPDATE `eh_locale_strings` SET `text` = '您报名参加的活动[${subject}]已被管理员拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
+UPDATE `eh_locale_templates` SET `text` = '${userName}报名参加了您发起的活动[${postName}]' WHERE `scope` = 'activity.notification' AND `code` = 1;
+UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活动[${postName}]报名' WHERE `scope` = 'activity.notification' AND `code` = 2;
+UPDATE `eh_locale_templates` SET `text` = '您报名参加的活动“${postName}”已被管理员通过' WHERE `scope` = 'activity.notification' AND `code` = 3;
+
+-- 发帖物业报修要收到短信配置
+SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052506,'EhUsers',222503,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',222502,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',226508,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052508,'EhUsers',222501,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052505,'EhUsers',226521,'REPAIRS','sms');
+
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',221616,'REPAIRS','sms');
+
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052505,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052505,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052506,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052506,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052507,'EhUsers',222569,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052508,'EhUsers',222568,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331052508,'EhUsers',222569,'REPAIRS','sms');
+
+-- 科技园的不屏蔽 by sfyan 20160817 
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 56100 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` in (SELECT `id` FROM `eh_web_menus` WHERE `path` LIKE '%56100/%') AND `owner_type` = 'EhNamespaces' AND `owner_id` = 1000000;
+
+-- 把打卡考勤的老功能重新开放  by sfyan 20160817  
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56172,'打卡详情',56105,null,'attendance_record',0,2,'/50000/56000/56100/56105/56172','park',571);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56174,'异常统计',56105,null,'attendance_result',0,2,'/50000/56000/56100/56105/56174','park',572);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56176,'异常处理',56105,null,'attendance_manage',0,2,'/50000/56000/56100/56105/56176','park',573);
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (797,0,'打卡详情','打卡详情',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (798,0,'异常统计','异常统计',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (799,0,'异常处理','异常处理',NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),797,56172,'打卡详情',1,1,'打卡详情  全部权限',577);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),798,56174,'异常统计',1,1,'异常统计 全部权限',578);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),799,56176,'异常处理',1,1,'异常处理 全部权限',579);
+
+-- 屏蔽 菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999999,0  FROM `eh_web_menus` WHERE `id` IN (56172, 56174, 56176); 
+
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999989,0  FROM `eh_web_menus` WHERE `id` IN (56172, 56174, 56176); 
+
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999991,0  FROM `eh_web_menus` WHERE `id` IN (56172, 56174, 56176); 
+
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999993,0  FROM `eh_web_menus` WHERE `id` IN (56172, 56174, 56176); 
+
+INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999990,0  FROM `eh_web_menus` WHERE `id` IN (56172, 56174, 56176); 
+
+-- 给角色加权限
+set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1001,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (56172, 56174, 56176);
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1002,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (56172, 56174, 56176);
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56100/%');
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56100/%');
+
+
+
+
+
+

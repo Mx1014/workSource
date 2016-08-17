@@ -718,10 +718,12 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
 		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+		Condition cond = Tables.EH_BUILDINGS.NAME.eq(buildingName);
+		cond = cond.or(Tables.EH_BUILDINGS.ALIAS_NAME.eq(buildingName));
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
 		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
+		query.addConditions(cond);
 		
         return ConvertHelper.convert(query.fetchOne(), Building.class);
 	}
