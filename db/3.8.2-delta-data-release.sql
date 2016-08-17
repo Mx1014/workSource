@@ -502,13 +502,13 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhOrganizations',1002756,0  FROM `eh_web_menus` WHERE `path` LIKE '%49500/%';
 
 -- 增加固定角色
-set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58210;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,NOW() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58210;
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58220;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,NOW() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58220;
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58230;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1010,0,1,NOW() FROM `eh_web_menu_privileges` WHERE `menu_id` = 58230;
 
 -- 发帖要收到消息的配置
 SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
@@ -521,12 +521,12 @@ INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',221616,'REPAIRS','push');
 
 -- 修改园区 名称
-UPDATE `eh_communities` SET `name` = 'ibase北京金地中心', `alias_name` = 'ibase北京金地中心' where `id` = 240111044331052505;
-UPDATE `eh_communities` SET `name` = 'ibase深圳龙井问山', `alias_name` = 'ibase深圳龙井问山' where `id` = 240111044331052506;
-UPDATE `eh_communities` SET `name` = 'ibase深圳威新中心', `alias_name` = 'ibase深圳威新中心' where `id` = 240111044331052507;
-UPDATE `eh_communities` SET `name` = 'ibase深圳园博园创意集群社', `alias_name` = 'ibase深圳园博园创意集群社' where `id` = 240111044331052508;
+UPDATE `eh_communities` SET `name` = 'ibase北京金地中心', `alias_name` = 'ibase北京金地中心' WHERE `id` = 240111044331052505;
+UPDATE `eh_communities` SET `name` = 'ibase深圳龙井问山', `alias_name` = 'ibase深圳龙井问山' WHERE `id` = 240111044331052506;
+UPDATE `eh_communities` SET `name` = 'ibase深圳威新中心', `alias_name` = 'ibase深圳威新中心' WHERE `id` = 240111044331052507;
+UPDATE `eh_communities` SET `name` = 'ibase深圳园博园创意集群社', `alias_name` = 'ibase深圳园博园创意集群社' WHERE `id` = 240111044331052508;
 
-UPDATE `eh_web_menus` SET `name` = '设备巡检' where `id` = 58200;
+UPDATE `eh_web_menus` SET `name` = '设备巡检' WHERE `id` = 58200;
 
 -- kickof message
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'user', '100018', 'zh_CN', '你已被其它登录设备踢出');
@@ -554,3 +554,13 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 36000,'', 'EhNamespaces', 999990 , 0);
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999990,0  FROM `eh_web_menus` WHERE `path` LIKE '%36000/%';
+
+-- 园区入驻发短信模板给威新之外的添加 by wuhan 20160817
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-左邻', '28063');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1000000, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-科技园', '28064');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999999, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-讯美', '28065');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-金隅', '28066');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999993, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-海岸', '28067');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999992, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-深业', '28068');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999990, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-储能', '28069');  
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999989, 'sms.default.yzx', 9, 'zh_CN', '看楼申请-Ibase', '28070');   
