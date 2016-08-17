@@ -569,7 +569,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 UPDATE `eh_locale_strings` SET `text` = '您报名参加的活动[${subject}]已被管理员拒绝，原因：${reason}' WHERE `scope` = 'activity' AND `code` = 5;
 UPDATE `eh_locale_templates` SET `text` = '${userName}报名参加了您发起的活动[${postName}]' WHERE `scope` = 'activity.notification' AND `code` = 1;
 UPDATE `eh_locale_templates` SET `text` = '${userName}取消了您发起的活动[${postName}]报名' WHERE `scope` = 'activity.notification' AND `code` = 2;
-
+UPDATE `eh_locale_templates` SET `text` = '您报名参加的活动“${postName}”已被管理员通过' WHERE `scope` = 'activity.notification' AND `code` = 3;
 
 -- 发帖物业保修要收到短信配置
 SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
