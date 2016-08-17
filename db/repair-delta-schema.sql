@@ -1,5 +1,5 @@
 
-DROP TABLE IF EXISTS `eh_community_tasks`;
+DROP TABLE IF EXISTS `eh_pm_tasks`;
 CREATE TABLE `eh_pm_tasks` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -27,7 +27,7 @@ CREATE TABLE `eh_pm_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
- DROP TABLE IF EXISTS `eh_community_task_logs`;
+ DROP TABLE IF EXISTS `eh_pm_task_logs`;
 CREATE TABLE `eh_pm_task_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -46,7 +46,7 @@ CREATE TABLE `eh_pm_task_logs` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
- DROP TABLE IF EXISTS `eh_community_task_attachments`;
+ DROP TABLE IF EXISTS `eh_pm_task_attachments`;
 CREATE TABLE `eh_pm_task_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g comment_id',
