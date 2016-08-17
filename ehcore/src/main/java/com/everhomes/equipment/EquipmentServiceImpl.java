@@ -2054,6 +2054,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1, task.getId(), cmd.getProcessType());
 		
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
+		if(null == logs) {
+			List<EquipmentTaskLogsDTO> dtos = new ArrayList<EquipmentTaskLogsDTO>();
+			response.setLogs(dtos);
+			return response;
+		}
+		
 		Long nextPageAnchor = null;
         if(logs.size() > pageSize) {
         	logs.remove(logs.size() - 1);
