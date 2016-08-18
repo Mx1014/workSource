@@ -12,7 +12,10 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parentCategoryId: 父类型id</li>
  * <li>categoryId: 子类型id</li>
+ * <li>parentCategoryName: 父类型名称</li>	
+ * <li>categoryName: 子类型名称</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
  * <li>status: 状态 1: 未处理  2: 处理中 3: 已完成  4: 已关闭{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
@@ -30,7 +33,10 @@ public class PmTaskDTO {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
+	private Long parentCategoryId;
 	private Long categoryId;
+	private String parentCategoryName;
+	private String categoryName;
 	private String address;
 	private String content;
 	private Byte status;
@@ -41,6 +47,9 @@ public class PmTaskDTO {
 	private Timestamp closedTime;
 	private Long creatorUid;
 	private Timestamp createTime;
+	
+	@ItemType(PmTaskAttachmentDTO.class)
+	private List<PmTaskAttachmentDTO> attachments;
 	
 	@ItemType(PmTaskLogDTO.class)
 	private List<PmTaskLogDTO> taskLogs;
@@ -143,6 +152,31 @@ public class PmTaskDTO {
 		this.taskLogs = taskLogs;
 	}
 	
+	public Long getParentCategoryId() {
+		return parentCategoryId;
+	}
+	public void setParentCategoryId(Long parentCategoryId) {
+		this.parentCategoryId = parentCategoryId;
+	}
+	public String getParentCategoryName() {
+		return parentCategoryName;
+	}
+	public void setParentCategoryName(String parentCategoryName) {
+		this.parentCategoryName = parentCategoryName;
+	}
+	public String getCategoryName() {
+		return categoryName;
+	}
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+	
+	public List<PmTaskAttachmentDTO> getAttachments() {
+		return attachments;
+	}
+	public void setAttachments(List<PmTaskAttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

@@ -7,16 +7,15 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>id: 任务ID</li>
- * <li>status: 被分配者ID 1: 未处理  2: 处理中 3: 已完成  4: 已关闭{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
+ * <li>content: 完成或关闭任务理由</li>
  * </ul>
  */
-public class SetTaskStatusCommand {
+public class CloseTaskCommand {
 	private String ownerType;
     private Long ownerId;
     private Long id;
     private String content;
-	private Byte status;
-	
+
 	public String getContent() {
 		return content;
 	}
@@ -41,13 +40,6 @@ public class SetTaskStatusCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Byte getStatus() {
-		return status;
-	}
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

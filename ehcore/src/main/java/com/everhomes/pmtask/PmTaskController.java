@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
+import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
@@ -34,8 +35,9 @@ import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.SetTaskStatusCommand;
+import com.everhomes.rest.pmtask.CompleteTaskCommand;
 
+@RestDoc(value="Pmtask controller", site="pmtask")
 @RestController
 @RequestMapping("/pmtask")
 public class PmTaskController extends ControllerBase {
@@ -189,13 +191,27 @@ public class PmTaskController extends ControllerBase {
   	}
      
 	/**
-	 * <b>URL: /pmtask/setTaskStatus</b>
+	 * <b>URL: /pmtask/completeTask</b>
 	 * <p>设置任务状态：待处理、处理中、已处理、其它</p>
 	 */
-	@RequestMapping("setTaskStatus")
+	@RequestMapping("completeTask")
 	@RestReturn(value=String.class)
-	public RestResponse setTaskStatus(SetTaskStatusCommand cmd) {
-		pmTaskService.setTaskStatus(cmd);
+	public RestResponse completeTask(CompleteTaskCommand cmd) {
+		pmTaskService.completeTask(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pmtask/closeTask</b>
+	 * <p>设置任务状态：待处理、处理中、已处理、其它</p>
+	 */
+	@RequestMapping("closeTask")
+	@RestReturn(value=String.class)
+	public RestResponse closeTask(CloseTaskCommand cmd) {
+		pmTaskService.closeTask(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -237,7 +253,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("listUserTasks")
     @RestReturn(value=ListUserTasksResponse.class)
     public RestResponse listUserTasks(ListUserTasksCommand cmd) {
-    	ListUserTasksResponse  res = pmTaskService.listUserTasks(cmd);
+    	ListUserTasksResponse res = pmTaskService.listUserTasks(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

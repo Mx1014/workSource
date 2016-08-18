@@ -3,12 +3,15 @@ package com.everhomes.category;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
 import org.jooq.SortField;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -25,11 +28,14 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
@@ -42,25 +48,24 @@ public class CategoryProviderImpl implements CategoryProvider {
     
     @Autowired
     private DbProvider dbProvider;
-
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
+    //查询物业任务分类 update by sw 20160817
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories") })
+            @CacheEvict(value="listBusinessSubCategories"),
+            @CacheEvict(value="listTaskCategories") })
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
-        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
-        query.setRecord(record);
-        query.setReturning(Tables.EH_CATEGORIES.ID);
-        query.execute();
-        
-        category.setId(query.getReturnedRecord().getId());
-        
-//        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
-//        dao.insert(category);
+        long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhCategories.class));
+        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
+        category.setId(id);
+        dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }
@@ -69,7 +74,8 @@ public class CategoryProviderImpl implements CategoryProvider {
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+            @CacheEvict(value="listBusinessSubCategories"),
+            @CacheEvict(value="listTaskCategories")})
     @Override
     public void updateCategory(Category category) {
         assert(category.getId() != null);
@@ -85,7 +91,8 @@ public class CategoryProviderImpl implements CategoryProvider {
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories") })
+            @CacheEvict(value="listBusinessSubCategories"),
+            @CacheEvict(value="listTaskCategories")})
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -354,4 +361,41 @@ public class CategoryProviderImpl implements CategoryProvider {
         List<Long> categoryIds = selectStep.where(condition).fetch().map(r -> r.getValue(Tables.EH_CATEGORIES.ID));
         return categoryIds;
     }
+    
+    //查询物业任务分类 add by sw 20160817
+    @Cacheable(value = "listTaskCategories", unless="#result.size() == 0")
+	@Override
+	public List<Category> listTaskCategories(Integer namespaceId, Long parentId, String name, 
+			Long pageAnchor, Integer pageSize){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != parentId)
+        	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
+        if(StringUtils.isNotBlank(name))
+        	query.addConditions(Tables.EH_CATEGORIES.PATH.like("%" + name + "%"));
+        if(null != pageAnchor && pageAnchor != 0)
+        	query.addConditions(Tables.EH_CATEGORIES.ID.gt(pageAnchor));
+        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_CATEGORIES.ID.asc());
+        if(null != pageSize)
+        	query.addLimit(pageSize);
+        List<Category> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, Category.class))
+        		.collect(Collectors.toList());
+        
+        return result;
+	}
+    
+    @Override
+	public Category findCategoryByPath(Integer namespaceId, String path){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != path)
+        	query.addConditions(Tables.EH_CATEGORIES.PATH.eq(path));
+        
+        return ConvertHelper.convert(query.fetchOne(), Category.class);
+	}
 }

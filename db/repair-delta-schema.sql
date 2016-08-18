@@ -9,7 +9,7 @@ CREATE TABLE `eh_pm_tasks` (
 	`category_id` BIGINT NOT NULL DEFAULT 0,
 
 	`address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
-	`content` TEXT NOT NULL COMMENT 'content data',
+	`content` TEXT COMMENT 'content data',
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
 	`star` TINYINT COMMENT 'evaluate score',
 
@@ -33,9 +33,10 @@ CREATE TABLE `eh_pm_task_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
+
   `task_id` BIGINT NOT NULL DEFAULT 0,
 
-  `content` TEXT NOT NULL  COMMENT 'content data',
+  `content` TEXT COMMENT 'content data',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
   `target_type` VARCHAR(32) COMMENT 'user',
   `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'target user id if target_type is a user',

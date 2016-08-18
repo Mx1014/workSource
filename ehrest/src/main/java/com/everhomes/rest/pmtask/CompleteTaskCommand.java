@@ -9,20 +9,24 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>categoryId: 子类型ID</li>
- * <li>address: 服务地点</li>
- * <li>content: 内容</li>
+ * <li>id: 任务ID</li>
+ * <li>content: 完成或关闭任务理由</li>
  * <li>attachments: 图片路径列表</li>
  * </ul>
  */
-public class CreateTaskCommand {
+public class CompleteTaskCommand {
 	private String ownerType;
     private Long ownerId;
-	private Long categoryId;
-	private String address;
-	private String content;
+    private Long id;
+    private String content;
 	@ItemType(String.class)
 	private List<String> attachments;
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -35,24 +39,11 @@ public class CreateTaskCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
-	public Long getCategoryId() {
-		return categoryId;
+	public Long getId() {
+		return id;
 	}
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
-	}
-	public String getContent() {
-		return content;
-	}
-	public void setContent(String content) {
-		this.content = content;
+	public void setId(Long id) {
+		this.id = id;
 	}
 	public List<String> getAttachments() {
 		return attachments;
@@ -60,7 +51,6 @@ public class CreateTaskCommand {
 	public void setAttachments(List<String> attachments) {
 		this.attachments = attachments;
 	}
-	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

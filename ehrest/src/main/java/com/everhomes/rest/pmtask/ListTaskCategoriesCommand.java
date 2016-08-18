@@ -4,22 +4,44 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>namspaceId: 域空间</li>
+ * <li>namespaceId: 域空间</li>
  * <li>parentId: 父类型Id</li>
+ * <li>name: 分类名称</li>
+ * <li>pageAnchor: 分页瞄</li>
+ * <li>pageSize: 每页条数</li>
  * </ul>
  */
 public class ListTaskCategoriesCommand {
-	private Integer namspaceId;
+	private Integer namespaceId;
 	private Long parentId;
+	private String name;
+	private Long pageAnchor;
+	private Integer pageSize;
 
-	public Integer getNamspaceId() {
-		return namspaceId;
+	public Integer getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setNamspaceId(Integer namspaceId) {
-		this.namspaceId = namspaceId;
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
-	
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -31,5 +53,13 @@ public class ListTaskCategoriesCommand {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

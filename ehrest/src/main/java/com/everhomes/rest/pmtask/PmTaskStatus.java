@@ -3,6 +3,7 @@ package com.everhomes.rest.pmtask;
 
 /**
  * <ul>
+ * <li>0: 无效任务</li>
  * <li>1: 未处理</li>
  * <li>2: 处理中</li>
  * <li>3: 已完成</li>
@@ -10,7 +11,7 @@ package com.everhomes.rest.pmtask;
  * </ul>
  */
 public enum PmTaskStatus {
-	UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), OTHER((byte)4);
+	INACTIVE((byte)0), UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), OTHER((byte)4);
     
     private byte code;
     private PmTaskStatus(byte code) {

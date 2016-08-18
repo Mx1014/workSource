@@ -9,9 +9,9 @@ import com.everhomes.util.StringHelper;
  * <li>newCount: 新增任务数量</li>
  * <li>totalCount: 任务总量</li>
  * <li>unProcessedCount: 未处理任务量</li>
- * <li>percentComplete: 完成率</li>
- * <li>percentClose: 关闭率</li>
- * <li>avgScore: 评价均分</li>
+ * <li>completePercent: 完成率</li>
+ * <li>closePercent: 关闭率</li>
+ * <li>avgStar: 评价均分</li>
  * </ul>
  */
 public class TaskStatisticsDTO {
@@ -20,9 +20,9 @@ public class TaskStatisticsDTO {
 	private Integer newCount;
 	private Integer totalCount;
 	private Integer unProcessedCount;
-	private Float percentComplete;
-	private Float percentClose;
-	private Float avgScore;
+	private Float completePercent;
+	private Float closePercent;
+	private Float avgStar;
 	public Integer getNewCount() {
 		return newCount;
 	}
@@ -30,25 +30,25 @@ public class TaskStatisticsDTO {
 		this.newCount = newCount;
 	}
 	
-	public Float getPercentComplete() {
-		return percentComplete;
+	public Float getCompletePercent() {
+		return completePercent;
 	}
-	public void setPercentComplete(Float percentComplete) {
-		this.percentComplete = percentComplete;
+	public void setCompletePercent(Float completePercent) {
+		this.completePercent = completePercent;
 	}
-	public Float getPercentClose() {
-		return percentClose;
+	public Float getClosePercent() {
+		return closePercent;
 	}
-	public void setPercentClose(Float percentClose) {
-		this.percentClose = percentClose;
-	}
-	public Float getAvgScore() {
-		return avgScore;
-	}
-	public void setAvgScore(Float avgScore) {
-		this.avgScore = avgScore;
+	public void setClosePercent(Float closePercent) {
+		this.closePercent = closePercent;
 	}
 	
+	public Float getAvgStar() {
+		return avgStar;
+	}
+	public void setAvgStar(Float avgStar) {
+		this.avgStar = avgStar;
+	}
 	public Long getOwnerId() {
 		return ownerId;
 	}

@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
+import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
@@ -22,7 +23,7 @@ import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.SetTaskStatusCommand;
+import com.everhomes.rest.pmtask.CompleteTaskCommand;
 
 public interface PmTaskService {
 	SearchTasksResponse searchTasks(SearchTasksCommand cmd);
@@ -31,7 +32,9 @@ public interface PmTaskService {
 	
 	void evaluateTask(EvaluateTaskCommand cmd);
 	
-	void setTaskStatus(SetTaskStatusCommand cmd);
+	void completeTask(CompleteTaskCommand cmd);
+	
+	void closeTask(CloseTaskCommand cmd);
 	
 	void assignTask(AssignTaskCommand cmd);
 	
