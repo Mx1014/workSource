@@ -3522,7 +3522,7 @@ public class PunchServiceImpl implements PunchService {
 		File file = new File(filePath);
 		if(!file.exists())
 			file.mkdirs();
-		filePath = filePath + "PunchStatistics"+System.currentTimeMillis()+".xlsx";
+		filePath = filePath + "PunchDetails"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
 		
 		this.createPunchDetailsBook(filePath,dtos);
@@ -3571,7 +3571,7 @@ public class PunchServiceImpl implements PunchService {
 		case TWICE:
 			row.createCell(++i).setCellValue(convertTimeLongToString(dto.getArriveTime())+"/"+convertTimeLongToString(dto.getLeaveTime())); 
 			row.createCell(++i).setCellValue(statusToString(dto.getStatus())); 
-			row.createCell(++i).setCellValue(statusToString(dto.getApprovalStatus())); 
+			row.createCell(++i).setCellValue(dto.getApprovalStatus()==null?statusToString(dto.getStatus()):statusToString(dto.getApprovalStatus())); 
 			break;
 		case FORTH:
 			row.createCell(++i).setCellValue(convertTimeLongToString(dto.getArriveTime())
@@ -3579,7 +3579,10 @@ public class PunchServiceImpl implements PunchService {
 					+"/"+convertTimeLongToString(dto.getAfternoonArriveTime())
 					+"/"+convertTimeLongToString(dto.getLeaveTime())); 
 			row.createCell(++i).setCellValue(statusToString(dto.getMorningStatus())+"/"+statusToString(dto.getAfternoonStatus())); 
-			row.createCell(++i).setCellValue(statusToString(dto.getMorningApprovalStatus())+"/"+statusToString(dto.getAfternoonApprovalStatus())); 
+			row.createCell(++i).setCellValue(
+					dto.getMorningApprovalStatus()==null?statusToString(dto.getMorningStatus()):statusToString(dto.getMorningApprovalStatus())
+					+"/"+
+					dto.getAfternoonApprovalStatus()==null?statusToString(dto.getAfternoonStatus()):statusToString(dto.getAfternoonApprovalStatus())); 
 			break;
 		default :
 			++i;
