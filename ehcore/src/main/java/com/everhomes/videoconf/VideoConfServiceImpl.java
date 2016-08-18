@@ -1995,7 +1995,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		 
 		order.setOwnerId(cmd.getEnterpriseId());
 		order.setQuantity(cmd.getQuantity());
-		order.setPeriod(cmd.getPeriod());
+//		order.setPeriod(cmd.getPeriod());
+		order.setExpiredDate(new Timestamp(cmd.getExpiredDate()));
 		order.setAmount(cmd.getAmount());
 		order.setStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
@@ -2178,7 +2179,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 				ConfAccounts account = new ConfAccounts();
 				account.setStatus((byte) 1);
 				account.setEnterpriseId(order.getOwnerId());
-				account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
+				if(order.getPeriod() == 0) {
+					account.setExpiredDate(order.getExpiredDate());
+				} else {
+					account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
+				}
+				
 				account.setAccountCategoryId(order.getAccountCategoryId());
 				if(null != category && null != category.getConfType() && category.getConfType() == 4) {
 					account.setAccountType((byte) 1);
