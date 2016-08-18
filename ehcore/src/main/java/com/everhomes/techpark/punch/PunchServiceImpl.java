@@ -1917,7 +1917,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private void processForthPunchListCount(List<PunchStatisticsDTO> list,
 			PunchStatistic statistic) { 
-		statistic.setWorkCount(0);
+		statistic.setWorkCount(0.0);
 		statistic.setUnpunchCount(0.0);
 		statistic.setSickCount(0.0);
 		statistic.setOutworkCount(0.0);
@@ -2098,11 +2098,15 @@ public class PunchServiceImpl implements PunchService {
 				}else  if(ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonStatus()&&ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningStatus()) {
 					statistic.setWorkCount(statistic.getWorkCount()+1);
 				} 
+
+				//应上班天数－缺勤天数－事假天数-病假天数-调休天数-公出天数-调休天数
+				statistic.setWorkCount(statistic.getWorkDayCount()-statistic.getUnpunchCount()-statistic.getAbsenceCount()
+						-statistic.getSickCount()-statistic.getOutworkCount()-statistic.getExchangeCount());
 			}
 		}
 	}
 	private void processTwicePunchListCount(List<PunchStatisticsDTO> list, PunchStatistic statistic) {
-		statistic.setWorkCount(0);
+		statistic.setWorkCount(0.0);
 		statistic.setUnpunchCount(0.0);
 		statistic.setSickCount(0.0);
 		statistic.setOutworkCount(0.0);
@@ -2115,9 +2119,7 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		for (PunchStatisticsDTO punchDayLogDTO : list) {
 			if (punchDayLogDTO.getApprovalStatus() != null) {
-				if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getApprovalStatus()) {
-					statistic.setWorkCount(statistic.getWorkCount()+1);
-				}else if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getApprovalStatus()){
+				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getApprovalStatus()){
 					statistic.setUnpunchCount(statistic.getUnpunchCount()+1);
 					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getApprovalStatus()){
@@ -2157,9 +2159,7 @@ public class PunchServiceImpl implements PunchService {
 					statistic.setOverTimeSum(statistic.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
 				} 
 			} else {
-				if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getStatus()) {
-					statistic.setWorkCount(statistic.getWorkCount()+1);
-				}else if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getStatus()){
+				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getStatus()){
 					statistic.setUnpunchCount(statistic.getUnpunchCount()+1);
 					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getStatus()){
@@ -2200,6 +2200,9 @@ public class PunchServiceImpl implements PunchService {
 				} 
 			}
 		}
+		//应上班天数－缺勤天数－事假天数-病假天数-调休天数-公出天数-调休天数
+		statistic.setWorkCount(statistic.getWorkDayCount()-statistic.getUnpunchCount()-statistic.getAbsenceCount()
+				-statistic.getSickCount()-statistic.getOutworkCount()-statistic.getExchangeCount());
 	}
 	 
 	// 创建每个user的打卡map信息
