@@ -1889,6 +1889,7 @@ public class PunchServiceImpl implements PunchService {
 		for(PunchDayLog dayLog : dayLogList){ 
 			PunchStatisticsDTO dto = ConvertHelper.convert(dayLog,
 					PunchStatisticsDTO.class);
+			list.add(dto);
 			processPunchStatisticsDTOTime(dto, dayLog);
 			PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(),
 							dto.getEnterpriseId(),new java.sql.Date(dto.getPunchDate()));
@@ -1897,7 +1898,7 @@ public class PunchServiceImpl implements PunchService {
 						.getApprovalStatus());
 				dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
 				dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus()); 
-				list.add(dto);
+				
 			} else {
 				//do nothing
 //				dto.setApprovalStatus((byte) 0);
