@@ -37,6 +37,7 @@ import com.everhomes.util.StringHelper;
  * <li>showFlag：控制是否在导航菜单中，{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
  * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>roles：机构/部门/群组拥有的角色</li>
+ * <li>doorplateAddress：门牌地址</li>
  * <li>
  * </ul>
  */
@@ -73,6 +74,9 @@ public class OrganizationDTO {
 	private Long groupId;
 	
 	private Byte showFlag;
+	
+	@ItemType(String.class)
+	private List<String> doorplateAddresses;
 	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> childrens;
@@ -306,8 +310,18 @@ public class OrganizationDTO {
     public void setFeedbackForumId(Long feedbackForumId) {
         this.feedbackForumId = feedbackForumId;
     }
+    
+    
 
-    @Override
+    public List<String> getDoorplateAddresses() {
+		return doorplateAddresses;
+	}
+
+	public void setDoorplateAddresses(List<String> doorplateAddresses) {
+		this.doorplateAddresses = doorplateAddresses;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
