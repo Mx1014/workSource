@@ -1,5 +1,7 @@
 package com.everhomes.acl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,8 +47,30 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +117,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -101,6 +126,7 @@ import com.everhomes.organization.OrganizationRoleMap;
 import com.everhomes.organization.OrganizationRoleMapProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
@@ -126,21 +152,31 @@ import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
+import com.everhomes.rest.organization.CreateOrganizationCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -164,6 +200,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private UserProvider userProvider;
 	
 	
 	@Override
@@ -576,9 +615,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void addAclRoleAssignment(AddAclRoleAssignmentCommand cmd) {
 		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
-			LOGGER.error("add acl role assignment error, cmd = {}", cmd);
+			LOGGER.error("invalid parameter error, cmd = {}", cmd);
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"add acl role assignment error.");
+					"invalid parameter error.");
 		}
 		
 		RoleAssignment roleAssignment = new RoleAssignment();
@@ -781,16 +820,188 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	command.setRoleIds(roleIds);
     	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(command);
     	List<OrganizationMemberDTO> members = res.getMembers();
-    	
+    	ByteArrayOutputStream out = null;
+    	XSSFWorkbook wb = organizationService.createXSSFWorkbook(members);
+    	try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+		    DownloadUtil.download(out, response);
+		} catch (Exception e) {
+			LOGGER.error("export error, e = {}", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("close error", e);
+			}
+		}
     }
     
     @Override
     public ImportDataResponse importRoleAssignmentPersonnelXls(
     		ExcelRoleExcelRoleAssignmentPersonnelCommand cmd,
     		MultipartFile[] files) {
+    	ImportDataResponse result = new ImportDataResponse();
+    	if(null == files || 0 == files.length){
+    		LOGGER.error("file is empty, cmd = {}" + cmd);
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+    				"file is empty.");
+    	}
     	
+    	Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
     	
-    	return null;
+    	if(null == organization){
+    		LOGGER.error("organization non-existent, organization = {}" + cmd.getOrganizationId());
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+    				"file is empty.");
+    	}
+    	
+    	//解析excel
+		try {
+			List excelList = PropMrgOwnerHandler.processorExcel(files[1].getInputStream());
+			
+			List<OrganizationMemberDTO> memberDTOs = this.convertMemberDTO(excelList);
+			
+			Long totalCount = 0l;
+			
+			Long failCount = 0l;
+			
+			List<String> logs = new ArrayList<String>();
+			
+			totalCount = (long)memberDTOs.size();
+			
+			for (OrganizationMemberDTO organizationMemberDTO : memberDTOs) {
+				try {
+					this.createMemberAndRoleAssignment(organizationMemberDTO, organization.getId(), cmd.getRoleId());
+				} catch (Exception e) {
+					logs.add(StringHelper.toJsonString(organizationMemberDTO));
+				}
+			}
+			
+			failCount = (long)logs.size();
+			
+			result.setFailCount(failCount);
+			result.setTotalCount(totalCount);
+			result.setLogs(logs);
+		} catch (IOException e) {
+			LOGGER.error("import data error , cmd = {}" + cmd);
+		}
+    	
+    	return result;
+    }
+    
+    private void createMemberAndRoleAssignment(OrganizationMemberDTO memberDTO, Long organizationId, Long roleId){
+    	
+    	OrganizationMember member = ConvertHelper.convert(memberDTO, OrganizationMember.class);
+    	
+    	User user = UserContext.current().getUser();
+    	
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	
+    	if(StringUtils.isEmpty(memberDTO.getContactToken())
+    			|| StringUtils.isEmpty(memberDTO.getContactName())
+    			|| StringUtils.isEmpty(memberDTO.getGroupName())
+    			|| StringUtils.isEmpty(memberDTO.getEmployeeNo())){
+    		LOGGER.error("invalid parameter error , member = {}" + member);
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+    				"invalid parameter error.");
+    	}
+    	
+    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, memberDTO.getContactToken());
+    	if(null == userIdentifier){
+    		LOGGER.error("Mobile phone not registered , contactToken = {}" + memberDTO.getContactToken());
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+    				"Mobile phone not registered.");
+    	}
+    	
+    	member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+    	member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+    	member.setContactType(IdentifierType.MOBILE.getCode());
+    	member.setCreatorUid(user.getId());
+    	member.setNamespaceId(namespaceId);
+    	member.setGroupId(0l);
+    	member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+    	member.setTargetId(userIdentifier.getOwnerUid());
+    	
+    	dbProvider.execute((TransactionStatus status) -> {
+    		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(memberDTO.getContactToken(), organizationId);
+        	
+        	if(null == organizationMember){
+        		member.setOrganizationId(organizationId);
+        		organizationProvider.createOrganizationMember(member);
+        	}
+        	
+        	Organization department = organizationProvider.findOrganizationByParentAndName(organizationId, memberDTO.getGroupName());
+        	
+        	if(null == department){
+        		CreateOrganizationCommand command = new CreateOrganizationCommand();
+        		command.setGroupType(OrganizationGroupType.DEPARTMENT.getCode());
+        		command.setName(memberDTO.getGroupName());
+        		command.setParentId(organizationId);
+        		OrganizationDTO departmentDTO = organizationService.createChildrenOrganization(command);
+        		member.setOrganizationId(departmentDTO.getId());
+        		member.setGroupPath(departmentDTO.getPath());
+        	}else{
+        		
+            	organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(memberDTO.getContactToken(), department.getId());
+            	
+            	if(null != organizationMember){
+            		LOGGER.error("phone number already exists. organizationId = {}, contactToken = {}", department.getId(), memberDTO.getContactToken());
+    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+    						"phone number already exists.");
+            	}
+            	
+        		member.setOrganizationId(department.getId());
+        		member.setGroupPath(department.getPath());
+        	}
+        	
+        	organizationProvider.createOrganizationMember(member);
+        	
+        	RoleAssignment roleAssignment = new RoleAssignment();
+    		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId());
+    		
+    		if(null != roleAssignments && 0 < roleAssignments.size()){
+    			for (RoleAssignment assignment : roleAssignments) {
+    				if(assignment.getRoleId().equals(roleId)){
+    	        		LOGGER.debug("role assignment already exists. roleId = {}, userId = {}, contactToken = {}", roleId, member.getTargetId(), member.getContactToken());
+    					return null;
+    				}
+    			}
+    		}
+    		
+    		roleAssignment.setRoleId(roleId);
+    		roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+    		roleAssignment.setOwnerId(organizationId);
+    		roleAssignment.setTargetType(EntityType.USER.getCode());
+    		roleAssignment.setTargetId(member.getTargetId());
+    		roleAssignment.setCreatorUid(user.getId());
+    		aclProvider.createRoleAssignment(roleAssignment);
+    		
+    		return null;
+    	});
+    }
+    
+    private List<OrganizationMemberDTO> convertMemberDTO(List excelList){
+    	List<OrganizationMemberDTO> result = new ArrayList<OrganizationMemberDTO>();
+		boolean firstRow = true;
+		for (Object o : excelList) {
+			if(firstRow){
+				firstRow = false;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			OrganizationMemberDTO dto = new OrganizationMemberDTO();
+			
+			if(!StringUtils.isEmpty(r.getB())){
+				dto.setEmployeeNo(Long.valueOf(r.getA()));
+			}
+			dto.setContactName(r.getB());
+			dto.setContactToken(r.getC());
+			dto.setGroupName(r.getD());
+			result.add(dto);
+		}
+		return result;
     }
     
     private List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){

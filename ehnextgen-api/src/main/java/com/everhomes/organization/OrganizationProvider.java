@@ -201,4 +201,6 @@ public interface OrganizationProvider {
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
     
     List<OrganizationMember> listOrganizationMemberByTokens(String contactPhone, List<Long> organizationIds);
+    
+    Organization findOrganizationByParentAndName(Long parentId, String name);
 }

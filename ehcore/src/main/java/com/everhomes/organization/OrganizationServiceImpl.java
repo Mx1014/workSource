@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,6 +23,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +40,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.Acl;
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Privilege;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -62,30 +67,27 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
-import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -98,7 +100,6 @@ import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.family.FamilyNotificationTemplateCode;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -128,14 +129,12 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
 import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
@@ -152,7 +151,6 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
-import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -170,7 +168,6 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
@@ -189,7 +186,6 @@ import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -6556,6 +6552,95 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return checkOfficalPrivilege(cmd.getOrganizationId());
 	}
 	
+	@Override
+	public void exportRoleAssignmentPersonnelXls(
+			ExcelOrganizationPersonnelCommand cmd,
+			HttpServletResponse httpResponse) {
+		
+		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+		command.setKeywords(cmd.getKeywords());
+		command.setOrganizationId(cmd.getOrganizationId());
+		command.setPageSize(100000);
+		ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnels(command, false);
+		List<OrganizationMemberDTO> memberDTOs = response.getMembers();
+		ByteArrayOutputStream out = null;
+    	XSSFWorkbook wb = this.createXSSFWorkbook(memberDTOs);
+    	try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+		    DownloadUtil.download(out, httpResponse);
+		} catch (Exception e) {
+			LOGGER.error("export error, e = {}", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("close error", e);
+			}
+		}
+	}
+	
+	/**
+     * 创建excel
+     * @param members
+     * @return
+     */
+	@Override
+    public XSSFWorkbook createXSSFWorkbook(List<OrganizationMemberDTO> members){
+    	XSSFWorkbook wb = new XSSFWorkbook();
+		String sheetName = "通讯录";
+		XSSFSheet sheet = wb.createSheet(sheetName);
+		XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);  
+        font.setFontName("Courier New");
+        
+        style.setFont(font);
+        
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER); 
+        
+        int rowNum = 0;	
+        
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+        row1.createCell(0).setCellValue("工号");
+        row1.createCell(1).setCellValue("姓名");
+        row1.createCell(2).setCellValue("手机号");
+        row1.createCell(3).setCellValue("部门");
+        row1.createCell(4).setCellValue("角色");
+        
+        for (OrganizationMemberDTO member : members) {
+        	XSSFRow row = sheet.createRow(rowNum ++);
+        	row.setRowStyle(style);
+        	row.createCell(0).setCellValue(member.getEmployeeNo());
+        	row.createCell(1).setCellValue(member.getContactName());
+            row.createCell(2).setCellValue(member.getContactToken());
+            List<OrganizationDTO> departments = member.getDepartments();
+            String departmentStr = "";
+            for (OrganizationDTO department : departments) {
+            	departmentStr += "|" + department.getName();
+			}
+            if(!StringUtils.isEmpty(departmentStr)){
+            	departmentStr = departmentStr.substring(1);
+            }
+            row.createCell(3).setCellValue(departmentStr);
+            List<RoleDTO> roles = member.getRoles();
+            String roleStr = "";
+            for (RoleDTO role : roles) {
+            	roleStr += "|" + role.getName();
+			}
+            if(!StringUtils.isEmpty(roleStr)){
+            	roleStr = roleStr.substring(1);
+            }
+            row.createCell(4).setCellValue(roleStr);
+		}
+        
+        return wb;
+    }
+	
 	private CheckOfficalPrivilegeResponse checkOfficalPrivilege(Long organizationId) {
 		CheckOfficalPrivilegeResponse response = new CheckOfficalPrivilegeResponse();
 		response.setOfficialFlag((byte) 0);
@@ -6572,5 +6657,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return response;
+	}
+	
+	@Override
+	public void deleteOrganizationPersonnelByContactToken(
+			DeleteOrganizationPersonnelByContactTokenCommand cmd) {
+		
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			
+			List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+			
+			for (Organization department : departments) {
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), department.getId());
+				if(null != member){
+					organizationProvider.deleteOrganizationMemberById(member.getId());
+				}
+			}
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), cmd.getOrganizationId());
+			
+			if(null != member){
+				organizationProvider.deleteOrganizationMemberById(member.getId());
+			}
+			
+			return null;
+		});
 	}
 }

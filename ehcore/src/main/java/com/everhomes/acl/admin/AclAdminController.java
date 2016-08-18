@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -432,7 +433,8 @@ public class AclAdminController extends ControllerBase {
      */
     @RequestMapping("exportRoleAssignmentPersonnelXls")
     @RestReturn(value=String.class)
-    public RestResponse exportRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd) {
+    public RestResponse exportRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, HttpServletResponse httpResponse) {
+    	rolePrivilegeService.exportRoleAssignmentPersonnelXls(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -446,7 +448,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("importRoleAssignmentPersonnelXls")
     @RestReturn(value=String.class)
     public RestResponse importRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.importRoleAssignmentPersonnelXls(cmd, files));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
