@@ -4031,6 +4031,7 @@ CREATE TABLE `eh_punch_day_logs` (
   `punch_times_per_day` TINYINT NOT NULL DEFAULT 2 COMMENT '2 or 4 times', 
   `noon_leave_time` TIME,
   `afternoon_arrive_time` TIME,
+  `exception_status` TINYINT COMMENT '异常状态: 0-正常;1-异常',
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -4166,7 +4167,7 @@ CREATE TABLE `eh_punch_rule_owner_map` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 
 -- 
@@ -4188,7 +4189,7 @@ CREATE TABLE `eh_punch_rules` (
   `operate_time` DATETIME ,
   
   PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 
 -- 
@@ -4222,7 +4223,7 @@ CREATE TABLE `eh_punch_statistics` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 
@@ -4230,7 +4231,7 @@ CREATE TABLE `eh_punch_statistics` (
 -- 
 DROP TABLE IF EXISTS `eh_punch_time_rules`;
 CREATE TABLE `eh_punch_time_rules` (
-  `id` BIGINT COMMENT 'id',
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
   `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
   `owner_id` BIGINT COMMENT 'owner resource(user/organization) id',
   `name` VARCHAR(128) COMMENT 'time rule name ',
@@ -4246,7 +4247,7 @@ CREATE TABLE `eh_punch_time_rules` (
   `operate_time` DATETIME ,
   
   PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 
 -- 
@@ -4263,7 +4264,7 @@ CREATE TABLE `eh_punch_wifi_rules` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 ;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 ;
 
 
 -- 
@@ -4281,7 +4282,7 @@ CREATE TABLE `eh_punch_wifis` (
   `create_time` DATETIME ,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_punch_workday`;
