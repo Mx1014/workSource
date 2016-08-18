@@ -530,8 +530,8 @@ public class PunchAdminController extends ControllerBase {
 	 */
 	@RequestMapping("refreshMonthDayLogs")
 	@RestReturn(value = String.class)
-	public RestResponse refreshMonthDayLogs(String month) {
-		punchService.refreshMonthDayLogs(month);
+	public RestResponse refreshMonthDayLogs(@Valid ListPunchMonthLogsCommand cmd) {
+		punchService.refreshMonthDayLogs(cmd.getPunchMonth());
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
