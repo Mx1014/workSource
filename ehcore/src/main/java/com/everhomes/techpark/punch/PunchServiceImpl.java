@@ -338,6 +338,7 @@ public class PunchServiceImpl implements PunchService {
 				return null;
 			}
 		}
+		pdl.setWorkTime(convertTimeToGMTMillisecond(punchDayLog.getWorkTime()));
 		// Long endrefreshPunchDayLogTimeLong =
 		// DateHelper.currentGMTTime().getTime();
 		Date now = new Date();
@@ -611,7 +612,8 @@ public class PunchServiceImpl implements PunchService {
 		for (PunchLog log : punchLogs){
 			pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
 		}
-		if(PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
+		//非工作日按照两次计算工作时长
+		if(!isWorkDay(logDay.getTime(),pr) || PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 			if (punchLogs.size() == 1) {
 				// 如果只有一次打卡:工作日忘打卡,休息日正常
 //				PunchLogDTO arriveLogDTO = new PunchLogDTO();
@@ -622,6 +624,8 @@ public class PunchServiceImpl implements PunchService {
 				if (!isWorkDay(logDay.getTime(),pr)){
 					// 如果非工作日 NORMAL
 					pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+					pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+					pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
 					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 					return pdl;
 				}
@@ -722,6 +726,8 @@ public class PunchServiceImpl implements PunchService {
 			// 如果是当日，则设置打卡考勤为正常并返回
 			if (!isWorkDay(logDay.getTime(),pr)){
 				pdl.setPunchStatus(PunchStatus.OVERTIME.getCode());
+				pdl.setMorningPunchStatus(PunchStatus.OVERTIME.getCode());
+				pdl.setAfternoonPunchStatus(PunchStatus.OVERTIME.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
 				return pdl;
 			}
