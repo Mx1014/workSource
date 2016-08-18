@@ -3658,9 +3658,11 @@ public class PunchServiceImpl implements PunchService {
 				//月初
 				monthBegin.set(Calendar.DAY_OF_MONTH, 1);
 				Calendar monthEnd = Calendar.getInstance();
-				monthEnd.setTime(monthSF.parse(cmd.getPunchMonth()));
-				//月末
-				monthEnd.set(Calendar.DAY_OF_MONTH, 0);
+				if(!monthSF.format(monthEnd.getTime()).equals(cmd.getPunchMonth())){
+					monthEnd.setTime(monthSF.parse(cmd.getPunchMonth()));
+					//月末
+					monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+				} 
 				for(OrganizationMember member : organizationMembers){
 					UserMonthLogsDTO userMonthLogsDTO = new UserMonthLogsDTO(); 
 					response.getUserLogs().add(userMonthLogsDTO);
@@ -3840,9 +3842,11 @@ public class PunchServiceImpl implements PunchService {
 			monthBegin.setTime(monthSF.parse(month));
 			//月初
 			monthBegin.set(Calendar.DAY_OF_MONTH, 1);
-			monthEnd.setTime(monthSF.parse(month));
-			//月末
-			monthEnd.set(Calendar.DAY_OF_MONTH, 0);
+			if(!monthSF.format(monthEnd.getTime()).equals(month)){
+				monthEnd.setTime(monthSF.parse(month));
+				//月末
+				monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+			}
 
 			while (true) {
 
