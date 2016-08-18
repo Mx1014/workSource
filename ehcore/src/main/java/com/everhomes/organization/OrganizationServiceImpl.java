@@ -532,22 +532,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(!StringUtils.isEmpty(cmd.getBuildingName())){
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
 			if(null != building){
-				cmd.setBuildingId(cmd.getBuildingId());
+				cmd.setBuildingId(building.getId());
 			}
 		}
 		
 		Long buildingId = cmd.getBuildingId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
-			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, cmd.getPageSize(), locator);
+			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
 			for (OrganizationAddress address : addresses) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
 					dtos.add(dto);
 			}
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
 			for (OrganizationCommunityRequest req : requests) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -555,7 +556,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, cmd.getPageSize());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, pageSize);
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -4740,13 +4741,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
-				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_OBJECT_NOT_EXIST,
-						"organization detail is null.");
+			}else{
+				detail.setContactor(cmd.getAccountName());
+				detail.setContact(cmd.getAccountPhone());
+				organizationProvider.updateOrganizationDetail(detail);
 			}
-			
-			detail.setContactor(cmd.getAccountName());
-			detail.setContact(cmd.getAccountPhone());
-			organizationProvider.updateOrganizationDetail(detail);
 			return null;
 		});
 	}
@@ -6521,6 +6520,44 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    return resp;
 	}
+	
+	@Override
+	public List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag) {
+		
+		if(null == naviFlag){
+			naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
+		}
+		
+		
+		Organization org =  this.checkOrganization(id);
+
+		if(null == org){
+			return null;
+		}
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+		
+		if(0 == orgs.size()){
+			return null;
+		}
+		
+		List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
+		for (Organization organization : orgs) {
+			OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+			if(OrganizationNaviFlag.fromCode(naviFlag) == OrganizationNaviFlag.HIDE_NAVI){
+				if(OrganizationNaviFlag.fromCode(organization.getShowFlag()) == OrganizationNaviFlag.SHOW_NAVI){
+					rganizationDTOs.add(orgDto);
+				}
+			}else{
+				rganizationDTOs.add(orgDto);
+			}
+		}
+		
+		
+		return rganizationDTOs;
+	}
+
 
 	@Override
 	public CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd) {

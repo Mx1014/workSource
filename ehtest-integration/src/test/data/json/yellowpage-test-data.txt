@@ -1,0 +1,56 @@
+{
+  "eh_categories": [
+    {
+		"id":1,
+		"parent_id":100001,
+		"link_id":0,
+		"name":"知识产权",
+		"path":"服务联盟类型/知识产权",
+		"status":2,
+		"create_time":"2016-7-27 11:58:34",
+		"namespace_id":1000000
+	},
+	{
+		"id":2,
+		"parent_id":100001,
+		"link_id":0,
+		"name":"法律事务",
+		"path":"服务联盟类型/法律事务",
+		"status":2,
+		"create_time":"2016-7-27 11:58:34",
+		"namespace_id":1000000
+	}
+  ],
+  "eh_yellow_pages": [
+    {
+		"id":1,
+		"parent_id":2,
+		"owner_type":"community",
+		"owner_id":240111044331048623,
+		"name":"深圳市创卓企业管理顾问有限公司",
+		"type":2,
+		"address":"广东省深圳市南山区科技园科智西路25栋5层东",
+		"contact":"13509667165",
+		"description":" 深圳市卓越质量品牌研究院是中国首家以《卓越绩效评价准则》为研究对象的专业研究院，通过研究世界最先进企业的管理模式，寻求适合于中国企业的最优管理模式。",
+		"poster_uri":"cs://1/image/aW1hZ2UvTVRvM01qRmtaalk0Wm1WaE9UVmxNR00wT0RNek5tVXpObVkyT0RZek56VXdZUQ",
+		"status":2,
+		"longitude":113.952909,
+		"latitude":22.549597,
+		"string_tag3":"法律事务",
+		"integral_tag2":2
+	},
+	{
+		"id":2,
+		"parent_id":0,
+		"owner_type":"community",
+		"owner_id":240111044331048623,
+		"name":"服务联盟",
+		"nick_name":"服务联盟首页",
+		"type":2,
+		"contact":"0755-86620293",
+		"description":"公共服务联盟旨在集聚社会优质服务资源，为园区广大企业提供专业、高效、有保障的服务，以帮助广大企业畅通信息渠道，提升企业管理，降低经营成本，增强市场竞争能力。服务类型包括项目融资对接、人才招聘和培训、信息化建设、管理咨询、知识产权管理、质量管理、外贸事务、法律事务、 物流服务、场地装修等。",
+		"poster_uri":"cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ",
+		"status":2
+	}
+  ]
+}

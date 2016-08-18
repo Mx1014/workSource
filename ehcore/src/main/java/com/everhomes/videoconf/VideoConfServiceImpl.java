@@ -1412,8 +1412,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return time;
 	}
 	
+
 	private int getConfStatus(String sourceAccountName, Long conferenceId) {
 		String path = BIZCONFPATH + "/getConf";
+
 		Long timestamp = DateHelper.currentGMTTime().getTime();
 		String tokenString = sourceAccountName + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 		String token = DigestUtils.md5Hex(tokenString);

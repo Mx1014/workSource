@@ -3506,6 +3506,10 @@ public class GroupServiceImpl implements GroupService {
        
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
+        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
+        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
+        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
+        }
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         
             //如果圈太大，不发消息
@@ -3879,12 +3883,29 @@ public class GroupServiceImpl implements GroupService {
 				quitFromGroup(userId, gm);
 				//转移权限
 				GroupMember newCreator = transferPrivilege(userId, groupId);
-				//发邮件
+				//发消息
+				sendNotificationToOldCreator(gm, user);
 				sendNotificationToNewCreator(newCreator, user.getLocale());
 				
 				return null;
 			});
 		}
+	}
+
+	private void sendNotificationToOldCreator(GroupMember gm, User user) {
+		Group group = groupProvider.findGroupById(gm.getGroupId());
+		String nickname = gm.getMemberNickName();
+		if (StringUtils.isEmpty(nickname)) {
+			nickname = user.getNickName();
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+       
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE_FOR_OPERATOR;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+        sendMessageToUser(user.getId(), notifyTextForApplicant, null);
 	}
 
 	private void sendNotificationToNewCreator(GroupMember newCreator, String locale) {
@@ -3895,7 +3916,13 @@ public class GroupServiceImpl implements GroupService {
 			nickname = user.getNickName();
 		}
 		
-		sendNotificationToCreator(newCreator.getMemberId(), nickname, group, locale);
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+       
+        String scope = GroupAdminNotificationTemplateCode.SCOPE;
+        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
 	}
 
 	private boolean checkIfOnlyOneGroupMember(Long userId, Long groupId) {
@@ -3921,9 +3948,9 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	private void quitFromGroup(Long userId, GroupMember gm) {
-		//把memberStatus设置为inactive即可
-		gm.setMemberStatus(GroupMemberStatus.INACTIVE.getCode());
-		groupProvider.updateGroupMember(gm);
+		this.groupProvider.deleteGroupMember(gm);
+        this.userProvider.deleteUserGroup(userId, gm.getGroupId());
+        deleteUserGroupOpRequest(gm.getGroupId(), gm.getMemberId(), userId, "leave group");
 	}
 
 	private GroupMember checkQuitAndTransferPrivilegeParameters(Long userId, Long groupId) {

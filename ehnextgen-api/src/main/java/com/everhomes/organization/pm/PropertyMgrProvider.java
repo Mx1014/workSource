@@ -128,4 +128,8 @@ public interface PropertyMgrProvider {
 	public List<CommunityPmBillItem> listOrganizationBillItemsByBillId(Long billId);
 	
 	List<OrganizationTask> communityPmTaskLists(Long organizationId, Long communityId,String taskType,Byte status,String startTime,String endTime);
+
+	List<CommunityPmOwner> listCommunityPmOwners(List<Long> ids);
+	List<CommunityPmOwner> listCommunityPmOwnersByToken(Long communityId, String contactToken);
+	List<CommunityPmOwner> listCommunityPmOwnersByToken(Integer namespaceId, String contactToken);
 }

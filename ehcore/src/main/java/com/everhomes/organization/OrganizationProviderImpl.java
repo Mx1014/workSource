@@ -1107,7 +1107,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, OrganizationMember.class);
 		return null;
 	}
+	
+	@Override
+	public List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId){
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetch();
 
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return list;
+	}
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByOrgId(Long orgId) {
@@ -1430,7 +1444,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes,String userName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		 
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		Condition cond = Tables.EH_ORGANIZATIONS.PATH.like(superiorPath + "/%")
+				.or(Tables.EH_ORGANIZATIONS.PATH.eq(superiorPath));
+		if(null != groupTypes){
+			cond = cond.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addConditions(
+				Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(
+						context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+						.where(cond)));
+		if(!StringUtils.isEmpty(userName))
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+userName+"%"));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		 
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		 
+		if(result != null && !result.isEmpty())
+			return result;
+		return null;
+	}
 	@Override
 	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

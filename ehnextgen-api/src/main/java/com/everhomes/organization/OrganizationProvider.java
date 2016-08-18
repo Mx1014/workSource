@@ -57,11 +57,12 @@ public interface OrganizationProvider {
     List<OrganizationCommunity> listOrganizationByCommunityId(Long communityId);
     
     int countOrganizations(String type, String name);
-    int countOrganizationMembers(Long organizationId, Long memberUid);
+    int countOrganizationMembers(Long organnizationId, Long memberUid);
     int countOrganizationCommunitys(Long organizationId);
 	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
 	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
+	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
@@ -200,6 +201,7 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
+
   //根据第三方机构token获取organization
     Organization findOrganizationByOrganizationToken(String organizationToken);
 	List<Organization> listOrganizationsByIds(List<Long> ids);
@@ -207,4 +209,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationsByIds(Set<Long> ids);
 	
 	Organization findOrganizationByNameAndNamespaceId(String name, Integer namespaceId);
+
+	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
+
 }

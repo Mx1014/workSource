@@ -30,12 +30,14 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
@@ -45,6 +47,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillItems;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
@@ -60,7 +63,9 @@ import com.everhomes.server.schema.tables.records.EhOrganizationContactsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.Tuple;
 
@@ -70,6 +75,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 
 	// ??? How to set cache if there is more than one parameters? 
@@ -491,6 +499,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	@Override
 	public void createPropOwner(CommunityPmOwner communityPmOwner) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwners.class));
+		communityPmOwner.setId(id);
+		communityPmOwner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		communityPmOwner.setCreatorUid(UserContext.current().getUser().getId());
 
 		EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
 		dao.insert(communityPmOwner);
@@ -1323,6 +1336,57 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		query.addOrderBy(Tables.EH_ORGANIZATION_BILL_ITEMS.ID.asc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmBillItem.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<CommunityPmOwner> listCommunityPmOwners(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		if(ids != null & ids.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.in(ids));
+		
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<CommunityPmOwner> listCommunityPmOwnersByToken(
+			Long communityId, String contactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<CommunityPmOwner> listCommunityPmOwnersByToken(
+			Integer namespaceId, String contactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
 			return null;
 		});
 		return result;
