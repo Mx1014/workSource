@@ -1,6 +1,8 @@
 package com.everhomes.rest.acl.admin;
 
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,9 +13,13 @@ import com.everhomes.util.StringHelper;
  */
 public class ExcelRoleExcelRoleAssignmentPersonnelCommand {
 	
+	@NotNull
 	private Long organizationId;
 	
+	@NotNull
 	private Long roleId;
+	
+	private String keywords;
     
 	public Long getOrganizationId() {
 		return organizationId;
@@ -31,6 +37,14 @@ public class ExcelRoleExcelRoleAssignmentPersonnelCommand {
 		this.roleId = roleId;
 	}
 	
+
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
 
 	@Override
     public String toString() {

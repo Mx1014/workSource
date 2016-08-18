@@ -12,7 +12,9 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -443,7 +445,7 @@ public class AclAdminController extends ControllerBase {
      */
     @RequestMapping("importRoleAssignmentPersonnelXls")
     @RestReturn(value=String.class)
-    public RestResponse importRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd) {
+    public RestResponse importRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
