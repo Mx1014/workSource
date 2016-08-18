@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -2192,6 +2193,61 @@ long id = sequenceProvider.getNextSequence(key);
 	              //fetchAny() maybe return null
 	              return null;
 	          }
+	}
+
+	@Override
+	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
+			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
+			Time workTime,  Integer pageOffset,Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(ownerId));
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		if(userIds != null)
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(null!= arriveTimeCompareFlag && arriveTime != null){ 
+			if(arriveTimeCompareFlag.equals(TimeCompareFlag.LESSOREQUAL.getCode())){
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.lessOrEqual(arriveTime));
+			}else{
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.greaterOrEqual(arriveTime));
+			}
+		}
+		if(null!= leaveTimeCompareFlag && null != leaveTime){ 
+			if(leaveTimeCompareFlag.equals(TimeCompareFlag.LESSOREQUAL.getCode())){
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.LEAVE_TIME.lessOrEqual(leaveTime));
+			}else{
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.LEAVE_TIME.greaterOrEqual(leaveTime));
+			}
+		}
+		if(null!= workTimeCompareFlag && null != workTime){ 
+			if(workTimeCompareFlag.equals(TimeCompareFlag.LESSOREQUAL.getCode())){
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.WORK_TIME.lessOrEqual(workTime));
+			}else{
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.WORK_TIME.greaterOrEqual(workTime));
+			}
+		}
+		 
+
+//		Integer offset = pageOffset == null ? 0 : (pageOffset - 1 ) * pageSize;
+		if(null != pageOffset && null != pageSize)
+			step.limit(pageOffset , pageSize);
+		List<PunchDayLog> result  = new ArrayList<PunchDayLog>();
+		step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+					result.add( ConvertHelper.convert(r, PunchDayLog.class));
+			 return null;
+		});
+		if(result == null || result.isEmpty())
+			return null;
+		return result;
 	}
 }
 
