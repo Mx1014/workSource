@@ -1,5 +1,7 @@
 package com.everhomes.rest.messaging;
 
+import com.everhomes.util.StringHelper;
+
 public class ImageBody {
     private String url;
     private String uri;
@@ -58,5 +60,10 @@ public class ImageBody {
     }
     public void setFormat(String format) {
         this.format = format;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
