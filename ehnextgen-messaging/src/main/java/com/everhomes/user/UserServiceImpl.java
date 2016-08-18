@@ -892,6 +892,11 @@ public class UserServiceImpl implements UserService {
 							    if(foundLogin == null) {
 							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
 							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+					                      if(LOGGER.isInfoEnabled()) {
+					                                LOGGER.info("User is kickoff state2 for logined in another place, userId=" + user.getId() 
+					                                        + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
+					                            }
+					                      
 							                //kickoff this login
 							                oldDeviceId = login.getDeviceIdentifier();
 							                oldLoginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
