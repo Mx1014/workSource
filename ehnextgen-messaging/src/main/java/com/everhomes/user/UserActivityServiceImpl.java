@@ -59,6 +59,8 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -161,6 +163,7 @@ import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.BizOrderHolder;
@@ -179,6 +182,7 @@ import com.everhomes.rest.user.ListSignupActivitiesCommand;
 import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.OrderCountDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -200,6 +204,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StatusChecker;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Component
 public class UserActivityServiceImpl implements UserActivityService {
@@ -661,9 +666,8 @@ public class UserActivityServiceImpl implements UserActivityService {
                 	Gson gson = new Gson();
                     BizOrderHolder holder = gson.fromJson(result.getBody(), BizOrderHolder.class);
                     if(holder.getResult()){
-                    	Map<String,Object> data = (Map<String, Object>) holder.getBody();
-                    	int orderCount = Double.valueOf(String.valueOf(data.get("orderCount"))).intValue();
-                    	response.setOrderCount(orderCount);
+                    	OrderCountDTO orderCount = gson.fromJson(holder.getBody(), new TypeToken<OrderCountDTO>() {}.getType());
+                    	response.setOrderCount(Integer.parseInt(orderCount.getOrderCount()));
                     }
                     
                 }
