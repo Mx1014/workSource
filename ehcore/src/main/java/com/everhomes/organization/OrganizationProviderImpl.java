@@ -1407,6 +1407,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
+	
+	@Override
+	public Organization findOrganizationByParentAndName(Long parentId, String name) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Organization> result  = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		
+		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+		
+		if(0 == result.size()){
+			return null;
+		}
+		return result.get(0);
+	}
 
 
 	@Override

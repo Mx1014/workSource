@@ -3,6 +3,7 @@ package com.everhomes.organization.admin;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
@@ -42,6 +44,8 @@ import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
+import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
@@ -779,8 +783,6 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("updateOrganizationPersonnel")
     @RestReturn(value=String.class)
     public RestResponse updateOrganizationPersonnel(@Valid UpdateOrganizationMemberCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         organizationService.updateOrganizationPersonnel(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -795,9 +797,6 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteOrganizationPersonnel")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationPersonnel(@Valid DeleteOrganizationIdCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        
     	organizationService.deleteOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -812,9 +811,6 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("verifyPersonnelByPhone")
     @RestReturn(value=OrganizationMemberDTO.class)
     public RestResponse verifyPersonnelByPhone(@Valid VerifyPersonnelByPhoneCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        
         RestResponse response = new RestResponse(organizationService.verifyPersonnelByPhone(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -829,9 +825,6 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganizationAccount")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationAccount(@Valid CreateOrganizationAccountCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        
         organizationService.createOrganizationAccount(cmd, RoleConstants.ENTERPRISE_SUPER_ADMIN);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1074,5 +1067,32 @@ public class OrganizationAdminController extends ControllerBase {
               res.setErrorDescription("OK");
               
               return res;
+          }
+
+          /**
+           * <b>URL: /admin/org/exportOrganizationPersonnelXls</b>
+           * <p>导出通讯录人员</p>
+           */
+          @RequestMapping("exportOrganizationPersonnelXls")
+          @RestReturn(value=String.class)
+          public RestResponse exportRoleAssignmentPersonnelXls(@Valid ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse) {
+              RestResponse response = new RestResponse();
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;
+          }
+          
+          /**
+           * <b>URL: /admin/org/deleteOrganizationPersonnelByContactToken</b>
+           * <p>删除机构成员包括子部门</p>
+           */
+          @RequestMapping("deleteOrganizationPersonnelByContactToken")
+          @RestReturn(value=String.class)
+          public RestResponse deleteOrganizationPersonnelByContactToken(@Valid DeleteOrganizationPersonnelByContactTokenCommand cmd) {
+          	organizationService.deleteOrganizationPersonnelByContactToken(cmd);
+              RestResponse response = new RestResponse();
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;
           }
 }

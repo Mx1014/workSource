@@ -11,6 +11,12 @@ import java.util.Map;
 
 
 
+
+
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.entity.EntityType;
@@ -57,6 +63,8 @@ import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
+import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
@@ -66,7 +74,6 @@ import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
@@ -343,4 +350,24 @@ public interface OrganizationService {
 	 * @return
 	 */
 	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath);
+	
+	/**
+	 * 导出通讯录
+	 * @param cmd
+	 * @param httpResponse
+	 */
+	void exportRoleAssignmentPersonnelXls(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
+	
+	/**
+	 * 删除机构人员 包括子部门
+	 * @param cmd
+	 */
+	void deleteOrganizationPersonnelByContactToken(DeleteOrganizationPersonnelByContactTokenCommand cmd);
+	
+	/**
+	 * 生产excel
+	 * @param members
+	 * @return
+	 */
+	XSSFWorkbook createXSSFWorkbook(List<OrganizationMemberDTO> members);
 }
