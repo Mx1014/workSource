@@ -1952,7 +1952,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
         		doorplateAddresses.add(address.getAddress());
 			}
-        	organizationDto.setDoorplateAddresses(doorplateAddresses);
+        	
+        	if(0 < doorplateAddresses.size()){
+        		organizationDto.setAddress(doorplateAddresses.get(0));
+        	}
         }
         
         
