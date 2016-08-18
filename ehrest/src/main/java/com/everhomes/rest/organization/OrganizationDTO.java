@@ -75,9 +75,6 @@ public class OrganizationDTO {
 	
 	private Byte showFlag;
 	
-	@ItemType(String.class)
-	private List<String> doorplateAddresses;
-	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> childrens;
 	
@@ -310,16 +307,6 @@ public class OrganizationDTO {
     public void setFeedbackForumId(Long feedbackForumId) {
         this.feedbackForumId = feedbackForumId;
     }
-    
-    
-
-    public List<String> getDoorplateAddresses() {
-		return doorplateAddresses;
-	}
-
-	public void setDoorplateAddresses(List<String> doorplateAddresses) {
-		this.doorplateAddresses = doorplateAddresses;
-	}
 
 	@Override
     public String toString() {
