@@ -43,6 +43,10 @@ import java.util.stream.Collectors;
 
 
 
+
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +89,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
@@ -106,6 +113,7 @@ import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
@@ -126,6 +134,7 @@ import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -754,6 +763,34 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	}
     	
     	return true;
+    }
+    
+    @Override
+    public void exportRoleAssignmentPersonnelXls(
+    		ExcelRoleExcelRoleAssignmentPersonnelCommand cmd,
+    		HttpServletResponse response) {
+    	
+    	Long organizationId = cmd.getOrganizationId();
+    	
+    	Long roleId = cmd.getRoleId();
+    	List<Long> roleIds = new ArrayList<Long>();
+    	ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
+    	command.setKeywords(cmd.getKeywords());
+    	command.setOrganizationId(organizationId);
+    	roleIds.add(roleId);
+    	command.setRoleIds(roleIds);
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(command);
+    	List<OrganizationMemberDTO> members = res.getMembers();
+    	
+    }
+    
+    @Override
+    public ImportDataResponse importRoleAssignmentPersonnelXls(
+    		ExcelRoleExcelRoleAssignmentPersonnelCommand cmd,
+    		MultipartFile[] files) {
+    	
+    	
+    	return null;
     }
     
     private List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){

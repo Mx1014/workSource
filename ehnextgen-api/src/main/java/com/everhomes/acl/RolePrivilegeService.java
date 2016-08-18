@@ -3,7 +3,10 @@ package com.everhomes.acl;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
@@ -12,6 +15,7 @@ import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
@@ -23,6 +27,7 @@ import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 
 public interface RolePrivilegeService {
 	
@@ -149,4 +154,19 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 */
 	void batchAddTargetRoles(BatchAddTargetRoleCommand cmd);
+	
+	/**
+	 * 导入
+	 * @param files
+	 * @return
+	 */
+	ImportDataResponse importRoleAssignmentPersonnelXls(ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, MultipartFile[] files);
+	
+	/**
+	 * 导出
+	 * @param cmd
+	 * @param response
+	 */
+	void exportRoleAssignmentPersonnelXls(ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, HttpServletResponse response);
+	
 }
