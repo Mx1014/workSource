@@ -30,8 +30,11 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
 import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
 import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
 import com.everhomes.rest.organization.pm.DeletePmBillCommand;
 import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerCommand;
 import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
 import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
 import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
@@ -76,15 +79,19 @@ import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
 import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
 import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
 import com.everhomes.rest.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.SearchPMOwnerCommand;
+import com.everhomes.rest.organization.pm.SearchPMOwnerResponse;
 import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
 import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
 import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
 import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
 import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerCommand;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
@@ -103,6 +110,8 @@ public class PropertyMgrController extends ControllerBase {
 	@Autowired
 	OrganizationService organizationService;
 	
+	@Autowired
+	private PMOwnerSearcher pmOwnerSearcher;
 
 	/**
 	 * <b>URL: /pm/findPropertyOrganization</b>
@@ -1370,4 +1379,81 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /pm/searchPMOwnerInfo</b>
+	 * <p>列出业主信息表</p>
+	 */
+	@RequestMapping("searchPMOwnerInfo")
+	@RestReturn(value=SearchPMOwnerResponse.class)
+	public RestResponse searchPMOwnerInfo(@Valid SearchPMOwnerCommand cmd) {
+		SearchPMOwnerResponse commandResponse = pmOwnerSearcher.query(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/createPMPropertyOwnerInfo</b>
+	 * <p>增加新业主</p>
+	 */
+	@RequestMapping("createPMPropertyOwnerInfo")
+	@RestReturn(value=String.class)
+	public RestResponse createPMPropertyOwnerInfo(@Valid CreatePropOwnerCommand cmd) {
+		
+		propertyMgrService.createPMPropertyOwnerInfo(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/deletePMPropertyOwnerInfo</b>
+	 * <p>删除业主</p>
+	 */
+	@RequestMapping("deletePMPropertyOwnerInfo")
+	@RestReturn(value=String.class)
+	public RestResponse deletePMPropertyOwnerInfo(@Valid DeletePropOwnerCommand cmd) {
+
+		propertyMgrService.deletePMPropertyOwnerInfo(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/deletePMPropertyOwnerAddress</b>
+	 * <p>删除业主地址</p>
+	 */
+	@RequestMapping("deletePMPropertyOwnerAddress")
+	@RestReturn(value=String.class)
+	public RestResponse deletePMPropertyOwnerAddress(@Valid DeletePropOwnerAddressCommand cmd) {
+
+		propertyMgrService.deletePMPropertyOwnerAddress(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/createPMPropertyOwnerAddress</b>
+	 * <p>增加业主地址</p>
+	 */
+	@RequestMapping("createPMPropertyOwnerAddress")
+	@RestReturn(value=String.class)
+	public RestResponse createPMPropertyOwnerAddress(@Valid CreatePropOwnerAddressCommand cmd) {
+
+		propertyMgrService.createPMPropertyOwnerAddress(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

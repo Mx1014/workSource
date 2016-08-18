@@ -38,6 +38,8 @@ public class CreateDoorAuthByUser {
     private String organization;
     private String description;
     
+    private String authMethod;
+    
     public Long getDoorId() {
         return doorId;
     }
@@ -86,6 +88,13 @@ public class CreateDoorAuthByUser {
     }
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getAuthMethod() {
+        return authMethod;
+    }
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
     }
     @Override
     public String toString() {

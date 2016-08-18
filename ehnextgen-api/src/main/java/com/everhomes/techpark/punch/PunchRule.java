@@ -14,5 +14,4 @@ public class PunchRule extends EhPunchRules {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

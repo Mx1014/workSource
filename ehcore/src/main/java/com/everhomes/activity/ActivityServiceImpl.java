@@ -930,8 +930,10 @@ public class ActivityServiceImpl implements ActivityService {
             private static final long serialVersionUID = 8928858603520552572L;
 
         {
-            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            put("subject", activity.getSubject());
             put("reason",cmd.getReason());
+            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            
         }}, ""));
 //        forumProvider.createPost(comment);
         

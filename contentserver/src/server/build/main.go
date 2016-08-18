@@ -8,7 +8,6 @@ import (
 	"runtime"
 
 	"git.lab.everhomes.com/eh-dev/contentserver/src/server"
-	_ "github.com/takama/daemon"
 )
 
 var cfgFile string
@@ -30,19 +29,6 @@ func main() {
 		log.Fatal("config file not exist!")
 		os.Exit(-1)
 	}
-
-	//TODO for daemon
-	//service, err := daemon.New("contentserver", "content server for saving file quickly")
-	//if err != nil {
-	//	log.Fatal("Error: ", err)
-	//	os.Exit(-2)
-	//}
-
-	//status, err := service.Install()
-	//if err != nil {
-	//	log.Fatal(status, "\nError: ", err)
-	//	os.Exit(-3)
-	//}
 
 	serverContext, err := server.NewContext(cfgFile)
 	if err != nil {

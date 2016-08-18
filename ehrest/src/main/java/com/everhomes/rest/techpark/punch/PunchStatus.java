@@ -10,6 +10,7 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum PunchStatus {
+	FORGOT((byte)14),
 	OVERTIME((byte)9),
 	OUTWORK((byte)8),
 	EXCHANGE((byte)7),

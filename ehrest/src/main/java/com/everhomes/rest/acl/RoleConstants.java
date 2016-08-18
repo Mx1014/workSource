@@ -36,6 +36,9 @@ public interface RoleConstants {
     /** 机构管理： 客服管理 */
     public static final long PM_KEFU = 1007L;
     
+    /** 设备巡检：设备及其配件的操作 */
+    public static final long EQUIPMENT_MANAGER = 1010L;
+    
     
     
     /** 平台定义的物业角色 */

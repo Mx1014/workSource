@@ -8,6 +8,7 @@ public interface JournalProvider {
 	Journal findJournal(Long id);
 	void updateJournal(Journal journal);
 	void updateJournalConfig(JournalConfig journalConfig);
+	void createJournalConfig(JournalConfig journalConfig);
 	JournalConfig findJournalConfig(Integer namespaceId);
 	void createJournal(Journal journal);
 }

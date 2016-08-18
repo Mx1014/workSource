@@ -71,6 +71,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.PusherService;
 import com.everhomes.messaging.UserMessageRoutingHandler;
@@ -84,6 +85,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
@@ -287,6 +289,13 @@ public class UserServiceImpl implements UserService {
 	
     @Autowired
     private LocaleStringService localeStringService;
+    
+    @Autowired
+    private PropertyMgrService propertyMgrService;
+    
+    @Autowired
+    private MessagingKickoffService kickoffService;
+    
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -557,6 +566,9 @@ public class UserServiceImpl implements UserService {
 			// 刷新企业通讯录
 	        organizationService.processUserForMember(identifier);
 	        
+	        //刷新地址信息
+	        propertyMgrService.processUserForOwner(identifier);
+	        
 			return rLogin;
 		}
 
@@ -764,6 +776,11 @@ public class UserServiceImpl implements UserService {
 
 			return login;
 		}
+		
+		if(kickoffService.isKickoff(UserContext.current().getNamespaceId(), loginToken)) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+                    UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others"); 		    
+		}
 
 		LOGGER.error("Invalid token or token has expired, userKey=" + userKey + ", loginToken=" + loginToken + ", userLogin=" + login);
 		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN, 
@@ -844,6 +861,7 @@ public class UserServiceImpl implements UserService {
 		int nextLoginId = 1;
 		int foundIndex = 0xFFFFFF;
 		String oldDeviceId = "";
+		LoginToken oldLoginToken = null;
 
 		if(maxLoginId != null) {
 			for(int i = 1; i <= maxLoginId.intValue(); i++) {
@@ -866,16 +884,28 @@ public class UserServiceImpl implements UserService {
 							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
 								foundLogin = login;
 								break;
+							} else if(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+							    //Inner login not found
+							    //Do nothing
 							} else {
+							    //Not inner login, not web login
 							    if(foundLogin == null) {
 							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
-							            login.setStatus(UserLoginStatus.LOGGED_OFF);
-							            oldDeviceId = login.getDeviceIdentifier();
+							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+							                //kickoff this login
+							                oldDeviceId = login.getDeviceIdentifier();
+							                oldLoginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+							                login.setStatus(UserLoginStatus.LOGGED_OFF);          
+							            }
+	                              
 			                        login.setDeviceIdentifier(deviceIdentifier);
 							        }
 							       
                             foundLogin = login;
                             foundIndex = i+2;
+							    } else if(login.getDeviceIdentifier() == null || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+							        //the next login is not web login and inner login
+							        foundIndex = i+2;
 							    } else {
 							        //found twice, delete all logins
 							        accessor.getTemplate().delete(accessor.getBucketName());
@@ -914,12 +944,13 @@ public class UserServiceImpl implements UserService {
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
-		if(isNew) {
-			//Kickoff other login in this devices
+		if(isNew && !(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) ) {
+			//Kickoff other login in this devices which is not inner login
 			kickoffLoginByDevice(foundLogin);
 		}
 		
 		if(!oldDeviceId.isEmpty()) {
+		    kickoffService.kickoff(namespaceId, oldLoginToken);
 	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
 	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
 	            locale = user.getLocale(); 

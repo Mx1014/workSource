@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -64,11 +66,15 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -143,6 +149,9 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	@Autowired
 	private CommunityProvider communityProvider;
 	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+	
 	
 	@PostConstruct
 	public void setup(){
@@ -181,11 +190,15 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		List<Date> dDates = DateUtil.getStartToEndDates(new Date(startDate), new Date(endDate));
 		
 		
+		
 		for (Date date : dDates) {
 			String sDate = DateUtil.dateToStr(date, DateUtil.YMR_SLASH);
 			//按日期结算数据
-			StatTaskLog statTaskLog = this.settlementByDate(sDate);
-			statTaskLogs.add(statTaskLog);
+			this.coordinationProvider.getNamedLock(CoordinationLocks.STAT_SETTLEMENT.getCode() + "_" + sDate).enter(()-> {
+				StatTaskLog statTaskLog = this.settlementByDate(sDate);
+				statTaskLogs.add(statTaskLog);
+				return null;
+            });
 		}
 		
 		return statTaskLogs.stream().map(r ->{
@@ -218,8 +231,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			else
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
-		
-		
 		
 		List<StatServiceSettlementResult> results = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
 		
@@ -506,10 +517,11 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			statTaskLog.setTaskNo(date);
 			statTransactionProvider.createStatTaskLog(statTaskLog);
 		}else{
-			if(StatTaskLock.fromCode(statTaskLog.getIslock()) == StatTaskLock.LOCK){
-				LOGGER.debug("settlement data task being executed, date = {}, lock = {} ", date, statTaskLog.getIslock());
-				return statTaskLog;
-			}
+			//把锁置成无效
+//			if(StatTaskLock.fromCode(statTaskLog.getIslock()) == StatTaskLock.LOCK){
+//				LOGGER.debug("settlement data task being executed, date = {}, lock = {} ", date, statTaskLog.getIslock());
+//				return statTaskLog;
+//			}
 			//把生成结算数据的任务锁住，不让其他线程执行
 			statTaskLog.setIslock(StatTaskLock.LOCK.getCode());
 			statTransactionProvider.updateStatTaskLog(statTaskLog);

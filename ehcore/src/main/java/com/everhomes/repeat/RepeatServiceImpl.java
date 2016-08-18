@@ -20,6 +20,7 @@ import com.everhomes.rest.repeat.RepeatDurationUnit;
 import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingStatus;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -313,6 +314,146 @@ public class RepeatServiceImpl implements RepeatService {
 		}
 		
 		return date;
+	}
+
+	@Override
+	public String getExecutionFrequency(RepeatSettingsDTO rs) {
+		List<RepeatExpressionDTO> expressionDto =  analyzeExpression(rs.getExpression());
+		List<TimeRangeDTO> timeRanges = analyzeTimeRange(rs.getTimeRanges());
+		
+		StringBuilder sb = new StringBuilder();
+		switch(rs.getRepeatType()) {
+		case 0:
+			sb.append("按次");
+		case 1:
+			sb.append("每" + rs.getRepeatInterval() + "天");
+			if(timeRanges != null) {
+				sb.append(timeRanges.size() + "次");
+			}
+			break; 
+		case 2:
+			sb.append("每" + rs.getRepeatInterval() + "周");
+			if(expressionDto != null) {
+				sb.append(expressionDto.size() * timeRanges.size() + "次");
+			}
+			break;
+		case 3:
+			sb.append("每" + rs.getRepeatInterval() + "月");
+			if(expressionDto != null) {
+				sb.append(expressionDto.size() * timeRanges.size() + "次");
+			}
+			break;
+		case 4:
+			sb.append("每" + rs.getRepeatInterval() + "年");
+			if(expressionDto != null) {
+				sb.append(expressionDto.size() * timeRanges.size() + "次");
+			}
+			break;
+		}
+		
+		return sb.toString();
+	}
+
+	@Override
+	public String getExecuteStartTime(RepeatSettingsDTO rs) {
+		List<RepeatExpressionDTO> expressionDto =  analyzeExpression(rs.getExpression());
+		List<TimeRangeDTO> timeRanges = analyzeTimeRange(rs.getTimeRanges());
+		
+		StringBuilder sb = new StringBuilder();
+		switch(rs.getRepeatType()) {
+		case 0:
+			if(expressionDto != null) {
+				for(RepeatExpressionDTO dto : expressionDto) {
+					if(sb.length() != 0)
+						sb.append(", ");
+					
+					sb.append(dto.getYear() + "年" + (dto.getMonth()+1) + "月" + dto.getDay() + "日");
+				}
+			}
+			
+		case 1:
+			if(timeRanges != null) {
+				for(TimeRangeDTO dto : timeRanges) {
+					if(sb.length() != 0)
+						sb.append(", ");
+					
+					sb.append(dto.getStartTime());
+				}
+			}
+			break; 
+		case 2:
+			if(expressionDto != null) {
+				for(RepeatExpressionDTO dto : expressionDto) {
+					if(sb.length() != 0)
+						sb.append(", ");
+					
+					if(dto.getDay() == 1) {
+						sb.append("周日");
+					} else {
+						sb.append("周" + (dto.getDay()-1));
+					}
+					
+				}
+			}
+			break;
+		case 3:
+			if(expressionDto != null) {
+				for(RepeatExpressionDTO dto : expressionDto) {
+					if(sb.length() != 0)
+						sb.append(", ");
+					
+					sb.append("每月" + dto.getDay() + "号");
+				}
+			}
+			break;
+		case 4:
+			if(expressionDto != null) {
+				for(RepeatExpressionDTO dto : expressionDto) {
+					if(sb.length() != 0)
+						sb.append(", ");
+					
+					sb.append("每年" + (dto.getMonth()+1) + "月" + dto.getDay() + "日");
+				}
+			}
+			break;
+		}
+		
+		return sb.toString();
+	}
+
+	@Override
+	public String getlimitTime(RepeatSettingsDTO rs) {
+		List<TimeRangeDTO> timeRanges = analyzeTimeRange(rs.getTimeRanges());
+		StringBuilder sb = new StringBuilder();
+		for(TimeRangeDTO dto : timeRanges) {
+			if(sb.length() != 0)
+				sb.append(", ");
+			
+			String duration = dto.getDuration();
+			String gap = duration.substring(0, duration.length()-1);
+			sb.append(gap);
+			String unit = duration.substring(duration.length()-1, duration.length());
+			
+			if(RepeatDurationUnit.MINUTE.getCode().equals(unit)) {
+				sb.append("分钟");
+			}
+			else if(RepeatDurationUnit.HOUR.getCode().equals(unit)) {
+				sb.append("小时");
+			}
+			else if(RepeatDurationUnit.DAY.getCode().equals(unit)) {
+				sb.append("天");
+			}
+			else if(RepeatDurationUnit.WEEK.getCode().equals(unit)) {
+				sb.append("周");
+			}
+			else if(RepeatDurationUnit.MONTH.getCode().equals(unit)) {
+				sb.append("月");
+			}
+			else if(RepeatDurationUnit.YEAR.getCode().equals(unit)) {
+				sb.append("年");
+			}
+		}
+		return sb.toString();
 	}
 	
 }

@@ -1,10 +1,18 @@
 package com.everhomes.rest.techpark.punch;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * 
+ * <li>id:id</li>
+ * <li>description:详情</li>
+ * <li>longitude:经度</li>
+ * <li>latitude:纬度</li>
+ * <li>distance:半径距离-单位米</li> 
+ * </ul>
+ */
 public class PunchGeoPointDTO {
 	private java.lang.Long     id;
-	private java.lang.Long     enterpriseId;
 	private java.lang.String   description;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
@@ -20,15 +28,6 @@ public class PunchGeoPointDTO {
 		this.id = id;
 	}
 
-
-	public java.lang.Long getEnterpriseId() {
-		return enterpriseId;
-	}
-
-
-	public void setEnterpriseId(java.lang.Long enterpriseId) {
-		this.enterpriseId = enterpriseId;
-	}
 
 
 	public java.lang.String getDescription() {

@@ -56,6 +56,7 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.admin.AppCreateCommand;
 import com.everhomes.rest.admin.DecodeContentPathCommand;
+import com.everhomes.rest.admin.EncodeWebTokenCommand;
 import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.admin.SampleCommand;
 import com.everhomes.rest.admin.SampleEmbedded;
@@ -69,6 +70,8 @@ import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.RegisterLoginCommand;
@@ -96,6 +99,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.ZipHelper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * Infrastructure Administration API controller
@@ -825,6 +830,54 @@ public class AdminController extends ControllerBase {
         SendMessageTestResponse msgResp = new SendMessageTestResponse();
         msgResp.setText(userService.pushMessageTest(cmd));
         RestResponse response = new RestResponse(msgResp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 生成webtoken
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping("encodeWebToken")
+    @RestReturn(String.class)
+    public RestResponse encodeWebToken(@Valid EncodeWebTokenCommand cmd) {        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        String json = cmd.getJson();
+        String tokenType = cmd.getTokenType();
+        
+        if(json == null || json.trim().length() == 0) {
+            LOGGER.error("json may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("json may not be empty");
+        }
+        
+        if(tokenType == null || tokenType.trim().length() == 0) {
+            LOGGER.error("Token type may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("Token type may not be empty");
+        }
+        
+        @SuppressWarnings("rawtypes")
+        Class clsObj = null;
+        Object tokenObj = null;
+        try {
+            clsObj = Class.forName(tokenType);
+            tokenObj = clsObj.newInstance();
+        } catch (Exception e) {
+            LOGGER.error("Invalid token type, cmd=" + cmd, e);
+            throw new IllegalArgumentException("Invalid token type");
+        }
+        
+        Gson gson = new Gson(); 
+        tokenObj = gson.fromJson(json, clsObj);
+        
+        Object obj = WebTokenGenerator.getInstance().toWebToken(tokenObj);
+        
+        RestResponse response = new RestResponse(StringHelper.toJsonString(obj));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
