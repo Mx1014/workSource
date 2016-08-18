@@ -144,10 +144,10 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
             builder.addHighlightedField("enterpriseId").addHighlightedField("enterpriseName").addHighlightedField("enterpriseDisplayName");
         }
 
-        FilterBuilder fb = null;
+        FilterBuilder fb = FilterBuilders.termFilter("deleteStatus", 1);
         
         if(cmd.getStatus() != null) {
-        	fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -242,6 +242,7 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("enterpriseId", enterprise.getEnterpriseId());
+            b.field("deleteStatus", enterprise.getStatus());
             
             //status: 状态 0-formally use 1-on trial 2-overdue
             if(enterprise.getActiveAccountAmount() == null)
