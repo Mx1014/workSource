@@ -3830,6 +3830,55 @@ public class PunchServiceImpl implements PunchService {
 		
 		return download(filePath,response);
 	}
+	
+	@Override
+	public void refreshMonthDayLogs(String month){
+
+		Calendar monthBegin = Calendar.getInstance();
+		Calendar monthEnd = Calendar.getInstance();
+		try {
+			monthBegin.setTime(monthSF.parse(month));
+			//月初
+			monthBegin.set(Calendar.DAY_OF_MONTH, 1);
+			monthEnd.setTime(monthSF.parse(month));
+			//月末
+			monthEnd.set(Calendar.DAY_OF_MONTH, 0);
+
+			while (true) {
+
+				List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
+				for(Long orgId : orgIds){
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(orgId);
+					//循环刷所有员工
+					for(OrganizationMember member : members){
+						if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
+							try {
+								//刷新 daylog
+								this.refreshPunchDayLog(member.getTargetId(), orgId, monthBegin);
+								  
+							} catch (Exception e) {
+								LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
+										+"] organization id :["+orgId+"] ");
+								LOGGER.error(e.getLocalizedMessage());
+								 
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+				monthBegin.add(Calendar.DAY_OF_MONTH, 1);
+				if (monthBegin.after(monthEnd)) {
+					return  ;
+				}
+			} 
+		} catch (ParseException e) {
+			throw RuntimeErrorException
+			.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
+					"there is something wrong with queryYear,please check again ");
+		}
+		
+	}
 	/**
 	 * 每天早上5点10分刷打卡记录
 	 * */
