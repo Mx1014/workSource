@@ -3392,7 +3392,7 @@ public class PunchServiceImpl implements PunchService {
 			if (null == parent)
 				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-						"have no punch rule");
+						"have no punch rule owner id = '"+ownerId+"'");
 			else 
 				return getPunchRule(ownerId, parent,loopMax);
 		}
