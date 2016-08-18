@@ -25,8 +25,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
@@ -42,6 +44,9 @@ public class CategoryProviderImpl implements CategoryProvider {
     
     @Autowired
     private DbProvider dbProvider;
+    
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
@@ -51,16 +56,20 @@ public class CategoryProviderImpl implements CategoryProvider {
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
-        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
-        query.setRecord(record);
-        query.setReturning(Tables.EH_CATEGORIES.ID);
-        query.execute();
         
-        category.setId(query.getReturnedRecord().getId());
+//        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
+//        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
+//        query.setRecord(record);
+//        query.setReturning(Tables.EH_CATEGORIES.ID);
+//        query.execute();
+//        
+//        category.setId(query.getReturnedRecord().getId());
         
-//        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
-//        dao.insert(category);
+        //修改成下面这样，因为数据库在id改成了非自动增长
+        category.setId(sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCategories.class)));
+        
+        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
+        dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }

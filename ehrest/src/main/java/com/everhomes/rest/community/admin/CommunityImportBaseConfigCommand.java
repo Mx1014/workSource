@@ -1,38 +1,49 @@
-package com.everhomes.rest.namespace;
+// @formatter:off
+package com.everhomes.rest.community.admin;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
- * <li>name：命名空间名称</li>
+ * <li>namespaceName：命名空间名称</li>
  * <li>communityType：小区类型，参考
  * {@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
- * <li>realm: realm</li>
- * <li>description: 描述</li>
- * <li>namespaceId: 域空间id</li>
+ * <li>androidRealm: androidRealm</li>
+ * <li>iosRealm: iosRealm</li>
+ * <li>versionDescription: 描述</li>
  * <li>versionRange: 版本上下界，比如[1.0.0,2.0.0)</li>
  * <li>targetVersion: 目标版本</li>
  * <li>forceUpgrade: 是否强制升级</li>
+ * <li>smsTemplates: 短信模板列表</li>
  * <li>appAgreementsUrl: app.agreements.url</li>
  * <li>homeUrl: home.url</li>
+ * <li>postTypes: 帖子类型列表</li>
  * </ul>
  */
-public class ConfigNamespaceCommand {
-	private String name;
+public class CommunityImportBaseConfigCommand {
+	private String namespaceName;
 	private String communityType;
 	private String androidRealm;
 	private String iosRealm;
-	private String description;
+	private String versionDescription;
 	private String versionRange;
 	private String targetVersion;
 	private Byte forceUpgrade;
+	@ItemType(SmsTemplate.class)
+	private List<SmsTemplate> smsTemplates;
 	private String appAgreementsUrl;
 	private String homeUrl;
+	@ItemType(String.class)
+	private List<String> postTypes;
 
-	public String getName() {
-		return name;
+	public String getNamespaceName() {
+		return namespaceName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNamespaceName(String namespaceName) {
+		this.namespaceName = namespaceName;
 	}
 
 	public String getCommunityType() {
@@ -59,12 +70,12 @@ public class ConfigNamespaceCommand {
 		this.iosRealm = iosRealm;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getVersionDescription() {
+		return versionDescription;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setVersionDescription(String versionDescription) {
+		this.versionDescription = versionDescription;
 	}
 
 	public String getVersionRange() {
@@ -91,6 +102,14 @@ public class ConfigNamespaceCommand {
 		this.forceUpgrade = forceUpgrade;
 	}
 
+	public List<SmsTemplate> getSmsTemplates() {
+		return smsTemplates;
+	}
+
+	public void setSmsTemplates(List<SmsTemplate> smsTemplates) {
+		this.smsTemplates = smsTemplates;
+	}
+
 	public String getAppAgreementsUrl() {
 		return appAgreementsUrl;
 	}
@@ -105,6 +124,14 @@ public class ConfigNamespaceCommand {
 
 	public void setHomeUrl(String homeUrl) {
 		this.homeUrl = homeUrl;
+	}
+
+	public List<String> getPostTypes() {
+		return postTypes;
+	}
+
+	public void setPostTypes(List<String> postTypes) {
+		this.postTypes = postTypes;
 	}
 
 }

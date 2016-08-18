@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.configuration.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.core.AppConfig;
@@ -25,8 +24,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.configuration.admin.ConfigurationDTO;
-import com.everhomes.rest.configuration.admin.CreateConfigurationCommand;
-import com.everhomes.rest.configuration.admin.CreateConfigurationResponse;
 import com.everhomes.rest.configuration.admin.DeleteConfigurationAdminCommand;
 import com.everhomes.rest.configuration.admin.ListConfigurationsAdminCommand;
 import com.everhomes.rest.configuration.admin.ListConfigurationsAdminCommandResponse;
@@ -47,8 +44,6 @@ public class ConfigurationAdminController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private DbProvider dbProvider;
-    
-    @Autowired ConfigurationsService configurationsService;
     
     /**
      * <b>URL: /admin/configuration/updateConfiguration</b>
@@ -130,14 +125,4 @@ public class ConfigurationAdminController extends ControllerBase {
         return new RestResponse(response);
     }
     
-    /**
-     * 
-     * <b>URL: /admin/configuration/createConfiguration</b>
-     * <p>创建一条配置</p>
-     */
-    @RequestMapping("createConfiguration")
-    @RestReturn(CreateConfigurationResponse.class)
-    public RestResponse createConfiguration(CreateConfigurationCommand cmd){
-    	return new RestResponse(configurationsService.createConfiguration(cmd));
-    }
 }
