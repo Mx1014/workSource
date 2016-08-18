@@ -912,6 +912,11 @@ public class UserServiceImpl implements UserService {
 							        //the next login is not web login and inner login
 							        foundIndex = i+2;
 							    } else {
+							        if(LOGGER.isInfoEnabled()) {
+                                        LOGGER.info("User is kickoff state3 remove old all login tokens, userId=" + user.getId() 
+                                                + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
+                                    }
+							        
 							        //found twice, delete all logins
 							        accessor.getTemplate().delete(accessor.getBucketName());
 							        foundLogin = null;
