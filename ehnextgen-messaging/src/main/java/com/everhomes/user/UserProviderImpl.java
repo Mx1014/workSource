@@ -902,12 +902,11 @@ public class UserProviderImpl implements UserProvider {
             public boolean map(DSLContext context, Object obj) {
                 SelectOnConditionStep<Record> onQuery = context.select().from(Tables.EH_USERS)
                         .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
-                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())))
-                        .leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
-                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
+                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())));
                 
                 SelectConditionStep<Record> select = null;
                 boolean useAddress = false;
+                boolean useMembers = false;
                 
                 Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
                 if(!StringUtils.isEmpty(keyword)){
@@ -929,6 +928,7 @@ public class UserProviderImpl implements UserProvider {
                 }
                 
                 if(isAuth != null) {
+                    useMembers = true;
                     if(isAuth > 0) {
                         cond = cond.and(EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
                     } else {
@@ -937,18 +937,29 @@ public class UserProviderImpl implements UserProvider {
                     }
                 
                 if(organizationId != null) {
+                    useMembers = true;
                     cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
                     }
                 
                 if(buildingId != null) {
                     useAddress = true;
+                    useMembers = true;
                     cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
                     }
                 
                 if(buildingName != null && !buildingName.isEmpty()) {
                     useAddress = true;
+                    useMembers = true;
                     cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.like(buildingName + "%"));
                     }
+                
+                if(useMembers) {
+                    onQuery = onQuery.leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                            .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
+                } else {
+                    onQuery = onQuery.join(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                            .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
+                }
                 
                 if(useAddress) {
                     onQuery = onQuery.leftOuterJoin(Tables.EH_ORGANIZATION_ADDRESSES)
