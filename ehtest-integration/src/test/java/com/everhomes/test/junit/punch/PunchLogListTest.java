@@ -110,6 +110,7 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			if (dayLog.getPunchDay().equals("5")) {
 				assertEquals(PunchStatus.OVERTIME, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
 				assertEquals(PunchStatus.OVERTIME, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals((10*60*60+2)*1000, dayLog.getWorkTime().intValue());
 			}
 			// 8月4 上午 早退且迟到 下午 早退且迟到
 			if (dayLog.getPunchDay().equals("4")) {
