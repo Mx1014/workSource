@@ -6596,6 +6596,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd) {
 
+		//没传namespaceId和communityId时加到左邻域空间的左邻园区内
 		if(null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(0);
 		}
@@ -6643,11 +6644,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 				userProvider.createIdentifier(newIdentifier);
 				
-//				// 刷新企业通讯录
-//		        organizationService.processUserForMember(identifier);
-//		        
-//		        //刷新地址信息
-//		        propertyMgrService.processUserForOwner(identifier);
+		        //刷新地址信息
+		        propertyMgrService.processUserForOwner(identifier);
 			}
 			
 			//create group
@@ -6674,7 +6672,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setName(cmd.getOrgName());
 			organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
 			organization.setStatus(OrganizationStatus.ACTIVE.getCode());
-			organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+			organization.setOrganizationType(cmd.getOrganizationType());
 			organization.setNamespaceId(cmd.getNamespaceId());
 			organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -6714,14 +6712,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			orgMember.setCreatorUid(UserContext.current().getUser().getId());
 			orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 			orgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			
 			organizationProvider.createOrganizationMember(orgMember);
 			
 			RoleAssignment roleAssignment = new RoleAssignment();
 	        roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
 	        roleAssignment.setOwnerId(organization.getId());
 	        roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-	        roleAssignment.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+	        if(OrganizationType.fromCode(organization.getOrganizationType()).equals(OrganizationType.PM)) {
+	        	roleAssignment.setRoleId(RoleConstants.PM_SUPER_ADMIN);
+			}
+	        if(OrganizationType.fromCode(organization.getOrganizationType()).equals(OrganizationType.ENTERPRISE)) {
+	        	roleAssignment.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+			}
+	        
 	        roleAssignment.setTargetType(EntityType.USER.getCode());
 	        roleAssignment.setTargetId(useridentifier.getOwnerUid());
 	        roleAssignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

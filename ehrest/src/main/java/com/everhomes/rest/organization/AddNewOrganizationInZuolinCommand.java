@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>orgName: 企业名称</li>
+ * <li>organizationType: 企业类型 参考{@link com.everhomes.rest.organization.OrganizationType}</li>
  * <li>contactor: 管理员姓名</li>
  * <li>mobile: 手机号</li>
  * <li>namespaceId: 域空间id</li>
@@ -16,6 +17,8 @@ public class AddNewOrganizationInZuolinCommand {
 	private String orgName;
 	
 	private String contactor;
+	
+	private String organizationType;
 	
 	private String mobile;
 	
@@ -29,6 +32,14 @@ public class AddNewOrganizationInZuolinCommand {
 
 	public void setOrgName(String orgName) {
 		this.orgName = orgName;
+	}
+
+	public String getOrganizationType() {
+		return organizationType;
+	}
+
+	public void setOrganizationType(String organizationType) {
+		this.organizationType = organizationType;
 	}
 
 	public String getContactor() {
