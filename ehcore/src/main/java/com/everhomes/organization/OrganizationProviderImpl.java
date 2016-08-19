@@ -292,13 +292,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationMembersRecord record = ConvertHelper.convert(organizationMember, EhOrganizationMembersRecord.class);
-		InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		query.setRecord(record);
-		query.setReturning(Tables.EH_ORGANIZATION_MEMBERS.ID);
-		query.execute();
-		organizationMember.setId(query.getReturnedRecord().getId());
-		
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
+		organizationMember.setId(id);
+		EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+		dao.insert(organizationMember);
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, organizationMember.getId());
 		}

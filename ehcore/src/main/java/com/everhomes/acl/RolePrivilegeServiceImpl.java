@@ -859,7 +859,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	//解析excel
 		try {
-			List excelList = PropMrgOwnerHandler.processorExcel(files[1].getInputStream());
+			List excelList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 			
 			List<OrganizationMemberDTO> memberDTOs = this.convertMemberDTO(excelList);
 			
@@ -993,7 +993,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			RowResult r = (RowResult)o;
 			OrganizationMemberDTO dto = new OrganizationMemberDTO();
 			
-			if(!StringUtils.isEmpty(r.getB())){
+			if(!StringUtils.isEmpty(r.getA())){
 				dto.setEmployeeNo(Long.valueOf(r.getA()));
 			}
 			dto.setContactName(r.getB());
