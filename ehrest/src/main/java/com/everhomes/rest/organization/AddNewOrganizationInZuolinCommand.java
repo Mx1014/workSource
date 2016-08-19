@@ -19,7 +19,7 @@ public class AddNewOrganizationInZuolinCommand {
 	private String orgName;
 	
 	private String contactor;
-	@NotNull
+
 	private String organizationType;
 	
 	private String mobile;

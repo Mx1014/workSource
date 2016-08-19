@@ -6604,6 +6604,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null == cmd.getCommunityId()) {
 			cmd.setCommunityId(240111044331051380L);
 		}
+		
+		//没传organizationType则默认为普通公司
+		if(null == cmd.getOrganizationType()) {
+			cmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+		}
+		
 		Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(cmd.getOrgName(), cmd.getNamespaceId());
 		if(null != org) {
 			LOGGER.error("organization already exist in the namespace!");
@@ -6620,6 +6626,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			if(null == identifier) {
 				User user = new User();
+				String password = "123456";
 				user.setStatus(UserStatus.ACTIVE.getCode());
 				user.setNamespaceId(cmd.getNamespaceId());
 				user.setNickName(cmd.getContactor());
@@ -6627,7 +6634,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				String salt=EncryptionUtils.createRandomSalt();
 				user.setSalt(salt);
 				try {
-					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "123456",salt)));
+					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
 				} catch (Exception e) {
 					LOGGER.error("encode password failed");
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
@@ -6645,7 +6652,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				userProvider.createIdentifier(newIdentifier);
 				
 		        //刷新地址信息
-		        propertyMgrService.processUserForOwner(identifier);
+		        propertyMgrService.processUserForOwner(newIdentifier);
 			}
 			
 			//create group
@@ -6657,6 +6664,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
 			group.setStatus(GroupAdminStatus.ACTIVE.getCode());
 			group.setNamespaceId(cmd.getNamespaceId());
+			group.setCreatorUid(UserContext.current().getUser().getId());
             this.groupProvider.createGroup(group);
     
             // create the group owned forum and save it
