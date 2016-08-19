@@ -23,7 +23,6 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
-import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
@@ -55,7 +54,6 @@ import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
@@ -1076,7 +1074,8 @@ public class OrganizationAdminController extends ControllerBase {
           @RequestMapping("exportOrganizationPersonnelXls")
           @RestReturn(value=String.class)
           public RestResponse exportRoleAssignmentPersonnelXls(@Valid ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse) {
-              RestResponse response = new RestResponse();
+        	  organizationService.exportRoleAssignmentPersonnelXls(cmd, httpResponse);
+        	  RestResponse response = new RestResponse();
               response.setErrorCode(ErrorCodes.SUCCESS);
               response.setErrorDescription("OK");
               return response;

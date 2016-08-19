@@ -4578,7 +4578,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			userSearcher.feedDoc(organizationMember);
+//			userSearcher.feedDoc(organizationMember);
 		}
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
@@ -6690,23 +6690,28 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationMemberDTO member : members) {
         	XSSFRow row = sheet.createRow(rowNum ++);
         	row.setRowStyle(style);
-        	row.createCell(0).setCellValue(member.getEmployeeNo());
-        	row.createCell(1).setCellValue(member.getContactName());
-            row.createCell(2).setCellValue(member.getContactToken());
+        	row.createCell(0).setCellValue(String.valueOf(member.getEmployeeNo()));
+        	row.createCell(1).setCellValue(String.valueOf(member.getContactName()));
+            row.createCell(2).setCellValue(String.valueOf(member.getContactToken()));
             List<OrganizationDTO> departments = member.getDepartments();
             String departmentStr = "";
-            for (OrganizationDTO department : departments) {
-            	departmentStr += "|" + department.getName();
-			}
+            if(null != departments){
+            	 for (OrganizationDTO department : departments) {
+                 	departmentStr += "|" + department.getName();
+     			}
+            }
+           
             if(!StringUtils.isEmpty(departmentStr)){
             	departmentStr = departmentStr.substring(1);
             }
             row.createCell(3).setCellValue(departmentStr);
             List<RoleDTO> roles = member.getRoles();
             String roleStr = "";
-            for (RoleDTO role : roles) {
-            	roleStr += "|" + role.getName();
-			}
+            if(null != roles){
+            	for (RoleDTO role : roles) {
+                	roleStr += "|" + role.getName();
+    			}
+            }
             if(!StringUtils.isEmpty(roleStr)){
             	roleStr = roleStr.substring(1);
             }
@@ -6959,6 +6964,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationProvider.deleteOrganizationMemberById(member.getId());
 			}
 			
+			// 删除他所有的角色
+	    	if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+		    	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), member.getTargetId());
+	    		if(null != userRoles){
+		    		for (RoleAssignment roleAssignment : userRoles) {
+		    			aclProvider.deleteRoleAssignment(roleAssignment.getId());
+					}
+		    	}
+	    	}
+	    	
 			return null;
 		});
 	}
