@@ -447,7 +447,7 @@ public class AclAdminController extends ControllerBase {
      */
     @RequestMapping("importRoleAssignmentPersonnelXls")
     @RestReturn(value=String.class)
-    public RestResponse importRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files) {
+    public RestResponse importRoleAssignmentPersonnelXls(@Valid ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         RestResponse response = new RestResponse(rolePrivilegeService.importRoleAssignmentPersonnelXls(cmd, files));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
