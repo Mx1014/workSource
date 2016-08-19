@@ -1191,6 +1191,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())&& 
 						rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode()))
 					rentalBill.setRentalCount(siteRule.getRentalCount());
+				else
+					rentalBill.setRentalCount(1.0);
 				if (null == siteRule)
 					continue;
 				RentalCell rentalSiteRule = rentalProvider
