@@ -2,7 +2,6 @@
 package com.everhomes.test.junit.organization;
 
 import static com.everhomes.server.schema.Tables.*;
-import static com.everhomes.schema.Tables.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +12,13 @@ import java.util.List;
 
 
 
-import org.jooq.DSLContext;
+
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+
 
 
 
@@ -28,6 +30,8 @@ import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.admin.OrgListChildrenOrganizationsRestResponse;
+import com.everhomes.rest.ui.launchpad.LaunchpadGetLastLaunchPadLayoutBySceneRestResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
@@ -60,12 +64,14 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         cmd.setGroupTypes(groupTypes);
         
-        ListOrganizationsCommandResponse response = httpClientService.restGet(commandRelativeUri, cmd, ListOrganizationsCommandResponse.class);
+        OrgListChildrenOrganizationsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, OrgListChildrenOrganizationsRestResponse.class, context);
         
         assertNotNull("The reponse of getting user info may not be null", response);
         assertTrue("The user info should be get from server, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
+        assertNotNull(response.getResponse());
+        assertEquals(5, response.getResponse().size());
     }
     
     
@@ -76,12 +82,8 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
     
     protected void initCustomData() {
     	
-        String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        String userInfoFilePath = "data/json/3.8.2-test-data-organizations_160819.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
-        dbProvider.loadJsonFileToDatabase(filePath, false);
-        
-        userInfoFilePath = "data/json/3.4.x-test-data-create-organization_member_160605.txt";
-        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
         
     }
