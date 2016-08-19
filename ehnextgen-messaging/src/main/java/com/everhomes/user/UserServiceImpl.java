@@ -884,10 +884,19 @@ public class UserServiceImpl implements UserService {
 							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
 								foundLogin = login;
 								break;
+							} else if(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+							    //Inner login not found
+							    //Do nothing
 							} else {
+							    //Not inner login, not web login
 							    if(foundLogin == null) {
 							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
 							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+					                      if(LOGGER.isInfoEnabled()) {
+					                                LOGGER.info("User is kickoff state2 for logined in another place, userId=" + user.getId() 
+					                                        + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
+					                            }
+					                      
 							                //kickoff this login
 							                oldDeviceId = login.getDeviceIdentifier();
 							                oldLoginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
@@ -899,7 +908,15 @@ public class UserServiceImpl implements UserService {
 							       
                             foundLogin = login;
                             foundIndex = i+2;
+							    } else if(login.getDeviceIdentifier() == null || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+							        //the next login is not web login and inner login
+							        foundIndex = i+2;
 							    } else {
+							        if(LOGGER.isInfoEnabled()) {
+                                        LOGGER.info("User is kickoff state3 remove old all login tokens, userId=" + user.getId() 
+                                                + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
+                                    }
+							        
 							        //found twice, delete all logins
 							        accessor.getTemplate().delete(accessor.getBucketName());
 							        foundLogin = null;
@@ -937,8 +954,8 @@ public class UserServiceImpl implements UserService {
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
-		if(isNew) {
-			//Kickoff other login in this devices
+		if(isNew && !(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) ) {
+			//Kickoff other login in this devices which is not inner login
 			kickoffLoginByDevice(foundLogin);
 		}
 		

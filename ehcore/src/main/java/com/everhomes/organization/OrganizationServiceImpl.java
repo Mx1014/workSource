@@ -528,22 +528,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(!StringUtils.isEmpty(cmd.getBuildingName())){
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
 			if(null != building){
-				cmd.setBuildingId(cmd.getBuildingId());
+				cmd.setBuildingId(building.getId());
 			}
 		}
 		
 		Long buildingId = cmd.getBuildingId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
-			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, cmd.getPageSize(), locator);
+			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
 			for (OrganizationAddress address : addresses) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
 					dtos.add(dto);
 			}
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
 			for (OrganizationCommunityRequest req : requests) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -551,7 +552,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, cmd.getPageSize());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, pageSize);
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -1943,6 +1944,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //增加门牌地址
+        List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+        if(null != organizationAddresses){
+        	List<String> doorplateAddresses = new ArrayList<String>();
+        	for (OrganizationAddress organizationAddress : organizationAddresses) {
+        		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+        		doorplateAddresses.add(address.getAddress());
+			}
+        	
+        	if(0 < doorplateAddresses.size()){
+        		organizationDto.setAddress(doorplateAddresses.get(0));
+        	}
+        }
+        
+        
         // 企业入驻的园区
         Long communityId = getOrganizationActiveCommunityId(organization.getId());
         // 园区对应的类型、论坛等信息
