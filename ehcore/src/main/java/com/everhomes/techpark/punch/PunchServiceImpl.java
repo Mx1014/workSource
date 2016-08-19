@@ -3681,7 +3681,11 @@ public class PunchServiceImpl implements PunchService {
 						continue;
 					userMonthLogsDTO.setPunchLogsDayList(new ArrayList<PunchLogsDay>());
 					for(PunchDayLog dayLog : punchDayLogs){
-						PunchLogsDay pdl = ConvertHelper.convert(dayLog, PunchLogsDay.class);
+						PunchLogsDay pdl = ConvertHelper.convert(dayLog, PunchLogsDay.class); 
+						pdl.setWorkTime(convertTimeToGMTMillisecond(dayLog.getWorkTime()));
+						pdl.setPunchStatus(dayLog.getStatus());
+						pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
+						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
 					}
 				}

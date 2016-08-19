@@ -1008,7 +1008,9 @@ long id = sequenceProvider.getNextSequence(key);
 		 
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
- 				.map(new EhPunchDayLogMapper());
+ 				.map((r) -> {
+ 		            return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
+ 		        });
 		
 		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
             return ConvertHelper.convert(r, PunchDayLog.class);
@@ -1021,7 +1023,7 @@ long id = sequenceProvider.getNextSequence(key);
 			Long companyId, String startDay, String endDay) {
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
+		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 //	 
@@ -1037,7 +1039,9 @@ long id = sequenceProvider.getNextSequence(key);
 		  
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
- 				.map(new EhPunchDayLogMapper());
+ 				.map((r) -> {
+ 		            return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
+ 		        });
 		
 		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
             return ConvertHelper.convert(r, PunchDayLog.class);
