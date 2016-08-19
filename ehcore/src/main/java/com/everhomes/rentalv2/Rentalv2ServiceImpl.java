@@ -1555,7 +1555,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
       map.put("userName", user.getNickName());
       map.put("resourceName", rentalBill.getResourceName());
       map.put("useDetail", rentalBill.getUseDetail());
-      map.put("rentalCount", ""+rentalBill.getRentalCount());  
+      map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());  
       sendMessageCode(rs.getChargeUid(),  PunchNotificationTemplateCode.locale, map, PunchNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
 	}
 	
