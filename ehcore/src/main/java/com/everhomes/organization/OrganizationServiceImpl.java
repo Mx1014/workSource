@@ -6625,47 +6625,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			
 			if(null == identifier) {
-				User user = new User();
-				String password = "123456";
-				user.setStatus(UserStatus.ACTIVE.getCode());
-				user.setNamespaceId(cmd.getNamespaceId());
-				user.setNickName(cmd.getContactor());
-				user.setGender(UserGender.UNDISCLOSURED.getCode());
-				String salt=EncryptionUtils.createRandomSalt();
-				user.setSalt(salt);
-				try {
-					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
-				} catch (Exception e) {
-					LOGGER.error("encode password failed");
-					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
-
-				}
-				userProvider.createUser(user);
-
-				UserIdentifier newIdentifier = new UserIdentifier();
-				newIdentifier.setOwnerUid(user.getId());
-				newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-				newIdentifier.setIdentifierToken(cmd.getMobile());
-				newIdentifier.setNamespaceId(cmd.getNamespaceId());
-
-				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-				userProvider.createIdentifier(newIdentifier);
-				
-		        //刷新地址信息
-		        propertyMgrService.processUserForOwner(newIdentifier);
+				createUser(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile());
 			}
 			
 			//create group
-			Group group = new Group();
-			group.setName(cmd.getOrgName());
-			group.setDisplayName(cmd.getOrgName());
-			group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-			group.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
-			group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
-			group.setStatus(GroupAdminStatus.ACTIVE.getCode());
-			group.setNamespaceId(cmd.getNamespaceId());
-			group.setCreatorUid(UserContext.current().getUser().getId());
-            this.groupProvider.createGroup(group);
+			Group group = createGroup(cmd.getOrgName(), cmd.getNamespaceId());
     
             // create the group owned forum and save it
             Forum forum = createGroupForum(group);
@@ -6673,75 +6637,105 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.groupProvider.updateGroup(group);
             
             //create organization
-            Organization organization = new Organization();
-            organization.setParentId(0L);
-			organization.setLevel(1);
-			organization.setPath("");
-			organization.setName(cmd.getOrgName());
-			organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
-			organization.setStatus(OrganizationStatus.ACTIVE.getCode());
-			organization.setOrganizationType(cmd.getOrganizationType());
-			organization.setNamespaceId(cmd.getNamespaceId());
-			organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organization.setGroupId(group.getId());
-			organizationProvider.createOrganization(organization);
-			
-			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
-			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
-			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
-			organizationCommunityRequest.setMemberId(organization.getId());
-
-			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
-			organizationCommunityRequest.setCreatorUid(UserContext.current().getUser().getId());
-			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        
-	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+            Organization organization = createOrganization(cmd.getOrgName(), cmd.getNamespaceId(), 
+            		cmd.getOrganizationType(), group.getId(), cmd.getCommunityId());
 	        
 	        //create administrator: add user group; add in organization member; add acl
-	        UserIdentifier useridentifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getMobile());
-	        
-	        UserGroup userGroup = new UserGroup();
-	        userGroup.setOwnerUid(useridentifier.getOwnerUid());
-	        userGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-	        userGroup.setGroupId(organization.getId());
-	        userGroup.setMemberRole(Role.ResourceUser);
-            userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-	        this.userProvider.createUserGroup(userGroup); 
-	        
-	        OrganizationMember orgMember = new OrganizationMember();
-			orgMember.setOrganizationId(organization.getId());
-			orgMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
-			orgMember.setContactName(cmd.getContactor());
-			orgMember.setContactToken(cmd.getMobile());
-			orgMember.setContactType(ContactType.MOBILE.getCode());
-			orgMember.setTargetId(useridentifier.getOwnerUid());
-			orgMember.setCreatorUid(UserContext.current().getUser().getId());
-			orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
-			orgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			organizationProvider.createOrganizationMember(orgMember);
-			
-			RoleAssignment roleAssignment = new RoleAssignment();
-	        roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-	        roleAssignment.setOwnerId(organization.getId());
-	        roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-	        if(OrganizationType.fromCode(organization.getOrganizationType()).equals(OrganizationType.PM)) {
-	        	roleAssignment.setRoleId(RoleConstants.PM_SUPER_ADMIN);
-			}
-	        if(OrganizationType.fromCode(organization.getOrganizationType()).equals(OrganizationType.ENTERPRISE)) {
-	        	roleAssignment.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
-			}
-	        
-	        roleAssignment.setTargetType(EntityType.USER.getCode());
-	        roleAssignment.setTargetId(useridentifier.getOwnerUid());
-	        roleAssignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        aclProvider.createRoleAssignment(roleAssignment);
+            OrganizationMember orgMember = addIntoOrgAndAssignRole(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile(), 
+            		cmd.getOrganizationType(), organization.getId());
 	        
 	        organizationSearcher.feedDoc(organization);
 	        userSearcher.feedDoc(orgMember);
 			return null;
 		});
+	}
+	
+	private OrganizationMember addIntoOrgAndAssignRole(Integer namespaceId, String contactor, String identifierToken, 
+			String organizationType, Long orgId) {
+		UserIdentifier useridentifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        
+        UserGroup userGroup = new UserGroup();
+        userGroup.setOwnerUid(useridentifier.getOwnerUid());
+        userGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+        userGroup.setGroupId(orgId);
+        userGroup.setMemberRole(Role.ResourceUser);
+        userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+        this.userProvider.createUserGroup(userGroup); 
+        
+        OrganizationMember orgMember = new OrganizationMember();
+		orgMember.setOrganizationId(orgId);
+		orgMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+		orgMember.setContactName(contactor);
+		orgMember.setContactToken(identifierToken);
+		orgMember.setContactType(ContactType.MOBILE.getCode());
+		orgMember.setTargetId(useridentifier.getOwnerUid());
+		orgMember.setCreatorUid(UserContext.current().getUser().getId());
+		orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+		orgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		organizationProvider.createOrganizationMember(orgMember);
+		
+		RoleAssignment roleAssignment = new RoleAssignment();
+        roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+        roleAssignment.setOwnerId(orgId);
+        roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+        if(OrganizationType.fromCode(organizationType).equals(OrganizationType.PM)) {
+        	roleAssignment.setRoleId(RoleConstants.PM_SUPER_ADMIN);
+		}
+        if(OrganizationType.fromCode(organizationType).equals(OrganizationType.ENTERPRISE)) {
+        	roleAssignment.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		}
+        
+        roleAssignment.setTargetType(EntityType.USER.getCode());
+        roleAssignment.setTargetId(useridentifier.getOwnerUid());
+        roleAssignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        aclProvider.createRoleAssignment(roleAssignment);
+        
+        return orgMember;
+	}
+	
+	private Organization createOrganization(String orgName, Integer namespaceId, String organizationType, Long groupId, Long communityId) {
+		Organization organization = new Organization();
+        organization.setParentId(0L);
+		organization.setLevel(1);
+		organization.setPath("");
+		organization.setName(orgName);
+		organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+		organization.setOrganizationType(organizationType);
+		organization.setNamespaceId(namespaceId);
+		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setGroupId(groupId);
+		organizationProvider.createOrganization(organization);
+		
+		OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+		organizationCommunityRequest.setCommunityId(communityId);
+		organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+		organizationCommunityRequest.setMemberId(organization.getId());
+
+		organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+		organizationCommunityRequest.setCreatorUid(UserContext.current().getUser().getId());
+		organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+
+        return organization;
+	}
+	
+	private Group createGroup(String orgName, Integer namespaceId) {
+		Group group = new Group();
+		group.setName(orgName);
+		group.setDisplayName(orgName);
+		group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+		group.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+		group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
+		group.setStatus(GroupAdminStatus.ACTIVE.getCode());
+		group.setNamespaceId(namespaceId);
+		group.setCreatorUid(UserContext.current().getUser().getId());
+        this.groupProvider.createGroup(group);
+
+        return group;
 	}
 	
 	private Forum createGroupForum(Group group) {
@@ -6759,4 +6753,36 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.forumProvider.createForum(forum);
         return forum;
     }
+	
+	private void createUser(Integer namespaceId, String nickName, String identifierToken) {
+		
+		User user = new User();
+		String password = "123456";
+		user.setStatus(UserStatus.ACTIVE.getCode());
+		user.setNamespaceId(namespaceId);
+		user.setNickName(nickName);
+		user.setGender(UserGender.UNDISCLOSURED.getCode());
+		String salt=EncryptionUtils.createRandomSalt();
+		user.setSalt(salt);
+		try {
+			user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
+		} catch (Exception e) {
+			LOGGER.error("encode password failed");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+		}
+		userProvider.createUser(user);
+
+		UserIdentifier newIdentifier = new UserIdentifier();
+		newIdentifier.setOwnerUid(user.getId());
+		newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+		newIdentifier.setIdentifierToken(identifierToken);
+		newIdentifier.setNamespaceId(namespaceId);
+
+		newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+		userProvider.createIdentifier(newIdentifier);
+		
+        //刷新地址信息
+        propertyMgrService.processUserForOwner(newIdentifier);
+	}
 }
