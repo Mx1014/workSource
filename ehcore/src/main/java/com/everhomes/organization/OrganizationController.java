@@ -925,18 +925,4 @@ public class OrganizationController extends ControllerBase {
           return res;
       }
       
-      /**
-       * <b>URL: /org/addNewOrganizationInZuolin</b>
-       * <p>左邻域下新增公司</p>
-       */
-      @RequestMapping("addNewOrganizationInZuolin")
-      @RestReturn(value=String.class)
-      public RestResponse addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd){
-    	  organizationService.addNewOrganizationInZuolin(cmd);
-    	  RestResponse res = new RestResponse();
-          res.setErrorCode(ErrorCodes.SUCCESS);
-          res.setErrorDescription("OK");
-          
-          return res;
-      }
 }
