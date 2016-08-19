@@ -2202,7 +2202,7 @@ long id = sequenceProvider.getNextSequence(key);
 	@Override
 	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
 			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
-			Time workTime,  Integer pageOffset,Integer pageSize) {
+			Time workTime, Byte exceptionStatus, Integer pageOffset,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
@@ -2212,6 +2212,8 @@ long id = sequenceProvider.getNextSequence(key);
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		if(userIds != null)
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
+		if(exceptionStatus != null)
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.EXCEPTION_STATUS.eq(exceptionStatus));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);

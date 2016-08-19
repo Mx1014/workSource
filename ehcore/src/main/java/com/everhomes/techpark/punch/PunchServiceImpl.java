@@ -3515,7 +3515,7 @@ public class PunchServiceImpl implements PunchService {
 					cmd.getOwnerId(),startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),getDAOTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					getDAOTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					getDAOTime(cmd.getWorkTime()), null, null);
+					getDAOTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
 			
 			if (null == results)
 				return null;
@@ -3746,7 +3746,7 @@ public class PunchServiceImpl implements PunchService {
 					cmd.getOwnerId(),startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),getDAOTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					getDAOTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					getDAOTime(cmd.getWorkTime()), pageOffset, pageSize );
+					getDAOTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
 			
 			if (null == results)
 				return response;
