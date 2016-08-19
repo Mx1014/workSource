@@ -917,6 +917,8 @@ public class UserProviderImpl implements UserProvider {
                 
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() > 0) {
                         onQuery = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
+                        cond = cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())));
                     }
                 
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() <= 0) {
