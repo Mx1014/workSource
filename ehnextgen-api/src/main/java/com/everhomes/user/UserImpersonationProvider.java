@@ -20,4 +20,6 @@ public interface UserImpersonationProvider {
 
     UserImpersonation getUserImpersonationByOwnerId(Long userId);
 
+    UserImpersonation getUserImpersonationByTargetId(Long userId);
+
 }

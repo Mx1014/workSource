@@ -226,7 +226,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
 			String pusherIdentify = null;
 			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
-			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
 			setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		}
@@ -303,7 +303,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
 		String pusherIdentify = null;
 		UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
-		LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
 		setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		//返回sourceUrl

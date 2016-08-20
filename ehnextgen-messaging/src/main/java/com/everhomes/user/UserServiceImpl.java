@@ -296,6 +296,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private MessagingKickoffService kickoffService;
     
+    @Autowired
+    private UserImpersonationProvider userImpersonationProvider;
+    
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -846,9 +849,159 @@ public class UserServiceImpl implements UserService {
 		accessorLogin.putMapValueObject(maxId.toString(), newLogin);
 		accessor.putMapValueObject(hkeyIndex, Integer.valueOf(maxId.toString()));
 	}
+	
+	private boolean foundUserLogin(UserLogin login, User user, String deviceIdentifier, LogonRef ref) {
+	    if(login.getDeviceIdentifier() == null 
+	            || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())
+	            || (login.getImpersonationId() != null && login.getImpersonationId() > 0)) {
+	        //not user login
+	        return false;
+	    }
+	    
+	    if(ref.getFoundLogin() != null) {
+	        //found user login again
+	        return true;
+	    }
+	    
+	    if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
+	        if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+	            if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("User is kickoff(normal) for logined in another place, userId=" + user.getId()
+                                + ", newNamespaceId=" + ref.getNamespaceId() + ", newDeviceIdentifier="
+                                + deviceIdentifier + ", oldUserLogin=" + login);
+	                }
+	            //kickoff this login
+	            login.setStatus(UserLoginStatus.LOGGED_OFF);
+	            ref.setOldDeviceId(login.getDeviceIdentifier());
+	            ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId()));
+	            }
+	        login.setDeviceIdentifier(deviceIdentifier);
+	        }
+	    
+	    //must found twice
+	    ref.setFoundLogin(login);
+	    return false;
+	}
+	
+	private boolean foundImpersonationLogin(UserLogin login, User user, String deviceIdentifier, LogonRef ref) {
+	    if(login.getDeviceIdentifier() == null 
+	            || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())
+	            || login.getImpersonationId() == null
+	            || login.getImpersonationId().equals(0)) {
+	        //not impersonation login
+	        return false;
+	    }
+	    
+	    if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
+	        if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+	               if(LOGGER.isInfoEnabled()) {
+	                    LOGGER.info("User is kickoff(impersonation) for logined in another place, userId=" + user.getId()
+	                                + ", newNamespaceId=" + ref.getNamespaceId() + ", newDeviceIdentifier="
+	                                + deviceIdentifier + ", oldUserLogin=" + login);
+	                    }
+	               //kickoff this login
+	               login.setStatus(UserLoginStatus.LOGGED_OFF);
+	               ref.setOldDeviceId(login.getDeviceIdentifier());
+	               ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), ref.getImpId()));
+	        }
+	        login.setDeviceIdentifier(deviceIdentifier);
+	    }
+	    
+	    ref.setFoundLogin(login);
+	    return true;
+	}
+	
+	private boolean foundLoginByLoginType(User user, String deviceIdentifier, LoginType loginType, LogonRef ref) {
+	    Integer namespaceId = ref.getNamespaceId();
+	    String userKey = NameMapper.getCacheKey("user", user.getId(), null);
+	    String hkeyIndex = "0";
+	    Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+	    Object o = accessor.getMapValueObject(hkeyIndex);
+	    Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
+	    UserLogin foundLogin = null;
+	    int nextLoginId = 1;
+	    if(maxLoginId != null) {
+	            for(int i = 1; i <= maxLoginId.intValue(); i++) {
+	                String hkeyLogin = String.valueOf(i);
+	                Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+	                UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
+	                if(login == null) {
+	                    continue;
+	                }
+	                
+	                //found web login
+	                if(loginType == LoginType.WEB) {
+	                    if(login.getDeviceIdentifier() == null) {
+	                        ref.setFoundLogin(login);
+	                    }
+	                }
+	              //found inner login
+	                if(loginType == LoginType.INNER) {
+	                    if(deviceIdentifier.equals(login.getDeviceIdentifier())) {
+	                        ref.setFoundLogin(login);
+	                        break;
+	                    }
+                    }
+	                
+	                //found user login
+	                if(loginType == LoginType.USER) {
+	                    if(foundUserLogin(login, user, deviceIdentifier, ref)) {
+	                        //found twice, clear all for this user
+                            if(LOGGER.isInfoEnabled()) {
+                                LOGGER.info("User is kickoff state3 remove old all login tokens, userId=" + user.getId() 
+                                        + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier
+                                        + ", oldUserLogin=" + login);
+                                }
+                            
+                            //found twice, delete all logins
+                            accessor.getTemplate().delete(accessor.getBucketName());
+                            accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+                            ref.setOldDeviceId("");
+                            ref.setNextLoginId(1);
+                            ref.setFoundLogin(null);
+	                        break;
+	                    }
+	                }
+	                
+	                //found impersonation
+	                if(loginType == LoginType.IMPERSONATION) {
+	                    if(foundImpersonationLogin(login, user, deviceIdentifier, ref)) {
+	                        break;
+	                    }
+	                }
+	             
+	                //check
+	                if(foundLogin == null && login.getLoginId() >= nextLoginId){
+	                    nextLoginId = login.getLoginId() + 1;
+	                    }
+	                
+	            }
+	       }
+	    
+	    if(ref.getFoundLogin() != null) {
+	        ref.setNextLoginId(ref.getFoundLogin().getLoginId());
+	        return true;
+	    } else {
+	        ref.setNextLoginId(nextLoginId);
+	    }
+	    return false;
+	}
 
-	private UserLogin createLogin(int namespaceId, User user, String deviceIdentifier, String pusherIdentify) {
+	private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify) {
 		Boolean isNew = false;
+		User user = null;
+		Long impId = null;
+		UserImpersonation userImp = userImpersonationProvider.getUserImpersonationByOwnerId(inUser.getId());
+		if(userImp == null) {
+		    user = inUser;
+		} else {
+		    user = userProvider.findUserById(userImp.getTargetId());
+		    if(user == null) {
+		        LOGGER.warn("get impersonation userId error. userId=" + userImp.getTargetId() + ", impId=" + userImp.getId());
+		        user = inUser;
+		    }
+		    impId = inUser.getId();
+		}
 
 		String userKey = NameMapper.getCacheKey("user", user.getId(), null);
 
@@ -856,111 +1009,43 @@ public class UserServiceImpl implements UserService {
 		String hkeyIndex = "0";
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object o = accessor.getMapValueObject(hkeyIndex);
-		Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
-		UserLogin foundLogin = null;
-		int nextLoginId = 1;
-		int foundIndex = 0xFFFFFF;
-		String oldDeviceId = "";
-		LoginToken oldLoginToken = null;
-
-		if(maxLoginId != null) {
-			for(int i = 1; i <= maxLoginId.intValue(); i++) {
-				String hkeyLogin = String.valueOf(i);
-				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
-				UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
-				if(login != null) {
-					if(login.getNamespaceId() == namespaceId) {
-						if(login.getDeviceIdentifier() == null && deviceIdentifier == null) {
-							// toggle status so that we can have a new loginIntanceNumber, this
-							// will cause the previous one to be kicked out
-							login.setStatus(UserLoginStatus.LOGGED_OFF);
-							foundLogin = login;
-							if(LOGGER.isInfoEnabled()) {
-								LOGGER.info("User is kickoff for logined in another place, userId=" + user.getId() 
-										+ ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
-							}
-							break;
-						} else if(login.getDeviceIdentifier() != null && deviceIdentifier != null) {
-							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
-								foundLogin = login;
-								break;
-							} else if(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
-							    //Inner login not found
-							    //Do nothing
-							} else {
-							    //Not inner login, not web login
-							    if(foundLogin == null) {
-							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
-							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
-					                      if(LOGGER.isInfoEnabled()) {
-					                                LOGGER.info("User is kickoff state2 for logined in another place, userId=" + user.getId() 
-					                                        + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
-					                            }
-					                      
-							                //kickoff this login
-							                oldDeviceId = login.getDeviceIdentifier();
-							                oldLoginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
-							                login.setStatus(UserLoginStatus.LOGGED_OFF);          
-							            }
-	                              
-			                        login.setDeviceIdentifier(deviceIdentifier);
-							        }
-							       
-                            foundLogin = login;
-                            foundIndex = i+2;
-							    } else if(login.getDeviceIdentifier() == null || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())) {
-							        //the next login is not web login and inner login
-							        foundIndex = i+2;
-							    } else {
-							        if(LOGGER.isInfoEnabled()) {
-                                        LOGGER.info("User is kickoff state3 remove old all login tokens, userId=" + user.getId() 
-                                                + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
-                                    }
-							        
-							        //found twice, delete all logins
-							        accessor.getTemplate().delete(accessor.getBucketName());
-							        foundLogin = null;
-							        nextLoginId = 1;
-							        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
-							        oldDeviceId = "";
-							        break;   
-							    }
-							}
-						}
-					}
-
-					if(foundLogin == null && login.getLoginId() >= nextLoginId)
-						nextLoginId = login.getLoginId() + 1;
-					
-					if(i > foundIndex && foundLogin != null) {
-					    //already found
-					    break;
-					}
-				}
-			}
+		LogonRef ref = new LogonRef();
+		ref.setNamespaceId(namespaceId);
+		ref.setOldDeviceId("");
+		ref.setImpId(impId);
+		if(deviceIdentifier == null || deviceIdentifier.isEmpty()) {
+		    foundLoginByLoginType(user, null, LoginType.WEB, ref);
+		} else if(deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+		    foundLoginByLoginType(user, deviceIdentifier, LoginType.INNER, ref);
+		} else if(impId != null) {
+		    foundLoginByLoginType(user, deviceIdentifier, LoginType.IMPERSONATION, ref);
+		} else {
+		    foundLoginByLoginType(user, deviceIdentifier, LoginType.USER, ref);
 		}
 
+		UserLogin foundLogin = ref.getFoundLogin();
 		if(foundLogin == null) {
-			foundLogin = new UserLogin(namespaceId, user.getId(), nextLoginId, deviceIdentifier, pusherIdentify);
-			accessor.putMapValueObject(hkeyIndex, nextLoginId);
+			foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify);
+			accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
 			isNew = true;
 		}
 
+		foundLogin.setImpersonationId(impId);
 		foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
 		foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 		foundLogin.setPusherIdentify(pusherIdentify);
-		String hkeyLogin = String.valueOf(nextLoginId);
+		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
-		if(isNew && !(deviceIdentifier != null && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) ) {
+		if(isNew && deviceIdentifier != null && (!deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name()))) {
 			//Kickoff other login in this devices which is not inner login
 			kickoffLoginByDevice(foundLogin);
 		}
 		
-		if(!oldDeviceId.isEmpty()) {
-		    kickoffService.kickoff(namespaceId, oldLoginToken);
+		if(!ref.getOldDeviceId().isEmpty()) {
+		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
 	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
 	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
 	            locale = user.getLocale(); 

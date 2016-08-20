@@ -140,4 +140,28 @@ public class UserImpersonationProviderImpl implements UserImpersonationProvider 
         
         return objs.get(0);
     }
+    
+    @Override
+    public UserImpersonation getUserImpersonationByTargetId(Long userId) {
+        ListingLocator locator = new ListingLocator();
+        List<UserImpersonation> objs = this.queryUserImpersonations(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.TARGET_ID.eq(userId));
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.OWNER_TYPE.eq(EntityType.USER.getCode()));
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.TARGET_TYPE.eq(EntityType.USER.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(objs == null || objs.size() == 0) {
+            return null;
+        }
+        
+        return objs.get(0);
+    }
 }
