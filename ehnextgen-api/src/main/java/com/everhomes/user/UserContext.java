@@ -11,7 +11,6 @@ public class UserContext {
     private UserLogin login;
     private App callerApp;
     private Integer namespaceId;
-    private Long impersonationId;
     
     public UserContext() {
     }
@@ -87,14 +86,5 @@ public class UserContext {
 		return namespaceId;
 		
 	}
-
-    public Long getImpersonationId() {
-        return impersonationId;
-    }
-
-    public void setImpersonationId(Long impersonationId) {
-        this.impersonationId = impersonationId;
-    }
-
 
 }
