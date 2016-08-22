@@ -33,7 +33,7 @@ public class VersionAdminController extends ControllerBase {
      * <b>URL: /admin/version/listVersionRealm</b>
      * <p>版本Realm列表</p>
      */
-    @RequestMapping("listVersionInfo")
+    @RequestMapping("listVersionRealm")
     @RestReturn(value = VersionRealmDTO.class, collection = true)
     public RestResponse listVersionRealm(){
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");

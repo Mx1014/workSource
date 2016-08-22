@@ -43,7 +43,7 @@ public class LocaleTemplateAdminController extends ControllerBase {
      * <b>URL: /admin/locale/updateLocaleTemplate</b>
      * <p>更新模板</p>
      */
-    @RequestMapping("listLocaleTemplate")
+    @RequestMapping("updateLocaleTemplate")
     @RestReturn(LocaleTemplateDTO.class)
     public RestResponse updateLocaleTemplate(UpdateLocaleTemplateCommand cmd){
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
