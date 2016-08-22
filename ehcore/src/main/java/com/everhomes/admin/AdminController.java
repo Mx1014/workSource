@@ -5,6 +5,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,12 +43,12 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.codegen.CodeGenContext;
 import com.everhomes.codegen.GeneratorContext;
 import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.ItemType;
 import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
@@ -54,6 +56,7 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.admin.AppCreateCommand;
 import com.everhomes.rest.admin.DecodeContentPathCommand;
+import com.everhomes.rest.admin.EncodeWebTokenCommand;
 import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.admin.SampleCommand;
 import com.everhomes.rest.admin.SampleEmbedded;
@@ -64,8 +67,11 @@ import com.everhomes.rest.border.BorderDTO;
 import com.everhomes.rest.border.UpdateBorderCommand;
 import com.everhomes.rest.persist.server.AddPersistServerCommand;
 import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.RegisterLoginCommand;
@@ -93,6 +99,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.ZipHelper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * Infrastructure Administration API controller
@@ -226,6 +234,9 @@ public class AdminController extends ControllerBase {
         context.setSourceFileExtention(this.sourceFileExtention);
         context.setRestResponseBase(restResponseBase);
         context.setContextParam("dest.dir.java", StringHelper.interpolate(this.destinationJavaDir));
+        LOGGER.info("Set destination of generating java, path={}", this.destinationJavaDir);
+        
+        checkItemTypeTest();
         
         if(language.equalsIgnoreCase("objc")) {
             ObjectiveCGenerator generator = new ObjectiveCGenerator();
@@ -234,6 +245,7 @@ public class AdminController extends ControllerBase {
             // generate REST POJO objects
             jars.stream().forEach((jar)-> {
                 try {
+                    LOGGER.info("Load classes in jar, jarPath={}", jar);
                     Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(StringHelper.interpolate(jar));
                     
                     for(Class<?> clz: classes) {
@@ -282,15 +294,39 @@ public class AdminController extends ControllerBase {
             generator.generateApiConstants(apiMethods, context);
         }
         
-        List<String> errorList = CodeGenContext.current().getErrorMessages();
-        CodeGenContext.clear();
-        if(errorList == null || errorList.size() == 0) {
-            return new RestResponse("OK");
+//        List<String> errorList = CodeGenContext.current().getErrorMessages();
+//        CodeGenContext.clear();
+//        if(errorList == null || errorList.size() == 0) {
+//            return new RestResponse("OK");
+//        } else {
+//            RestResponse response = new RestResponse(errorList);
+//            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
+//            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+//            return response;
+//        }
+        return new RestResponse("OK");
+    }
+    
+    private void checkItemTypeTest() {
+        Field[] fields = ExpressionDTO.class.getDeclaredFields();
+    
+        if(fields != null) {
+            for(Field field : fields) {
+                LOGGER.debug("Find field for ExpressionDTO, fieldName={}", field.getName());
+                if("expression".equals(field.getName())) {
+                    ItemType itemType = field.getAnnotation(ItemType.class);
+                    if(itemType != null) {
+                        Class<?> itemClz = itemType.value();
+                        String clsName = null;
+                        if(itemClz != null) {
+                            clsName = itemClz.getName();
+                        }
+                        LOGGER.debug("Find item type, clsName={}", clsName);
+                    }
+                } 
+            }
         } else {
-            RestResponse response = new RestResponse(errorList);
-            response.setErrorScope(ErrorCodes.SCOPE_GENERAL);
-            response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-            return response;
+            LOGGER.debug("No field found for ExpressionDTO");
         }
     }
     
@@ -794,6 +830,54 @@ public class AdminController extends ControllerBase {
         SendMessageTestResponse msgResp = new SendMessageTestResponse();
         msgResp.setText(userService.pushMessageTest(cmd));
         RestResponse response = new RestResponse(msgResp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 生成webtoken
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping("encodeWebToken")
+    @RestReturn(String.class)
+    public RestResponse encodeWebToken(@Valid EncodeWebTokenCommand cmd) {        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        String json = cmd.getJson();
+        String tokenType = cmd.getTokenType();
+        
+        if(json == null || json.trim().length() == 0) {
+            LOGGER.error("json may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("json may not be empty");
+        }
+        
+        if(tokenType == null || tokenType.trim().length() == 0) {
+            LOGGER.error("Token type may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("Token type may not be empty");
+        }
+        
+        @SuppressWarnings("rawtypes")
+        Class clsObj = null;
+        Object tokenObj = null;
+        try {
+            clsObj = Class.forName(tokenType);
+            tokenObj = clsObj.newInstance();
+        } catch (Exception e) {
+            LOGGER.error("Invalid token type, cmd=" + cmd, e);
+            throw new IllegalArgumentException("Invalid token type");
+        }
+        
+        Gson gson = new Gson(); 
+        tokenObj = gson.fromJson(json, clsObj);
+        
+        Object obj = WebTokenGenerator.getInstance().toWebToken(tokenObj);
+        
+        RestResponse response = new RestResponse(StringHelper.toJsonString(obj));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

@@ -72,6 +72,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
@@ -143,7 +144,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             if(cert != null) {
                 ByteArrayInputStream bis = new ByteArrayInputStream(cert.getData());
                 //.withCert("/home/janson/projects/pys/apns/apns_develop.p12", "123456")
-                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5);
+                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5).asQueued();
                 if(certName.indexOf("develop") >= 0) {
                     builder = builder.withSandboxDestination();
                 } else {
@@ -182,6 +183,153 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             }
     }
     
+    private void pushMessageAndroid(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
+        Message message = new Message();
+        message.setAppId(AppConstants.APPID_DEFAULT);
+        //message.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+        message.setNamespaceId(destLogin.getNamespaceId());
+        message.setChannelType("");
+        message.setChannelToken("");
+        message.setSenderUid(senderLogin.getUserId());
+        
+        Gson gson = new Gson();
+        message.setContent(gson.toJson(devMessage));
+        String key = getPushMessageKey(destLogin.getNamespaceId(), destLogin.getDeviceIdentifier());
+        this.messageBoxProvider.putMessage(key, message);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Pushing message(push android), pushMsgKey=" + key + ", msgId=" + msgId 
+                + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+        }
+
+        PusherNotifyPdu pdu = new PusherNotifyPdu();
+        pdu.setPlatform(platform);
+        pdu.setNotification(msg.getContent());
+        pdu.setMessageType("UNICAST");
+        pdu.setMessageId(msgId);
+        pdu.setDeviceId(destLogin.getDeviceIdentifier());
+
+        long requestId = LocalSequenceGenerator.getNextSequence();
+        borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
+        
+        LOGGER.info("pushing to uid=" + destLogin.getUserId() );
+    }
+    private void pushMessageApple(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
+        PayloadBuilder payloadBuilder = APNS.newPayload();
+        if(devMessage.getAlert().length() > 20) {
+            payloadBuilder = payloadBuilder.alertBody(devMessage.getAlert().substring(0, 20));
+        } else {
+            payloadBuilder = payloadBuilder.alertBody(devMessage.getAlert());
+            }
+        
+        payloadBuilder = payloadBuilder
+        //.alertAction(devMessage.getAction())
+        //.actionKey("testAction")
+        //.category("testCategory")
+        .alertTitle(devMessage.getTitle())
+        .badge(devMessage.getBadge())
+        //.forNewsstand() aps {content-available: 1}
+        //.instantDeliveryOrSilentNotification()
+        .customField("alertType", devMessage.getAlertType())
+        .customField("appId", devMessage.getAppId());
+        
+        if(devMessage.getAudio() != null && !devMessage.getAudio().isEmpty()) {
+            payloadBuilder = payloadBuilder.sound(devMessage.getAudio());    
+            }
+//        if(devMessage.getAlertType().equals(DeviceMessageType.Jump.getCode())) {
+//            payloadBuilder = payloadBuilder.customField("jumpObj", devMessage.getExtra().get("jumpObj"))
+//                    .customField("jumpType", devMessage.getExtra().get("jumpType"));
+//            }
+        if(null != devMessage.getAction()) {
+            payloadBuilder = payloadBuilder.customField("actionType", devMessage.getAction())
+                  .customField("actionData", devMessage.getExtra().get("actionData"));
+            }
+        
+        String payload = payloadBuilder.build();
+        
+        //.customField("", devMessage.)
+        //.customField("", devMessage.)
+        //String payload = APNS.newPayload().alertBody(devMessage.getAlert()).build();
+        //String identify = "0e45353318a46f03269fbce18f6643475043d01d298ec4ef305a70b7c1de09ff";
+        //String identify = "b135d649736eedd8dbf649a245a42856d400d13fbf96ecc0a2746fb670f09471";
+        String identify = destLogin.getDeviceIdentifier();
+        identify = identify.replace("<", "").replace(">", "").replace(" ", "");
+        String partner = certName;
+        if(destLogin.getNamespaceId() > 0) {
+            partner = this.namespacePrefix + destLogin.getNamespaceId();
+            }
+        if(destLogin.getPusherIdentify() != null) {
+            partner = partner + ":" + destLogin.getPusherIdentify(); 
+            }
+        
+//        String payload = APNS.newPayload().badge(3)
+//                .customField("secret", "what do you think?")
+//                .localizedKey("GAME_PLAY_REQUEST_FORMAT")
+//                .localizedArguments("Jenna", "Frank")
+//                .actionKey("Play").build();
+        
+//        if(msgId != 0) {
+//            final Job job = new Job(PusherAction.class.getName(),
+//                    new Object[]{ payload, identify, partner });
+//            jesqueClientFactory.getClientPool().enqueue(queueName, job);    
+//        } else {
+        
+        //use queue to notify
+        
+            int now =  (int)(new Date().getTime()/1000);
+
+            try {
+                    EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                                now + 60 * 60 /* Expire in one hour */,
+                                identify /* Device Token */,
+                                payload);
+                    ApnsService tempService = getApnsService(partner);
+                    if(tempService != null) {
+                            tempService.push(notification);   
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    }
+                     }
+            } catch (NetworkIOException e) {
+                LOGGER.warn("apns error and stop it", e);
+                stopApnsServiceByName(partner);
+            } catch(Exception ex) {
+                LOGGER.warn("apns error deviceId not correct", ex);
+            }
+            
+    }
+    
+    private String getPlatform(UserLogin destLogin) {
+        if(destLogin.getStatus() == UserLoginStatus.LOGGED_OFF) {
+            LOGGER.error("Pushing message, destLogin loggedoff, destLogin=" + destLogin);
+            return null;
+        }
+        
+        if(destLogin.getDeviceIdentifier() == null || destLogin.getDeviceIdentifier().isEmpty()) {
+            return null;
+        }
+
+        Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
+        if(d == null) {
+            LOGGER.error("Pushing message, dest device not found, destLogin=" + destLogin);
+            return null;
+        }
+        
+        String platform = d.getPlatform();
+        if(platform == null || !(platform.equals("iOS") || platform.equals("android"))) {
+            //platform != iOS && platform != "android", auto detect by deviceId
+            if(d.getDeviceId() != null) {
+                if(d.getDeviceId().indexOf(":") >= 0) {
+                    platform = "android";
+                } else if(d.getDeviceId().length() >= 60) {
+                    platform = "iOS";
+                }
+            }
+        }
+        
+        return platform;
+    }
+    
     //https://developer.apple.com/library/
     //  ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html
     //  #//apple_ref/doc/uid/TP40008194-CH100-SW1
@@ -192,18 +340,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             return;
         }
 
-        if(destLogin.getStatus() == UserLoginStatus.LOGGED_OFF) {
-            LOGGER.error("Pushing message, destLogin loggedoff, msgId=" + msgId 
-                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-            return;
-        }
-
-        Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
-        if(d == null) {
-            LOGGER.error("Pushing message, dest device not found, msgId=" + msgId 
-                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-            return;
-        }
+        
         String beanName = PushMessageResolver.PUSH_MESSAGE_RESOLVER_PREFIX + msg.getAppId();
         PushMessageResolver messageResolver = PlatformContext.getComponent(beanName);
         if(null == messageResolver) {
@@ -212,115 +349,17 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         //assert(messageResolver != null)
         DeviceMessage devMessage = messageResolver.resolvMessage(senderLogin, destLogin, msg);
         
-        if(d.getPlatform().equals("iOS")) {
-                PayloadBuilder payloadBuilder = APNS.newPayload();
-                if(devMessage.getAlert().length() > 20) {
-                    payloadBuilder = payloadBuilder.alertBody(devMessage.getAlert().substring(0, 20));
-                } else {
-                    payloadBuilder = payloadBuilder.alertBody(devMessage.getAlert());
-                    }
-                
-                payloadBuilder = payloadBuilder
-                //.alertAction(devMessage.getAction())
-                //.actionKey("testAction")
-                //.category("testCategory")
-                .alertTitle(devMessage.getTitle())
-                .badge(devMessage.getBadge())
-                //.forNewsstand() aps {content-available: 1}
-                //.instantDeliveryOrSilentNotification()
-                .customField("alertType", devMessage.getAlertType())
-                .customField("appId", devMessage.getAppId());
-                
-                if(devMessage.getAudio() != null && !devMessage.getAudio().isEmpty()) {
-                    payloadBuilder = payloadBuilder.sound(devMessage.getAudio());    
-                    }
-//                if(devMessage.getAlertType().equals(DeviceMessageType.Jump.getCode())) {
-//                    payloadBuilder = payloadBuilder.customField("jumpObj", devMessage.getExtra().get("jumpObj"))
-//                            .customField("jumpType", devMessage.getExtra().get("jumpType"));
-//                    }
-                if(null != devMessage.getAction()) {
-                    payloadBuilder = payloadBuilder.customField("actionType", devMessage.getAction())
-                          .customField("actionData", devMessage.getExtra().get("actionData"));
-                    }
-                
-                String payload = payloadBuilder.build();
-                
-                //.customField("", devMessage.)
-                //.customField("", devMessage.)
-                //String payload = APNS.newPayload().alertBody(devMessage.getAlert()).build();
-                //String identify = "0e45353318a46f03269fbce18f6643475043d01d298ec4ef305a70b7c1de09ff";
-                //String identify = "b135d649736eedd8dbf649a245a42856d400d13fbf96ecc0a2746fb670f09471";
-                String identify = destLogin.getDeviceIdentifier();
-                identify = identify.replace("<", "").replace(">", "").replace(" ", "");
-                String partner = certName;
-                if(destLogin.getNamespaceId() > 0) {
-                    partner = this.namespacePrefix + destLogin.getNamespaceId();
-                    }
-                if(destLogin.getPusherIdentify() != null) {
-                    partner = partner + ":" + destLogin.getPusherIdentify(); 
-                    }
-                
-//                String payload = APNS.newPayload().badge(3)
-//                        .customField("secret", "what do you think?")
-//                        .localizedKey("GAME_PLAY_REQUEST_FORMAT")
-//                        .localizedArguments("Jenna", "Frank")
-//                        .actionKey("Play").build();
-                if(msgId != 0) {
-                    final Job job = new Job(PusherAction.class.getName(),
-                            new Object[]{ payload, identify, partner });
-                    jesqueClientFactory.getClientPool().enqueue(queueName, job);    
-                } else {
-                    int now =  (int)(new Date().getTime()/1000);
-                    
-                    EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
-                                now + 60 * 60 /* Expire in one hour */,
-                                identify /* Device Token */,
-                                payload);
-                    ApnsService tempService = getApnsService(partner);
-                    if(tempService != null) {
-                        tempService.push(notification);    
-                    }
-                    
-                }
-                
-            
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId 
-                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-            }
+        String platform = getPlatform(destLogin);
+        if(platform == null) {
+            return;
+        }
+        
+        if(platform.equals("iOS")) {
+            pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
         } else {
             //Android or other here
-            //copy the message to message box
-            //messageBoxProvider.putMessage(messageBoxPrefix+destLogin.getDeviceIdentifier(), msgId);
+            pushMessageAndroid(senderLogin, destLogin, msgId, msg, platform, devMessage);
             
-            Message message = new Message();
-            message.setAppId(AppConstants.APPID_DEFAULT);
-            //message.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-            message.setNamespaceId(destLogin.getNamespaceId());
-            message.setChannelType("");
-            message.setChannelToken("");
-            message.setSenderUid(senderLogin.getUserId());
-            
-            Gson gson = new Gson();
-            message.setContent(gson.toJson(devMessage));
-            String key = getPushMessageKey(destLogin.getNamespaceId(), destLogin.getDeviceIdentifier());
-            this.messageBoxProvider.putMessage(key, message);
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Pushing message(push android), pushMsgKey=" + key + ", msgId=" + msgId 
-                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-            }
-
-            PusherNotifyPdu pdu = new PusherNotifyPdu();
-            pdu.setPlatform(d.getPlatform());
-            pdu.setNotification(msg.getContent());
-            pdu.setMessageType("UNICAST");
-            pdu.setMessageId(msgId);
-            pdu.setDeviceId(destLogin.getDeviceIdentifier());
-
-            long requestId = LocalSequenceGenerator.getNextSequence();
-            borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
-            
-            LOGGER.info("pushing to uid=" + destLogin.getUserId() );
         }
     }
     
@@ -363,11 +402,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         deviceMsgs.setAnchor(l.getAnchor());
 
         for(Message mb : msgInBox) {
-            Gson gson = new Gson();
-            DeviceMessage msg = gson.fromJson(mb.getContent(), DeviceMessage.class);
-            if(msg != null) {
-                deviceMsgs.add(msg);    
-                }
+            String msgStr = null;
+            try {
+                msgStr = mb.getContent();
+                if(msgStr != null && !msgStr.isEmpty()) {
+                    DeviceMessage msg = (DeviceMessage)StringHelper.fromJsonString(msgStr, DeviceMessage.class);
+                    if(msg != null) {
+                        deviceMsgs.add(msg);    
+                        }
+                    }
+                
+            } catch(Exception ex) {
+                LOGGER.error("device message error msgStr=" + msgStr, ex);
+            }
+            
         }
 
         return deviceMsgs;
@@ -467,9 +515,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         Object o = redisTemplate.opsForValue().get(key);
-        redisTemplate.opsForValue().set(key, 1l, 10, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key, "1", 10, TimeUnit.SECONDS);
         
-        if(o == null) {
+        String platform = getPlatform(destLogin);
+        
+        if(o == null && platform != null && platform.equals("iOS")) {
+            //iOS only
             pushMessage(senderLogin, destLogin, msgId, msg);
         }
     }

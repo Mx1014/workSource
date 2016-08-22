@@ -32,6 +32,8 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
@@ -48,6 +50,9 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+	private SequenceProvider sequenceProvider;
+    
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
@@ -55,7 +60,6 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        
         
 //        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
 //        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
@@ -65,8 +69,12 @@ public class CategoryProviderImpl implements CategoryProvider {
 //        
 //        category.setId(query.getReturnedRecord().getId());
         
-        //修改成下面这样，因为数据库在id改成了非自动增长
-        category.setId(sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCategories.class)));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCategories.class));
+		
+        category.setId(id);
+        
+        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
+        dao.insert(category);
         
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         dao.insert(category);

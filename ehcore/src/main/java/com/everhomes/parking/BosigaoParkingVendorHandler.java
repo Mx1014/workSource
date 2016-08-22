@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,20 +22,26 @@ import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.ListCardTypeCommand;
+import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotVendor;
+import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingRechargeRateStatus;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
+import com.everhomes.rest.techpark.park.GetAllCardDescriptDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -50,6 +57,9 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 	
     @SuppressWarnings("unchecked")
 	@Override
@@ -111,28 +121,52 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         return resultList;
     }
 
+    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+    	ListCardTypeResponse ret = new ListCardTypeResponse();
+    	URL wsdlURL = Service1.WSDL_LOCATION;
+    	 
+		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
+        Service1Soap port = ss.getService1Soap12();
+        String json = port.getAllCardDescript();
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.debug("Card type from bosigao={}", json);
+        
+        GetAllCardDescriptDTO cardDescriptDTO = GsonUtil.fromJson(json, GetAllCardDescriptDTO.class);
+
+		if(cardDescriptDTO.isSuccess()){
+			ret.setCardTypes(cardDescriptDTO.getCardDescript());
+		}
+    	return ret;
+    }
+    
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
-        URL wsdlURL = Service1.WSDL_LOCATION;
-        Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
-        Service1Soap port = ss.getService1Soap12();
-        LOGGER.info("verifyRechargedPlate");
-        String json = port.getCardInfo("", plateNumber, "2", "sign");
-        
-        ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-        this.checkResultHolderIsNull(resultHolder,plateNumber);
-        Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
-		Map<String,Object> card = (Map<String, Object>) data.get("card");
-		Boolean validStatus =  (Boolean) card.get("valid");
-		this.checkValidStatusIsNull(validStatus,plateNumber);
+    	List<ParkingRechargeRate> parkingRechargeRateList = null;
+    	List<ParkingRechargeRateDTO> result = null;
+    	if(StringUtils.isBlank(plateNumber)) {
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,null);
+    		
+    	}else{
+    		URL wsdlURL = Service1.WSDL_LOCATION;
+            Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
+            Service1Soap port = ss.getService1Soap12();
+            LOGGER.info("verifyRechargedPlate");
+            String json = port.getCardInfo("", plateNumber, "2", "sign");
+            
+            ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+            this.checkResultHolderIsNull(resultHolder,plateNumber);
+            Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+    		Map<String,Object> card = (Map<String, Object>) data.get("card");
+    		Boolean validStatus =  (Boolean) card.get("valid");
+    		this.checkValidStatusIsNull(validStatus,plateNumber);
 
-		String cardType = (String) card.get("cardDescript");
-		List<ParkingRechargeRate> parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
-		
-		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
+    		String cardType = (String) card.get("cardDescript");
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
+    	}
+		result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
-			dto.setRateName(dto.getMonthCount().intValue()+"个月");
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;
@@ -184,10 +218,20 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     	parkingRechargeRate.setOwnerType(cmd.getOwnerType());
     	parkingRechargeRate.setOwnerId(cmd.getOwnerId());
     	parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
-    	parkingRechargeRate.setRateName(cmd.getRateName());
+    	parkingRechargeRate.setCardType(cmd.getCardType());
+    	/*费率 名称默认设置 by sw*/
+    	Map<String, Object> map = new HashMap<String, Object>();
+	    map.put("count", cmd.getMonthCount().intValue());
+		String scope = ParkingNotificationTemplateCode.SCOPE;
+		int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
+		String locale = "zh_CN";
+		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+    	parkingRechargeRate.setRateName(rateName);
     	parkingRechargeRate.setMonthCount(cmd.getMonthCount());
     	parkingRechargeRate.setPrice(cmd.getPrice());
     	parkingRechargeRate.setCreatorUid(user.getId());
+    	parkingRechargeRate.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    	parkingRechargeRate.setStatus(ParkingRechargeRateStatus.ACTIVE.getCode());
     	parkingProvider.createParkingRechargeRate(parkingRechargeRate);
     	return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
     }

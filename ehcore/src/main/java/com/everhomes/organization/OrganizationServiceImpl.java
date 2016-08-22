@@ -12,16 +12,20 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,103 +134,7 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.AddOrgAddressCommand;
-import com.everhomes.rest.organization.AddPersonnelsToGroup;
-import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
-import com.everhomes.rest.organization.AssginOrgTopicCommand;
-import com.everhomes.rest.organization.CreateDepartmentCommand;
-import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
-import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
-import com.everhomes.rest.organization.CreateOrganizationContactCommand;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
-import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
-import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DepartmentDTO;
-import com.everhomes.rest.organization.DepartmentType;
-import com.everhomes.rest.organization.GetOrgDetailCommand;
-import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
-import com.everhomes.rest.organization.ImportOwnerDataCommand;
-import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
-import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.ListUserTaskCommand;
-import com.everhomes.rest.organization.OrganizationAddressDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDTO2;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroup;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberCommand;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
-import com.everhomes.rest.organization.OrganizationNaviFlag;
-import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
-import com.everhomes.rest.organization.OrganizationPostDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskApplyEnityType;
-import com.everhomes.rest.organization.OrganizationTaskDTO2;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskTargetType;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.PmManagementCommunityDTO;
-import com.everhomes.rest.organization.PmManagementIsAll;
-import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
-import com.everhomes.rest.organization.RejectOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
-import com.everhomes.rest.organization.SendOrganizationMessageCommand;
-import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
-import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
-import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
-import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdateOrganizationsCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
-import com.everhomes.rest.organization.UserExitOrganizationCommand;
-import com.everhomes.rest.organization.UserJoinOrganizationCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
@@ -249,6 +157,7 @@ import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -284,6 +193,7 @@ import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -618,22 +528,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(!StringUtils.isEmpty(cmd.getBuildingName())){
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
 			if(null != building){
-				cmd.setBuildingId(cmd.getBuildingId());
+				cmd.setBuildingId(building.getId());
 			}
 		}
 		
 		Long buildingId = cmd.getBuildingId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
-			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, cmd.getPageSize(), locator);
+			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
 			for (OrganizationAddress address : addresses) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
 					dtos.add(dto);
 			}
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
 			for (OrganizationCommunityRequest req : requests) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -641,7 +552,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, cmd.getPageSize());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, pageSize);
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -1316,12 +1227,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//PostEntityTag.USER
 		switch(targetTag){
 		case USER:
-			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
-				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+//			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
+//				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+//			}
+//			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
+//				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
+//			}
+			//update by tt, 20160804
+			if(!PostEntityTag.USER.getCode().equals(creatorTag.getCode()) && cmd.getVisibleRegionType() != null 
+					&& VisibleRegionType.REGION.getCode() == cmd.getVisibleRegionType().byteValue()){
+				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());
+			} else {
+				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());
 			}
-			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
-				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
-			}
+			break;
 		case PM:
 		case GARC:
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
@@ -1863,24 +1782,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	/**
 	 * 根据小区ID获取机构及该机构在树型结构的组织架构上的所有上层机构。
+	 * 修改1：找出小区的所有上级机构，update by tt, 20160810
 	 * @param communityId 小区ID
 	 */
 	public List<Organization> getOrganizationTreeUpToRoot(Long communityId) {
 	    long startTime = System.currentTimeMillis();
-	    List<Organization> orgResultist = new ArrayList<Organization>();
-	    
-	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
-	    String rootPath = null;
-	    for(Organization org : orgDbist) {
-	        orgResultist.add(org);
-	        rootPath = getOrganizationRootPath(org.getPath());
-	        if(rootPath != null && rootPath.length() > 0) {
-	            List<Organization> tempDbist = this.organizationProvider.findOrganizationByPath(rootPath);
-	            if(tempDbist != null && tempDbist.size() > 0) {
-	                orgResultist.addAll(tempDbist);
-	            }
-	        }
-	    }
+	    List<Long> organizationIds = getOrganizationIdsTreeUpToRoot(communityId);
+	    List<Organization> orgResultist = organizationProvider.listOrganizationsByIds(organizationIds);
 	    long endTime = System.currentTimeMillis();
 	    if(LOGGER.isDebugEnabled()) {
 	        LOGGER.info("List all the organization from bottom to the top in the tree, communityId=" + communityId 
@@ -1888,6 +1796,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    return orgResultist;
+	}
+	
+	@Override
+	public List<Long> getOrganizationIdsTreeUpToRoot(Long communityId){
+//	    List<Organization> orgResultist = new ArrayList<Organization>();
+	    
+	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
+//	    String rootPath = null;
+	    Set<Long> organizationIds = new HashSet<>();
+	    for(Organization org : orgDbist) {
+//	        orgResultist.add(org);
+//	        rootPath = getOrganizationRootPath(org.getPath());
+//	        if(rootPath != null && rootPath.length() > 0) {
+//	            List<Organization> tempDbist = this.organizationProvider.findOrganizationByPath(rootPath);
+//	            if(tempDbist != null && tempDbist.size() > 0) {
+//	                orgResultist.addAll(tempDbist);
+//	            }
+//	        }
+
+			if(org != null && org.getPath() != null){
+				organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
+												.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
+												.filter(f->f!=null).collect(Collectors.toSet()));
+			}
+	    }
+	    return new ArrayList<>(organizationIds);
 	}
 	
 	/**
@@ -2010,6 +1944,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //增加门牌地址
+        List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+        if(null != organizationAddresses){
+        	List<String> doorplateAddresses = new ArrayList<String>();
+        	for (OrganizationAddress organizationAddress : organizationAddresses) {
+        		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+        		doorplateAddresses.add(address.getAddress());
+			}
+        	
+        	if(0 < doorplateAddresses.size()){
+        		organizationDto.setAddress(doorplateAddresses.get(0));
+        	}
+        }
+        
+        
         // 企业入驻的园区
         Long communityId = getOrganizationActiveCommunityId(organization.getId());
         // 园区对应的类型、论坛等信息
@@ -4592,7 +4541,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationMember.setNamespaceId(namespaceId);
 		organizationProvider.createOrganizationMember(organizationMember);
-	//	userSearcher.feedDoc(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
@@ -4803,13 +4752,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
-				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_OBJECT_NOT_EXIST,
-						"organization detail is null.");
+			}else{
+				detail.setContactor(cmd.getAccountName());
+				detail.setContact(cmd.getAccountPhone());
+				organizationProvider.updateOrganizationDetail(detail);
 			}
-			
-			detail.setContactor(cmd.getAccountName());
-			detail.setContact(cmd.getAccountPhone());
-			organizationProvider.updateOrganizationDetail(detail);
 			return null;
 		});
 	}
@@ -6169,9 +6116,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			locator.setAnchor(cmd.getPageOffset());
 			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organizationIds,cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
 			List<PostDTO> dtos = new ArrayList<PostDTO>();
+			
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-				
 				if(null == dto){
 					continue;
 				}
@@ -6508,6 +6455,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		return members;
 	    	}
 	    	
+	    	Integer namespaceId = UserContext.getCurrentNamespaceId(organization.getNamespaceId());
+	    	if(!namespaceId.equals(organization.getNamespaceId())) {
+	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Namespace error for group forward");
+	    	}
+	    	
 	    	List<OrganizationMember> organizationMember = organizationProvider.listOrganizationMembersByOrgId(organization.getId());
 	    	for (OrganizationMember member : organizationMember) {
 				if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE && OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
@@ -6578,5 +6530,77 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    resp.setNextPageAnchor(locator.getAnchor());
 	    
 	    return resp;
+	}
+	
+	@Override
+	public List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag) {
+		
+		if(null == naviFlag){
+			naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
+		}
+		
+		
+		Organization org =  this.checkOrganization(id);
+
+		if(null == org){
+			return null;
+		}
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+		
+		if(0 == orgs.size()){
+			return null;
+		}
+		
+		List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
+		for (Organization organization : orgs) {
+			OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+			if(OrganizationNaviFlag.fromCode(naviFlag) == OrganizationNaviFlag.HIDE_NAVI){
+				if(OrganizationNaviFlag.fromCode(organization.getShowFlag()) == OrganizationNaviFlag.SHOW_NAVI){
+					rganizationDTOs.add(orgDto);
+				}
+			}else{
+				rganizationDTOs.add(orgDto);
+			}
+		}
+		
+		
+		return rganizationDTOs;
+	}
+
+
+	@Override
+	public CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+		if (UserCurrentEntityType.fromCode(sceneToken.getEntityType()) != UserCurrentEntityType.ORGANIZATION) {
+			return checkOfficalPrivilege(-1L);
+		}
+		
+		return checkOfficalPrivilege(sceneToken.getEntityId());
+	}
+
+	@Override
+	public CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd) {
+		return checkOfficalPrivilege(cmd.getOrganizationId());
+	}
+	
+	private CheckOfficalPrivilegeResponse checkOfficalPrivilege(Long organizationId) {
+		CheckOfficalPrivilegeResponse response = new CheckOfficalPrivilegeResponse();
+		response.setOfficialFlag((byte) 0);
+		if (organizationId != null && organizationId.longValue() >= 0) {
+			Organization organization = organizationProvider.findOrganizationById(organizationId);
+			if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
+				try{
+					if (rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.OfficialActivity)) {
+						response.setOfficialFlag((byte) 1);
+					}
+				}catch(Exception e){
+				}
+			}
+		}
+		
+		return response;
 	}
 }

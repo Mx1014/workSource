@@ -699,10 +699,32 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         String sceneType = cmd.getCurrentSceneType();
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         
+        // 产品规则每个公司都有一个办公地点所在的园区/小区，故在公司场景也可以拿到小区ID
+        // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
+        Long communityId = null;
+        OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+        if(org != null) {
+            communityId = org.getCommunityId();
+        } else {
+            LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
+        }
+        
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
         
         //增加定制item流程 by sfyan 20160607
       	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(),cmd.getOrganizationId(),null);
+
+        // 如果只定制scope为公司的，则只有当前公司才能查到，其它公司就查不到，故补充也按园区查询 by lqs 20160729
+      	int orgItemSize = (orgItems == null) ? 0 : orgItems.size();
+      	int cmntyItemSize = 0;
+      	if((orgItems == null || orgItems.size() == 0) && communityId != null) {
+      	    orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), communityId, null);
+            cmntyItemSize = (orgItems == null) ? 0 : orgItems.size();
+      	}
+      	if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Check custom launchpad items, namespaceId={}, sceneType={}, organizationId={}, communityId={}, orgItemsize={}, cmntyItemSize={}", 
+                namespaceId, sceneType, cmd.getOrganizationId(), communityId, orgItemSize, cmntyItemSize);
+        }
 
       	List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
       		
@@ -742,17 +764,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             }
             	
       	}
-        
-        
-        // 产品规则每个公司都有一个办公地点所在的园区/小区，故在公司场景也可以拿到小区ID
-        // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
-        Long communityId = null;
-        OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
-        if(org != null) {
-            communityId = org.getCommunityId();
-        } else {
-            LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
-        }
         
         return processLaunchPadItems(token, userId, communityId, allItems, request);
     }
@@ -1441,6 +1452,23 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		//先看社区或者机构是否有定制的layout，没有则查询All的layout，然后看社区或者机构的场景下是否有覆盖新增的layout，再看特定的园区和社区有覆盖新增的layout，合并起来。 by sfyan 20160628
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
 		List<LaunchPadLayout> launchPadLayouts = this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode(), scopeType, scopeId);
+		
+		// 对于机构实体，其有可能是为机构定制，也有可能是为机构所在园区定制，以机构定制优先 by lqs 20160730
+        int orgLayoutsize = (launchPadLayouts == null) ? 0 : launchPadLayouts.size();
+        int cmntyLayoutSize = 0;
+        Long communityId = null;
+		if((launchPadLayouts == null || launchPadLayouts.size() == 0) && scopeType == ScopeType.ORGANIZATION) {
+		    OrganizationDTO organization = organizationService.getOrganizationById(scopeId);
+		    communityId = organization.getCommunityId();
+		    if(organization != null && communityId != null) {
+		        launchPadLayouts = this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode(), ScopeType.COMMUNITY, communityId);
+		        cmntyLayoutSize = (launchPadLayouts == null) ? 0 : launchPadLayouts.size();
+		    }
+		}
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Check custom launchpad layouts, namespaceId={}, sceneType={}, organizationId={}, communityId={}, orgLayoutsize={}, cmntyLayoutSize={}", 
+                namespaceId, sceneType, scopeId, communityId, orgLayoutsize, cmntyLayoutSize);
+        }
 		
 		for (LaunchPadLayout launchPadLayout : launchPadLayouts) {
 			if(ApplyPolicy.fromCode(launchPadLayout.getApplyPolicy()) == ApplyPolicy.CUSTOMIZED){

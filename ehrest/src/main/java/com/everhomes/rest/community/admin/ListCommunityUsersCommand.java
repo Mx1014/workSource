@@ -26,6 +26,8 @@ public class ListCommunityUsersCommand {
 	
 	private Long communityId;
 	
+	private Long organizationId;
+	
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -78,6 +80,14 @@ public class ListCommunityUsersCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 	
 	

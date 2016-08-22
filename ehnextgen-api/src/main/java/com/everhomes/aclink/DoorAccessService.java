@@ -8,6 +8,7 @@ import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkUserResponse;
@@ -17,6 +18,7 @@ import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
@@ -28,6 +30,8 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetShortMessageCommand;
+import com.everhomes.rest.aclink.GetShortMessageResponse;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
@@ -105,8 +109,6 @@ public interface DoorAccessService {
 
     DoorAccessDTO createDoorAccessLingLing(CreateDoorAccessLingLing cmd);
 
-    DoorAuthDTO createLinglingVisitorAuth(CreateLinglingVisitorCommand cmd);
-
     GetVisitorResponse getVisitor(GetVisitorCommand cmd);
 
     DoorMessage queryWifiMgmtMessage(AclinkMgmtCommand cmd);
@@ -122,4 +124,10 @@ public interface DoorAccessService {
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
 
     void remoteOpenDoor(Long doorId);
+
+    DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd);
+
+    ListDoorAccessQRKeyResponse updateAndQueryQR(AclinkUpdateLinglingStoreyCommand cmd);
+
+    GetShortMessageResponse getShortMessages(GetShortMessageCommand cmd);
 }

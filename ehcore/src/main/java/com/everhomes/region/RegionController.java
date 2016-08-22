@@ -58,9 +58,10 @@ public class RegionController extends ControllerBase {
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
-        
+        if(null == cmd.getNamespaceId())
+        	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.fromCode(cmd.getScope()), 
+        List<Region> entityResultList = this.regionProvider.listRegions(cmd.getNamespaceId(), RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
         List<RegionDTO> dtoResultList = entityResultList.stream()
@@ -87,9 +88,11 @@ public class RegionController extends ControllerBase {
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
-        
+
+        if(null == cmd.getNamespaceId())
+        	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listChildRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listChildRegions( cmd.getNamespaceId(), cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         

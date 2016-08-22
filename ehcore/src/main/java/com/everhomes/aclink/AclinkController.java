@@ -36,10 +36,12 @@ import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
+import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
@@ -160,6 +162,10 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("createAuth")
     @RestReturn(value=DoorAuthDTO.class)
     public RestResponse createDoorAuth(@Valid CreateDoorAuthByUser cmd) {
+        if(cmd.getAuthMethod() == null) {
+            cmd.setAuthMethod(DoorAuthMethodType.MOBILE.getCode());    
+        }
+        
         RestResponse response = new RestResponse(doorAccessService.createDoorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -473,6 +479,41 @@ public class AclinkController extends ControllerBase {
     public RestResponse remoteOpen(@Valid AclinkRemoteOpenCommand cmd) {
         doorAccessService.remoteOpenDoor(cmd.getAuthId());
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/remoteOpen</b>
+     * <p>删除一个组或者单独一个门禁设备</p>
+     * @return
+     */
+    @RequestMapping("updateAndQueryQR")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse updateAndQueryQR(@Valid AclinkUpdateLinglingStoreyCommand cmd) {
+        doorAccessService.updateAndQueryQR(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/createDoorVistor</b>
+     * <p>给令令访客授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createDoorVistor")
+    @RestReturn(value=DoorAuthDTO.class)
+    public RestResponse createLingingVistor(@Valid CreateDoorVisitorCommand cmd) {
+        if(cmd.getAuthMethod() == null) {
+            cmd.setAuthMethod(DoorAuthMethodType.MOBILE.getCode());    
+        }
+        
+        RestResponse response = new RestResponse(doorAccessService.createDoorVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        

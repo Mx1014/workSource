@@ -1,6 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,9 +30,12 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
@@ -59,15 +63,24 @@ import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
-    
+
+	@Autowired
+	private SmsProvider smsProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	
@@ -86,7 +99,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private CommunityProvider communityProvider;
 	
-
+	@Autowired
+	private UserProvider userProvider;
+	
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
 			ListEnterpriseDetailCommand cmd) {
@@ -254,9 +269,105 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
+		
+		// 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
+//		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+//		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
+//		String phoneNumber = null;
+//		if(rentType != null) {
+//			switch(rentType) {
+//			case ORDINARY:
+//				phoneNumber = lp.getContactPhone();
+//				break;
+//			case BUILDING:
+//				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+//				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
+//				if(null != identifier)
+//					phoneNumber = identifier.getIdentifierToken();
+//				break;
+//			default:
+//				break;
+//				
+//			}
+//		} 
+//		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+//        sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+//                lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+        // 根据apply type来区分
+        String phoneNumber = null;
+        String location = null;
+        ApplyEntryApplyType applyType = ApplyEntryApplyType.fromType(cmd.getApplyType());
+        if(applyType != null && cmd.getSourceId() != null) {
+			//modify by wuhan 2016-8-17 园区入驻2.2全部变成了给管理员发短信(其实是没有for_rent的类型了)
+			  Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
+			  if(building != null) {
+			  	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+			
+			      if(null != member) {
+			          phoneNumber = member.getContactToken();
+			      }
+			      location = building.getName();
+			  } else {
+			      if(LOGGER.isWarnEnabled()) {
+			          LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
+			      }
+			  }
+
+	  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+	  		
+            switch(applyType) {
+            case APPLY:
+            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
+                break;
+            case RENEW:
+            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"续租");
+                break;
+            case EXPANSION:
+            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
+                break;
+            default:
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Apply entry source type not supported, applyType={}, cmd={}", applyType, cmd);
+                }
+                break;
+            }
+
+        }
+
 		return true;
 	}
-
+	/**
+	 * 用户{userName}（手机号：{userPhone}）于{applyTime}提交了预约{applyType}申请：
+ 	 * 参观位置：{location}
+ 	 * 面积需求：{area}
+	 * 公司名称：{enterpriseName}
+	 * 备注：{description}
+	 * */
+	private void sendApplyEntrySmsToManager(String phoneNumber,String userName,String userPhone,String applyTime,String location
+			,String area,String enterpriseName,String description , Integer namespaceId,String applyType){
+		
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_USERNAME, processNull(userName));
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_USERPHONE, processNull(userPhone)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTIME, processNull(applyTime)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_APPLYTYPE, processNull(applyType)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_LOCATION, processNull(location)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_AREA, processNull(area)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_ENTERPRISENAME, processNull(enterpriseName)); 
+		smsProvider.addToTupleList(variables,SmsTemplateCode.KEY_DESCRIPTION, processNull(description));  
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.WEIXIN_APPLY_RENEW_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+	}
+	public String processNull(String variable){
+		if(org.apache.commons.lang.StringUtils.isBlank(variable) )
+			return "无";
+		else
+			return variable;
+	}
 	@Override
 	public boolean applyRenew(EnterpriseApplyRenewCommand cmd) {
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getId(), UserContext.current().getUser().getId());
@@ -270,6 +381,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setApplyType(ApplyEntryApplyType.RENEW.getCode());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
+        String phoneNumber = null;
+        String location = null;
+		//续租的时候给楼栋管理员发续租申请短信
+        Building building = this.communityProvider.findBuildingById(request.getSourceId());
+        if(building != null) {
+        	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+
+            if(null != member) {
+                phoneNumber = member.getContactToken();
+            }
+            location = building.getName();
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Building not found, builingId={}, cmd={}", request.getSourceId(), cmd);
+            }
+        } 
+
+  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+  		sendApplyEntrySmsToManager(phoneNumber, request.getApplyUserName(),request.getApplyContact(), datetimeSF.format(new Date()), 
+  				location, request.getAreaSize()+"平米", request.getEnterpriseName(), request.getDescription(), request.getNamespaceId(),"续租");
 		return true;
 	}
 	

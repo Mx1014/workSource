@@ -26,6 +26,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.oauth2.CommonRestResponse;
@@ -70,6 +71,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+    @Autowired
+    private MessagingKickoffService kickoffService;
 
 
 	public WebRequestInterceptor() {
@@ -143,6 +147,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 						}
 						return true;
 					}
+					
+					//Kickoff state support
+					if(kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
+	                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+	                            UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");  					    
+					}
+					
 					//Update by Janson, when the request is using apiKey, we generate a 403 response to app.
 					String appKey = request.getParameter(APP_KEY_NAME); 
 					if(null != appKey && (!appKey.isEmpty())) {
@@ -390,24 +401,25 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	}
 
 	private LoginToken innerSignLogon(HttpServletRequest request,HttpServletResponse response) {
+		//2016-07-29:modify by liujinwne,parameter name don't be signed.
+		
 		Map<String, String[]> paramMap = request.getParameterMap();
 		String appKey = getParamValue(paramMap, "appKey");
 		String signature = getParamValue(paramMap, "signature");
 		String id = getParamValue(paramMap, "id");
-		String name = getParamValue(paramMap, "name");
 		String randomNum = getParamValue(paramMap, "randomNum");
 		String timeStamp = getParamValue(paramMap, "timeStamp");
 		if(StringUtils.isEmpty(appKey)||StringUtils.isEmpty(signature)||
-				StringUtils.isEmpty(id)||StringUtils.isEmpty(name)||
+				StringUtils.isEmpty(id)||
 				StringUtils.isEmpty(randomNum)||StringUtils.isEmpty(timeStamp)){
-			LOGGER.error("invalid parameter.appKey="+appKey+",signature="+signature+",id="+id+",name="+name+",randomNum="+randomNum+",timeStamp="+timeStamp);
+			LOGGER.error("invalid parameter.appKey="+appKey+",signature="+signature+",id="+id+",randomNum="+randomNum+",timeStamp="+timeStamp);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"invalid parameter.appKey or signature or id or name or randomNum or timeStamp is null.");
+					"invalid parameter.appKey or signature or id or randomNum or timeStamp is null.");
 		}
 
 		User user = UserContext.current().getUser();
 		if(user==null||user.getId()==User.ANNONYMOUS_UID){
-			UserInfo userInfo = this.getBizUserInfo(signature,appKey,id,name,String.valueOf(randomNum),String.valueOf(timeStamp));
+			UserInfo userInfo = this.getBizUserInfo(signature,appKey,id,String.valueOf(randomNum),String.valueOf(timeStamp));
 			String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
 			String pusherIdentify = null;
 			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
@@ -419,7 +431,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		return null;
 	}
 
-	private UserInfo getBizUserInfo(String zlSignature,String zlAppKey,String id,String name,String randomNum,String timeStamp) {
+	private UserInfo getBizUserInfo(String zlSignature,String zlAppKey,String id,String randomNum,String timeStamp) {
+		//2016-07-29:modify by liujinwne,parameter name don't be signed.
+		
 		try{
 			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
 			String getUserInfoUri = homeUrl+"/evh/openapi/getUserInfoById";
@@ -435,15 +449,14 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			params.put("zlAppKey", zlAppKey);
 			params.put("zlSignature", zlSignature);
 			params.put("id", id);
-			params.put("name", name);
 			params.put("randomNum", randomNum);
 			params.put("timeStamp", timeStamp);
 			String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
 
-			String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&name=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
+			String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
 					getUserInfoUri,
 					URLEncoder.encode(zlSignature,"UTF-8"),zlAppKey,
-					id,URLEncoder.encode(name,"UTF-8"),
+					id,
 					randomNum,timeStamp,
 					appKey,URLEncoder.encode(signature,"UTF-8"));
 			Clients ci = new Clients();
@@ -452,7 +465,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
 			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
 			if(userInfo==null){
-				LOGGER.error("userInfo don't get.appKey="+appKey+",signature="+signature+",zlAppKey="+zlAppKey+",zlSignature="+zlSignature+",id="+id+",name="+name+",randomNum="+randomNum+",timeStamp="+timeStamp);
+				LOGGER.error("userInfo don't get.appKey="+appKey+",signature="+signature+",zlAppKey="+zlAppKey+",zlSignature="+zlSignature+",id="+id+",randomNum="+randomNum+",timeStamp="+timeStamp);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"userInfo don't get.");
 			}

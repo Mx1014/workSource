@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhRentalBillDTO.h"
+#import "EvhRentalv2RentalBillDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhBatchCompleteBillCommandResponse
@@ -12,7 +12,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-// item type EvhRentalBillDTO*
+// item type EvhRentalv2RentalBillDTO*
 @property(nonatomic, strong) NSMutableArray* bills;
 
 -(id) init;

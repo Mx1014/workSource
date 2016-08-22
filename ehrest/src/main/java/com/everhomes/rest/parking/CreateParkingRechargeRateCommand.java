@@ -24,8 +24,9 @@ public class CreateParkingRechargeRateCommand {
     private Long ownerId;
 	@NotNull
     private Long parkingLotId;
-	@NotNull
     private String rateName;
+	@NotNull
+	private String cardType;
 	@NotNull
     private BigDecimal monthCount;
 	@NotNull
@@ -86,4 +87,13 @@ public class CreateParkingRechargeRateCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
+	}
+    
 }

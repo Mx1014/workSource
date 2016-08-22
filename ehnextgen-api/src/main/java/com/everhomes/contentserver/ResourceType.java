@@ -1,7 +1,7 @@
 package com.everhomes.contentserver;
 
 public enum ResourceType {
-    image(1), audio(2), video(3), unknown(0);
+    image(1), audio(2), video(3), file(4), unknown(0);
     private Integer fileType;
 
     ResourceType(Integer fileType) {

@@ -16,6 +16,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectOffsetStep;
+import org.jooq.SelectOnConditionStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +44,9 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.aclink.DoorAuthStatus;
+import com.everhomes.rest.aclink.DoorAuthType;
+import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -63,6 +71,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserLikes;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
+import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -875,9 +884,13 @@ public class UserProviderImpl implements UserProvider {
 	 * added by Janson
 	 */
 	@Override
-    public List<AclinkUser> searchDoorUsers(Integer namespaceId, Long organizationId, 
-            Long buildingId, String buildingName, Byte isAuth, String keyword,
-            CrossShardListingLocator locator, int pageSize) {
+    public List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize) {
+	    Integer namespaceId = cmd.getNamespaceId();
+	    Long organizationId = cmd.getOrganizationId();
+	    Long buildingId = cmd.getBuildingId();
+	    String buildingName =  cmd.getBuildingName();
+	    Byte isAuth = cmd.getIsAuth();
+	    String keyword = cmd.getKeyword();
         
         List<AclinkUser> list = new ArrayList<AclinkUser>();
         Map<Long, Long> isExists = new HashMap<Long, Long>();
@@ -887,45 +900,95 @@ public class UserProviderImpl implements UserProvider {
 
             @Override
             public boolean map(DSLContext context, Object obj) {
+                SelectOnConditionStep<Record> onQuery = context.select().from(Tables.EH_USERS)
+                        .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
+                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())));
+                
+                SelectConditionStep<Record> select = null;
+                boolean useAddress = false;
+                boolean useMembers = false;
+                
                 Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
                 if(!StringUtils.isEmpty(keyword)){
                      Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
-                     cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
+                     cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword + "%"));
                      cond = cond.and(cond1);
-                }
+                     }
                 
-                if(organizationId != null) {
-                    cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
-                }
+                if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() > 0) {
+                        onQuery = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
+                        cond = cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())));
+                    }
                 
-                if(buildingId != null) {
-                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
-                }
-                
-                if(buildingName != null && !buildingName.isEmpty()) {
-                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.like("%" + buildingName + "%"));
+                if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() <= 0) {
+                    SelectQuery<Record1<Long>> subQuery = context.select(Tables.EH_USERS.ID).from(Tables.EH_DOOR_AUTH).join(Tables.EH_USERS).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID))
+                    .where(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+                            .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))).getQuery();
+                    
+                    cond = cond.and(Tables.EH_USERS.ID.notIn(subQuery));
                 }
                 
                 if(isAuth != null) {
+                    useMembers = true;
                     if(isAuth > 0) {
                         cond = cond.and(EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
                     } else {
                         cond = cond.and(EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()));
+                        }
                     }
+                
+                if(organizationId != null) {
+                    useMembers = true;
+                    cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+                    }
+                
+                if(buildingId != null) {
+                    useAddress = true;
+                    useMembers = true;
+                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId));
+                    }
+                
+                if(buildingName != null && !buildingName.isEmpty()) {
+                    useAddress = true;
+                    useMembers = true;
+                    cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.like(buildingName + "%"));
+                    }
+                
+                if(useMembers) {
+                    onQuery = onQuery.join(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                            .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
+//                    onQuery = onQuery.leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+//                            .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
+                }
+                
+                if(useAddress) {
+                    onQuery = onQuery.leftOuterJoin(Tables.EH_ORGANIZATION_ADDRESSES)
+                            .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID));
                 }
                  
                 if(locator.getAnchor() != null ) {
                     cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
-                }
+                    }
                 
-                context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
-                .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
-                .join(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
-                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())))
-                        .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
-                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())))
-                        .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2)
-                .fetch().map(r -> {
+//                SelectOnConditionStep<Record> onQuery = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).join(Tables.EH_ORGANIZATION_ADDRESSES)
+//                .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
+//                .rightOuterJoin(Tables.EH_USERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+//                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())))
+//                        .leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)
+//                                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())));
+                
+                select = onQuery.where(cond);
+                SelectOffsetStep<Record> query = select.orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2);
+                final boolean useAddress2 = useAddress;
+                final boolean useMembers2 = useMembers;
+                query.fetch().map(r -> {
+                    
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("Query users sql=" + query.getSQL());
+//                        LOGGER.debug("Query users bindValues=" + query.getBindValues());
+//                    }
+                    
                     if(list.size() >= pageSize) {
                         return null;
                     }
@@ -945,10 +1008,15 @@ public class UserProviderImpl implements UserProvider {
                     user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
                     user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
                     user.setGender(r.getValue(Tables.EH_USERS.GENDER));
-                    user.setAddressId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
-                    user.setCompanyId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
-                    user.setBuildingId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID));
-                    user.setBuildingName(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME));
+                    if(useMembers2) {
+                        user.setCompanyId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));    
+                    }
+                    
+                    if(useAddress2) {
+                        user.setAddressId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+                        user.setBuildingId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID));
+                        user.setBuildingName(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME));    
+                    }
                     
                     list.add(user);
                     return null;
@@ -971,7 +1039,7 @@ public class UserProviderImpl implements UserProvider {
 	public User findUserByNamespace(Integer namespaceId, String namespaceUserToken) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return ConvertHelper.convert(context.select().from(Tables.EH_USERS)
-				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).fetchOne(),
+				.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(namespaceUserToken))).limit(1).fetchOne(),
 				User.class);
 	}
 	

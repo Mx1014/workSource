@@ -57,6 +57,10 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -159,6 +163,8 @@ import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.repeat.RangeDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.BizOrderHolder;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
@@ -176,6 +182,7 @@ import com.everhomes.rest.user.ListSignupActivitiesCommand;
 import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.OrderCountDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -197,6 +204,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StatusChecker;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Component
 public class UserActivityServiceImpl implements UserActivityService {
@@ -618,7 +626,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.TOPIC.getCode(), locator, pageSize + 1);
         
         if (CollectionUtils.isEmpty(result)) {
-            return null;
+        	ListPostResponse response = new ListPostResponse();
+            response.setPostDtos(new ArrayList<PostDTO>());
+            return response;
         }
         
         if(result.size() > pageSize) {
@@ -656,9 +666,8 @@ public class UserActivityServiceImpl implements UserActivityService {
                 	Gson gson = new Gson();
                     BizOrderHolder holder = gson.fromJson(result.getBody(), BizOrderHolder.class);
                     if(holder.getResult()){
-                    	Map<String,Object> data = (Map<String, Object>) holder.getBody();
-                    	int orderCount = Double.valueOf(String.valueOf(data.get("orderCount"))).intValue();
-                    	response.setOrderCount(orderCount);
+                    	OrderCountDTO orderCount = gson.fromJson(holder.getBody(), new TypeToken<OrderCountDTO>() {}.getType());
+                    	response.setOrderCount(Integer.parseInt(orderCount.getOrderCount()));
                     }
                     
                 }
@@ -677,6 +686,8 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public ListTreasureResponse getUserTreasure() {
+    	//2016-07-29:modify by liujinwen.get orderCount's value like couponCount
+    	
         User user = UserContext.current().getUser();
         ListTreasureResponse rsp = ConvertHelper.convert(user, ListTreasureResponse.class);
         UserProfile item = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
@@ -687,6 +698,8 @@ public class UserActivityServiceImpl implements UserActivityService {
                 UserProfileContstant.IS_APPLIED_SHOP);
         UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
         		UserProfileContstant.RECEIVED_COUPON_COUNT);
+        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+        		UserProfileContstant.RECEIVED_ORDER_COUNT);
         if (item != null)
             rsp.setSharedCount(NumberUtils.toInt(item.getItemValue(), 0));
         if (fav != null)
@@ -701,19 +714,46 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         if(couponCount != null) {
         	rsp.setCouponCount(NumberUtils.toInt(couponCount.getItemValue(), 0));
+        }else {
+        	rsp.setCouponCount(0);
         }
         rsp.setMyOrderUrl(getMyOrderUrl());
         rsp.setPointRuleUrl(getPointRuleUrl());
         rsp.setMyCoupon(getMyCoupon());
         
-        rsp.setOrderCount(0);
-        bizFindOrderCountByUserId(user.getId(), rsp);
+        if(orderCount != null) {
+        	rsp.setOrderCount(NumberUtils.toInt(orderCount.getItemValue(), 0));
+        } else {
+        	rsp.setOrderCount(0);
+        }
+        //bizFindOrderCountByUserId(user.getId(), rsp);
+        
+        rsp.setBusinessUrl(getBusinessUrl());
+        rsp.setBusinessRealm(getBusinessRealm());
         return rsp;
     }
     
-   
-    
-    private String getMyOrderUrl() {
+    private String getBusinessRealm() {
+    	String businessRealm = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_REALM, "");
+        if(businessRealm.length() == 0) {
+            LOGGER.error("Invalid business url path, businessRealm=" + businessRealm);
+            return null;
+        } else {
+            return businessRealm;
+        }
+	}
+
+	private String getBusinessUrl() {
+    	String businessUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_URL, "");
+        if(businessUrl.length() == 0) {
+            LOGGER.error("Invalid business url path, businessUrl=" + businessUrl);
+            return null;
+        } else {
+            return businessUrl;
+        }
+	}
+
+	private String getMyOrderUrl() {
         String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");
         String orderPath = configurationProvider.getValue(ConfigConstants.USER_ORDER_URL, "");
         if(homeurl.length() == 0 || orderPath.length() == 0) {
@@ -978,7 +1018,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.ACTIVITY.getCode(), locator, pageSize + 1);
         
         if (CollectionUtils.isEmpty(result)) {
-            return null;
+            return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
         }
         
         if(result.size() > pageSize) {
@@ -1019,7 +1059,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1);
         
         if (CollectionUtils.isEmpty(result)) {
-            return null;
+            return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
         }
         
         if(result.size() > pageSize) {
@@ -1119,4 +1159,27 @@ public class UserActivityServiceImpl implements UserActivityService {
         return ActivityStatus.SIGNUP;
 
     }
+
+	@Override
+	public UserProfileDTO findUserProfileBySpecialKey(Long userId, String itemName) {
+		if(userId==null|| StringUtils.isEmpty(itemName)){
+			LOGGER.error("userId or itemName is null");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_PARAMS, "userId or itemName is null");
+		}
+		UserProfile profile =  userActivityProvider.findUserProfileBySpecialKey(userId, itemName);
+		if(profile==null)
+			return null;
+		return ConvertHelper.convert(profile, UserProfileDTO.class);
+	}
+
+	@Override
+	public void updateProfileIfNotExist(Long userId, String itemName, Integer itemValue) {
+		if(userId==null||StringUtils.isEmpty(itemName)||itemValue==null){
+			LOGGER.error("userId or itemName or itemValue is null");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_PARAMS, "userId or itemName or itemValue is null");
+		}
+		userActivityProvider.updateProfileIfNotExist(userId, itemName, itemValue);
+	}
 }

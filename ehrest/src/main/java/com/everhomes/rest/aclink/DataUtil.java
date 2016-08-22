@@ -17,6 +17,17 @@ public class DataUtil {
         return result;
     }
     
+    public static byte[] longToByteArray(long i) {
+        //TODO use 8 bytes?
+        byte[] result = new byte[4];
+        //由高位到低位
+        result[0] = (byte) ((i >> 24) & 0xFF);
+        result[1] = (byte) ((i >> 16) & 0xFF);
+        result[2] = (byte) ((i >> 8) & 0xFF);
+        result[3] = (byte) (i & 0xFF);
+        return result;
+    }
+    
     public static byte[] shortToByteArray(short i) {
         byte[] result = new byte[2];
         result[0] = (byte)((i >> 8) & 0xFF);

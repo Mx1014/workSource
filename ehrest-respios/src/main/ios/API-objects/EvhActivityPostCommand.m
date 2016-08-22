@@ -72,6 +72,8 @@
         [jsonObject setObject: self.guest forKey: @"guest"];
     if(self.mediaUrl)
         [jsonObject setObject: self.mediaUrl forKey: @"mediaUrl"];
+    if(self.officialFlag)
+        [jsonObject setObject: self.officialFlag forKey: @"officialFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -160,6 +162,10 @@
         self.mediaUrl = [jsonObject objectForKey: @"mediaUrl"];
         if(self.mediaUrl && [self.mediaUrl isEqual:[NSNull null]])
             self.mediaUrl = nil;
+
+        self.officialFlag = [jsonObject objectForKey: @"officialFlag"];
+        if(self.officialFlag && [self.officialFlag isEqual:[NSNull null]])
+            self.officialFlag = nil;
 
         return self;
     }

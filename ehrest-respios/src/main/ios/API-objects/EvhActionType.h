@@ -53,7 +53,8 @@ typedef enum {
     EvhActionType_SERVICE_HOT_LINE = 45, 
     EvhActionType_CONTACTS = 46, 
     EvhActionType_WIFI = 47, 
-    EvhActionType_NEWS = 48
+    EvhActionType_NEWS = 48, 
+    EvhActionType_RENTAL = 49
 
 } EvhActionType;
 

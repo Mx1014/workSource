@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -49,9 +51,12 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.openapi.BusinessMessageCommand;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
+import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.FindTokenByUserIdCommand;
@@ -72,6 +77,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.EtagHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -287,7 +293,7 @@ public class BusinessOpenController extends ControllerBase {
 
 	/**
 	 * <b>URL: /openapi/receiveCoupon</b>
-	 * <p>同步用户领取优惠券</p>
+	 * <p>用户优惠券数加1</p>
 	 */
 	@RequestMapping("receiveCoupon")
 	@RestReturn(String.class)
@@ -302,12 +308,41 @@ public class BusinessOpenController extends ControllerBase {
 	/**
 	 * 
 	 * <b>URL: /openapi/invalidCoupon</b>
-	 * <p>同步用户不能使用的优惠券</p>
+	 * <p>用户优惠券数减1</p>
 	 */
 	@RequestMapping("invalidCoupon")
 	@RestReturn(String.class)
 	public RestResponse invalidCoupon(UserCouponsCommand cmd) {
 		userActivityService.invalidCoupon(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * 
+	 * <b>URL: /openapi/findUserCouponCount</b>
+	 * <p>查询用户优惠券数</p>
+	 */
+	@RequestMapping("findUserCouponCount")
+	@RestReturn(Integer.class)
+	public RestResponse findUserCouponCount(UserCouponsCommand cmd) {
+		Integer couponCount = businessService.findUserCouponCount(cmd);
+		RestResponse response =  new RestResponse(couponCount);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /openapi/updateUserCouponCount</b>
+	 * <p>更新用户优惠券数</p>
+	 */
+	@RequestMapping("updateUserCouponCount")
+	@RestReturn(String.class)
+	public RestResponse updateUserCouponCount(UpdateUserCouponCountCommand cmd) {
+		businessService.updateUserCouponCount(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -555,5 +590,83 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+	 * <b>URL: /openapi/addUserOrderCount</b>
+	 * <p>用户订单数加1</p>
+	 */
+	@RequestMapping("addUserOrderCount")
+	@RestReturn(String.class)
+	public RestResponse addUserOrderCount(UserCouponsCommand cmd) {
+		businessService.addUserOrderCount(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /openapi/reduceUserOrderCount</b>
+	 * <p>用户订单数减1</p>
+	 */
+	@RequestMapping("reduceUserOrderCount")
+	@RestReturn(String.class)
+	public RestResponse reduceUserOrderCount(UserCouponsCommand cmd) {
+		businessService.reduceUserOrderCount(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * 
+	 * <b>URL: /openapi/findUserOrderCount</b>
+	 * <p>查询用户订单数</p>
+	 */
+	@RequestMapping("findUserOrderCount")
+	@RestReturn(Integer.class)
+	public RestResponse findUserOrderCount(UserCouponsCommand cmd) {
+		Integer orderCount = businessService.findUserOrderCount(cmd);
+		RestResponse response =  new RestResponse(orderCount);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /openapi/updateUserOrderCount</b>
+	 * <p>更新用户订单数</p>
+	 */
+	@RequestMapping("updateUserOrderCount")
+	@RestReturn(String.class)
+	public RestResponse updateUserOrderCount(UpdateUserOrderCountCommand cmd) {
+		businessService.updateUserOrderCount(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+     * <b>URL: /openapi/listRegion</b>
+     * 列出指定范围和状态的区域列表（用填父亲区域ID）
+     */
+    @RequestMapping("listRegion")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listRegion(@Valid ListRegionCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+    	
+    	List<RegionDTO> dtoResultList = businessService.listRegion(cmd);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        
+        return new RestResponse();
     }
 }

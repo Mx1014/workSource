@@ -111,6 +111,7 @@ import com.everhomes.rest.group.ListMemberInStatusCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
 import com.everhomes.rest.group.RejectAdminRoleCommand;
 import com.everhomes.rest.group.RejectJoinGroupInvitation;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -2416,13 +2417,20 @@ public class GroupServiceImpl implements GroupService {
                     }
                     result.setErrorDescription("Target user is already in the group");
                 } else {
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Target user is in the joining group process, operatorId=" + operator.getId() 
-                            + ", groupId=" + groupId + ", inviteeId=" + inviteeId);
-                    }
-                    result.setErrorScope(GroupServiceErrorCode.SCOPE);
-                    result.setErrorCode(GroupServiceErrorCode.ERROR_USER_IN_JOINING_GROUP_PROCESS);
-                    result.setErrorDescription("Target user is in the joining group process");
+//                    if(LOGGER.isInfoEnabled()) {
+//                        LOGGER.info("Target user is in the joining group process, operatorId=" + operator.getId() 
+//                            + ", groupId=" + groupId + ", inviteeId=" + inviteeId);
+//                    }
+//                    result.setErrorScope(GroupServiceErrorCode.SCOPE);
+//                    result.setErrorCode(GroupServiceErrorCode.ERROR_USER_IN_JOINING_GROUP_PROCESS);
+//                    result.setErrorDescription("Target user is in the joining group process");
+                	
+                	//A创建了群，邀请了B，A退出了群并把权限转移给了B，B再邀请A则邀请不了了， update by tt,20160809
+                	member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                	member.setMemberRole(RoleConstants.ResourceUser);
+                	groupProvider.updateGroupMember(member);
+                	result.setErrorCode(ErrorCodes.SUCCESS);
+                	result.setErrorDescription("OK");
                 }
             } else {
             	//群管理员群聊拉人显示 Insufficient privilege 所以注释掉 modified by xiongying 20160613
@@ -3498,6 +3506,10 @@ public class GroupServiceImpl implements GroupService {
        
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
+        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
+        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
+        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
+        }
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         
             //如果圈太大，不发消息
@@ -3515,7 +3527,7 @@ public class GroupServiceImpl implements GroupService {
     public void deleteGroupByCreator(long groupId) {
         User user = UserContext.current().getUser();
         Group group = checkGroupParameter(groupId, user.getId(), "deleteGroup");
-        if(!user.getId().equals(group.getCreatorUid())) {
+        if(!user.getId().equals(group.getCreatorUid()) && !isAdmin(user.getId(), groupId)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Forbidden");
         }
@@ -3581,7 +3593,30 @@ public class GroupServiceImpl implements GroupService {
         sendNotifactionToMembers(members, nickName, group, locale);
     }
 
-    //管理员删除与创建者删除不一样。
+    /**
+     * 如果是转移权限的，则不是group表中的创建者
+     */
+    private boolean isAdmin(Long userId, long groupId) {
+    	ListingLocator locator = new ListingLocator(groupId);
+		List<GroupMember> list = groupProvider.queryGroupMembers(locator, 10, (loc, query)->{
+									 Condition c1 = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode());
+									 Condition c2 = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+									 Condition c3 = Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.eq(RoleConstants.ResourceCreator);
+						             query.addConditions(c1, c2, c3);
+						             return query;
+								 });
+		if (list != null && list.size() > 0) {
+			for (GroupMember groupMember : list) {
+				if(groupMember.getMemberId().longValue() == userId.longValue()){
+					return true;
+				}
+			}
+		}
+    	
+		return false;
+	}
+
+	//管理员删除与创建者删除不一样。
 	@Override
 	public void deleteGroup(long groupId) {
 		User operator = UserContext.current().getUser();
@@ -3831,4 +3866,116 @@ public class GroupServiceImpl implements GroupService {
         
         return resp;
     }
+
+	@Override
+	public void quitAndTransferPrivilege(QuitAndTransferPrivilegeCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		Long groupId = cmd.getGroupId();
+		GroupMember gm = checkQuitAndTransferPrivilegeParameters(userId, groupId);
+		
+		//检查如果当前群只有创建者一个人了，则退出并转移权限时直接解散该群
+		if (checkIfOnlyOneGroupMember(userId, groupId)) {
+			deleteGroupByCreator(groupId);
+		}else{
+			dbProvider.execute(t->{
+				//从本群中退出
+				quitFromGroup(userId, gm);
+				//转移权限
+				GroupMember newCreator = transferPrivilege(userId, groupId);
+				//发消息
+				sendNotificationToOldCreator(gm, user);
+				sendNotificationToNewCreator(newCreator, user.getLocale());
+				
+				return null;
+			});
+		}
+	}
+
+	private void sendNotificationToOldCreator(GroupMember gm, User user) {
+		Group group = groupProvider.findGroupById(gm.getGroupId());
+		String nickname = gm.getMemberNickName();
+		if (StringUtils.isEmpty(nickname)) {
+			nickname = user.getNickName();
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+       
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE_FOR_OPERATOR;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+        sendMessageToUser(user.getId(), notifyTextForApplicant, null);
+	}
+
+	private void sendNotificationToNewCreator(GroupMember newCreator, String locale) {
+		Group group = groupProvider.findGroupById(newCreator.getGroupId());
+		String nickname = newCreator.getMemberNickName();
+		if (StringUtils.isEmpty(nickname)) {
+			User user = userProvider.findUserById(newCreator.getMemberId());
+			nickname = user.getNickName();
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+       
+        String scope = GroupAdminNotificationTemplateCode.SCOPE;
+        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+	}
+
+	private boolean checkIfOnlyOneGroupMember(Long userId, Long groupId) {
+		ListingLocator locator = new ListingLocator(groupId);
+		List<GroupMember> list = groupProvider.queryGroupMembers(locator, 2, (loc, query)->{
+									 Condition c1 = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode());
+									 Condition c2 = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+						             query.addConditions(c1, c2);
+						             return query;
+								 });
+		if (list != null && list.size() == 1) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	private GroupMember transferPrivilege(Long userId, Long groupId) {
+		GroupMember gm = groupProvider.findGroupMemberTopOne(groupId);
+		gm.setMemberRole(RoleConstants.ResourceCreator);
+		groupProvider.updateGroupMember(gm);
+		return gm;
+	}
+
+	private void quitFromGroup(Long userId, GroupMember gm) {
+		this.groupProvider.deleteGroupMember(gm);
+        this.userProvider.deleteUserGroup(userId, gm.getGroupId());
+        deleteUserGroupOpRequest(gm.getGroupId(), gm.getMemberId(), userId, "leave group");
+	}
+
+	private GroupMember checkQuitAndTransferPrivilegeParameters(Long userId, Long groupId) {
+		//1.groupId不能为空
+		if (groupId == null) {
+			LOGGER.error("Invalid parameters, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, userId = "+userId+", groupId"+groupId);
+		}
+		//2.userId是这个group的成员
+		GroupMember gm = groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), userId);
+		if (gm == null) {
+			LOGGER.error("group member not found, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, 
+					GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "group member not found, userId = "+userId+", groupId"+groupId);
+		}
+		
+		//3.userId是这个group的创建者
+		if (gm.getMemberRole().longValue() != RoleConstants.ResourceCreator) {
+			LOGGER.error("group member is not the creator, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, 
+					GroupServiceErrorCode.ERROR_GROUP_MEMBER_IS_NOT_CREATOR, "group member is not the creator, userId = "+userId+", groupId"+groupId);
+		}
+		
+		return gm;
+	}
+    
 }

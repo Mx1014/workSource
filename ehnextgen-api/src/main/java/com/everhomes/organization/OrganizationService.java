@@ -7,6 +7,7 @@ import java.util.Map;
 
 
 
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.entity.EntityType;
@@ -37,6 +38,9 @@ import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
+import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
+import com.everhomes.rest.organization.CheckOfficalPrivilegeCommand;
+import com.everhomes.rest.organization.CheckOfficalPrivilegeResponse;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
@@ -314,4 +318,14 @@ public interface OrganizationService {
 	 */
 	List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId);
     ListOrganizationsByNameResponse listOrganizationByName(ListOrganizationsByNameCommand cmd);
+    
+    /** 不带menu格式的所有子机构 */
+    List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag);
+
+	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
+	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
+
+	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
+
 }

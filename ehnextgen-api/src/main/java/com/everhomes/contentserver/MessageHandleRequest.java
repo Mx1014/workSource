@@ -2,6 +2,7 @@ package com.everhomes.contentserver;
 
 
 import com.everhomes.util.Name;
+import com.everhomes.util.StringHelper;
 
 @Name(value = "contentserver.request")
 public class MessageHandleRequest extends ContentServerBase {
@@ -35,4 +36,8 @@ public class MessageHandleRequest extends ContentServerBase {
 		this.accessKey = accessKey;
 	}
 
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
