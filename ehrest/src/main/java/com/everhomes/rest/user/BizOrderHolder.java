@@ -3,17 +3,17 @@ package com.everhomes.rest.user;
 import com.everhomes.util.StringHelper;
 
 public class BizOrderHolder {
-	private String body;
+	private Object body;
 	
 	private Boolean result;
 
 	
-	public String getBody() {
+	public Object getBody() {
 		return body;
 	}
 
 
-	public void setBody(String body) {
+	public void setBody(Object body) {
 		this.body = body;
 	}
 
