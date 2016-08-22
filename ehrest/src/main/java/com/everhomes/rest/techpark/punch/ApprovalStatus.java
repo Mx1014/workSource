@@ -2,6 +2,8 @@ package com.everhomes.rest.techpark.punch;
 
 /**
  * <ul>审批后的状态
+ * 
+ *<li>FORGOT(14): 忘打卡</li>
  *<li>HALFOUTWORK(13):  半天公出</li>
  *<li>HALFEXCHANGE(12):  半天调休</li>
  *<li>HALFABSENCE(11):  半天病假</li>
@@ -19,6 +21,7 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum ApprovalStatus { 
+	FORGOT((byte)14),
 	HALFOUTWORK((byte)13),
 	HALFEXCHANGE((byte)12),
 	HALFABSENCE((byte)11),

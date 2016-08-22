@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,30 +127,57 @@ public class JournalServiceImpl implements JournalService{
 
 	@Override
 	public void updateJournalConfig(UpdateJournalConfigCommand cmd) {
-		checkParam(cmd.getNamespaceId(), cmd.getId());
-		JournalConfig journalConfig = journalProvider.findJournalConfig(cmd.getNamespaceId());
-		if(null == journalConfig){
-			LOGGER.error("JournalConfig not found, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"JournalConfig not found");
-		}
-		journalConfig.setDescription(cmd.getDescription());
-		journalProvider.updateJournalConfig(journalConfig);
-	}
-
-	@Override
-	public JournalConfigDTO getJournalConfig(GetJournalConfigCommand cmd) {
 		if(null == cmd.getNamespaceId()) {
         	LOGGER.error("NamespaceId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"NamespaceId cannot be null.");
         }
-		JournalConfig ret = journalProvider.findJournalConfig(cmd.getNamespaceId());
+		JournalConfig journalConfig = journalProvider.findJournalConfig(cmd.getNamespaceId());
 		long userId = UserContext.current().getUser().getId();
+		if(null == journalConfig){
+			journalConfig = new JournalConfig();
+			journalConfig.setPosterPath(cmd.getPosterPath());
+			journalConfig.setDescription(cmd.getDescription());
+			journalConfig.setCreatorUid(userId);
+			journalConfig.setNamespaceId(cmd.getNamespaceId());
+			journalConfig.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			journalProvider.createJournalConfig(journalConfig);
+		}else{
+			journalConfig.setPosterPath(cmd.getPosterPath());
+			journalConfig.setDescription(cmd.getDescription());
+			journalProvider.updateJournalConfig(journalConfig);
+		}
+	}
+
+	@Override
+	public JournalConfigDTO getJournalConfig(GetJournalConfigCommand cmd) {
+		if(null == cmd.getNamespaceId()) {
+        	LOGGER.error("NamespaceId cannot be null, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"NamespaceId cannot be null.");
+        }
+		JournalConfig ret = journalProvider.findJournalConfig(cmd.getNamespaceId());
 		JournalConfigDTO dto = ConvertHelper.convert(ret, JournalConfigDTO.class);
-		String posterPathUrl = getResourceUrlByUir(ret.getPosterPath(), 
-                EntityType.USER.getCode(), ret.getCreatorUid());
-		dto.setPosterPathUrl(posterPathUrl);
+		if(null != dto) {
+			
+			String posterPath = ret.getPosterPath();
+			if(StringUtils.isBlank(ret.getPosterPath())){
+				posterPath = configProvider.getValue("journal.posterPath", "");
+			}
+			String posterPathUrl = getResourceUrlByUir(posterPath, 
+	                EntityType.USER.getCode(), ret.getCreatorUid());
+			dto.setPosterPath(posterPath);
+			dto.setPosterPathUrl(posterPathUrl);
+        }else{
+        	dto = new JournalConfigDTO();
+        	long userId = UserContext.current().getUser().getId();
+        	String posterPath = configProvider.getValue("journal.posterPath", "");
+			String posterPathUrl = getResourceUrlByUir(posterPath, 
+	                EntityType.USER.getCode(), userId);
+			dto.setPosterPath(posterPath);
+			dto.setPosterPathUrl(posterPathUrl);
+        }
+		
 		return dto;
 	}
 	

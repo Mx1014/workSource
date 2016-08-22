@@ -1967,6 +1967,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             auth.setOwnerType(doorAccess.getOwnerType());
             auth.setOwnerId(doorAccess.getOwnerId());
             auth.setStatus(DoorAuthStatus.VALID.getCode());
+            auth.setAuthMethod(cmd.getAuthMethod());
             doorAuthProvider.createDoorAuth(auth);
             
             AesUserKey aesUserKey = generateAesUserKey(user, auth);

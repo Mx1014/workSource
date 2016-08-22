@@ -162,6 +162,10 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("createAuth")
     @RestReturn(value=DoorAuthDTO.class)
     public RestResponse createDoorAuth(@Valid CreateDoorAuthByUser cmd) {
+        if(cmd.getAuthMethod() == null) {
+            cmd.setAuthMethod(DoorAuthMethodType.MOBILE.getCode());    
+        }
+        
         RestResponse response = new RestResponse(doorAccessService.createDoorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -505,6 +509,10 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("createDoorVistor")
     @RestReturn(value=DoorAuthDTO.class)
     public RestResponse createLingingVistor(@Valid CreateDoorVisitorCommand cmd) {
+        if(cmd.getAuthMethod() == null) {
+            cmd.setAuthMethod(DoorAuthMethodType.MOBILE.getCode());    
+        }
+        
         RestResponse response = new RestResponse(doorAccessService.createDoorVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

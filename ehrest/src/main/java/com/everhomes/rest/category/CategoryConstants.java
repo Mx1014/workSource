@@ -26,6 +26,7 @@ import java.util.List;
  * <li>CATEGORY_ID_BUSINESS_AROUND(3001): 周边商铺</li>
  * <li>CATEGORY_ID_BUSINESS_NEXTDOOR(3002): 邻家小店</li>
  * <li>CATEGORY_ID_EQUIPMENT_TYPE(7): 设备类型父类型</li>
+ * <li>CATEGORY_ID_YELLOW_PAGE(100001L): 服务联盟父类型</li>
  * </ul>
  */
 public interface CategoryConstants {
@@ -44,6 +45,9 @@ public interface CategoryConstants {
     /** 品质核查类型 */
     public static final long CATEGORY_ID_QUALITY_INSPECTION = 6L;
 
+    /** 服务联盟根类型 */
+    public static final long CATEGORY_ID_YELLOW_PAGE = 100001L;
+    
     /** 帖子/普通 */
     public static final long CATEGORY_ID_TOPIC_COMMON = 1001L;
     
@@ -113,6 +117,7 @@ public interface CategoryConstants {
         CATEGORY_ID_COMPLAINT_ADVICE,
         CATEGORY_ID_CLEANING,
         CATEGORY_ID_HOUSE_KEEPING,
-        CATEGORY_ID_MAINTENANCE
+        CATEGORY_ID_MAINTENANCE,
+        CATEGORY_ID_EMERGENCY_HELP
     );
 }

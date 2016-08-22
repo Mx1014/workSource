@@ -910,6 +910,14 @@ public class ForumServiceImpl implements ForumService {
         Long forumId = cmd.getForumId();
         Forum forum = checkForumParameter(operatorId, forumId, "listTopics");
         
+        // 对创客空间论坛的帖子进行特殊处理：为所有园区的创客空间建一个固定的论坛，通过visible_region_type/id来区分不同园区的帖子；
+        // 这样做主要是为了减轻listTopics接口偶合性，使得创客空间的帖子查询条件可以单独定制，对其改动也不影响原来的帖子查询；
+        // 由于老版本的创客空间已经调用了该接口，故需要在些插入这段来进行兼容处理 by lqs 20160815
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(isMakerzoneForum(namespaceId, forumId, cmd.getCommunityId())) {
+            return listMakerzoneForumTopics(forum, cmd);
+        }
+        
         ListPostCommandResponse cmdResponse = null;
         if(isSystemForum(forumId, cmd.getCommunityId())) {
             cmdResponse = listSystemForumTopicsByUser(forum, cmd);
@@ -2673,7 +2681,7 @@ public class ForumServiceImpl implements ForumService {
         	contentCategoryIds.add(contentCategoryId);
         }else{
         	// 為0或者null的情況下，默認查詢全部的任務貼
-        	contentCategoryIds =  CategoryConstants.GA_RELATED_CATEGORIES;
+        	contentCategoryIds =  CategoryConstants.GA_PRIVACY_CATEGORIES;
         }
         
         Condition cond = null;
@@ -4792,5 +4800,83 @@ public class ForumServiceImpl implements ForumService {
         }
         
         return uniqueForumIdList;
+    }
+    
+    /**
+     * 把创客空间的帖子独立出来查询，免得全部耦合到listTopics()方法里。
+     * 为所有园区的创客空间帖子建一个固定论坛（类似社区论坛）
+     * @param forum
+     * @param cmd
+     * @return
+     */
+    public ListPostCommandResponse listMakerzoneForumTopics(Forum forum, ListTopicCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        Long communityId = cmd.getCommunityId();
+        
+        Community community = checkCommunityParameter(userId, communityId, "listMakerzoneForumTopics");
+
+        // 根据查帖指定的可见性创建查询条件
+        Condition cmntyCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        cmntyCondition = cmntyCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(community.getId()));
+        
+        final Condition condition = cmntyCondition;
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
+        locator.setAnchor(cmd.getPageAnchor());
+        List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
+            query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
+                Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+                        
+            if(condition != null){
+                query.addConditions(condition);
+            }
+            
+            return query;
+        });
+        this.forumProvider.populatePostAttachments(posts);
+        
+        Long nextPageAnchor = null;
+        if(posts.size() > pageSize) {
+            posts.remove(posts.size() - 1);
+            nextPageAnchor = posts.get(posts.size() - 1).getId();
+        }
+        
+        populatePosts(userId, posts, communityId, false);
+        
+        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+          return ConvertHelper.convert(r, PostDTO.class);  
+        }).collect(Collectors.toList());
+        
+        if(LOGGER.isDebugEnabled()) {
+            int size = (postDtoList == null) ? 0 : postDtoList.size();
+            LOGGER.debug("Query maker zone topics, userId={}, size={}, cmd={}", userId, size, cmd);
+        }
+        
+        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }    
+    
+    /**
+     * 判断是否是创客空间论坛
+     * @param namespaceId 域空间ID
+     * @param forumId 论坛ID
+     * @param communityId 小区ID
+     * @return 如果是创客空间论坛则返回true，否则返回false
+     */
+    public boolean isMakerzoneForum(Integer namespaceId, Long forumId, Long communityId) {
+        if(namespaceId == null || forumId == null) {
+            return false;
+        }
+        
+        long makerzoneForumId = this.configProvider.getLongValue(namespaceId, "makerzone.forum_id", 0L);
+        if(makerzoneForumId == 0) {
+            return false;
+        }
+        
+        return forumId.equals(makerzoneForumId);
     }
 }

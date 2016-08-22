@@ -13,6 +13,7 @@ public class UpdateJournalConfigCommand {
 	private Long id;
 	private Integer namespaceId;
 	private String description;
+	private String posterPath;
 	public Long getId() {
 		return id;
 	}
@@ -35,5 +36,11 @@ public class UpdateJournalConfigCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public String getPosterPath() {
+		return posterPath;
+	}
+	public void setPosterPath(String posterPath) {
+		this.posterPath = posterPath;
 	}
 }

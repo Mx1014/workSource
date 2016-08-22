@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
@@ -35,7 +34,6 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
@@ -65,6 +63,13 @@ public class CategoryProviderImpl implements CategoryProvider {
 				.getSequenceDomainFromTablePojo(EhCategories.class));
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         category.setId(id);
+//        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
+//        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
+//        query.setRecord(record);
+//        query.setReturning(Tables.EH_CATEGORIES.ID);
+//        query.execute();
+//        
+//        category.setId(query.getReturnedRecord().getId());
         dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);

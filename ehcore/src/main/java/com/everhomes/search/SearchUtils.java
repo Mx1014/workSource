@@ -24,6 +24,16 @@ public class SearchUtils {
     public static final String HOTTAGINDEXTYPE = "hottag";
 
     public static final String NEWS = "news";
+
+    public static final String EQUIPMENTTASKINDEXTYPE = "equipmentTask";
+    
+    public static final String EQUIPMENTACCESSORYINDEXTYPE = "equipmentAccessory";
+    
+    public static final String EQUIPMENTINDEXTYPE = "equipment";
+    
+    public static final String EQUIPMENTSTANDARDINDEXTYPE = "equipmentStandard";
+    
+    public static final String PMOWNERINDEXTYPE = "pmowner";
     
     public static final String PMTASK = "pmtask";
     

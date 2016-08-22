@@ -12,6 +12,12 @@ type AudioStorage interface {
 	GetAudio(md5 string, format string) ([]byte, error)
 }
 
+type FileStorage interface {
+	SaveFile(md5 string, data []byte, frag int, total int, meta map[string]string) (string, error)
+	GetFile(md5 string) (chan []byte, *MetaHeader, map[string]string, error)
+	GetFileMeta(md5 string) (map[string]string, error)
+}
+
 type BaseStorage struct {
 	context *ServerContext
 }

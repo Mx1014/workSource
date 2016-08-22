@@ -81,7 +81,7 @@ public class JournalProviderImpl implements JournalProvider {
 		if(namespaceId != null)
 			query.addConditions(Tables.EH_JOURNALS.NAMESPACE_ID.eq(namespaceId));
 		if(StringUtils.isNotBlank(keyword))
-			query.addConditions(Tables.EH_JOURNALS.TITLE.eq(keyword));
+			query.addConditions(Tables.EH_JOURNALS.TITLE.like("%" + keyword + "%"));
 		if(pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_JOURNALS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		query.addConditions(Tables.EH_JOURNALS.STATUS.eq(JournalStatus.ACTIVE.getCode()));
@@ -100,6 +100,19 @@ public class JournalProviderImpl implements JournalProvider {
 		SelectQuery<EhJournalConfigsRecord> query = context.selectQuery(Tables.EH_JOURNAL_CONFIGS);
 		query.addConditions(Tables.EH_JOURNAL_CONFIGS.NAMESPACE_ID.eq(namespaceId));
 		return ConvertHelper.convert(query.fetchOne(), JournalConfig.class);
+	}
+
+	@Override
+	public void createJournalConfig(JournalConfig journalConfig) {
+		Long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhJournalConfigs.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhJournalConfigsDao dao = new EhJournalConfigsDao(context.configuration());
+		journalConfig.setId(id);
+		dao.insert(journalConfig);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhJournalConfigs.class, null);
+		
 	}
 
 	

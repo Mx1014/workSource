@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+    <script src="/static/jquery.min.js"></script>
+    <script src="/static/canvas-to-blob.js"></script>
+
+    </head>
+    <body onload="body_onload();">
+        <form name="myform" method="POST">
+            <label for="field1">file:</label>
+            <img id="imgTest" src="" />
+            <input value="upload" type="button" onclick="return uploadfile();" />
+        </form>
+<script>
+    var imageUrl = 'data:image/gif;base64,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';
+function parseUrl(val) {
+    var result = "Not found",
+        tmp = [];
+    var items = location.search.substr(1).split("&");
+    for (var index = 0; index < items.length; index++) {
+        tmp = items[index].split("=");
+        if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
+    }
+    return result;
+}
+function body_onload(e){
+    token = parseUrl("token");
+    if(!token) {
+        token = "aaaj";
+    }
+    document.myform.action="/upload/image?token=" + token;
+    $("#imgTest").attr("src", imageUrl);
+    console.log("oooo");
+}
+function uploadfile() {
+    var fd = new FormData();
+    var blob = window.dataURLtoBlob && window.dataURLtoBlob(imageUrl);
+    console.log("bbbb");
+    var fd = new FormData();
+    fd.append('fname', 'test.wav');
+    fd.append('upload_file', blob);
+    $.ajax({
+        type: 'POST',
+        url: 'http://10.1.110.36:5001/upload/image',
+        data: fd,
+        processData: false,
+        contentType: false
+    }).done(function(data) {
+        console.log(data);
+    });
+}
+</script>
+    </body>
+</html>
+
