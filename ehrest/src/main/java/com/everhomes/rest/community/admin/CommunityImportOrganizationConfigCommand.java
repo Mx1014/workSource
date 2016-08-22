@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>adminPhone: 管理员账号</li>
  * </ul>
  */
-public class CommunityImportOrganizationCofigCommand {
+public class CommunityImportOrganizationConfigCommand {
 	private Integer namespaceId;
 	private String organizationName;
 	private Long communityId;

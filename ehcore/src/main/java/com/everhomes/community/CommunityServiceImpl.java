@@ -90,7 +90,7 @@ import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
-import com.everhomes.rest.community.admin.CommunityImportOrganizationCofigCommand;
+import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -2071,7 +2071,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public void communityImportOrganizationCofig(CommunityImportOrganizationCofigCommand cmd) {
+	public void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd) {
 		if (StringUtils.isEmptyOrWhitespaceOnly(cmd.getOrganizationName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getAdminNickname()) 
 				|| cmd.getNamespaceId() == null || cmd.getCommunityId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getAdminPhone())
 				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getGroupName())) {

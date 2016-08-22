@@ -1,6 +1,7 @@
 package com.everhomes.version;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,8 +14,10 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.version.ListVersionInfoCommand;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionDTO;
+import com.everhomes.rest.version.VersionInfoDTO;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionServiceErrorCode;
 import com.everhomes.rest.version.VersionUrlResponse;
@@ -176,6 +179,12 @@ public class VersionServiceImpl implements VersionService {
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
         return response;
         	
+	}
+
+	@Override
+	public List<VersionInfoDTO> listVersionInfo(ListVersionInfoCommand cmd) {
+		
+		return null;
 	}
 
 }

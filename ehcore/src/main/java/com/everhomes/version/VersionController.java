@@ -11,11 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.version.CreateVersionCommand;
+import com.everhomes.rest.version.DeleteVersionCommand;
+import com.everhomes.rest.version.ListVersionInfoCommand;
+import com.everhomes.rest.version.UpdateVersionCommand;
 import com.everhomes.rest.version.UpgradeInfoResponse;
+import com.everhomes.rest.version.VersionInfoDTO;
+import com.everhomes.rest.version.VersionRealmDTO;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
 import com.everhomes.util.RequireAuthentication;
+import com.fasterxml.jackson.annotation.JsonFormat.Value;
 
 @RestController
 @RequestMapping("/version")
@@ -57,4 +64,58 @@ public class VersionController extends ControllerBase {
         return new RestResponse(cmdResponse);
     }
     
+    /**
+     * 
+     * <b>URL: /version/listVersionInfo</b>
+     * <p>版本信息列表</p>
+     */
+    @RequestMapping("listVersionInfo")
+    @RestReturn(value = VersionRealmDTO.class, collection = true)
+    public RestResponse listVersionRealm(){
+    	return new RestResponse();
+    }
+    
+    /**
+     * 
+     * <b>URL: /version/listVersionInfo</b>
+     * <p>版本信息列表</p>
+     */
+    @RequestMapping("listVersionInfo")
+    @RestReturn(value = VersionInfoDTO.class, collection = true)
+    public RestResponse listVersionInfo(ListVersionInfoCommand cmd){
+    	return new RestResponse(versionService.listVersionInfo(cmd));
+    }
+    
+    /**
+     * 
+     * <b>URL: /version/createVersion</b>
+     * <p>创建一条版本</p>
+     */
+    @RequestMapping("createVersion")
+    @RestReturn(value = VersionInfoDTO.class)
+    public RestResponse createVersion(CreateVersionCommand cmd){
+    	return new RestResponse();
+    }
+    
+    /**
+     * 
+     * <b>URL: /version/updateVersion</b>
+     * <p>更新版本信息</p>
+     */
+    @RequestMapping("updateVersion")
+    @RestReturn(value = VersionInfoDTO.class)
+    public RestResponse updateVersion(UpdateVersionCommand cmd){
+    	return new RestResponse();
+    }
+    
+    /**
+     * 
+     * <b>URL: /version/deleteVersionById</b>
+     * <p>更新版本信息</p>
+     */
+    @RequestMapping("deleteVersionById")
+    @RestReturn(value = String.class)
+    public RestResponse deleteVersionById(DeleteVersionCommand cmd){
+    	return new RestResponse();
+    }
 }

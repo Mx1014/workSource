@@ -23,7 +23,7 @@ import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
-import com.everhomes.rest.community.admin.CommunityImportOrganizationCofigCommand;
+import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -122,5 +122,5 @@ public interface CommunityService {
 
 	void communityImportBaseConfig(CommunityImportBaseConfigCommand cmd);
 
-	void communityImportOrganizationCofig(CommunityImportOrganizationCofigCommand cmd);
+	void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd);
 }
