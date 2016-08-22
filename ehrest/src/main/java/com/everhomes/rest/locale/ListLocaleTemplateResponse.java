@@ -3,6 +3,8 @@ package com.everhomes.rest.locale;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * 
  * <ul>
@@ -12,6 +14,7 @@ import java.util.List;
  */
 public class ListLocaleTemplateResponse {
 	private Long nextPageAnchor;
+	@ItemType(LocaleTemplateDTO.class)
 	private List<LocaleTemplateDTO> templateList;
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
