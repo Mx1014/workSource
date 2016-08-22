@@ -382,7 +382,7 @@ public class ForumServiceImpl implements ForumService {
     	
     	map.put("createUName", user.getNickName());
     	map.put("createUToken", userIdentifier.getIdentifierToken());
-    	map.put("subject", userIdentifier.getIdentifierToken());
+    	map.put("subject", subject);
     	
     	String msg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_NEW, user.getLocale(), map, "");
     	
