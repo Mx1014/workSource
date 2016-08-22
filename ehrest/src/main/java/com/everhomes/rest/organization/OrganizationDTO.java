@@ -38,6 +38,8 @@ import com.everhomes.util.StringHelper;
  * <li>showFlag：控制是否在导航菜单中，{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
  * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>roles：机构/部门/群组拥有的角色</li>
+ *  <li>enterpriseContactor: 企业联系人</li>
+ *  <li>mobile: 手机号</li>
  * <li>
  * </ul>
  */
@@ -82,6 +84,26 @@ public class OrganizationDTO {
 	@ItemType(RoleDTO.class)
 	private List<RoleDTO> roles;
 	
+	private String enterpriseContactor;
+	
+	private String mobile;
+	
+	public String getEnterpriseContactor() {
+		return enterpriseContactor;
+	}
+
+	public void setEnterpriseContactor(String enterpriseContactor) {
+		this.enterpriseContactor = enterpriseContactor;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
 	public Integer getNamespaceId() {
         return namespaceId;
     }

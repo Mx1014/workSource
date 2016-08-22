@@ -23,14 +23,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.GroupQueryFilter;
 import com.everhomes.search.OrganizationSearcher;
@@ -50,6 +56,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 	
 	@Autowired
     private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
+	
+	@Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Override
     public String getIndexType() {
@@ -307,9 +319,24 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             	dto.setDescription(String.valueOf(source.get("description")));
             	dto.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
             	
-            	Namespace ns = nsProvider.findNamespaceById(dto.getNamespaceId());
-    			if(ns != null)
-    				dto.setNamespaceName(ns.getName());
+    	    	if(dto.getNamespaceId() == 0) {
+    	    		dto.setNamespaceName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+    						String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+    						UserContext.current().getUser().getLocale(),"ZUOLIN"));
+    			} else {
+    		    	Namespace ns = nsProvider.findNamespaceById(dto.getNamespaceId());
+    				if(ns != null)
+    					dto.setNamespaceName(ns.getName());
+    			}
+    	    	
+    	    	ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
+		    	orgAdminCmd.setOrganizationId(dto.getId());
+		    	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
+		    	if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
+		    		OrganizationMemberDTO member = res.getMembers().get(0);
+		    		dto.setEnterpriseContactor(member.getContactName());
+			    	dto.setMobile(member.getContactToken());
+		    	}
     			
             	dtos.add(dto);
             	
