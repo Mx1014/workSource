@@ -2,8 +2,8 @@
 package com.everhomes.banner;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -13,9 +13,6 @@ import org.jooq.SelectJoinStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -24,7 +21,9 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerStatus;
+import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBannerClicksDao;
@@ -303,6 +302,42 @@ public class BannerProviderImpl implements BannerProvider {
 
         return result[0];
     }
-
-
+    
+	@Override
+	public List<Banner> findBannerByNamespeaceId(Integer namespaceId) {
+		List<Banner> banners = new ArrayList<>();
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), namespaceId, (context, reducingContext) -> {
+          context.select().from(Tables.EH_BANNER_CLICKS)
+            .where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+            .fetch().map((r) ->{
+            	banners.add(ConvertHelper.convert(r, Banner.class));
+            	return null;
+            });
+           return true;
+        });
+		return banners;
+	}
+	
+	@Override
+	public List<BannerDTO> listBannersByOwner(Integer namespaceId, Long scopeId, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		String s = context.selectFrom(Tables.EH_BANNERS)
+				.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()))
+				.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId))
+				.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
+				.and(Tables.EH_BANNERS.ID.ge(pageAnchor))
+				.limit(pageSize).getSQL(true);
+		
+		List<BannerDTO> dtoList = context.selectFrom(Tables.EH_BANNERS)
+		.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()))
+		.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId))
+		.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
+		.and(Tables.EH_BANNERS.ID.ge(pageAnchor))
+		.limit(pageSize)
+		.fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+		return dtoList;
+	}
 }

@@ -2,6 +2,9 @@ package com.everhomes.banner;
 
 import java.util.List;
 
+import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.launchpad.ApplyPolicy;
+
 
 public interface BannerProvider {
     void createBanner(Banner banner);
@@ -27,5 +30,17 @@ public interface BannerProvider {
     BannerClick findBannerClickByBannerIdAndUserId(long bannerId, long userId);
     BannerClick findBannerClickByToken(String token);
     List<Banner> listBanners(String keyword, long offset, long pageSize);
-    
+	List<Banner> findBannerByNamespeaceId(Integer currentNamespaceId);
+	
+	/**
+	 * 根据scopeId列表banner
+	 * @param namespaceId 域空间id
+	 * @param scopeId     作用域id
+	 * @param pageAnchor  锚点
+	 * @param pageSize	      分页大小
+	 * @param applyPolicy 应用类型
+	 * @return
+	 */
+	List<BannerDTO> listBannersByOwner(Integer namespaceId, Long scopeId, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
+	
 }

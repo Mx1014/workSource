@@ -19,9 +19,15 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.ReorderBannerByOwnerCommand;
+import com.everhomes.rest.banner.CreateBannerByOwnerCommand;
 import com.everhomes.rest.banner.CreateBannerClickCommand;
+import com.everhomes.rest.banner.DeleteBannerByOwnerCommand;
 import com.everhomes.rest.banner.GetBannerByIdCommand;
 import com.everhomes.rest.banner.GetBannersCommand;
+import com.everhomes.rest.banner.ListBannersByOwnerCommand;
+import com.everhomes.rest.banner.ListBannersByOwnerCommandResponse;
+import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
 import com.everhomes.util.EtagHelper;
 
 @RestDoc(value="Banner controller", site="core")
@@ -29,6 +35,7 @@ import com.everhomes.util.EtagHelper;
 @RequestMapping("/banner")
 public class BannerController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(BannerController.class);
+    
     private static final String MARKETDATA_ITEM_VERSION = "marketdata.item.version";
     @Autowired
     private BannerService bannerService;
@@ -79,5 +86,73 @@ public class BannerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
+    
+    /**
+     * <b>URL: /banner/listBannersByOwner</b>
+     * <p>获取归属的banner</p>
+     */
+    @RequestMapping("listBannersByOwner")
+    @RestReturn(value=ListBannersByOwnerCommandResponse.class)
+    public RestResponse listBannersByOwner(@Valid ListBannersByOwnerCommand cmd) {
+    	RestResponse resp = new RestResponse(bannerService.listBannersByOwner(cmd));
+    	resp.setErrorCode(ErrorCodes.SUCCESS);
+    	resp.setErrorDescription("OK");
+    	return resp;
+    }
+    
+    /**
+     * <b>URL: /banner/updateBannerByOwner</b>
+     * <p>修改归属的banner</p>
+     */
+    @RequestMapping("updateBannerByOwner")
+    @RestReturn(value=String.class)
+    public RestResponse updateBannerByOwner(@Valid UpdateBannerByOwnerCommand cmd) {
+    	bannerService.updateBannerByOwner(cmd);
+    	RestResponse resp = new RestResponse();
+    	resp.setErrorCode(ErrorCodes.SUCCESS);
+    	resp.setErrorDescription("OK");
+    	return resp;
+    }
+    
+    /**
+     * <b>URL: /banner/deleteBannerByOwner</b>
+     * <p>删除归属的banner</p>
+     */
+    @RequestMapping("deleteBannerByOwner")
+    @RestReturn(value=String.class)
+    public RestResponse deleteBannerByOwner(@Valid DeleteBannerByOwnerCommand cmd) {
+    	bannerService.deleteBannerByOwner(cmd);
+    	RestResponse resp = new RestResponse();
+    	resp.setErrorCode(ErrorCodes.SUCCESS);
+    	resp.setErrorDescription("OK");
+    	return resp;
+    }
+    
+    /**
+     * <b>URL: /banner/createBannerByOwner</b>
+     * <p>创建banner</p>
+     */
+    @RequestMapping("createBannerByOwner")
+    @RestReturn(value=String.class)
+    public RestResponse createBannerByOwner(@Valid CreateBannerByOwnerCommand cmd) {
+    	bannerService.createBannerByOwner(cmd);
+    	RestResponse resp = new RestResponse();
+    	resp.setErrorCode(ErrorCodes.SUCCESS);
+    	resp.setErrorDescription("OK");
+    	return resp;
+    }
+    
+    /**
+     * <b>URL: /banner/reorderBannerByOwner</b>
+     * <p>调整banner的顺序</p>
+     */
+    @RequestMapping("reorderBannerByOwner")
+    @RestReturn(value=String.class)
+    public RestResponse reorderBannerByOwner(@Valid ReorderBannerByOwnerCommand cmd) {
+    	bannerService.reorderBannerByOwner(cmd);
+    	RestResponse resp = new RestResponse();
+    	resp.setErrorCode(ErrorCodes.SUCCESS);
+    	resp.setErrorDescription("OK");
+    	return resp;
+    }
 }
