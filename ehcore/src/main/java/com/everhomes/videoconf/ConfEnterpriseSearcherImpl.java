@@ -26,6 +26,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.Organization;
@@ -34,6 +35,7 @@ import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.videoconf.ConfAccountDTO;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
@@ -43,6 +45,7 @@ import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.mysql.jdbc.StringUtils;
 
@@ -69,6 +72,9 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	
 	@Autowired
     private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -181,9 +187,15 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
         	dto.setId(confEnterprise.getId());
 	    	dto.setEnterpriseId(confEnterprise.getEnterpriseId());
 	    	dto.setNamespaceId(confEnterprise.getNamespaceId());
-	    	Namespace ns = nsProvider.findNamespaceById(confEnterprise.getNamespaceId());
-			if(ns != null)
-				dto.setNamespaceName(ns.getName());
+	    	if(dto.getNamespaceId() == 0) {
+	    		dto.setNamespaceName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+						String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+						UserContext.current().getUser().getLocale(),"ZUOLIN"));
+			} else {
+		    	Namespace ns = nsProvider.findNamespaceById(confEnterprise.getNamespaceId());
+				if(ns != null)
+					dto.setNamespaceName(ns.getName());
+			}
 			
 //	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
 	    	Organization org = organizationProvider.findOrganizationById(confEnterprise.getEnterpriseId());
