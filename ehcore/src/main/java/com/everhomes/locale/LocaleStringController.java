@@ -11,6 +11,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.locale.GetLocalizedStringCommand;
 import com.everhomes.rest.locale.ListLocaleTemplateCommand;
+import com.everhomes.rest.locale.ListLocaleTemplateResponse;
 import com.everhomes.rest.locale.LocaleTemplateDTO;
 import com.everhomes.rest.locale.UpdateLocaleTemplateCommand;
 import com.everhomes.util.RequireAuthentication;
@@ -39,9 +40,9 @@ public class LocaleStringController extends ControllerBase {
      * <p>模板列表</p>
      */
     @RequestMapping("listLocaleTemplate")
-    @RestReturn(LocaleTemplateDTO.class)
+    @RestReturn(ListLocaleTemplateResponse.class)
     public RestResponse listLocaleTemplate(ListLocaleTemplateCommand cmd){
-    	return new RestResponse();
+    	return new RestResponse(localeService.listLocaleTemplate(cmd));
     }
     
     /**
@@ -52,6 +53,6 @@ public class LocaleStringController extends ControllerBase {
     @RequestMapping("listLocaleTemplate")
     @RestReturn(LocaleTemplateDTO.class)
     public RestResponse updateLocaleTemplate(UpdateLocaleTemplateCommand cmd){
-    	return new RestResponse();
+    	return new RestResponse(localeService.updateLocaleTemplate(cmd));
     }
 }

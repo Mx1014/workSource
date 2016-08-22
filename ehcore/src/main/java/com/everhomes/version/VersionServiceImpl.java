@@ -3,6 +3,7 @@ package com.everhomes.version;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,14 +15,18 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.version.CreateVersionCommand;
 import com.everhomes.rest.version.ListVersionInfoCommand;
+import com.everhomes.rest.version.ListVersionInfoResponse;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionDTO;
 import com.everhomes.rest.version.VersionInfoDTO;
+import com.everhomes.rest.version.VersionRealmDTO;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionServiceErrorCode;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -182,7 +187,32 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	@Override
-	public List<VersionInfoDTO> listVersionInfo(ListVersionInfoCommand cmd) {
+	public List<VersionRealmDTO> listVersionRealm() {
+		List<VersionRealm> list = versionProvider.listVersionRealm();
+		return list.stream().map(v->ConvertHelper.convert(v, VersionRealmDTO.class)).collect(Collectors.toList());
+	}
+
+	@Override
+	public ListVersionInfoResponse listVersionInfo(ListVersionInfoCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<VersionInfoDTO> list = versionProvider.listVersionInfo(cmd.getPageAnchor(), pageSize+1);
+		
+		Long nextPageAnchor = null;
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			nextPageAnchor = list.get(list.size()-1).getId();
+		}
+		
+		ListVersionInfoResponse response = new ListVersionInfoResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setVersionList(list);
+		
+		return response;
+	}
+
+	@Override
+	public VersionInfoDTO createVersion(CreateVersionCommand cmd) {
 		
 		return null;
 	}

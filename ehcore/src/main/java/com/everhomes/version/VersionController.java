@@ -14,6 +14,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.version.CreateVersionCommand;
 import com.everhomes.rest.version.DeleteVersionCommand;
 import com.everhomes.rest.version.ListVersionInfoCommand;
+import com.everhomes.rest.version.ListVersionInfoResponse;
 import com.everhomes.rest.version.UpdateVersionCommand;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionInfoDTO;
@@ -66,13 +67,13 @@ public class VersionController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /version/listVersionInfo</b>
-     * <p>版本信息列表</p>
+     * <b>URL: /version/listVersionRealm</b>
+     * <p>版本Realm列表</p>
      */
     @RequestMapping("listVersionInfo")
     @RestReturn(value = VersionRealmDTO.class, collection = true)
     public RestResponse listVersionRealm(){
-    	return new RestResponse();
+    	return new RestResponse(versionService.listVersionRealm());
     }
     
     /**
@@ -81,7 +82,7 @@ public class VersionController extends ControllerBase {
      * <p>版本信息列表</p>
      */
     @RequestMapping("listVersionInfo")
-    @RestReturn(value = VersionInfoDTO.class, collection = true)
+    @RestReturn(value = ListVersionInfoResponse.class)
     public RestResponse listVersionInfo(ListVersionInfoCommand cmd){
     	return new RestResponse(versionService.listVersionInfo(cmd));
     }
@@ -94,7 +95,7 @@ public class VersionController extends ControllerBase {
     @RequestMapping("createVersion")
     @RestReturn(value = VersionInfoDTO.class)
     public RestResponse createVersion(CreateVersionCommand cmd){
-    	return new RestResponse();
+    	return new RestResponse(versionService.createVersion(cmd));
     }
     
     /**
@@ -111,7 +112,7 @@ public class VersionController extends ControllerBase {
     /**
      * 
      * <b>URL: /version/deleteVersionById</b>
-     * <p>更新版本信息</p>
+     * <p>删除版本信息</p>
      */
     @RequestMapping("deleteVersionById")
     @RestReturn(value = String.class)

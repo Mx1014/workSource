@@ -46,7 +46,7 @@ public class NamespaceAdminController extends ControllerBase {
 	/**
 	 * 
 	 * <b>URL: /admin/namespace/updateNamespace</b>
-	 * <p>创建域空间</p>
+	 * <p>更新域空间</p>
 	 */
 	@RequestMapping("updateNamespace")
 	@RestReturn(NamespaceInfoDTO.class)
