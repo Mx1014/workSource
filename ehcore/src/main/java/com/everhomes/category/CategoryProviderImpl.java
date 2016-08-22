@@ -49,9 +49,6 @@ public class CategoryProviderImpl implements CategoryProvider {
     
     @Autowired
     private SequenceProvider sequenceProvider;
-
-    @Autowired
-	private SequenceProvider sequenceProvider;
     
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
@@ -72,9 +69,6 @@ public class CategoryProviderImpl implements CategoryProvider {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCategories.class));
 		
         category.setId(id);
-        
-        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
-        dao.insert(category);
         
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         dao.insert(category);
