@@ -2,9 +2,11 @@ package com.everhomes.locale.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.RestResponse;
@@ -15,6 +17,9 @@ import com.everhomes.rest.locale.UpdateLocaleTemplateCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
+@RestDoc(value="locale admin controller", site="core")
+@RestController
+@RequestMapping("/admin/locale")
 public class LocaleTemplateAdminController extends ControllerBase {
 
     @Autowired

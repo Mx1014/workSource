@@ -2,9 +2,11 @@ package com.everhomes.version.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.version.CreateVersionCommand;
@@ -18,6 +20,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.version.VersionService;
 
+@RestDoc(value="version admin controller", site="core")
+@RestController
+@RequestMapping("/admin/version")
 public class VersionAdminController extends ControllerBase {
 
     @Autowired
