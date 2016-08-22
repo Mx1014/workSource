@@ -16,6 +16,7 @@ import com.everhomes.rest.techpark.punch.PunchListMonthPunchLogsRestResponse;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.TimeCompareFlag;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsRestResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
@@ -76,9 +77,8 @@ public class PunchListDetailsTest extends BaseLoginAuthTestCase {
 		return null;
 	}
 
-	 /**测试点:
-	  * 1.四次打卡的状态
-	  * 2.给上层设置规则,下层部门没有规则自动找上层的规则
+	 /**测试点: 
+	  * 测试过滤条件：时间段，正常，异常，工作时间大于，工作时间小于，上班时间大于，上班时间小于 ，下班时间大于，上班时间小于，综合搜索
 	  * */
 	@Test
 	public void listPunchDetailsTest() {
@@ -111,7 +111,7 @@ public class PunchListDetailsTest extends BaseLoginAuthTestCase {
 			assertNotNull(dayLog.getExceptionStatus());
 		} 
 		//正常 
-
+		cmd = new ListPunchDetailsCommand();
 		cmd.setOwnerId(ownerId);
 		cmd.setOwnerType(ownerType);
 		cmd.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
@@ -138,6 +138,7 @@ public class PunchListDetailsTest extends BaseLoginAuthTestCase {
 		} 
 		
 		//异常
+		cmd = new ListPunchDetailsCommand();
 		cmd.setOwnerId(ownerId);
 		cmd.setOwnerType(ownerType);
 		cmd.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 
@@ -155,13 +156,216 @@ public class PunchListDetailsTest extends BaseLoginAuthTestCase {
 		assertNotNull("The reponse of may not be null", response);
 		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
-		assertEquals(cmd.getEndDay().longValue(), response.getResponse().getPunchDayDetails().get(0).getPunchDate().longValue());
+		
 		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
 			assertNotNull(dayLog);
 			assertNotNull(dayLog.getUserName());
 			assertNotNull(dayLog.getDeptName());
 			assertEquals(ExceptionStatus.EXCEPTION.getCode(), dayLog.getExceptionStatus().byteValue());
 		} 
+
+		//工作时长大于7小时
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setWorkTimeCompareFlag(TimeCompareFlag.GREATEROREQUAL.getCode());
+		cmd.setWorkTime(7*60*60*1000L);
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime());
 		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getWorkTime()>=cmd.getWorkTime());
+		} 
+
+		//工作时长小于7小时
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setWorkTimeCompareFlag(TimeCompareFlag.LESSOREQUAL.getCode());
+		cmd.setWorkTime(7*60*60*1000L);
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime()); 
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getWorkTime()<=cmd.getWorkTime());
+		} 
+
+		//上班时间超过9点
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setArriveTimeCompareFlag(TimeCompareFlag.GREATEROREQUAL.getCode());
+		cmd.setArriveTime(9*60*60*1000L);
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime());
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getArriveTime()>=cmd.getArriveTime());
+		} 
+
+
+		//上班时间不到9点
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setArriveTimeCompareFlag(TimeCompareFlag.LESSOREQUAL.getCode());
+		cmd.setArriveTime(9*60*60*1000L);
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime());
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getArriveTime()<=cmd.getArriveTime());
+		} 
+		
+
+
+		//下班时间超过19点
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setLeaveTimeCompareFlag(TimeCompareFlag.GREATEROREQUAL.getCode());
+		cmd.setLeaveTime(19*60*60*1000L);
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime());
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getLeaveTime()>=cmd.getLeaveTime());
+		} 
+
+		//下班时间不到19点
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setLeaveTimeCompareFlag(TimeCompareFlag.LESSOREQUAL.getCode());
+		cmd.setLeaveTime(19*60*60*1000L);
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime());
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getLeaveTime()<=cmd.getLeaveTime());
+		} 
+
+		//综合搜索
+		cmd = new ListPunchDetailsCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setArriveTimeCompareFlag(TimeCompareFlag.GREATEROREQUAL.getCode());
+		cmd.setArriveTime(9*60*60*1000L);
+		cmd.setLeaveTimeCompareFlag(TimeCompareFlag.LESSOREQUAL.getCode());
+		cmd.setLeaveTime(19*60*60*1000L);
+		cmd.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
+		try {
+			cmd.setStartDay(dateSF.parse("2016-08-01").getTime());
+			cmd.setEndDay(dateSF.parse("2016-08-15").getTime());
+		
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		response = httpClientService.restGet(commandRelativeUri, cmd,
+				ListPunchDetailsRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		
+		for (PunchDayDetailDTO dayLog : response.getResponse().getPunchDayDetails()) {
+			assertNotNull(dayLog);
+			assertNotNull(dayLog.getUserName());
+			assertNotNull(dayLog.getDeptName());
+			assertTrue(dayLog.getLeaveTime()<=cmd.getLeaveTime());
+			assertTrue(dayLog.getArriveTime()>=cmd.getArriveTime());
+			assertEquals(ExceptionStatus.NORMAL.getCode(), cmd.getExceptionStatus().byteValue());
+		} 
 	} 
 }

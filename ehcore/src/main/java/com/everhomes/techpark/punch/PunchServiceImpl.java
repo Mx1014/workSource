@@ -3513,9 +3513,9 @@ public class PunchServiceImpl implements PunchService {
 			
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
 					cmd.getOwnerId(),startDay,endDay , 
-					cmd.getArriveTimeCompareFlag(),getDAOTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
-					getDAOTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					getDAOTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
+					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
+					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
+					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
 			
 			if (null == results)
 				return null;
@@ -3744,9 +3744,9 @@ public class PunchServiceImpl implements PunchService {
 			
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
 					cmd.getOwnerId(),startDay,endDay , 
-					cmd.getArriveTimeCompareFlag(),getDAOTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
-					getDAOTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					getDAOTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
+					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
+					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
+					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
 			
 			if (null == results)
 				return response;
