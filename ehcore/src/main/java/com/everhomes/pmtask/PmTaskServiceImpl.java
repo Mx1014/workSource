@@ -45,7 +45,6 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
-import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
@@ -103,20 +102,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		Byte status = null;
-		Boolean flag = true;
-		if(null != cmd.getStatus()){
-			if(cmd.getStatus().equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
-				status = PmTaskStatus.UNPROCESSED.getCode();
-			if(cmd.getStatus().equals(PmTaskProcessStatus.PROCESSED.getCode())){
-				status = PmTaskStatus.UNPROCESSED.getCode();
-				flag = false;
-			}
-		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
-		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId(), 
-				status, flag, cmd.getPageAnchor(), cmd.getPageSize());
+		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId(), cmd.getStatus()
+				, cmd.getPageAnchor(), cmd.getPageSize());
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
@@ -372,6 +361,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskLog.setTaskId(task.getId());
 		pmTaskProvider.createTaskLog(pmTaskLog);
 		
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		task.setNickName(user.getNickName());
+		task.setMobile(userIdentifier.getIdentifierToken());
 		pmTaskSearch.feedDoc(task);
 		
 		return ConvertHelper.convert(task, PmTaskDTO.class);

@@ -35,8 +35,12 @@ import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -49,6 +53,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     @Autowired
 	private PmTaskProvider pmTaskProvider;
     
+    @Autowired
+	private UserProvider userProvider;
 	@Override
 	public String getIndexType() {
 		return SearchUtils.PMTASK;
@@ -115,21 +121,29 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         this.deleteAll();
         for(;;){
-        	tasks = pmTaskProvider.listPmTask(null, null, null, null, null, nextPageAnchor, pageSize);
+        	tasks = pmTaskProvider.listPmTask(null, null, null, nextPageAnchor, pageSize);
         	
         	if(tasks.size() > 0){
-        		
-        		if(tasks.size() != pageSize){
-        			break;
-            	}else{
+        		tasks = tasks.stream().map(r -> {
+        			User user = userProvider.findUserById(r.getCreatorUid());
+        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        			r.setNickName(user.getNickName());
+        			r.setMobile(userIdentifier.getIdentifierToken());
+        			return r;
+        		}).collect(Collectors.toList());
+
+        		if(tasks.size() == pageSize){
             		nextPageAnchor = tasks.get(tasks.size()-1).getCreateTime().getTime();
             	}
         	}
         	
- 	        if(null != tasks && tasks.size() < pageSize) {
- 	        	break;
- 	        }
+ 	        
  	       this.bulkUpdate(tasks);
+ 	       
+ 	       if(tasks.size() < pageSize) {
+	        	break;
+	        }
+ 	       
            tasks.clear();
            LOGGER.info("Sync pmtask(syncupdate), process count: " + tasks.size());
            
@@ -209,7 +223,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setCreatorUid(SearchUtils.getLongField(source.get("creatorUid")));
             doc.setCategoryId(SearchUtils.getLongField(source.get("categoryId")));
             doc.setCreateTime(new Timestamp((Long)source.get("createTime")));
-            doc.setStatus((Byte)source.get("status"));
+            doc.setStatus(((Integer)source.get("status")).byteValue());
             doc.setNickName((String)source.get("nickName"));
             doc.setMobile((String)source.get("mobile"));
 //            doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
