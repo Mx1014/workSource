@@ -74,7 +74,7 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
 -- 创建任务贴发的消息 by sfyan 20160819
 UPDATE `eh_locale_templates` SET `text` = '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。' WHERE `scope` = 'organization.notification' AND `code` = 11;
 
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。”的申请。', 0);
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。”的申请。', 1000000);
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。”的申请。', 999992);
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。', 0);
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。', 1000000);
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。', 999992);
 
