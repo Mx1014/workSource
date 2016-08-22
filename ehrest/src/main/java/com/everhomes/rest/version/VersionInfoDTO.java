@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>maxVersion: 版本上限</li>
  * <li>targetVersion: 目标版本</li>
  * <li>forceUpgrade: 是否强制升级，0不强制1强制</li>
+ * <li>urlId: url的记录id</li>
  * <li>downloadUrl: 下载链接</li>
  * <li>upgradeDescription: 升级描述</li>
  * </ul>
@@ -27,8 +28,17 @@ public class VersionInfoDTO {
 	private String maxVersion;
 	private String targetVersion;
 	private Byte forceUpgrade;
+	private Long urlId;
 	private String downloadUrl;
 	private String upgradeDescription;
+
+	public Long getUrlId() {
+		return urlId;
+	}
+
+	public void setUrlId(Long urlId) {
+		this.urlId = urlId;
+	}
 
 	public Long getId() {
 		return id;

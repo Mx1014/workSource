@@ -1,5 +1,6 @@
 package com.everhomes.version;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.version.CreateVersionCommand;
+import com.everhomes.rest.version.DeleteVersionCommand;
 import com.everhomes.rest.version.ListVersionInfoCommand;
 import com.everhomes.rest.version.ListVersionInfoResponse;
+import com.everhomes.rest.version.UpdateVersionCommand;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionDTO;
 import com.everhomes.rest.version.VersionInfoDTO;
@@ -28,6 +31,7 @@ import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
@@ -212,9 +216,113 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	@Override
-	public VersionInfoDTO createVersion(CreateVersionCommand cmd) {
+	public VersionInfoDTO createVersion(final CreateVersionCommand cmd) {
+		final VersionRealm realm = versionProvider.findVersionRealmById(cmd.getRealmId());
+		if(realm == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not found versionRealm: cmd="+cmd);
+		}
 		
-		return null;
+		final VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
+		
+		dbProvider.execute(s->{
+			VersionUpgradeRule rule = new VersionUpgradeRule();
+			rule.setRealmId(cmd.getRealmId());
+			VersionRange versionRange = new VersionRange("["+cmd.getMinVersion()+","+cmd.getMaxVersion()+")");
+			rule.setMatchingLowerBound(versionRange.getLowerBound());
+			rule.setMatchingUpperBound(versionRange.getUpperBound());
+			rule.setOrder(0);
+			rule.setTargetVersion(cmd.getTargetVersion());
+			rule.setNamespaceId(realm.getNamespaceId());
+			versionProvider.createVersionUpgradeRule(rule);
+			
+			VersionUrl url = new VersionUrl();
+			url.setRealmId(cmd.getRealmId());
+			url.setTargetVersion(cmd.getTargetVersion());
+			url.setDownloadUrl(cmd.getDownloadUrl());
+			url.setUpgradeDescription(cmd.getUpgradeDescription());
+			url.setNamespaceId(realm.getNamespaceId());
+			versionProvider.createVersionUrl(url);
+
+			versionInfoDTO.setRealm(realm.getRealm());
+			versionInfoDTO.setDescription(realm.getDescription());
+			versionInfoDTO.setId(rule.getId());
+			versionInfoDTO.setUrlId(url.getId());
+			
+			return true;
+		});
+		
+		return versionInfoDTO;
+	}
+
+	@Override
+	public VersionInfoDTO updateVersion(UpdateVersionCommand cmd) {
+		VersionRealm realm = versionProvider.findVersionRealmById(cmd.getRealmId());
+		if(realm == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not found versionRealm: cmd="+cmd);
+		}
+		
+		VersionUpgradeRule rule = versionProvider.findVersionUpgradeRuleById(cmd.getId());
+		if (rule == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not found versionUpgradeRule: cmd="+cmd);
+		}
+		
+		VersionUrl url = versionProvider.findVersionUrlById(cmd.getUrlId());
+		if (url == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not found versionUrl: cmd="+cmd);
+		}
+		
+		VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
+		
+		dbProvider.execute(s->{
+			rule.setRealmId(cmd.getRealmId());
+			VersionRange versionRange = new VersionRange("["+cmd.getMinVersion()+","+cmd.getMaxVersion()+")");
+			rule.setMatchingLowerBound(versionRange.getLowerBound());
+			rule.setMatchingUpperBound(versionRange.getUpperBound());
+			rule.setOrder(0);
+			rule.setTargetVersion(cmd.getTargetVersion());
+			rule.setNamespaceId(realm.getNamespaceId());
+			versionProvider.updateVersionUpgradeRule(rule);
+			
+			url.setRealmId(cmd.getRealmId());
+			url.setTargetVersion(cmd.getTargetVersion());
+			url.setDownloadUrl(cmd.getDownloadUrl());
+			url.setUpgradeDescription(cmd.getUpgradeDescription());
+			url.setNamespaceId(realm.getNamespaceId());
+			versionProvider.updateVersionUrl(url);
+			
+			versionInfoDTO.setRealm(realm.getRealm());
+			versionInfoDTO.setDescription(realm.getDescription());
+			
+			return true;
+		});
+		
+		return versionInfoDTO;
+	}
+
+	@Override
+	public void deleteVersionById(DeleteVersionCommand cmd) {
+		VersionUpgradeRule rule = versionProvider.findVersionUpgradeRuleById(cmd.getId());
+		if (rule == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not found versionUpgradeRule: cmd="+cmd);
+		}
+		
+		VersionUrl url = versionProvider.findVersionUrlById(cmd.getUrlId());
+		if (url == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not found versionUrl: cmd="+cmd);
+		}
+		
+		dbProvider.execute(s->{
+			versionProvider.deleteVersionUpgradeRule(rule);
+			versionProvider.deleteVersionUrl(url);
+			
+			return true;
+		});
 	}
 
 }

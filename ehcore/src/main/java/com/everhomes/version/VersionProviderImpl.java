@@ -438,7 +438,7 @@ public class VersionProviderImpl implements VersionProvider {
 		com.everhomes.server.schema.tables.EhVersionRealm t1 = Tables.EH_VERSION_REALM.as("t1");
 		com.everhomes.server.schema.tables.EhVersionUpgradeRules t2 = Tables.EH_VERSION_UPGRADE_RULES.as("t2");
 		com.everhomes.server.schema.tables.EhVersionUrls t3 = Tables.EH_VERSION_URLS.as("t3");
-		SelectConditionStep<?> step = context.select(t2.ID, t2.REALM_ID, t1.REALM, t1.DESCRIPTION, t2.MATCHING_LOWER_BOUND, t2.MATCHING_UPPER_BOUND, t2.TARGET_VERSION, t2.FORCE_UPGRADE, t3.DOWNLOAD_URL)
+		SelectConditionStep<?> step = context.select(t2.ID, t2.REALM_ID, t1.REALM, t1.DESCRIPTION, t2.MATCHING_LOWER_BOUND, t2.MATCHING_UPPER_BOUND, t2.TARGET_VERSION, t2.FORCE_UPGRADE, t3.ID.as("url_id"), t3.DOWNLOAD_URL, t3.UPGRADE_DESCRIPTION)
 											.from(t2)
 											.leftOuterJoin(t1).on(t2.REALM_ID.eq(t1.ID))
 											.leftOuterJoin(t3).on(t2.REALM_ID.eq(t3.REALM_ID)).and(t2.TARGET_VERSION.eq(t3.TARGET_VERSION))

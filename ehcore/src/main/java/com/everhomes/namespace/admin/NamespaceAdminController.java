@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -12,6 +13,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.namespace.admin.CreateNamespaceCommand;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.namespace.admin.UpdateNamespaceCommand;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="namespace admin controller", site="core")
 @RestController
@@ -29,6 +32,8 @@ public class NamespaceAdminController extends ControllerBase {
 	@RequestMapping("listNamespace")
 	@RestReturn(value=NamespaceInfoDTO.class, collection=true)
 	public RestResponse listNamespace(){
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		return new RestResponse(namespacesService.listNamespace());
 	}
 	
@@ -40,6 +45,8 @@ public class NamespaceAdminController extends ControllerBase {
 	@RequestMapping("createNamespace")
 	@RestReturn(NamespaceInfoDTO.class)
 	public RestResponse createNamespace(CreateNamespaceCommand cmd){
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		return new RestResponse(namespacesService.createNamespace(cmd));
 	}
 	
@@ -51,6 +58,8 @@ public class NamespaceAdminController extends ControllerBase {
 	@RequestMapping("updateNamespace")
 	@RestReturn(NamespaceInfoDTO.class)
 	public RestResponse updateNamespace(UpdateNamespaceCommand cmd){
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		return new RestResponse(namespacesService.updateNamespace(cmd));
 	}
 	

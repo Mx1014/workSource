@@ -1,0 +1,61 @@
+{
+  "eh_version_realm": [
+    {
+      "create_time": "2015-08-31 15:01:36",
+      "namespace_id": "0",
+      "description": "3.0.0-user",
+      "realm": "Android",
+      "id": "1"
+    },
+    {
+      "create_time": "2015-08-31 15:01:36",
+      "namespace_id": "0",
+      "description": "3.0.0-0",
+      "realm": "iOS",
+      "id": "2"
+    }
+  ],
+  "eh_version_upgrade_rules": [
+    {
+      "matching_upper_bound": "3145728.0",
+      "create_time": "2015-08-31 15:01:36",
+      "namespace_id": "0",
+      "matching_lower_bound": "1048575.9",
+      "force_upgrade": "0",
+      "id": "1",
+      "realm_id": "1",
+      "order": "0",
+      "target_version": "3.0.0-user"
+    },
+    {
+      "matching_upper_bound": "3145728.0",
+      "create_time": "2015-08-31 15:04:24",
+      "namespace_id": "0",
+      "matching_lower_bound": "1048575.9",
+      "force_upgrade": "0",
+      "id": "2",
+      "realm_id": "2",
+      "order": "0",
+      "target_version": "3.0.0-0"
+    }
+  ],
+  "eh_version_urls": [
+    {
+      "namespace_id": "0",
+      "download_url": "${homeurl}/web/download/apk/android_v3.0.0_2015092201_release.apk",
+      "id": "1",
+      "realm_id": "1",
+      "info_url": "${homeurl}/web/download/apk/andriod-3-0-0.html",
+      "upgrade_description": "upgrade description",
+      "target_version": "3.0.0-user"
+    },
+    {
+      "namespace_id": "0",
+      "id": "2",
+      "realm_id": "2",
+      "info_url": "${homeurl}/web/download/apk/iOS-3-0-0.html",
+      "upgrade_description": "upgrade description",
+      "target_version": "3.0.0-0"
+    }
+  ],
+}

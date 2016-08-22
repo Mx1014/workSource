@@ -3,8 +3,10 @@ package com.everhomes.version;
 import java.util.List;
 
 import com.everhomes.rest.version.CreateVersionCommand;
+import com.everhomes.rest.version.DeleteVersionCommand;
 import com.everhomes.rest.version.ListVersionInfoCommand;
 import com.everhomes.rest.version.ListVersionInfoResponse;
+import com.everhomes.rest.version.UpdateVersionCommand;
 import com.everhomes.rest.version.UpgradeInfoResponse;
 import com.everhomes.rest.version.VersionInfoDTO;
 import com.everhomes.rest.version.VersionRealmDTO;
@@ -21,6 +23,8 @@ public interface VersionService {
     ListVersionInfoResponse listVersionInfo(ListVersionInfoCommand cmd);
 	List<VersionRealmDTO> listVersionRealm();
 	VersionInfoDTO createVersion(CreateVersionCommand cmd);
+	VersionInfoDTO updateVersion(UpdateVersionCommand cmd);
+	void deleteVersionById(DeleteVersionCommand cmd);
     
     
 }
