@@ -51,6 +51,8 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.scene.SceneTypeInfoDTO;
+import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.user.AppIdStatusCommand;
 import com.everhomes.rest.user.AppIdStatusResponse;
 import com.everhomes.rest.user.AppServiceAccessCommand;
@@ -83,6 +85,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
 import com.everhomes.rest.user.VerifyAndLogonCommand;
 import com.everhomes.rest.user.VerifyAndResetPasswordCommand;
+import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.EtagHelper;
@@ -249,6 +252,9 @@ public class UserController extends ControllerBase {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private SceneService sceneService;
 
 	public UserController() {
 	}
@@ -1025,12 +1031,23 @@ public class UserController extends ControllerBase {
 		return response;
 	}
 	
-	   @RequestMapping("listBorders")
-	    @RestReturn(BorderListResponse.class)
-	    public RestResponse listBorders(){
-	        RestResponse response =  new RestResponse(userService.listBorders());
-	        response.setErrorCode(ErrorCodes.SUCCESS);
-	        response.setErrorDescription("OK");
-	        return response;
-	    }
+    @RequestMapping("listBorders")
+    @RestReturn(BorderListResponse.class)
+    public RestResponse listBorders(){
+        RestResponse response =  new RestResponse(userService.listBorders());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+    /**
+     * <b>URL: /user/listSceneTypeByOwner</b>
+     * <p>根据归属类型获取场景列表</p>
+     */
+    @RequestMapping("listSceneTypeByOwner")
+	@RestReturn(value = SceneTypeInfoDTO.class, collection = true)
+	public RestResponse listSceneTypeByOwner(ListScentTypeByOwnerCommand cmd) {
+	
+	    return null;
+	}
 }

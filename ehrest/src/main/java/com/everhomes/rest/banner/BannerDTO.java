@@ -1,5 +1,8 @@
 package com.everhomes.rest.banner;
 
+import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
+import static com.everhomes.rest.banner.BannerStatus.CLOSE;
+
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -23,10 +26,11 @@ import com.everhomes.util.StringHelper;
  * <li>order: 顺序</li>
  * <li>creatorUid: banner创建者</li>
  * <li>createTime: 创建时间</li>
+ * <li>updateTime: 最后一次更新的时间</li>
  * <li>deleteTime: 删除时间</li>
  * </ul>
  */
-public class BannerDTO {
+public class BannerDTO implements Comparable<BannerDTO> {
     private Long     id;
     private Integer  namespaceId;
     private Long     appid;
@@ -45,6 +49,7 @@ public class BannerDTO {
     private Integer  order;
     private Long     creatorUid;
     private Timestamp createTime;
+    private Timestamp updateTime;
     private Timestamp deleteTime;
     
     public Long getId() {
@@ -77,7 +82,6 @@ public class BannerDTO {
     public void setScopeId(Long scopeId) {
         this.scopeId = scopeId;
     }
-    
     public String getBannerLocation() {
         return bannerLocation;
     }
@@ -96,7 +100,14 @@ public class BannerDTO {
     public void setName(String name) {
         this.name = name;
     }
-    public String getVendorTag() {
+    
+    public Timestamp getUpdateTime() {
+		return updateTime;
+	}
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+	public String getVendorTag() {
         return vendorTag;
     }
     public void setVendorTag(String vendorTag) {
@@ -167,5 +178,19 @@ public class BannerDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+    
+	@Override
+	public int compareTo(BannerDTO b) {
+		if (b == null) {
+			return 0;
+		}
+		if (this.getStatus() == ACTIVE.getCode() && b.getStatus() == ACTIVE.getCode()) {
+			return b.getOrder().compareTo(this.getOrder());
+		}
+		if (this.getStatus() == CLOSE.getCode() && b.getStatus() == CLOSE.getCode()) {
+			return b.getUpdateTime().compareTo(this.getUpdateTime());
+		}
+		return b.getStatus().compareTo(this.getStatus());
+	}
 
 }
