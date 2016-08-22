@@ -96,33 +96,67 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long categoryId, Byte status, Byte unstatus, String keyword, 
+	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status, Boolean flag,
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+        
+        if(null == flag)
+        	flag = true;
         
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
         	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
-        if(null != categoryId)
-        	query.addJoin(Tables.EH_CATEGORIES, Tables.EH_PM_TASKS.CATEGORY_ID.eq(Tables.EH_CATEGORIES.ID));
-        	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(categoryId));
-        if(null != status)
+        if(null != userId){
+        	query.addConditions(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
+        }
+        if(flag && null != status)
         	query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(status));
-        if(null != unstatus){
-        	query.addConditions(Tables.EH_PM_TASKS.STATUS.ne(unstatus));
-
+        if(!flag && null != status){
+        	query.addConditions(Tables.EH_PM_TASKS.STATUS.ne(status));
         }
         if(null != pageAnchor && pageAnchor != 0)
-        	query.addConditions(Tables.EH_PM_TASKS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
-        query.addOrderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
+        	query.addConditions(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+        query.addOrderBy(Tables.EH_PM_TASKS.CREATE_TIME.asc());
         if(null != pageSize)
         	query.addLimit(pageSize);
         
         List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
         return result;
 	}
+	
+//	@Override
+//	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long categoryId, Byte status, Boolean flag, String keyword, 
+//			Long pageAnchor, Integer pageSize){
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+//        SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+//        
+//        if(null == flag)
+//        	flag = true;
+//        
+//        if(StringUtils.isNotBlank(ownerType))
+//        	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
+//        if(null != ownerId)
+//        	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+//        if(null != categoryId){
+//        	query.addJoin(Tables.EH_CATEGORIES, Tables.EH_PM_TASKS.CATEGORY_ID.eq(Tables.EH_CATEGORIES.ID));
+//        	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId));
+//        }
+//        if(flag && null != status)
+//        	query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(status));
+//        if(!flag && null != status){
+//        	query.addConditions(Tables.EH_PM_TASKS.STATUS.ne(status));
+//        }
+//        if(null != pageAnchor && pageAnchor != 0)
+//        	query.addConditions(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+//        query.addOrderBy(Tables.EH_PM_TASKS.CREATE_TIME.asc());
+//        if(null != pageSize)
+//        	query.addLimit(pageSize);
+//        
+//        List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+//        return result;
+//	}
 	
 	@Override
 	public List<PmTaskLog> listPmTaskLogs(Long taskId){

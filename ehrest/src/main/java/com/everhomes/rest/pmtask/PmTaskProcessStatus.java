@@ -8,7 +8,7 @@ package com.everhomes.rest.pmtask;
  * </ul>
  */
 public enum PmTaskProcessStatus {
-	UNPROCESSED((byte)0), PROCESSED((byte)1);
+	UNPROCESSED((byte)0), PROCESSED((byte)1), ALL((byte)2);
     
     private byte code;
     private PmTaskProcessStatus(byte code) {

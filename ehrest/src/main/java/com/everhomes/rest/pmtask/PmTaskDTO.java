@@ -48,6 +48,9 @@ public class PmTaskDTO {
 	private Long creatorUid;
 	private Timestamp createTime;
 	
+	private String nickName;
+	private String mobile;
+	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
 	
@@ -176,6 +179,18 @@ public class PmTaskDTO {
 	}
 	public void setAttachments(List<PmTaskAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+	public String getNickName() {
+		return nickName;
+	}
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+	public String getMobile() {
+		return mobile;
+	}
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
 	}
 	@Override
 	public String toString() {

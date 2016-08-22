@@ -16,6 +16,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
+import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -47,6 +48,8 @@ public class PmTaskController extends ControllerBase {
 	
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+	@Autowired
+	private PmTaskSearch pmTaskSearch;
 
 //    /**
 //     * <b>URL: /org/listUserTask</b>
@@ -153,7 +156,7 @@ public class PmTaskController extends ControllerBase {
        * <p>创建新任务</p>
        */
       @RequestMapping("createTask")
-      @RestReturn(value=String.class)
+      @RestReturn(value=PmTaskDTO.class)
       public RestResponse createTask(CreateTaskCommand cmd) {
     	  PmTaskDTO dto = pmTaskService.createTask(cmd);
           RestResponse response = new RestResponse(dto);
@@ -192,7 +195,7 @@ public class PmTaskController extends ControllerBase {
      
 	/**
 	 * <b>URL: /pmtask/completeTask</b>
-	 * <p>设置任务状态：待处理、处理中、已处理、其它</p>
+	 * <p>完成任务</p>
 	 */
 	@RequestMapping("completeTask")
 	@RestReturn(value=String.class)
@@ -206,12 +209,26 @@ public class PmTaskController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /pmtask/closeTask</b>
-	 * <p>设置任务状态：待处理、处理中、已处理、其它</p>
+	 * <p>关闭任务</p>
 	 */
 	@RequestMapping("closeTask")
 	@RestReturn(value=String.class)
 	public RestResponse closeTask(CloseTaskCommand cmd) {
 		pmTaskService.closeTask(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pmtask/cancelTask</b>
+	 * <p>取消任务</p>
+	 */
+	@RequestMapping("cancelTask")
+	@RestReturn(value=String.class)
+	public RestResponse cancelTask(CancelTaskCommand cmd) {
+		pmTaskService.cancelTask(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -339,5 +356,17 @@ public class PmTaskController extends ControllerBase {
         return response;
     }
     
-      
+    /**
+     * <b>URL: /pmtask/syncFromDb</b>
+     * <p>同步索引</p>
+     */
+    @RequestMapping("syncFromDb")
+    @RestReturn(value=String.class)
+    public RestResponse syncFromDb() {
+    	pmTaskSearch.syncFromDb();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }  
 }

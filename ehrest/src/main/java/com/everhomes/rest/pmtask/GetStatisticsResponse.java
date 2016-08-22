@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerId: 园区id</li>
  * <li>ownerName: 园区名称</li>
+ * <li>totalCount: 园区总数量</li>
  * <li>avgScore: 评价均分</li>
  * <li>evaluateCount: 评价人数</li>
  * </ul>
@@ -16,6 +17,7 @@ import com.everhomes.util.StringHelper;
 public class GetStatisticsResponse {
 	private Long ownerId;
 	private String ownerName;
+	private Integer totalCount;
 	@ItemType(CategoryTaskStatisticsDTO.class)
 	private List<CategoryTaskStatisticsDTO> CategoryTaskStatistics;
 	private Float avgScore;
@@ -63,5 +65,11 @@ public class GetStatisticsResponse {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
 	}
 }

@@ -26,6 +26,33 @@ CREATE TABLE `eh_pm_tasks` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_pm_task_statistics`;
+CREATE TABLE `eh_pm_task_statistics` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `category_id` BIGINT NOT NULL DEFAULT 0,
+  `total_count` INT NOT NULL DEFAULT 0,
+  `unprocess_count` INT NOT NULL DEFAULT 0,
+  `processong_count` INT NOT NULL DEFAULT 0,
+  `processed_count` INT NOT NULL DEFAULT 0,
+  `close_count` INT NOT NULL DEFAULT 0,
+
+  `star1` INT NOT NULL DEFAULT 0,
+  `star2` INT NOT NULL DEFAULT 0,
+  `star3` INT NOT NULL DEFAULT 0,
+  `star4` INT NOT NULL DEFAULT 0,
+  `star5` INT NOT NULL DEFAULT 0,
+
+  `date_str` DATETIME,
+
+  `create_time` DATETIME,
+  
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
  DROP TABLE IF EXISTS `eh_pm_task_logs`;
 CREATE TABLE `eh_pm_task_logs` (

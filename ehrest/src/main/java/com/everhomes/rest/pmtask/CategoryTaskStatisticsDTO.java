@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 类型ID</li>
  * <li>categoryName: 类型名称</li>
  * <li>totalCount: 总量</li>
- * <li>unProcessedCount: 未处理数量</li>
+ * <li>unprocesseCount: 未处理数量</li>
  * <li>processingCount: 处理中数量</li>
  * <li>processedCount: 已完成数量</li>
  * <li>closeCount: 关闭数量</li>
@@ -17,7 +17,7 @@ public class CategoryTaskStatisticsDTO {
 	private Long categoryId;
 	private String categoryName;
 	private Integer totalCount;
-	private Integer unProcessedCount;
+	private Integer unprocesseCount;
 	private Integer processingCount;
 	private Integer processedCount;
 	private Integer closeCount;
@@ -40,11 +40,11 @@ public class CategoryTaskStatisticsDTO {
 	public void setTotalCount(Integer totalCount) {
 		this.totalCount = totalCount;
 	}
-	public Integer getUnProcessedCount() {
-		return unProcessedCount;
+	public Integer getUnprocesseCount() {
+		return unprocesseCount;
 	}
-	public void setUnProcessedCount(Integer unProcessedCount) {
-		this.unProcessedCount = unProcessedCount;
+	public void setUnprocesseCount(Integer unprocesseCount) {
+		this.unprocesseCount = unprocesseCount;
 	}
 	public Integer getProcessingCount() {
 		return processingCount;

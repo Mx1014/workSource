@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
+import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -55,4 +56,6 @@ public interface PmTaskService {
 	GetStatisticsResponse getStatistics(GetStatisticsCommand cmd);
 	
 	PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd);
+	
+	void cancelTask(CancelTaskCommand cmd);
 }
