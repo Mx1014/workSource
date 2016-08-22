@@ -6606,8 +6606,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		//没传organizationType则默认为普通公司
-		if(null == cmd.getOrganizationType()) {
+		if(StringUtils.isEmpty(cmd.getOrganizationType())) {
 			cmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+		}
+		
+		if(!OrganizationType.ENTERPRISE.equals(OrganizationType.fromCode(cmd.getOrganizationType()))
+				&& !OrganizationType.PM.equals(OrganizationType.fromCode(cmd.getOrganizationType()))) {
+			LOGGER.error("organization type is wrong!");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, 
+					"organization type is wrong!");
 		}
 		
 		Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(cmd.getOrgName(), cmd.getNamespaceId());
@@ -6678,10 +6685,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
         roleAssignment.setOwnerId(orgId);
         roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-        if(OrganizationType.fromCode(organizationType).equals(OrganizationType.PM)) {
+        if(OrganizationType.PM.equals(OrganizationType.fromCode(organizationType))) {
         	roleAssignment.setRoleId(RoleConstants.PM_SUPER_ADMIN);
 		}
-        if(OrganizationType.fromCode(organizationType).equals(OrganizationType.ENTERPRISE)) {
+        if(OrganizationType.ENTERPRISE.equals(OrganizationType.fromCode(organizationType))) {
         	roleAssignment.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
 		}
         

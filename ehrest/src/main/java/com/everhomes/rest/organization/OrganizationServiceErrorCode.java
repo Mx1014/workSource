@@ -33,5 +33,7 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_OBJECT_NOT_EXIST = 400002;
     
     static final int ERROR_ORG_EXIST = 500001; //公司已存在
+    
+    static final int ERROR_ORG_TYPE = 500002; //公司类型错误
    
 }
