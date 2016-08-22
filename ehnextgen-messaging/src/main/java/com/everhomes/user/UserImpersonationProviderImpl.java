@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
 import com.everhomes.server.schema.tables.records.EhUserImpersonationsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class UserImpersonationProviderImpl implements UserImpersonationProvider {
@@ -111,6 +112,8 @@ public class UserImpersonationProviderImpl implements UserImpersonationProvider 
     }
 
     private void prepareObj(UserImpersonation obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
     
     /**
