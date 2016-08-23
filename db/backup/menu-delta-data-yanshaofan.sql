@@ -1127,7 +1127,7 @@ VALUES (56106,'考勤统计',56100,null,null,1,2,'/50000/56000/56100/56106','par
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56111,'考勤统计',56106,null,'punch_statistics',0,2,'/50000/56000/56100/56106/56111','park',572);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56112,'打卡详情',56105,null,'punch_detail',0,2,'/50000/56000/56100/56106/56112','park',573);
+VALUES (56112,'打卡详情',56106,null,'punch_detail',0,2,'/50000/56000/56100/56106/56112','park',573);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (820,0,'考勤统计','考勤统计',null);
