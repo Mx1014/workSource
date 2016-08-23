@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 
 public interface Rentalv2Provider {
  
@@ -251,6 +252,9 @@ public interface Rentalv2Provider {
 
 
 	void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap);
+
+
+	void batchCreateRentalCells(List<EhRentalv2Cells> list);
 
  
 

@@ -1830,6 +1830,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result;
 		return null;
 	}
+
+	@Override
+	public void batchCreateRentalCells(List<EhRentalv2Cells> list) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Cells.class,
+				 null);
+	}
  
 	
 }

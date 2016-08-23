@@ -77,6 +77,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -193,6 +194,8 @@ import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -215,6 +218,12 @@ import com.google.gson.reflect.TypeToken;
 public class Rentalv2ServiceImpl implements Rentalv2Service {
 	final String downloadDir ="\\download\\";
 
+    private static ThreadLocal<List<EhRentalv2Cells>> cellList = new ThreadLocal<List<EhRentalv2Cells>>() {  
+        public List<EhRentalv2Cells> initialValue() {  
+            return new ArrayList<EhRentalv2Cells>();  
+        }  
+    };  
+    
 	private Time convertTime(Long TimeLong) {
 		if (null != TimeLong) {
 			//从8点开始计算
@@ -262,7 +271,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
+ 
+    private static ThreadLocal<Long> seqNum = new ThreadLocal<Long>() {  
+        public Long initialValue() {  
+            return 0L;  
+        }  
+    };  
 
+    private static ThreadLocal<Long> currentId = new ThreadLocal<Long>() {  
+        
+    };  
+      
+	@Autowired
+	private SequenceProvider sequenceProvider;
 	@Autowired
 	private CommunityProvider communityProvider;
 	@Autowired
@@ -1953,6 +1974,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //	}
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd) {
+		
 		if(null == cmd.getRefundFlag())
 			cmd.setRefundFlag(NormalFlag.NONEED.getCode());
 		if(null== cmd.getRentalEndTime())
@@ -1962,12 +1984,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
-			
+			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))+1);
 			//设置默认规则，删除所有的单元格
-			Integer deleteCount = rentalProvider.deleteResourceCells(
-					cmd.getRentalSiteId(), null, null);
-			LOGGER.debug("delete count = " + String.valueOf(deleteCount)
-					+ "  from rental site rules  ");
+//			Integer deleteCount = rentalProvider.deleteResourceCells(cmd.getRentalSiteId(), null, null);
+//			LOGGER.debug("delete count = " + String.valueOf(deleteCount)+ "  from rental site rules  ");
 			RentalResource rs = this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId());
 			rs.setExclusiveFlag(cmd.getExclusiveFlag());
 			if(cmd.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
@@ -2067,7 +2087,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				signleCmd.setWorkdayPrice(workdayPrice);
 				addRentalSiteSingleSimpleRule(signleCmd);
 			}
-
+			Long id = sequenceProvider.getNextSequenceBlock(NameMapper
+					.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
+			if(LOGGER.isDebugEnabled()) {
+	            LOGGER.debug("eh rental cells get next sequence block, id=" + id+",block count = "+ seqNum.get()); 
+	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
+						.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))); 
+	            LOGGER.debug("eh rental cells  , begin id=" + cellList.get().get(0).getId()+
+	            		",last id  = "+ cellList.get().get(cellList.get().size()-1).getId()); 
+	            
+	        }
+			this.rentalProvider.batchCreateRentalCells(cellList.get());
 			this.rentalProvider.updateRentalSite(rs);
 			
 			return null;
@@ -2075,7 +2105,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 	
 	
-	public void addRentalSiteSingleSimpleRule(AddRentalSiteSingleSimpleRule cmd) {
+	public void addRentalSiteSingleSimpleRule(AddRentalSiteSingleSimpleRule cmd  ) {
 		Long userId = UserContext.current().getUser().getId();
 		if(cmd.getSiteCounts() ==null)
 			cmd.setSiteCounts(1.0);
@@ -2135,7 +2165,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rsr.setCreateTime(new Timestamp(DateHelper
 								.currentGMTTime().getTime()));
 						rsr.setCreatorUid(userId);
-						
+
+							
 
 						createRSR(rsr, cmd);
 					}
@@ -2155,6 +2186,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							.getTime()));
 					rsr.setCreatorUid(userId);
 					rsr.setRentalStep(1);
+ 
+						
 					if (weekday == 1 || weekday == 7) {
 						rsr.setPrice(cmd.getWeekendPrice());
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
@@ -2182,6 +2215,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						if(cmd.getRentalType().equals(
 								RentalType.THREETIMEADAY.getCode())){
 							rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+							
 							createRSR(rsr, cmd);
 						}
 					}
@@ -2208,25 +2242,35 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 							.getTime()));
 					rsr.setCreatorUid(userId);
-
-					createRSR(rsr, cmd);
+  
+					createRSR(rsr, cmd );
+					
 				}
 
 			}
 			start.add(Calendar.DAY_OF_MONTH, 1);
-		}
+		} 
 	}
-	public void createRSR(RentalCell rsr,AddRentalSiteSingleSimpleRule cmd){
+	public void createRSR(RentalCell rsr,AddRentalSiteSingleSimpleRule cmd ){
 		if(cmd.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-			//自动分配sitenumber --这个需求被改掉
 			//根据用户填写分配sitenumber
-			for(int num =0;num<cmd.getSiteCounts();num++){
+			for(int num =0;num<cmd.getSiteCounts();num++){  
 				rsr.setCounts(1.0);
 				rsr.setResourceNumber(cmd.getSiteNumbers().get(num));
-				rentalProvider.createRentalSiteRule(rsr);
+				//改成批量插入 2016-8-23 by wuhan
+//				rentalProvider.createRentalSiteRule(rsr);
+				rsr.setId(currentId.get()+seqNum.get());
+				seqNum.set(seqNum.get()+1);
+				cellList.get().add(ConvertHelper.convert(rsr, EhRentalv2Cells.class)); 
 			}
 		}else{
-			rentalProvider.createRentalSiteRule(rsr);
+
+			//改成批量插入 2016-8-23 by wuhan
+//			rentalProvider.createRentalSiteRule(rsr);
+			rsr.setId(currentId.get()+seqNum.get());
+			seqNum.set(seqNum.get()+1);
+			cellList.get().add(ConvertHelper.convert(rsr, EhRentalv2Cells.class));
+		  
 		}
 	}
 	@Override
@@ -3779,11 +3823,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
 					
 			}
-			
+			long cellCount = 0L;
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
 				//在这里统一处理 
 				signleCmd.setRentalSiteId(resource.getId()); 
-				addRentalSiteSingleSimpleRule(signleCmd);
+				addRentalSiteSingleSimpleRule(signleCmd );
 				}
 			
 			if(cmd.getOwners() != null){
