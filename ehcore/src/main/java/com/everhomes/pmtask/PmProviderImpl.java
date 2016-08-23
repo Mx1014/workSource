@@ -8,8 +8,11 @@ import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.SelectSelectStep;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,15 +28,19 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTaskLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPmTaskStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTasksDao;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
 import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
@@ -197,12 +204,12 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public List<PmTaskAttachment> listPmTaskAttachments(Long ownerId){
+	public List<PmTaskAttachment> listPmTaskAttachments(Long ownerId, String contentType){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskAttachments.class));
         
         SelectQuery<EhPmTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_PM_TASK_ATTACHMENTS);
-        if(null != ownerId)
-        	query.addConditions(Tables.EH_PM_TASK_ATTACHMENTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PM_TASK_ATTACHMENTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PM_TASK_ATTACHMENTS.CONTENT_TYPE.eq(contentType));
         
         List<PmTaskAttachment> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskAttachment.class))
         		.collect(Collectors.toList());
@@ -218,4 +225,40 @@ public class PmProviderImpl implements PmTaskProvider{
         return query.fetch().stream().map(r -> ConvertHelper.convert(r, Namespace.class))
         		.collect(Collectors.toList());
 	}
+	@Override
+	public Integer countTask(Long ownerId, Byte status, Long categoryId, Byte star){
+        //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPmTasks.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	
+                	SelectJoinStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PM_TASKS);
+                	
+                	Condition condition = Tables.EH_PM_TASKS.OWNER_ID.equal(ownerId);
+                	if(null != categoryId){
+                    	query.join(Tables.EH_CATEGORIES).on(Tables.EH_CATEGORIES.ID.eq(Tables.EH_PM_TASKS.CATEGORY_ID));
+                    	condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId));
+                	}
+                	condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
+                	if(null != status)
+                		condition = condition.and(Tables.EH_PM_TASKS.STATUS.equal(status));
+                    if(null != star)
+                    	condition = condition.and(Tables.EH_PM_TASKS.STAR.equal(status));
+                	
+                    count[0] = query.fetchOneInto(Integer.class);
+                    return true;
+                });
+		return count[0];
+	}
+	
+	@Override
+    public void createTaskStatistics(PmTaskStatistics statistics){
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmTaskStatistics.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPmTaskStatisticsDao dao = new EhPmTaskStatisticsDao(context.configuration());
+        statistics.setId(id);
+    	dao.insert(statistics);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskStatistics.class, null);
+    }
 }

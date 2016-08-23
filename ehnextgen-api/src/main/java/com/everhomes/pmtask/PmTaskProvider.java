@@ -11,7 +11,7 @@ public interface PmTaskProvider {
 	
 	List<PmTaskLog> listPmTaskLogs(Long taskId);
 	
-	List<PmTaskAttachment> listPmTaskAttachments(Long ownerId);
+	List<PmTaskAttachment> listPmTaskAttachments(Long ownerId, String contentType);
 	
 	void createTaskAttachment(PmTaskAttachment pmTaskAttachment);
 	
@@ -27,4 +27,8 @@ public interface PmTaskProvider {
 	PmTaskLog findTaskLogById(Long id);
 	
 	List<Namespace> listNamespace();
+	
+	Integer countTask(Long ownerId, Byte status, Long categoryId, Byte star);
+	
+	void createTaskStatistics(PmTaskStatistics statistics);
 }

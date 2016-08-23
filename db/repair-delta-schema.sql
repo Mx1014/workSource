@@ -36,7 +36,7 @@ CREATE TABLE `eh_pm_task_statistics` (
   `category_id` BIGINT NOT NULL DEFAULT 0,
   `total_count` INT NOT NULL DEFAULT 0,
   `unprocess_count` INT NOT NULL DEFAULT 0,
-  `processong_count` INT NOT NULL DEFAULT 0,
+  `processing_count` INT NOT NULL DEFAULT 0,
   `processed_count` INT NOT NULL DEFAULT 0,
   `close_count` INT NOT NULL DEFAULT 0,
 

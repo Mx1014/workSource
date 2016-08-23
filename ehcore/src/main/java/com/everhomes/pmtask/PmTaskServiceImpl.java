@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -46,6 +48,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
+import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
@@ -85,6 +88,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
+	@Autowired
+	private CommunityProvider communityProvider;
+	
 	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -177,7 +183,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskLog.setTaskId(task.getId());
 		pmTaskProvider.createTaskLog(pmTaskLog);
 		
-		addAttachments(attachments, user.getId(), pmTaskLog.getId());
+		addAttachments(attachments, user.getId(), pmTaskLog.getId(), PmTaskAttachmentType.TASKLOG.getCode());
 	}
 
 	@Override
@@ -253,7 +259,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dto.setParentCategoryId(parentCategory.getId());
 		dto.setParentCategoryName(parentCategory.getName());
 		//查询图片
-		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId());
+		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
 		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
 			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
 			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
@@ -312,7 +318,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 				
-				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId());
+				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
 				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
 					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
 					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
@@ -356,7 +362,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
 		task.setUnprocessedTime(now);
 		pmTaskProvider.createTask(task);
-		addAttachments(cmd.getAttachments(), user.getId(), task.getId());
+		addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 		
 		PmTaskLog pmTaskLog = new PmTaskLog();
 		pmTaskLog.setNamespaceId(task.getNamespaceId());
@@ -376,12 +382,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 	
-	private void addAttachments(List<String> list, Long userId, Long ownerId){
+	private void addAttachments(List<String> list, Long userId, Long ownerId, String contentType){
 		if(!CollectionUtils.isEmpty(list)){
 			for(String uri: list){
 				if(StringUtils.isNotBlank(uri)){
 					PmTaskAttachment attachment = new PmTaskAttachment();
-					attachment.setContentType(PmTaskAttachmentType.IMAGE.getCode());
+					attachment.setContentType(contentType);
 					attachment.setContentUri(uri);
 					attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
 					attachment.setCreatorUid(userId);
@@ -490,7 +496,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskStatisticsResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -501,7 +506,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 	
 	public void createStatistics(){
-		PmTaskStatistics statistics = new PmTaskStatistics();
 		
 		List<Namespace> namepaces = pmTaskProvider.listNamespace();
 		
@@ -509,18 +513,58 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), "任务");
 			if(ancestor != null){
 				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
-				
-				for(Category c: categories){
-					
+				if(null != categories && !categories.isEmpty()){
+					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
+					for(Community community:communities){
+						for(Category category: categories){
+							PmTaskStatistics statistics = new PmTaskStatistics();
+							Integer totalCount = pmTaskProvider.countTask(community.getId(), null, category.getId(), null);
+							Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), category.getId(), null);
+							Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), category.getId(), null);
+							Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), category.getId(), null);
+							Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.OTHER.getCode(), category.getId(), null);
+							
+							Integer star1 = pmTaskProvider.countTask(community.getId(), null, null, (byte)1);
+							Integer star2 = pmTaskProvider.countTask(community.getId(), null, null, (byte)2);
+							Integer star3 = pmTaskProvider.countTask(community.getId(), null, null, (byte)3);
+							Integer star4 = pmTaskProvider.countTask(community.getId(), null, null, (byte)4);
+							Integer star5 = pmTaskProvider.countTask(community.getId(), null, null, (byte)5);
+							
+							long now = System.currentTimeMillis();
+							statistics.setCategoryId(category.getParentId());
+							statistics.setCreateTime(new Timestamp(now));
+							//statistics.setDateStr(dateStr);
+							statistics.setNamespaceId(n.getId());
+							statistics.setOwnerId(community.getId());
+							statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+							
+							statistics.setTotalCount(totalCount);
+							statistics.setUnprocessCount(unprocessCount);
+							statistics.setProcessedCount(processedCount);
+							statistics.setProcessongCount(processingCount);
+							statistics.setCloseCount(closeCount);
+							
+							statistics.setStar1(star1);
+							statistics.setStar2(star2);
+							statistics.setStar3(star3);
+							statistics.setStar4(star4);
+							statistics.setStar5(star5);
+							pmTaskProvider.createTaskStatistics(statistics);
+						}
+					}
 					
 				}
+				
 			}
 		}
 		
 		
-		
 	}
 
+//	private long getYearMonth(Long time){
+//		
+//	}
+	
 	@Override
 	public PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -529,7 +573,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskLog pmTaskLog = checkPmTaskLog(cmd.getId());
 		PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(pmTaskLog, PmTaskLogDTO.class);
 		
-		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(pmTaskLog.getId());
+		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(pmTaskLog.getId(), PmTaskAttachmentType.TASKLOG.getCode());
 		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
 			PmTaskAttachmentDTO dto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
 			String contentUrl = getResourceUrlByUir(r.getContentUri(), 

@@ -1,11 +1,17 @@
 // @formatter:off
 package com.everhomes.rest.pmtask;
 
-public enum PmTaskAttachmentType {
-    TASK("task"), TASKLOG("tasklog");
+/**
+ * <p>归属类型</p>
+ * <ul>
+ * <li>COMMUNITY("community"): 小区</li>
+ * </ul>
+ */
+public enum PmTaskOwnerType {
+    COMMUNITY("community");
     
     private String code;
-    private PmTaskAttachmentType(String code) {
+    private PmTaskOwnerType(String code) {
         this.code = code;
     }
     
@@ -13,10 +19,10 @@ public enum PmTaskAttachmentType {
         return this.code;
     }
     
-    public static PmTaskAttachmentType fromCode(String code) {
+    public static PmTaskOwnerType fromCode(String code) {
         if(code != null) {
-            PmTaskAttachmentType[] values = PmTaskAttachmentType.values();
-            for(PmTaskAttachmentType value : values) {
+            PmTaskOwnerType[] values = PmTaskOwnerType.values();
+            for(PmTaskOwnerType value : values) {
                 if(code.equals(value.code)) {
                     return value;
                 }
