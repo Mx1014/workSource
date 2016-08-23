@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.test.junit.banner;
 
-import static com.everhomes.server.schema.Tables.EH_BANNERS;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,16 +11,11 @@ import org.junit.Test;
 
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.banner.BannerScope;
-import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.rest.banner.ReorderBannerByOwnerCommand;
-import com.everhomes.rest.banner.admin.CreateBannerAdminCommand;
-import com.everhomes.rest.banner.admin.UpdateBannerAdminCommand;
+import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
 import com.everhomes.rest.common.ScopeType;
-import com.everhomes.rest.scene.admin.SceneListSceneTypesRestResponse;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.server.schema.tables.pojos.EhBanners;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class ReorderBannerByOwnerTest extends BaseLoginAuthTestCase {
@@ -32,145 +25,52 @@ public class ReorderBannerByOwnerTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void createBannerWithDefaultScenes() {
-        Integer namespaceId = 0;
-        String userIdentifier = "12900000001"; // 管理员帐号
+    public void testReorderBanners() {
+        Integer namespaceId = 2;
+        String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
-        logon(null, userIdentifier, plainTexPassword);
+        logon(namespaceId, userIdentifier, plainTexPassword);
         
-        String name = "你秀你的恩爱，我买我的期待";
-        String location = "/home";
-        String group = "DEFAULT";
-        String posterUri = "cs://1/image/aW1hZ2UvTVRvM1ltRm1ORE01WVRNeU56UmtZakZqWVRRME1tVmhabUpqT0RNMU1qazRNUQ";
-        byte actionType = 9;
-        String actionData = "{\"forumId\":100334,\"topicId\":175219}"; 
-        int order = 10;
-        byte status = BannerStatus.ACTIVE.getCode();
-
-        byte scopeType = ScopeType.ALL.getCode();
+        byte scopeType = ScopeType.COMMUNITY.getCode();
         long scopeId = 0L;
         BannerScope scope = new BannerScope();
         scope.setScopeCode(scopeType);
         scope.setScopeId(scopeId);
-        scope.setOrder(order);
-        List<BannerScope> scopeList = new ArrayList<BannerScope>();
-        scopeList.add(scope);
         
-        // 不设置场景，以测试老版本没有场景时是否兼容
-        List<String> sceneTypeList = null;
+        ReorderBannerByOwnerCommand cmd = new ReorderBannerByOwnerCommand();
+        cmd.setOwnerType("organization");
+        cmd.setOwnerId(1000750L);
+        cmd.setScope(scope);
         
-        CreateBannerAdminCommand cmd = new CreateBannerAdminCommand();
-        cmd.setNamespaceId(namespaceId);
-        cmd.setName(name);
-        cmd.setBannerLocation(location);
-        cmd.setBannerGroup(group);
-        cmd.setPosterPath(posterUri);
-        cmd.setActionType(actionType);
-        cmd.setActionData(actionData);
-        //cmd.setOrder(order); // 注意：order是使用scope中的order，而不是cmd里的order
-        cmd.setStatus(status);
-        cmd.setScopes(scopeList);
-        cmd.setSceneTypeList(sceneTypeList);
+        List<UpdateBannerByOwnerCommand> upcs = new ArrayList<>();
+        UpdateBannerByOwnerCommand c = new UpdateBannerByOwnerCommand();
+        c.setDefaultOrder(1);
+        c.setId(1L);
+        upcs.add(c);
         
-        // 创建4个banner
-        String commandRelativeUri = "/admin/banner/createBanner";
-        SceneListSceneTypesRestResponse 
-        response = httpClientService.restGet(commandRelativeUri, cmd, SceneListSceneTypesRestResponse.class, context);
-        response = httpClientService.restGet(commandRelativeUri, cmd, SceneListSceneTypesRestResponse.class, context);
-        response = httpClientService.restGet(commandRelativeUri, cmd, SceneListSceneTypesRestResponse.class, context);
-        response = httpClientService.restGet(commandRelativeUri, cmd, SceneListSceneTypesRestResponse.class, context);
+        c = new UpdateBannerByOwnerCommand();
+        c.setDefaultOrder(2);
+        c.setId(2L);
+        upcs.add(c);
         
-        assertNotNull("The reponse of may not be null", response);
-        assertTrue("The banner should be created, response=" + 
-            StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        c = new UpdateBannerByOwnerCommand();
+        c.setDefaultOrder(3);
+        c.setId(3L);
+        upcs.add(c);
         
-        List<EhBanners> result = new ArrayList<EhBanners>();
-        DSLContext context = dbProvider.getDslContext();
-        context.select().from(EH_BANNERS)
-            .fetch().map((r) -> {
-                result.add(ConvertHelper.convert(r, EhBanners.class));
-                return null;
-            });
-        assertEquals(4, result.size());
+        c = new UpdateBannerByOwnerCommand();
+        c.setDefaultOrder(4);
+        c.setId(4L);
+        upcs.add(c);
         
-        EhBanners banner = result.get(0);
-        assertEquals(name, banner.getName());
-        assertEquals(location, banner.getBannerLocation());
-        assertEquals(group, banner.getBannerGroup());
-        assertEquals(posterUri, banner.getPosterPath());
-        assertEquals(Byte.valueOf(actionType), banner.getActionType());
-        assertEquals(actionData, banner.getActionData());
-        assertEquals(Integer.valueOf(order), banner.getOrder());
-        assertEquals(Byte.valueOf(status), banner.getStatus());
-        assertEquals(Byte.valueOf(scopeType), banner.getScopeCode());
-        assertEquals(Long.valueOf(scopeId), banner.getScopeId());
+        cmd.setBanners(upcs);
         
-        SceneType sceneType = SceneType.fromCode(banner.getSceneType());
-        assertEquals(SceneType.DEFAULT, sceneType);
-    }
-    
-    @Test
-    public void batchUpdateBannerWithMultiScenes() {
-    	createBannerWithDefaultScenes();
-    	
-    	List<EhBanners> result = new ArrayList<EhBanners>();
-    	DSLContext context = dbProvider.getDslContext();
-        context.select().from(EH_BANNERS)
-            .fetch().map((r) -> {
-                result.add(ConvertHelper.convert(r, EhBanners.class));
-                return null;
-            });
-        assertEquals(4, result.size());
-        
-        Long scopeId = 2L;
-        BannerScope scope = new BannerScope();
-        scope.setScopeId(scopeId);
-        List<BannerScope> scopeList = new ArrayList<BannerScope>();
-        scopeList.add(scope);
-        
-        List<String> sceneTypeList = new ArrayList<String>();
-        sceneTypeList.add(SceneType.PM_ADMIN.getCode());
-        
-        ReorderBannerByOwnerCommand batchCmd = new ReorderBannerByOwnerCommand();
-        List<UpdateBannerAdminCommand> list = new ArrayList<>();
-        UpdateBannerAdminCommand cmd = new UpdateBannerAdminCommand();
-        cmd.setOrder(0);
-        cmd.setId(result.get(0).getId());
-        list.add(cmd);
-        cmd = new UpdateBannerAdminCommand();
-        cmd.setOrder(1);
-        cmd.setId(result.get(1).getId());
-        list.add(cmd);
-        cmd = new UpdateBannerAdminCommand();
-        cmd.setOrder(2);
-        cmd.setId(result.get(2).getId());
-        list.add(cmd);
-        cmd = new UpdateBannerAdminCommand();
-        cmd.setOrder(3);
-        cmd.setId(result.get(3).getId());
-        list.add(cmd);
-        //batchCmd.setBanners(list);
-        
-        String commandRelativeUri = "/admin/banner/batchUpdate";
-        RestResponse response = httpClientService.restGet(commandRelativeUri, batchCmd, RestResponse.class);  
+        String commandRelativeUri = "/banner/reorderBannerByOwner";
+        RestResponse response = httpClientService.restGet(commandRelativeUri, cmd, RestResponse.class, context);
         
         assertNotNull("The reponse of may not be null", response);
         assertTrue("The banner should be created, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-        
-        List<EhBanners> banners = new ArrayList<>();
-        context.select().from(EH_BANNERS)
-	        .fetch().map((r) -> {
-	        	banners.add(ConvertHelper.convert(r, EhBanners.class));
-	            return null;
-	        });
-        
-        assertEquals(4, banners.size());
-        
-        assertEquals(Integer.valueOf(0), banners.get(0).getOrder());
-        assertEquals(Integer.valueOf(1), banners.get(1).getOrder());
-        assertEquals(Integer.valueOf(2), banners.get(2).getOrder());
-        assertEquals(Integer.valueOf(3), banners.get(3).getOrder());
     }
     
     @After
@@ -180,12 +80,8 @@ public class ReorderBannerByOwnerTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-        String jsonFilePath = "data/json/3.4.x-test-data-scene_types_160607.txt";
+        String jsonFilePath = "data/json/create-banner-by-owner-reorder-test-data.txt";
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
-        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
-        
-        jsonFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
-        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
     }
 }

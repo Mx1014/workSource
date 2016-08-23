@@ -7,7 +7,7 @@ import com.everhomes.rest.launchpad.ApplyPolicy;
 
 
 public interface BannerProvider {
-    void createBanner(Banner banner);
+	long createBanner(Banner banner);
     void updateBanner(Banner banner);
     void deleteBanner(Banner banner);
     void deleteBanner(long id);
@@ -31,6 +31,7 @@ public interface BannerProvider {
     BannerClick findBannerClickByToken(String token);
     List<Banner> listBanners(String keyword, long offset, long pageSize);
 	List<Banner> findBannerByNamespeaceId(Integer currentNamespaceId);
+	List<Banner> listBannersByNamespeaceId(Integer namespaceId);
 	
 	/**
 	 * 根据scopeId列表banner

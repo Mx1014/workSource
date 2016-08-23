@@ -1020,7 +1020,7 @@ public class UserController extends ControllerBase {
     @RequestMapping("listBorders")
     @RestReturn(BorderListResponse.class)
     public RestResponse listBorders(){
-        RestResponse response =  new RestResponse(userService.listBorders());
+        RestResponse response = new RestResponse(userService.listBorders());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1032,8 +1032,11 @@ public class UserController extends ControllerBase {
      */
     @RequestMapping("listSceneTypeByOwner")
 	@RestReturn(value = SceneTypeInfoDTO.class, collection = true)
-	public RestResponse listSceneTypeByOwner(ListScentTypeByOwnerCommand cmd) {
-	
-	    return null;
+	public RestResponse listSceneTypeByOwner(@Valid ListScentTypeByOwnerCommand cmd) {
+    	List<SceneTypeInfoDTO> list = sceneService.listSceneTypeByOwner(cmd);
+    	RestResponse resp = new RestResponse(list);
+    	resp.setErrorCode(ErrorCodes.SUCCESS);
+    	resp.setErrorDescription("OK");
+	    return resp;
 	}
 }

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.banner;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>ownerType: 归属者类型 {@link com.everhomes.rest.banner.BannerOwnerType}</li>
@@ -11,9 +13,11 @@ package com.everhomes.rest.banner;
  * </li>
  */
 public class ListBannersByOwnerCommand {
-	
+	@NotNull
 	private String  ownerType;
+	@NotNull
 	private Long    ownerId;
+	@NotNull
 	private Long    communityId;
 	private Long    pageAnchor;
 	private Integer pageSize;
