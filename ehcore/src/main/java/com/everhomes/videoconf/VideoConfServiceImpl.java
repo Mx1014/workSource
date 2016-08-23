@@ -1471,22 +1471,22 @@ public class VideoConfServiceImpl implements VideoConfService {
 			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", source account is not exist!");
 			return ;
 		}
-		
-		boolean flag=true;
-		while(flag){
-			int status = getConfStatus(source.getAccountName(), conf.getConferenceId());
-			if(3 == status) {
-				flag = false;
-			} else {
-				//睡眠5秒钟
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
+		//有几分钟的延迟且没有实际时间长度返回，先不轮询
+//		boolean flag=true;
+//		while(flag){
+//			int status = getConfStatus(source.getAccountName(), conf.getConferenceId());
+//			if(3 == status) {
+//				flag = false;
+//			} else {
+//				//睡眠5秒钟
+//				try {
+//					Thread.sleep(5000);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//
+//		}
 		
 		if(conf != null && conf.getStatus() != null && conf.getStatus() != 0) {
 			conf.setStatus((byte) 0);
