@@ -80,8 +80,8 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 7, 'zh_CN', '新发布一条任务短信消息', '28180', 999992);
 
 -- 物业贴 actionData 增加参数privateFlag默认1 by sfyan 20160822
-UPDATE `eh_launch_pad_items` SET `action_data` = REPLACE(`action_data`, '}', ',"privateFlag":1}') WHERE `item_group` = 'GaActions' AND `item_name` in ('HELP', 'REPAIR', 'ADVISE');
+-- UPDATE `eh_launch_pad_items` SET `action_data` = REPLACE(`action_data`, '}', ',"privateFlag":1}') WHERE `item_group` = 'GaActions' AND `item_name` in ('HELP', 'REPAIR', 'ADVISE');
 -- 把老的物业贴都修改成私有  by sfyan 20160822
-UPDATE `eh_forum_posts` SET private_flag = 1 WHERE `embedded_app_id` = 27;
+-- UPDATE `eh_forum_posts` SET private_flag = 1 WHERE `embedded_app_id` = 27;
 
 
