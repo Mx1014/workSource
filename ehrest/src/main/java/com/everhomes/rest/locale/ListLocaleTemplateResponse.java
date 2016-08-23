@@ -4,6 +4,7 @@ package com.everhomes.rest.locale;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * 
@@ -27,6 +28,11 @@ public class ListLocaleTemplateResponse {
 	}
 	public void setTemplateList(List<LocaleTemplateDTO> templateList) {
 		this.templateList = templateList;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 	
 }

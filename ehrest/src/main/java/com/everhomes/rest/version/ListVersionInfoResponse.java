@@ -4,6 +4,7 @@ package com.everhomes.rest.version;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * 
@@ -27,6 +28,11 @@ public class ListVersionInfoResponse {
 	}
 	public void setVersionList(List<VersionInfoDTO> versionList) {
 		this.versionList = versionList;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 	
 }

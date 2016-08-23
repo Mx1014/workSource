@@ -281,6 +281,7 @@ public class VersionServiceImpl implements VersionService {
 			rule.setMatchingUpperBound(versionRange.getUpperBound());
 			rule.setOrder(0);
 			rule.setTargetVersion(cmd.getTargetVersion());
+			rule.setForceUpgrade(cmd.getForceUpgrade());
 			rule.setNamespaceId(realm.getNamespaceId());
 			versionProvider.updateVersionUpgradeRule(rule);
 			
@@ -312,6 +313,11 @@ public class VersionServiceImpl implements VersionService {
 		if (url == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not found versionUrl: cmd="+cmd);
+		}
+		
+		if (rule.getRealmId().longValue() != url.getRealmId().longValue() || (rule.getTargetVersion() != null && !rule.getTargetVersion().equals(url.getTargetVersion()))) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"two ids are not consistent: cmd="+cmd);
 		}
 		
 		dbProvider.execute(s->{

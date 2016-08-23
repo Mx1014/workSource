@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.version;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -26,6 +28,11 @@ public class DeleteVersionCommand {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 	
 }

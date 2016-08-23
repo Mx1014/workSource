@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.version;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -26,5 +28,10 @@ public class ListVersionInfoCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

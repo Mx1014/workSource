@@ -1,10 +1,13 @@
 package com.everhomes.version;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
@@ -35,6 +38,7 @@ import com.everhomes.server.schema.tables.records.EhVersionUrlsRecord;
 import com.everhomes.user.UserLike;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.Version;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
@@ -183,7 +187,7 @@ public class VersionProviderImpl implements VersionProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
         EhVersionUpgradeRulesDao dao = new EhVersionUpgradeRulesDao(context.configuration());
-        dao.update(rule);
+        dao.delete(rule);
     }
 
     @Override
@@ -453,13 +457,14 @@ public class VersionProviderImpl implements VersionProvider {
 		
 		if (result != null && result.size() > 0) {
 			return result.map(r->{
-				VersionInfoDTO versionInfoDTO = ConvertHelper.convert(r, VersionInfoDTO.class);
-				versionInfoDTO.setMinVersion(Version.fromEncodedValue(r.getValue("matching_lower_bound", Double.class).longValue()).toString());
-				versionInfoDTO.setMaxVersion(Version.fromEncodedValue(r.getValue("matching_upper_bound", Double.class).longValue()).toString());
+				VersionInfoDTO versionInfoDTO = RecordHelper.convert(r, VersionInfoDTO.class);
+				versionInfoDTO.setMinVersion(Version.fromEncodedValue(Double.valueOf(r.getValue("matching_lower_bound", Double.class)+0.2).longValue()).toString());
+				versionInfoDTO.setMaxVersion(Version.fromEncodedValue(Double.valueOf(r.getValue("matching_upper_bound", Double.class)+0.2).longValue()).toString());
 				return versionInfoDTO;
 			});
 		}
 			
 		return new ArrayList<VersionInfoDTO>();
 	}
+	
 }

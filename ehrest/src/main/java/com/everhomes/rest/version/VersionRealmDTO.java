@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.version;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -36,5 +38,10 @@ public class VersionRealmDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }
