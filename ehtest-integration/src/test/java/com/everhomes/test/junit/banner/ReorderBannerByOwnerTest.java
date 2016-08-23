@@ -4,7 +4,6 @@ package com.everhomes.test.junit.banner;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jooq.DSLContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +13,6 @@ import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.ReorderBannerByOwnerCommand;
 import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
 import com.everhomes.rest.common.ScopeType;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
