@@ -1529,14 +1529,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 		String path = BIZCONFPATH + "/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
-//			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
-//				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
-//				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-//				if(conf != null)
-//					cancelCmd.setConfId(conf.getMeetingNo());
-//				
-//				cancelVideoConf(cancelCmd);
-//			}
+			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
+				account.setAssignedConfId(0L);
+				account.setAssignedFlag((byte) 0);
+				account.setAssignedSourceId(0L);
+				account.setAssignedTime(null);
+				
+				vcProvider.updateConfAccounts(account);
+			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			List<Long> accountCategories = vcProvider.findAccountCategoriesByConfType(category.getConfType());
 			ConfSourceAccounts sourceAccount = vcProvider.findSpareAccount(accountCategories);
