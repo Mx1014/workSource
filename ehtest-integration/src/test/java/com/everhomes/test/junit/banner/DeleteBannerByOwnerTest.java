@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.test.junit.banner;
 
-import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.junit.After;
 import org.junit.Before;
@@ -23,7 +22,7 @@ public class DeleteBannerByOwnerTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void deleteBannerWithMultiScenes() {
+    public void deleteBannerByOwner() {
     	Integer namespaceId = 2;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
@@ -51,6 +50,7 @@ public class DeleteBannerByOwnerTest extends BaseLoginAuthTestCase {
         		.where(Tables.EH_BANNERS.STATUS.eq(BannerStatus.DELETE.getCode()))
         		.fetchOne();
         assertNotNull(record);
+        assertNotSame(2, record.getValue(Tables.EH_BANNERS.ID));
     }
     
     @After

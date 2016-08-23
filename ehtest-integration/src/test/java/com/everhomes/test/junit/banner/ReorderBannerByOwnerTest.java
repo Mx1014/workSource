@@ -41,25 +41,25 @@ public class ReorderBannerByOwnerTest extends BaseLoginAuthTestCase {
         cmd.setScope(scope);
         
         List<UpdateBannerByOwnerCommand> upcs = new ArrayList<>();
-        UpdateBannerByOwnerCommand c = new UpdateBannerByOwnerCommand();
-        c.setDefaultOrder(1);
-        c.setId(1L);
-        upcs.add(c);
+        UpdateBannerByOwnerCommand ubbc = new UpdateBannerByOwnerCommand();
+        ubbc.setDefaultOrder(1);
+        ubbc.setId(1L);
+        upcs.add(ubbc);
         
-        c = new UpdateBannerByOwnerCommand();
-        c.setDefaultOrder(2);
-        c.setId(2L);
-        upcs.add(c);
+        ubbc = new UpdateBannerByOwnerCommand();
+        ubbc.setDefaultOrder(2);
+        ubbc.setId(2L);
+        upcs.add(ubbc);
         
-        c = new UpdateBannerByOwnerCommand();
-        c.setDefaultOrder(3);
-        c.setId(3L);
-        upcs.add(c);
+        ubbc = new UpdateBannerByOwnerCommand();
+        ubbc.setDefaultOrder(3);
+        ubbc.setId(3L);
+        upcs.add(ubbc);
         
-        c = new UpdateBannerByOwnerCommand();
-        c.setDefaultOrder(4);
-        c.setId(4L);
-        upcs.add(c);
+        ubbc = new UpdateBannerByOwnerCommand();
+        ubbc.setDefaultOrder(4);
+        ubbc.setId(4L);
+        upcs.add(ubbc);
         
         cmd.setBanners(upcs);
         

@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -614,135 +616,6 @@ public class BannerServiceImpl implements BannerService {
         }
     }
     
-    @Override
-	public void createBannerByOwner(CreateBannerByOwnerCommand cmd) {
-		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
-         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
-        }
-        if(cmd.getBannerLocation() == null) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerLocation parameter.");
-        }
-        if(cmd.getBannerGroup() == null) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup parameter.");
-        }
-        if(cmd.getSceneTypes() == null || cmd.getSceneTypes().isEmpty()) {
-        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scentTypes parameter.");
-        }
-        copyBannerToCustomized(cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), null);
-        User user = UserContext.current().getUser();
-        long userId = user.getId();
-        for(String sceneStr : cmd.getSceneTypes()) {
-            SceneType sceneType = SceneType.fromCode(sceneStr);
-            if(sceneType == null) {
-                LOGGER.error("Invalid scene type, userId={}, sceneType={}, cmd={}", userId, sceneStr, cmd);
-                continue;
-            }
-            
-            Banner banner = new Banner();
-            banner.setActionType(cmd.getActionType());
-            banner.setActionData(cmd.getActionData());
-            banner.setCreatorUid(userId);
-            banner.setBannerLocation(cmd.getBannerLocation());
-            banner.setBannerGroup(cmd.getBannerGroup());
-            banner.setName(cmd.getName());
-            banner.setNamespaceId(user.getNamespaceId());
-            banner.setStatus(cmd.getStatus());
-            banner.setPosterPath(cmd.getPosterPath());
-            banner.setScopeCode(cmd.getScope().getScopeCode());
-            banner.setScopeId(cmd.getScope().getScopeId());
-            banner.setOrder(cmd.getDefaultOrder());
-            banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-            banner.setSceneType(sceneType.getCode());
-            
-            bannerProvider.createBanner(banner);
-        }
-	}
-
-	@Override
-	public void updateBannerByOwner(UpdateBannerByOwnerCommand cmd) {
-		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		if(cmd.getId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
-        }
-        Banner banner = bannerProvider.findBannerById(cmd.getId());
-        if(banner == null){
-            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
-                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
-        }
-        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) != ApplyPolicy.CUSTOMIZED) {
-        	banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-        	Long newId = copyBannerToCustomized(cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getId());
-        	if(newId > 0) {
-        		banner.setId(newId);
-        	}
-        }
-		if(cmd.getActionType() != null)
-            banner.setActionType(cmd.getActionType());
-        if(cmd.getActionData() != null)
-            banner.setActionData(cmd.getActionData());
-        if(cmd.getDefaultOrder() != null)
-            banner.setOrder(cmd.getDefaultOrder());
-        if(cmd.getPosterPath() != null)
-            banner.setPosterPath(cmd.getPosterPath());
-        if(cmd.getScope().getScopeId() != null)
-            banner.setScopeId(cmd.getScope().getScopeId());
-        if(cmd.getStatus() != null)
-            banner.setStatus(cmd.getStatus());
-        if(cmd.getScope().getScopeCode() != null)
-        	banner.setScopeCode(cmd.getScope().getScopeCode());
-        if(cmd.getName() != null)
-        	banner.setName(cmd.getName());
-        
-        bannerProvider.updateBanner(banner);
-	}
-
-	private void checkUserNotInOrg(String ownerType, Long ownerId) {
-		BannerOwnerType bot = BannerOwnerType.fromCode(ownerType);
-		if(bot == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
-		}
-		User user = UserContext.current().getUser();
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
-		if(member == null){
-			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"User is not in the organization.");
-		}
-	}
-
-	/**
-	 * 复制默认的banner为用户可见范围下customized的banner
-	 */
-	private Long copyBannerToCustomized(Byte scopeCode, Long scopeId, Long bannerId) {
-		Long newId = 0L;
-		List<Banner> banners = bannerProvider.listBannersByNamespeaceId(UserContext.getCurrentNamespaceId());
-		for(Banner b : banners) {
-			if(b.getApplyPolicy() == ApplyPolicy.CUSTOMIZED.getCode()) {
-				continue;
-			}
-			b.setScopeCode(scopeCode);
-			b.setScopeId(scopeId);
-			b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-			if(b.getId() == bannerId) {
-				b.setId(null);
-				newId = bannerProvider.createBanner(b);
-			} else {
-				b.setId(null);
-				bannerProvider.createBanner(b);
-			}
-		}
-		return newId;
-	}
-
 	@Override
     public void updateBanner(UpdateBannerAdminCommand cmd){
         if(cmd.getId() == null){
@@ -779,45 +652,7 @@ public class BannerServiceImpl implements BannerService {
         
         bannerProvider.updateBanner(banner);
     }
-    
-	@Override
-	public void deleteBannerByOwner(DeleteBannerByOwnerCommand cmd) {
-		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		if(cmd.getId() == null) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
-        }
-        Banner banner = bannerProvider.findBannerById(cmd.getId());
-        if(banner == null) {
-            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
-                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
-        }
-        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) != ApplyPolicy.CUSTOMIZED) {
-        	banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-        	Long newId = copyBannerToCustomized(cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getId());
-        	if(newId > 0) {
-        		// 把需要删除的banner设置为复制过后新的banner的id
-        		banner.setId(newId);
-        	}
-        }
-        banner.setStatus(BannerStatus.DELETE.getCode());
-        bannerProvider.updateBanner(banner);
-        createDeleteOperLog(banner.getId());
-	}
 	
-	private void createDeleteOperLog(Long bannerId) {
-		User user = UserContext.current().getUser();
-		AuditLog log = new AuditLog();
-		log.setAppId(0L);
-		log.setOperatorUid(user.getId());
-		log.setOperationType(AuditLogOperator.DELETE.name());
-		log.setResourceType(Tables.EH_BANNERS.getName());
-		log.setResourceId(bannerId);
-		log.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		auditLogProvider.createAuditLog(log);
-	}
-
 	@Override
     public void deleteBannerById(DeleteBannerAdminCommand cmd){
         if(cmd.getId() == null){
@@ -924,25 +759,34 @@ public class BannerServiceImpl implements BannerService {
 	public ListBannersByOwnerCommandResponse listBannersByOwner(ListBannersByOwnerCommand cmd) {
 		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
+		if(cmd.getCommunityId() == null) {
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Invalid community id parameter.");
+		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		final Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() 
 				: this.configurationProvider.getIntValue("pagination.page.size", AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
-        Long pageAnchor = cmd.getPageAnchor();
-        if(pageAnchor == null) {
-        	pageAnchor = 0L;
-        }
+		
+		long pageAnchor = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0L;
 		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getCommunityId(), pageAnchor, 
-        		pageSize + 1, ApplyPolicy.CUSTOMIZED);
+				pageSize + 1, ApplyPolicy.CUSTOMIZED);
         if(result == null || result.isEmpty()) {
         	result = bannerProvider.listBannersByOwner(namespaceId, cmd.getCommunityId(), pageAnchor, 
         			pageSize + 1, ApplyPolicy.DEFAULT);
         }
+        
+        for(BannerDTO dto : result) {
+        	dto.setPosterPath(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
+        }
+        
 		Collections.sort(result);
 		ListBannersByOwnerCommandResponse resp = new ListBannersByOwnerCommandResponse();
 		resp.setBanners(result);
-		if(result.size() > pageSize)
+		if(result.size() > pageSize) {
 			resp.setNextPageAnchor(result.get(result.size() - 1).getId());
+			result.remove(result.size() - 1);
+		}
 		return resp;
 	}
 
@@ -955,32 +799,208 @@ public class BannerServiceImpl implements BannerService {
         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid banners parameter.");
         }
-        // 此步骤为复制默认的应用类型的banner为自定义的banner
-        List<Banner> banners = bannerProvider.listBannersByNamespeaceId(UserContext.getCurrentNamespaceId());
-        for(Banner b : banners) {
-        	if(b.getApplyPolicy() == ApplyPolicy.CUSTOMIZED.getCode()) {
-				continue;
-			}
-        	Long oldId = b.getId();
-			b.setScopeCode(cmd.getScope().getScopeCode());
-			b.setScopeId(cmd.getScope().getScopeId());
-			b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-			b.setId(null);
-			long newId = bannerProvider.createBanner(b);
-			for(UpdateBannerByOwnerCommand ubc : updateCmds) {
-				// 把复制后的新的id替换成旧的id
-				if(ubc.getId() == oldId) {
-					ubc.setId(newId);
-					break;
-				}
-			}
+        if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
         }
+        Map<Long, Long> oldNewIdMap = copyDefaultToCustomized(cmd.getScope());
         updateCmds.forEach(uc -> {
         	Banner banner = bannerProvider.findBannerById(uc.getId());
-            if(uc.getDefaultOrder() != null) {
+            if(banner != null && uc.getDefaultOrder() != null) {
+            	// 将旧的id替换成新的id
+            	banner.setId(oldNewIdMap !=null ? oldNewIdMap.get(banner.getId()) : uc.getId());
             	banner.setOrder(uc.getDefaultOrder());
             	bannerProvider.updateBanner(banner);
             }
         });
+	}
+	
+	/**
+	 * 复制默认的banner为用户可见范围下customized的banner
+	 * 
+	 * @param  复制过后新的banner的可见范围
+	 * @return 返回默认banner的id与复制的新的banner的id的对应的map,不需要复制的话返回 null
+	 */
+	private Map<Long, Long> copyDefaultToCustomized(BannerScope scope) {
+		// 此步骤为复制默认的应用类型的banner为自定义的banner
+        List<Banner> customizedBanners = bannerProvider.listByNamespeaceAndApplyPolicy(UserContext.getCurrentNamespaceId(), ApplyPolicy.CUSTOMIZED);
+        if(customizedBanners == null || customizedBanners.isEmpty()) {
+        	Map<Long, Long> oldNewIdMap = new HashMap<>();
+        	List<Banner> defaultBanners = bannerProvider.listByNamespeaceAndApplyPolicy(UserContext.getCurrentNamespaceId(), ApplyPolicy.DEFAULT);
+        	for(Banner b : defaultBanners) {
+        		Long oldId = b.getId();
+        		b.setScopeCode(scope.getScopeCode());
+        		b.setScopeId(scope.getScopeId());
+        		b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+        		b.setId(null);
+        		Long newId = bannerProvider.createBanner(b);
+        		oldNewIdMap.put(oldId, newId);
+        	}
+        	return oldNewIdMap;
+        }
+        return null;
+	}
+
+	@Override
+	public void deleteBannerByOwner(DeleteBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(cmd.getId() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+        }
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null) {
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) != ApplyPolicy.CUSTOMIZED) {
+        	banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+        	Map<Long, Long> oldNewIdMap = copyDefaultToCustomized(cmd.getScope());
+        	if(oldNewIdMap != null) {
+        		Long newId = oldNewIdMap.get(cmd.getId());
+        		if(newId != null) {
+        			// 首次删除默认应用类型的banner,把需要删除的banner设置为复制过后新的banner的id
+        			banner.setId(newId);
+        		}
+        	}
+        }
+        banner.setStatus(BannerStatus.DELETE.getCode());
+        bannerProvider.updateBanner(banner);
+        createDeleteOperLog(banner.getId());
+	}
+	
+	private void createDeleteOperLog(Long bannerId) {
+		User user = UserContext.current().getUser();
+		AuditLog log = new AuditLog();
+		log.setAppId(0L);
+		log.setOperatorUid(user.getId());
+		log.setOperationType(AuditLogOperator.DELETE.name());
+		log.setResourceType(Tables.EH_BANNERS.getName());
+		log.setResourceId(bannerId);
+		log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		auditLogProvider.createAuditLog(log);
+	}
+	
+
+    @Override
+	public void createBannerByOwner(CreateBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        if(cmd.getBannerLocation() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerLocation parameter.");
+        }
+        if(cmd.getBannerGroup() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup parameter.");
+        }
+        if(cmd.getSceneTypes() == null || cmd.getSceneTypes().isEmpty()) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scentTypes parameter.");
+        }
+        copyDefaultToCustomized(cmd.getScope());
+        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        for(String sceneStr : cmd.getSceneTypes()) {
+            SceneType sceneType = SceneType.fromCode(sceneStr);
+            if(sceneType == null) {
+                LOGGER.error("Invalid scene type, userId={}, sceneType={}, cmd={}", userId, sceneStr, cmd);
+                continue;
+            }
+            
+            Banner banner = new Banner();
+            banner.setActionType(cmd.getActionType());
+            banner.setActionData(cmd.getActionData());
+            banner.setCreatorUid(userId);
+            banner.setBannerLocation(cmd.getBannerLocation());
+            banner.setBannerGroup(cmd.getBannerGroup());
+            banner.setName(cmd.getName());
+            banner.setNamespaceId(user.getNamespaceId());
+            banner.setStatus(cmd.getStatus());
+            banner.setPosterPath(cmd.getPosterPath());
+            banner.setScopeCode(cmd.getScope().getScopeCode());
+            banner.setScopeId(cmd.getScope().getScopeId());
+            banner.setOrder(cmd.getDefaultOrder());
+            banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+            banner.setSceneType(sceneType.getCode());
+            
+            bannerProvider.createBanner(banner);
+        }
+	}
+
+	@Override
+	public void updateBannerByOwner(UpdateBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+        }
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null){
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) != ApplyPolicy.CUSTOMIZED) {
+        	banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+        	Map<Long, Long> oldNewIdMap = copyDefaultToCustomized(cmd.getScope());
+        	if(oldNewIdMap != null) {
+        		Long newId = oldNewIdMap.get(cmd.getId());
+        		if(newId != null) {
+        			banner.setId(newId);
+        		}
+        	}
+        }
+		if(cmd.getActionType() != null)
+            banner.setActionType(cmd.getActionType());
+        if(cmd.getActionData() != null)
+            banner.setActionData(cmd.getActionData());
+        if(cmd.getDefaultOrder() != null)
+            banner.setOrder(cmd.getDefaultOrder());
+        if(cmd.getPosterPath() != null)
+            banner.setPosterPath(cmd.getPosterPath());
+        if(cmd.getScope().getScopeId() != null)
+            banner.setScopeId(cmd.getScope().getScopeId());
+        if(cmd.getStatus() != null)
+            banner.setStatus(cmd.getStatus());
+        if(cmd.getScope().getScopeCode() != null)
+        	banner.setScopeCode(cmd.getScope().getScopeCode());
+        if(cmd.getName() != null)
+        	banner.setName(cmd.getName());
+        
+        bannerProvider.updateBanner(banner);
+	}
+
+	private void checkUserNotInOrg(String ownerType, Long ownerId) {
+		if(ownerType == null || ownerId == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType or ownerId parameter.");
+		}
+		BannerOwnerType bot = BannerOwnerType.fromCode(ownerType);
+		if(bot == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
+		}
+		User user = UserContext.current().getUser();
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
+		if(member == null){
+			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is not in the organization.");
+		}
 	}
 }

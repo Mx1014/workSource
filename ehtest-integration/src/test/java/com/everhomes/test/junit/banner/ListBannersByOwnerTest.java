@@ -18,7 +18,7 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 	}
 	
 	@Test
-	public void testListBanners() {
+	public void testListBannersByOwner() {
 		Integer namespaceId = 2;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
@@ -39,7 +39,7 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 	    assertNotNull("The requests of may not be null", resp);
 	    assertNotNull("The requests of may not be null", resp.getResponse());
 	     
-	    assertEquals(3, resp.getResponse().getBanners().size());
+	    assertEquals(5, resp.getResponse().getBanners().size());
 	}
 	
 	protected void initCustomData() {

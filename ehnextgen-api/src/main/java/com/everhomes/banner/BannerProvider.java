@@ -31,7 +31,14 @@ public interface BannerProvider {
     BannerClick findBannerClickByToken(String token);
     List<Banner> listBanners(String keyword, long offset, long pageSize);
 	List<Banner> findBannerByNamespeaceId(Integer currentNamespaceId);
-	List<Banner> listBannersByNamespeaceId(Integer namespaceId);
+	
+	/**
+	 * 根据域空间及应用类型查询banner
+	 * @param namespaceId 域空间id
+	 * @param applyPolicy 应用类型
+	 * @return	banner集合
+	 */
+	List<Banner> listByNamespeaceAndApplyPolicy(Integer namespaceId, ApplyPolicy applyPolicy);
 	
 	/**
 	 * 根据scopeId列表banner
@@ -40,7 +47,7 @@ public interface BannerProvider {
 	 * @param pageAnchor  锚点
 	 * @param pageSize	      分页大小
 	 * @param applyPolicy 应用类型
-	 * @return
+	 * @return			  bannerDTO集合
 	 */
 	List<BannerDTO> listBannersByOwner(Integer namespaceId, Long scopeId, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
 	

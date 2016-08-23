@@ -322,15 +322,16 @@ public class BannerProviderImpl implements BannerProvider {
 	}
 	
 	@Override
-	public List<Banner> listBannersByNamespeaceId(Integer namespaceId) {
+	public List<Banner> listByNamespeaceAndApplyPolicy(Integer namespaceId, ApplyPolicy applyPolicy) {
 		List<Banner> banners = new ArrayList<>();
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), namespaceId, (context, reducingContext) -> {
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, reducingContext) -> {
 			context.select().from(Tables.EH_BANNERS)
-			.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
-			.fetch().map((r) ->{
-				banners.add(ConvertHelper.convert(r, Banner.class));
-				return null;
-			});
+				.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
+				.fetch().map((r) ->{
+					banners.add(ConvertHelper.convert(r, Banner.class));
+					return null;
+				});
 			return true;
 		});
 		return banners;
@@ -341,13 +342,13 @@ public class BannerProviderImpl implements BannerProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		List<BannerDTO> dtoList = context.selectFrom(Tables.EH_BANNERS)
-		.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
-		.and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()))
-		.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId))
-		.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
-		.and(Tables.EH_BANNERS.ID.ge(pageAnchor))
-		.limit(pageSize)
-		.fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+			.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()))
+			.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId))
+			.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
+			.and(Tables.EH_BANNERS.ID.ge(pageAnchor))
+			.limit(pageSize)
+			.fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
 		return dtoList;
 	}
 }

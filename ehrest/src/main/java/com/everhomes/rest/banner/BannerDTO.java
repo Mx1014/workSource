@@ -185,12 +185,12 @@ public class BannerDTO implements Comparable<BannerDTO> {
 			return 0;
 		}
 		if (this.getStatus() == ACTIVE.getCode() && b.getStatus() == ACTIVE.getCode()) {
-			return b.getOrder().compareTo(this.getOrder());
+			return this.getOrder().compareTo(b.getOrder());
 		}
 		if (this.getStatus() == CLOSE.getCode() && b.getStatus() == CLOSE.getCode()) {
 			return b.getUpdateTime().compareTo(this.getUpdateTime());
 		}
-		return b.getStatus().compareTo(this.getStatus());
+		return this.getStatus().compareTo(b.getStatus());
 	}
 
 }
