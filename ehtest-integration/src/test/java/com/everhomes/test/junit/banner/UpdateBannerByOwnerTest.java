@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
@@ -67,7 +68,6 @@ public class UpdateBannerByOwnerTest extends BaseLoginAuthTestCase {
         cmd.setActionData(actionData);
         cmd.setStatus(status);
         cmd.setActionType(actionType);
-        cmd.setActionData(actionData);
         cmd.setDefaultOrder(order);
         cmd.setOwnerId(1000750L);
         cmd.setOwnerType("organization");
@@ -80,15 +80,14 @@ public class UpdateBannerByOwnerTest extends BaseLoginAuthTestCase {
         assertNotNull("The reponse of may not be null", resp);
         assertTrue("The banner should be created, response=" + StringHelper.toJsonString(resp), httpClientService.isReponseSuccess(resp));
         
-        List<EhBanners> ehBanners = context.select().from(EH_BANNERS)
+        List<BannerDTO> ehBanners = context.select().from(EH_BANNERS)
         		.where(EH_BANNERS.NAME.eq(name))
         		.and(EH_BANNERS.ACTION_DATA.eq(actionData))
         		.and(EH_BANNERS.SCOPE_ID.eq(scopeId))
-	            .fetch().map((r) -> {
-	                result.add(ConvertHelper.convert(r, EhBanners.class));
-	                return null;
-	            });
+	            .fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+        
         assertEquals(1, ehBanners.size());
+        assertNotSame(result.get(0).getId(), ehBanners.get(0).getId());
     }
     
     @After

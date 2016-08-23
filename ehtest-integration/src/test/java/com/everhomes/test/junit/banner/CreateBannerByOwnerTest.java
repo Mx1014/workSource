@@ -28,7 +28,7 @@ public class CreateBannerByOwnerTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testCreateBannerWithDefaultScenes() {
+    public void testCreateBannerByOwner() {
     	Integer namespaceId = 2;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
