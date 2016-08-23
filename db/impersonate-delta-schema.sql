@@ -2,7 +2,7 @@
 -- member of eh_users sharding group
 -- Pretending someone to login and operate as real user
 --
-
+DROP TABLE IF EXISTS `eh_user_impersonations`;
 CREATE TABLE `eh_user_impersonations`(
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -13,6 +13,6 @@ CREATE TABLE `eh_user_impersonations`(
   `description` TEXT,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
   `create_time` DATETIME,
-
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -11,6 +11,7 @@ public class User extends EhUsers {
     private static final long serialVersionUID = 7192442994996415975L;
     
     private String identifierToken;
+    private Long impersonationUserId;
     
     /** 暂认为小于10的用户为系统用户，系统用户不接收消息，当系统用户数量超过限制需要扩充时需要修改此最大值，否则消息那边的控制有问题 */
     public static final long MAX_SYSTEM_USER_ID = 10;
@@ -28,7 +29,6 @@ public class User extends EhUsers {
     public static final UserLogin ANNONYMOUS_LOGIN = new UserLogin(0, User.ANNONYMOUS_UID, 0, null, null);
     
     public static final UserLogin BIZ_USER_LOGIN = new UserLogin(0, User.BIZ_UID, 0, "bizhelper", null);
-    
     
     
     public User() {
@@ -51,7 +51,6 @@ public class User extends EhUsers {
         }
     }
     
-    
     public String getIdentifierToken() {
 		return identifierToken;
 	}
@@ -60,7 +59,15 @@ public class User extends EhUsers {
 		this.identifierToken = identifierToken;
 	}
 
-	@Override
+	public Long getImpersonationUserId() {
+        return impersonationUserId;
+    }
+
+    public void setImpersonationUserId(Long impersonationUserId) {
+        this.impersonationUserId = impersonationUserId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

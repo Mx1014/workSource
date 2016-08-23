@@ -917,6 +917,8 @@ public class UserProviderImpl implements UserProvider {
                 
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() > 0) {
                         onQuery = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
+                        cond = cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
+                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())));
                     }
                 
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() <= 0) {
@@ -954,11 +956,10 @@ public class UserProviderImpl implements UserProvider {
                     }
                 
                 if(useMembers) {
-                    onQuery = onQuery.leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
-                            .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
-                } else {
                     onQuery = onQuery.join(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
                             .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
+//                    onQuery = onQuery.leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+//                            .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode())));
                 }
                 
                 if(useAddress) {
@@ -980,6 +981,7 @@ public class UserProviderImpl implements UserProvider {
                 select = onQuery.where(cond);
                 SelectOffsetStep<Record> query = select.orderBy(Tables.EH_USERS.CREATE_TIME.desc()).limit(pageSize * 2);
                 final boolean useAddress2 = useAddress;
+                final boolean useMembers2 = useMembers;
                 query.fetch().map(r -> {
                     
 //                    if(LOGGER.isDebugEnabled()) {
@@ -1006,7 +1008,10 @@ public class UserProviderImpl implements UserProvider {
                     user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
                     user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
                     user.setGender(r.getValue(Tables.EH_USERS.GENDER));
-                    user.setCompanyId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
+                    if(useMembers2) {
+                        user.setCompanyId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));    
+                    }
+                    
                     if(useAddress2) {
                         user.setAddressId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
                         user.setBuildingId(r.getValue(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID));

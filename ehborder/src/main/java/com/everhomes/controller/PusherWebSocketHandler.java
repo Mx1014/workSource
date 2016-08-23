@@ -61,7 +61,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     private Map<String, WebSocketSession> device2sessionMap = new ConcurrentHashMap<>();
     private CustomLinkedList<DeviceInfo> timeoutList = new CustomLinkedList<DeviceInfo>(); 
     
-    private Object lockobj = new Object();
+    static private Object lockobj = new Object();
     
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -103,8 +103,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         removeSession(session);
     }
     
-    @Scheduled(fixedDelay=5000, initialDelay=5000)
-    public void tickCheck() {
+    private void tickInner() {
         //LOGGER.info("tickCheck");
         
         LinkedList<DeviceInfo> invalids = new LinkedList<DeviceInfo>();
@@ -175,7 +174,16 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     }
                 }
             }
-        });
+        });        
+    }
+    
+    @Scheduled(fixedDelay=5000, initialDelay=5000)
+    public void tickCheck() {
+        try {
+            tickInner();
+        } catch(Exception ex) {
+            LOGGER.warn("tickInner error", ex);
+        }
     }
     
     public Map<String, Object> getOnlineDevices() {
