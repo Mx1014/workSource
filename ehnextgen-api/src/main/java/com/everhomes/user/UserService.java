@@ -18,6 +18,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
@@ -30,6 +31,7 @@ import com.everhomes.rest.user.SignupCommand;
 import com.everhomes.rest.user.SynThridUserCommand;
 import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserLoginResponse;
@@ -131,5 +133,6 @@ public interface UserService {
     String sendMessageTest(SendMessageTestCommand cmd);
     String pushMessageTest(SendMessageTestCommand cmd);
     BorderListResponse listBorders();
+    UserImpersonationDTO createUserImpersionation(CreateUserImpersonationCommand cmd);
 
 }

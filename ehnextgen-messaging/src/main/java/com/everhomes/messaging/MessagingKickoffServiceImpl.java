@@ -25,7 +25,8 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
     
     @Override
     public String getKickoffMessageKey(Integer namespaceId, LoginToken loginToken) {
-        String id = String.format("%d:%d:%d", loginToken.getUserId(), loginToken.getUserId(), loginToken.getLoginId());
+        long impId = (loginToken.getImpId() == null? 0: loginToken.getImpId().longValue());
+        String id = String.format("%d:%d:%d:%d", loginToken.getUserId(), loginToken.getUserId(), loginToken.getLoginId(), impId);
         if(namespaceId == null || namespaceId.equals(0)) {
             return messageBoxPrefix + ":" + id; 
         } else {

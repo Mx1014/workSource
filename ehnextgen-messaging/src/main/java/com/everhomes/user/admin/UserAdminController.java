@@ -23,12 +23,14 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
 import com.everhomes.rest.user.EncriptInfoDTO;
 import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.ListVerfyCodeResponse;
 import com.everhomes.rest.user.ListVestResponse;
 import com.everhomes.rest.user.PaginationCommand;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.EncryptPlainTextCommand;
@@ -383,4 +385,26 @@ public class UserAdminController extends ControllerBase {
         return response;
     }
 	
+    /**
+     * 
+     * 生成测试用户密码
+     * @return
+     */
+    @RequestMapping("createUserImpersonation")
+    @RestReturn(UserImpersonationDTO.class)
+    public RestResponse createUserImpersonation(@Valid CreateUserImpersonationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        RestResponse response = new RestResponse(userService.createUserImpersionation(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        if(response.getResponseObject() == null) {
+            response.setErrorDescription("User not found");
+        } else {
+            response.setErrorDescription("OK");
+        }
+        
+        
+        return response;
+    }
 }
