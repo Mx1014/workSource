@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.Cache;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -18,14 +17,16 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.category.Category;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.schema.tables.pojos.EhNamespaces;
+import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
@@ -209,4 +210,12 @@ public class PmProviderImpl implements PmTaskProvider{
         return result;
 	}
 	
+	@Override
+	public List<Namespace> listNamespace(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNamespaces.class));
+        SelectQuery<EhNamespacesRecord> query = context.selectQuery(com.everhomes.schema.Tables.EH_NAMESPACES);
+        
+        return query.fetch().stream().map(r -> ConvertHelper.convert(r, Namespace.class))
+        		.collect(Collectors.toList());
+	}
 }

@@ -22,6 +22,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
@@ -113,6 +114,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
     			dto.setNickName(user.getNickName());
     			dto.setMobile(userIdentifier.getIdentifierToken());
+    			
+    			Category category = checkCategory(r.getCategoryId());
+    			Category parentCategory = checkCategory(category.getParentId());
+    			dto.setCategoryName(category.getName());
+    			dto.setParentCategoryId(parentCategory.getId());
+    			dto.setParentCategoryName(parentCategory.getName());
     			
     			return dto;
     		}).collect(Collectors.toList()));
@@ -425,7 +432,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
 						"PmTask parent category not found");
 			}
-			path = category.getName() + CATEGORY_SEPARATOR + cmd.getName();
+			path = category.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 		}
 		category = categoryProvider.findCategoryByPath(namespaceId, path);
 		if(category != null) {
@@ -491,6 +498,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public GetStatisticsResponse getStatistics(GetStatisticsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public void createStatistics(){
+		PmTaskStatistics statistics = new PmTaskStatistics();
+		
+		List<Namespace> namepaces = pmTaskProvider.listNamespace();
+		
+		for(Namespace n: namepaces){
+			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), "任务");
+			if(ancestor != null){
+				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
+				
+				for(Category c: categories){
+					
+					
+				}
+			}
+		}
+		
+		
+		
 	}
 
 	@Override

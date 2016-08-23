@@ -2,6 +2,8 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import com.everhomes.namespace.Namespace;
+
 public interface PmTaskProvider {
 	void createTask(PmTask pmTask);
 	
@@ -23,4 +25,6 @@ public interface PmTaskProvider {
 	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Long pageAnchor, Integer pageSize);
 	
 	PmTaskLog findTaskLogById(Long id);
+	
+	List<Namespace> listNamespace();
 }
