@@ -797,6 +797,7 @@ public class BannerServiceImpl implements BannerService {
         	banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
         	Long newId = copyBannerToCustomized(cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getId());
         	if(newId > 0) {
+        		// 把需要删除的banner设置为复制过后新的banner的id
         		banner.setId(newId);
         	}
         }
@@ -954,6 +955,7 @@ public class BannerServiceImpl implements BannerService {
         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid banners parameter.");
         }
+        // 此步骤为复制默认的应用类型的banner为自定义的banner
         List<Banner> banners = bannerProvider.listBannersByNamespeaceId(UserContext.getCurrentNamespaceId());
         for(Banner b : banners) {
         	if(b.getApplyPolicy() == ApplyPolicy.CUSTOMIZED.getCode()) {
@@ -966,6 +968,7 @@ public class BannerServiceImpl implements BannerService {
 			b.setId(null);
 			long newId = bannerProvider.createBanner(b);
 			for(UpdateBannerByOwnerCommand ubc : updateCmds) {
+				// 把复制后的新的id替换成旧的id
 				if(ubc.getId() == oldId) {
 					ubc.setId(newId);
 					break;
@@ -974,10 +977,6 @@ public class BannerServiceImpl implements BannerService {
         }
         updateCmds.forEach(uc -> {
         	Banner banner = bannerProvider.findBannerById(uc.getId());
-        	if(ApplyPolicy.fromCode(banner.getApplyPolicy()) != ApplyPolicy.CUSTOMIZED) {
-        		banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-        		copyBannerToCustomized(uc.getScope().getScopeCode(), uc.getScope().getScopeId(), null);
-        	}
             if(uc.getDefaultOrder() != null) {
             	banner.setOrder(uc.getDefaultOrder());
             	bannerProvider.updateBanner(banner);
