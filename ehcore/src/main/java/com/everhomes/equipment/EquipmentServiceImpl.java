@@ -1018,7 +1018,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 			}
 			
-			if(equipment.getLatitude() != exist.getLatitude() || equipment.getLongitude() != exist.getLongitude()) {
+			if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
 				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 						EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
 	 				"设备经纬度不能修改");
