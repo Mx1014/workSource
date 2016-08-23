@@ -1137,7 +1137,7 @@ public class UserServiceImpl implements UserService {
 		String hkeyLogin = String.valueOf(loginToken.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		UserLogin login = accessor.getMapValueObject(hkeyLogin);
-		if(login != null) {
+		if(login != null && login.getStatus() == UserLoginStatus.LOGGED_IN) {
 		    //Save loginBorderId here
 			login.setLoginBorderId(borderId);
 			login.setBorderSessionId(borderSessionId);
@@ -1145,12 +1145,12 @@ public class UserServiceImpl implements UserService {
 			accessor.putMapValueObject(hkeyLogin, login);
 			
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
+			return login;
 		} else {
 			LOGGER.warn("Unable to find UserLogin in big map, borderId=" + borderId 
 					+ ", loginToken=" + StringHelper.toJsonString(loginToken) + ", borderSessionId=" + borderSessionId);
+			return null;
 		}
-
-		return login;
 	}
 
 	public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
