@@ -18,11 +18,14 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
@@ -30,6 +33,7 @@ import com.everhomes.rest.user.SignupCommand;
 import com.everhomes.rest.user.SynThridUserCommand;
 import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserLoginResponse;
@@ -131,5 +135,7 @@ public interface UserService {
     String sendMessageTest(SendMessageTestCommand cmd);
     String pushMessageTest(SendMessageTestCommand cmd);
     BorderListResponse listBorders();
+    UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
+    SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
 
 }

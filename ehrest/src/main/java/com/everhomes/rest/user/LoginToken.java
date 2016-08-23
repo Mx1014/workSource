@@ -20,14 +20,23 @@ public class LoginToken {
     private long userId;
     private int loginId;
     private int loginInstanceNumber;
+    private Long impId; //the impersonation id
     
     public LoginToken() {
     }
 
-    public LoginToken(long userId, int loginId, int instanceNumber) {
+//    public LoginToken(long userId, int loginId, int instanceNumber) {
+//        this.userId = userId;
+//        this.loginId = loginId;
+//        this.loginInstanceNumber = instanceNumber;
+//    }
+    
+    //added by Janson
+    public LoginToken(long userId, int loginId, int instanceNumber, Long impId) {
         this.userId = userId;
         this.loginId = loginId;
         this.loginInstanceNumber = instanceNumber;
+        this.impId = impId;
     }
     
     public long getUserId() {
@@ -53,7 +62,15 @@ public class LoginToken {
     public void setLoginInstanceNumber(int loginInstanceNumber) {
         this.loginInstanceNumber = loginInstanceNumber;
     }
-    
+
+    public Long getImpId() {
+        return impId;
+    }
+
+    public void setImpId(Long impId) {
+        this.impId = impId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
