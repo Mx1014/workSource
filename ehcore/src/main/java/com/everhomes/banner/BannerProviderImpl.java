@@ -49,17 +49,19 @@ public class BannerProviderImpl implements BannerProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createBanner(Banner banner) {
+    public long createBanner(Banner banner) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         
         InsertQuery<EhBannersRecord> query = context.insertQuery(Tables.EH_BANNERS);
         banner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        banner.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         query.setRecord(ConvertHelper.convert(banner, EhBannersRecord.class));
         query.setReturning(Tables.EH_BANNERS.ID);
         query.execute();
+        Long id = query.getReturnedRecord().getId();
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBanners.class, null);
-        
+        return id;
     }
 //    @Caching(evict = { @CacheEvict(value="Banner", key="#banner.id"),
 //            @CacheEvict(value="BannerList", key="#banner.id") } )
@@ -68,6 +70,7 @@ public class BannerProviderImpl implements BannerProvider {
         assert(banner != null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBannersDao dao = new EhBannersDao(context.configuration());
+        banner.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(banner);
         
     }
@@ -319,16 +322,23 @@ public class BannerProviderImpl implements BannerProvider {
 	}
 	
 	@Override
+	public List<Banner> listBannersByNamespeaceId(Integer namespaceId) {
+		List<Banner> banners = new ArrayList<>();
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), namespaceId, (context, reducingContext) -> {
+			context.select().from(Tables.EH_BANNERS)
+			.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+			.fetch().map((r) ->{
+				banners.add(ConvertHelper.convert(r, Banner.class));
+				return null;
+			});
+			return true;
+		});
+		return banners;
+	}
+	
+	@Override
 	public List<BannerDTO> listBannersByOwner(Integer namespaceId, Long scopeId, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		
-		String s = context.selectFrom(Tables.EH_BANNERS)
-				.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()))
-				.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId))
-				.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
-				.and(Tables.EH_BANNERS.ID.ge(pageAnchor))
-				.limit(pageSize).getSQL(true);
 		
 		List<BannerDTO> dtoList = context.selectFrom(Tables.EH_BANNERS)
 		.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))

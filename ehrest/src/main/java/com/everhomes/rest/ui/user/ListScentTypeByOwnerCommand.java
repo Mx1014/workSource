@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.ui.user;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *   <li>ownerType: 归属者类型 </li>
@@ -9,9 +11,9 @@ package com.everhomes.rest.ui.user;
  * </ul>
  */
 public class ListScentTypeByOwnerCommand {
-	
 	private String ownerType;
 	private Long   ownerId;
+	@NotNull
 	private Long   communityId;
 	
 	public String getOwnerType() {

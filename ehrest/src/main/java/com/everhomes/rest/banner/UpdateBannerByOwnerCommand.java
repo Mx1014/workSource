@@ -14,9 +14,9 @@ import com.everhomes.util.StringHelper;
  * <li>id: banner id</li>
  * <li>ownerType: 归属者类型 {@link com.everhomes.rest.banner.BannerOwnerType}</li>
  * <li>ownerId: 归属者id</li>
- * <li>scopeCode: banner可见范围类型</li>
- * <li>scopeId：banner可见范围的具体id</li>
+ * <li>scope: 可见范围，参考 {@link com.everhomes.rest.banner.BannerScope}</li>
  * <li>posterPath: 图片路径</li>
+ * <li>name: 名称</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>status: banner的状态{@link com.everhomes.rest.banner.BannerStatus}</li>
@@ -28,11 +28,14 @@ public class UpdateBannerByOwnerCommand {
 
     @NotNull
     private Long    id;
+    @NotNull
     private String  ownerType;
+    @NotNull
 	private Long    ownerId;
-    private Byte    scopeCode;
-    private Long    scopeId;
+	@NotNull
+	private BannerScope scope;
     private String  posterPath;
+    private String  name;
     private Byte    actionType;
     private String  actionData;
     private Byte    status;
@@ -56,6 +59,14 @@ public class UpdateBannerByOwnerCommand {
 		this.sceneTypes = sceneTypes;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getPosterPath() {
         return posterPath;
     }
@@ -64,23 +75,15 @@ public class UpdateBannerByOwnerCommand {
         this.posterPath = posterPath;
     }
 
-    public Byte getScopeCode() {
-        return scopeCode;
-    }
+    public BannerScope getScope() {
+		return scope;
+	}
 
-    public void setScopeCode(Byte scopeCode) {
-        this.scopeCode = scopeCode;
-    }
+	public void setScope(BannerScope scope) {
+		this.scope = scope;
+	}
 
-    public Long getScopeId() {
-        return scopeId;
-    }
-
-    public void setScopeId(Long scopeId) {
-        this.scopeId = scopeId;
-    }
-
-    public Byte getActionType() {
+	public Byte getActionType() {
         return actionType;
     }
 

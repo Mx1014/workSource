@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.everhomes:ehplatform-persist:0.0.4-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehplatform-persist/0.0.4-SNAPSHOT/ehplatform-persist-0.0.4-20160818.112518-17.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehplatform-persist/0.0.4-SNAPSHOT/ehplatform-persist-0.0.4-20160818.112518-17-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/everhomes/ehplatform-persist/0.0.4-SNAPSHOT/ehplatform-persist-0.0.4-20160818.112518-17-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -3,6 +3,8 @@ package com.everhomes.rest.banner;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -23,11 +25,13 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateBannerByOwnerCommand {
-
+	@NotNull
 	private String   ownerType;
+	@NotNull
 	private Long     ownerId;
-    private String   name;
+    @NotNull
     private BannerScope scope;
+    private String   name;
     private String   bannerLocation;
     private String   bannerGroup;
     private String   posterPath;
