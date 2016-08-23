@@ -68,6 +68,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
@@ -138,6 +139,8 @@ import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
@@ -169,6 +172,7 @@ import com.everhomes.rest.user.admin.SendUserTestMailCommand;
 import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -2996,7 +3000,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public UserImpersonationDTO createUserImpersionation(CreateUserImpersonationCommand cmd) {
+    public UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd) {
         User owner = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getOwnerPhone());
         User target = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getTargetPhone());
         if(owner == null || target == null) {
@@ -3013,5 +3017,18 @@ public class UserServiceImpl implements UserService {
         this.userImpersonationProvider.createUserImpersonation(obj);
         
         return ConvertHelper.convert(obj, UserImpersonationDTO.class);
+    }
+    
+    @Override
+    public SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd) {
+        SearchUserImpersonationResponse resp = new SearchUserImpersonationResponse();
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getAnchor());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<UserImpersonation> impers = this.userImpersonationProvider.searchUserImpersonations(cmd.getUserId(), locator, count);
+        List<UserImpersonationDTO> impersonations = impers.stream().map((r) -> { return ConvertHelper.convert(r, UserImpersonationDTO.class); }).collect(Collectors.toList());;
+        resp.setImpersonations(impersonations);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
     }
 }

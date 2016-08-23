@@ -22,4 +22,6 @@ public interface UserImpersonationProvider {
 
     UserImpersonation getUserImpersonationByTargetId(Long userId);
 
+    List<UserImpersonation> searchUserImpersonations(Long userId, ListingLocator locator, int count);
+
 }

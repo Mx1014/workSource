@@ -24,6 +24,8 @@ import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
@@ -133,6 +135,7 @@ public interface UserService {
     String sendMessageTest(SendMessageTestCommand cmd);
     String pushMessageTest(SendMessageTestCommand cmd);
     BorderListResponse listBorders();
-    UserImpersonationDTO createUserImpersionation(CreateUserImpersonationCommand cmd);
+    UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
+    SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
 
 }

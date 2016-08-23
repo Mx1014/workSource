@@ -19,6 +19,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
@@ -166,5 +167,24 @@ public class UserImpersonationProviderImpl implements UserImpersonationProvider 
         }
         
         return objs.get(0);
+    }
+    
+    @Override
+    public List<UserImpersonation> searchUserImpersonations(Long userId, ListingLocator locator, int count) {
+        List<UserImpersonation> objs = this.queryUserImpersonations(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.TARGET_ID.eq(userId).or(Tables.EH_USER_IMPERSONATIONS.OWNER_ID.eq(userId)));
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.OWNER_TYPE.eq(EntityType.USER.getCode()));
+                query.addConditions(Tables.EH_USER_IMPERSONATIONS.TARGET_TYPE.eq(EntityType.USER.getCode()));
+                return query;
+            }
+            
+        });
+        
+        return objs;
     }
 }
