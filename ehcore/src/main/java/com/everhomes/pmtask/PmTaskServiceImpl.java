@@ -541,7 +541,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 							statistics.setTotalCount(totalCount);
 							statistics.setUnprocessCount(unprocessCount);
 							statistics.setProcessedCount(processedCount);
-							statistics.setProcessongCount(processingCount);
+							statistics.setProcessingCount(processingCount);
 							statistics.setCloseCount(closeCount);
 							
 							statistics.setStar1(star1);
