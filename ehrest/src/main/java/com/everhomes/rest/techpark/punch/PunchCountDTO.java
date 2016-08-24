@@ -1,7 +1,6 @@
 package com.everhomes.rest.techpark.punch;
 
 
-import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -27,7 +26,7 @@ public class PunchCountDTO {
 	private String token;
 	private String deptName;
     private Integer workDayCount;
-    private Integer workCount;
+    private Double workCount;
     private Integer belateCount;
     private Integer leaveEarlyCount;
     private Double unpunchCount;
@@ -46,13 +45,7 @@ public class PunchCountDTO {
 	}
 	public void setWorkDayCount(Integer workDayCount) {
 		this.workDayCount = workDayCount;
-	}
-	public Integer getWorkCount() {
-		return workCount;
-	}
-	public void setWorkCount(Integer workCount) {
-		this.workCount = workCount;
-	}
+	} 
 	public Integer getBelateCount() {
 		return belateCount;
 	}
@@ -147,5 +140,11 @@ public class PunchCountDTO {
 	}
 	public void setDeptName(String deptName) {
 		this.deptName = deptName;
+	}
+	public Double getWorkCount() {
+		return workCount;
+	}
+	public void setWorkCount(Double workCount) {
+		this.workCount = workCount;
 	}
 }
