@@ -2338,7 +2338,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0); 
-			row.createCell(++i).setCellValue(b.setScale(2).doubleValue());  
+			row.createCell(++i).setCellValue(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());  
 		}
 			 
 	}
@@ -3483,7 +3483,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			else{
 				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
-				dto.setOverTimeSum(b.setScale(2).doubleValue());
+				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 			}
 			
 			punchCountDTOList.add(dto);
