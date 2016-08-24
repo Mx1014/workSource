@@ -43,6 +43,8 @@ public interface PmTaskService {
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
 	
+	PmTaskDTO createTaskByAdmin(CreateTaskCommand cmd);
+	
 	void deleteTaskCategory(DeleteTaskCategoryCommand cmd);
 	
 	CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd);

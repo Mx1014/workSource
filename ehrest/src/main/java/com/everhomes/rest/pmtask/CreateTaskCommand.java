@@ -21,6 +21,9 @@ public class CreateTaskCommand {
 	private Long categoryId;
 	private String address;
 	private String content;
+	private String nickName;
+	private String mobile;
+	
 	@ItemType(String.class)
 	private List<String> attachments;
 	public String getOwnerType() {
@@ -64,5 +67,17 @@ public class CreateTaskCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public String getNickName() {
+		return nickName;
+	}
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+	public String getMobile() {
+		return mobile;
+	}
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
 	}
 }

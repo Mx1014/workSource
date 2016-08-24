@@ -11,6 +11,12 @@ import com.everhomes.util.StringHelper;
 public class EvaluateScoreDTO {
 	private Integer score;
 	private Integer count;
+	
+	public EvaluateScoreDTO(Integer score, Integer count){
+		this.score = score;
+		this.count = count;
+	}
+	
 	public Integer getScore() {
 		return score;
 	}

@@ -176,6 +176,10 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         }
         
         RangeQueryBuilder rb = null;
+        if(null !=pageAnchor){
+        	rb = QueryBuilders.rangeQuery("createTime").gt(new Timestamp(pageAnchor));
+            qb = qb.must(rb);	
+        }
         if(null != startDate){
             rb = QueryBuilders.rangeQuery("createTime").gt(new Timestamp(startDate));
             qb = qb.must(rb);	

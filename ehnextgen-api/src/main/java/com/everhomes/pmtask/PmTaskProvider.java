@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.namespace.Namespace;
@@ -28,7 +29,12 @@ public interface PmTaskProvider {
 	
 	List<Namespace> listNamespace();
 	
-	Integer countTask(Long ownerId, Byte status, Long categoryId, Byte star);
+	Integer countTask(Long ownerId, Byte status, Long categoryId, Byte star, Timestamp startDate, Timestamp endDate);
 	
 	void createTaskStatistics(PmTaskStatistics statistics);
+	
+	List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Long dateStr,
+			Long pageAnchor, Integer pageSize);
+	
+	Integer countTaskStatistics(Long ownerId, Long categoryId, Timestamp dateStr);
 }
