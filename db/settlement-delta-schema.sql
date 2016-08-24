@@ -1,3 +1,29 @@
+-- DROP TABLE IF EXISTS `eh_community_services`;
+CREATE TABLE `eh_community_services` (
+  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
+  `scope_id` BIGINT,
+  `item_name` VARCHAR(32),
+  `item_label` VARCHAR(64),
+  `icon_uri` VARCHAR(1024),
+  `action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
+  `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
+  `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_users ADD COLUMN `namespace_user_type` varchar(128) DEFAULT NULL COMMENT 'the type of user';
+
+ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_token` varchar(256) DEFAULT NULL COMMENT 'the token from third party';
+
+ALTER TABLE eh_organizations ADD COLUMN `namespace_organization_type` varchar(128) DEFAULT NULL COMMENT 'the type of organization';
+
+
+-- 结算表  by sfyan 2016010
 -- 订单交易流水表
 CREATE TABLE `eh_stat_orders` (
   `id` bigint(20) NOT NULL,
@@ -132,3 +158,17 @@ CREATE TABLE `eh_stat_task_logs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `task_no` (`task_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_stat_service` (
+  `id` bigint(20) NOT NULL,
+   `namespace_id` int(11) NOT NULL,
+  `owner_type` varchar(64) NOT NULL '',
+  `owner_id` bigint(20) DEFAULT NULL,
+  `service_type` varchar(64) NOT NULL '',
+  `service_name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0' COMMENT '0 无效 1 正常',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
