@@ -40,6 +40,7 @@ import com.everhomes.util.StringHelper;
  * <li>roles：机构/部门/群组拥有的角色</li>
  *  <li>enterpriseContactor: 企业联系人</li>
  *  <li>mobile: 手机号</li>
+ * <li>doorplateAddress：门牌地址</li>
  * <li>
  * </ul>
  */
@@ -339,7 +340,7 @@ public class OrganizationDTO {
         this.feedbackForumId = feedbackForumId;
     }
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

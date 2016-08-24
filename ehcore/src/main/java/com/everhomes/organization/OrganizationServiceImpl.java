@@ -1948,6 +1948,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //增加门牌地址
+        List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+        if(null != organizationAddresses){
+        	List<String> doorplateAddresses = new ArrayList<String>();
+        	for (OrganizationAddress organizationAddress : organizationAddresses) {
+        		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+        		doorplateAddresses.add(address.getAddress());
+			}
+        	
+        	if(0 < doorplateAddresses.size()){
+        		organizationDto.setAddress(doorplateAddresses.get(0));
+        	}
+        }
+        
+        
         // 企业入驻的园区
         Long communityId = getOrganizationActiveCommunityId(organization.getId());
         // 园区对应的类型、论坛等信息
