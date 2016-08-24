@@ -2333,8 +2333,13 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getSickCount()); 
 		row.createCell(++i).setCellValue(statistic.getExchangeCount()); 
 		row.createCell(++i).setCellValue(statistic.getOutworkCount()); 
-		BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0); 
-		row.createCell(++i).setCellValue(b.setScale(2).doubleValue());  
+		if(statistic.getOverTimeSum().equals(0)){
+			row.createCell(++i).setCellValue(0);
+		}
+		else{
+			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0); 
+			row.createCell(++i).setCellValue(b.setScale(2).doubleValue());  
+		}
 			 
 	}
 	
@@ -3473,8 +3478,14 @@ public class PunchServiceImpl implements PunchService {
 		}
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
-			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
-			dto.setOverTimeSum(b.setScale(2).doubleValue());
+			if(statistic.getOverTimeSum().equals(0)){
+				dto.setOverTimeSum(0.0);
+			}
+			else{
+				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
+				dto.setOverTimeSum(b.setScale(2).doubleValue());
+			}
+			
 			punchCountDTOList.add(dto);
 		}
 		response.setNextPageAnchor(nextPageAnchor);
