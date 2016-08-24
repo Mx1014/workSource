@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 子类型ID</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
- * <li>attachments: 图片路径列表</li>
+ * <li>attachments: 图片列表</li>
  * </ul>
  */
 public class CreateTaskCommand {

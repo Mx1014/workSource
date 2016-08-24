@@ -201,12 +201,12 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public List<PmTaskAttachment> listPmTaskAttachments(Long ownerId, String contentType){
+	public List<PmTaskAttachment> listPmTaskAttachments(Long ownerId, String ownerType){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskAttachments.class));
         
         SelectQuery<EhPmTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_PM_TASK_ATTACHMENTS);
         query.addConditions(Tables.EH_PM_TASK_ATTACHMENTS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_PM_TASK_ATTACHMENTS.CONTENT_TYPE.eq(contentType));
+        query.addConditions(Tables.EH_PM_TASK_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
         
         List<PmTaskAttachment> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskAttachment.class))
         		.collect(Collectors.toList());
