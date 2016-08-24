@@ -1,0 +1,1 @@
+ALTER TABLE `eh_rentalv2_resources` ADD COLUMN `cell_begin_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'cells begin id'; 
