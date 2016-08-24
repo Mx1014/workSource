@@ -77,6 +77,7 @@ CREATE TABLE `eh_pm_task_logs` (
  DROP TABLE IF EXISTS `eh_pm_task_attachments`;
 CREATE TABLE `eh_pm_task_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) COMMENT 'attachment object owner type',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g comment_id',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
