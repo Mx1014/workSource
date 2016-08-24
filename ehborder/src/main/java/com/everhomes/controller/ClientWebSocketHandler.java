@@ -105,8 +105,18 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         }
         else if (message instanceof PongMessage) {
             handlePongMessage(session, (PongMessage) message);
-        }
-        else {
+        } else if (message instanceof PingMessage) {
+            LOGGER.info("Got ping message from " + session.getId());
+            PongMessage msg = new PongMessage();
+            try {
+                synchronized(session) {
+                    session.sendMessage(msg);
+                }
+                updateSessionSendTick(session);
+            } catch(IOException e) {
+                LOGGER.warn("Unable to send imessage to " + session.getRemoteAddress().toString(), e);
+            }
+        } else {
             throw new IllegalStateException("Unexpected WebSocket message type: " + message);
         }
     }
