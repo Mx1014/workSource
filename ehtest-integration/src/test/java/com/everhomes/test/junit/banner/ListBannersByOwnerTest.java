@@ -1,12 +1,17 @@
 // @formatter: off
 package com.everhomes.test.junit.banner;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.ListBannersByOwnerCommand;
 import com.everhomes.rest.banner.ListBannersByOwnerRestResponse;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
@@ -29,7 +34,10 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 		ListBannersByOwnerCommand cmd = new ListBannersByOwnerCommand();
 		cmd.setOwnerType("organization");
 	    cmd.setOwnerId(1000750L);
-	    cmd.setCommunityId(24210090697426103L);
+	    BannerScope scope = new BannerScope();
+	    scope.setScopeCode(ScopeType.COMMUNITY.getCode());
+	    scope.setScopeId(24210090697426103L);
+	    cmd.setScope(scope);
 		
 	    ListBannersByOwnerRestResponse resp = httpClientService.restGet(commandRelativeUri, cmd, ListBannersByOwnerRestResponse.class, context);
 		
@@ -39,7 +47,18 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 	    assertNotNull("The requests of may not be null", resp);
 	    assertNotNull("The requests of may not be null", resp.getResponse());
 	     
-	    assertEquals(5, resp.getResponse().getBanners().size());
+	    List<BannerDTO> banners = resp.getResponse().getBanners();
+		assertEquals(5, banners.size());
+	    banners.forEach(r -> {
+	    	assertTrue(r.getPosterPath().startsWith("http://"));
+	    });
+	    
+	    // 测试顺序
+	    assertEquals(Long.valueOf(1), banners.get(0).getId());
+	    assertEquals(Long.valueOf(5), banners.get(1).getId());
+	    assertEquals(Long.valueOf(2), banners.get(2).getId());
+	    assertEquals(Long.valueOf(4), banners.get(3).getId());
+	    assertEquals(Long.valueOf(3), banners.get(4).getId());
 	}
 	
 	protected void initCustomData() {

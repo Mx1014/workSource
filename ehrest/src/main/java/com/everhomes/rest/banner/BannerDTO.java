@@ -1,8 +1,5 @@
 package com.everhomes.rest.banner;
 
-import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
-import static com.everhomes.rest.banner.BannerStatus.CLOSE;
-
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -25,12 +22,13 @@ import com.everhomes.util.StringHelper;
  * <li>endTime: banner结束时间</li>
  * <li>order: 顺序</li>
  * <li>creatorUid: banner创建者</li>
+ * <li>sceneType: 场景类型</li>
  * <li>createTime: 创建时间</li>
  * <li>updateTime: 最后一次更新的时间</li>
  * <li>deleteTime: 删除时间</li>
  * </ul>
  */
-public class BannerDTO implements Comparable<BannerDTO> {
+public class BannerDTO {
     private Long     id;
     private Integer  namespaceId;
     private Long     appid;
@@ -48,6 +46,7 @@ public class BannerDTO implements Comparable<BannerDTO> {
     private Byte     status;
     private Integer  order;
     private Long     creatorUid;
+    private String    sceneType;
     private Timestamp createTime;
     private Timestamp updateTime;
     private Timestamp deleteTime;
@@ -73,7 +72,13 @@ public class BannerDTO implements Comparable<BannerDTO> {
     public String getScopeType() {
         return scopeType;
     }
-    public void setScopeType(String scopeType) {
+	public String getSceneType() {
+		return sceneType;
+	}
+	public void setSceneType(String sceneType) {
+		this.sceneType = sceneType;
+	}
+	public void setScopeType(String scopeType) {
         this.scopeType = scopeType;
     }
     public Long getScopeId() {
@@ -178,19 +183,4 @@ public class BannerDTO implements Comparable<BannerDTO> {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
-	@Override
-	public int compareTo(BannerDTO b) {
-		if (b == null) {
-			return 0;
-		}
-		if (this.getStatus() == ACTIVE.getCode() && b.getStatus() == ACTIVE.getCode()) {
-			return this.getOrder().compareTo(b.getOrder());
-		}
-		if (this.getStatus() == CLOSE.getCode() && b.getStatus() == CLOSE.getCode()) {
-			return b.getUpdateTime().compareTo(this.getUpdateTime());
-		}
-		return this.getStatus().compareTo(b.getStatus());
-	}
-
 }
