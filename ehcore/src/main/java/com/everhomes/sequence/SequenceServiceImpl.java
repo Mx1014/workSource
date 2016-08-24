@@ -772,6 +772,19 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhCategories.class, Tables.EH_CATEGORIES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_CATEGORIES.ID.max()).from(Tables.EH_CATEGORIES).fetchOne().value1(); 
         });
+        
+        syncTableSequence(null, EhPmTasks.class, Tables.EH_PM_TASKS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PM_TASKS.ID.max()).from(Tables.EH_PM_TASKS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPmTaskAttachments.class, Tables.EH_PM_TASK_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PM_TASK_ATTACHMENTS.ID.max()).from(Tables.EH_PM_TASK_ATTACHMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPmTaskLogs.class, Tables.EH_PM_TASK_LOGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PM_TASK_LOGS.ID.max()).from(Tables.EH_PM_TASK_LOGS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPmTaskStatistics.class, Tables.EH_PM_TASK_STATISTICS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PM_TASK_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_STATISTICS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")
