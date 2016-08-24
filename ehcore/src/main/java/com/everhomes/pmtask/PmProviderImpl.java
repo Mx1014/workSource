@@ -172,6 +172,7 @@ public class PmProviderImpl implements PmTaskProvider{
 //    				.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId)));
     	}else{
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
+    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
     	}
         
         if(null != pageAnchor && pageAnchor != 0)
