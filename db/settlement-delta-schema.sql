@@ -162,9 +162,9 @@ CREATE TABLE `eh_stat_task_logs` (
 CREATE TABLE `eh_stat_service` (
   `id` bigint(20) NOT NULL,
    `namespace_id` int(11) NOT NULL,
-  `owner_type` varchar(64) NOT NULL '',
+  `owner_type` varchar(64) NOT NULL ,
   `owner_id` bigint(20) DEFAULT NULL,
-  `service_type` varchar(64) NOT NULL '',
+  `service_type` varchar(64) NOT NULL ,
   `service_name` varchar(64) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '0' COMMENT '0 无效 1 正常',
   `create_time` datetime DEFAULT NULL,
