@@ -326,35 +326,35 @@ VALUES (50000,'内部管理',0,'fa fa-group',null,1,2,'/50000','park',500);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (51000,'层级管理',50000,null,null,1,2,'/50000/51000','park',510);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (51100,'层级管理',51000,null,'-- ',0,2,'/50000/51000/51100','park',511);
+VALUES (51100,'层级管理',51000,null,null,0,2,'/50000/51000/51100','park',511);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (52000,'人员管理',50000,null,null,1,2,'/50000/52000','park',520);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (52100,'管理员',52000,null,'-- ',0,2,'/50000/52000/52100','park',521);
+VALUES (52100,'管理员',52000,null,null,0,2,'/50000/52000/52100','park',521);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (52200,'部门通讯录',52000,null,'-- ',0,2,'/50000/52000/52200','park',522);
+VALUES (52200,'部门通讯录',52000,null,null,0,2,'/50000/52000/52200','park',522);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (52300,'群组通讯录',52000,null,'-- ',0,2,'/50000/52000/52300','park',523);
+VALUES (52300,'群组通讯录',52000,null,null,0,2,'/50000/52000/52300','park',523);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (52400,'认证管理',52000,null,'-- ',0,2,'/50000/52000/52400','park',524);
+VALUES (52400,'认证管理',52000,null,null,0,2,'/50000/52000/52400','park',524);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (53000,'管辖范围',50000,null,null,1,2,'/50000/53000','park',530);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (53100,'管辖范围',53000,null,'-- ',0,2,'/50000/53000/53100','park',531);
+VALUES (53100,'管辖范围',53000,null,null,0,2,'/50000/53000/53100','park',531);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (54000,'权限管理',50000,null,null,1,2,'/50000/54000','park',540);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (54100,'权限管理',54000,null,'-- ',0,2,'/50000/54000/54100','park',541);
+VALUES (54100,'权限管理',54000,null,null,0,2,'/50000/54000/54100','park',541);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (55000,'物业管理',50000,null,null,1,2,'/50000/55000','park',550);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (55100,'设备巡检',55000,null,'-- ',0,2,'/50000/55000/55100','park',551);
+VALUES (55100,'设备巡检',55000,null,null,0,2,'/50000/55000/55100','park',551);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (55200,'品质核查',55000,null,'-- ',0,2,'/50000/55000/55200','park',552);
+VALUES (55200,'品质核查',55000,null,null,0,2,'/50000/55000/55200','park',552);
 
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
@@ -363,20 +363,20 @@ VALUES (56000,'OA管理',50000,null,null,1,2,'/50000/56000','park',560);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56100,'考勤管理',56000,null,null,1,2,'/50000/56000/56100','park',561);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56110,'考勤设置',56100,null,'-- ',0,2,'/50000/56000/56100/56110','park',563);
+VALUES (56110,'考勤设置',56100,null,null,0,2,'/50000/56000/56100/56110','park',563);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56120,'打卡详情',56100,null,'-- ',0,2,'/50000/56000/56100/56120','park',564);
+VALUES (56120,'打卡详情',56100,null,'attendance_record',0,2,'/50000/56000/56100/56120','park',564);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56130,'异常统计',56100,null,'-- ',0,2,'/50000/56000/56100/56130','park',565);
+VALUES (56130,'异常统计',56100,null,'attendance_result',0,2,'/50000/56000/56100/56130','park',565);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56140,'异常处理',56100,null,'-- ',0,2,'/50000/56000/56100/56140','park',566);
+VALUES (56140,'异常处理',56100,null,'attendance_manage',0,2,'/50000/56000/56100/56140','park',566);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56200,'视频会议',56000,null,null,1,2,'/50000/56000/56200','park',567);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56210,'账号管理',56200,null,'-- ',0,2,'/50000/56000/56200/56210','park',568);
+VALUES (56210,'账号管理',56200,null,null,0,2,'/50000/56000/56200/56210','park',568);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56220,'我的订单',56200,null,'-- ',0,2,'/50000/56000/56200/56220','park',569);
+VALUES (56220,'我的订单',56200,null,null,0,2,'/50000/56000/56200/56220','park',569);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (58000,'物业服务',50000,null,null,1,2,'/50000/58000','park',600);
@@ -970,7 +970,6 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),781,49520,'约稿须知',1,1,'约稿须知 全部权限',347);
 
 
-<<<<<<< HEAD
 -- 考勤管理 by sfyan 20160811
 DELETE FROM `eh_acl_privileges` WHERE `id` IN (544, 545, 546, 547);
 DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (62, 63, 64, 65);
@@ -1103,3 +1102,41 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),540,44100,'类型管理',1,1,'备品备件 全部权限',603);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),541,44200,'机构管理',1,1,'任务列表 全部权限',604);
+
+UPDATE `eh_web_menus` SET `name` = '设备巡检' where `id` = 58200;
+
+
+-- 把打卡考勤的老功能重新开放  by sfyan 20160817  
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56172,'打卡详情',56105,null,'attendance_record',0,2,'/50000/56000/56100/56105/56172','park',571);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56174,'异常统计',56105,null,'attendance_result',0,2,'/50000/56000/56100/56105/56174','park',572);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56176,'异常处理',56105,null,'attendance_manage',0,2,'/50000/56000/56100/56105/56176','park',573);
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (797,0,'打卡详情','打卡详情',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (798,0,'异常统计','异常统计',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (799,0,'异常处理','异常处理',NULL);
+
+-- 增加考勤统计菜单 by sfyan 20160822
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56106,'考勤统计',56100,null,null,1,2,'/50000/56000/56100/56106','park',571);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56111,'考勤统计',56106,null,'punch_statistics',0,2,'/50000/56000/56100/56106/56111','park',572);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56112,'打卡详情',56106,null,'punch_detail',0,2,'/50000/56000/56100/56106/56112','park',573);
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (820,0,'考勤统计','考勤统计',null);
+
+
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),820,56111,'考勤统计',1,1,'考勤统计  全部权限',577);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),797,56112,'打卡详情',1,1,'打卡详情 全部权限',578);
+
+

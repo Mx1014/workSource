@@ -769,6 +769,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhJournalConfigs.class, Tables.EH_JOURNAL_CONFIGS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_JOURNAL_CONFIGS.ID.max()).from(Tables.EH_JOURNAL_CONFIGS).fetchOne().value1(); 
         });
+        syncTableSequence(null, EhUserImpersonations.class, Tables.EH_USER_IMPERSONATIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_USER_IMPERSONATIONS.ID.max()).from(Tables.EH_USER_IMPERSONATIONS).fetchOne().value1();
+        });
     }
     
     @SuppressWarnings("rawtypes")

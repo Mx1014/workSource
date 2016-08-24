@@ -434,6 +434,10 @@ public class YellowPageServiceImpl implements YellowPageService {
         for (YellowPage yellowPage : yellowPages){
         	populateYellowPage(yellowPage);
 			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+			if(null == serviceAlliance.getServiceType() && null != serviceAlliance.getCategoryId()) {
+				Category category = categoryProvider.findCategoryById(serviceAlliance.getCategoryId());
+				serviceAlliance.setServiceType(category.getName());
+			}
 			ServiceAllianceDTO dto = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
 			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
@@ -500,6 +504,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 			UpdateServiceAllianceEnterpriseCommand cmd) {
 		YellowPage yp = null;
 		ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
+		
+		if(null != serviceAlliance.getCategoryId()) {
+			Category category = categoryProvider.findCategoryById(serviceAlliance.getCategoryId());
+			serviceAlliance.setServiceType(category.getName());
+		}
 		
 		if(cmd.getId() == null) {
 			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);

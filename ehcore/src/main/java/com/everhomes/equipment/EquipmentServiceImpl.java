@@ -136,7 +136,15 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
 
 
 
@@ -267,6 +275,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
 
 
 
@@ -522,6 +534,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.videoconf.ConfOrders;
 
 @Component
 public class EquipmentServiceImpl implements EquipmentService {
@@ -835,9 +848,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		processRepeatSetting(standard);
 		
 		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-		
-		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-		dto.setRepeat(rs);
+		if(null != standard.getRepeat()) {
+			RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+			dto.setRepeat(rs);
+		}
 		
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(), 
 				standard.getOwnerId());
@@ -849,8 +863,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	private void processRepeatSetting(EquipmentInspectionStandards standard) {
-		RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
-		standard.setRepeat(repeat);
+		if(null != standard.getRepeatSettingId() && standard.getRepeatSettingId() != 0) {
+			RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
+			standard.setRepeat(repeat);
+		}
 	}
 	
 	private void processEquipmentsCount(EquipmentInspectionStandards standard) {
@@ -954,11 +970,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			DeleteEquipmentStandardRelationsCommand cmd) {
 		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
-		if(EquipmentStatus.fromStatus(equipment.getStatus()) == EquipmentStatus.INACTIVE) {
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
- 				"设备已删除");
-		}
+//		if(EquipmentStatus.fromStatus(equipment.getStatus()) == EquipmentStatus.INACTIVE) {
+//			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+//					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
+// 				"设备已删除");
+//		}
 		
 		if(EquipmentReviewStatus.fromStatus(equipment.getReviewStatus()) == EquipmentReviewStatus.INACTIVE) {
 			equipment.setReviewStatus(EquipmentReviewStatus.DELETE.getCode());
@@ -1018,7 +1034,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 			}
 			
-			if(equipment.getLatitude() != exist.getLatitude() || equipment.getLongitude() != exist.getLongitude()) {
+			if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
 				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 						EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
 	 				"设备经纬度不能修改");
@@ -1144,6 +1160,32 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 		
 		inActiveEquipmentStandardRelations(equipment);
+		
+		inactiveTasks(equipment.getId());
+	}
+	
+	private void inactiveTasks(Long equipmentId) {
+		int pageSize = 200;      
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, locator, pageSize);
+            
+            if(tasks.size() > 0) {
+                for(EquipmentInspectionTasks task : tasks) {
+                	task.setStatus(EquipmentTaskStatus.NONE.getCode());
+                	equipmentProvider.updateEquipmentTask(task);
+                	
+                	equipmentTasksSearcher.feedDoc(task);
+                }
+            }
+            
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+        
+        
 	}
 
 	@Override
@@ -2011,12 +2053,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(dto.getTaskName());
 		row.createCell(++i).setCellValue((StandardType.fromStatus(dto.getTaskType()).getName()));
 		row.createCell(++i).setCellValue(dto.getEquipmentName());
-		
-		row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
+		if(null != dto.getExecutiveStartTime())
+			row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
 		if(dto.getProcessExpireTime() != null) {
 			row.createCell(++i).setCellValue(dto.getProcessExpireTime().toString());
 		} else {
-			row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
+			if(null != dto.getExecutiveExpireTime())
+				row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
 		}
 		
 		row.createCell(++i).setCellValue(dto.getEquipmentLocation());
@@ -2034,7 +2077,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
 			row.createCell(++i).setCellValue(dto.getOperatorName());
 		} else {
-			row.createCell(++i).setCellValue(dto.getExecutiveTime().toString());
+			if(null != dto.getExecutiveTime())
+				row.createCell(++i).setCellValue(dto.getExecutiveTime().toString());
 			row.createCell(++i).setCellValue(dto.getExecutorName());
 		}
 		
@@ -2052,6 +2096,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionTasksLogs> logs = equipmentProvider.listLogsByTaskId(locator, pageSize + 1, task.getId(), cmd.getProcessType());
 		
 		ListLogsByTaskIdResponse response = new ListLogsByTaskIdResponse();
+		if(null == logs) {
+			List<EquipmentTaskLogsDTO> dtos = new ArrayList<EquipmentTaskLogsDTO>();
+			response.setLogs(dtos);
+			return response;
+		}
+		
 		Long nextPageAnchor = null;
         if(logs.size() > pageSize) {
         	logs.remove(logs.size() - 1);
@@ -2386,6 +2436,25 @@ public class EquipmentServiceImpl implements EquipmentService {
         if(standard != null) {
         	dto.setStandardName(standard.getName());
         }
+        
+        List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+//        eqAccessories: 备品配件信息 参考com.everhomes.rest.equipment.EquipmentAccessoriesDTO 
+//        quantity: 数量 
+//        equipmentId: 设备id 
+//        id: 主键id 
+        List<EquipmentInspectionAccessoryMap> map = equipmentProvider.listAccessoryMapByEquipmentId(dto.getId());
+        if(null != map) {
+        	for(EquipmentInspectionAccessoryMap acMap : map) {
+        		
+        		EquipmentAccessoryMapDTO mapDto = ConvertHelper.convert(acMap, EquipmentAccessoryMapDTO.class);
+        		EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(acMap.getAccessoryId());
+        		mapDto.setEqAccessories(ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class));
+        		
+        		eqAccessoryMap.add(mapDto);
+        	}
+        }
+        
+        dto.setEqAccessoryMap(eqAccessoryMap);
 		
 		return dto;
 	}
