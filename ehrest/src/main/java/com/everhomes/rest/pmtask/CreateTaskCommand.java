@@ -24,8 +24,8 @@ public class CreateTaskCommand {
 	private String nickName;
 	private String mobile;
 	
-	@ItemType(String.class)
-	private List<String> attachments;
+	@ItemType(AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachments;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -57,13 +57,12 @@ public class CreateTaskCommand {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public List<String> getAttachments() {
+	public List<AttachmentDescriptor> getAttachments() {
 		return attachments;
 	}
-	public void setAttachments(List<String> attachments) {
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
-	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

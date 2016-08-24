@@ -45,6 +45,7 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
+import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
@@ -203,7 +204,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	}
 
-	private void setTaskStatus(String ownerType, Long ownerId, Long id, String content, List<String> attachments, Byte status) {
+	private void setTaskStatus(String ownerType, Long ownerId, Long id, String content, List<AttachmentDescriptor> attachments, Byte status) {
 		checkOwnerIdAndOwnerType(ownerType, ownerId);
 		checkId(id);
 		PmTask task = checkPmTask(id);
@@ -456,16 +457,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return createTask(cmd, user);
 	}
 	
-	private void addAttachments(List<String> list, Long userId, Long ownerId, String contentType){
+	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
 		if(!CollectionUtils.isEmpty(list)){
-			for(String uri: list){
-				if(StringUtils.isNotBlank(uri)){
+			for(AttachmentDescriptor ad: list){
+				if(null != ad){
 					PmTaskAttachment attachment = new PmTaskAttachment();
-					attachment.setContentType(contentType);
-					attachment.setContentUri(uri);
+					attachment.setContentType(ad.getContentType());
+					attachment.setContentUri(ad.getContentUri());
 					attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
 					attachment.setCreatorUid(userId);
 					attachment.setOwnerId(ownerId);
+					attachment.setOwnerType(targetType);
 					pmTaskProvider.createTaskAttachment(attachment);
 				}
 			}

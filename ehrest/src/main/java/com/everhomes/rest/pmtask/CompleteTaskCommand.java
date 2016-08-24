@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>id: 任务ID</li>
  * <li>content: 完成或关闭任务理由</li>
- * <li>attachments: 图片路径列表</li>
+ * <li>attachments: 图片列表</li>
  * </ul>
  */
 public class CompleteTaskCommand {
@@ -19,8 +19,8 @@ public class CompleteTaskCommand {
     private Long ownerId;
     private Long id;
     private String content;
-	@ItemType(String.class)
-	private List<String> attachments;
+	@ItemType(AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachments;
 	public String getContent() {
 		return content;
 	}
@@ -45,10 +45,11 @@ public class CompleteTaskCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public List<String> getAttachments() {
+	
+	public List<AttachmentDescriptor> getAttachments() {
 		return attachments;
 	}
-	public void setAttachments(List<String> attachments) {
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
 	@Override
