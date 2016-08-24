@@ -2333,7 +2333,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getSickCount()); 
 		row.createCell(++i).setCellValue(statistic.getExchangeCount()); 
 		row.createCell(++i).setCellValue(statistic.getOutworkCount()); 
-		row.createCell(++i).setCellValue(statistic.getOverTimeSum()/3600000);  
+		BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0); 
+		row.createCell(++i).setCellValue(b.setScale(2).doubleValue());  
 			 
 	}
 	
