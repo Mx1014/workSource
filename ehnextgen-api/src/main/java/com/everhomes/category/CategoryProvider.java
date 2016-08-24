@@ -26,6 +26,6 @@ public interface CategoryProvider {
     List<Category> listBusinessSubCategories(long categoryId, CategoryAdminStatus status, Tuple<String, SortOrder>... orderBy);
     List<Long> getBusinessSubCategories(long categoryId);
     
-    List<Category> listTaskCategories(Integer namespaceId, Long parentId, String name, Long pageAnchor, Integer pageSize);
+    List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, Long pageAnchor, Integer pageSize);
     Category findCategoryByPath(Integer namespaceId, String path);
 }

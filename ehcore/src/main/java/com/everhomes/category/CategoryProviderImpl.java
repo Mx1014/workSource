@@ -370,7 +370,7 @@ public class CategoryProviderImpl implements CategoryProvider {
     //查询物业任务分类 add by sw 20160817
     @Cacheable(value = "listTaskCategories", unless="#result.size() == 0")
 	@Override
-	public List<Category> listTaskCategories(Integer namespaceId, Long parentId, String name, 
+	public List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, 
 			Long pageAnchor, Integer pageSize){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
         SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
@@ -378,8 +378,8 @@ public class CategoryProviderImpl implements CategoryProvider {
         	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         if(null != parentId)
         	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
-        if(StringUtils.isNotBlank(name))
-        	query.addConditions(Tables.EH_CATEGORIES.PATH.like("%" + name + "%"));
+        if(StringUtils.isNotBlank(keyword))
+        	query.addConditions(Tables.EH_CATEGORIES.NAME.like("%" + keyword + "%"));
         if(null != pageAnchor && pageAnchor != 0)
         	query.addConditions(Tables.EH_CATEGORIES.ID.gt(pageAnchor));
         query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));

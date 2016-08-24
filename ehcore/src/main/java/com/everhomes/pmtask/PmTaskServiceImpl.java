@@ -361,22 +361,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
-				
-				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
-				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
-					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
-					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
-			                EntityType.USER.getCode(), r2.getCreatorUid());
-					dto.setContentUrl(contentUrl);
-					return dto;
-				}).collect(Collectors.toList());
-				pmTaskLogDTO.setAttachments(attachmentDtos);
+				pmTaskLogDTO.setContent(null);
+//				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+//				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
+//					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
+//					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
+//			                EntityType.USER.getCode(), r2.getCreatorUid());
+//					dto.setContentUrl(contentUrl);
+//					return dto;
+//				}).collect(Collectors.toList());
+//				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
 			}else{
 				
 				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
+				pmTaskLogDTO.setContent(null);
 			}
 			
 			return pmTaskLogDTO;
@@ -502,10 +503,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String path = "";
 		Category category = null;
 		if(null == parentId){
-			path = cmd.getName();
+			
 			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
 			Category ancestor = categoryProvider.findCategoryByPath(namespaceId, defaultName);
 			parentId = ancestor.getId();
+			path = ancestor.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 		}else{
 			category = categoryProvider.findCategoryById(parentId);
 			if(category == null) {
