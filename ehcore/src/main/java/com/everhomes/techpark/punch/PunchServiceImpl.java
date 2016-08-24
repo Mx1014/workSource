@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -3471,6 +3472,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
+			dto.setOverTimeSum(b.setScale(2).doubleValue());
 			punchCountDTOList.add(dto);
 		}
 		response.setNextPageAnchor(nextPageAnchor);
