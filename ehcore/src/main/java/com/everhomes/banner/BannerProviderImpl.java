@@ -10,6 +10,7 @@ import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectSeekStep3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.sequence.SequenceProvider;
@@ -322,33 +324,45 @@ public class BannerProviderImpl implements BannerProvider {
 	}
 	
 	@Override
-	public List<Banner> listByNamespeaceAndApplyPolicy(Integer namespaceId, ApplyPolicy applyPolicy) {
-		List<Banner> banners = new ArrayList<>();
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, reducingContext) -> {
-			context.select().from(Tables.EH_BANNERS)
-				.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
-				.fetch().map((r) ->{
-					banners.add(ConvertHelper.convert(r, Banner.class));
-					return null;
-				});
-			return true;
-		});
-		return banners;
+	public List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()));
+		if(scope != null && scope.getScopeId() != null && scope.getScopeCode() != null) {
+			condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(Tables.EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
+		}
+		if(pageAnchor != null) {
+			condition = condition.and(Tables.EH_BANNERS.CREATE_TIME.ge(new Timestamp(pageAnchor)));
+		}
+		if(applyPolicy != null) {
+			condition = condition.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()));
+		}
+		
+		SelectSeekStep3<EhBannersRecord, Byte, Integer, Timestamp> orderBy = context.selectFrom(Tables.EH_BANNERS).where(condition)
+			.orderBy(Tables.EH_BANNERS.STATUS.asc(), Tables.EH_BANNERS.ORDER.desc(), Tables.EH_BANNERS.CREATE_TIME.desc());
+		
+		List<BannerDTO> dtoList;
+		if(pageSize != null) {
+			dtoList = orderBy.limit(pageSize).fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+		} else {
+			dtoList = orderBy.fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+		}
+		return dtoList;
 	}
 	
 	@Override
-	public List<BannerDTO> listBannersByOwner(Integer namespaceId, Long scopeId, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
+	public Integer selectCountBannerByScopeAndStatus(Integer namespaceId, BannerScope scope, BannerStatus status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
-		List<BannerDTO> dtoList = context.selectFrom(Tables.EH_BANNERS)
-			.where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()))
-			.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId))
-			.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()))
-			.and(Tables.EH_BANNERS.ID.ge(pageAnchor))
-			.limit(pageSize)
-			.fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
-		return dtoList;
+		Condition condition = Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId);
+		if(scope != null && scope.getScopeId() != null && scope.getScopeCode() != null) {
+			condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(Tables.EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
+		}
+		if(status != null) {
+			condition = condition.and(Tables.EH_BANNERS.STATUS.eq(status.getCode()));
+		}
+		return context.selectCount().from(Tables.EH_BANNERS).where(condition)
+				.fetchOne().into(Integer.class);
 	}
+	
 }

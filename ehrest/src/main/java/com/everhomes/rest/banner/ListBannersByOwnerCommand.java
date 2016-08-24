@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  * <li>ownerType: 归属者类型 {@link com.everhomes.rest.banner.BannerOwnerType}</li>
  * <li>ownerId: 归属者id</li>
- * <li>communityId: 小区id</li>
+ * <li>scope: 可见范围 {@link com.everhomes.rest.banner.BannerScope}</li>
  * <li>pageAnchor: 下一页开始的锚点</li>
  * <li>pageSize: 每页大小</li>
  * </li>
@@ -18,7 +18,7 @@ public class ListBannersByOwnerCommand {
 	@NotNull
 	private Long    ownerId;
 	@NotNull
-	private Long    communityId;
+	private BannerScope scope;
 	private Long    pageAnchor;
 	private Integer pageSize;
 
@@ -54,12 +54,12 @@ public class ListBannersByOwnerCommand {
 		this.ownerType = ownerType;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public BannerScope getScope() {
+		return scope;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setScope(BannerScope scope) {
+		this.scope = scope;
 	}
-	
+
 }

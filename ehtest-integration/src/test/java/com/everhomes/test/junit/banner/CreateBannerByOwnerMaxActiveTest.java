@@ -18,17 +18,19 @@ import com.everhomes.rest.banner.CreateBannerByOwnerCommand;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class CreateBannerByOwnerTest extends BaseLoginAuthTestCase {
+public class CreateBannerByOwnerMaxActiveTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {
         super.setUp();
     }
     
+    /**
+     * 测试创建banner时创建动作
+     */
     @Test
-    public void testCreateBannerByOwner() {
+    public void testCreateBannerByOwner_testCreate() {
     	Integer namespaceId = 2;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
@@ -75,9 +77,8 @@ public class CreateBannerByOwnerTest extends BaseLoginAuthTestCase {
         assertTrue("The banner should be created, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
-        List<EhBanners> result = new ArrayList<EhBanners>();
         DSLContext context = dbProvider.getDslContext();
-        context.select().from(EH_BANNERS)
+        List<EhBanners> result = context.select().from(EH_BANNERS)
 	        .where(EH_BANNERS.NAME.eq(name))
 	        .and(EH_BANNERS.STATUS.eq(status))
 	        .and(EH_BANNERS.SCOPE_CODE.eq(scopeType))
@@ -86,10 +87,7 @@ public class CreateBannerByOwnerTest extends BaseLoginAuthTestCase {
 	        .and(EH_BANNERS.ACTION_DATA.eq(actionData))
 	        .and(EH_BANNERS.ORDER.eq(order))
 	        .and(EH_BANNERS.APPLY_POLICY.eq(Byte.parseByte("3")))
-            .fetch().map((r) -> {
-                result.add(ConvertHelper.convert(r, EhBanners.class));
-                return null;
-            });
+            .fetch().into(EhBanners.class);
         
         assertEquals(2, result.size());
     }
@@ -101,7 +99,7 @@ public class CreateBannerByOwnerTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-		String userInfoFilePath = "data/json/create-banner-by-owner-create-test-data.txt";
+		String userInfoFilePath = "data/json/create-banner-by-owner-create-max-active-test-data.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

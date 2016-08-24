@@ -3,6 +3,8 @@ package com.everhomes.banner;
 import java.util.List;
 
 import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerScope;
+import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 
 
@@ -33,14 +35,6 @@ public interface BannerProvider {
 	List<Banner> findBannerByNamespeaceId(Integer currentNamespaceId);
 	
 	/**
-	 * 根据域空间及应用类型查询banner
-	 * @param namespaceId 域空间id
-	 * @param applyPolicy 应用类型
-	 * @return	banner集合
-	 */
-	List<Banner> listByNamespeaceAndApplyPolicy(Integer namespaceId, ApplyPolicy applyPolicy);
-	
-	/**
 	 * 根据scopeId列表banner
 	 * @param namespaceId 域空间id
 	 * @param scopeId     作用域id
@@ -49,6 +43,15 @@ public interface BannerProvider {
 	 * @param applyPolicy 应用类型
 	 * @return			  bannerDTO集合
 	 */
-	List<BannerDTO> listBannersByOwner(Integer namespaceId, Long scopeId, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
+	List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
+	
+	/**
+	 * 根据作用域及状态查询banner的数量
+	 * @param namespaceId
+	 * @param scope
+	 * @param status
+	 * @return
+	 */
+	Integer selectCountBannerByScopeAndStatus(Integer namespaceId, BannerScope scope, BannerStatus status);
 	
 }

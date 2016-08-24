@@ -64,7 +64,7 @@
       "namespace_id": "2",
       "banner_group": "DEFAULT",
       "scope_id": "24210090697426103",
-      "name": "你秀你的恩爱，我买我的期待",
+      "name": "zuolin1",
       "creator_uid": "1025",
       "id": "2",
       "status": "2",
@@ -83,29 +83,10 @@
       "namespace_id": "2",
       "banner_group": "DEFAULT",
       "scope_id": "24210090697426103",
-      "name": "你秀你的恩爱，我买我的期待",
+      "name": "zuolin2",
       "creator_uid": "1025",
       "id": "3",
-      "status": "3",
-      "order": "5",
-      "apply_policy" : "3"
-    },
-    {
-      "create_time": "2013-11-11 09:08:47",
-      "update_time": "2016-07-02 09:00:00",
-      "banner_location": "/home",
-      "action_type": "9",
-      "scope_code": "1",
-      "action_data": "{\"forumId\":100334,\"topicId\":175219}",
-      "poster_path": "cs://1/image/aW1hZ2UvTVRvM1ltRm1ORE01WVRNeU56UmtZakZqWVRRME1tVmhabUpqT0RNMU1qazRNUQ",
-      "scene_type": "default",
-      "namespace_id": "2",
-      "banner_group": "DEFAULT",
-      "scope_id": "24210090697426103",
-      "name": "你秀你的恩爱，我买我的期待",
-      "creator_uid": "1025",
-      "id": "4",
-      "status": "3",
+      "status": "2",
       "order": "10",
       "apply_policy" : "3"
     },
@@ -121,11 +102,11 @@
       "namespace_id": "2",
       "banner_group": "DEFAULT",
       "scope_id": "24210090697426103",
-      "name": "你秀你的恩爱，我买我的期待",
+      "name": "zuolin2",
       "creator_uid": "1025",
-      "id": "5",
+      "id": "4",
       "status": "2",
-      "order": "5",
+      "order": "10",
       "apply_policy" : "3"
     },
     {
@@ -139,12 +120,12 @@
       "scene_type": "default",
       "namespace_id": "2",
       "banner_group": "DEFAULT",
-      "scope_id": "12378",
-      "name": "BannerBanner",
+      "scope_id": "24210090697426103",
+      "name": "zuolin2",
       "creator_uid": "1025",
-      "id": "6",
+      "id": "5",
       "status": "2",
-      "order": "6",
+      "order": "10",
       "apply_policy" : "3"
     },
     {
@@ -152,18 +133,18 @@
       "update_time": "2016-06-01 09:00:00",
       "banner_location": "/home",
       "action_type": "9",
-      "scope_code": "0",
+      "scope_code": "1",
       "action_data": "{\"forumId\":100334,\"topicId\":175219}",
       "poster_path": "cs://1/image/aW1hZ2UvTVRvM1ltRm1ORE01WVRNeU56UmtZakZqWVRRME1tVmhabUpqT0RNMU1qazRNUQ",
       "scene_type": "default",
       "namespace_id": "2",
       "banner_group": "DEFAULT",
-      "scope_id": "0",
-      "name": "BannerBanner",
+      "scope_id": "24210090697426103",
+      "name": "zuolin2",
       "creator_uid": "1025",
-      "id": "7",
+      "id": "6",
       "status": "2",
-      "order": "5",
+      "order": "10",
       "apply_policy" : "3"
     }
   ],
@@ -201,5 +182,14 @@
       "identifier_type": "0",
       "id": "0"
     }
-  ]
+  ],
+  "eh_configurations": [
+	  {
+	    "id": 31,
+	    "name": "banner.max.active.count",
+	    "value": "3",
+	    "description": "一个域空间下激活banner的最多个数",
+	    "namespace_id": 0
+	  }
+	]
 }
