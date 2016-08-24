@@ -2333,7 +2333,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getSickCount()); 
 		row.createCell(++i).setCellValue(statistic.getExchangeCount()); 
 		row.createCell(++i).setCellValue(statistic.getOutworkCount()); 
-		if(statistic.getOverTimeSum().equals(0)){
+		if(statistic.getOverTimeSum().equals(0L)){
 			row.createCell(++i).setCellValue(0);
 		}
 		else{
@@ -3478,7 +3478,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
-			if(statistic.getOverTimeSum().equals(0)){
+			if(statistic.getOverTimeSum().equals(0L)){
 				dto.setOverTimeSum(0.0);
 			}
 			else{
