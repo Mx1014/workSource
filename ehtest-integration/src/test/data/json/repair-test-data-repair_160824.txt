@@ -1,0 +1,59 @@
+{
+    "eh_categories": [
+        {
+            "id": 5,
+            "parent_id": 0,
+            "link_id": 0,
+            "name": "任务",
+            "path": "任务",
+            "default_order": 0,
+            "status": 2,
+            "create_time": "2015:9:28 06:09:03",
+            "namespace_id": 999991
+        },
+        {
+            "id": 200888,
+            "parent_id": 5,
+            "link_id": 0,
+            "name": "测试1",
+            "path": "任务/测试1",
+            "default_order": 0,
+            "status": 2,
+            "create_time": "2016:8:19 15:44:45",
+            "namespace_id": 999991
+        },
+        {
+            "id": 200889,
+            "parent_id": 5,
+            "link_id": 0,
+            "name": "测试2",
+            "path": "任务/测试2",
+            "default_order": 0,
+            "status": 0,
+            "create_time": "2016:8:19 15:45:10",
+            "namespace_id": 999991
+        },
+        {
+            "id": 200890,
+            "parent_id": 200888,
+            "link_id": 0,
+            "name": "报修，水龙头100块",
+            "path": "任务/测试1/报修，水龙头100块",
+            "default_order": 0,
+            "status": 2,
+            "create_time": "2016:8:19 15:45:34",
+            "namespace_id": 999991
+        },
+        {
+            "id": 200891,
+            "parent_id": 200888,
+            "link_id": 0,
+            "name": "报修，水龙头200块",
+            "path": "任务/测试1/报修，水龙头200块",
+            "default_order": 0,
+            "status": 2,
+            "create_time": "2016:8:19 15:55:10",
+            "namespace_id": 999991
+        }
+    ]
+}

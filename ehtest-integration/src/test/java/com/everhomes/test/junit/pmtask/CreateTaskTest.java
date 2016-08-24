@@ -2,6 +2,7 @@
 package com.everhomes.test.junit.pmtask;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,17 +17,22 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryRestResponse;
+import com.everhomes.rest.pmtask.CreateTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskRestResponse;
 import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesRestResponse;
+import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhPmTasksRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class ListTaskCategoriesTest extends BaseLoginAuthTestCase {
+public class CreateTaskTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {
         super.setUp();
@@ -35,54 +41,48 @@ public class ListTaskCategoriesTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testListTaskCategories() {
-        String keyword = "";
-        Long pageAnchor = null;
-        Integer pageSize = 5;
-        Long parentId = null;
-        
+    public void testCreateTask() {
+    	String ownerType = "community";
+        Long ownerId = 240111044331053517L;
+    	Long categoryId = 200890L;
+    	String address = "南山区科技园";
+    	String content = "厨房水龙头坏了";
+    	String nickName;
+    	String mobile;
+        List<String> attachments = new ArrayList<String>();
+        attachments.add("cs://1/image/aW1hZ2UvTVRvek5XSTVNell4TTJRME0yTXlaRFZsT1RZeE1HTTBOVGxrWWpJeFpHTmpNUQ");
+    	
         String userIdentifier = "13760240661";
         String plainTexPassword = "123456";
         Integer namespaceId = 999991;
         // 登录时不传namepsace，默认为左邻域空间
         logon(namespaceId, userIdentifier, plainTexPassword);
         
-        ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
-        cmd.setNamespaceId(namespaceId);
-//        cmd.setParentId(parentId);
-        cmd.setKeyword(keyword);
-       
-        cmd.setPageAnchor(pageAnchor);
-        cmd.setPageSize(pageSize);
+        CreateTaskCommand cmd = new CreateTaskCommand();
+        cmd.setOwnerType(ownerType);
+        cmd.setOwnerId(ownerId);
+        cmd.setCategoryId(categoryId);
+        cmd.setContent(content);
+        cmd.setAddress(address);
         
-        String commandRelativeUri = "/pmtask/listTaskCategories";
-        ListTaskCategoriesRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, ListTaskCategoriesRestResponse.class,context);
+        String commandRelativeUri = "/pmtask/createTask";
+        CreateTaskRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, CreateTaskRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("The user info should be get from server, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
         DSLContext context = dbProvider.getDslContext();
-		SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+		SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
     	
-		if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_CATEGORIES.ID.gt(pageAnchor));
-		if(StringUtils.isNotBlank(keyword))
-        	query.addConditions(Tables.EH_CATEGORIES.NAME.like("%"+keyword+"%"));
-		
-        if(null != namespaceId)
-        	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
-        if(null != parentId)
-        	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
+        query.addConditions(Tables.EH_PM_TASKS.ID.eq(response.getResponse().getId()));
        
-    	query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
-        query.addOrderBy(Tables.EH_CATEGORIES.ID.asc());
-        	query.addLimit(pageSize);
+        EhPmTasks result = ConvertHelper.convert(query.fetchOne(), EhPmTasks.class);
         
-        List<EhCategories> result =  query.fetch().map(r -> 
-			ConvertHelper.convert(r, EhCategories.class));
-        List<CategoryDTO> list = response.getResponse().getRequests();
-        assertEquals(list.size(), result.size());
+        PmTaskDTO dto = response.getResponse();
+        
+        assertEquals(result.getContent(), dto.getContent());
+        assertEquals(result.getStatus().byteValue(), (byte)1);
         
     }
     
