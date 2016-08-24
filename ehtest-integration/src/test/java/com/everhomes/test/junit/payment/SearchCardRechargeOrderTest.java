@@ -38,7 +38,7 @@ import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
+public class SearchCardRechargeOrderTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {
         super.setUp();

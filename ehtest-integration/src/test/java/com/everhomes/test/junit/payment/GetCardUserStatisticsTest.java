@@ -10,7 +10,7 @@ import com.everhomes.rest.payment.GetCardUserStatisticsRestResponse;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
-public class getCardUserStatisticsTest extends BaseLoginAuthTestCase {
+public class GetCardUserStatisticsTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {
         super.setUp();

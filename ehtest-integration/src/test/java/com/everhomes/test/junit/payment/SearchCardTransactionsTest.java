@@ -24,7 +24,7 @@ import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
+public class SearchCardTransactionsTest extends BaseLoginAuthTestCase {
     @Before
     public void setUp() {
         super.setUp();
