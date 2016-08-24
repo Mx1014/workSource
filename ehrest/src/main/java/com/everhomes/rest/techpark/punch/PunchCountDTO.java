@@ -37,7 +37,7 @@ public class PunchCountDTO {
     private Double sickCount;
     private Double exchangeCount;
     private Double outworkCount;
-    private Long overTimeSum;
+    private Double overTimeSum;
 	private java.lang.Byte     punchTimesPerDay;
 	private String userEnterpriseGroup;
 	
@@ -118,13 +118,7 @@ public class PunchCountDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-	public Long getOverTimeSum() {
-		return overTimeSum;
-	}
-	public void setOverTimeSum(Long overTimeSum) {
-		this.overTimeSum = overTimeSum;
-	}
+    } 
 	public java.lang.Byte getPunchTimesPerDay() {
 		return punchTimesPerDay;
 	}
@@ -148,5 +142,11 @@ public class PunchCountDTO {
 	}
 	public void setWorkCount(Double workCount) {
 		this.workCount = workCount;
+	}
+	public Double getOverTimeSum() {
+		return overTimeSum;
+	}
+	public void setOverTimeSum(Double overTimeSum) {
+		this.overTimeSum = overTimeSum;
 	}
 }
