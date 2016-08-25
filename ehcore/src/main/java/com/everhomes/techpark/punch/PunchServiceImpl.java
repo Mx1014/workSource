@@ -1062,6 +1062,10 @@ public class PunchServiceImpl implements PunchService {
 		ClockCode code = ClockCode.SUCESS;
 		Long userId = UserContext.current().getUser().getId(); 
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
+		if (null == pr  )
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+ 				"公司没有设置打卡规则");
 		//是否有wifi打卡,如果是判断wifi是否符合
 		if(pr.getWifiRuleId() != null && cmd.getWifiMac() != null){
 			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
