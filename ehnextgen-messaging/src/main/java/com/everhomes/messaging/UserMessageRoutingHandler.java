@@ -82,7 +82,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 if ((login.getStatus() == UserLoginStatus.LOGGED_IN) && login.getUserId() == senderLogin.getUserId() && login.getLoginId() == senderLogin.getLoginId()) {
                     return true;
                     }
-                return context.checkAndAdd(login.getUserId());
+                return context.checkAndAdd(login.getUserId(), login.getLoginId());
             }).forEach((UserLogin login) -> {
                 routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, message, deliveryOption);
             });
@@ -125,7 +125,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 return false;
             }
 
-            return context.checkAndAdd(login.getUserId());
+            return context.checkAndAdd(login.getUserId(), login.getLoginId());
         }).forEach((UserLogin login) -> {
             routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, shadowCloneFinal, deliveryOption);
         });
