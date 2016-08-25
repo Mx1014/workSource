@@ -3470,7 +3470,8 @@ public class PunchServiceImpl implements PunchService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		
-		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getMonth(),
+		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
+				organizationMembers.get(0).getOrganizationId(),cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
 		
 		if (null == results)
