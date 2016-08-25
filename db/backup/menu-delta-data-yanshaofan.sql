@@ -1084,21 +1084,22 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),804,58231,'任务列表',1,1,'任务列表 全部权限',604);
 
 -- 更新服务联盟的菜单
+-- 更新服务联盟的菜单
 DELETE FROM `eh_web_menus` WHERE `id` = 44000;
-DELETE FROM `eh_acl_privileges` WHERE `id` in (540, 541);
-DELETE FROM `eh_web_menu_privileges` WHERE `id` in (40, 41);
+DELETE FROM `eh_acl_privileges` WHERE `id` IN (540, 541);
+DELETE FROM `eh_web_menu_privileges` WHERE `id` IN (40, 41);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (44000,'服务联盟',40000,null,null,1,2,'/40000/44000','park',455);
+VALUES (44000,'服务联盟',40000,NULL,NULL,1,2,'/40000/44000','park',455);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (44100,'类型管理',44000,null,'service_type_management',0,2,'/40000/44000/44100','park',456);
+VALUES (44100,'类型管理',44000,NULL,'service_type_management',0,2,'/40000/44000/44100','park',456);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (44200,'机构管理',44000,null,'service_alliance',0,2,'/40000/44000/44200','park',457);
+VALUES (44200,'机构管理',44000,NULL,'service_alliance',0,2,'/40000/44000/44200','park',457);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (540,0,'类型管理','类型管理 全部权限',null);
+VALUES (540,0,'服务联盟 类型管理','服务联盟 类型管理 全部权限',NULL);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (541,0,'机构管理','机构管理 全部权限',null);
+VALUES (541,0,'服务联盟 机构管理','服务联盟 机构管理 全部权限',NULL);
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),540,44100,'类型管理',1,1,'备品备件 全部权限',603);
