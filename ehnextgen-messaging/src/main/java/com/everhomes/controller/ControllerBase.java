@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -93,7 +94,9 @@ public class ControllerBase {
         if(user != null && user.getLocale() != null)
             return user.getLocale();
         
-        return "en_US";
+        // 在某些情况下并没有用户，此时默认使用中文locale by lqs 20160825
+        // return "en_US";
+        return Locale.SIMPLIFIED_CHINESE.toString();
     }
     
     public static RestMethod getRestMethod(String uri) {

@@ -53,10 +53,10 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
         
         EhLocaleStringsRecord record = (EhLocaleStringsRecord)query.fetchOne();
         
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query locale string, sql=" + query.getSQL());
-            LOGGER.debug("Query locale string, bindValues=" + query.getBindValues());
-        }
+//        if(LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("Query locale string, sql=" + query.getSQL());
+//            LOGGER.debug("Query locale string, bindValues=" + query.getBindValues());
+//        }
             
         return ConvertHelper.convert(record, LocaleString.class);
     }
