@@ -21,3 +21,4 @@ CREATE TABLE `eh_user_impersonations`(
 -- banner表增加更新时间字段
 ALTER TABLE `eh_banners`
 ADD COLUMN `update_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP AFTER `create_time`;
+
