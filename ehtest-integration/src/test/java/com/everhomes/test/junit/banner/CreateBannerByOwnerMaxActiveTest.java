@@ -18,7 +18,6 @@ import com.everhomes.rest.banner.CreateBannerByOwnerCommand;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.StringHelper;
 
 public class CreateBannerByOwnerMaxActiveTest extends BaseLoginAuthTestCase {
     @Before
@@ -74,8 +73,8 @@ public class CreateBannerByOwnerMaxActiveTest extends BaseLoginAuthTestCase {
         RestResponse response = httpClientService.restGet(commandRelativeUri, cmd, RestResponse.class, context);
         
         assertNotNull("The reponse of may not be null", response);
-        assertTrue("The banner should be created, response=" + 
-            StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        assertEquals("banner", response.getErrorScope());
+        assertEquals("10003", response.getErrorCode()+"");
         
         DSLContext context = dbProvider.getDslContext();
         List<EhBanners> result = context.select().from(EH_BANNERS)
@@ -89,7 +88,7 @@ public class CreateBannerByOwnerMaxActiveTest extends BaseLoginAuthTestCase {
 	        .and(EH_BANNERS.APPLY_POLICY.eq(Byte.parseByte("3")))
             .fetch().into(EhBanners.class);
         
-        assertEquals(2, result.size());
+        assertEquals(0, result.size());
     }
     
     @After

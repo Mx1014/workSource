@@ -126,7 +126,7 @@
       "id": "5",
       "status": "2",
       "order": "10",
-      "apply_policy" : "3"
+      "apply_policy" : "2"
     },
     {
       "create_time": "2013-11-11 09:08:47",
@@ -145,7 +145,7 @@
       "id": "6",
       "status": "2",
       "order": "10",
-      "apply_policy" : "3"
+      "apply_policy" : "2"
     }
   ],
   "eh_users": [

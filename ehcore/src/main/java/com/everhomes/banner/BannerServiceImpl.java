@@ -5,11 +5,7 @@ import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
 import static com.everhomes.rest.banner.BannerStatus.CLOSE;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -831,7 +827,7 @@ public class BannerServiceImpl implements BannerService {
          		bannerOrders.forEach(bo -> {
          			Banner banner = null;
          			for(BannerDTO dto : defaultBanners) {
-         				if(dto.getId() == bo.getId()) {
+         				if(Objects.equals(dto.getId(), bo.getId())) {
          					banner = ConvertHelper.convert(dto, Banner.class);
          					break;
          				}
@@ -865,52 +861,7 @@ public class BannerServiceImpl implements BannerService {
 	/**
 	 * 复制默认的banner为用户可见范围下customized的banner
 	 * 
-	 * @param  复制过后新的banner的可见范围
-	 * @return 返回默认banner的id与复制的新的banner的id的对应的map,不需要复制的话返回 null
-	 */
-	/*private Map<Long, Banner> copyDefaultToCustomizedForReorder(BannerScope scope) {
-		// 此步骤为复制默认的应用类型的banner为自定义的banner
-        List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), scope, null, null, ApplyPolicy.CUSTOMIZED);
-        if(customizedBanners == null || customizedBanners.isEmpty()) {
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
-        	Map<Long, Banner> bannersMap = new HashMap<>();
-        	for(BannerDTO dto : defaultBanners) {
-        		Banner b = ConvertHelper.convert(dto, Banner.class);
-        		b.setScopeCode(scope.getScopeCode());
-        		b.setScopeId(scope.getScopeId());
-        		b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-        		bannersMap.put(b.getId(), b);
-        	}
-        	return bannersMap;
-        }
-        return null;
-	}
-	private void copyDefaultToCustomized(BannerScope scope) {
-		// 此步骤为复制默认的应用类型的banner为自定义的banner
-        List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), scope, null, null, ApplyPolicy.CUSTOMIZED);
-        if(customizedBanners == null || customizedBanners.isEmpty()) {
-        	//Map<Long, Long> oldNewIdMap = new HashMap<>();
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
-        	for(BannerDTO dto : defaultBanners) {
-        		Banner b = ConvertHelper.convert(dto, Banner.class);
-        		//Long oldId = b.getId();
-        		b.setScopeCode(scope.getScopeCode());
-        		b.setScopeId(scope.getScopeId());
-        		b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
-        		b.setId(null);
-        		bannerProvider.createBanner(b);
-        		//oldNewIdMap.put(oldId, newId);
-        	}
-        	//return oldNewIdMap;
-        }
-        //return null;
-	}
-	*/
-	
-	/**
-	 * 复制默认的banner为用户可见范围下customized的banner
-	 * 
-	 * @param  复制过后新的banner的可见范围
+	 * @param scope 复制过后新的banner的可见范围
 	 */
 	private void copyDefaultToCustomized(BannerScope scope) {
         List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), scope, null, null, ApplyPolicy.CUSTOMIZED);
@@ -949,7 +900,7 @@ public class BannerServiceImpl implements BannerService {
         	dbProvider.execute(status -> {
         		for(BannerDTO dto : defaultBanners) {
      				Banner b = ConvertHelper.convert(dto, Banner.class);
-     				if(b.getId() == cmd.getId()) {
+     				if(Objects.equals(b.getId(), cmd.getId())) {
      					b.setStatus(BannerStatus.DELETE.getCode());
      					createDeleteOperLog(b.getId());
      				}
@@ -989,7 +940,7 @@ public class BannerServiceImpl implements BannerService {
     @Override
 	public void createBannerByOwner(CreateBannerByOwnerCommand cmd) {
 		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
-		checkBannerActivationCount(cmd.getScope());
+		checkBannerActivationCount(cmd.getScope(), cmd.getSceneTypes());
 		
 		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
          	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1044,16 +995,23 @@ public class BannerServiceImpl implements BannerService {
 	}
 
     /**
-     * 检查banner的激活数量是否超限
-     * @param scope
+     * 分不同的场景检查当前作用范围下banner的激活数量是否超限
+     * @param scope 当前作用范围
+     * @param sceneTypes 需要检查的场景列表
      */
-	private void checkBannerActivationCount(BannerScope scope) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		int maxBannerCount = this.configurationProvider.getIntValue("banner.max.active.count", AppConstants.DEFAULT_MAX_BANNER_CAN_ACTIVE);
-		Integer activeCount = bannerProvider.selectCountBannerByScopeAndStatus(namespaceId, scope, BannerStatus.ACTIVE);
-		if(activeCount >= maxBannerCount) {
-			throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
-                    BannerServiceErrorCode.ERROR_BANNER_MAX_ACTIVE, "Banner with maximum number of activations");
+	private void checkBannerActivationCount(BannerScope scope, List<String> sceneTypes) {
+		if(sceneTypes != null && !sceneTypes.isEmpty()) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			int maxBannerCount = this.configurationProvider.getIntValue("banner.max.active.count", AppConstants.DEFAULT_MAX_BANNER_CAN_ACTIVE);
+			Map<String, Integer> sceneTypeCountMap = bannerProvider.selectCountGroupBySceneType(namespaceId, scope, BannerStatus.ACTIVE);
+			
+			sceneTypes.forEach(scene -> {
+				Integer activeCount = sceneTypeCountMap.get(scene);
+				if(activeCount != null && activeCount >= maxBannerCount) {
+					throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+							BannerServiceErrorCode.ERROR_BANNER_MAX_ACTIVE, "Banner with maximum number %s of activations", maxBannerCount);
+				}
+			});
 		}
 	}
 
@@ -1061,9 +1019,6 @@ public class BannerServiceImpl implements BannerService {
 	public void updateBannerByOwner(UpdateBannerByOwnerCommand cmd) {
 		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
-		if(cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
-			checkBannerActivationCount(cmd.getScope());
-		}
 		if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
@@ -1077,6 +1032,11 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
+        if(cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
+        	// 检查最大banner的激活数量是否超限
+			checkBannerActivationCount(cmd.getScope(), Collections.singletonList(banner.getSceneType()));
+		}
+        // 目前只考虑banner的应用类型为default和customized这两种情况 
         if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 要更新的banner为默认的，复制并更新
         	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
         	dbProvider.execute(status -> {

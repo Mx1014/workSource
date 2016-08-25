@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.banner;
 
+import static com.everhomes.server.schema.Tables.EH_BANNERS;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -11,6 +14,7 @@ import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectSeekStep3;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -351,18 +355,19 @@ public class BannerProviderImpl implements BannerProvider {
 	}
 	
 	@Override
-	public Integer selectCountBannerByScopeAndStatus(Integer namespaceId, BannerScope scope, BannerStatus status) {
+	public Map<String, Integer> selectCountGroupBySceneType(Integer namespaceId, BannerScope scope, BannerStatus status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
-		Condition condition = Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId);
+		Condition condition = EH_BANNERS.NAMESPACE_ID.eq(namespaceId);
 		if(scope != null && scope.getScopeId() != null && scope.getScopeCode() != null) {
-			condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(Tables.EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
+			condition = condition.and(EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
 		}
 		if(status != null) {
-			condition = condition.and(Tables.EH_BANNERS.STATUS.eq(status.getCode()));
+			condition = condition.and(EH_BANNERS.STATUS.eq(status.getCode()));
 		}
-		return context.selectCount().from(Tables.EH_BANNERS).where(condition)
-				.fetchOne().into(Integer.class);
+		return context.select(EH_BANNERS.SCENE_TYPE, DSL.count())
+				.from(EH_BANNERS).where(condition)
+				.groupBy(EH_BANNERS.SCENE_TYPE).fetchMap(EH_BANNERS.SCENE_TYPE, DSL.count());
 	}
 	
 }
