@@ -15,7 +15,7 @@ CREATE TABLE `eh_service_alliance_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_service_alliances`` (
+CREATE TABLE `eh_service_alliances` (
   `id` BIGINT NOT NULL,
   `parent_id` BIGINT NOT NULL DEFAULT '0',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community;group,organaization,exhibition,',
