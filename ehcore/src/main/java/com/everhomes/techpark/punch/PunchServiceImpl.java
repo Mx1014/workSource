@@ -3456,7 +3456,7 @@ public class PunchServiceImpl implements PunchService {
 			return response;
 		List<Long> userIds = new ArrayList<Long>();
 		for(OrganizationMember member : organizationMembers){
-			if (member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+			if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
 		//分页查询
