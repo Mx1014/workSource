@@ -1042,7 +1042,7 @@ public class BannerServiceImpl implements BannerService {
         	dbProvider.execute(status -> {
         		for(BannerDTO dto : defaultBanners) {
      				Banner b = ConvertHelper.convert(dto, Banner.class);
-     				if(b.getId() == cmd.getId()) {
+     				if(Objects.equals(b.getId(), cmd.getId())) {
      					setUpdateDataToBanner(cmd, b);
      				}
      				b.setId(null);
