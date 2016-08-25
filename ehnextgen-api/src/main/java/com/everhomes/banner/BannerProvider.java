@@ -1,6 +1,7 @@
 package com.everhomes.banner;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
@@ -46,12 +47,12 @@ public interface BannerProvider {
 	List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
 	
 	/**
-	 * 根据作用域及状态查询banner的数量
+	 * 查询每个场景下的banner的数量
 	 * @param namespaceId
 	 * @param scope
 	 * @param status
-	 * @return
+	 * @return 返回场景和数量对应的map结构
 	 */
-	Integer selectCountBannerByScopeAndStatus(Integer namespaceId, BannerScope scope, BannerStatus status);
+	Map<String, Integer> selectCountGroupBySceneType(Integer namespaceId, BannerScope scope, BannerStatus status);
 	
 }
