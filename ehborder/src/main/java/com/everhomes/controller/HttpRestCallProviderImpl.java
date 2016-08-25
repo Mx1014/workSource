@@ -62,7 +62,7 @@ public class HttpRestCallProviderImpl implements HttpRestCallProvider {
         
         params.put("appKey", this.appKey);
         String signature = SignatureHelper.computeSignature(params, this.secretKey);
-        params.put("signature", signature);
+        params.put("signature", signature);//Do not use UrlEncoder.encode when using http post in java.
         
         MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
         for(Map.Entry<String, String> entry: params.entrySet()) {
