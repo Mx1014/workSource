@@ -17,6 +17,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
+import com.everhomes.rest.statistics.transaction.StatServiceStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatOrdersDao;
@@ -27,12 +28,14 @@ import com.everhomes.server.schema.tables.daos.EhStatTaskLogsDao;
 import com.everhomes.server.schema.tables.daos.EhStatTransactionsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatOrders;
 import com.everhomes.server.schema.tables.pojos.EhStatRefunds;
+import com.everhomes.server.schema.tables.pojos.EhStatService;
 import com.everhomes.server.schema.tables.pojos.EhStatServiceSettlementResults;
 import com.everhomes.server.schema.tables.pojos.EhStatSettlements;
 import com.everhomes.server.schema.tables.pojos.EhStatTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhStatTransactions;
 import com.everhomes.server.schema.tables.records.EhStatOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhStatRefundsRecord;
+import com.everhomes.server.schema.tables.records.EhStatServiceRecord;
 import com.everhomes.server.schema.tables.records.EhStatServiceSettlementResultsRecord;
 import com.everhomes.server.schema.tables.records.EhStatSettlementsRecord;
 import com.everhomes.server.schema.tables.records.EhStatTaskLogsRecord;
@@ -341,7 +344,6 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		return null;
 	}
 	
-	
 	@Override
 	public List<StatServiceSettlementResult> listStatServiceSettlementResult(
 			Condition cond, String startDate, String endDate) {
@@ -368,7 +370,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
 				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
 				.where(condition)
-				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID)
+				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID)
 				.fetch().map((r) -> {
 					StatServiceSettlementResult statServiceSettlementResult = new StatServiceSettlementResult();
 					statServiceSettlementResult.setServiceType(String.valueOf(r.getValue(0)));
@@ -507,4 +509,34 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		return null;
 	}
 	
+	@Override
+	public List<StatService> listStatServices(Integer namespaceId,
+			String ownerType, Long ownerId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatService> results = new ArrayList<StatService>();
+		SelectQuery<EhStatServiceRecord> query = context.selectQuery(Tables.EH_STAT_SERVICE);
+		query.addConditions(Tables.EH_STAT_SERVICE.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_STAT_SERVICE.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_STAT_SERVICE.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_STAT_SERVICE.STATUS.eq(StatServiceStatus.ACTIVE.getCode()));
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatService.class));
+			return null;
+		});
+		return results;
+	}
+	
+	@Override
+	public List<StatService> listStatServiceGroupByServiceTypes() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatService> results = new ArrayList<StatService>();
+		SelectQuery<EhStatServiceRecord> query = context.selectQuery(Tables.EH_STAT_SERVICE);
+		query.addConditions(Tables.EH_STAT_SERVICE.STATUS.eq(StatServiceStatus.ACTIVE.getCode()));
+		query.addGroupBy(Tables.EH_STAT_SERVICE.SERVICE_TYPE);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatService.class));
+			return null;
+		});
+		return results;
+	}
 }

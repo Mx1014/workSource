@@ -34,6 +34,10 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -48,6 +52,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
+
 
 
 
@@ -219,25 +227,61 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
 		
+		List<StatServiceSettlementResult> results = new ArrayList<StatServiceSettlementResult>();
 		
+		List<String> serviceTypes = new ArrayList<String>();
+		serviceTypes.add(SettlementServiceType.ZUOLIN_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.OTHER_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.COMMUNITY_SERVICE.getCode());
 		
-		List<StatServiceSettlementResult> results = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+		for (String serviceType : serviceTypes) {
+			if(null == cond)
+				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType);
+			else
+				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType));
+			
+			if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.ZUOLIN_SHOP || SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
+				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+				results.addAll(shopSettlementResults);
+			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.COMMUNITY_SERVICE){
+				List<StatService> statServices = null;
+				if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+					statServices = statTransactionProvider.listStatServices(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+				}else{
+					statServices = statTransactionProvider.listStatServiceGroupByServiceTypes();
+				}
+				for (StatService statService : statServices) {
+					cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
+					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(cond, sStartDate, sEndDate);
+					result.setResourceName(statService.getServiceName());
+					result.setServiceType(serviceType);
+					results.add(result);
+				}
+			}
+		}
 		
 		return results.stream().map(r ->{
 			return this.convertStatServiceSettlementResultDTO(r);
 		}).collect(Collectors.toList());
 	}
 	
+
+	
 	private StatServiceSettlementResultDTO convertStatServiceSettlementResultDTO(StatServiceSettlementResult statServiceSettlementResult){
 		StatServiceSettlementResultDTO dto = ConvertHelper.convert(statServiceSettlementResult, StatServiceSettlementResultDTO.class);
 		dto.setServiceName(this.getServiceName(dto.getServiceType()));
 		if(SettlementResourceType.fromCode(dto.getResourceType()) == SettlementResourceType.SHOP){
-			Business business = businessProvider.findBusinessByTargetId(dto.getResourceId());
-			if(null != business){
-				dto.setResourceName(business.getName());
+			if(!StringUtils.isEmpty(dto.getResourceId()) && dto.getResourceId().equals("-1")){
+				dto.setResourceName("临时店铺");
+			}else{
+				Business business = businessProvider.findBusinessByTargetId(dto.getResourceId());
+				if(null != business){
+					dto.setResourceName(business.getName());
+				}
 			}
 		}
-		dto.setResourceName(this.getResourceName(dto.getResourceType(), dto.getResourceName()));
+		
+//		dto.setResourceName(this.getResourceName(dto.getResourceType(), dto.getResourceName()));
 		
 		if(null == dto.getCommunityId()){
 			dto.setCommunityName("-");
@@ -249,7 +293,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				dto.setCommunityName("-");
 			}
 		}
-		
 		
 		dto.setAlipayPaidAmount(statServiceSettlementResult.getAlipayPaidAmount().doubleValue());
 		dto.setAlipayRefundAmount(statServiceSettlementResult.getAlipayRefundAmount().doubleValue());
@@ -293,9 +336,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 		StatServiceSettlementResult total = statTransactionProvider.getStatServiceSettlementResultTotal(cond, sStartDate, sEndDate);
 		
+		results = this.processStatServiceSettlementAmounts(results);
+		
 		List<StatServiceSettlementResultDTO> dtos = results.stream().map(r ->{
 			return this.convertStatServiceSettlementResultDTO(r);
 		}).collect(Collectors.toList());
+		
+		
 		
 		StatServiceSettlementResultDTO totalDTO = new StatServiceSettlementResultDTO();
 		if(null != total){
@@ -309,32 +356,41 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		return dtos;
 	}
 	
+	private List<StatServiceSettlementResult> processStatServiceSettlementAmounts(List<StatServiceSettlementResult> results){
+		List<StatServiceSettlementResult> statServiceSettlementResults= new ArrayList<StatServiceSettlementResult>();
+		Map<String, StatServiceSettlementResult> resultMap = new HashMap<String, StatServiceSettlementResult>();
+		for (StatServiceSettlementResult statServiceSettlementResult : results) {
+			resultMap.put(statServiceSettlementResult.getServiceType(), statServiceSettlementResult);
+		}
+		
+		List<String> serviceTypes = new ArrayList<String>();
+		serviceTypes.add(SettlementServiceType.ZUOLIN_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.OTHER_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+		
+		for (String serviceType : serviceTypes) {
+			StatServiceSettlementResult result = resultMap.get(serviceType);
+			if(null == result){
+				result = new StatServiceSettlementResult();
+				result.setServiceType(serviceType);
+				result.setAlipayPaidAmount(new BigDecimal(0.00));
+				result.setAlipayRefundAmount(new BigDecimal(0.00));
+				result.setWechatPaidAmount(new BigDecimal(0.00));
+				result.setWechatRefundAmount(new BigDecimal(0.00));
+				result.setPaymentCardPaidAmount(new BigDecimal(0.00));
+				result.setPaymentCardRefundAmount(new BigDecimal(0.00));
+				result.setTotalPaidAmount(new BigDecimal(0.00));
+				result.setTotalRefundAmount(new BigDecimal(0.00));
+			}
+			statServiceSettlementResults.add(result);
+		}
+		
+		return statServiceSettlementResults;
+	}
+	
 	@Override
 	public void exportStatServiceSettlementAmounts(
 			ListStatServiceSettlementAmountsCommand cmd, HttpServletResponse response) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, -1);
-		Long startDate = cmd.getStartDate();
-		Long endDate = cmd.getEndDate();
-		if(null == startDate || null == endDate){
-			startDate = calendar.getTimeInMillis();
-			endDate = calendar.getTimeInMillis();
-		}
-		
-		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
-		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
-		
-		Condition cond = null;
-		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
-			cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(cmd.getNamespaceId());
-		}
-		
-		if(!StringUtils.isEmpty(cmd.getCommunityId())){
-			if(null == cond)
-				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId());
-			else
-				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
-		}
 		
 		List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs = this.listStatServiceSettlementAmounts(cmd);
 		
@@ -474,21 +530,21 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		return "其他服务";
 	}
 	
-	private String getResourceName(String resourceType, String resourceName){
-		if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.SHOP){
-			return resourceName;
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PARKING_RECHARGE){
-			return "停车充值";
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PAYMENT_CARD){
-			return "一卡通";
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PMSY){
-			return "物业缴费";
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.RENTAL_SITE){
-			return "资源预定";
-		}
-		
-		return "其他服务";
-	}
+//	private String getResourceName(String resourceType, String resourceName){
+//		if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.SHOP){
+//			return resourceName;
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PARKING_RECHARGE){
+//			return "停车充值";
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PAYMENT_CARD){
+//			return "一卡通";
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PMSY){
+//			return "物业缴费";
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.RENTAL_SITE){
+//			return "资源预定";
+//		}
+//		
+//		return "其他服务";
+//	}
 	
 	/**
 	 * 按天生成结算
@@ -803,6 +859,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != user){
 					order.setNamespaceId(user.getNamespaceId());
 				}
+			}else{
+				order.setNamespaceId(1000000);
 			}
 			order.setShopType(bizPaidOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
@@ -829,6 +887,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != user){
 					order.setNamespaceId(user.getNamespaceId());
 				}
+			}else{
+				order.setNamespaceId(1000000);
 			}
 			order.setShopType(bizRefundOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
@@ -1084,6 +1144,9 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}else{
 				statTransaction.setCommunityId(0L);
 				statTransaction.setNamespaceId(0);
+				statTransaction.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
+				statTransaction.setResourceId("-1");
+				statTransaction.setPayerUid(0L);
 			}
 			statTransaction.setPaidDate(DateUtil.dateToStr(new Date(paidTransaction.getPaidTime()), DateUtil.YMR_SLASH));
 			statTransactionProvider.createStatTransaction(statTransaction);
@@ -1283,9 +1346,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			
 			StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), statRefund.getResourceType());
 			
-			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidRefund.getOrderType())){
-				statRefund.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
-			}
 			
 			if(null != statOrder){
 				statRefund.setCommunityId(statOrder.getCommunityId());
@@ -1301,7 +1361,15 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				}
 			}else{
 				statRefund.setCommunityId(0L);
-				statRefund.setNamespaceId(0);
+				statRefund.setNamespaceId(1000000);
+				statRefund.setResourceId("-1");
+				statRefund.setPayerUid(0L);
+			}
+			
+			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidRefund.getOrderType())){
+				statRefund.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+			}else{
+				statRefund.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
 			}
 			statRefund.setRefundDate(DateUtil.dateToStr(new Date(paidRefund.getRefundTime()), DateUtil.YMR_SLASH));
 			statTransactionProvider.createStatRefund(statRefund);

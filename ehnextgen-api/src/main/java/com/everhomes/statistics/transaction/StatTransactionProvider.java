@@ -82,4 +82,8 @@ public interface StatTransactionProvider {
 	
 	StatServiceSettlementResult getStatServiceSettlementResultTotal(Condition cond, String startDate, String endDate);
 	
+	List<StatService> listStatServices(Integer namespaceId, String ownerType, Long ownerId);
+	
+	List<StatService> listStatServiceGroupByServiceTypes();
+	
 }
