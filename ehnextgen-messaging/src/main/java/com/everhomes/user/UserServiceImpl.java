@@ -2938,7 +2938,7 @@ public class UserServiceImpl implements UserService {
         return resp;
     }
     
-    private void sendMessageToUser(Long userId, String body, MessagingConstants flag) {
+    private void sendMessageToUser(Integer namespaceId, Long userId, String body, MessagingConstants flag) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
@@ -2955,7 +2955,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public String sendMessageTest(SendMessageTestCommand cmd) {
         String body = "test message " + Double.valueOf(Math.random());
-        sendMessageToUser(cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = 0;
+        }
+        sendMessageToUser(namespaceId, cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
         return body;
     }
     
@@ -2969,7 +2973,11 @@ public class UserServiceImpl implements UserService {
         msg.setContent("test push " + Double.valueOf(Math.random()));
         msg.setMetaAppId(AppConstants.APPID_MESSAGING);
         msg.setCreateTime(System.currentTimeMillis());
-        msg.setNamespaceId(cmd.getNamespaceId());
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = 0;
+        }
+        msg.setNamespaceId(namespaceId);
         
         Map<String, String> meta = new HashMap<String, String>();
         meta.put("bodyType", "TEXT");
