@@ -116,28 +116,4 @@ public class LiveCheckController extends ControllerBase {
         
         return "livecheck/login-detail";
     }
-    
-    @RequestMapping("loginMessage")
-    @RestReturn(FetchMessageCommandResponse.class)
-    @RequireAuthentication(value=true)
-    public RestResponse loginMessages(@Valid FetchRecentToPastMessageAdminCommand cmd) {
-        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
-                UserContext.current().getUser().getId(), Privilege.Write, null)) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
-        }
-
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        
-        List<UserLogin> logins = userService.listUserLogins(cmd.getUserId());
-        for(UserLogin login: logins) {
-            if(login.getLoginId() == cmd.getLoginId().intValue()) {
-                FetchMessageCommandResponse cmdResponse = this.messageServce.fetchRecentToPastMessagesAny(cmd);
-                response.setResponseObject(cmdResponse);
-            }
-        }
-        
-        return response;
-    }
 }
