@@ -65,6 +65,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMenuResponse;
 import com.everhomes.rest.organization.PmManagementCommunityDTO;
 import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
@@ -497,7 +498,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>获取层级菜单</p>
      */
     @RequestMapping("listAllChildrenOrganizations")
-    @RestReturn(value=OrganizationDTO.class, collection=true)
+    @RestReturn(value=OrganizationMenuResponse.class)
     public RestResponse listAllChildrenOrganizations(@Valid ListAllChildrenOrganizationsCommand cmd) {
         RestResponse response = new RestResponse(organizationService.listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag()));
         response.setErrorCode(ErrorCodes.SUCCESS);

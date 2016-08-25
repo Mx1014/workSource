@@ -201,10 +201,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	}
 
-	private void setTaskStatus(String ownerType, Long ownerId, Long id, String content, List<AttachmentDescriptor> attachments, Byte status) {
+	private void setTaskStatus(String ownerType, Long ownerId, PmTask task, String content, List<AttachmentDescriptor> attachments, Byte status) {
 		checkOwnerIdAndOwnerType(ownerType, ownerId);
-		checkId(id);
-		PmTask task = checkPmTask(id);
+		
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(status);
@@ -230,14 +229,28 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void completeTask(CompleteTaskCommand cmd) {
-		setTaskStatus(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId(), cmd.getContent(), 
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode() ){
+			LOGGER.error("Task cannot be completed.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be completed.");
+		}
+		setTaskStatus(cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
 				cmd.getAttachments(), PmTaskStatus.PROCESSED.getCode());
 		
 	}
 
 	@Override
 	public void closeTask(CloseTaskCommand cmd) {
-		setTaskStatus(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId(), cmd.getContent(), 
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode()){
+			LOGGER.error("Task cannot be closed.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be closed.");
+		} 
+		setTaskStatus(cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
 				null, PmTaskStatus.OTHER.getCode());
 		
 	}
@@ -248,6 +261,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
+		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+			LOGGER.error("Task cannot be canceled.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be canceled.");
+		}
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(PmTaskStatus.INACTIVE.getCode());
