@@ -62,11 +62,7 @@ public class HttpRestCallProviderImpl implements HttpRestCallProvider {
         
         params.put("appKey", this.appKey);
         String signature = SignatureHelper.computeSignature(params, this.secretKey);
-        try {
-            params.put("signature", URLEncoder.encode(signature, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("signature failed", e);
-        }
+        params.put("signature", signature);
         
         MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
         for(Map.Entry<String, String> entry: params.entrySet()) {
@@ -87,7 +83,7 @@ public class HttpRestCallProviderImpl implements HttpRestCallProvider {
         
         params.put("appKey", this.appKey);
         String signature = SignatureHelper.computeSignature(params, this.secretKey);
-        params.put("signature", URLEncoder.encode(signature, "UTF-8"));
+        params.put("signature", signature);
         
         MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
         for(Map.Entry<String, String> entry: params.entrySet()) {
