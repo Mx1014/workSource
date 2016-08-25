@@ -781,7 +781,7 @@ public class BannerServiceImpl implements BannerService {
         }
         
         for(BannerDTO dto : result) {
-        	dto.setPosterPath(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
+        	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
         }
         
 		bannerDTOSort(result);

@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 名称</li>
  * <li>vendorTag: 左邻系统或第三方服务标签标识</li>
  * <li>posterPath: 图片路径</li>
+ * <li>posterUrl:  图片链接</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
@@ -39,6 +40,7 @@ public class BannerDTO {
     private String   name;
     private String   vendorTag;
     private String   posterPath;
+    private String   posterUrl;
     private Byte    actionType;
     private String  actionData;
     private Timestamp startTime;
@@ -72,6 +74,12 @@ public class BannerDTO {
     public String getScopeType() {
         return scopeType;
     }
+	public String getPosterUrl() {
+		return posterUrl;
+	}
+	public void setPosterUrl(String posterUrl) {
+		this.posterUrl = posterUrl;
+	}
 	public String getSceneType() {
 		return sceneType;
 	}
