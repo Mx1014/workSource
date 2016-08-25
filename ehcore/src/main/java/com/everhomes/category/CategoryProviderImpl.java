@@ -49,12 +49,10 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
     
-    //查询物业任务分类 update by sw 20160817
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories"),
-            @CacheEvict(value="listTaskCategories") })
+            @CacheEvict(value="listBusinessSubCategories")})
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -79,8 +77,7 @@ public class CategoryProviderImpl implements CategoryProvider {
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories"),
-            @CacheEvict(value="listTaskCategories")})
+            @CacheEvict(value="listBusinessSubCategories")})
     @Override
     public void updateCategory(Category category) {
         assert(category.getId() != null);
@@ -96,8 +93,7 @@ public class CategoryProviderImpl implements CategoryProvider {
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories"),
-            @CacheEvict(value="listTaskCategories")})
+            @CacheEvict(value="listBusinessSubCategories")})
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -367,8 +363,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         return categoryIds;
     }
     
-    //查询物业任务分类 add by sw 20160817
-    @Cacheable(value = "listTaskCategories", unless="#result.size() == 0")
+//    @Cacheable(value = "listTaskCategories", unless="#result.size() == 0")
 	@Override
 	public List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, 
 			Long pageAnchor, Integer pageSize){

@@ -13,9 +13,6 @@ import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -40,7 +37,6 @@ import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
 import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
-import com.everhomes.server.schema.tables.records.EhPmTaskStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTasksRecord;
 import com.everhomes.util.ConvertHelper;
 
@@ -53,7 +49,7 @@ public class PmProviderImpl implements PmTaskProvider{
 	@Autowired
     private DbProvider dbProvider;
 	
-	@Caching(evict = { @CacheEvict(value="listPmTask") })
+//	@Caching(evict = { @CacheEvict(value="listPmTask") })
 	@Override
     public void createTask(PmTask pmTask){
     	long id = sequenceProvider.getNextSequence(NameMapper
@@ -65,9 +61,9 @@ public class PmProviderImpl implements PmTaskProvider{
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTasks.class, null);
     }
 	
-	@Caching(evict = { 
-			@CacheEvict(value="PmTask", key="#pmTask.id"),
-			@CacheEvict(value="listPmTask")})
+//	@Caching(evict = { 
+//			@CacheEvict(value="PmTask", key="#pmTask.id")
+//			/*@CacheEvict(value="listPmTask")*/})
 	@Override
     public void updateTask(PmTask pmTask){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -98,7 +94,7 @@ public class PmProviderImpl implements PmTaskProvider{
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskAttachments.class, null);
     }
     
-	@Cacheable(value="PmTask", key="#id", unless="#result == null")
+//	@Cacheable(value="PmTask", key="#id", unless="#result == null")
 	@Override
     public PmTask findTaskById(Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
@@ -138,7 +134,7 @@ public class PmProviderImpl implements PmTaskProvider{
         return result;
 	}
 	//查询管理员已办任务，未办任务， 用户发的任务
-	@Cacheable(value="listPmTask", unless="#result.size() == 0")
+//	@Cacheable(value="listPmTask",key="{#ownerType, #ownerId, #userId, #status}", unless="#result.size() == 0")
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
