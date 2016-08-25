@@ -260,7 +260,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     @Autowired
     private LocaleTemplateService localeTemplateService;
     
-    private final Long MILLISECONDGMT=8*3600*1000L;
+    private static final Long MILLISECONDGMT=8*3600*1000L;
 	// N分钟后取消
 	private Long cancelTime = 15 * 60 * 1000L;
 	
@@ -2133,6 +2133,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 	}
+	/**
+	 * 取某个场所,某段时间的单元格
+	 * */
+	List<RentalCell> findRentalSiteRuleByDate(Long rentalSiteId,
+			String siteNumber, Timestamp beginTime, Timestamp endTime,
+			List<Byte> ampmList, String rentalDate){
+		List<RentalCell>  result = new ArrayList<RentalCell>();
+		//TODO:
+		return result;
+	}
+			
 	/**
 	 * 取某个场所,某段时间的单元格
 	 * */
