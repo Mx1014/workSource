@@ -2969,7 +2969,11 @@ public class UserServiceImpl implements UserService {
         msg.setContent("test push " + Double.valueOf(Math.random()));
         msg.setMetaAppId(AppConstants.APPID_MESSAGING);
         msg.setCreateTime(System.currentTimeMillis());
-        msg.setNamespaceId(cmd.getNamespaceId());
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = 0;
+        }
+        msg.setNamespaceId(namespaceId);
         
         Map<String, String> meta = new HashMap<String, String>();
         meta.put("bodyType", "TEXT");

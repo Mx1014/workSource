@@ -50,6 +50,7 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachm
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
@@ -297,6 +298,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STANDARD_ID.eq(standardId));
+		
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STATUS.ne(EquipmentStatus.INACTIVE.getCode()));
 		 
 		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
 		query.fetch().map((r) -> {
@@ -520,7 +523,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if(locator.getAnchor() != null && locator.getAnchor() != 0L){
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.lt(locator.getAnchor()));
             }
-            
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.STATUS.ne((byte) 0));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.desc());
             query.addLimit(pageSize - accessories.size());
             
@@ -698,6 +701,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
 		if(targetType != null && targetType.size() > 0)
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_TYPE.in(targetType));
 		
@@ -777,6 +781,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if(standardIds != null && standardIds.size() > 0)
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
             
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
             
@@ -813,6 +818,28 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		
 		return standardIds;
+	}
+
+	@Override
+	public List<EquipmentInspectionAccessoryMap> listAccessoryMapByEquipmentId(
+			Long equipmentId) {
+		List<EquipmentInspectionAccessoryMap> map = new ArrayList<EquipmentInspectionAccessoryMap>();
+		
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionAccessoryMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORY_MAP.EQUIPMENT_ID.eq(equipmentId));
+		 
+		query.fetch().map((r) -> {
+				
+			map.add(ConvertHelper.convert(r, EquipmentInspectionAccessoryMap.class));
+            return null;
+        });
+		
+		if(map.size()==0)
+			return null;
+		
+        return map;
 	}
 
 }
