@@ -137,6 +137,7 @@ public interface UserService {
     String sendMessageTest(SendMessageTestCommand cmd);
     String pushMessageTest(SendMessageTestCommand cmd);
     BorderListResponse listBorders();
+
     UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
     SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
 }
