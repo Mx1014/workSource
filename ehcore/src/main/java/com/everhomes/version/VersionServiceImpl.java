@@ -190,7 +190,11 @@ public class VersionServiceImpl implements VersionService {
 	@Override
 	public List<VersionRealmDTO> listVersionRealm() {
 		List<VersionRealm> list = versionProvider.listVersionRealm();
-		return list.stream().map(v->ConvertHelper.convert(v, VersionRealmDTO.class)).collect(Collectors.toList());
+		return list.stream().map(v->{
+			VersionRealmDTO versionRealmDTO = ConvertHelper.convert(v, VersionRealmDTO.class);
+			versionRealmDTO.setRealmId(v.getId());
+			return versionRealmDTO;
+			}).collect(Collectors.toList());
 	}
 
 	@Override
@@ -230,13 +234,14 @@ public class VersionServiceImpl implements VersionService {
 			rule.setMatchingUpperBound(versionRange.getUpperBound());
 			rule.setOrder(0);
 			rule.setTargetVersion(cmd.getTargetVersion());
+			rule.setForceUpgrade(cmd.getForceUpgrade());
 			rule.setNamespaceId(realm.getNamespaceId());
 			versionProvider.createVersionUpgradeRule(rule);
 			
 			VersionUrl url = new VersionUrl();
 			url.setRealmId(cmd.getRealmId());
 			url.setTargetVersion(cmd.getTargetVersion());
-			url.setDownloadUrl(cmd.getDownloadUrl());
+			url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
 			url.setUpgradeDescription(cmd.getUpgradeDescription());
 			url.setNamespaceId(realm.getNamespaceId());
 			versionProvider.createVersionUrl(url);
@@ -245,6 +250,7 @@ public class VersionServiceImpl implements VersionService {
 			versionInfoDTO.setDescription(realm.getDescription());
 			versionInfoDTO.setId(rule.getId());
 			versionInfoDTO.setUrlId(url.getId());
+			versionInfoDTO.setDownloadUrl(url.getDownloadUrl());
 			
 			return true;
 		});
@@ -254,6 +260,10 @@ public class VersionServiceImpl implements VersionService {
 
 	@Override
 	public VersionInfoDTO updateVersion(UpdateVersionCommand cmd) {
+		if (cmd.getRealmId() == null || cmd.getId() == null || cmd.getUrlId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: cmd="+cmd);
+		}
 		VersionRealm realm = versionProvider.findVersionRealmById(cmd.getRealmId());
 		if(realm == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -287,13 +297,14 @@ public class VersionServiceImpl implements VersionService {
 			
 			url.setRealmId(cmd.getRealmId());
 			url.setTargetVersion(cmd.getTargetVersion());
-			url.setDownloadUrl(cmd.getDownloadUrl());
+			url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
 			url.setUpgradeDescription(cmd.getUpgradeDescription());
 			url.setNamespaceId(realm.getNamespaceId());
 			versionProvider.updateVersionUrl(url);
 			
 			versionInfoDTO.setRealm(realm.getRealm());
 			versionInfoDTO.setDescription(realm.getDescription());
+			versionInfoDTO.setDownloadUrl(url.getDownloadUrl());
 			
 			return true;
 		});
@@ -303,6 +314,10 @@ public class VersionServiceImpl implements VersionService {
 
 	@Override
 	public void deleteVersionById(DeleteVersionCommand cmd) {
+		if (cmd.getId() == null || cmd.getUrlId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: cmd="+cmd);
+		}
 		VersionUpgradeRule rule = versionProvider.findVersionUpgradeRuleById(cmd.getId());
 		if (rule == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -328,4 +343,10 @@ public class VersionServiceImpl implements VersionService {
 		});
 	}
 
+	private String processUrl(String url){
+		if (url.startsWith("http:") || url.startsWith("${")) {
+			return url;
+		}
+		return "${homeurl}"+url;
+	}
 }
