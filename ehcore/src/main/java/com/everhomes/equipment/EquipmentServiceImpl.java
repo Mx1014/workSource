@@ -2219,6 +2219,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				standard.setOwnerId(cmd.getOwnerId());
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
 				
+				standard.setCreatorUid(userId);
+				standard.setOperatorUid(userId);
 				LOGGER.info("add standard");
 				equipmentProvider.creatEquipmentStandard(standard);
 				equipmentStandardSearcher.feedDoc(standard);
@@ -2250,6 +2252,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setTargetId(cmd.getTargetId());
 				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
 				
+				equipment.setCreatorUid(userId);
+				equipment.setOperatorUid(userId);
 				LOGGER.info("add equipment");
 				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
 				equipmentSearcher.feedDoc(equipment);
