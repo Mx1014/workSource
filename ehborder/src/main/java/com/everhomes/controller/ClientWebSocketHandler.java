@@ -105,8 +105,18 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         }
         else if (message instanceof PongMessage) {
             handlePongMessage(session, (PongMessage) message);
-        }
-        else {
+        } else if (message instanceof PingMessage) {
+            LOGGER.info("Got ping message from " + session.getId());
+            PongMessage msg = new PongMessage();
+            try {
+                synchronized(session) {
+                    session.sendMessage(msg);
+                }
+                updateSessionSendTick(session);
+            } catch(IOException e) {
+                LOGGER.warn("Unable to send imessage to " + session.getRemoteAddress().toString(), e);
+            }
+        } else {
             throw new IllegalStateException("Unexpected WebSocket message type: " + message);
         }
     }
@@ -430,8 +440,11 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     
     private void updateSessionSendTick(WebSocketSession session) {
         SessionStats stats = this.sessionStatsMap.get(session);
-        if(stats != null)
+        if(stats != null) {
             stats.updateSendTick();
+            stats.updatePeerReceiveTick();//tick here, fix for pong timeout error   
+        }
+            
     }
     
     private void updateSessionReceiveTick(WebSocketSession session) {
