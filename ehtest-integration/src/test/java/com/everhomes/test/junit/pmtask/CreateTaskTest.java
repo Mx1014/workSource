@@ -15,6 +15,8 @@ import org.junit.Test;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.pmtask.AssignTaskCommand;
+import com.everhomes.rest.pmtask.CompleteTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryRestResponse;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
@@ -72,8 +74,8 @@ public class CreateTaskTest extends BaseLoginAuthTestCase {
         assertTrue("The user info should be get from server, response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
-        DSLContext context = dbProvider.getDslContext();
-		SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+        DSLContext dslcontext = dbProvider.getDslContext();
+		SelectQuery<EhPmTasksRecord> query = dslcontext.selectQuery(Tables.EH_PM_TASKS);
     	
         query.addConditions(Tables.EH_PM_TASKS.ID.eq(response.getResponse().getId()));
        
@@ -83,6 +85,42 @@ public class CreateTaskTest extends BaseLoginAuthTestCase {
         
         assertEquals(result.getContent(), dto.getContent());
         assertEquals(result.getStatus().byteValue(), (byte)1);
+        //分配任务
+        AssignTaskCommand cmd2 = new AssignTaskCommand();
+        cmd2.setOwnerType(ownerType);
+        cmd2.setOwnerId(ownerId);
+        cmd2.setId(dto.getId());
+        cmd2.setTargetId(1205L);
+        
+        String commandRelativeUri2 = "/pmtask/assignTask";
+        RestResponse response2 = httpClientService.restGet(commandRelativeUri2, cmd2, RestResponse.class,context);
+        
+        assertNotNull("The reponse of getting card issuer may not be null", response2);
+        assertTrue("The user info should be get from server, response=" + 
+            StringHelper.toJsonString(response2), httpClientService.isReponseSuccess(response2));
+        
+        EhPmTasks result2 = ConvertHelper.convert(query.fetchOne(), EhPmTasks.class);
+        assertEquals(result2.getContent(), dto.getContent());
+        assertEquals(result2.getStatus().byteValue(), (byte)2);
+        
+        
+        //完成任务
+        CompleteTaskCommand cmd3 = new CompleteTaskCommand();
+        cmd3.setOwnerType(ownerType);
+        cmd3.setOwnerId(ownerId);
+        cmd3.setId(dto.getId());
+        cmd3.setContent("测试测试测试");
+        
+        String commandRelativeUri3 = "/pmtask/completeTask";
+        RestResponse response3 = httpClientService.restGet(commandRelativeUri3, cmd3, RestResponse.class,context);
+        
+        assertNotNull("The reponse of getting card issuer may not be null", response3);
+        assertTrue("The user info should be get from server, response=" + 
+            StringHelper.toJsonString(response3), httpClientService.isReponseSuccess(response3));
+        
+        EhPmTasks result3 = ConvertHelper.convert(query.fetchOne(), EhPmTasks.class);
+        assertEquals(result3.getContent(), dto.getContent());
+        assertEquals(result3.getStatus().byteValue(), (byte)3);
         
     }
     
