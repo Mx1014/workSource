@@ -1551,6 +1551,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         if(null != equipment) {
         	dto.setEquipmentName(equipment.getName());
         	dto.setEquipmentLocation(equipment.getLocation());
+        	dto.setQrCodeFlag(equipment.getQrCodeFlag());
         }
         
     	Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
