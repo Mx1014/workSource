@@ -256,6 +256,9 @@ public interface Rentalv2Provider {
 
 	void batchCreateRentalCells(List<EhRentalv2Cells> list);
 
+
+	RentalCell getRentalCellById(Long cellId);
+
  
 
  

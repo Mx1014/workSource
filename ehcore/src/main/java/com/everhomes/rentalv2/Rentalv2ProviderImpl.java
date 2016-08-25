@@ -1719,6 +1719,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public RentalCell getRentalCellById(Long cellId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
+		EhRentalv2Cells order = dao.findById(cellId);
+		return ConvertHelper.convert(order, RentalCell.class);
+	}
+	
+	@Override
 	public void createRentalResourceType(RentalResourceType rentalResourceType) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2ResourceTypes.class));
 		rentalResourceType.setId(id); 
