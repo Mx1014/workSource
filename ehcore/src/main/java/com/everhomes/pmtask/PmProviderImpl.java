@@ -143,12 +143,16 @@ public class PmProviderImpl implements PmTaskProvider{
         SelectJoinStep<Record> query = context.select().from(Tables.EH_PM_TASKS);
         Condition condition = Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType);
         condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
-        	
+        
+        if(null != pageAnchor && pageAnchor != 0)
+        	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+        
         if(null != status && status.equals(PmTaskProcessStatus.UNPROCESSED.getCode())){
         	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
         	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.UNPROCESSED.getCode())
         			.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId))));
+        	query.groupBy(Tables.EH_PM_TASKS.ID);
 //    		query.addJoin(Tables.EH_PM_TASK_LOGS, Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
 //    		query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.UNPROCESSED.getCode())
 //    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
@@ -160,7 +164,7 @@ public class PmProviderImpl implements PmTaskProvider{
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
     				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
     				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.OTHER.getCode())));
-    		
+    		query.groupBy(Tables.EH_PM_TASKS.ID);
 //    		query.addJoin(Tables.EH_PM_TASK_LOGS, Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
 //    		query.addConditions((Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
 //    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
@@ -171,8 +175,7 @@ public class PmProviderImpl implements PmTaskProvider{
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
     	}
         
-        if(null != pageAnchor && pageAnchor != 0)
-        	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+        
         query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.asc());
         if(null != pageSize)
         	query.limit(pageSize);
