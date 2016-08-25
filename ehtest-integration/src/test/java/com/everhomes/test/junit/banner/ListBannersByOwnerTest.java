@@ -50,7 +50,8 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 	    List<BannerDTO> banners = resp.getResponse().getBanners();
 		assertEquals(5, banners.size());
 	    banners.forEach(r -> {
-	    	assertTrue(r.getPosterPath().startsWith("http://"));
+	    	assertTrue(r.getPosterUrl().startsWith("http://"));
+	    	assertTrue(r.getPosterPath().startsWith("cs://"));
 	    });
 	    
 	    // 测试顺序
