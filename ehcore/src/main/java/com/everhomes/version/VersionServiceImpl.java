@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.version.CreateVersionCommand;
 import com.everhomes.rest.version.DeleteVersionCommand;
+import com.everhomes.rest.version.GetUpgradeContentCommand;
+import com.everhomes.rest.version.GetUpgradeContentResponse;
 import com.everhomes.rest.version.ListVersionInfoCommand;
 import com.everhomes.rest.version.ListVersionInfoResponse;
 import com.everhomes.rest.version.UpdateVersionCommand;
@@ -139,6 +142,11 @@ public class VersionServiceImpl implements VersionService {
         	return resp;
         }
         
+        //如果InfoUrl为空则从configuration表中取
+        if(StringUtils.isBlank(versionUrl.getInfoUrl())){
+        	versionUrl.setInfoUrl("${homeurl}"+getUpgradeUrl()+"?id="+versionUrl.getId());
+        }
+        
         VersionUrlResponse response = new VersionUrlResponse();
         Map<String, String> params = new HashMap<String, String>();
         if(cmd.getLocale() == null || cmd.getLocale().isEmpty())
@@ -172,6 +180,12 @@ public class VersionServiceImpl implements VersionService {
         if(versionUrl == null)
             throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_VERSION_URL_SET, 
                     "No version URLs has been setup yet");
+        
+
+        //如果InfoUrl为空则从configuration表中取
+        if(StringUtils.isBlank(versionUrl.getInfoUrl())){
+        	versionUrl.setInfoUrl("${homeurl}"+getUpgradeUrl()+"?id="+versionUrl.getId());
+        }
         
         VersionUrlResponse response = new VersionUrlResponse();
         Map<String, String> params = new HashMap<String, String>();
@@ -348,5 +362,21 @@ public class VersionServiceImpl implements VersionService {
 			return url;
 		}
 		return "${homeurl}"+url;
+	}
+
+	@Override
+	public GetUpgradeContentResponse getUpgradeContent(GetUpgradeContentCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: cmd="+cmd);
+		}
+		
+		VersionUrl versionUrl = versionProvider.findVersionUrlById(cmd.getId());
+		
+		return ConvertHelper.convert(versionUrl, GetUpgradeContentResponse.class);
+	}
+	
+	private String getUpgradeUrl(){
+		return configurationProvider.getValue(ConfigConstants.UPGRADE_URL, "");
 	}
 }

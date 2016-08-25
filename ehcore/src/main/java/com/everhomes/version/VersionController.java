@@ -1,5 +1,7 @@
 package com.everhomes.version;
 
+import java.sql.Timestamp;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -13,6 +15,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.version.CreateVersionCommand;
 import com.everhomes.rest.version.DeleteVersionCommand;
+import com.everhomes.rest.version.GetUpgradeContentCommand;
+import com.everhomes.rest.version.GetUpgradeContentResponse;
 import com.everhomes.rest.version.ListVersionInfoCommand;
 import com.everhomes.rest.version.ListVersionInfoResponse;
 import com.everhomes.rest.version.UpdateVersionCommand;
@@ -22,6 +26,7 @@ import com.everhomes.rest.version.VersionRealmDTO;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.fasterxml.jackson.annotation.JsonFormat.Value;
 
@@ -65,4 +70,14 @@ public class VersionController extends ControllerBase {
         return new RestResponse(cmdResponse);
     }
     
+    /**
+     * 
+     * <b>URL: /version/getUpgradeContent</b>
+     * <p>获取升级内容</p>
+     */
+    @RequestMapping("getUpgradeContent")
+    @RestReturn(GetUpgradeContentResponse.class)
+    public RestResponse getUpgradeContent(GetUpgradeContentCommand cmd){
+    	return new RestResponse(versionService.getUpgradeContent(cmd));
+    }
 }
