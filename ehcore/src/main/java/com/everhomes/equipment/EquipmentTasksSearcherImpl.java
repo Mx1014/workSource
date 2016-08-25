@@ -199,6 +199,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             if(null != equipment) {
             	dto.setEquipmentName(equipment.getName());
             	dto.setEquipmentLocation(equipment.getLocation());
+            	dto.setQrCodeFlag(equipment.getQrCodeFlag());
             }
             
             if(task.getExecutorId() != null && task.getExecutorId() != 0) {
