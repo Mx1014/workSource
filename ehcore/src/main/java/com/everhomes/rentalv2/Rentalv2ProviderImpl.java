@@ -152,9 +152,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public void createRentalSiteRule(RentalCell rsr) {
-		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2Cells.class));
-		rsr.setId(id);
+//		long id = sequenceProvider.getNextSequence(NameMapper
+//				.getSequenceDomainFromTablePojo(EhRentalv2Cells.class));
+//		rsr.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2CellsRecord record = ConvertHelper.convert(rsr,
 				EhRentalv2CellsRecord.class);

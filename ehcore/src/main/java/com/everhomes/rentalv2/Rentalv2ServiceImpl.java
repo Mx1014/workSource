@@ -53,7 +53,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -196,7 +195,6 @@ import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
@@ -2139,8 +2137,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	List<RentalCell> findRentalSiteRuleByDate(Long rentalSiteId,
 			String siteNumber, Timestamp beginTime, Timestamp endTime,
 			List<Byte> ampmList, String rentalDate){
-		List<RentalCell>  result = new ArrayList<RentalCell>();
-		//TODO:
+		List<RentalCell>  result = new ArrayList<RentalCell>(); 
+		for(RentalCell cell : cellList.get()){
+			if (null != rentalSiteId && !rentalSiteId.equals(cell.getRentalResourceId()))
+				continue;
+			if (null != siteNumber && !siteNumber.equals(cell.getResourceNumber()))
+				continue; 
+			if (null != beginTime && null !=cell.getBeginTime() && cell.getBeginTime().before(beginTime))
+				continue;
+			if (null != endTime && null !=cell.getEndTime() && cell.getEndTime().after(endTime))
+				continue; 
+			if (null != ampmList && !ampmList.contains(cell.getAmorpm()))
+				continue; 
+			if (null != siteNumber && !siteNumber.equals(cell.getResourceNumber()))
+				continue; 
+			if (null != rentalDate && !rentalDate.equals(dateSF.format(cell.getResourceRentalDate())))
+				continue; 
+			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
+			RentalCell dbCell = this.rentalProvider.getRentalCellById(cell.getId());
+			if(null != dbCell )
+				cell = dbCell;
+			result.add(cell);
+			
+		}
 		return result;
 	}
 			
@@ -4155,14 +4174,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void updateRSRs(List<RentalCell> changeRentalSiteRules, UpdateRentalSiteRulesAdminCommand cmd){
 		if(null==changeRentalSiteRules || changeRentalSiteRules.size()==0)
 			return;
-		for(RentalCell rsr : changeRentalSiteRules){
-			rsr.setPrice(cmd.getPrice());
-			rsr.setOriginalPrice(cmd.getOriginalPrice());
-			rsr.setHalfresourcePrice(cmd.getHalfsitePrice());
-			rsr.setHalfresourceOriginalPrice(cmd.getHalfsiteOriginalPrice());
-			rsr.setStatus(cmd.getStatus());
-			rsr.setCounts(cmd.getCounts());
-			this.rentalProvider.updateRentalSiteRule(rsr);
+		for(RentalCell cell : changeRentalSiteRules){
+			cell.setPrice(cmd.getPrice());
+			cell.setOriginalPrice(cmd.getOriginalPrice());
+			cell.setHalfresourcePrice(cmd.getHalfsitePrice());
+			cell.setHalfresourceOriginalPrice(cmd.getHalfsiteOriginalPrice());
+			cell.setStatus(cmd.getStatus());
+			cell.setCounts(cmd.getCounts());
+			RentalCell dbCell = this.rentalProvider.getRentalCellById(cell.getId());
+			if(null == dbCell)
+				this.rentalProvider.createRentalSiteRule(cell);
+			else
+				this.rentalProvider.updateRentalSiteRule(cell);
 		}
 	}
 	@Override
@@ -4190,28 +4213,95 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 			List<RentalCell> changeRentalSiteRules= null;
-			//查询rs，判断是按日按小时还是按半天
-			try {
-				if(cmd.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())){
-				//当天的
+			if(cmd.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())){
+			//当天的
+			
+				if(rs.getRentalType().equals(RentalType.HOUR.getCode()))
+					{
+						//按小时
+						Timestamp beginTime = Timestamp.valueOf(dateSF.format(choseRSR.getBeginTime().getTime())+ " "
+								+ String.valueOf( cmd.getBeginTime().intValue())
+								+ ":"
+								+ String.valueOf((int) ((cmd.getBeginTime() % 1) * 60))
+								+ ":00");
+						Timestamp endTime = Timestamp.valueOf(dateSF.format(choseRSR.getBeginTime().getTime())+ " "
+								+ String.valueOf(cmd.getEndTime().intValue())
+								+ ":"
+								+ String.valueOf((int) ((cmd.getEndTime() % 1) * 60))
+								+ ":00");
+						changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),beginTime,endTime,
+								null, dateSF.format(choseRSR.getResourceRentalDate()));
+					}
 				
-					if(rs.getRentalType().equals(RentalType.HOUR.getCode()))
-						{
-							//按小时
-							Timestamp beginTime = Timestamp.valueOf(dateSF.format(choseRSR.getBeginTime().getTime())+ " "
-									+ String.valueOf( cmd.getBeginTime().intValue())
-									+ ":"
-									+ String.valueOf((int) ((cmd.getBeginTime() % 1) * 60))
-									+ ":00");
-							Timestamp endTime = Timestamp.valueOf(dateSF.format(choseRSR.getBeginTime().getTime())+ " "
-									+ String.valueOf(cmd.getEndTime().intValue())
-									+ ":"
-									+ String.valueOf((int) ((cmd.getEndTime() % 1) * 60))
-									+ ":00");
-							changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),beginTime,endTime,
-									null, dateSF.format(choseRSR.getResourceRentalDate()));
-						}
+				else if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
+					List<Byte> ampmList = new ArrayList<Byte>();
+					//0早上1下午2晚上
+					if(AmorpmFlag.AM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.AM.getCode()<=cmd.getEndTime())
+						ampmList.add(AmorpmFlag.AM.getCode());
+					if(AmorpmFlag.PM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.PM.getCode()<=cmd.getEndTime())
+						ampmList.add(AmorpmFlag.PM.getCode());
 					
+					changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+							ampmList,dateSF.format(choseRSR.getResourceRentalDate()));
+				}
+				else if(rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+					List<Byte> ampmList = new ArrayList<Byte>();
+					//0早上1下午2晚上
+					if(AmorpmFlag.AM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.AM.getCode()<=cmd.getEndTime())
+						ampmList.add(AmorpmFlag.AM.getCode());
+					if(AmorpmFlag.PM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.PM.getCode()<=cmd.getEndTime())
+						ampmList.add(AmorpmFlag.PM.getCode());
+					if(AmorpmFlag.NIGHT.getCode()>=cmd.getBeginTime()&&AmorpmFlag.NIGHT.getCode()<=cmd.getEndTime())
+						ampmList.add(AmorpmFlag.NIGHT.getCode());
+					changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+							ampmList, dateSF.format(choseRSR.getResourceRentalDate()));
+				}
+				else if(rs.getRentalType().equals(RentalType.DAY.getCode())){
+					 
+					changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+							null, dateSF.format(choseRSR.getResourceRentalDate()));
+				}
+			
+				updateRSRs(changeRentalSiteRules, cmd);
+			}
+
+			else {
+				//	每天的
+				Calendar chooseCalendar = Calendar.getInstance();
+				Calendar start = Calendar.getInstance();
+				Calendar end = Calendar.getInstance();
+				chooseCalendar.setTime(new Date(choseRSR.getBeginTime().getTime()));
+				 
+				start.setTime(new Date(cmd.getBeginDate()));
+				end.setTime(new Date(cmd.getEndDate()));
+				
+				while (start.before(end)) {
+					Integer weekday = start.get(Calendar.DAY_OF_WEEK);
+					Integer monthDay = start.get(Calendar.DAY_OF_MONTH);
+					//按周循环的,如果不对就继续循环	
+					if(cmd.getLoopType().equals(LoopType.EVERYWEEK.getCode())&&
+							!weekday.equals(chooseCalendar.get(Calendar.DAY_OF_WEEK) ))
+						continue;
+					//按月循环的，如果不对就继续循环
+					if(cmd.getLoopType().equals(LoopType.EVERYMONTH.getCode())&&
+							!monthDay.equals( chooseCalendar.get(Calendar.DAY_OF_MONTH) ))
+						continue;
+					//当天的
+					if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
+						//按小时
+						Timestamp beginTime = Timestamp.valueOf(dateSF.format(start.getTime().getTime())+ " "
+								+ String.valueOf( cmd.getBeginTime().intValue())
+								+ ":"
+								+ String.valueOf((int) ((cmd.getBeginTime() % 1) * 60))
+								+ ":00");
+						Timestamp endTime = Timestamp.valueOf(dateSF.format(start.getTime().getTime())+ " "
+								+ String.valueOf(cmd.getEndTime().intValue())
+								+ ":"
+								+ String.valueOf((int) ((cmd.getEndTime() % 1) * 60))
+								+ ":00");
+						changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),beginTime,endTime,
+								null,null);
+					}
 					else if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
 						List<Byte> ampmList = new ArrayList<Byte>();
 						//0早上1下午2晚上
@@ -4219,9 +4309,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							ampmList.add(AmorpmFlag.AM.getCode());
 						if(AmorpmFlag.PM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.PM.getCode()<=cmd.getEndTime())
 							ampmList.add(AmorpmFlag.PM.getCode());
-						
-						changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
-								ampmList,dateSF.format(choseRSR.getResourceRentalDate()));
+						changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+								ampmList, dateSF.format(new java.util.Date(start.getTimeInMillis())));
 					}
 					else if(rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 						List<Byte> ampmList = new ArrayList<Byte>();
@@ -4232,92 +4321,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							ampmList.add(AmorpmFlag.PM.getCode());
 						if(AmorpmFlag.NIGHT.getCode()>=cmd.getBeginTime()&&AmorpmFlag.NIGHT.getCode()<=cmd.getEndTime())
 							ampmList.add(AmorpmFlag.NIGHT.getCode());
-						changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
-								ampmList, dateSF.format(choseRSR.getResourceRentalDate()));
+						changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+								ampmList, dateSF.format(new java.util.Date(start.getTimeInMillis())));
 					}
 					else if(rs.getRentalType().equals(RentalType.DAY.getCode())){
 						 
-						changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
-								null, dateSF.format(choseRSR.getResourceRentalDate()));
+						changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
+								null, dateSF.format(new java.util.Date(start.getTimeInMillis())));
 					}
-				
 					updateRSRs(changeRentalSiteRules, cmd);
+					start.add(Calendar.DAY_OF_MONTH, 1);
 				}
-			
-				else {
-					//	每天的
-					Calendar chooseCalendar = Calendar.getInstance();
-					Calendar start = Calendar.getInstance();
-					Calendar end = Calendar.getInstance();
-					chooseCalendar.setTime(new Date(choseRSR.getBeginTime().getTime()));
-					 
-					start.setTime(new Date(cmd.getBeginDate()));
-					end.setTime(new Date(cmd.getEndDate()));
-					
-					while (start.before(end)) {
-						Integer weekday = start.get(Calendar.DAY_OF_WEEK);
-						Integer monthDay = start.get(Calendar.DAY_OF_MONTH);
-						//按周循环的,如果不对就继续循环	
-						if(cmd.getLoopType().equals(LoopType.EVERYWEEK.getCode())&&
-								!weekday.equals(chooseCalendar.get(Calendar.DAY_OF_WEEK) ))
-							continue;
-						//按月循环的，如果不对就继续循环
-						if(cmd.getLoopType().equals(LoopType.EVERYMONTH.getCode())&&
-								!monthDay.equals( chooseCalendar.get(Calendar.DAY_OF_MONTH) ))
-							continue;
-						//当天的
-						if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
-							//按小时
-							Timestamp beginTime = Timestamp.valueOf(dateSF.format(start.getTime().getTime())+ " "
-									+ String.valueOf( cmd.getBeginTime().intValue())
-									+ ":"
-									+ String.valueOf((int) ((cmd.getBeginTime() % 1) * 60))
-									+ ":00");
-							Timestamp endTime = Timestamp.valueOf(dateSF.format(start.getTime().getTime())+ " "
-									+ String.valueOf(cmd.getEndTime().intValue())
-									+ ":"
-									+ String.valueOf((int) ((cmd.getEndTime() % 1) * 60))
-									+ ":00");
-							changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),beginTime,endTime,
-									null,null);
-						}
-						else if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
-							List<Byte> ampmList = new ArrayList<Byte>();
-							//0早上1下午2晚上
-							if(AmorpmFlag.AM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.AM.getCode()<=cmd.getEndTime())
-								ampmList.add(AmorpmFlag.AM.getCode());
-							if(AmorpmFlag.PM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.PM.getCode()<=cmd.getEndTime())
-								ampmList.add(AmorpmFlag.PM.getCode());
-							changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
-									ampmList, dateSF.format(new java.util.Date(start.getTimeInMillis())));
-						}
-						else if(rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-							List<Byte> ampmList = new ArrayList<Byte>();
-							//0早上1下午2晚上
-							if(AmorpmFlag.AM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.AM.getCode()<=cmd.getEndTime())
-								ampmList.add(AmorpmFlag.AM.getCode());
-							if(AmorpmFlag.PM.getCode()>=cmd.getBeginTime()&&AmorpmFlag.PM.getCode()<=cmd.getEndTime())
-								ampmList.add(AmorpmFlag.PM.getCode());
-							if(AmorpmFlag.NIGHT.getCode()>=cmd.getBeginTime()&&AmorpmFlag.NIGHT.getCode()<=cmd.getEndTime())
-								ampmList.add(AmorpmFlag.NIGHT.getCode());
-							changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
-									ampmList, dateSF.format(new java.util.Date(start.getTimeInMillis())));
-						}
-						else if(rs.getRentalType().equals(RentalType.DAY.getCode())){
-							 
-							changeRentalSiteRules = this.rentalProvider.findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
-									null, dateSF.format(new java.util.Date(start.getTimeInMillis())));
-						}
-						updateRSRs(changeRentalSiteRules, cmd);
-						start.add(Calendar.DAY_OF_MONTH, 1);
-					}
-				}
-			} catch (java.text.ParseException e) { 
-				e.printStackTrace();
-
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_SQL_EXCEPTION,
-						"error: parse date from string to java.sql.date"); 
 			}
 			return null;
 		});
