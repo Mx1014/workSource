@@ -2152,13 +2152,14 @@ long id = sequenceProvider.getNextSequence(key);
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-//                query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId));
                 query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));   
                 if(null != exceptionStatus)
                 	query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));   
                 if(null != userIds )
                 	query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));   
-                 
+                if(null != month)
+                	query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(month));   
                 	
                 return query;
             }
