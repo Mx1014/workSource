@@ -310,12 +310,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
 
         Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
+        String platform = null;
         if(d == null) {
-            LOGGER.error("Pushing message, dest device not found, destLogin=" + destLogin);
-            return null;
+            LOGGER.warn("Pushing message, dest device not found, using auto detect, destLogin=" + destLogin);
+            //auto detect by destLogin.getDeviceIdentifier()
+            if(destLogin.getDeviceIdentifier().indexOf(":") >= 0) {
+                platform = "android";
+            } else if(destLogin.getDeviceIdentifier().length() >= 60) {
+                platform = "iOS";
+            }
+            
+            return platform;
         }
         
-        String platform = d.getPlatform();
+        platform = d.getPlatform();
         if(platform == null || !(platform.equals("iOS") || platform.equals("android"))) {
             //platform != iOS && platform != "android", auto detect by deviceId
             if(d.getDeviceId() != null) {
