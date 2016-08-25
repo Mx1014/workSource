@@ -2938,7 +2938,7 @@ public class UserServiceImpl implements UserService {
         return resp;
     }
     
-    private void sendMessageToUser(Integer namespaceId, Long userId, String body, MessagingConstants flag) {
+    private void sendMessageToUser(Long userId, String body, MessagingConstants flag) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
@@ -2955,11 +2955,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String sendMessageTest(SendMessageTestCommand cmd) {
         String body = "test message " + Double.valueOf(Math.random());
-        Integer namespaceId = cmd.getNamespaceId();
-        if(namespaceId == null) {
-            namespaceId = 0;
-        }
-        sendMessageToUser(namespaceId, cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
+        sendMessageToUser(cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
         return body;
     }
     
