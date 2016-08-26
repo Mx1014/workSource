@@ -258,6 +258,8 @@ public class VersionServiceImpl implements VersionService {
 			url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
 			url.setUpgradeDescription(cmd.getUpgradeDescription());
 			url.setNamespaceId(realm.getNamespaceId());
+			url.setAppName(cmd.getAppName());
+			url.setPublishTime(cmd.getPublishTime());
 			versionProvider.createVersionUrl(url);
 
 			versionInfoDTO.setRealm(realm.getRealm());
@@ -274,7 +276,7 @@ public class VersionServiceImpl implements VersionService {
 
 	@Override
 	public VersionInfoDTO updateVersion(UpdateVersionCommand cmd) {
-		if (cmd.getRealmId() == null || cmd.getId() == null || cmd.getUrlId() == null) {
+		if (cmd.getRealmId() == null || cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: cmd="+cmd);
 		}
@@ -290,11 +292,11 @@ public class VersionServiceImpl implements VersionService {
 					"Not found versionUpgradeRule: cmd="+cmd);
 		}
 		
-		VersionUrl url = versionProvider.findVersionUrlById(cmd.getUrlId());
-		if (url == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Not found versionUrl: cmd="+cmd);
+		VersionUrl versionUrl = null;
+		if (cmd.getUrlId() != null) {
+			versionUrl = versionProvider.findVersionUrlById(cmd.getUrlId());
 		}
+		final VersionUrl url = versionUrl;
 		
 		VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
 		
@@ -309,12 +311,26 @@ public class VersionServiceImpl implements VersionService {
 			rule.setNamespaceId(realm.getNamespaceId());
 			versionProvider.updateVersionUpgradeRule(rule);
 			
-			url.setRealmId(cmd.getRealmId());
-			url.setTargetVersion(cmd.getTargetVersion());
-			url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
-			url.setUpgradeDescription(cmd.getUpgradeDescription());
-			url.setNamespaceId(realm.getNamespaceId());
-			versionProvider.updateVersionUrl(url);
+			if (url != null) {
+				url.setRealmId(cmd.getRealmId());
+				url.setTargetVersion(cmd.getTargetVersion());
+				url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
+				url.setUpgradeDescription(cmd.getUpgradeDescription());
+				url.setNamespaceId(realm.getNamespaceId());
+				url.setAppName(cmd.getAppName());
+				url.setPublishTime(cmd.getPublishTime());
+				versionProvider.updateVersionUrl(url);
+			}else {
+				VersionUrl url2 = new VersionUrl();
+				url2.setRealmId(cmd.getRealmId());
+				url2.setTargetVersion(cmd.getTargetVersion());
+				url2.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
+				url2.setUpgradeDescription(cmd.getUpgradeDescription());
+				url2.setNamespaceId(realm.getNamespaceId());
+				url2.setAppName(cmd.getAppName());
+				url2.setPublishTime(cmd.getPublishTime());
+				versionProvider.createVersionUrl(url2);
+			}
 			
 			versionInfoDTO.setRealm(realm.getRealm());
 			versionInfoDTO.setDescription(realm.getDescription());
@@ -328,7 +344,7 @@ public class VersionServiceImpl implements VersionService {
 
 	@Override
 	public void deleteVersionById(DeleteVersionCommand cmd) {
-		if (cmd.getId() == null || cmd.getUrlId() == null) {
+		if (cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: cmd="+cmd);
 		}
@@ -338,20 +354,22 @@ public class VersionServiceImpl implements VersionService {
 					"Not found versionUpgradeRule: cmd="+cmd);
 		}
 		
-		VersionUrl url = versionProvider.findVersionUrlById(cmd.getUrlId());
-		if (url == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Not found versionUrl: cmd="+cmd);
+		VersionUrl versionUrl = null;
+		if (cmd.getUrlId() != null) {
+			versionUrl = versionProvider.findVersionUrlById(cmd.getUrlId());
 		}
+		final VersionUrl url = versionUrl;
 		
-		if (rule.getRealmId().longValue() != url.getRealmId().longValue() || (rule.getTargetVersion() != null && !rule.getTargetVersion().equals(url.getTargetVersion()))) {
+		if (url != null && (rule.getRealmId().longValue() != url.getRealmId().longValue() || (rule.getTargetVersion() != null && !rule.getTargetVersion().equals(url.getTargetVersion())))) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"two ids are not consistent: cmd="+cmd);
 		}
 		
 		dbProvider.execute(s->{
 			versionProvider.deleteVersionUpgradeRule(rule);
-			versionProvider.deleteVersionUrl(url);
+			if (url != null) {
+				versionProvider.deleteVersionUrl(url);
+			}
 			
 			return true;
 		});

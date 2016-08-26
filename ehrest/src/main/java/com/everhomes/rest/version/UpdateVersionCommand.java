@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.version;
 
+import java.security.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,6 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>maxVersion: 版本上限</li>
  * <li>targetVersion: 目标版本</li>
  * <li>forceUpgrade: 是否强制升级，0不强制1强制</li>
+ * <li>appName: app名称</li>
+ * <li>publishTime: 发布时间</li>
  * <li>urlId: url的记录id</li>
  * <li>downloadUrl: 下载链接</li>
  * <li>upgradeDescription: 升级描述</li>
@@ -25,8 +29,26 @@ public class UpdateVersionCommand {
 	private String targetVersion;
 	private Byte forceUpgrade;
 	private Long urlId;
+	private String appName;
+	private Timestamp publishTime;
 	private String downloadUrl;
 	private String upgradeDescription;
+
+	public String getAppName() {
+		return appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+
+	public Timestamp getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(Timestamp publishTime) {
+		this.publishTime = publishTime;
+	}
 
 	public Long getUrlId() {
 		return urlId;
