@@ -2,9 +2,11 @@ package com.everhomes.rest.pmtask;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class GetPrivilegesDTO {
+	@ItemType(String.class)
 	private List<String> privileges;
 
 	public List<String> getPrivileges() {
