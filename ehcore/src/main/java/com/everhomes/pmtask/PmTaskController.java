@@ -118,7 +118,7 @@ public class PmTaskController extends ControllerBase {
      * <p>获取权限列表</p>
      */
     @RequestMapping("getPrivileges")
-    @RestReturn(value=ListTaskCategoriesResponse.class)
+    @RestReturn(value=GetPrivilegesDTO.class)
     public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
   	    GetPrivilegesDTO res = pmTaskService.getPrivileges(cmd);
         RestResponse response = new RestResponse(res);
