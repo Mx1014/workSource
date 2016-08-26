@@ -275,7 +275,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
         List<Community> results = self.findFixNearbyCommunityById(namespaceId, communityId);
         if(results == null || results.size() == 0) {
-            results = self.calculateNearbyCommunityByGeoPoints(communityId);
+            results = self.calculateNearbyCommunityByGeoPoints(communityId, namespaceId);
         }
         long endTime = System.currentTimeMillis();
         LOGGER.info("Find nearby community elapse=" + (endTime - startTime));
@@ -337,7 +337,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Cacheable(value="calNearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
     @Override
-    public List<Community> calculateNearbyCommunityByGeoPoints(Long communityId) {
+    public List<Community> calculateNearbyCommunityByGeoPoints(Long communityId, Integer namespaceId) {
         long startTime = System.currentTimeMillis();
         List<Community> results = new ArrayList<Community>();
         
@@ -352,10 +352,9 @@ public class CommunityProviderImpl implements CommunityProvider {
                     communityIds.add(p.getCommunityId());
             }
         }
-        
         communityIds.forEach((Long id) ->{
             Community community = self.findCommunityById(id);
-            if(community != null)
+            if(community != null && community.getNamespaceId().equals(namespaceId))
                 results.add(community);
         });
         
@@ -364,11 +363,11 @@ public class CommunityProviderImpl implements CommunityProvider {
             for(Community community : results) {
                 ids.add(community.getId());
             }
-            LOGGER.debug("Calculate nearby communities, communityId=" + communityId + ", nearbyCommunities=" + ids);
+            LOGGER.debug("Calculate nearby communities 20160815, communityId=" + communityId + ", nearbyCommunities=" + ids);
         }
         
         long endTime = System.currentTimeMillis();
-        LOGGER.info("Calculate nearby communities, communityId=" + communityId + ", elapse=" + (endTime - startTime));
+        LOGGER.info("Calculate nearby communities 20160815, communityId=" + communityId + ", elapse=" + (endTime - startTime));
         
         return results;
     }
@@ -719,10 +718,12 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
 		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+		Condition cond = Tables.EH_BUILDINGS.NAME.eq(buildingName);
+		cond = cond.or(Tables.EH_BUILDINGS.ALIAS_NAME.eq(buildingName));
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
 		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
+		query.addConditions(cond);
 		
         return ConvertHelper.convert(query.fetchOne(), Building.class);
 	}

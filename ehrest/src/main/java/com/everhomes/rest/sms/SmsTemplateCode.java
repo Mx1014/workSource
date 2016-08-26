@@ -20,6 +20,7 @@ public interface SmsTemplateCode {
     static final String KEY_USERNAME = "userName";
     static final String KEY_USERPHONE = "userPhone";
     static final String KEY_APPLYTIME = "applyTime";
+    static final String KEY_APPLYTYPE = "applyType";
     static final String KEY_LOCATION = "location";
     static final String KEY_AREA = "area";
     static final String KEY_ENTERPRISENAME = "enterpriseName"; 

@@ -14,6 +14,7 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
+import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 
 /**
@@ -53,7 +54,8 @@ public enum EntityType {
     BUILDING(EhBuildings.class.getSimpleName()),
     NAMESPACE(EhNamespaces.class.getSimpleName()),
     APPURLS(EhAppUrls.class.getSimpleName()),
-	NEWS(EhNews.class.getSimpleName());
+    NEWS(EhNews.class.getSimpleName()),
+    IMPERSONATION(EhUserImpersonations.class.getSimpleName());
     private String code;
     
     private EntityType(String code) {
@@ -94,6 +96,9 @@ public enum EntityType {
             return TOPIC;
         else if(code.equalsIgnoreCase("EhBuildings"))
         	return BUILDING;
+        else if(code.equalsIgnoreCase(IMPERSONATION.getCode())) {
+            return IMPERSONATION;
+        }
         
         return null;
     }

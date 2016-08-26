@@ -14,17 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
@@ -37,7 +29,6 @@ import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
-import com.everhomes.util.SignatureHelper;
 
 public class PusherWebSocketHandler extends TextWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherWebSocketHandler.class);
@@ -61,6 +52,8 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     private Map<String, WebSocketSession> device2sessionMap = new ConcurrentHashMap<>();
     private CustomLinkedList<DeviceInfo> timeoutList = new CustomLinkedList<DeviceInfo>(); 
     
+    static private Object lockobj = new Object();
+    
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         LOGGER.info("Connection establed, session=" + session.getId());
@@ -81,7 +74,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 this.device2sessionMap.remove(dev.Item().getDeviceId());    
             }
             
-         synchronized(this) {
+         synchronized(lockobj) {
                 this.timeoutList.removeWithNode(dev.node);
             }
         }
@@ -101,8 +94,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         removeSession(session);
     }
     
-    @Scheduled(fixedDelay=5000, initialDelay=5000)
-    public void tickCheck() {
+    private void tickInner() {
         //LOGGER.info("tickCheck");
         
         LinkedList<DeviceInfo> invalids = new LinkedList<DeviceInfo>();
@@ -133,29 +125,29 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         }
         
         long timeoutTick = System.currentTimeMillis() - TIMEOUT_TICK;
-        synchronized(this) {
-            Iterator<DeviceInfo> iter = timeoutList.iterator();
-            while(iter.hasNext()) {
-                DeviceInfo dev = iter.next();
-                if(!dev.isValid()) {
-                    //The deviceNode in sessionMap is invalid after it
+        synchronized(lockobj) {
+                Iterator<DeviceInfo> iter = timeoutList.iterator();
+                while(iter.hasNext()) {
+                    DeviceInfo dev = iter.next();
+                    if(!dev.isValid()) {
+                        //The deviceNode in sessionMap is invalid after it
+                            iter.remove();
+                            invalids.add(dev);
+                            continue;
+                            }
+                    
+                    if(dev.getLastPingTime() < timeoutTick) {
+                        //Set flag and wait to delete it from sessionMap
+                        dev.setValid(false);
                         iter.remove();
                         invalids.add(dev);
                         continue;
+                        
                         }
-                
-                if(dev.getLastPingTime() < timeoutTick) {
-                    //Set flag and wait to delete it from sessionMap
-                    dev.setValid(false);
-                    iter.remove();
-                    invalids.add(dev);
-                    continue;
-                    
-                    }
-                //No more timeouts
-               break;
-            }     
-        }
+                    //No more timeouts
+                   break;
+                }
+            }
         
         //Outside synchronized
         invalids.forEach((DeviceInfo dev) -> {
@@ -173,7 +165,16 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     }
                 }
             }
-        });
+        });        
+    }
+    
+    @Scheduled(fixedDelay=5000, initialDelay=5000)
+    public void tickCheck() {
+        try {
+            tickInner();
+        } catch(Exception ex) {
+            LOGGER.warn("tickInner error", ex);
+        }
     }
     
     public Map<String, Object> getOnlineDevices() {
@@ -193,7 +194,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             dev.Item().setLastPingTime(System.currentTimeMillis());
             
             //Move the item to last   
-            synchronized(this) {
+            synchronized(lockobj) {
                 timeoutList.removeWithNode(dev.node);
                 dev.node = timeoutList.addLastWithNode(dev.Item());
             }
@@ -273,7 +274,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                         }
                     
                     DeviceNode devNode = new DeviceNode(null, dev);
-                    synchronized(this) {
+                    synchronized(PusherWebSocketHandler.lockobj) {
                         devNode.node = timeoutList.addLastWithNode(dev);
                         }
                     session2deviceMap.put(session, devNode);

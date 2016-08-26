@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+    </head>
+    <body onload="body_onload();">
+        <form name="myform" method="POST" enctype="multipart/form-data">
+            <label for="field1">file:</label>
+            <input name="upload_file" type="file" />
+            <input type="submit" />
+        </form>
+<script>
+function parseUrl(val) {
+    var result = "Not found",
+        tmp = [];
+    var items = location.search.substr(1).split("&");
+    for (var index = 0; index < items.length; index++) {
+        tmp = items[index].split("=");
+        if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
+    }
+    return result;
+}
+function body_onload(e){
+    token = parseUrl("token");
+    if(!token) {
+        token = "aaaj";
+    }
+    document.myform.action="/upload/file?token=" + token;
+}
+</script>
+    </body>
+</html>
+

@@ -276,27 +276,27 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         //use queue to notify
         
             int now =  (int)(new Date().getTime()/1000);
+
+            try {
+                    EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                                now + 60 * 60 /* Expire in one hour */,
+                                identify /* Device Token */,
+                                payload);
+                    ApnsService tempService = getApnsService(partner);
+                    if(tempService != null) {
+                            tempService.push(notification);   
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    }
+                     }
+            } catch (NetworkIOException e) {
+                LOGGER.warn("apns error and stop it", e);
+                stopApnsServiceByName(partner);
+            } catch(Exception ex) {
+                LOGGER.warn("apns error deviceId not correct", ex);
+            }
             
-            EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
-                        now + 60 * 60 /* Expire in one hour */,
-                        identify /* Device Token */,
-                        payload);
-            ApnsService tempService = getApnsService(partner);
-            if(tempService != null) {
-                try {
-                    tempService.push(notification);   
-                    
-                    if(LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
-                            + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-                            }
-                } catch (NetworkIOException e) {
-                    LOGGER.warn("apns error and stop it", e);
-                    stopApnsServiceByName(partner);
-                }
-//            }
-            
-        }
     }
     
     private String getPlatform(UserLogin destLogin) {
@@ -310,12 +310,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
 
         Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
+        String platform = null;
         if(d == null) {
-            LOGGER.error("Pushing message, dest device not found, destLogin=" + destLogin);
-            return null;
+            LOGGER.warn("Pushing message, dest device not found, using auto detect, destLogin=" + destLogin);
+            //auto detect by destLogin.getDeviceIdentifier()
+            if(destLogin.getDeviceIdentifier().indexOf(":") >= 0) {
+                platform = "android";
+            } else if(destLogin.getDeviceIdentifier().length() >= 60) {
+                platform = "iOS";
+            }
+            
+            return platform;
         }
         
-        String platform = d.getPlatform();
+        platform = d.getPlatform();
         if(platform == null || !(platform.equals("iOS") || platform.equals("android"))) {
             //platform != iOS && platform != "android", auto detect by deviceId
             if(d.getDeviceId() != null) {

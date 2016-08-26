@@ -4,16 +4,6 @@ package com.everhomes.organization;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-
-
-
-
-
-
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -329,6 +319,11 @@ public interface OrganizationService {
 	 */
 	List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId);
     ListOrganizationsByNameResponse listOrganizationByName(ListOrganizationsByNameCommand cmd);
+    
+    /** 不带menu格式的所有子机构 */
+    List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag);
+
 	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
 	
@@ -360,4 +355,6 @@ public interface OrganizationService {
 	 * @return
 	 */
 	XSSFWorkbook createXSSFWorkbook(List<OrganizationMemberDTO> members);
+
+	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
 }

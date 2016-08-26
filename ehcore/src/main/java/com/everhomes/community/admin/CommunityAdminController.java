@@ -35,6 +35,8 @@ import com.everhomes.rest.community.UpdateCommunityCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
+import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -560,4 +562,32 @@ public class CommunityAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * 
+	 * <b>URL: /admin/community/communityImportBaseConfig</b>
+	 * <p>小区导入第一步：配置域空间相关信息</p>
+	 */
+	@RequestMapping("communityImportBaseConfig")
+	@RestReturn(String.class)
+	public RestResponse communityImportBaseConfig(CommunityImportBaseConfigCommand cmd){
+		communityService.communityImportBaseConfig(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * 
+	 * <b>URL: /admin/community/communityImportOrganizationConfig</b>
+	 * <p>小区导入第三步：配置管理公司相关信息</p>
+	 */
+	@RequestMapping("communityImportOrganizationConfig")
+	@RestReturn(String.class)
+	public RestResponse communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd){
+		communityService.communityImportOrganizationConfig(cmd);
+		return new RestResponse();
+	}
+	
+	
+	
+	
 }

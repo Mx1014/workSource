@@ -13,11 +13,14 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,6 +33,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -526,22 +530,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(!StringUtils.isEmpty(cmd.getBuildingName())){
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
 			if(null != building){
-				cmd.setBuildingId(cmd.getBuildingId());
+				cmd.setBuildingId(building.getId());
 			}
 		}
 		
 		Long buildingId = cmd.getBuildingId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
-			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, cmd.getPageSize(), locator);
+			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
 			for (OrganizationAddress address : addresses) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
 					dtos.add(dto);
 			}
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
 			for (OrganizationCommunityRequest req : requests) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -549,7 +554,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, cmd.getPageSize());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, pageSize);
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -1779,24 +1784,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	/**
 	 * 根据小区ID获取机构及该机构在树型结构的组织架构上的所有上层机构。
+	 * 修改1：找出小区的所有上级机构，update by tt, 20160810
 	 * @param communityId 小区ID
 	 */
 	public List<Organization> getOrganizationTreeUpToRoot(Long communityId) {
 	    long startTime = System.currentTimeMillis();
-	    List<Organization> orgResultist = new ArrayList<Organization>();
-	    
-	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
-	    String rootPath = null;
-	    for(Organization org : orgDbist) {
-	        orgResultist.add(org);
-	        rootPath = getOrganizationRootPath(org.getPath());
-	        if(rootPath != null && rootPath.length() > 0) {
-	            List<Organization> tempDbist = this.organizationProvider.findOrganizationByPath(rootPath);
-	            if(tempDbist != null && tempDbist.size() > 0) {
-	                orgResultist.addAll(tempDbist);
-	            }
-	        }
-	    }
+	    List<Long> organizationIds = getOrganizationIdsTreeUpToRoot(communityId);
+	    List<Organization> orgResultist = organizationProvider.listOrganizationsByIds(organizationIds);
 	    long endTime = System.currentTimeMillis();
 	    if(LOGGER.isDebugEnabled()) {
 	        LOGGER.info("List all the organization from bottom to the top in the tree, communityId=" + communityId 
@@ -1804,6 +1798,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    return orgResultist;
+	}
+	
+	@Override
+	public List<Long> getOrganizationIdsTreeUpToRoot(Long communityId){
+//	    List<Organization> orgResultist = new ArrayList<Organization>();
+	    
+	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
+//	    String rootPath = null;
+	    Set<Long> organizationIds = new HashSet<>();
+	    for(Organization org : orgDbist) {
+//	        orgResultist.add(org);
+//	        rootPath = getOrganizationRootPath(org.getPath());
+//	        if(rootPath != null && rootPath.length() > 0) {
+//	            List<Organization> tempDbist = this.organizationProvider.findOrganizationByPath(rootPath);
+//	            if(tempDbist != null && tempDbist.size() > 0) {
+//	                orgResultist.addAll(tempDbist);
+//	            }
+//	        }
+
+			if(org != null && org.getPath() != null){
+				organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
+												.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
+												.filter(f->f!=null).collect(Collectors.toSet()));
+			}
+	    }
+	    return new ArrayList<>(organizationIds);
 	}
 	
 	/**
@@ -1926,6 +1946,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //增加门牌地址
+        List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+        if(null != organizationAddresses){
+        	List<String> doorplateAddresses = new ArrayList<String>();
+        	for (OrganizationAddress organizationAddress : organizationAddresses) {
+        		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+        		doorplateAddresses.add(address.getAddress());
+			}
+        	
+        	if(0 < doorplateAddresses.size()){
+        		organizationDto.setAddress(doorplateAddresses.get(0));
+        	}
+        }
+        
+        
         // 企业入驻的园区
         Long communityId = getOrganizationActiveCommunityId(organization.getId());
         // 园区对应的类型、论坛等信息
@@ -4751,13 +4786,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
-				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_OBJECT_NOT_EXIST,
-						"organization detail is null.");
+			}else{
+				detail.setContactor(cmd.getAccountName());
+				detail.setContact(cmd.getAccountPhone());
+				organizationProvider.updateOrganizationDetail(detail);
 			}
-			
-			detail.setContactor(cmd.getAccountName());
-			detail.setContact(cmd.getAccountPhone());
-			organizationProvider.updateOrganizationDetail(detail);
 			return null;
 		});
 	}
@@ -6535,6 +6568,44 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    return resp;
 	}
+	
+	@Override
+	public List<OrganizationDTO> listAllChildrenOrganizationMenusWithoutMenuStyle(Long id,
+			List<String> groupTypes,Byte naviFlag) {
+		
+		if(null == naviFlag){
+			naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
+		}
+		
+		
+		Organization org =  this.checkOrganization(id);
+
+		if(null == org){
+			return null;
+		}
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+		
+		if(0 == orgs.size()){
+			return null;
+		}
+		
+		List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
+		for (Organization organization : orgs) {
+			OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+			if(OrganizationNaviFlag.fromCode(naviFlag) == OrganizationNaviFlag.HIDE_NAVI){
+				if(OrganizationNaviFlag.fromCode(organization.getShowFlag()) == OrganizationNaviFlag.SHOW_NAVI){
+					rganizationDTOs.add(orgDto);
+				}
+			}else{
+				rganizationDTOs.add(orgDto);
+			}
+		}
+		
+		
+		return rganizationDTOs;
+	}
+
 
 	@Override
 	public CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd) {

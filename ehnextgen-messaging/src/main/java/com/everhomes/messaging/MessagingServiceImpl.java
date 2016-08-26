@@ -24,10 +24,12 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
+import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
 import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Name;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
@@ -115,7 +117,21 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Override
     public FetchMessageCommandResponse fetchRecentToPastMessages(FetchRecentToPastMessageCommand cmd) {
-        String messageBoxKey = UserMessageRoutingHandler.getMessageBoxKey(UserContext.current().getLogin(), 
+        FetchRecentToPastMessageAdminCommand adminCmd = ConvertHelper.convert(cmd, FetchRecentToPastMessageAdminCommand.class);
+        return fetchRecentToPastMessagesAny(adminCmd);
+    }
+    
+    @Override
+    public FetchMessageCommandResponse fetchRecentToPastMessagesAny(FetchRecentToPastMessageAdminCommand cmd) {
+        UserLogin userLogin;
+        if(cmd.getLoginId() == null || cmd.getUserId() == null) {
+             userLogin = UserContext.current().getLogin();
+            cmd.setLoginId(userLogin.getLoginId());
+        } else {
+            userLogin = new UserLogin(cmd.getNamespaceId(), cmd.getUserId(), cmd.getLoginId(), "", "");
+        }
+        
+        String messageBoxKey = UserMessageRoutingHandler.getMessageBoxKey(userLogin, 
                 cmd.getNamespaceId(), cmd.getAppId());
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Fetch messages(recent to past), messageBoxKey=" + messageBoxKey + ", cmd=" + cmd);
