@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
 public class CompleteTaskCommand {
 	private String ownerType;
     private Long ownerId;
+    private Long organizationId;
     private Long id;
     private String content;
 	@ItemType(AttachmentDescriptor.class)
@@ -55,5 +56,11 @@ public class CompleteTaskCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

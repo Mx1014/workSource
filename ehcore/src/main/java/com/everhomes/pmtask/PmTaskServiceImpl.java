@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -39,14 +40,19 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.EvaluateScoreDTO;
+import com.everhomes.rest.pmtask.GetPrivilegesCommand;
+import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -66,6 +72,7 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
+import com.everhomes.rest.pmtask.PmTaskPrivilege;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
@@ -109,7 +116,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private CommunityProvider communityProvider;
-	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -200,15 +210,45 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskProvider.updateTask(task);
 
 	}
+	@Override
+	public GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd){
+		if(null == cmd.getOrganizationId()){
+			LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+		}
+		GetPrivilegesDTO dto = new GetPrivilegesDTO();
+		User user = UserContext.current().getUser();
 
-	private void setTaskStatus(String ownerType, Long ownerId, PmTask task, String content, List<AttachmentDescriptor> attachments, Byte status) {
+		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<String> result = new ArrayList<String>();
+		for(Long p:privileges){
+			if(p.longValue() == PrivilegeConstants.ASSIGNTASK);
+				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
+			if(p.longValue() == PrivilegeConstants.COMPLETETASK);
+				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
+			if(p.longValue() == PrivilegeConstants.CLOSETASK);
+				result.add(PmTaskPrivilege.CLOSETASK.getCode());
+		}
+		dto.setPrivileges(result);
+		return dto;
+	}
+	
+	private void setTaskStatus(Long organizationId, String ownerType, Long ownerId, PmTask task, String content, 
+			List<AttachmentDescriptor> attachments, Byte status) {
 		checkOwnerIdAndOwnerType(ownerType, ownerId);
 		
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(status);
-		if(status.equals(PmTaskStatus.PROCESSED.getCode()))
+		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+	    	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
+	    		returnNoPrivileged(privileges, user);
+			}
+		}
+			
 		if(status.equals(PmTaskStatus.OTHER.getCode()))
 			task.setClosedTime(now);
 		pmTaskProvider.updateTask(task);
@@ -236,7 +276,8 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be completed.");
 		}
-		setTaskStatus(cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
+		
+		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
 				cmd.getAttachments(), PmTaskStatus.PROCESSED.getCode());
 		
 	}
@@ -250,7 +291,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be closed.");
 		} 
-		setTaskStatus(cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
+		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
 				null, PmTaskStatus.OTHER.getCode());
 		
 	}
@@ -279,13 +320,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public void assignTask(AssignTaskCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
+		User user = UserContext.current().getUser();
 		if(null == cmd.getTargetId()){
 			LOGGER.error("TargetId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"TargetId cannot be null.");
 		}
+		
+    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+    	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
+    		returnNoPrivileged(privileges, user);
+		}
+		
 		PmTask task = checkPmTask(cmd.getId());
-		User user = UserContext.current().getUser();
+		
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		if(!task.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
 			task.setStatus(PmTaskStatus.PROCESSING.getCode());
@@ -306,6 +354,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskProvider.createTaskLog(pmTaskLog);
 	}
 
+	private void returnNoPrivileged(List<Long> privileges, User user){
+    	LOGGER.error("non-privileged, privileges="+privileges + ", userId=" + user.getId());
+		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+				"non-privileged.");
+    }
+	
 	@Override
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());

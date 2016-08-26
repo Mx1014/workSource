@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>id: 任务ID</li>
  * <li>targetId: 被分配者ID</li>
+ * <li>organizationId: 机构ID</li>
  * </ul>
  */
 public class AssignTaskCommand {
@@ -15,6 +16,7 @@ public class AssignTaskCommand {
     private Long ownerId;
     private Long id;
     private Long targetId;
+    private Long organizationId;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -44,5 +46,11 @@ public class AssignTaskCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

@@ -15,7 +15,8 @@ public class CloseTaskCommand {
     private Long ownerId;
     private Long id;
     private String content;
-
+    private Long organizationId;
+    
 	public String getContent() {
 		return content;
 	}
@@ -43,5 +44,11 @@ public class CloseTaskCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

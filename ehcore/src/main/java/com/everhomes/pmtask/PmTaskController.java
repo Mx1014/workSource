@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.pmtask;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -18,6 +20,8 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
+import com.everhomes.rest.pmtask.GetPrivilegesCommand;
+import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
@@ -108,7 +112,21 @@ public class PmTaskController extends ControllerBase {
 //      }
       
       /*------------------------------------------------- */
-      
+    
+	/**
+     * <b>URL: /pmtask/getPrivileges</b>
+     * <p>获取权限列表</p>
+     */
+    @RequestMapping("getPrivileges")
+    @RestReturn(value=ListTaskCategoriesResponse.class)
+    public RestResponse getPrivileges(GetPrivilegesCommand cmd) {
+  	    GetPrivilegesDTO res = pmTaskService.getPrivileges(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
       /**
        * <b>URL: /pmtask/listTaskCategories</b>
        * <p>获取服务类型列表</p>

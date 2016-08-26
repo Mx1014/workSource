@@ -1,11 +1,15 @@
 package com.everhomes.pmtask;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
+import com.everhomes.rest.pmtask.GetPrivilegesCommand;
+import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
@@ -60,4 +64,6 @@ public interface PmTaskService {
 	PmTaskLogDTO getTaskLog(GetTaskLogCommand cmd);
 	
 	void cancelTask(CancelTaskCommand cmd);
+	
+	GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd);
 }
