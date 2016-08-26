@@ -7,6 +7,9 @@ package com.everhomes.rest.statistics.transaction;
  *<li>communityId:小區ID</li>
  *<li>namespaceId:域id</li>
  *<li>wareId:商品</li>
+ *<li>orderType:退款订单和支付订单</li>
+ *<li>pageSize:页数</li>
+ *<li>pageAnchor:喵点</li>
  *</ul>
  */
 public class ListStatTransactionCommand {
@@ -20,6 +23,14 @@ public class ListStatTransactionCommand {
 	private Integer namespaceId;
 	
 	private String wareId;
+	
+	private String orderType;
+	
+	private String serviceType;
+	
+	private Integer pageSize;
+	
+	private Long pageAnchor;
 
 	public Long getStartDate() {
 		return startDate;
@@ -59,6 +70,38 @@ public class ListStatTransactionCommand {
 
 	public void setWareId(String wareId) {
 		this.wareId = wareId;
+	}
+
+	public String getOrderType() {
+		return orderType;
+	}
+
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
+	}
+
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 	
 	

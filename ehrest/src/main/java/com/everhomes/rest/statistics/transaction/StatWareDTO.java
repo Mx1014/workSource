@@ -14,7 +14,7 @@ public class StatWareDTO {
 	
 	private String wareName;
 	
-	private String number;
+	private Integer number;
 
 	public String getWareId() {
 		return wareId;
@@ -32,11 +32,11 @@ public class StatWareDTO {
 		this.wareName = wareName;
 	}
 
-	public String getNumber() {
+	public Integer getNumber() {
 		return number;
 	}
 
-	public void setNumber(String number) {
+	public void setNumber(Integer number) {
 		this.number = number;
 	}
 

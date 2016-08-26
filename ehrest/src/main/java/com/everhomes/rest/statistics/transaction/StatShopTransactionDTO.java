@@ -8,15 +8,16 @@ import com.everhomes.discover.ItemType;
  *<ul>
  *<li>orderNo:订单ID</li>
  *<li>payerUid:用户编号</li>
- *<li>status:状态</li>
+ *<li>status:状态 orderType=transaction 1-待支付,2-待发货,3-已发货,6-已完成,7-已关闭   orderType=refund 1-未申请退款,2-待处理,3-已拒绝,4-退款中,5-退款成功,6-已关闭</li>
  *<li>paidAmount: 支付金额</li>
  *<li>paidChannel: 支付渠道</li>
  *<li>userPhone: 电话号码</li>
  *<li>paidTime: 支付时间</li>
+ *<li>orderType: 订单类型 交易transaction  退款refund</li>
  *<li>wares: 商品列表  {@link com.everhomes.rest.statistics.transaction.StatWareDTO}</li>
  *</ul>
  */
-public class StatTransactionDTO {
+public class StatShopTransactionDTO {
 	
 	private String orderNo;
 	
@@ -31,6 +32,8 @@ public class StatTransactionDTO {
 	private String userPhone;
 	
 	private Long paidTime;
+	
+	private String orderType;
 	
 	@ItemType(StatWareDTO.class)
 	private List<StatWareDTO> wares;
@@ -97,6 +100,14 @@ public class StatTransactionDTO {
 
 	public void setWares(List<StatWareDTO> wares) {
 		this.wares = wares;
+	}
+
+	public String getOrderType() {
+		return orderType;
+	}
+
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
 	}
  
 	

@@ -39,6 +39,13 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
+
+
+
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -53,6 +60,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
+
+
+
+
 
 
 
@@ -96,6 +110,7 @@ import com.everhomes.rest.payment.CardTransactionStatus;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyOwnerType;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
+import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
 import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
@@ -108,12 +123,15 @@ import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
 import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskStatus;
-import com.everhomes.rest.statistics.transaction.StatTransactionDTO;
+import com.everhomes.rest.statistics.transaction.StatShopTransactionDTO;
+import com.everhomes.rest.statistics.transaction.StatWareDTO;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -549,10 +567,172 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	}
 	
 	@Override
-	public List<StatTransactionDTO> listStatTransactions(
+	public ListStatShopTransactionsResponse listStatShopTransactions(
 			ListStatTransactionCommand cmd) {
 		
-		return null;
+		ListStatShopTransactionsResponse response = new ListStatShopTransactionsResponse();
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Long startDate = cmd.getStartDate();
+		Long endDate = cmd.getEndDate();
+		if(null == startDate || null == endDate){
+			startDate = calendar.getTimeInMillis();
+			endDate = calendar.getTimeInMillis();
+		}
+		
+		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
+		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<StatShopTransactionDTO> dtos = null;
+		if(SettlementOrderType.TRANSACTION == SettlementOrderType.fromCode(cmd.getOrderType())){
+			List<StatTransaction> statTransactions = statTransactionProvider.listStatTransactions(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			dtos = convertTransactionDTOByPaid(statTransactions);
+		}else{
+			List<StatRefund> statRefunds = statTransactionProvider.listStatRefunds(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			dtos = convertTransactionDTOByRefund(statRefunds);
+		}
+		response.setNextPageAnchor(locator.getAnchor());
+		response.setDtos(dtos);
+		
+		return response;
+	}
+	
+	private List<StatShopTransactionDTO> convertTransactionDTOByPaid(List<StatTransaction> statTransactions){
+		List<StatShopTransactionDTO> dtos = new ArrayList<StatShopTransactionDTO>();
+		for (StatTransaction statTransaction : statTransactions) {
+			StatShopTransactionDTO dto = ConvertHelper.convert(statTransaction, StatShopTransactionDTO.class);
+			dto.setPaidTime(statTransaction.getPaidTime().getTime());
+			dto.setPaidAmount(statTransaction.getPaidAmount().doubleValue());
+			if(null != statTransaction.getPayerUid()){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(statTransaction.getPayerUid(), IdentifierType.MOBILE.getCode());
+				if(null != userIdentifier){
+					dto.setUserPhone(userIdentifier.getIdentifierToken());
+				}
+			}
+			
+			String wareJson = statTransaction.getWareJson();
+			List<StatWareDTO> statWareDTOs =  new ArrayList<StatWareDTO>();
+			
+			if(!StringUtils.isEmpty(wareJson)){
+				Ware[] wares = (Ware[])StringHelper.fromJsonString(wareJson, Ware[].class);
+				if(null != wares){
+					for (Ware ware : wares) {
+						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
+						wareDTO.setNumber(ware.getNumber());
+						statWareDTOs.add(wareDTO);
+					}
+				}
+			}
+			dto.setWares(statWareDTOs);
+			
+			StatOrder order = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statTransaction.getOrderNo(), SettlementResourceType.SHOP.getCode());
+			
+			if(null != order){
+				dto.setStatus(order.getStatus());
+			}
+			
+			dtos.add(dto);
+		}
+		
+		return dtos;
+	}
+	
+	private List<StatShopTransactionDTO> convertTransactionDTOByRefund(List<StatRefund> statRefunds){
+		List<StatShopTransactionDTO> dtos = new ArrayList<StatShopTransactionDTO>();
+		for (StatRefund statRefund : statRefunds) {
+			StatShopTransactionDTO dto = ConvertHelper.convert(statRefund, StatShopTransactionDTO.class);
+			dto.setPaidAmount(statRefund.getRefundAmount().doubleValue());
+			dto.setPaidTime(statRefund.getRefundTime().getTime());
+			if(null != statRefund.getPayerUid()){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(statRefund.getPayerUid(), IdentifierType.MOBILE.getCode());
+				if(null != userIdentifier){
+					dto.setUserPhone(userIdentifier.getIdentifierToken());
+				}
+			}
+			String wareJson = statRefund.getWareJson();
+			List<StatWareDTO> statWareDTOs =  new ArrayList<StatWareDTO>();
+			
+			if(!StringUtils.isEmpty(wareJson)){
+				List<Ware> wares = (List<Ware>)StringHelper.fromJsonString(wareJson, List.class);
+				if(null != wares){
+					for (Ware ware : wares) {
+						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
+						wareDTO.setNumber(ware.getNumber());
+						statWareDTOs.add(wareDTO);
+					}
+				}
+			}
+			dto.setWares(statWareDTOs);
+			StatOrder order = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), SettlementResourceType.SHOP.getCode());
+			if(null != order){
+				dto.setStatus(order.getStatus());
+			}
+			dtos.add(dto);
+		}
+		
+		return dtos;
+	}
+	
+	private StatWareDTO getWareInfo(Long modelId){
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
+		if(StringUtils.isEmpty(serverURL)){
+			LOGGER.error("biz serverURL not configured, param = {}", StatTransactionConstant.BIZ_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz serverURL not configured.");
+		}
+		
+		String paidOrderApi = configurationProvider.getValue(StatTransactionConstant.BIZ_WARE_INFO_API, "");
+		
+		if(StringUtils.isEmpty(paidOrderApi)){
+			LOGGER.error("biz paid ware info api not configured, param = {}", StatTransactionConstant.BIZ_WARE_INFO_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz paid  ware info api not configured.");
+		}
+		
+		try {
+			String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
+	        String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
+	        List<Long> modelIds = new ArrayList<Long>();
+	        modelIds.add(modelId);
+	        Integer nonce = (int)(Math.random()*1000);
+		    Long timestamp = System.currentTimeMillis();       
+		    Map<String,Object> params = new HashMap<String, Object>();
+		    params.put("nonce", nonce);
+		    params.put("timestamp", timestamp);
+		    params.put("appKey", appKey);
+		    params.put("modelIds", modelIds);
+		    Map<String, String> mapForSignature = new HashMap<String, String>();
+	        for(Map.Entry<String, Object> entry : params.entrySet()) {
+	        	if(!entry.getKey().equals("modelIds")) {
+	        		mapForSignature.put(entry.getKey(), entry.getValue().toString());
+	        	}
+	        }
+	        mapForSignature.put("modelIds", org.apache.commons.lang.StringUtils.join(modelIds, ","));
+		    String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+		    params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		    String url = serverURL + paidOrderApi;
+		    
+		    String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+		    
+		    ListModelInfoResponse response = (ListModelInfoResponse)StringHelper.fromJsonString(result, ListModelInfoResponse.class);
+		    
+		    if(null != response){
+		    	List<Model> models = response.getResponse();
+		    	if(null != models && 0 < models.size()){
+		    		Model model = models.get(0);
+		    		StatWareDTO dto = new StatWareDTO();
+		    		dto.setWareName(model.getCommoName());
+		    		dto.setWareId(model.getCommoNo());
+		    		return dto;
+		    	}
+		    }
+		} catch (Exception e) {
+			LOGGER.error("Get ware info error e = {}");
+		}
+		
+	    return null;
 	}
 	
 	private String getServiceName(String serviceType){
@@ -905,6 +1085,19 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			order.setResourceId(bizPaidOrder.getShopNo());
 			order.setOrderTime(new Timestamp(bizPaidOrder.getPaidTime()));
 			order.setOrderDate(DateUtil.dateToStr(new Date(bizPaidOrder.getPaidTime()), DateUtil.YMR_SLASH));
+			
+			
+			List<Ware> wares = new ArrayList<Ware>();
+			if(null != bizPaidOrder.getModels() && 0 < bizPaidOrder.getModels().size()){
+				for (BizOrderModel model : bizPaidOrder.getModels()) {
+					Ware ware = new Ware();
+					ware.setWareId(model.getId());
+					ware.setNumber(model.getQuantity());
+					wares.add(ware);
+				}
+			}
+			order.setWareJson(StringHelper.toJsonString(wares));
+			
 			statTransactionProvider.createStatOrder(order);
 		}
 	}
@@ -933,6 +1126,14 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			order.setResourceId(bizRefundOrder.getShopNo());
 			order.setOrderTime(new Timestamp(bizRefundOrder.getRefundTime()));
 			order.setOrderDate(DateUtil.dateToStr(new Date(bizRefundOrder.getRefundTime()), DateUtil.YMR_SLASH));
+			
+			List<Ware> wares = new ArrayList<Ware>();
+			Ware ware = new Ware();
+			ware.setWareId(bizRefundOrder.getModelId());
+			ware.setNumber(bizRefundOrder.getRefundQuantity());
+			wares.add(ware);
+			order.setWareJson(StringHelper.toJsonString(wares));
+			
 			statTransactionProvider.createStatOrder(order);
 		}
 	}
@@ -1175,6 +1376,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					}
 					statTransaction.setResourceId(statOrder.getResourceId());
 				}
+				statTransaction.setWareJson(statOrder.getWareJson());
 			}else{
 				statTransaction.setCommunityId(0L);
 				statTransaction.setNamespaceId(1000000);
@@ -1401,6 +1603,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 						statRefund.setServiceType(SettlementServiceType.OTHER_SHOP.getCode());
 					}
 				}
+				statRefund.setWareJson(statOrder.getWareJson());
 			}else{
 				statRefund.setCommunityId(0L);
 				statRefund.setNamespaceId(1000000);
