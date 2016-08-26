@@ -3693,7 +3693,6 @@ public class PunchServiceImpl implements PunchService {
 					if(null == member.getTargetType())
 						continue;
 					UserMonthLogsDTO userMonthLogsDTO = new UserMonthLogsDTO(); 
-					response.getUserLogs().add(userMonthLogsDTO);
 					Organization dept = this.organizationProvider.findOrganizationById(member.getGroupId());
 					if(null == dept)
 						dept = this.organizationProvider.findOrganizationById(member.getOrganizationId());
@@ -3715,6 +3714,8 @@ public class PunchServiceImpl implements PunchService {
 						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
 					}
+
+					response.getUserLogs().add(userMonthLogsDTO);
 				}
 
 			} catch (ParseException e) {
