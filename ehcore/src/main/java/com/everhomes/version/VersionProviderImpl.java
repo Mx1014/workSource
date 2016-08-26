@@ -150,6 +150,7 @@ public class VersionProviderImpl implements VersionProvider {
     }
 
     @Caching(evict = {
+        @CacheEvict(value="VersionUpgrade-Match", allEntries=true),
         @CacheEvict(value="VersionUpgrade-List", key="#rule.realmId")
     })
     @Override
@@ -166,7 +167,7 @@ public class VersionProviderImpl implements VersionProvider {
 
     @Caching(evict = {
         @CacheEvict(value="VersionUpgrade-Id", key="#rule.id"),
-        @CacheEvict(value="VersionUpgrade-Match"),
+        @CacheEvict(value="VersionUpgrade-Match", allEntries=true),
         @CacheEvict(value="VersionUpgrade-List", key="#rule.realmId")
     })
     @Override
@@ -179,7 +180,7 @@ public class VersionProviderImpl implements VersionProvider {
 
     @Caching(evict = {
         @CacheEvict(value="VersionUpgrade-Id", key="#rule.id"),
-        @CacheEvict(value="VersionUpgrade-Match"),
+        @CacheEvict(value="VersionUpgrade-Match", allEntries=true),
         @CacheEvict(value="VersionUpgrade-List", key="#rule.realmId")
     })
     @Override
@@ -267,7 +268,7 @@ public class VersionProviderImpl implements VersionProvider {
 
     @Caching(evict = {
         @CacheEvict(value="VersionedContent-Id", key="#content.id"),
-        @CacheEvict(value="VersionedContent-Match"),
+        @CacheEvict(value="VersionedContent-Match", allEntries=true),
         @CacheEvict(value="VersionedContent-List", key="#content.realmId")
     })
     @Override
@@ -280,7 +281,7 @@ public class VersionProviderImpl implements VersionProvider {
 
     @Caching(evict = {
         @CacheEvict(value="VersionedContent-Id", key="#content.id"),
-        @CacheEvict(value="VersionedContent-Match"),
+        @CacheEvict(value="VersionedContent-Match", allEntries=true),
         @CacheEvict(value="VersionedContent-List", key="#content.realmId")
     })
     @Override
@@ -351,6 +352,9 @@ public class VersionProviderImpl implements VersionProvider {
         return contentPojos;
     }
     
+    @Caching(evict = {
+            @CacheEvict(value="VersionUrl-Version", allEntries=true)
+        })
     @Override
     public void createVersionUrl(VersionUrl versionUrl) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -364,7 +368,7 @@ public class VersionProviderImpl implements VersionProvider {
     
     @Caching(evict = {
         @CacheEvict(value="VersionUrl-Id", key="#versionUrl.id"),
-        @CacheEvict(value="VersionUrl-Version")
+        @CacheEvict(value="VersionUrl-Version", allEntries=true)
     })
     @Override
     public void updateVersionUrl(VersionUrl versionUrl) {
@@ -376,7 +380,7 @@ public class VersionProviderImpl implements VersionProvider {
     
     @Caching(evict = {
         @CacheEvict(value="VersionUrl-Id", key="#versionUrl.id"),
-        @CacheEvict(value="VersionUrl-Version")
+        @CacheEvict(value="VersionUrl-Version", allEntries=true)
     })
     @Override
     public void deleteVersionUrl(VersionUrl versionUrl) {
