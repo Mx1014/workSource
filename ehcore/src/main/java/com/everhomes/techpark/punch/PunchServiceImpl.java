@@ -3469,9 +3469,11 @@ public class PunchServiceImpl implements PunchService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		
+		Long organizationId = org.getDirectlyEnterpriseId();
+		if(organizationId.equals(0L))
+			organizationId = org.getId();
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
-				org.getDirectlyEnterpriseId(),cmd.getMonth(),
+				organizationId,cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
 		
 		if (null == results)
@@ -3761,9 +3763,11 @@ public class PunchServiceImpl implements PunchService {
 			String endDay=null;
 			if(null!=cmd.getEndDay())
 				endDay =  dateSF.format(new Date(cmd.getEndDay()));
-			
+			Long organizationId = org.getDirectlyEnterpriseId();
+			if(organizationId.equals(0L))
+				organizationId = org.getId();
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					org.getDirectlyEnterpriseId(),startDay,endDay , 
+					organizationId,startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
