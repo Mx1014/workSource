@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *  <li>contact: 咨询电话</li>
  *  <li>description: 介绍</li>
  *  <li>posterUri: 标题图</li>
+ *  <li>type:类型  </li>
  * </ul>
  */
 public class UpdateServiceAllianceCommand {
@@ -34,6 +35,8 @@ public class UpdateServiceAllianceCommand {
 	private String   description;
 	
 	private String   posterUri;
+	
+	private Long type;
 
 	public Long getId() {
 		return id;
@@ -97,6 +100,14 @@ public class UpdateServiceAllianceCommand {
 
 	public void setPosterUri(String posterUri) {
 		this.posterUri = posterUri;
+	}
+
+	public Long getType() {
+		return type;
+	}
+
+	public void setType(Long type) {
+		this.type = type;
 	}
 
 	@Override
