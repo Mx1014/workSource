@@ -549,16 +549,16 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		condition = condition.and(Tables.EH_STAT_TRANSACTIONS.PAID_DATE.le(endDate));
 		
 		if(null != namespaceId){
-			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.le(namespaceId));
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId));
 		}
 		
 		
 		if(null != locator.getAnchor()){
-			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.PAID_TIME.lt(new Timestamp(locator.getAnchor())));
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.PAID_TIME.gt(new Timestamp(locator.getAnchor())));
 		}
 		
 		if(null != serviceType){
-			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.SERVICE_TYPE.le(serviceType));
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.SERVICE_TYPE.eq(serviceType));
 		}
 		if(!StringUtils.isEmpty(wareId)){
 			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.WARE_JSON.like("%" + wareId + "%"));
@@ -591,15 +591,15 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_DATE.le(endDate));
 		
 		if(null != namespaceId){
-			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.le(namespaceId));
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId));
 		}
 		
 		if(null != locator.getAnchor()){
-			condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_TIME.lt(new Timestamp(locator.getAnchor())));
+			condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_TIME.gt(new Timestamp(locator.getAnchor())));
 		}
 		
 		if(null != serviceType){
-			condition = condition.and(Tables.EH_STAT_REFUNDS.SERVICE_TYPE.le(serviceType));
+			condition = condition.and(Tables.EH_STAT_REFUNDS.SERVICE_TYPE.eq(serviceType));
 		}
 		if(!StringUtils.isEmpty(wareId)){
 			condition = condition.and(Tables.EH_STAT_REFUNDS.WARE_JSON.like("%" + wareId + "%"));

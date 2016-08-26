@@ -7,7 +7,7 @@ package com.everhomes.rest.statistics.transaction;
  *<li>communityId:小區ID</li>
  *<li>namespaceId:域id</li>
  *<li>wareId:商品</li>
- *<li>orderType:退款订单和支付订单</li>
+ *<li>orderType:退款订单: refund 和支付订 transaction</li>
  *<li>pageSize:页数</li>
  *<li>pageAnchor:喵点</li>
  *</ul>
