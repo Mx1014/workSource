@@ -2176,8 +2176,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				continue; 
 			if (null == status && !cell.getStatus().equals(RentalSiteStatus.NORMAL.getCode()))
 				continue;
+			//如果cell在最早预定时间之后则跳过
 			if (null != beginDate && rentalType.equals(RentalType.HOUR.getCode()))
-				if (cell.getBeginTime().before(beginDate))
+				if (cell.getBeginTime().after(beginDate))
 					continue; 
 			if (null != ruleDate){
 				DateLength dateLen = DateLength.fromCode(dateLength);
@@ -2230,13 +2231,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 生成某个资源的单元格
 	 * */
 	public void proccessCells(RentalResource rs){
- 
+		
 		cellList.set(new ArrayList<RentalCell>());
+		currentId.set(rs.getCellBeginId());
 		BigDecimal weekendPrice = rs.getWeekendPrice() == null ? new BigDecimal(0) : rs.getWeekendPrice(); 
 		BigDecimal workdayPrice = rs.getWorkdayPrice() == null ? new BigDecimal(0) : rs.getWorkdayPrice();
 //		List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
 		AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(rs, AddRentalSiteSingleSimpleRule.class );
-
+		signleCmd.setRentalSiteId(rs.getId());
+		signleCmd.setSiteCounts(rs.getCounts());
+		signleCmd.setOpenWeekday(new ArrayList<Integer>());
+		int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
+        for(int i=1;i<8;i++){
+        	if(openWeekInt%10 == 1)
+        		signleCmd.getOpenWeekday().add(i);
+        	openWeekInt = openWeekInt/10;
+        }
+		 
+        
 		List<RentalResourceNumber> resourceNumbers = this.rentalProvider.queryRentalResourceNumbersByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		if(null!=resourceNumbers){
 			signleCmd.setSiteNumbers (new ArrayList<String>());
@@ -2270,6 +2282,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				signleCmd.getAttachments().add(ConvertHelper.convert(single, com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO .class));
 			}
 		}
+
 		if (rs.getRentalType().equals(RentalType.HOUR.getCode()))  {
 			if(signleCmd.getTimeIntervals() != null){
 				Double beginTime = null;
@@ -2281,7 +2294,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						beginTime=timeInterval.getBeginTime();
 					if(endTime==null||endTime<timeInterval.getEndTime())
 						endTime=timeInterval.getEndTime();
-					
+					signleCmd.setBeginDate(rs.getBeginDate().getTime());
+					signleCmd.setEndDate(rs.getEndDate().getTime());
 					signleCmd.setBeginTime(timeInterval.getBeginTime());
 					signleCmd.setEndTime(timeInterval.getEndTime());
 					signleCmd.setWeekendPrice(weekendPrice); 
@@ -2314,6 +2328,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (cmd.getOpenWeekday().contains(weekday)) {
 				RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
+				rsr.setRentalResourceId(cmd.getRentalSiteId());
 				rsr.setAutoAssign(cmd.getAutoAssign()); 
 				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
@@ -4191,7 +4206,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void updateRentalSiteSimpleRules(
 			UpdateRentalSiteRulesAdminCommand cmd) { 
-
+		
 		if(null==cmd.getRuleId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4207,7 +4222,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"rental resource (site) cannot found ");
-		 
+		proccessCells(rs);
 		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED)){
 			cmd.setCounts(1.0);
 		}
