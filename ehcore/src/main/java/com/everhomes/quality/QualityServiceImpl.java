@@ -319,6 +319,8 @@ public class QualityServiceImpl implements QualityService {
 		
 		qualityProvider.updateQualityInspectionStandards(standard);
 		
+		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.DELETE.getCode(), user.getId());
+		
 	}
 
 	@Override
