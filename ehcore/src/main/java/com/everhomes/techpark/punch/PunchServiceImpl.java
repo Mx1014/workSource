@@ -3532,9 +3532,11 @@ public class PunchServiceImpl implements PunchService {
 			String endDay=null;
 			if(null!=cmd.getEndDay())
 				endDay =  dateSF.format(new Date(cmd.getEndDay()));
-			
+			Long organizationId = org.getDirectlyEnterpriseId();
+			if(organizationId.equals(0L))
+				organizationId = org.getId();
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					cmd.getOwnerId(),startDay,endDay , 
+					organizationId,startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
@@ -3871,7 +3873,11 @@ public class PunchServiceImpl implements PunchService {
 			if (null != member.getTargetType() && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
-		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getMonth(),cmd.getExceptionStatus()
+
+		Long organizationId = org.getDirectlyEnterpriseId();
+		if(organizationId.equals(0L))
+			organizationId = org.getId();
+		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),organizationId,cmd.getMonth(),cmd.getExceptionStatus()
 				,userIds, null, Integer.MAX_VALUE);
 		
 		URL rootPath = PunchServiceImpl.class.getResource("/");
