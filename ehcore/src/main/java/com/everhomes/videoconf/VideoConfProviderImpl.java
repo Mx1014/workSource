@@ -15,12 +15,14 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -1454,6 +1456,37 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         });
 
         return conferences;
+	}
+
+	@Override
+	public boolean allTrialEnterpriseAccounts(Long enterpriseId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		boolean trial = true;
+		
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		List<Long> categories = findAccountCategoriesByConfType((byte) 4);
+		
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+            
+        if(enterpriseId != null)
+        	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+        
+        
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.ACCOUNT_CATEGORY_ID.notIn(categories));
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+       
+        
+        query.fetch().map((r) -> {
+        	accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+        });
+        
+        if(accounts != null && accounts.size() > 0) {
+        	trial = false;
+        }
+		
+		return trial;
 	}
 	
 	

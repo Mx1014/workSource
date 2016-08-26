@@ -108,6 +108,7 @@ public interface VideoConfProvider {
 	void updateEnterpriseAccounts();
 	int countAccountsByEnterprise(Long enterpriseId, Byte accountType);
 	int countEnterpriseAccounts(Long enterpriseId);
+	boolean allTrialEnterpriseAccounts(Long enterpriseId);
 	List<ConfAccounts> listOccupiedConfAccounts(Timestamp assignedTime);
 	Long listConfTimeByAccount(Long accountId);
 	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize);
