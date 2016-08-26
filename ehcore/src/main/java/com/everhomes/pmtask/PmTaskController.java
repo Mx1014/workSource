@@ -55,64 +55,6 @@ public class PmTaskController extends ControllerBase {
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 
-//    /**
-//     * <b>URL: /org/listUserTask</b>
-//     * <p>查询分配给自己的任务</p>
-//     */
-//    @RequestMapping("listUserTask")
-//    @RestReturn(value=ListTopicsByTypeCommandResponse.class)
-//    public RestResponse listUserTask(ListUserTaskCommand cmd){
-//    	ListTopicsByTypeCommandResponse tasks = this.pmTaskService.listUserTask(cmd);
-//        
-//        RestResponse response = new RestResponse(tasks);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//    
-//    /**
-//     * <b>URL: /org/searchTopicsByType</b>
-//     * <p>搜索任务贴</p>
-//     */
-//    @RequestMapping("searchTopicsByType")
-//	@RestReturn(value=SearchTopicsByTypeResponse.class)
-//	public RestResponse searchTopicsByType(SearchTopicsByTypeCommand cmd) {
-//    	SearchTopicsByTypeResponse result= pmTaskService.searchTopicsByType(cmd);
-//		RestResponse response = new RestResponse(result);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//      /**
-//       * <b>URL: /org/checkOfficalPrivilegeByScene</b>
-//       * <p>检查是否具有官方的权限</p>
-//       */
-//      @RequestMapping("checkOfficalPrivilegeByScene")
-//      @RestReturn(value=CheckOfficalPrivilegeResponse.class)
-//      public RestResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd){
-//    	  RestResponse res = new RestResponse(pmTaskService.checkOfficalPrivilegeByScene(cmd));
-//          res.setErrorCode(ErrorCodes.SUCCESS);
-//          res.setErrorDescription("OK");
-//          
-//          return res;
-//      }
-//      
-//      /**
-//       * <b>URL: /org/checkOfficalPrivilege</b>
-//       * <p>检查是否具有官方的权限</p>
-//       */
-//      @RequestMapping("checkOfficalPrivilege")
-//      @RestReturn(value=CheckOfficalPrivilegeResponse.class)
-//      public RestResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd){
-//    	  RestResponse res = new RestResponse(pmTaskService.checkOfficalPrivilege(cmd));
-//          res.setErrorCode(ErrorCodes.SUCCESS);
-//          res.setErrorDescription("OK");
-//          
-//          return res;
-//      }
-      
-      /*------------------------------------------------- */
-    
 	/**
      * <b>URL: /pmtask/getPrivileges</b>
      * <p>获取权限列表</p>
