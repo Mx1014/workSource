@@ -3471,7 +3471,7 @@ public class PunchServiceImpl implements PunchService {
 		locator.setAnchor(cmd.getPageAnchor());
 		
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
-				organizationMembers.get(0).getOrganizationId(),cmd.getMonth(),
+				org.getDirectlyEnterpriseId(),cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
 		
 		if (null == results)
@@ -3763,7 +3763,7 @@ public class PunchServiceImpl implements PunchService {
 				endDay =  dateSF.format(new Date(cmd.getEndDay()));
 			
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					organizationMembers.get(0).getOrganizationId(),startDay,endDay , 
+					org.getDirectlyEnterpriseId(),startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
