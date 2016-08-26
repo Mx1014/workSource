@@ -46,6 +46,7 @@ public class CategoryProviderImpl implements CategoryProvider {
     
     @Autowired
     private DbProvider dbProvider;
+
     @Autowired
     private SequenceProvider sequenceProvider;
     

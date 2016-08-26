@@ -8,17 +8,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-
-
-
-
-
-
-
-
-
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -29,29 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-
-
-
-
-
-
-
-
-
-
-
 import ch.hsr.geohash.GeoHash;
-
-
-
-
-
-
-
-
-
-
-
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
@@ -71,7 +38,6 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
@@ -136,6 +102,7 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.launchpad.DeleteFlagType;
@@ -147,8 +114,8 @@ import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.region.RegionScope;
@@ -2127,6 +2094,23 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid parameter,userId or orderCount is null");
 		}
 		userActivityService.updateUserProfile(cmd.getUserId(), UserProfileContstant.RECEIVED_ORDER_COUNT, cmd.getOrderCount()+"");
+	}
+	
+	@Override
+	public List<RegionDTO> listRegion(ListRegionCommand cmd) {
+		if(null == cmd.getNamespaceId())
+        	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        @SuppressWarnings("unchecked")
+        List<Region> entityResultList = this.regionProvider.listRegionByParentId(
+        		cmd.getNamespaceId(),
+        		cmd.getParentId(),
+        		RegionScope.fromCode(cmd.getScope()), 
+            RegionAdminStatus.fromCode(cmd.getStatus()));
+        
+        return entityResultList.stream()
+                .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
+                .collect(Collectors.toList());
+        
 	}
 
 }

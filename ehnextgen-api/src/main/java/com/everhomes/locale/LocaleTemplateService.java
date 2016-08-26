@@ -13,4 +13,5 @@ public interface LocaleTemplateService {
     void deleteLocaleTemplate(Integer namespaceId, long id);
     
     void clearLocaleTemplateCache();
+
 }
