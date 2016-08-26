@@ -539,4 +539,39 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		});
 		return results;
 	}
+	
+	@Override
+	public List<StatTransaction> listStatTransactions(String startDate,
+			String endDate, String wareId, Integer namespaceId, Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatTransaction> results = new ArrayList<StatTransaction>();
+		Condition condition = Tables.EH_STAT_TRANSACTIONS.PAID_DATE.ge(startDate);
+		condition = condition.and(Tables.EH_STAT_TRANSACTIONS.PAID_DATE.le(endDate));
+		condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.le(namespaceId));
+		SelectQuery<EhStatTransactionsRecord> query = context.selectQuery(Tables.EH_STAT_TRANSACTIONS);
+		query.addOrderBy(Tables.EH_STAT_TRANSACTIONS.PAID_TIME);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatTransaction.class));
+			return null;
+		});
+		return results;
+	}
+	
+	@Override
+	public List<StatRefund> listStatRefunds(String startDate,
+			String endDate, String wareId, Integer namespaceId, Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatRefund> results = new ArrayList<StatRefund>();
+		Condition condition = Tables.EH_STAT_REFUNDS.REFUND_DATE.ge(startDate);
+		condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_DATE.le(endDate));
+		condition = condition.and(Tables.EH_STAT_REFUNDS.NAMESPACE_ID.le(namespaceId));
+//		condition = condition.and(Tables.EH_STAT_REFUNDS..le(namespaceId));
+		SelectQuery<EhStatRefundsRecord> query = context.selectQuery(Tables.EH_STAT_REFUNDS);
+		query.addOrderBy(Tables.EH_STAT_REFUNDS.REFUND_TIME);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatRefund.class));
+			return null;
+		});
+		return results;
+	}
 }

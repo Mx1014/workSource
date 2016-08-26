@@ -86,4 +86,8 @@ public interface StatTransactionProvider {
 	
 	List<StatService> listStatServiceGroupByServiceTypes();
 	
+	List<StatTransaction> listStatTransactions(String startDate, String endDate, String wareId, Integer namespaceId, Long communityId);
+	
+	
+	List<StatRefund> listStatRefunds(String startDate,String endDate, String wareId, Integer namespaceId, Long communityId);
 }

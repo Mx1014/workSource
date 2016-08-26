@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -52,6 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -94,6 +96,7 @@ import com.everhomes.rest.payment.CardTransactionStatus;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyOwnerType;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
+import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.statistics.transaction.SettlementOrderType;
@@ -105,6 +108,7 @@ import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
 import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskStatus;
+import com.everhomes.rest.statistics.transaction.StatTransactionDTO;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -235,13 +239,26 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		serviceTypes.add(SettlementServiceType.COMMUNITY_SERVICE.getCode());
 		
 		for (String serviceType : serviceTypes) {
+			Condition serviceCond = null;
 			if(null == cond)
-				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType);
+				serviceCond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType);
 			else
-				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType));
+				serviceCond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType));
 			
-			if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.ZUOLIN_SHOP || SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
-				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+			if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.ZUOLIN_SHOP){
+				Condition neCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.ne("-1"));
+				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(neCond, sStartDate, sEndDate);
+				results.addAll(shopSettlementResults);
+				
+				//乱数据全部统计在临时店铺下面
+				Condition eqCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq("-1"));
+				StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(eqCond, sStartDate, sEndDate);
+				result.setServiceType(serviceType);
+				result.setResourceType(SettlementResourceType.SHOP.getCode());
+				result.setResourceId("-1");
+				results.add(result);
+			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
+				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(serviceCond, sStartDate, sEndDate);
 				results.addAll(shopSettlementResults);
 			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.COMMUNITY_SERVICE){
 				List<StatService> statServices = null;
@@ -251,8 +268,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					statServices = statTransactionProvider.listStatServiceGroupByServiceTypes();
 				}
 				for (StatService statService : statServices) {
-					cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
-					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(cond, sStartDate, sEndDate);
+					Condition resCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
+					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(resCond, sStartDate, sEndDate);
 					result.setResourceName(statService.getServiceName());
 					result.setServiceType(serviceType);
 					results.add(result);
@@ -331,6 +348,20 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			else
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
+		
+		List<StatService> statServices = null;
+		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+			statServices = statTransactionProvider.listStatServices(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		}else{
+			statServices = statTransactionProvider.listStatServiceGroupByServiceTypes();
+		}
+		
+		Condition servCond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(SettlementResourceType.SHOP.getCode());
+		for (StatService statService : statServices) {
+			servCond = servCond.or(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
+		}
+		
+		cond = cond.and(servCond);
 		
 		List<StatServiceSettlementResult> results = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
 		
@@ -515,6 +546,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 		}
 		
+	}
+	
+	@Override
+	public List<StatTransactionDTO> listStatTransactions(
+			ListStatTransactionCommand cmd) {
+		
+		return null;
 	}
 	
 	private String getServiceName(String serviceType){
@@ -1125,10 +1163,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			
 			StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statTransaction.getOrderNo(), statTransaction.getResourceType());
 			
-			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidTransaction.getOrderType())){
-				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
-			}
-			
 			if(null != statOrder){
 				statTransaction.setCommunityId(statOrder.getCommunityId());
 				statTransaction.setNamespaceId(statOrder.getNamespaceId());
@@ -1143,11 +1177,19 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				}
 			}else{
 				statTransaction.setCommunityId(0L);
-				statTransaction.setNamespaceId(0);
-				statTransaction.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
+				statTransaction.setNamespaceId(1000000);
 				statTransaction.setResourceId("-1");
 				statTransaction.setPayerUid(0L);
 			}
+			
+			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidTransaction.getOrderType())){
+				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+			}else{
+				statTransaction.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
+			}
+			
+			
+			
 			statTransaction.setPaidDate(DateUtil.dateToStr(new Date(paidTransaction.getPaidTime()), DateUtil.YMR_SLASH));
 			statTransactionProvider.createStatTransaction(statTransaction);
 		}
@@ -1572,7 +1614,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		PaidOrderResponse res = response.getResponse();
 		List<BizPaidOrder> list  = res.getList();
 		Integer s = 200;
-		System.out.println(Timestamp.valueOf("2016-08-03" + " 00:00:00").getTime());
+		System.out.println(Timestamp.valueOf("2016-08-01" + " 00:00:00").getTime());
 		
 		System.out.println(Long.valueOf("14598342843426081282"));
 	}
