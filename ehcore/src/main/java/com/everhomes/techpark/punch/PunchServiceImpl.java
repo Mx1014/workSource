@@ -3690,6 +3690,8 @@ public class PunchServiceImpl implements PunchService {
 					monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
 				} 
 				for(OrganizationMember member : organizationMembers){
+					if(null == member.getTargetType())
+						continue;
 					UserMonthLogsDTO userMonthLogsDTO = new UserMonthLogsDTO(); 
 					response.getUserLogs().add(userMonthLogsDTO);
 					Organization dept = this.organizationProvider.findOrganizationById(member.getGroupId());
