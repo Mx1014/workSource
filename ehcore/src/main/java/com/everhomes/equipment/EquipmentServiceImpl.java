@@ -682,8 +682,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private void inActiveEquipmentStandardRelations(EquipmentInspectionEquipments equipment) {
 		equipment.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+		equipment.setReviewResult(ReviewResult.INACTIVE.getCode());
 		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 		equipmentSearcher.feedDoc(equipment);
+		
+		inactiveTasks(equipment.getId());
 	}
 
 	@Override
@@ -1032,6 +1035,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setReviewTime(null);
 				equipment.setReviewResult(ReviewResult.NONE.getCode());
 				equipment.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+				
+				inactiveTasks(equipment.getId());
 			}
 			
 			if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
@@ -1161,7 +1166,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		inActiveEquipmentStandardRelations(equipment);
 		
-		inactiveTasks(equipment.getId());
 	}
 	
 	private void inactiveTasks(Long equipmentId) {
@@ -1397,6 +1401,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+			LOGGER.error("task is inactive");
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_INACTIVE,
+ 				"该任务已失效");
+		}
 		
 		//process_time operator_type operator_id
 		if(EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.WAITING_FOR_EXECUTING 

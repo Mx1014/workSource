@@ -22,4 +22,5 @@ public interface EquipmentServiceErrorCode {
     
     static final int ERROR_CREATE_EXCEL = 10016;  //生成excel信息有问题
     static final int ERROR_DOWNLOAD_EXCEL = 10017;  //下载excel信息有问题
+    static final int ERROR_EQUIPMENT_TASK_INACTIVE = 10018;//任务已失效
 }
