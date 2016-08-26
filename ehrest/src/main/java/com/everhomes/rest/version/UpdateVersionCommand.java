@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.version;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
 
@@ -30,7 +30,7 @@ public class UpdateVersionCommand {
 	private Byte forceUpgrade;
 	private Long urlId;
 	private String appName;
-	private Timestamp publishTime;
+	private Long publishTime;
 	private String downloadUrl;
 	private String upgradeDescription;
 
@@ -42,11 +42,11 @@ public class UpdateVersionCommand {
 		this.appName = appName;
 	}
 
-	public Timestamp getPublishTime() {
+	public Long getPublishTime() {
 		return publishTime;
 	}
 
-	public void setPublishTime(Timestamp publishTime) {
+	public void setPublishTime(Long publishTime) {
 		this.publishTime = publishTime;
 	}
 

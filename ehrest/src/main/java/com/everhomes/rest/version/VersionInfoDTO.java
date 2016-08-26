@@ -1,7 +1,7 @@
 // formatter:off
 package com.everhomes.rest.version;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
 

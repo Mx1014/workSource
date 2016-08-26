@@ -259,7 +259,7 @@ public class VersionServiceImpl implements VersionService {
 			url.setUpgradeDescription(cmd.getUpgradeDescription());
 			url.setNamespaceId(realm.getNamespaceId());
 			url.setAppName(cmd.getAppName());
-			url.setPublishTime(cmd.getPublishTime());
+			url.setPublishTime(new Timestamp(cmd.getPublishTime()!=null?cmd.getPublishTime():DateHelper.currentGMTTime().getTime()));
 			versionProvider.createVersionUrl(url);
 
 			versionInfoDTO.setRealm(realm.getRealm());
@@ -267,6 +267,7 @@ public class VersionServiceImpl implements VersionService {
 			versionInfoDTO.setId(rule.getId());
 			versionInfoDTO.setUrlId(url.getId());
 			versionInfoDTO.setDownloadUrl(url.getDownloadUrl());
+			versionInfoDTO.setPublishTime(url.getPublishTime());
 			
 			return true;
 		});
@@ -311,30 +312,32 @@ public class VersionServiceImpl implements VersionService {
 			rule.setNamespaceId(realm.getNamespaceId());
 			versionProvider.updateVersionUpgradeRule(rule);
 			
-			if (url != null) {
-				url.setRealmId(cmd.getRealmId());
-				url.setTargetVersion(cmd.getTargetVersion());
-				url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
-				url.setUpgradeDescription(cmd.getUpgradeDescription());
-				url.setNamespaceId(realm.getNamespaceId());
-				url.setAppName(cmd.getAppName());
-				url.setPublishTime(cmd.getPublishTime());
-				versionProvider.updateVersionUrl(url);
+			VersionUrl innerUrl = url;
+			if (innerUrl != null) {
+				innerUrl.setRealmId(cmd.getRealmId());
+				innerUrl.setTargetVersion(cmd.getTargetVersion());
+				innerUrl.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
+				innerUrl.setUpgradeDescription(cmd.getUpgradeDescription());
+				innerUrl.setNamespaceId(realm.getNamespaceId());
+				innerUrl.setAppName(cmd.getAppName());
+				innerUrl.setPublishTime(new Timestamp(cmd.getPublishTime()!=null?cmd.getPublishTime():DateHelper.currentGMTTime().getTime()));
+				versionProvider.updateVersionUrl(innerUrl);
 			}else {
-				VersionUrl url2 = new VersionUrl();
-				url2.setRealmId(cmd.getRealmId());
-				url2.setTargetVersion(cmd.getTargetVersion());
-				url2.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
-				url2.setUpgradeDescription(cmd.getUpgradeDescription());
-				url2.setNamespaceId(realm.getNamespaceId());
-				url2.setAppName(cmd.getAppName());
-				url2.setPublishTime(cmd.getPublishTime());
-				versionProvider.createVersionUrl(url2);
+				innerUrl = new VersionUrl();
+				innerUrl.setRealmId(cmd.getRealmId());
+				innerUrl.setTargetVersion(cmd.getTargetVersion());
+				innerUrl.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
+				innerUrl.setUpgradeDescription(cmd.getUpgradeDescription());
+				innerUrl.setNamespaceId(realm.getNamespaceId());
+				innerUrl.setAppName(cmd.getAppName());
+				innerUrl.setPublishTime(new Timestamp(cmd.getPublishTime()!=null?cmd.getPublishTime():DateHelper.currentGMTTime().getTime()));
+				versionProvider.createVersionUrl(innerUrl);
 			}
 			
 			versionInfoDTO.setRealm(realm.getRealm());
 			versionInfoDTO.setDescription(realm.getDescription());
-			versionInfoDTO.setDownloadUrl(url.getDownloadUrl());
+			versionInfoDTO.setDownloadUrl(innerUrl.getDownloadUrl());
+			versionInfoDTO.setPublishTime(innerUrl.getPublishTime());
 			
 			return true;
 		});
