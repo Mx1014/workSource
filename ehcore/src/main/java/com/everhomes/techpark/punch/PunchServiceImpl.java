@@ -3700,7 +3700,7 @@ public class PunchServiceImpl implements PunchService {
 					userMonthLogsDTO.setUserName(member.getContactName());
 					List<PunchDayLog> punchDayLogs = punchProvider.listPunchDayLogs(member.getTargetId(),member.getOrganizationId(), dateSF.format(monthBegin.getTime()),
 							dateSF.format(monthEnd.getTime()) );
-					if (null == punchDayLogs)
+					if (null == punchDayLogs || punchDayLogs.isEmpty())
 						continue;
 					userMonthLogsDTO.setPunchLogsDayList(new ArrayList<PunchLogsDay>());
 					for(PunchDayLog dayLog : punchDayLogs){
