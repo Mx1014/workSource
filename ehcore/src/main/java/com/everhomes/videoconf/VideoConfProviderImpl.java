@@ -15,12 +15,14 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -772,13 +774,14 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             SelectQuery<EhConfReservationsRecord> query = context.selectQuery(Tables.EH_CONF_RESERVATIONS);
             query.addConditions(Tables.EH_CONF_RESERVATIONS.STATUS.eq((byte) 1));
             query.addConditions(Tables.EH_CONF_RESERVATIONS.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(Tables.EH_CONF_RESERVATIONS.START_TIME.gt(new Timestamp(DateHelper.currentGMTTime().getTime())));
             if(locator.getAnchor() != null)
-            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.lt(locator.getAnchor()));
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.START_TIME.gt(new Timestamp(locator.getAnchor())));
             
             if(accountId != null)
             	query.addConditions(Tables.EH_CONF_RESERVATIONS.CONF_ACCOUNT_ID.eq(accountId));
            
-            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.ID.desc());
+            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.START_TIME.asc());
             query.addLimit(pageSize - reservations.size());
             
             query.fetch().map((r) -> {
@@ -788,7 +791,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             });
 
             if (reservations.size() >= pageSize) {
-                locator.setAnchor(reservations.get(reservations.size() - 1).getId());
+            	locator.setAnchor(reservations.get(reservations.size() - 1).getCreateTime().getTime());
+ //               locator.setAnchor(reservations.get(reservations.size() - 1).getId());
                 return AfterAction.done;
             }
             return AfterAction.next;
@@ -1452,6 +1456,37 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         });
 
         return conferences;
+	}
+
+	@Override
+	public boolean allTrialEnterpriseAccounts(Long enterpriseId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		boolean trial = true;
+		
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		List<Long> categories = findAccountCategoriesByConfType((byte) 4);
+		
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+            
+        if(enterpriseId != null)
+        	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+        
+        
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.ACCOUNT_CATEGORY_ID.notIn(categories));
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+       
+        
+        query.fetch().map((r) -> {
+        	accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+        });
+        
+        if(accounts != null && accounts.size() > 0) {
+        	trial = false;
+        }
+		
+		return trial;
 	}
 	
 	

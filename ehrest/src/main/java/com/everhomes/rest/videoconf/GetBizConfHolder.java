@@ -2,17 +2,17 @@ package com.everhomes.rest.videoconf;
 
 import com.everhomes.util.StringHelper;
 
-public class BizConfHolder {
-	
-	private BizConfDTO data;
+public class GetBizConfHolder {
+
+	private BizConfStatus data;
 	
 	private Integer status;
 
-	public BizConfDTO getData() {
+	public BizConfStatus getData() {
 		return data;
 	}
 
-	public void setData(BizConfDTO data) {
+	public void setData(BizConfStatus data) {
 		this.data = data;
 	}
 

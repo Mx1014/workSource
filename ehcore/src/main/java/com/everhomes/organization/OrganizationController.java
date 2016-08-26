@@ -34,6 +34,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
@@ -923,4 +924,5 @@ public class OrganizationController extends ControllerBase {
           
           return res;
       }
+      
 }

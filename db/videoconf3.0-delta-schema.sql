@@ -1,0 +1,1 @@
+ALTER TABLE `eh_conf_orders` ADD COLUMN `expired_date` DATETIME;

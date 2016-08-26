@@ -28,6 +28,7 @@ import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
@@ -1046,5 +1047,20 @@ public class OrganizationAdminController extends ControllerBase {
               response.setErrorCode(ErrorCodes.SUCCESS);
               response.setErrorDescription("OK");
               return response;              
+          }
+          
+          /**
+           * <b>URL: /admin/org/addNewOrganization</b>
+           * <p>新增公司</p>
+           */
+          @RequestMapping("addNewOrganization")
+          @RestReturn(value=String.class)
+          public RestResponse addNewOrganization(AddNewOrganizationInZuolinCommand cmd){
+        	  organizationService.addNewOrganizationInZuolin(cmd);
+        	  RestResponse res = new RestResponse();
+              res.setErrorCode(ErrorCodes.SUCCESS);
+              res.setErrorDescription("OK");
+              
+              return res;
           }
 }

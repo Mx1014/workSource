@@ -207,6 +207,8 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationsByIds(List<Long> ids);
 	List<Organization> listOrganizationsByIds(Long... ids);
 	List<Organization> listOrganizationsByIds(Set<Long> ids);
+	
+	Organization findOrganizationByNameAndNamespaceId(String name, Integer namespaceId);
 
 	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
 

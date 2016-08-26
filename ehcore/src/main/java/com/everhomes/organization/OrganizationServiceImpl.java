@@ -63,12 +63,16 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupJoinPolicy;
+import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -6602,5 +6606,205 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return response;
+	}
+
+	@Override
+	public void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd) {
+
+		//没传namespaceId和communityId时加到左邻域空间的左邻园区内
+		if(null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(0);
+		}
+		
+		if(null == cmd.getCommunityId()) {
+			cmd.setCommunityId(240111044331051380L);
+		}
+		
+		//没传organizationType则默认为普通公司
+		if(StringUtils.isEmpty(cmd.getOrganizationType())) {
+			cmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+		}
+		
+		if(!OrganizationType.ENTERPRISE.equals(OrganizationType.fromCode(cmd.getOrganizationType()))
+				&& !OrganizationType.PM.equals(OrganizationType.fromCode(cmd.getOrganizationType()))) {
+			LOGGER.error("organization type is wrong!");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, 
+					"organization type is wrong!");
+		}
+		
+		Organization org = organizationProvider.findOrganizationByNameAndNamespaceId(cmd.getOrgName(), cmd.getNamespaceId());
+		if(null != org) {
+			LOGGER.error("organization already exist in the namespace!");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_EXIST, 
+					"organization already exist in the namespace!");
+		}
+		
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getMobile());
+		if(null != identifier) {
+			LOGGER.warn("User identifier token has already been claimed.");
+		}
+		
+		this.dbProvider.execute((TransactionStatus status) -> {
+			
+			if(null == identifier) {
+				createUser(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile());
+			}
+			
+			//create group
+			Group group = createGroup(cmd.getOrgName(), cmd.getNamespaceId());
+    
+            // create the group owned forum and save it
+            Forum forum = createGroupForum(group);
+            group.setOwningForumId(forum.getId());
+            this.groupProvider.updateGroup(group);
+            
+            //create organization
+            Organization organization = createOrganization(cmd.getOrgName(), cmd.getNamespaceId(), 
+            		cmd.getOrganizationType(), group.getId(), cmd.getCommunityId());
+	        
+	        //create administrator: add user group; add in organization member; add acl
+            OrganizationMember orgMember = addIntoOrgAndAssignRole(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile(), 
+            		cmd.getOrganizationType(), organization.getId());
+	        
+	        organizationSearcher.feedDoc(organization);
+	        userSearcher.feedDoc(orgMember);
+			return null;
+		});
+	}
+	
+	private OrganizationMember addIntoOrgAndAssignRole(Integer namespaceId, String contactor, String identifierToken, 
+			String organizationType, Long orgId) {
+		UserIdentifier useridentifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        
+        UserGroup userGroup = new UserGroup();
+        userGroup.setOwnerUid(useridentifier.getOwnerUid());
+        userGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+        userGroup.setGroupId(orgId);
+        userGroup.setMemberRole(Role.ResourceUser);
+        userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+        this.userProvider.createUserGroup(userGroup); 
+        
+        OrganizationMember orgMember = new OrganizationMember();
+		orgMember.setOrganizationId(orgId);
+		orgMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+		orgMember.setContactName(contactor);
+		orgMember.setContactToken(identifierToken);
+		orgMember.setContactType(ContactType.MOBILE.getCode());
+		orgMember.setTargetId(useridentifier.getOwnerUid());
+		orgMember.setCreatorUid(UserContext.current().getUser().getId());
+		orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+		orgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		organizationProvider.createOrganizationMember(orgMember);
+		
+		RoleAssignment roleAssignment = new RoleAssignment();
+        roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+        roleAssignment.setOwnerId(orgId);
+        roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+        if(OrganizationType.PM.equals(OrganizationType.fromCode(organizationType))) {
+        	roleAssignment.setRoleId(RoleConstants.PM_SUPER_ADMIN);
+		}
+        if(OrganizationType.ENTERPRISE.equals(OrganizationType.fromCode(organizationType))) {
+        	roleAssignment.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		}
+        
+        roleAssignment.setTargetType(EntityType.USER.getCode());
+        roleAssignment.setTargetId(useridentifier.getOwnerUid());
+        roleAssignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        aclProvider.createRoleAssignment(roleAssignment);
+        
+        return orgMember;
+	}
+	
+	private Organization createOrganization(String orgName, Integer namespaceId, String organizationType, Long groupId, Long communityId) {
+		Organization organization = new Organization();
+        organization.setParentId(0L);
+		organization.setLevel(1);
+		organization.setPath("");
+		organization.setName(orgName);
+		organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+		organization.setOrganizationType(organizationType);
+		organization.setNamespaceId(namespaceId);
+		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setGroupId(groupId);
+		organizationProvider.createOrganization(organization);
+		
+		OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+		organizationCommunityRequest.setCommunityId(communityId);
+		organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+		organizationCommunityRequest.setMemberId(organization.getId());
+
+		organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+		organizationCommunityRequest.setCreatorUid(UserContext.current().getUser().getId());
+		organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+
+        return organization;
+	}
+	
+	private Group createGroup(String orgName, Integer namespaceId) {
+		Group group = new Group();
+		group.setName(orgName);
+		group.setDisplayName(orgName);
+		group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+		group.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+		group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
+		group.setStatus(GroupAdminStatus.ACTIVE.getCode());
+		group.setNamespaceId(namespaceId);
+		group.setCreatorUid(UserContext.current().getUser().getId());
+        this.groupProvider.createGroup(group);
+
+        return group;
+	}
+	
+	private Forum createGroupForum(Group group) {
+        Forum forum = new Forum();
+        forum.setOwnerType(EntityType.GROUP.getCode());
+        forum.setOwnerId(group.getId());
+        forum.setAppId(AppConstants.APPID_FORUM);
+        forum.setNamespaceId(group.getNamespaceId());
+        forum.setName(group.getName());
+        forum.setModifySeq(0L);
+        Timestamp currTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        forum.setUpdateTime(currTime);
+        forum.setCreateTime(currTime);
+        
+        this.forumProvider.createForum(forum);
+        return forum;
+    }
+	
+	private void createUser(Integer namespaceId, String nickName, String identifierToken) {
+		
+		User user = new User();
+		String password = "123456";
+		user.setStatus(UserStatus.ACTIVE.getCode());
+		user.setNamespaceId(namespaceId);
+		user.setNickName(nickName);
+		user.setGender(UserGender.UNDISCLOSURED.getCode());
+		String salt=EncryptionUtils.createRandomSalt();
+		user.setSalt(salt);
+		try {
+			user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
+		} catch (Exception e) {
+			LOGGER.error("encode password failed");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+		}
+		userProvider.createUser(user);
+
+		UserIdentifier newIdentifier = new UserIdentifier();
+		newIdentifier.setOwnerUid(user.getId());
+		newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+		newIdentifier.setIdentifierToken(identifierToken);
+		newIdentifier.setNamespaceId(namespaceId);
+
+		newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+		userProvider.createIdentifier(newIdentifier);
+		
+        //刷新地址信息
+        propertyMgrService.processUserForOwner(newIdentifier);
 	}
 }

@@ -2364,4 +2364,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		return results;
 	}
+
+	@Override
+	public Organization findOrganizationByNameAndNamespaceId(String name,
+			Integer namespaceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
 }

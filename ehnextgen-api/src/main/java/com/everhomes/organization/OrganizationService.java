@@ -34,6 +34,7 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
@@ -327,5 +328,6 @@ public interface OrganizationService {
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
 
 	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
-
+	
+	void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd);
 }
