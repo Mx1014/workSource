@@ -9,4 +9,6 @@ public interface LocaleTemplateProvider {
     void updateLocaleTemplate(LocaleTemplate template);
     
     void deleteLocaleTemplate(LocaleTemplate template);
+
+	void createLocaleTemplate(LocaleTemplate template);
 }

@@ -98,6 +98,7 @@
         eh_journals | eh_journal_configs |
 		eh_community_services |
 
+		eh_namespaces | eh_configurations
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

@@ -1,10 +1,15 @@
 package com.everhomes.version;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -16,6 +21,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.version.VersionDTO;
+import com.everhomes.rest.version.VersionInfoDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhVersionRealmDao;
@@ -31,6 +38,7 @@ import com.everhomes.server.schema.tables.records.EhVersionUrlsRecord;
 import com.everhomes.user.UserLike;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.Version;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
@@ -179,7 +187,7 @@ public class VersionProviderImpl implements VersionProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
         EhVersionUpgradeRulesDao dao = new EhVersionUpgradeRulesDao(context.configuration());
-        dao.update(rule);
+        dao.delete(rule);
     }
 
     @Override
@@ -427,4 +435,36 @@ public class VersionProviderImpl implements VersionProvider {
         
         return null;
     }
+
+	@Override
+	public List<VersionInfoDTO> listVersionInfo(Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhVersionRealm t1 = Tables.EH_VERSION_REALM.as("t1");
+		com.everhomes.server.schema.tables.EhVersionUpgradeRules t2 = Tables.EH_VERSION_UPGRADE_RULES.as("t2");
+		com.everhomes.server.schema.tables.EhVersionUrls t3 = Tables.EH_VERSION_URLS.as("t3");
+		SelectConditionStep<?> step = context.select(t2.ID, t2.REALM_ID, t1.REALM, t1.DESCRIPTION, t2.MATCHING_LOWER_BOUND, t2.MATCHING_UPPER_BOUND, t2.TARGET_VERSION, t2.FORCE_UPGRADE, t3.ID.as("url_id"), t3.APP_NAME, t3.PUBLISH_TIME, t3.DOWNLOAD_URL, t3.UPGRADE_DESCRIPTION)
+											.from(t2)
+											.leftOuterJoin(t1).on(t2.REALM_ID.eq(t1.ID))
+											.leftOuterJoin(t3).on(t2.REALM_ID.eq(t3.REALM_ID)).and(t2.TARGET_VERSION.eq(t3.TARGET_VERSION))
+											.where("1=1");
+		if (pageAnchor != null) {
+			step = step.and(t2.ID.lt(pageAnchor));
+		}
+		
+		Result<?> result = step.orderBy(t2.ID.desc())
+								.limit(pageSize)
+								.fetch();
+		
+		if (result != null && result.size() > 0) {
+			return result.map(r->{
+				VersionInfoDTO versionInfoDTO = RecordHelper.convert(r, VersionInfoDTO.class);
+				versionInfoDTO.setMinVersion(Version.fromEncodedValue(Double.valueOf(r.getValue("matching_lower_bound", Double.class)+0.2).longValue()).toString());
+				versionInfoDTO.setMaxVersion(Version.fromEncodedValue(Double.valueOf(r.getValue("matching_upper_bound", Double.class)+0.2).longValue()).toString());
+				return versionInfoDTO;
+			});
+		}
+			
+		return new ArrayList<VersionInfoDTO>();
+	}
+	
 }
