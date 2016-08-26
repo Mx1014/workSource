@@ -223,11 +223,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<String> result = new ArrayList<String>();
 		for(Long p:privileges){
-			if(p.longValue() == PrivilegeConstants.ASSIGNTASK);
+			if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
 				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
-			if(p.longValue() == PrivilegeConstants.COMPLETETASK);
+			if(p.longValue() == PrivilegeConstants.COMPLETETASK)
 				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
-			if(p.longValue() == PrivilegeConstants.CLOSETASK);
+			if(p.longValue() == PrivilegeConstants.CLOSETASK)
 				result.add(PmTaskPrivilege.CLOSETASK.getCode());
 		}
 		dto.setPrivileges(result);
