@@ -3868,7 +3868,7 @@ public class PunchServiceImpl implements PunchService {
 			return response;
 		List<Long> userIds = new ArrayList<Long>();
 		for(OrganizationMember member : organizationMembers){
-			if (member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+			if (null != member.getTargetType() && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getMonth(),cmd.getExceptionStatus()
