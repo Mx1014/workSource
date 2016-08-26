@@ -28,6 +28,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -126,8 +127,11 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
+        FilterBuilder fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -195,6 +199,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             if(null != equipment) {
             	dto.setEquipmentName(equipment.getName());
             	dto.setEquipmentLocation(equipment.getLocation());
+            	dto.setQrCodeFlag(equipment.getQrCodeFlag());
             }
             
             if(task.getExecutorId() != null && task.getExecutorId() != 0) {
