@@ -86,3 +86,5 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 -- 10 min for chuneng
 update eh_configurations set value='600' where name='aclink.qr_timeout';
+
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('equipment', '10018', 'zh_CN', '任务已失效');
