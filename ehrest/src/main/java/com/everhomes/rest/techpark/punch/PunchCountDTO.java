@@ -5,9 +5,10 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>userId：申请人id</li>
- * <li>userName：申请人名称</li>
- * <li>token：申请人联系电话</li>
+ * <li>userId：用户id</li>
+ * <li>userName：名称</li>
+ * <li>token：联系电话</li>
+ * <li>deptName：部门</li>
  * <li>workDayCount:应上班天数</li>
  * <li>workCount:实际上班天数</li>
  * <li>belateCount：迟到天数</li>
@@ -24,11 +25,12 @@ public class PunchCountDTO {
 	private Long userId;
 	private String userName;
 	private String token;
+	private String deptName;
     private Integer workDayCount;
     private Integer workCount;
     private Integer belateCount;
     private Integer leaveEarlyCount;
-    private Double unPunchCount;
+    private Double unpunchCount;
     private Integer blandleCount;
     private Double absenceCount;
     private Double sickCount;
@@ -63,11 +65,11 @@ public class PunchCountDTO {
 	public void setLeaveEarlyCount(Integer leaveEarlyCount) {
 		this.leaveEarlyCount = leaveEarlyCount;
 	}
-	public Double getUnPunchCount() {
-		return unPunchCount;
+	public Double getUnpunchCount() {
+		return unpunchCount;
 	}
-	public void setUnPunchCount(Double unPunchCount) {
-		this.unPunchCount = unPunchCount;
+	public void setUnpunchCount(Double unPunchCount) {
+		this.unpunchCount = unPunchCount;
 	}
 	public Integer getBlandleCount() {
 		return blandleCount;
@@ -139,5 +141,11 @@ public class PunchCountDTO {
 	}
 	public void setUserEnterpriseGroup(String userEnterpriseGroup) {
 		this.userEnterpriseGroup = userEnterpriseGroup;
+	}
+	public String getDeptName() {
+		return deptName;
+	}
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
 	}
 }

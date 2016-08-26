@@ -60,7 +60,7 @@ public class ThirdUserOpenController extends ControllerBase {
 
 		    UserLogin login = this.userService.synThridUser(cmd);
 
-	        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+	        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 	        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
 	        LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));

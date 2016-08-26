@@ -1409,7 +1409,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			return ;
 		}
 		
-		String path = "http://api.confcloud.cn/openapi/cancelConf";
+		String path = "http://api.bizvideo.cn/openapi/cancelConf";
 		Long timestamp = DateHelper.currentGMTTime().getTime();
 		String tokenString = source.getAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 		String token = DigestUtils.md5Hex(tokenString);
@@ -1479,7 +1479,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		
-		String path = "http://api.confcloud.cn/openapi/confReservation";
+		String path = "http://api.bizvideo.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
 			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {

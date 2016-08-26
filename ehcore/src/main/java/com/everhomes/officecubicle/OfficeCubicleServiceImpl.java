@@ -162,28 +162,29 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				.getUser().getId()));
 
 		List<Attachment> attachments = this.attachmentProvider.listAttachmentByOwnerId(EhOfficeCubicleAttachments.class, dto.getId());
-		if (null != attachments)
+		if (null != attachments){
 			dto.setAttachments(new ArrayList<OfficeAttachmentDTO>());
-		attachments.forEach((attachment) -> {
-			OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
-			attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
-					UserContext.current().getUser().getId()));
-			dto.getAttachments().add(attachmentDTO);
-		});
-
+			attachments.forEach((attachment) -> {
+				OfficeAttachmentDTO attachmentDTO = ConvertHelper.convert(attachment, OfficeAttachmentDTO.class);
+				attachmentDTO.setContentUrl(this.contentServerService.parserUri(attachment.getContentUri(), EntityType.USER.getCode(),
+						UserContext.current().getUser().getId()));
+				dto.getAttachments().add(attachmentDTO);
+			});
+		}
 		List<OfficeCubicleCategory> categories = this.officeCubicleProvider.queryCategoriesBySpaceId(dto.getId());
-		if (null != categories)
+		if (null != categories){
 			dto.setCategories(new ArrayList<OfficeCategoryDTO>());
-		categories.forEach((category) -> {
-			OfficeCategoryDTO categoryDTO = ConvertHelper.convert(category, OfficeCategoryDTO.class);
-			categoryDTO.setSize(category.getSpaceSize());
-			dto.getCategories().add(categoryDTO);
-		});
-		Collections.sort(dto.getCategories(),new Comparator<OfficeCategoryDTO>(){
-			public int compare(OfficeCategoryDTO s1, OfficeCategoryDTO s2) {
-                return s2.getSize() - s1.getSize();
-            }
-		});
+			categories.forEach((category) -> {
+				OfficeCategoryDTO categoryDTO = ConvertHelper.convert(category, OfficeCategoryDTO.class);
+				categoryDTO.setSize(category.getSpaceSize());
+				dto.getCategories().add(categoryDTO);
+			});
+			Collections.sort(dto.getCategories(),new Comparator<OfficeCategoryDTO>(){
+				public int compare(OfficeCategoryDTO s1, OfficeCategoryDTO s2) {
+	                return s2.getSize() - s1.getSize();
+	            }
+			});	
+		}
 		return dto;
 	}
 

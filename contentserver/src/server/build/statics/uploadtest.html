@@ -22,6 +22,9 @@ function parseUrl(val) {
 }
 function body_onload(e){
     token = parseUrl("token");
+    if(!token) {
+        token = "aaaj";
+    }
     document.myform.action="/upload/image?token=" + token;
 }
 </script>

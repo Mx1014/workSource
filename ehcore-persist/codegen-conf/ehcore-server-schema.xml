@@ -37,7 +37,7 @@
         eh_audit_logs | eh_locale_strings | eh_locale_templates | eh_devices | eh_certs |
         eh_regions | eh_communities | eh_community_geopoints | eh_nearby_community_map | eh_organizations | eh_organization_communities |
         eh_organization_members | eh_organization_tasks | eh_organization_address_mappings | eh_organization_bills |
-        eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts | 
+        eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts |
         eh_organization_billing_accounts | eh_organization_billing_transactions | eh_community_profiles | eh_addresses |
         eh_family_billing_accounts | eh_family_billing_transactions |
         eh_family_followers | eh_banners | eh_banner_clicks |
@@ -56,18 +56,18 @@
         eh_cooperation_requests | eh_thirdpart_users | eh_push_messages | eh_push_message_results |
         eh_enterprise_addresses | eh_enterprise_contacts | eh_enterprise_contact_entries | eh_enterprise_contact_groups |
         eh_enterprise_contact_group_members | eh_enterprise_community_members |
-        eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday |
-        eh_punch_exception_approvals | eh_punch_day_logs |  
+        eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday | eh_punch_statistics |
+        eh_punch_exception_approvals | eh_punch_day_logs |  eh_punch_time_rules | eh_punch_location_rules | eh_punch_wifis | eh_punch_wifi_rules | eh_punch_holidays | eh_punch_workday_rules | eh_punch_rule_owner_map |
          eh_rental_rules | eh_rental_sites | eh_rental_site_items | eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills | eh_rental_bill_paybill_map |
-		    eh_park_charge | eh_recharge_info| eh_park_apply_card |  
+		    eh_park_charge | eh_recharge_info| eh_park_apply_card |
         eh_enterprise_contact_group_members | eh_enterprise_community_map | eh_building_attachments | eh_buildings |
         eh_enterprise_attachments | eh_organization_assigned_scopes | eh_user_communities |
         eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources | eh_enterprise_details | eh_enterprise_op_requests |
         eh_lease_promotions | eh_lease_promotion_attachments | eh_user_group_histories |
         eh_conf_account_categories | eh_conf_invoices | eh_conf_orders | eh_conf_order_account_map | eh_conf_source_accounts |
-        eh_conf_accounts | eh_conf_account_histories | eh_conf_conferences | eh_conf_enterprises | eh_warning_contacts | eh_conf_reservations |	
-		eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |	
-		eh_repeat_settings | eh_quality_inspection_standards | eh_quality_inspection_standard_group_map | 
+        eh_conf_accounts | eh_conf_account_histories | eh_conf_conferences | eh_conf_enterprises | eh_warning_contacts | eh_conf_reservations |
+		eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
+		eh_repeat_settings | eh_quality_inspection_standards | eh_quality_inspection_standard_group_map |
 		eh_quality_inspection_tasks | eh_quality_inspection_task_attachments | eh_quality_inspection_evaluation_factors | eh_quality_inspection_evaluations |
 		eh_quality_inspection_task_records | eh_quality_inspection_categories |
 		eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
@@ -90,11 +90,16 @@
 		eh_wifi_settings |
 		eh_news | eh_news_attachments | eh_news_comment |
 		eh_stat_orders | eh_stat_transactions | eh_stat_refunds | eh_stat_settlements | eh_stat_service_settlement_results | eh_stat_task_logs | eh_stat_service |
+		eh_wifi_settings | eh_news | eh_news_attachments | eh_news_comment | eh_equipment_inspection_standards | eh_equipment_inspection_equipments | eh_equipment_inspection_accessories |
+        eh_equipment_inspection_accessory_map | eh_equipment_inspection_equipment_parameters | eh_equipment_inspection_equipment_attachments |
+        eh_equipment_inspection_tasks | eh_equipment_inspection_task_attachments | eh_equipment_inspection_task_logs |
 		eh_rentalv2_default_rules | eh_rentalv2_time_interval | eh_rentalv2_close_dates | eh_rentalv2_resources | eh_rentalv2_resource_ranges | eh_rentalv2_resource_pics |
-		eh_rentalv2_cells | eh_rentalv2_config_attachments | eh_rentalv2_items | eh_rentalv2_orders |eh_rentalv2_resource_orders | 
+		eh_rentalv2_cells | eh_rentalv2_config_attachments | eh_rentalv2_items | eh_rentalv2_orders |eh_rentalv2_resource_orders |
 		eh_rentalv2_items_orders | eh_rentalv2_order_attachments | eh_rentalv2_order_payorder_map | eh_rentalv2_refund_orders | eh_rentalv2_resource_types | eh_rentalv2_resource_numbers |
-		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | 
+		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | eh_rich_texts | eh_user_impersonations |
+        eh_journals | eh_journal_configs |
 		eh_community_services |
+
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

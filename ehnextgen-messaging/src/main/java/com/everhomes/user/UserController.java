@@ -295,7 +295,7 @@ public class UserController extends ControllerBase {
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse verifyAndLogon(@Valid VerifyAndLogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 		UserLogin login = this.userService.verifyAndLogon(cmd);
-		LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
 		setCookieInResponse("token", tokenString, request, response);
 		
@@ -325,7 +325,7 @@ public class UserController extends ControllerBase {
 			HttpServletResponse response) {
 		UserLogin login = this.userService.verifyAndLogonByIdentifier(cmd);
 
-		LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
 		setCookieInResponse("token", tokenString, request, response);
         
@@ -359,7 +359,7 @@ public class UserController extends ControllerBase {
 				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 		long loginEndTime = System.currentTimeMillis();
 		
-		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
 		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
@@ -400,8 +400,12 @@ public class UserController extends ControllerBase {
 		if(loginToken == null)
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN, "Invalid login token");
 
+		if(cmd.getNamespaceId() != null) {
+		    UserContext.current().setNamespaceId(cmd.getNamespaceId());    
+		}
+		
 		UserLogin login = this.userService.logonByToken(loginToken);
-		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 		setCookieInResponse("token", tokenString, request, response);
 
@@ -582,13 +586,21 @@ public class UserController extends ControllerBase {
 	@RequestMapping("fetchPastToRecentMessages")
 	@RestReturn(FetchMessageCommandResponse.class)
 	public RestResponse fetchPastToRecentMessages(@Valid FetchPastToRecentMessageCommand cmd) {
-		FetchMessageCommandResponse cmdResponse = this.messagingService.fetchPastToRecentMessages(cmd);
+	    RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+	    try {
+	        long startTime = System.currentTimeMillis();
+	        FetchMessageCommandResponse cmdResponse = this.messagingService.fetchPastToRecentMessages(cmd);
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.info("fetchPastToRecentMessages took=" + (endTime - startTime) + " milliseconds");
 
-		RestResponse response = new RestResponse(cmdResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-
-		return response;
+	        response.setResponseObject(cmdResponse);
+	        return response;
+	    } catch(Exception ex) {
+	        LOGGER.error("fetchPastToRecentMessages error:", ex);
+	    }
+	    return response;
 	}
 
 	/**
@@ -715,6 +727,14 @@ public class UserController extends ControllerBase {
 	@RestReturn(AppIdStatusResponse.class)
 	public RestResponse getAppIdStatus(@Valid AppIdStatusCommand cmd) {
 		AppIdStatusResponse cmdResponse = new AppIdStatusResponse();
+		
+		RestResponse response = new RestResponse(cmdResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		if(UserContext.current().getLogin() == null) {
+		    //check user first
+		    return response;
+		}
 
 		for(Long appId : cmd.getAppIds()) {
 			FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
@@ -730,9 +750,6 @@ public class UserController extends ControllerBase {
 			}
 		}
 
-		RestResponse response = new RestResponse(cmdResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
 		return response;
 	}
 
@@ -899,7 +916,7 @@ public class UserController extends ControllerBase {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(login.getUserId(), 0);
 
-		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
 		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));

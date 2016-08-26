@@ -3,7 +3,7 @@ package server
 import (
 	"math"
 
-	"github.com/gographics/imagick/imagick"
+	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 func crop(mw *imagick.MagickWand, x, y int, cols, rows uint) error {
