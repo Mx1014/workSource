@@ -325,6 +325,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public void assignTask(AssignTaskCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
+		if(null == cmd.getOrganizationId()){
+			LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+		}
 		User user = UserContext.current().getUser();
 		if(null == cmd.getTargetId()){
 			LOGGER.error("TargetId cannot be null.");
