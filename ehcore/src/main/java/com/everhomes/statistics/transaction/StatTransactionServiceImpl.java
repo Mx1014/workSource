@@ -1809,6 +1809,11 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		Integer s = 200;
 		System.out.println(Timestamp.valueOf("2016-08-01" + " 00:00:00").getTime());
 		
-		System.out.println(Long.valueOf("14598342843426081282"));
+		
+		List<Date> dDates = DateUtil.getStartToEndDates(new Date(1422025100000L), new Date(1472065200001L));
+		for (Date date : dDates) {
+			System.out.println(DateUtil.dateToStr(date, DateUtil.YMR_SLASH));
+
+		}
 	}
 }
