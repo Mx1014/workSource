@@ -237,7 +237,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void setTaskStatus(Long organizationId, String ownerType, Long ownerId, PmTask task, String content, 
 			List<AttachmentDescriptor> attachments, Byte status) {
 		checkOwnerIdAndOwnerType(ownerType, ownerId);
-		
+		if(null == organizationId){
+			LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+		}
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(status);
@@ -285,6 +289,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public void closeTask(CloseTaskCommand cmd) {
 		checkId(cmd.getId());
+		
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode()){
 			LOGGER.error("Task cannot be closed.");
