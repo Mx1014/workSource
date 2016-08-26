@@ -25,4 +25,12 @@ public class ListPunchDetailsResponse {
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
 	}
+
+	public List<PunchDayDetailDTO> getPunchDayDetails() {
+		return punchDayDetails;
+	}
+
+	public void setPunchDayDetails(List<PunchDayDetailDTO> punchDayDetails) {
+		this.punchDayDetails = punchDayDetails;
+	}
 }

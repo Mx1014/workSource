@@ -1459,10 +1459,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 		}
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-		query.addConditions(
-				Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(
-						context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
-						.where(cond)));
+		Condition cond2 = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+				.where(cond));
+		if(null != groupTypes && groupTypes.contains(OrganizationGroupType.DEPARTMENT.getCode()))
+			cond2 = cond2.or( Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID.in(context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+					.where(cond)));
+		query.addConditions(cond2 );
 		if(!StringUtils.isEmpty(userName))
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+userName+"%"));
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
