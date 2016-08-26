@@ -90,5 +90,4 @@ update eh_configurations set value='600' where name='aclink.qr_timeout';
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('equipment', '10018', 'zh_CN', '任务已失效');
 
 -- 升级使用的url
-set @configuration_id = (select max(id) from eh_configurations) +1;
-INSERT INTO `eh_configurations` VALUES (@configuration_id, 'upgrade.url', '/management/views/upgrade.html', 'upgrade url', 0, NULL);
+INSERT INTO `eh_configurations` VALUES (141, 'upgrade.url', '/management/views/upgrade.html', 'upgrade url', 0, NULL);

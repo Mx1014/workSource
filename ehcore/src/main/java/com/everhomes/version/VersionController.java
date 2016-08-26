@@ -75,6 +75,7 @@ public class VersionController extends ControllerBase {
      * <b>URL: /version/getUpgradeContent</b>
      * <p>获取升级内容</p>
      */
+    @RequireAuthentication(false)
     @RequestMapping("getUpgradeContent")
     @RestReturn(GetUpgradeContentResponse.class)
     public RestResponse getUpgradeContent(GetUpgradeContentCommand cmd){
