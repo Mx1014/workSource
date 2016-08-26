@@ -3763,7 +3763,7 @@ public class PunchServiceImpl implements PunchService {
 				endDay =  dateSF.format(new Date(cmd.getEndDay()));
 			
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					cmd.getOwnerId(),startDay,endDay , 
+					organizationMembers.get(0).getOrganizationId(),startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
@@ -3776,6 +3776,22 @@ public class PunchServiceImpl implements PunchService {
 			response.setPunchDayDetails(new ArrayList<PunchDayDetailDTO>());
 			for(PunchDayLog r : results){
 				PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
+				if(null!= r.getArriveTime())
+					dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
+
+				if(null!= r.getLeaveTime())
+					dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
+
+				if(null!= r.getWorkTime())
+					dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
+
+				if(null!= r.getNoonLeaveTime())
+					dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
+
+				if(null!= r.getAfternoonArriveTime())
+					dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
+				if(null!= r.getPunchDate())
+					dto.setPunchDate(r.getPunchDate().getTime());
 				response.getPunchDayDetails().add(dto);
 			}
 			
