@@ -44,6 +44,7 @@ public class ConfigurationAdminController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private DbProvider dbProvider;
+    
     /**
      * <b>URL: /admin/configuration/updateConfiguration</b>
      * <p>更新配置</p>
@@ -123,4 +124,5 @@ public class ConfigurationAdminController extends ControllerBase {
         
         return new RestResponse(response);
     }
+    
 }

@@ -159,9 +159,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
         	processRepeatSetting(standard);
     		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-
-    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-    		dto.setRepeat(rs);
+    		if(null != standard.getRepeat()) {
+	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+	    		dto.setRepeat(rs);
+    		}
     		eqStandards.add(dto);
         }
         
@@ -169,8 +170,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	}
 
 	private void processRepeatSetting(EquipmentInspectionStandards standard) {
-		RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
-		standard.setRepeat(repeat);
+		if(null != standard.getRepeatSettingId() && standard.getRepeatSettingId() != 0) {
+			RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
+			standard.setRepeat(repeat);
+		}
 	}
 	
 	@Override

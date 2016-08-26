@@ -41,6 +41,8 @@ public class UserLogin implements Serializable {
     
     private String borderSessionId;
     
+    private Long impersonationId;
+    
     public UserLogin() {
     }
     
@@ -132,7 +134,7 @@ public class UserLogin implements Serializable {
     }
 
     public LoginToken getLoginToken() {
-        LoginToken token = new LoginToken(this.userId, this.loginId, this.loginInstanceNumber);
+        LoginToken token = new LoginToken(this.userId, this.loginId, this.loginInstanceNumber, this.impersonationId);
         return token;
     }
     
@@ -167,6 +169,14 @@ public class UserLogin implements Serializable {
 
     public void setBorderSessionId(String borderSessionId) {
         this.borderSessionId = borderSessionId;
+    }
+
+    public Long getImpersonationId() {
+        return impersonationId;
+    }
+
+    public void setImpersonationId(Long impersonationId) {
+        this.impersonationId = impersonationId;
     }
 
     @Override

@@ -43,6 +43,7 @@ import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.user.UserProfileDTO;
@@ -99,4 +100,5 @@ public interface BusinessService {
 	void reduceUserOrderCount(Long userId);
 	Integer findUserOrderCount(UserCouponsCommand cmd);
 	void updateUserOrderCount(UpdateUserOrderCountCommand cmd);
+	List<RegionDTO> listRegion(ListRegionCommand cmd);
 }

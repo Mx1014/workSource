@@ -1,6 +1,7 @@
 package com.everhomes.rest.equipment;
 
 import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>equipmentId: 设备id</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>equipmentLocation: 设备位置</li>
+ *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
  *  <li>parentId: 父任务id</li>
  *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>
@@ -105,6 +107,8 @@ public class EquipmentTaskDTO {
 	private String reviewerName;
 
 	private String standardDescription;
+	
+	private Byte qrCodeFlag;
 	
 	public Long getId() {
 		return id;
@@ -368,6 +372,14 @@ public class EquipmentTaskDTO {
 
 	public void setStandardDescription(String standardDescription) {
 		this.standardDescription = standardDescription;
+	}
+
+	public Byte getQrCodeFlag() {
+		return qrCodeFlag;
+	}
+
+	public void setQrCodeFlag(Byte qrCodeFlag) {
+		this.qrCodeFlag = qrCodeFlag;
 	}
 
 	@Override

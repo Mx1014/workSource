@@ -313,8 +313,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public void createOrganizationMember(OrganizationMember departmentMember) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-		departmentMember.setNamespaceId(namespaceId);
+		if (departmentMember.getNamespaceId() == null) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+			departmentMember.setNamespaceId(namespaceId);
+		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMembersRecord record = ConvertHelper.convert(departmentMember, EhOrganizationMembersRecord.class);
 		InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);

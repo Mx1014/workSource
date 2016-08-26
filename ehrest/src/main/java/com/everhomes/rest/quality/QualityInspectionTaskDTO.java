@@ -105,7 +105,7 @@ public class QualityInspectionTaskDTO {
 	
 	private Byte taskFlag;
 	
-	private Byte manualFlag;
+	private Long manualFlag;
 	
 	private String standardDescription;
 	
@@ -343,11 +343,11 @@ public class QualityInspectionTaskDTO {
 		this.categoryId = categoryId;
 	}
 
-	public Byte getManualFlag() {
+	public Long getManualFlag() {
 		return manualFlag;
 	}
 
-	public void setManualFlag(Byte manualFlag) {
+	public void setManualFlag(Long manualFlag) {
 		this.manualFlag = manualFlag;
 	}
 
