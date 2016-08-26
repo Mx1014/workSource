@@ -18,7 +18,7 @@ public interface YellowPageProvider {
 			String serviceType, String keywords);
 	
 	
-	List<YellowPage> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
+	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
 			String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords);
 
 
@@ -42,5 +42,17 @@ public interface YellowPageProvider {
 	List<YellowPage> getYellowPagesByCategoryId(Long categoryId);
 
 	YellowPage findYellowPageById(Long id, String ownerType, Long ownerId);
+	
+	ServiceAllianceCategories findCategoryById(Long id);
+	void createCategory(ServiceAllianceCategories category);
+	void updateCategory(ServiceAllianceCategories category);
+	void createServiceAlliances(ServiceAlliances sa);
+	void updateServiceAlliances(ServiceAlliances sa);
+	void createServiceAllianceAttachments(ServiceAllianceAttachment attachment);
+	void deleteServiceAllianceAttachmentsByOwnerId(Long ownerId);
+	
+	ServiceAlliances queryServiceAllianceTopic(String ownerType, Long ownerId, Long type);
+	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
+	void populateServiceAlliancesAttachment(ServiceAlliances sa);
  
 }
