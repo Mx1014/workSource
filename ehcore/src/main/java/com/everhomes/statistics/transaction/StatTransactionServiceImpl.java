@@ -805,7 +805,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}			
 			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_CARD_ORDER){
-				this.syncPaymentToStatOrderByDate(date);
+//				this.syncPaymentToStatOrderByDate(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.SYNC_PAID_PLATFORM_TRANSACTION.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
@@ -817,7 +817,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_CARD_TRANSACTION){
-				this.syncPaymentToStatTransaction(date);
+//				this.syncPaymentToStatTransaction(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.SYNC_PAID_PLATFORM_REFUND.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
@@ -829,7 +829,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_REFUND){
-				this.syncPaymentToStatRefund(date);
+//				this.syncPaymentToStatRefund(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.GENERATE_SETTLEMENT_DETAIL.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
