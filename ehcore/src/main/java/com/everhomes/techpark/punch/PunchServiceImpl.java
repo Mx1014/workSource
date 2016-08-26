@@ -3879,7 +3879,8 @@ public class PunchServiceImpl implements PunchService {
 			organizationId = org.getId();
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),organizationId,cmd.getMonth(),cmd.getExceptionStatus()
 				,userIds, null, Integer.MAX_VALUE);
-		
+		if(null == results || results.isEmpty())
+			return response;
 		URL rootPath = PunchServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
