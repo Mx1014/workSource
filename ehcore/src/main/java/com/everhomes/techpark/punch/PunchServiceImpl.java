@@ -3705,6 +3705,7 @@ public class PunchServiceImpl implements PunchService {
 					if (null == punchDayLogs || punchDayLogs.isEmpty())
 						continue;
 					userMonthLogsDTO.setPunchLogsDayList(new ArrayList<PunchLogsDay>());
+					ExceptionStatus exceptionStatus = ExceptionStatus.NORMAL;
 					for(PunchDayLog dayLog : punchDayLogs){
 						PunchLogsDay pdl = ConvertHelper.convert(dayLog, PunchLogsDay.class);
 						Calendar logDay = Calendar.getInstance();
@@ -3715,8 +3716,14 @@ public class PunchServiceImpl implements PunchService {
 						pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
 						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
+						if ( ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
+							exceptionStatus = ExceptionStatus.EXCEPTION;
+							break;
+						}
+							
 					}
-
+					if (ExceptionStatus.EXCEPTION.equals(exceptionStatus)) 
+						continue;
 					response.getUserLogs().add(userMonthLogsDTO);
 				}
 
