@@ -3722,7 +3722,7 @@ public class PunchServiceImpl implements PunchService {
 						}
 							
 					}
-					if (ExceptionStatus.EXCEPTION.equals(exceptionStatus)) 
+					if (cmd.getExceptionStatus()!= null && exceptionStatus.equals(ExceptionStatus.fromCode(cmd.getExceptionStatus()))) 
 						continue;
 					response.getUserLogs().add(userMonthLogsDTO);
 				}
