@@ -865,7 +865,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				try {
 					this.createMemberAndRoleAssignment(organizationMemberDTO, organization.getId(), cmd.getRoleId());
 				} catch (Exception e) {
-					logs.add(StringHelper.toJsonString(organizationMemberDTO));
+					logs.add(StringHelper.toJsonString(organizationMemberDTO) + "Exception:" + e);
 				}
 			}
 			
