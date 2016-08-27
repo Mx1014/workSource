@@ -4543,10 +4543,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 						throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
 								"phone number already exists.");
 					}
+					
+					organizationMember.setOrganizationId(organizationId);
+					organizationProvider.createOrganizationMember(organizationMember);
 					return null;
 				}
-				organizationMember.setOrganizationId(organizationId);
-				organizationProvider.createOrganizationMember(organizationMember);
+				if(null == desOrgMember){
+					organizationMember.setOrganizationId(organizationId);
+					organizationProvider.createOrganizationMember(organizationMember);
+				}
 				
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
 				groupId = cmd.getOrganizationId();
