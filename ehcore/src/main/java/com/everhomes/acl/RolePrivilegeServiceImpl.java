@@ -986,9 +986,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(!StringUtils.isEmpty(r.getA())){
 				dto.setEmployeeNo(Long.valueOf(r.getA()));
 			}
-			dto.setContactName(r.getB());
+			dto.setGroupName(r.getB());
+			dto.setContactName(r.getC());
+			Byte gender = 0;
+			if(!StringUtils.isEmpty(r.getD()) && r.getD().equals("男")){
+				gender = 1;
+			}else if(!StringUtils.isEmpty(r.getD()) && r.getD().equals("女")){
+				gender = 2;
+			}
+			dto.setGender(gender);
 			dto.setContactToken(r.getC());
-			dto.setGroupName(r.getD());
+			
 			result.add(dto);
 		}
 		return result;
