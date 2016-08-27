@@ -69,3 +69,5 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES (53,609,52300,'成员的增删改',0,1,'成员的增删改',480);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (54,610,52300,'设置角色',0,1,'设置角色',490);
+
+
