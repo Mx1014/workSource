@@ -659,27 +659,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<Long> roleIds = cmd.getRoleIds();
 		dbProvider.execute((TransactionStatus status) -> {
-
+			for (RoleAssignment assignment : roleAssignments) {
+				aclProvider.deleteRoleAssignment(assignment.getId());
+			}
 			for (Long roleId : roleIds) {
-				boolean flag = true;
-				if(null != roleAssignments && 0 < roleAssignments.size()){
-					for (RoleAssignment assignment : roleAssignments) {
-						if(assignment.getRoleId().equals(roleId)){
-							flag = false;
-							break;
-						}
-					}
-				}
-				
-				if(flag){
-					roleAssignment.setRoleId(roleId);
-					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-					roleAssignment.setOwnerId(cmd.getOrganizationId());
-					roleAssignment.setTargetType(cmd.getTargetType());
-					roleAssignment.setTargetId(cmd.getTargetId());
-					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-					aclProvider.createRoleAssignment(roleAssignment);
-				}
+				roleAssignment.setRoleId(roleId);
+				roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+				roleAssignment.setOwnerId(cmd.getOrganizationId());
+				roleAssignment.setTargetType(cmd.getTargetType());
+				roleAssignment.setTargetId(cmd.getTargetId());
+				roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+				aclProvider.createRoleAssignment(roleAssignment);
 				
 			}
 			

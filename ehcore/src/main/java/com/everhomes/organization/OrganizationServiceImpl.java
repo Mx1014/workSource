@@ -4536,16 +4536,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Long groupId = cmd.getGroupId();
 			
 			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
 				if(null == groupId || 0 == groupId){
-					OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
 					if(null != desOrgMember){
 						LOGGER.error("phone number already exists. organizationId = {}", organizationId);
 						throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
 								"phone number already exists.");
 					}
-					organizationProvider.createOrganizationMember(organizationMember);
 					return null;
 				}
+				organizationMember.setOrganizationId(organizationId);
+				organizationProvider.createOrganizationMember(organizationMember);
 				
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
 				groupId = cmd.getOrganizationId();
