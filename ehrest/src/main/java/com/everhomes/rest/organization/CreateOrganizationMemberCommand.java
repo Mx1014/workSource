@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -36,6 +38,8 @@ public class CreateOrganizationMemberCommand {
 	private Long groupId;
 	private Byte gender;
 	private String employeeNo;
+	
+	private List<Long> departmentIds;
 	
 	public CreateOrganizationMemberCommand() {
     }
@@ -117,6 +121,15 @@ public class CreateOrganizationMemberCommand {
 
 	public void setEmployeeNo(String employeeNo) {
 		this.employeeNo = employeeNo;
+	}
+
+	
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
+	}
+
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
 	}
 
 	@Override

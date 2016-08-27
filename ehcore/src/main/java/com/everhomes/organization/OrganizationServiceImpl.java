@@ -5366,7 +5366,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			org = this.checkOrganization(orgId);
 		}
 		
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypes);
+		
 		depts.add(org);
 		
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
