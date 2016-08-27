@@ -26,6 +26,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.oauth2.CommonRestResponse;
@@ -70,6 +71,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+    @Autowired
+    private MessagingKickoffService kickoffService;
 
 
 	public WebRequestInterceptor() {
@@ -143,6 +147,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 						}
 						return true;
 					}
+					
+					//Kickoff state support
+					if(kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
+	                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+	                            UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");  					    
+					}
+					
 					//Update by Janson, when the request is using apiKey, we generate a 403 response to app.
 					String appKey = request.getParameter(APP_KEY_NAME); 
 					if(null != appKey && (!appKey.isEmpty())) {
@@ -199,7 +210,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			if(user != null) {
 				userId = user.getId();
 			}
-			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+//			It's ok when using signature
+//			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
 			return false;
 		}
 
@@ -412,7 +424,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
 			String pusherIdentify = null;
 			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
-			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
 			setCookieInResponse("token", tokenString, request, response);
 			return logintoken;

@@ -23,6 +23,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
@@ -126,7 +127,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(parkingLotId != null)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PARKING_LOT_ID.eq(parkingLotId));
         if(StringUtils.isNotBlank(cardType))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.RATE_NAME.eq(cardType));
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.CARD_TYPE.eq(cardType));
         
         List<ParkingRechargeRate> result = new ArrayList<ParkingRechargeRate>();
         
@@ -558,4 +559,38 @@ public class ParkingProviderImpl implements ParkingProvider {
         else 
         	return null;
 	}
+	
+	 @Override
+	 public List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
+				Timestamp startDate, Timestamp endDate,List<Byte> statuses,
+				CrossShardListingLocator locator){
+ 		 List<ParkingRechargeOrder> results = new ArrayList<ParkingRechargeOrder>();
+		 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
+		 SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+	        //带上逻辑删除条件
+		 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
+		 if(null != locator.getAnchor())
+			 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(locator.getAnchor()));
+		 if(null != startDate)
+			 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.ge(startDate));
+		 if(null != endDate)
+			 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
+		 if(null != statuses && statuses.size() > 0){
+			 query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.in(statuses));
+		 }
+		 query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.asc());
+		 query.addLimit(pageSize + 1);
+		 query.fetch().map(r -> {
+			 results.add(ConvertHelper.convert(r, ParkingRechargeOrder.class));
+	    	 return null;
+		 });
+	        
+		 locator.setAnchor(null);
+		 if(results.size() > pageSize){
+			 results.remove(results.size() - 1);
+			 locator.setAnchor(results.get(results.size() -1).getId());
+		 }
+		 return results;
+	    	
+	 }
  }

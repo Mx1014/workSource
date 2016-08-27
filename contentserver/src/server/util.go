@@ -55,6 +55,10 @@ func gen_image_md5(md5 string) string {
 	return gen_str_prefix("1", md5)
 }
 
+func gen_file_md5(md5 string) string {
+	return gen_str_prefix("3", md5)
+}
+
 func key_decode(message string) (string, error) {
 	//return url.QueryUnescape(message)
 	rlt, err := decode_websafe64(message)

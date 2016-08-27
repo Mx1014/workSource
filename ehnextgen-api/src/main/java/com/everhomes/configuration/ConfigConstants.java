@@ -61,5 +61,7 @@ public interface ConfigConstants {
     public static final String ACTIVITY_LIST_NUM = "activity.list.num"; 
     public static final String BUSINESS_URL = "business.url"; 
     public static final String BUSINESS_REALM = "business.realm"; 
+    
+    public static final String UPGRADE_URL = "upgrade.url"; 
      
 }

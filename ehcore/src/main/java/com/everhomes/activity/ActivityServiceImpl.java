@@ -6,18 +6,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
-import org.jooq.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +46,6 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -70,7 +66,6 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.GeoLocation;
-import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -84,7 +79,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.GetTopicCommand;
@@ -95,8 +89,6 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -106,14 +98,12 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -384,6 +374,9 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setActivityId(activity.getId());
         roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         roster.setConfirmFamilyId(user.getAddressId());
+        if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
+        	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        }
         return roster;
     }
 
@@ -930,8 +923,10 @@ public class ActivityServiceImpl implements ActivityService {
             private static final long serialVersionUID = 8928858603520552572L;
 
         {
-            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            put("subject", activity.getSubject());
             put("reason",cmd.getReason());
+            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            
         }}, ""));
 //        forumProvider.createPost(comment);
         

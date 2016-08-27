@@ -448,5 +448,42 @@ public class RegionProviderImpl implements RegionProvider {
 		}
 	}
 
+	@Override
+	public List<Region> listRegionByParentId(Integer namespaceId,
+			Long parentId, RegionScope scope, RegionAdminStatus status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Region> result;
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = null;
+		
+		if(parentId != null) {
+			condition = Tables.EH_REGIONS.PARENT_ID.eq(parentId.longValue());
+		}
+		if(scope != null){
+			if(condition != null) {
+				condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+			} else {
+				condition = Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode());
+			}
+		}
+		if(status == null){
+			status = RegionAdminStatus.ACTIVE;
+		}
+		if(condition != null)
+			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+		else
+			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
+
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
+		if(condition != null) {
+			selectStep.where(condition);
+		}
+
+		result = selectStep.fetch().map(
+				new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+				);
+		return result;
+	}
+
 
 }

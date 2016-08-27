@@ -828,6 +828,8 @@
 #define EVH_RENTAL_LISTRENTALBILLS_URL @"/rental/listRentalBills"
 #define EVH_RENTAL_ONLINEPAYCALLBACK_URL @"/rental/onlinePayCallback"
 #define EVH_REPEAT_TESTEXPRESSIONANALYZE_URL @"/repeat/testExpressionAnalyze"
+#define EVH_SERVICECONF_LISTCOMMUNITYSERVICES_URL @"/serviceConf/listCommunityServices"
+#define EVH_SERVICECONF_LOGINANDGETCOMMUNITIES_URL @"/serviceConf/loginAndGetCommunities"
 #define EVH_TECHPARK_ENTRY_APPLYENTRY_URL @"/techpark/entry/applyEntry"
 #define EVH_TECHPARK_ENTRY_CREATELEASEPROMOTION_URL @"/techpark/entry/createLeasePromotion"
 #define EVH_TECHPARK_ENTRY_DELETEAPPLYENTRY_URL @"/techpark/entry/deleteApplyEntry"

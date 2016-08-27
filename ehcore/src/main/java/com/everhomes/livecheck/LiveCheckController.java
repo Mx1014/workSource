@@ -2,6 +2,8 @@ package com.everhomes.livecheck;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
@@ -103,7 +107,7 @@ public class LiveCheckController extends ControllerBase {
                 cmd.setAppId(AppConstants.APPID_MESSAGING);
                 cmd.setAnchor(anchor);
                 
-                FetchMessageCommandResponse cmdResponse = this.messageServce.fetchRecentToPastMessages(cmd);
+                FetchMessageCommandResponse cmdResponse = this.messageServce.fetchRecentToPastMessagesAny(cmd);
                 model.addAttribute("messages", cmdResponse.getMessages());
                 if(anchor != null)
                     model.addAttribute("anchor", anchor);

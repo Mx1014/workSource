@@ -1967,6 +1967,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             auth.setOwnerType(doorAccess.getOwnerType());
             auth.setOwnerId(doorAccess.getOwnerId());
             auth.setStatus(DoorAuthStatus.VALID.getCode());
+            auth.setAuthMethod(cmd.getAuthMethod());
             doorAuthProvider.createDoorAuth(auth);
             
             AesUserKey aesUserKey = generateAesUserKey(user, auth);
@@ -2071,7 +2072,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         AclinkLinglingQrCodeRequest qrRequest = new AclinkLinglingQrCodeRequest();
         qrRequest.setEffecNumber(2l);
-        qrRequest.setEndTime(30l);
+        qrRequest.setEndTime(24*60l);
         qrRequest.setStartTime(Long.toString(System.currentTimeMillis() - 5000));
         
         List<Long> floorIds = new ArrayList<Long>();

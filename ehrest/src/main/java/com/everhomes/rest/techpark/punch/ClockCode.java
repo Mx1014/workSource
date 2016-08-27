@@ -7,7 +7,7 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum ClockCode {
-    NOTINAREA((byte)0),SUCESS((byte)1);
+    FAIL((byte)0),SUCESS((byte)1);
     
     private byte code;
     private ClockCode(byte code) {

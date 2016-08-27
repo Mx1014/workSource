@@ -41,6 +41,8 @@ import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
+import com.everhomes.rest.parking.ListCardTypeCommand;
+import com.everhomes.rest.parking.ListCardTypeResponse;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -127,6 +129,21 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+	 * <b>URL: /parking/listCardType</b>
+	 * @return
+	 */
+	@RequestMapping("listCardType")
+	@RestReturn(value = ListCardTypeResponse.class)
+	public RestResponse listCardType(ListCardTypeCommand cmd) {
+		
+		ListCardTypeResponse result = parkingService.listCardType(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
     /**
      * <b>URL: /parking/listParkingRechargeOrders</b>

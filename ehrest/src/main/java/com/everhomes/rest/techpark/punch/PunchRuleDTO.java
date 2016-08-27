@@ -13,152 +13,132 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id：主键id</li>
- * <li>companyId：公司id</li>
- * <li>startEarlyTime：最早上班时间</li>
- * <li>startLateTime：最晚上班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
- * <li>endEarlyTime：最早下班班时间</li>
- * <li>endLateTime：最晚下班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
- * <li>workTime：每天工作时间 ,有由后台处理 (startLateTime - startEarlyTime)</li>
- * <li>createUid：创建人id</li>
- * <li>createTime：创建时间</li>
- * <li>updateUid：更新人id</li>
- * <li>updateTime：更新时间</li>
+ * <li>ownerType：organization/user</li>
+ * <li>ownerId：id</li>
+ * <li>name：名称</li>
+ * <li>timeRuleId：时间规则id</li>
+ * <li>locationRuleId：地点规则id</li>
+ * <li>wifiRuleId：wifi规则id</li>
+ * <li>workdayRuleId：排班规则id</li>
+ * <li>timeRuleName：时间规则名称</li>
+ * <li>locationRuleName：地点规则名称</li>
+ * <li>wifiRuleName规则名称</li>
+ * <li>workdayRuleName：排班规则名称</li>
  * </ul>
  */
 public class PunchRuleDTO {
 	@NotNull
-	private Long     id;
-	@NotNull
-	private Long     EnterpriseId;
-	
-	@NotNull
-	private Long      startEarlyTime;
-	@NotNull
-	private Long      startLateTime;
-	@NotNull
-	private Long      endEarlyTime;
-	@NotNull
-	private Long noonLeaveTime;
-	@NotNull
-	private Long afternoonArriveTime;
-	
-	private Byte punchTimesPerDay;
-	
-	@ItemType(PunchGeoPointDTO.class)
-	private  List<PunchGeoPointDTO>  punchGeoPoints;
-	
-	 
-	 
+	private Long id;
+	private String ownerType;
+	private Long ownerId;
+	private String name;
+	private Long timeRuleId;
+	private Long locationRuleId;
+	private Long wifiRuleId;
+	private Long workdayRuleId;
+
+	private String timeRuleName;
+	private String locationRuleName;
+	private String wifiRuleName;
+	private String workdayRuleName;
 	public Long getId() {
 		return id;
 	}
-
-
 
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-
-
-	public Long getEnterpriseId() {
-		return EnterpriseId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-
-
-	public void setEnterpriseId(Long enterpriseId) {
-		EnterpriseId = enterpriseId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
 
-
-
-	public Long getStartEarlyTime() {
-		return startEarlyTime;
+	public Long getOwnerId() {
+		return ownerId;
 	}
 
-
-
-	public void setStartEarlyTime(Long startEarlyTime) {
-		this.startEarlyTime = startEarlyTime;
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
-
-
-	public Long getStartLateTime() {
-		return startLateTime;
+	public String getName() {
+		return name;
 	}
 
-
-
-	public void setStartLateTime(Long startLateTime) {
-		this.startLateTime = startLateTime;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-
-
-	public Long getEndEarlyTime() {
-		return endEarlyTime;
+	public Long getTimeRuleId() {
+		return timeRuleId;
 	}
 
-
-
-	public void setEndEarlyTime(Long endEarlyTime) {
-		this.endEarlyTime = endEarlyTime;
+	public void setTimeRuleId(Long timeRuleId) {
+		this.timeRuleId = timeRuleId;
 	}
 
-
-
-	public Long getNoonLeaveTime() {
-		return noonLeaveTime;
+	public Long getLocationRuleId() {
+		return locationRuleId;
 	}
 
-
-
-	public void setNoonLeaveTime(Long noonLeaveTime) {
-		this.noonLeaveTime = noonLeaveTime;
+	public void setLocationRuleId(Long locationRuleId) {
+		this.locationRuleId = locationRuleId;
 	}
 
-
-
-	public Long getAfternoonArriveTime() {
-		return afternoonArriveTime;
+	public Long getWifiRuleId() {
+		return wifiRuleId;
 	}
 
-
-
-	public void setAfternoonArriveTime(Long afternoonArriveTime) {
-		this.afternoonArriveTime = afternoonArriveTime;
+	public void setWifiRuleId(Long wifiRuleId) {
+		this.wifiRuleId = wifiRuleId;
 	}
-
-
-
-	public Byte getPunchTimesPerDay() {
-		return punchTimesPerDay;
-	}
-
-
-
-	public void setPunchTimesPerDay(Byte punchTimesPerDay) {
-		this.punchTimesPerDay = punchTimesPerDay;
-	}
-
-
-
-	public List<PunchGeoPointDTO> getPunchGeoPoints() {
-		return punchGeoPoints;
-	}
-
-
-
-	public void setPunchGeoPoints(List<PunchGeoPointDTO> punchGeoPoints) {
-		this.punchGeoPoints = punchGeoPoints;
-	}
-
-
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public Long getWorkdayRuleId() {
+		return workdayRuleId;
+	}
+
+	public void setWorkdayRuleId(Long workdayRuleId) {
+		this.workdayRuleId = workdayRuleId;
+	}
+
+	public String getTimeRuleName() {
+		return timeRuleName;
+	}
+
+	public void setTimeRuleName(String timeRuleName) {
+		this.timeRuleName = timeRuleName;
+	}
+
+	public String getLocationRuleName() {
+		return locationRuleName;
+	}
+
+	public void setLocationRuleName(String locationRuleName) {
+		this.locationRuleName = locationRuleName;
+	}
+
+	public String getWifiRuleName() {
+		return wifiRuleName;
+	}
+
+	public void setWifiRuleName(String wifiRuleName) {
+		this.wifiRuleName = wifiRuleName;
+	}
+
+	public String getWorkdayRuleName() {
+		return workdayRuleName;
+	}
+
+	public void setWorkdayRuleName(String workdayRuleName) {
+		this.workdayRuleName = workdayRuleName;
+	}
 }

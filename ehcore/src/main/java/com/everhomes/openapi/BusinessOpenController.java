@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -54,6 +56,7 @@ import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.FindTokenByUserIdCommand;
@@ -74,6 +77,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.EtagHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -645,4 +649,24 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+     * <b>URL: /openapi/listRegion</b>
+     * 列出指定范围和状态的区域列表（用填父亲区域ID）
+     */
+    @RequestMapping("listRegion")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listRegion(@Valid ListRegionCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+    	
+    	List<RegionDTO> dtoResultList = businessService.listRegion(cmd);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        
+        return new RestResponse();
+    }
 }
