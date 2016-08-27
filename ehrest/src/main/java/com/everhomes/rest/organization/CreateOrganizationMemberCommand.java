@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -39,6 +40,7 @@ public class CreateOrganizationMemberCommand {
 	private Byte gender;
 	private String employeeNo;
 	
+	@ItemType(Long.class)
 	private List<Long> departmentIds;
 	
 	public CreateOrganizationMemberCommand() {
