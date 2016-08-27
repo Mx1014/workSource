@@ -16,6 +16,6 @@ INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`,
 INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
     VALUES ('4', '0', '政府资源类型', '政府资源类型', '2', '1', UTC_TIMESTAMP(), '999999');
     
-update eh_service_alliances set type = 1 where namespace_id = 1000000;
-update eh_service_alliances set type = 2 where namespace_id = 999990;
-update eh_service_alliances set type = 3 where namespace_id = 999999;
+update eh_service_alliances set type = 1 where owner_id = 240111044331048623;
+update eh_service_alliances set type = 2 where owner_id = 240111044331051500;
+update eh_service_alliances set type = 3 where owner_id = 240111044331049963;
