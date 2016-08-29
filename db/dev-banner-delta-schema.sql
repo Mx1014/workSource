@@ -17,8 +17,9 @@ CREATE TABLE `eh_user_impersonations`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+--
 -- banner表增加更新时间字段
+--
 ALTER TABLE `eh_banners`
 ADD COLUMN `update_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP AFTER `create_time`;
 
