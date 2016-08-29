@@ -308,9 +308,9 @@ public class PmTaskController extends ControllerBase {
      */
     @RequestMapping("exportStatistics")
     @RestReturn(value=GetStatisticsResponse.class)
-    public RestResponse exportStatistics(GetStatisticsCommand cmd) {
-    	GetStatisticsResponse res = pmTaskService.getStatistics(cmd);
-        RestResponse response = new RestResponse(res);
+    public RestResponse exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp) {
+    	pmTaskService.exportStatistics(cmd, resp);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -328,5 +328,19 @@ public class PmTaskController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }  
+    } 
+    
+    /**
+     * <b>URL: /pmtask/createStatistics</b>
+     * <p>统计</p>
+     */
+    @RequestMapping("createStatistics")
+    @RestReturn(value=String.class)
+    public RestResponse createStatistics() {
+    	pmTaskService.createStatistics();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
