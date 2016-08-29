@@ -445,7 +445,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
-				pmTaskLogDTO.setContent(null);
 				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
 				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
 					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
@@ -457,11 +456,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
 			}else{
-				
 				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
-				pmTaskLogDTO.setContent(null);
 			}
 			
 			return pmTaskLogDTO;
