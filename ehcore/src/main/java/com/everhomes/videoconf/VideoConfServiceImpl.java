@@ -878,6 +878,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		account.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
 		vcProvider.updateConfAccounts(account);
+		
+//		in
 	}
 
 	@Override
@@ -2012,7 +2014,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		confOrderSearcher.feedDoc(order);
 		
-		if(order.getInvoiceIssueFlag() != null && order.getInvoiceReqFlag() == 1) {
+		if(order.getInvoiceReqFlag() != null && order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
 			if(invoice == null) {
 				invoice = new ConfInvoices();
