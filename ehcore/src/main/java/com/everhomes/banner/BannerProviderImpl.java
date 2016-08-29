@@ -328,22 +328,25 @@ public class BannerProviderImpl implements BannerProvider {
 	}
 	
 	@Override
-	public List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
+	public List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, String sceneType, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
-		Condition condition = Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()));
+		Condition condition = EH_BANNERS.NAMESPACE_ID.eq(namespaceId).and(EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()));
 		if(scope != null && scope.getScopeId() != null && scope.getScopeCode() != null) {
-			condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(Tables.EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
+			condition = condition.and(EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
 		}
+		if (sceneType != null){
+		    condition = condition.and(EH_BANNERS.SCENE_TYPE.eq(sceneType));
+        }
 		if(pageAnchor != null) {
-			condition = condition.and(Tables.EH_BANNERS.CREATE_TIME.ge(new Timestamp(pageAnchor)));
+			condition = condition.and(EH_BANNERS.CREATE_TIME.ge(new Timestamp(pageAnchor)));
 		}
 		if(applyPolicy != null) {
-			condition = condition.and(Tables.EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()));
+			condition = condition.and(EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()));
 		}
 		
-		SelectSeekStep3<EhBannersRecord, Byte, Integer, Timestamp> orderBy = context.selectFrom(Tables.EH_BANNERS).where(condition)
-			.orderBy(Tables.EH_BANNERS.STATUS.asc(), Tables.EH_BANNERS.ORDER.desc(), Tables.EH_BANNERS.CREATE_TIME.desc());
+		SelectSeekStep3<EhBannersRecord, Byte, Integer, Timestamp> orderBy = context.selectFrom(EH_BANNERS).where(condition)
+			.orderBy(EH_BANNERS.STATUS.asc(), EH_BANNERS.ORDER.desc(), EH_BANNERS.CREATE_TIME.desc());
 		
 		List<BannerDTO> dtoList;
 		if(pageSize != null) {

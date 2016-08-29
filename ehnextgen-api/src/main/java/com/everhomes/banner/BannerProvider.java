@@ -38,13 +38,14 @@ public interface BannerProvider {
 	/**
 	 * 根据scopeId列表banner
 	 * @param namespaceId 域空间id
-	 * @param scopeId     作用域id
+	 * @param scope     作用域
+	 * @param sceneType  场景类型
 	 * @param pageAnchor  锚点
 	 * @param pageSize	      分页大小
 	 * @param applyPolicy 应用类型
 	 * @return			  bannerDTO集合
 	 */
-	List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
+	List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, String sceneType, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy);
 	
 	/**
 	 * 查询每个场景下的banner的数量

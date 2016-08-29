@@ -34,6 +34,8 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 		ListBannersByOwnerCommand cmd = new ListBannersByOwnerCommand();
 		cmd.setOwnerType("organization");
 	    cmd.setOwnerId(1000750L);
+		cmd.setSceneType("default");
+
 	    BannerScope scope = new BannerScope();
 	    scope.setScopeCode(ScopeType.COMMUNITY.getCode());
 	    scope.setScopeId(24210090697426103L);
@@ -48,7 +50,7 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 	    assertNotNull("The requests of may not be null", resp.getResponse());
 	     
 	    List<BannerDTO> banners = resp.getResponse().getBanners();
-		assertEquals(5, banners.size());
+		assertEquals(4, banners.size());
 	    banners.forEach(r -> {
 	    	assertTrue(r.getPosterUrl().startsWith("http://"));
 	    	assertTrue(r.getPosterPath().startsWith("cs://"));
@@ -57,9 +59,8 @@ public class ListBannersByOwnerTest extends BaseLoginAuthTestCase{
 	    // 测试顺序
 	    assertEquals(Long.valueOf(1), banners.get(0).getId());
 	    assertEquals(Long.valueOf(5), banners.get(1).getId());
-	    assertEquals(Long.valueOf(2), banners.get(2).getId());
-	    assertEquals(Long.valueOf(4), banners.get(3).getId());
-	    assertEquals(Long.valueOf(3), banners.get(4).getId());
+	    assertEquals(Long.valueOf(4), banners.get(2).getId());
+	    assertEquals(Long.valueOf(3), banners.get(3).getId());
 	}
 	
 	protected void initCustomData() {

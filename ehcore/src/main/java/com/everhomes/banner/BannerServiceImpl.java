@@ -769,10 +769,10 @@ public class BannerServiceImpl implements BannerService {
 		
 		Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() 
 				: this.configurationProvider.getIntValue("pagination.page.size", AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
-		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getPageAnchor(), 
+		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
 				pageSize + 1, ApplyPolicy.CUSTOMIZED);
         if(result == null || result.isEmpty()) {
-        	result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getPageAnchor(), 
+        	result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
         			pageSize + 1, ApplyPolicy.DEFAULT);
         }
         
@@ -820,9 +820,11 @@ public class BannerServiceImpl implements BannerService {
                      ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
         }
         
-    	List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), cmd.getScope(), null, null, ApplyPolicy.CUSTOMIZED);
+    	List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                cmd.getScope(), null, null, null, ApplyPolicy.CUSTOMIZED);
         if(customizedBanners == null || customizedBanners.isEmpty()) {// 如果没有自定义的banner，则复制默认banner并重排序
-         	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
+         	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
          	dbProvider.execute(status -> {
          		bannerOrders.forEach(bo -> {
          			Banner banner = null;
@@ -864,9 +866,11 @@ public class BannerServiceImpl implements BannerService {
 	 * @param scope 复制过后新的banner的可见范围
 	 */
 	private void copyDefaultToCustomized(BannerScope scope) {
-        List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), scope, null, null, ApplyPolicy.CUSTOMIZED);
+        List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                scope, null, null, null, ApplyPolicy.CUSTOMIZED);
         if(customizedBanners == null || customizedBanners.isEmpty()) {
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
+        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
         	for(BannerDTO dto : defaultBanners) {
         		Banner b = ConvertHelper.convert(dto, Banner.class);
         		b.setScopeCode(scope.getScopeCode());
@@ -896,7 +900,8 @@ public class BannerServiceImpl implements BannerService {
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
         if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 如果当前要删除的banner为默认的banner，则需要复制并设置删除状态
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
+        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
         	dbProvider.execute(status -> {
         		for(BannerDTO dto : defaultBanners) {
      				Banner b = ConvertHelper.convert(dto, Banner.class);
@@ -1038,7 +1043,8 @@ public class BannerServiceImpl implements BannerService {
 		}
         // 目前只考虑banner的应用类型为default和customized这两种情况 
         if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 要更新的banner为默认的，复制并更新
-        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(), null, null, null, ApplyPolicy.DEFAULT);
+        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
         	dbProvider.execute(status -> {
         		for(BannerDTO dto : defaultBanners) {
      				Banner b = ConvertHelper.convert(dto, Banner.class);
