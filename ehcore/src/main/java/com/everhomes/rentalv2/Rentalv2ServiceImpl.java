@@ -1975,7 +1975,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
-			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))+1);
+			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			//设置默认规则，删除所有的单元格
 //			Integer deleteCount = rentalProvider.deleteResourceCells(cmd.getRentalSiteId(), null, null);
 //			LOGGER.debug("delete count = " + String.valueOf(deleteCount)+ "  from rental site rules  ");
@@ -2048,8 +2048,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			rs.setOpenWeekday(openWorkday); 
 			rs.setWorkdayPrice(cmd.getWorkdayPrice());
-			rs.setWeekendPrice(cmd.getWeekendPrice());
-			rs.setCounts(cmd.getSiteCounts()); 
+			rs.setWeekendPrice(cmd.getWeekendPrice()); 
 			//重新生成附件
 			this.rentalProvider.deleteRentalConfigAttachmentsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
 			if(null!=cmd.getAttachments())
@@ -2125,7 +2124,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//优化方案2.0 不插入数据库,每次需要时候进行计算,根据起始id
 //			this.rentalProvider.batchCreateRentalCells(cellList.get());
 			rs.setCellBeginId(cellBeginId);
-			rs.setCellEndId(cellBeginId+seqNum.get());
+			rs.setCellEndId(cellBeginId+seqNum.get()-1);
 			this.rentalProvider.updateRentalSite(rs);
 			
 			return null;
@@ -2239,7 +2238,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
 		AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(rs, AddRentalSiteSingleSimpleRule.class );
 		signleCmd.setRentalSiteId(rs.getId());
-		signleCmd.setSiteCounts(rs.getCounts());
+		signleCmd.setSiteCounts(rs.getResourceCounts());
 		signleCmd.setOpenWeekday(new ArrayList<Integer>());
 		int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
         for(int i=1;i<8;i++){
@@ -3977,8 +3976,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			resource.setOpenWeekday(openWorkday); 
 			resource.setWorkdayPrice(defaultRule.getWorkdayPrice());
-			resource.setWeekendPrice(defaultRule.getWeekendPrice());
-			resource.setCounts(defaultRule.getSiteCounts()); 
+			resource.setWeekendPrice(defaultRule.getWeekendPrice()); 
 			
 			
 			if(null!=defaultRule.getAttachments())
