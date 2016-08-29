@@ -42,8 +42,8 @@
         [jsonObject setObject: self.description_ forKey: @"description"];
     if(self.creatorUid)
         [jsonObject setObject: self.creatorUid forKey: @"creatorUid"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.privateFlag)
         [jsonObject setObject: self.privateFlag forKey: @"privateFlag"];
 }
@@ -75,9 +75,9 @@
         if(self.creatorUid && [self.creatorUid isEqual:[NSNull null]])
             self.creatorUid = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.privateFlag = [jsonObject objectForKey: @"privateFlag"];
         if(self.privateFlag && [self.privateFlag isEqual:[NSNull null]])

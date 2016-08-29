@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +35,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.Acl;
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Privilege;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -66,14 +62,12 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
-import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -86,10 +80,8 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -102,7 +94,6 @@ import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.family.FamilyNotificationTemplateCode;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -132,14 +123,12 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
 import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
@@ -156,7 +145,6 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
-import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -174,7 +162,6 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
@@ -193,7 +180,6 @@ import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -2940,7 +2926,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					orgVo.setOrgComms(new ArrayList<OrganizationCommunity>());
 				orgVo.getOrgComms().add(orgComm);
 				orgCommCount++;
-				//orgComm.setOrganizationId(org.getId());
+				//orgComm.setCommunityId(org.getId());
 				//this.organizationProvider.createOrganizationCommunity(orgComm);
 			}
 			//机构电话
@@ -2955,7 +2941,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					orgVo.setOrgContacts(new ArrayList<CommunityPmContact>());
 				orgVo.getOrgContacts().add(orgContact);
 				orgContactCount++;
-				//				orgContact.setOrganizationId(org.getId());
+				//				orgContact.setCommunityId(org.getId());
 				//				this.propertyMgrProvider.createPropContact(orgContact);
 			}
 			orgVos.add(orgVo);
@@ -3586,7 +3572,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			//二期实现机构管理楼栋
-//			this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getOrganizationId());
+//			this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getCommunityId());
 //			if(cmd.getIsAll() == 0) {
 //				List<Long> buildingIds = this.communityProvider.listBuildingIdByCommunityId(cmd.getCommunityId());
 //				cmd.setBuildingIds(buildingIds);
@@ -3594,7 +3580,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //			
 //			for(Long buildingId: cmd.getBuildingIds()) {
 //				OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
-//				pmBuilding.setOrganizationId(cmd.getOrganizationId());
+//				pmBuilding.setCommunityId(cmd.getCommunityId());
 //				pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
 //				pmBuilding.setScopeId(buildingId);
 //				this.organizationProvider.addPmBuilding(pmBuilding);
@@ -3911,7 +3897,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            member = new OrganizationMember();
 //
 //            member.setContactName(user.getNickName());
-//            member.setOrganizationId(organization.getId());
+//            member.setCommunityId(organization.getId());
 //            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 //            member.setTargetId(user.getId());
 //            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
@@ -6330,9 +6316,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     		
     		
 	    	if(null == userIdentifier){
-	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
+	    		OrganizationOwner owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
 	    		if(null == owner){
-	    			owner = ConvertHelper.convert(cmd, OrganizationOwners.class);
+	    			owner = ConvertHelper.convert(cmd, OrganizationOwner.class);
 	    			owner.setAddressId(address.getId());
 	    			if(null == owner.getContactType()){
 	    				owner.setContactType(ContactType.MOBILE.getCode());
@@ -6357,7 +6343,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 	    	if(null == userIdentifier){
-	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), cmd.getAddressId());
+	    		OrganizationOwner owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), cmd.getAddressId());
 		    	if(null != owner){
 		    		organizationProvider.deleteOrganizationOwnerById(owner.getId());
 		    	}

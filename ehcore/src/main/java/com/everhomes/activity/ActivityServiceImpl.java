@@ -293,7 +293,7 @@ public class ActivityServiceImpl implements ActivityService {
 //            Post comment = new Post();
 //            comment.setParentPostId(post.getId());
 //            comment.setForumId(post.getForumId());
-//            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//            comment.setBehaviorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //            comment.setCreatorUid(user.getId());
 //            comment.setContentType(PostContentType.TEXT.getCode());
 ////            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
@@ -1857,7 +1857,7 @@ public class ActivityServiceImpl implements ActivityService {
 //            break;
 //        case ORGANIZATION:
 //            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-//            execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+//            execOrgCmd.setCommunityId(sceneTokenDto.getEntityId());
 //            resp = listOrgNearbyActivities(execOrgCmd);
 //            break;
 //        default:

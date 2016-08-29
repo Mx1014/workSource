@@ -1,0 +1,37 @@
+
+package com.everhomes.rest.organization.pm;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>addressId: 地址id</li>
+ * <li>organizationId: 公司id</li>
+ * </ul>
+ */
+public class ListOrganizationOwnersByAddressCommand {
+
+    private Long addressId;
+    private Long organizationId;
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

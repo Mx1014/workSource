@@ -1,11 +1,11 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.address.ApartmentDTO;
+
+import java.util.List;
 
 public interface AddressProvider {
     void createAddress(Address address);
@@ -27,4 +27,12 @@ public interface AddressProvider {
     Address findAddressByRegionAndAddress(Long cityId, Long areaId, String address);
 	Address findAddressByAddress(String address);
 	Address findAddressByCommunityAndAddress(Long cityId, Long areaId, Long communityId, String addressName);
+
+    /**
+     * 根据id列表查询address
+     * @param namespaceId
+     * @param ids
+     * @return
+     */
+    List<Address> listAddressByIds(Integer namespaceId, List<Long> ids);
 }

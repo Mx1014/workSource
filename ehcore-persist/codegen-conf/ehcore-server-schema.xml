@@ -97,6 +97,7 @@
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | eh_rich_texts |
         eh_journals | eh_journal_configs |
 		eh_community_services |
+        eh_organization_owner_cars | eh_organization_owner_address | eh_organization_owner_owner_car | eh_organization_owner_attachments | eh_organization_owner_car_attachments | eh_organization_owner_behaviors | eh_organization_owner_type |
 
         </includes>
             <!-- All elements that are excluded from your schema

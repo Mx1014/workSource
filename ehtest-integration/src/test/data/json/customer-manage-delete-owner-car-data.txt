@@ -1,0 +1,128 @@
+{
+    "eh_organization_owner_cars": [
+        {
+        	"id": 1,
+        	"namespace_id": 0,
+        	"brand": "Mercedes-G500",
+        	"parking_space": "20F",
+        	"parking_type": 1,
+        	"plate_number": "粤B77777",
+        	"contacts": "xiaoxiao",
+        	"contact_number": "1111",
+        	"content_uri": null,
+        	"color": "white",
+        	"status": 1,
+        	"create_time": "2016-09-09 18:43:27",
+        	"update_time": "2016-09-09 18:43:27",
+        	"update_uid": 1001,
+        	"community_id": 24206890946790405
+        }, {
+        	"id": 2,
+        	"namespace_id": 0,
+        	"brand": "Mercedes-G500",
+        	"parking_space": "20F",
+        	"parking_type": 1,
+        	"plate_number": "粤B66666",
+        	"contacts": "王五",
+        	"contact_number": "2222",
+        	"content_uri": null,
+        	"color": "white",
+        	"status": 1,
+        	"create_time": "2016-09-09 18:43:27",
+        	"update_time": "2016-09-09 18:43:27",
+        	"update_uid": 1001,
+        	"community_id": 24206890946790405
+        },{
+        	"id": 3,
+        	"namespace_id": 0,
+        	"brand": "Mercedes-G500",
+        	"parking_space": "20F",
+        	"parking_type": 1,
+        	"plate_number": "粤B55777",
+        	"contacts": "五百万豪车",
+        	"contact_number": "3333",
+        	"content_uri": null,
+        	"color": "white",
+        	"status": 1,
+        	"create_time": "2016-09-09 18:43:27",
+        	"update_time": "2016-09-09 18:43:27",
+        	"update_uid": 1001,
+        	"community_id": 24206890946790405
+        }
+      ],
+    "eh_communities": [
+        {
+          "id": 24206890946790405,
+          "uuid": "e8e1c688-65a8-11e5-801d-00163e0018d7",
+          "city_id": 10002,
+          "city_name": "北京市",
+          "area_id": 10007,
+          "area_name": "朝阳区",
+          "name": "点击未来沁居",
+          "alias_name": "",
+          "address": "朝阳区花家地西里八间房毗邻西门子公司",
+          "zipcode": "",
+          "description": "",
+          "detail_description": "",
+          "apt_segment1": "楼栋号",
+          "apt_segment2": "门牌号"
+        }
+    ],
+    "eh_locale_strings":[
+          {
+              "id": 206,
+              "scope": "user",
+              "code": "1",
+              "locale": "zh_CN",
+              "text": "男"
+          },
+          {
+            "id": 207,
+            "scope": "user",
+            "code": "2",
+            "locale": "zh_CN",
+            "text": "女"
+          },
+          {
+            "id": 208,
+            "scope": "pm",
+            "code": "15001",
+            "locale": "zh_CN",
+            "text": "导入失败"
+          },
+          {
+           "id": 204,
+           "scope": "orgOwnerAddressLivingStatus",
+           "code": "0",
+           "locale": "zh_CN",
+           "text": "否"
+         },
+         {
+           "id": 205,
+           "scope": "orgOwnerAddressLivingStatus",
+           "code": "1",
+           "locale": "zh_CN",
+           "text": "是"
+         }
+    ],
+    "eh_organization_owner_car_attachments": [
+       {
+         "id": 2,
+         "namespace_id": 0,
+         "owner_id": 1,
+         "attachment_name": "证件照.jpg",
+         "content_uri": "cs://1/image/aW1hZ2UvTVRvMk5EWTFZekJtTnpaa1lqSmpObVV6WlRObFpUVmhaVGN3TlRCaVkyTmpOQQ",
+         "creator_uid": 1,
+         "create_time": "2016-09-06 10:37:37"
+       }
+    ],
+    "eh_organization_owner_owner_car":[
+        {
+          "id": 1,
+          "namespace_id": 0,
+          "organization_owner_id": 1,
+          "car_id": 1,
+          "primary_flag": 1
+        }
+     ]
+}

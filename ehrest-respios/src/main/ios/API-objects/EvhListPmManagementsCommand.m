@@ -32,8 +32,8 @@
 {
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -47,9 +47,9 @@
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

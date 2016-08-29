@@ -34,8 +34,8 @@
         [jsonObject setObject: self.userName forKey: @"userName"];
     if(self.doorName)
         [jsonObject setObject: self.doorName forKey: @"doorName"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.qr)
         [jsonObject setObject: self.qr forKey: @"qr"];
 }
@@ -51,9 +51,9 @@
         if(self.doorName && [self.doorName isEqual:[NSNull null]])
             self.doorName = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.qr = [jsonObject objectForKey: @"qr"];
         if(self.qr && [self.qr isEqual:[NSNull null]])

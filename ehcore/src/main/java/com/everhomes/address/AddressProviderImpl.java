@@ -1,22 +1,6 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -24,9 +8,9 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
@@ -38,6 +22,21 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -319,4 +318,12 @@ public class AddressProviderImpl implements AddressProvider {
 	        	return null;
 	        return addresses.get(0);
 	  }
+
+    @Override
+    public List<Address> listAddressByIds(Integer namespaceId, List<Long> ids) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.in(ids))
+                .fetchInto(Address.class);
+    }
 }

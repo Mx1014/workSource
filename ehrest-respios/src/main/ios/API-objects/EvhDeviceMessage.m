@@ -41,8 +41,8 @@
         [jsonObject setObject: self.audio forKey: @"audio"];
     if(self.alertType)
         [jsonObject setObject: self.alertType forKey: @"alertType"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.timeLive)
         [jsonObject setObject: self.timeLive forKey: @"timeLive"];
     if(self.action)
@@ -83,9 +83,9 @@
         if(self.alertType && [self.alertType isEqual:[NSNull null]])
             self.alertType = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.timeLive = [jsonObject objectForKey: @"timeLive"];
         if(self.timeLive && [self.timeLive isEqual:[NSNull null]])

@@ -9,6 +9,7 @@ public class Attachment implements Serializable {
 	private static final long serialVersionUID = -221832334617095447L;
 	private java.lang.Long id;
 	private java.lang.Long ownerId;
+	private java.lang.String attachmentName;
 	private java.lang.String contentType;
 	private java.lang.String contentUri;
 	private java.lang.Long creatorUid;
@@ -16,6 +17,14 @@ public class Attachment implements Serializable {
 
 	public java.lang.Long getId() {
 		return id;
+	}
+
+	public java.lang.String getAttachmentName() {
+		return attachmentName;
+	}
+
+	public void setAttachmentName(java.lang.String attachmentName) {
+		this.attachmentName = attachmentName;
 	}
 
 	public void setId(java.lang.Long id) {

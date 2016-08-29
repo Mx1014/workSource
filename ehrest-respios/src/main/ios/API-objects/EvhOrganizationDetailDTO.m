@@ -38,8 +38,8 @@
 {
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.description_)
         [jsonObject setObject: self.description_ forKey: @"description"];
     if(self.contact)
@@ -58,14 +58,14 @@
         [jsonObject setObject: self.checkinDate forKey: @"checkinDate"];
     if(self.name)
         [jsonObject setObject: self.name forKey: @"name"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
     if(self.updateTime)
         [jsonObject setObject: self.updateTime forKey: @"updateTime"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.accountPhone)
         [jsonObject setObject: self.accountPhone forKey: @"accountPhone"];
     if(self.accountName)
@@ -121,9 +121,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.description_ = [jsonObject objectForKey: @"description"];
         if(self.description_ && [self.description_ isEqual:[NSNull null]])
@@ -161,9 +161,9 @@
         if(self.name && [self.name isEqual:[NSNull null]])
             self.name = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])
@@ -173,9 +173,9 @@
         if(self.updateTime && [self.updateTime isEqual:[NSNull null]])
             self.updateTime = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.accountPhone = [jsonObject objectForKey: @"accountPhone"];
         if(self.accountPhone && [self.accountPhone isEqual:[NSNull null]])

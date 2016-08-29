@@ -3,11 +3,11 @@ package com.everhomes.organization;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
 import com.everhomes.util.StringHelper;
 
-public class OrganizationOwners extends EhOrganizationOwners{
+public class OrganizationOwner extends EhOrganizationOwners{
 
 	private static final long serialVersionUID = -7443424881891300179L;
 	
-	public OrganizationOwners(){
+	public OrganizationOwner(){
 	}
 
 	@Override

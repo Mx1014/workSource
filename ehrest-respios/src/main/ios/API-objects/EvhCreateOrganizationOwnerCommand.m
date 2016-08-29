@@ -32,8 +32,8 @@
 {
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.contactName)
         [jsonObject setObject: self.contactName forKey: @"contactName"];
     if(self.contactType)
@@ -42,8 +42,8 @@
         [jsonObject setObject: self.contactToken forKey: @"contactToken"];
     if(self.contactDescription)
         [jsonObject setObject: self.contactDescription forKey: @"contactDescription"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.buildingName)
@@ -59,9 +59,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.contactName = [jsonObject objectForKey: @"contactName"];
         if(self.contactName && [self.contactName isEqual:[NSNull null]])
@@ -79,9 +79,9 @@
         if(self.contactDescription && [self.contactDescription isEqual:[NSNull null]])
             self.contactDescription = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.communityId = [jsonObject objectForKey: @"communityId"];
         if(self.communityId && [self.communityId isEqual:[NSNull null]])

@@ -30,8 +30,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.payTime)
         [jsonObject setObject: self.payTime forKey: @"payTime"];
     if(self.payAmount)
@@ -53,9 +53,9 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.payTime = [jsonObject objectForKey: @"payTime"];
         if(self.payTime && [self.payTime isEqual:[NSNull null]])

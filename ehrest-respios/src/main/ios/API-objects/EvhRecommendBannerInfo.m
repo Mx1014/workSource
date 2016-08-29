@@ -38,8 +38,8 @@
         [jsonObject setObject: self.redirectUrl forKey: @"redirectUrl"];
     if(self.posterUrl)
         [jsonObject setObject: self.posterUrl forKey: @"posterUrl"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -61,9 +61,9 @@
         if(self.posterUrl && [self.posterUrl isEqual:[NSNull null]])
             self.posterUrl = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         return self;
     }

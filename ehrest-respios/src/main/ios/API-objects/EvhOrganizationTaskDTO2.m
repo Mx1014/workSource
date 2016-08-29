@@ -34,8 +34,8 @@
 {
     if(self.taskId)
         [jsonObject setObject: self.taskId forKey: @"taskId"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.organizationType)
         [jsonObject setObject: self.organizationType forKey: @"organizationType"];
     if(self.applyEntityType)
@@ -132,8 +132,8 @@
         [jsonObject setObject: self.viewCount forKey: @"viewCount"];
     if(self.updateTime)
         [jsonObject setObject: self.updateTime forKey: @"updateTime"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhAttachmentDTO* item in self.attachments) {
@@ -162,9 +162,9 @@
         if(self.taskId && [self.taskId isEqual:[NSNull null]])
             self.taskId = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.organizationType = [jsonObject objectForKey: @"organizationType"];
         if(self.organizationType && [self.organizationType isEqual:[NSNull null]])
@@ -358,9 +358,9 @@
         if(self.updateTime && [self.updateTime isEqual:[NSNull null]])
             self.updateTime = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
