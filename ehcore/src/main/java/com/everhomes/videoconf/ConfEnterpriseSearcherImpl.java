@@ -230,12 +230,12 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 //	    	dto.setEnterpriseContactor(confEnterprise.getContactName());
 //	    	dto.setMobile(confEnterprise.getContact());
 
-	    	if(confEnterprise.getActiveAccountAmount() > 0)
+	    	if(confEnterprise.getActiveAccountAmount() != 0 && confEnterprise.getActiveAccountAmount() > confEnterprise.getTrialAccountAmount())
 	    		dto.setUseStatus((byte) 0);
-	    	if(confEnterprise.getActiveAccountAmount() == 0 && confEnterprise.getTrialAccountAmount() > 0) {
+	    	if(confEnterprise.getActiveAccountAmount() != 0 && confEnterprise.getActiveAccountAmount() == confEnterprise.getTrialAccountAmount()) {
 	    		dto.setUseStatus((byte) 1);
 	    	}
-	    	if(confEnterprise.getActiveAccountAmount() == 0 && confEnterprise.getTrialAccountAmount() == 0) {
+	    	if(confEnterprise.getActiveAccountAmount() == 0) {
 	    		dto.setUseStatus((byte) 2);
 	    	}
 	    	
@@ -268,10 +268,10 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
             if(enterprise.getTrialAccountAmount() == null)
             	enterprise.setTrialAccountAmount(0);
             
-        	if(enterprise.getActiveAccountAmount() > enterprise.getTrialAccountAmount()) {
+        	if(enterprise.getActiveAccountAmount() != 0 && enterprise.getActiveAccountAmount() > enterprise.getTrialAccountAmount()) {
         		b.field("status", 0);
         	}
-			if(enterprise.getActiveAccountAmount() == enterprise.getTrialAccountAmount()) {
+			if(enterprise.getActiveAccountAmount() != 0 && enterprise.getActiveAccountAmount() == enterprise.getTrialAccountAmount()) {
 				b.field("status", 1);
 			}
 			if(enterprise.getActiveAccountAmount() == 0) {
