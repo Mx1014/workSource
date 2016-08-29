@@ -139,9 +139,15 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
-        } else {
+        } if(org.apache.commons.lang.StringUtils.isNumeric(cmd.getKeyword())) {
+        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("enterpriseId", 5.0f);
+            
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("enterpriseId");
+        }else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("enterpriseId", 5.0f)
                     .field("enterpriseName", 2.0f)
                     .field("enterpriseDisplayName", 1.0f);
             
