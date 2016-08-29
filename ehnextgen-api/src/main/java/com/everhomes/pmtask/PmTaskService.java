@@ -69,5 +69,7 @@ public interface PmTaskService {
 	
 	void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp);
 	
+	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
+	
 	void createStatistics();
 }
