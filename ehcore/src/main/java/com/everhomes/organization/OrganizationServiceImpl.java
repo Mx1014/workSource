@@ -1955,7 +1955,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         	List<String> doorplateAddresses = new ArrayList<String>();
         	for (OrganizationAddress organizationAddress : organizationAddresses) {
         		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
-        		doorplateAddresses.add(address.getAddress());
+        		if(null != address){
+        			doorplateAddresses.add(address.getAddress());
+        		}
+        		
 			}
         	
         	if(0 < doorplateAddresses.size()){
