@@ -1,6 +1,7 @@
 
 -- 结算表  by sfyan 2016010
 -- 订单交易流水表
+DROP TABLE IF EXISTS `eh_stat_orders`;
 CREATE TABLE `eh_stat_orders` (
   `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
@@ -22,6 +23,7 @@ CREATE TABLE `eh_stat_orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算交易流水表
+DROP TABLE IF EXISTS `eh_stat_transactions`;
 CREATE TABLE `eh_stat_transactions` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
@@ -52,6 +54,7 @@ CREATE TABLE `eh_stat_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算退款流水表
+DROP TABLE IF EXISTS `eh_stat_refunds`;
 CREATE TABLE `eh_stat_refunds` (
   `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
@@ -78,6 +81,7 @@ CREATE TABLE `eh_stat_refunds` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
+DROP TABLE IF EXISTS `eh_stat_settlements`;
 CREATE TABLE `eh_stat_settlements` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
@@ -104,6 +108,7 @@ CREATE TABLE `eh_stat_settlements` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算統計結果表
+DROP TABLE IF EXISTS `eh_stat_service_settlement_results`;
 CREATE TABLE `eh_stat_service_settlement_results` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
@@ -125,6 +130,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_stat_task_logs`;
 CREATE TABLE `eh_stat_task_logs` (
   `id` bigint(20) NOT NULL,
   `task_no` varchar(20) NOT NULL,
@@ -136,6 +142,7 @@ CREATE TABLE `eh_stat_task_logs` (
   UNIQUE KEY `task_no` (`task_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_stat_service`;
 CREATE TABLE `eh_stat_service` (
   `id` bigint(20) NOT NULL,
    `namespace_id` int(11) NOT NULL,
