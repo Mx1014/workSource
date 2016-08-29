@@ -66,4 +66,8 @@ public interface PmTaskService {
 	void cancelTask(CancelTaskCommand cmd);
 	
 	GetPrivilegesDTO getPrivileges(GetPrivilegesCommand cmd);
+	
+	void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp);
+	
+	void createStatistics();
 }
