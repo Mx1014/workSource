@@ -993,7 +993,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				gender = 2;
 			}
 			dto.setGender(gender);
-			dto.setContactToken(r.getC());
+			dto.setContactToken(r.getE());
 			
 			result.add(dto);
 		}
