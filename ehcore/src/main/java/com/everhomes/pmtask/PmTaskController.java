@@ -280,9 +280,9 @@ public class PmTaskController extends ControllerBase {
      */
     @RequestMapping("exportListStatistics")
     @RestReturn(value=SearchTaskStatisticsResponse.class)
-    public RestResponse exportListStatistics(SearchTaskStatisticsCommand cmd) {
-    	SearchTaskStatisticsResponse res = pmTaskService.searchTaskStatistics(cmd);
-        RestResponse response = new RestResponse(res);
+    public RestResponse exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+    	pmTaskService.exportListStatistics(cmd, resp);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

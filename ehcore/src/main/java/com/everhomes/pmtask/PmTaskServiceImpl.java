@@ -18,12 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1176,6 +1178,68 @@ public class PmTaskServiceImpl implements PmTaskService {
 			result.put(s.getOwnerId(), tempList);
 		}
 		return result;
+	}
+	
+	@Override
+	public void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+		
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), cmd.getDateStr(),
+				cmd.getPageAnchor(), cmd.getPageSize());
+		
+		XSSFWorkbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("task");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("项目名称");
+		row.createCell(1).setCellValue("新增物业报修");
+		row.createCell(2).setCellValue("物业报修总量");
+		row.createCell(3).setCellValue("剩余未处理");
+		row.createCell(4).setCellValue("任务完成率");
+		row.createCell(5).setCellValue("任务关闭率");
+		row.createCell(6).setCellValue("客户评价均分");
+		for(int i=0;i<list.size();i++){
+			Row tempRow = sheet.createRow(i + 1);
+			PmTaskStatistics pts = list.get(i);
+			Category category = checkCategory(pts.getCategoryId());
+			tempRow.createCell(0).setCellValue(category.getName());
+			tempRow.createCell(1).setCellValue(pts.getTotalCount());
+			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getCategoryId(), null);
+			tempRow.createCell(2).setCellValue(totalCount);
+			tempRow.createCell(3).setCellValue(pts.getUnprocessCount());
+			CellStyle cellStyle = wb.createCellStyle();
+			XSSFDataFormat fmt = wb.createDataFormat(); 
+			cellStyle.setDataFormat(fmt.getFormat("0.00%"));
+			Cell cell4 = tempRow.createCell(4);
+			cell4.setCellStyle(cellStyle);
+			cell4.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getProcessedCount()/pts.getTotalCount():0);
+			Cell cell5 = tempRow.createCell(5);
+			cell5.setCellStyle(cellStyle);
+			cell5.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getCloseCount()/pts.getTotalCount():0);
+			float avgStar = calculatePerson(pts)!=0?(float) (calculateStar(pts)) / (calculatePerson(pts)):0;
+			tempRow.createCell(6).setCellValue(avgStar);
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			download(out, resp);
+		} catch (IOException e) {
+			LOGGER.error("ExportListStatistics is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ExportListStatistics is fail.");
+		}
+		
 	}
 
 }
