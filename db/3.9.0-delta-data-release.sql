@@ -51,7 +51,9 @@ update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE na
 update eh_service_alliance_categories SET parent_id = 3 WHERE namespace_id = 999999;
 
 
-
+update eh_launch_pad_items set action_data = '{"type":1,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"type":2,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
+update eh_launch_pad_items set action_data = '{"type":3,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
 
 -- merge from videoconf3.0-delta-data-release.sql 20160829
 update `eh_locale_strings` set `text` = "抱歉您当前不可更换此账号（最短更换频率为7天）" where `scope` = "videoConf" and `code` = "10005";
