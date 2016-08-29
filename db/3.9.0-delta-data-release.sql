@@ -34,6 +34,7 @@ INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`,
 INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
     VALUES ('4', '0', '政府资源类型', '政府资源类型', '2', '1', UTC_TIMESTAMP(), '999999');
     
+
 update eh_service_alliances set type = 1 where owner_id = 240111044331048623;
 update eh_service_alliances set type = 2 where owner_id = 240111044331051500;
 update eh_service_alliances set type = 3 where owner_id = 240111044331049963;
@@ -48,3 +49,19 @@ update eh_service_alliance_categories SET owner_id = 240111044331051500 WHERE na
 update eh_service_alliance_categories SET parent_id = 2 WHERE namespace_id = 999990;
 update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
 update eh_service_alliance_categories SET parent_id = 3 WHERE namespace_id = 999999;
+
+update eh_service_alliances set type = 1 where namespace_id = 1000000;
+update eh_service_alliances set type = 2 where namespace_id = 999990;
+update eh_service_alliances set type = 3 where namespace_id = 999999
+
+
+
+-- merge from videoconf3.0-delta-data-release.sql 20160829
+update `eh_locale_strings` set `text` = "抱歉您当前不可更换此账号（最短更换频率为7天）" where `scope` = "videoConf" and `code` = "10005";
+
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('videoConf', '10010', 'zh_CN', '公司不存在或已删除');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('videoConf', '10011', 'zh_CN', '未过期状态不可删除');
+
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500001', 'zh_CN', '该域下该公司已存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500002', 'zh_CN', '公司类型错误，只能为普通公司或物业公司');
+

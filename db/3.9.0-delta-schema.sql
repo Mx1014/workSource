@@ -176,5 +176,6 @@ CREATE TABLE `eh_service_alliance_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 -- merge from videoconf3.0-delta-schema.sql 20160829
 ALTER TABLE `eh_conf_orders` ADD COLUMN `expired_date` DATETIME;
