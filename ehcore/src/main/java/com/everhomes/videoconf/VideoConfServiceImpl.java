@@ -2012,7 +2012,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		confOrderSearcher.feedDoc(order);
 		
-		if(order.getInvoiceReqFlag() == 1) {
+		if(order.getInvoiceIssueFlag() != null && order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
 			if(invoice == null) {
 				invoice = new ConfInvoices();
