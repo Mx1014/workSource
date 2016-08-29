@@ -6,20 +6,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-<<<<<<< HEAD
-
-
-
-
-
-
-
-
-
-import javax.servlet.http.HttpServletResponse;
-
-=======
->>>>>>> organization
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -374,33 +360,4 @@ public interface OrganizationService {
 	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
 	
 	void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd);
-	
-	/**
-	 * 获取通讯录的部门或者群组
-	 * @param organizationGroupType
-	 * @param token
-	 * @param orgPath
-	 * @return
-	 */
-	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath);
-	
-	/**
-	 * 导出通讯录
-	 * @param cmd
-	 * @param httpResponse
-	 */
-	void exportRoleAssignmentPersonnelXls(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
-	
-	/**
-	 * 删除机构人员 包括子部门
-	 * @param cmd
-	 */
-	void deleteOrganizationPersonnelByContactToken(DeleteOrganizationPersonnelByContactTokenCommand cmd);
-	
-	/**
-	 * 生产excel
-	 * @param members
-	 * @return
-	 */
-	XSSFWorkbook createXSSFWorkbook(List<OrganizationMemberDTO> members);
 }
