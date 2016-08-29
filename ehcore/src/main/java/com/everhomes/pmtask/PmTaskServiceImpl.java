@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -1043,16 +1044,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkNamespaceId(namespaceId);
 		
 		Workbook wb = new XSSFWorkbook();
-		if(null != cmd.getOwnerId()){
-			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 		
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, cmd.getDateStr(),
 				null, null);
-		int totalCount = 0;
-		//评价人数
-		int evaluateCount = 0;
-		int totalStar = 0;
-		int[] stars = new int[5];
+		
+		Map<Long, List<PmTaskStatistics>> map = convertStatistics(list);
+		
 		
 		Font font = wb.createFont();   
 		font.setFontName("黑体");   
@@ -1061,60 +1058,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		style.setFont(font);
 		
 		Sheet sheet = wb.createSheet("task");
-		sheet.setDefaultColumnWidth(20);  
-		sheet.setDefaultRowHeightInPoints(20); 
-		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("园区名称");
-		row.createCell(1).setCellValue("服务总数量");
-		row.createCell(2).setCellValue("服务类型");
-		row.createCell(3).setCellValue("总量");
-		row.createCell(4).setCellValue("未处理数量");
-		row.createCell(5).setCellValue("处理中数量");
-		row.createCell(6).setCellValue("已完成数量");
-		row.createCell(7).setCellValue("已关闭数量");
+		setHeader(sheet);
 		
+		setValue(sheet, map);
 		
-		int i = 0;
-		for(PmTaskStatistics statistics: list){
-			i++;
-			totalCount += statistics.getTotalCount();
-			evaluateCount += calculatePerson(statistics);
-			totalStar += calculateStar(statistics);
-			stars[0] += statistics.getStar1();
-			stars[1] += statistics.getStar2();
-			stars[2] += statistics.getStar3();
-			stars[3] += statistics.getStar4();
-			stars[4] += statistics.getStar5();
-			
-			Category category = checkCategory(statistics.getCategoryId());
-			Row tempRow = sheet.createRow(i);
-			
-			tempRow.createCell(0);
-			tempRow.createCell(1);
-			tempRow.createCell(2).setCellValue(category.getName());
-			tempRow.createCell(3).setCellValue(statistics.getTotalCount());
-			tempRow.createCell(4).setCellValue(statistics.getUnprocessCount());
-			tempRow.createCell(5).setCellValue(statistics.getProcessingCount());
-			tempRow.createCell(6).setCellValue(statistics.getProcessedCount());
-			tempRow.createCell(7).setCellValue(statistics.getCloseCount());
-			
-		}
-		CellRangeAddress cra1 = new CellRangeAddress(1, list.size(), 0, 0);
-		CellRangeAddress cra2 = new CellRangeAddress(1, list.size(), 1, 1);
-		sheet.addMergedRegion(cra1);
-		sheet.addMergedRegion(cra2);
-		Row tempRow = sheet.getRow(1);
-		tempRow.getCell(0).setCellValue(community.getName());
-		tempRow.getCell(1).setCellValue(totalCount);
-		
-//		for(int i=0;i<5;i++){
-//			evaluates.add(new EvaluateScoreDTO(i+1, stars[i]));
-//		}
-		
-//		response.setEvaluateCount(evaluateCount);
-//		response.setAvgScore((float) totalStar/evaluateCount);
-//		response.setEvaluates(evaluates);
-		}
 		ByteArrayOutputStream out = null;
 		try {
 			out = new ByteArrayOutputStream();
@@ -1128,5 +1075,107 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 	}
 
+	private void setValue(Sheet sheet, Map<Long, List<PmTaskStatistics>> map){
+		Set<Long> keys = map.keySet();
+		int start=1,end = 0,i=0;
+		for(Long id: keys){
+			List<PmTaskStatistics> temp = map.get(id);
+			int totalCount = 0;
+			//评价人数
+			int evaluateCount = 0;
+			int totalStar = 0;
+//			int[] stars = new int[5];
+			for(PmTaskStatistics statistics: temp){
+				i++;
+				totalCount += statistics.getTotalCount();
+				evaluateCount += calculatePerson(statistics);
+				totalStar += calculateStar(statistics);
+//				stars[0] += statistics.getStar1();
+//				stars[1] += statistics.getStar2();
+//				stars[2] += statistics.getStar3();
+//				stars[3] += statistics.getStar4();
+//				stars[4] += statistics.getStar5();
+				
+				Category category = checkCategory(statistics.getCategoryId());
+				Row tempRow = sheet.createRow(i);
+				
+				tempRow.createCell(0);
+				tempRow.createCell(1);
+				tempRow.createCell(2);
+				tempRow.createCell(3);
+				tempRow.createCell(4).setCellValue(category.getName());
+				tempRow.createCell(5).setCellValue(statistics.getTotalCount());
+				tempRow.createCell(6).setCellValue(statistics.getUnprocessCount());
+				tempRow.createCell(7).setCellValue(statistics.getProcessingCount());
+				tempRow.createCell(8).setCellValue(statistics.getProcessedCount());
+				tempRow.createCell(9).setCellValue(statistics.getCloseCount());
+				
+				tempRow.createCell(10).setCellValue(statistics.getStar1());
+				tempRow.createCell(11).setCellValue(statistics.getStar2());
+				tempRow.createCell(12).setCellValue(statistics.getStar3());
+				tempRow.createCell(13).setCellValue(statistics.getStar4());
+				tempRow.createCell(14).setCellValue(statistics.getStar5());
+				
+			}
+			//设置结束点
+			end = end + temp.size();
+			CellRangeAddress cra1 = new CellRangeAddress(start, end, 0, 0);
+			CellRangeAddress cra2 = new CellRangeAddress(start, end, 1, 1);
+			CellRangeAddress cra3 = new CellRangeAddress(start, end, 2, 2);
+			CellRangeAddress cra4 = new CellRangeAddress(start, end, 3, 3);
+			
+			sheet.addMergedRegion(cra1);
+			sheet.addMergedRegion(cra2);
+			sheet.addMergedRegion(cra3);
+			sheet.addMergedRegion(cra4);
+			Row tempRow = sheet.getRow(start);
+			Community community = communityProvider.findCommunityById(id);
+			tempRow.getCell(0).setCellValue(community.getName());
+			tempRow.getCell(1).setCellValue(totalCount);
+			tempRow.getCell(2).setCellValue(evaluateCount!=0?totalStar/evaluateCount:0);
+			tempRow.getCell(3).setCellValue(evaluateCount);
+			//设置开始点
+			start = end + 1;
+			
+		}
+	}
+	
+	private void setHeader(Sheet sheet){
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("园区名称");
+		row.createCell(1).setCellValue("服务总数量");
+		row.createCell(2).setCellValue("平均得分");
+		row.createCell(3).setCellValue("评价人数");
+		row.createCell(4).setCellValue("服务类型");
+		row.createCell(5).setCellValue("总量");
+		row.createCell(6).setCellValue("未处理数量");
+		row.createCell(7).setCellValue("处理中数量");
+		row.createCell(8).setCellValue("已完成数量");
+		row.createCell(9).setCellValue("已关闭数量");
+		row.createCell(10).setCellValue("一分");
+		row.createCell(11).setCellValue("两分");
+		row.createCell(12).setCellValue("三分");
+		row.createCell(13).setCellValue("四分");
+		row.createCell(14).setCellValue("五分");
+	}
+	
+	private Map<Long, List<PmTaskStatistics>> convertStatistics(List<PmTaskStatistics> list){
+		Map<Long, List<PmTaskStatistics>> result = new HashMap<>();
+		for(PmTaskStatistics s: list){
+			List<PmTaskStatistics> tempList = null;
+				
+			if(result.containsKey(s.getOwnerId())){
+				tempList = result.get(s.getOwnerId());
+				tempList.add(s);
+				continue;
+			}
+			tempList = new ArrayList<>();
+			tempList.add(s);
+			result.put(s.getOwnerId(), tempList);
+		}
+		return result;
+	}
 
 }
