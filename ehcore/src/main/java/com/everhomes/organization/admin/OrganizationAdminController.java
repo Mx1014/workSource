@@ -31,6 +31,7 @@ import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
+import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
@@ -1090,6 +1091,19 @@ public class OrganizationAdminController extends ControllerBase {
           public RestResponse deleteOrganizationPersonnelByContactToken(@Valid DeleteOrganizationPersonnelByContactTokenCommand cmd) {
           	organizationService.deleteOrganizationPersonnelByContactToken(cmd);
               RestResponse response = new RestResponse();
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;
+          }
+          
+          /**
+           * <b>URL: /admin/org/addOrganizationPersonnel</b>
+           * <p>添加成员到多部门</p>
+           */
+          @RequestMapping("addOrganizationPersonnel")
+          @RestReturn(value=OrganizationDTO.class)
+          public RestResponse addOrganizationPersonnel(@Valid AddOrganizationPersonnelCommand cmd) {
+              RestResponse response = new RestResponse(organizationService.addOrganizationPersonnel(cmd));
               response.setErrorCode(ErrorCodes.SUCCESS);
               response.setErrorDescription("OK");
               return response;

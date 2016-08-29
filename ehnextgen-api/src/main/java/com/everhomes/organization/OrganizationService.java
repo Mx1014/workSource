@@ -35,6 +35,7 @@ import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
+import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
@@ -360,4 +361,10 @@ public interface OrganizationService {
 	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
 	
 	void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd);
+	
+	/**
+	 * 添加通讯录到多部门或者多群组
+	 * @param cmd
+	 */
+	OrganizationMemberDTO addOrganizationPersonnel(AddOrganizationPersonnelCommand cmd);
 }

@@ -874,10 +874,22 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void deleteVideoConfAccount(DeleteVideoConfAccountCommand cmd) {
 
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+		account.setStatus((byte) 0);
 		account.setDeleteUid(UserContext.current().getUser().getId());
 		account.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
 		vcProvider.updateConfAccounts(account);
+		confAccountSearcher.feedDoc(account);
+		
+		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(account.getEnterpriseId());
+		confEnterprise.setActiveAccountAmount(confEnterprise.getActiveAccountAmount() - 1);
+		confEnterprise.setAccountAmount(confEnterprise.getAccountAmount() - 1);
+		if(account.getAccountType() == 1) {
+			confEnterprise.setTrialAccountAmount(confEnterprise.getTrialAccountAmount() - 1);
+		}
+		
+		vcProvider.updateConfEnterprises(confEnterprise);
+		confEnterpriseSearcher.feedDoc(confEnterprise);
 	}
 
 	@Override
@@ -896,12 +908,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		
 		vcProvider.updateConfAccounts(account);
+		confAccountSearcher.feedDoc(account);
 		
 		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(account.getEnterpriseId());
 		int activeCount = vcProvider.countAccountsByEnterprise(account.getEnterpriseId(), null);
 		int trialCount = vcProvider.countAccountsByEnterprise(account.getEnterpriseId(), (byte) 1);
 		confEnterprise.setActiveAccountAmount(activeCount);
 		confEnterprise.setTrialAccountAmount(trialCount);
+		
+		vcProvider.updateConfEnterprises(confEnterprise);
 		confEnterpriseSearcher.feedDoc(confEnterprise);
 
 	}
@@ -2012,7 +2027,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		confOrderSearcher.feedDoc(order);
 		
-		if(order.getInvoiceIssueFlag() != null && order.getInvoiceReqFlag() == 1) {
+		if(order.getInvoiceReqFlag() != null && order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
 			if(invoice == null) {
 				invoice = new ConfInvoices();

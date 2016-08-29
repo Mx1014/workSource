@@ -33,14 +33,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Condition;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1963,7 +1955,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         	List<String> doorplateAddresses = new ArrayList<String>();
         	for (OrganizationAddress organizationAddress : organizationAddresses) {
         		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
-        		doorplateAddresses.add(address.getAddress());
+        		if(null != address){
+        			doorplateAddresses.add(address.getAddress());
+        		}
+        		
 			}
         	
         	if(0 < doorplateAddresses.size()){
@@ -6964,6 +6959,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		
 		List<String> groupTypes = new ArrayList<String>();
+		
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 		
 		dbProvider.execute((TransactionStatus status) -> {
@@ -6994,5 +6990,110 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 			return null;
 		});
+	}
+	
+	@Override
+	public OrganizationMemberDTO addOrganizationPersonnel(AddOrganizationPersonnelCommand cmd) {
+		User user = UserContext.current().getUser();
+		
+		Organization org = checkOrganization(cmd.getOrganizationId());
+		
+		String groupType = OrganizationGroupType.DEPARTMENT.getCode();
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
+		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+		organizationMember.setContactType(IdentifierType.MOBILE.getCode());
+		organizationMember.setCreatorUid(user.getId());
+		organizationMember.setNamespaceId(namespaceId);
+		organizationMember.setGroupId(0l);
+		if(StringUtils.isEmpty(organizationMember.getTargetId())){
+			organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+			organizationMember.setTargetId(0l);
+		}
+		
+		
+		Long organizationId = cmd.getOrganizationId();
+		
+		if(OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			organizationId = org.getDirectlyEnterpriseId();
+			groupType = org.getGroupType();
+			org = checkOrganization(organizationId);
+		}
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(groupType);
+		
+		List<Organization> childOrganizations = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+		
+		OrganizationMemberDTO dto = ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);;
+		
+		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
+		List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+		
+		Long finalOrganizationId = organizationId;
+		String finalGroupType = groupType;
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			
+			List<Long> childOrganizationIds = cmd.getChildOrganizationIds();
+			
+			OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), finalOrganizationId);
+			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
+				if(null != desOrgMember){
+					LOGGER.error("phone number already exists. organizationId = {}", finalOrganizationId);
+					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+							"phone number already exists.");
+				}
+				organizationMember.setOrganizationId(finalOrganizationId);
+				organizationProvider.createOrganizationMember(organizationMember);
+				return null;
+			}
+		
+			// 公司没有此通讯录，则添加 by sfyan 20160829
+			if(null == desOrgMember){
+				organizationMember.setOrganizationId(finalOrganizationId);
+				organizationProvider.createOrganizationMember(organizationMember);
+			}
+			
+			// 先把把成员从公司所有部门都删除掉
+			for (Organization organization : childOrganizations) {
+				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
+				if(null != groupMember){
+					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
+				}
+			}
+			
+			// 重新把成员添加到公司多个部门
+			for (Long childOrganizationId : childOrganizationIds) {
+				Organization group = checkOrganization(childOrganizationId);
+				
+				organizationMember.setGroupPath(group.getPath());
+				
+				organizationMember.setOrganizationId(childOrganizationId);
+				
+				organizationProvider.createOrganizationMember(organizationMember);
+				
+				if(OrganizationGroupType.fromCode(finalGroupType) == OrganizationGroupType.GROUP){
+					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}else if(OrganizationGroupType.fromCode(finalGroupType) == OrganizationGroupType.DEPARTMENT){
+					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
+			}
+			
+			dto.setGroups(groups);
+			
+			dto.setDepartments(departments);
+			
+			return null;
+		});
+		
+		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+			userSearcher.feedDoc(organizationMember);
+		}
+		sendMessageForContactApproved(organizationMember);
+		return dto;
 	}
 }
