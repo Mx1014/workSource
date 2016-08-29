@@ -139,9 +139,15 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
-        } else {
+        } else if(org.apache.commons.lang.StringUtils.isNumeric(cmd.getKeyword())) {
+        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("enterpriseId", 5.0f);
+            
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("enterpriseId");
+        }else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("enterpriseId", 5.0f)
                     .field("enterpriseName", 2.0f)
                     .field("enterpriseDisplayName", 1.0f);
             
@@ -224,12 +230,12 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 //	    	dto.setEnterpriseContactor(confEnterprise.getContactName());
 //	    	dto.setMobile(confEnterprise.getContact());
 
-	    	if(confEnterprise.getActiveAccountAmount() > 0)
+	    	if(confEnterprise.getActiveAccountAmount() != 0 && confEnterprise.getActiveAccountAmount() > confEnterprise.getTrialAccountAmount())
 	    		dto.setUseStatus((byte) 0);
-	    	if(confEnterprise.getActiveAccountAmount() == 0 && confEnterprise.getTrialAccountAmount() > 0) {
+	    	if(confEnterprise.getActiveAccountAmount() != 0 && confEnterprise.getActiveAccountAmount() == confEnterprise.getTrialAccountAmount()) {
 	    		dto.setUseStatus((byte) 1);
 	    	}
-	    	if(confEnterprise.getActiveAccountAmount() == 0 && confEnterprise.getTrialAccountAmount() == 0) {
+	    	if(confEnterprise.getActiveAccountAmount() == 0) {
 	    		dto.setUseStatus((byte) 2);
 	    	}
 	    	
@@ -262,10 +268,10 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
             if(enterprise.getTrialAccountAmount() == null)
             	enterprise.setTrialAccountAmount(0);
             
-        	if(enterprise.getActiveAccountAmount() > enterprise.getTrialAccountAmount()) {
+        	if(enterprise.getActiveAccountAmount() != 0 && enterprise.getActiveAccountAmount() > enterprise.getTrialAccountAmount()) {
         		b.field("status", 0);
         	}
-			if(enterprise.getActiveAccountAmount() == enterprise.getTrialAccountAmount()) {
+			if(enterprise.getActiveAccountAmount() != 0 && enterprise.getActiveAccountAmount() == enterprise.getTrialAccountAmount()) {
 				b.field("status", 1);
 			}
 			if(enterprise.getActiveAccountAmount() == 0) {
