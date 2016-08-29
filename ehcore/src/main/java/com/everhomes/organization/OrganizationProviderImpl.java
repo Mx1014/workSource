@@ -316,11 +316,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
-        if (departmentMember.getNamespaceId() == null) {
-            Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-            departmentMember.setNamespaceId(namespaceId);
-        }
-        
+		if (organizationMember.getNamespaceId() == null) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+			organizationMember.setNamespaceId(namespaceId);
+		}
+		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
 		organizationMember.setId(id);

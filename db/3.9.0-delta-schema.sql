@@ -179,3 +179,165 @@ CREATE TABLE `eh_service_alliance_attachments` (
 
 -- merge from videoconf3.0-delta-schema.sql 20160829
 ALTER TABLE `eh_conf_orders` ADD COLUMN `expired_date` DATETIME;
+
+
+
+
+-- 结算表  by sfyan 20160829
+-- 订单交易流水表
+DROP TABLE IF EXISTS `eh_stat_orders`;
+CREATE TABLE `eh_stat_orders` (
+  `id` bigint(20) NOT NULL,
+  `community_id` bigint(20) DEFAULT 0,
+  `namespace_id` int(11) DEFAULT 0,
+  `order_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
+  `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
+  `payer_uid` bigint(20) COMMENT '支付用户编号',
+  `ware_json` text  COMMENT '商品',
+  `vendor_code` varchar(64) DEFAULT null COMMENT '供应商编号',
+  `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
+  `order_type` varchar(64) DEFAULT NULL COMMENT '订单类型  transaction refund',
+  `order_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '订单金额',
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `shop_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '1-platform shop,2-self shop',
+  `order_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 结算交易流水表
+DROP TABLE IF EXISTS `eh_stat_transactions`;
+CREATE TABLE `eh_stat_transactions` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT 0,
+  `community_id` bigint(20) DEFAULT 0,
+  `paid_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
+  `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
+  `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
+  `ware_json` text  COMMENT '商品',
+  `vendor_code` varchar(64) DEFAULT null COMMENT '供应商编号',
+  `payer_uid` bigint(20) COMMENT '支付用户编号',
+  `transaction_no` varchar(100) DEFAULT NULL COMMENT '平台流水号',
+  `vendor_transaction_no` varchar(100) DEFAULT NULL COMMENT '第三方支付流水号',
+  `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
+  `order_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '订单金额',
+  `paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '支付金额',
+  `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
+  `paid_account` varchar(100) DEFAULT NULL COMMENT '第三方支付账号 ',
+  `paid_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '支付类型 二维码支付 等。。 ',
+  `fee_rate` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易费率',
+  `fee_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总手续费',
+  `settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '结算金额',
+  `paid_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '支付状态',
+  `paid_time` DATETIME DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 结算退款流水表
+DROP TABLE IF EXISTS `eh_stat_refunds`;
+CREATE TABLE `eh_stat_refunds` (
+  `id` bigint(20) NOT NULL,
+  `community_id` bigint(20) DEFAULT 0,
+  `namespace_id` int(11) DEFAULT 0,
+  `refund_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
+  `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
+  `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
+  `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
+  `ware_json` text  COMMENT '商品',
+  `payer_uid` bigint(20) COMMENT '支付用户编号',
+  `refund_no` varchar(100) DEFAULT NULL COMMENT '平台退款流水号',
+  `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
+  `vendor_refund_no` varchar(100) DEFAULT NULL COMMENT'第三方退款流水号',
+  `order_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '订单金额',
+  `refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款金额',
+  `fee_rate` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易费率',
+  `fee_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总手续费',
+  `settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总结算金额，交易总金额-交易总手续费',
+  `refund_time` DATETIME DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 结算支付退款详情表
+DROP TABLE IF EXISTS `eh_stat_settlements`;
+CREATE TABLE `eh_stat_settlements` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT 0,
+  `community_id` bigint(20) DEFAULT 0,
+  `paid_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
+  `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
+  `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
+  `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
+  `order_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '订单总金额',
+  `paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总金额',
+  `fee_rate` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易费率',
+  `fee_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总手续费',
+  `settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总结算金额，交易总金额-交易总手续费',
+  `paid_count` bigint(20) NOT NULL DEFAULT 0 COMMENT '交易总笔数',
+  `refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款总金额',
+  `refund_fee_rate` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款费率',
+  `refund_fee_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款总手续费',
+  `refund_settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '退款总结算金额，退款总金额-退款总手续费',
+  `refund_count` bigint(20) NOT NULL DEFAULT 0 COMMENT '退款总笔数',
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 结算統計結果表
+DROP TABLE IF EXISTS `eh_stat_service_settlement_results`;
+CREATE TABLE `eh_stat_service_settlement_results` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT 0,
+  `community_id` bigint(20) DEFAULT 0,
+  `paid_date` varchar(20) DEFAULT NULL COMMENT '处理成日期 比如2016-07-09',
+  `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
+  `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
+  `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
+  `alipay_paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '支付寶支付金額',
+  `alipay_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '支付寶退款金額',
+  `wechat_paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '微信支付金額',
+  `wechat_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '微信退款金額',
+  `payment_card_paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '一卡通交易金額',
+  `payment_card_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '一卡通退款金額',
+  `total_paid_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总金额',
+  `total_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '交易总金额',
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_stat_task_logs`;
+CREATE TABLE `eh_stat_task_logs` (
+  `id` bigint(20) NOT NULL,
+  `task_no` varchar(20) NOT NULL,
+  `status` tinyint(4) DEFAULT NULL COMMENT '10 同步物业缴费订单到结算订单表 20 同步电商订单订单到结算订单表 30 同步停车充值订单到结算订单表 40 同步一卡通订单到结算订单表 50 同步支付平台交易流水到结算交易流水表 60 同步一卡通交易流水到结算交易流水表 70 同步支付平台退款流水到结算退款流水表 80 同步一卡通退款流水到结算退款流水表 90 生成结算数据 100 生成结算数据结果 110 完成',
+  `islock` tinyint(4) DEFAULT '0' COMMENT '0 未锁 1 有锁',
+  `update_Time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `task_no` (`task_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_stat_service`;
+CREATE TABLE `eh_stat_service` (
+  `id` bigint(20) NOT NULL,
+   `namespace_id` int(11) NOT NULL,
+  `owner_type` varchar(64) NOT NULL ,
+  `owner_id` bigint(20) DEFAULT NULL,
+  `service_type` varchar(64) NOT NULL ,
+  `service_name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0' COMMENT '0 无效 1 正常',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+

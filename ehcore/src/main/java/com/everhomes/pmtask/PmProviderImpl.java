@@ -277,16 +277,17 @@ public class PmProviderImpl implements PmTaskProvider{
         	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.CATEGORY_ID.eq(categoryId));
         if(null != ownerId)
         	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.OWNER_ID.eq(ownerId));
-        if(StringUtils.isNotBlank(keyword))
+        if(StringUtils.isNotBlank(keyword)){
         	query.join(Tables.EH_COMMUNITIES).on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_PM_TASK_STATISTICS.OWNER_ID));
         	condition = condition.and(Tables.EH_COMMUNITIES.NAME.like("%"+keyword+"%").or(Tables.EH_COMMUNITIES.ALIAS_NAME.like("%"+keyword+"%")));
+        }
         if(null != pageAnchor)
             condition = condition.and(Tables.EH_PM_TASK_STATISTICS.ID.gt(pageAnchor));
         query.orderBy(Tables.EH_PM_TASK_STATISTICS.ID.asc());
         if(null != pageSize)
         	query.limit(pageSize);
         
-		return query.fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASK_STATISTICS.recordType(), PmTaskStatistics.class));
+		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASK_STATISTICS.recordType(), PmTaskStatistics.class));
 	}
 	
 	@Override

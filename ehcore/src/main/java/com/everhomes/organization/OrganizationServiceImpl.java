@@ -26,6 +26,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import javax.servlet.http.HttpServletResponse;
 
@@ -4540,17 +4547,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Long groupId = cmd.getGroupId();
 			
 			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
 				if(null == groupId || 0 == groupId){
-					OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
 					if(null != desOrgMember){
 						LOGGER.error("phone number already exists. organizationId = {}", organizationId);
 						throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
 								"phone number already exists.");
 					}
+					organizationMember.setOrganizationId(organizationId);
 					organizationProvider.createOrganizationMember(organizationMember);
 					return null;
 				}
-				
+			
+				if(null == desOrgMember){
+					organizationMember.setOrganizationId(organizationId);
+					organizationProvider.createOrganizationMember(organizationMember);
+				}
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
 				groupId = cmd.getOrganizationId();
 				organizationId = org.getDirectlyEnterpriseId();
@@ -5370,7 +5382,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			org = this.checkOrganization(orgId);
 		}
 		
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypes);
+		
 		depts.add(org);
 		
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);

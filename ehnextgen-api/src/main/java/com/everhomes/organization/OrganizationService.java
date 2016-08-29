@@ -4,16 +4,6 @@ package com.everhomes.organization;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-
-
-
-
-
-
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -337,10 +327,6 @@ public interface OrganizationService {
 
 	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
-
-	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
-	
-	void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd);
 	
 	/**
 	 * 获取通讯录的部门或者群组
@@ -370,4 +356,8 @@ public interface OrganizationService {
 	 * @return
 	 */
 	XSSFWorkbook createXSSFWorkbook(List<OrganizationMemberDTO> members);
+
+	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
+	
+	void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd);
 }
