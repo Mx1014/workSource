@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1069,8 +1070,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		row.createCell(3).setCellValue("总量");
 		row.createCell(4).setCellValue("未处理数量");
 		row.createCell(5).setCellValue("处理中数量");
-		row.createCell(5).setCellValue("已完成数量");
-		row.createCell(5).setCellValue("已关闭数量");
+		row.createCell(6).setCellValue("已完成数量");
+		row.createCell(7).setCellValue("已关闭数量");
 		
 		
 		int i = 0;
@@ -1088,6 +1089,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Category category = checkCategory(statistics.getCategoryId());
 			Row tempRow = sheet.createRow(i);
 			
+			tempRow.createCell(0);
+			tempRow.createCell(1);
 			tempRow.createCell(2).setCellValue(category.getName());
 			tempRow.createCell(3).setCellValue(statistics.getTotalCount());
 			tempRow.createCell(4).setCellValue(statistics.getUnprocessCount());
@@ -1096,9 +1099,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 			tempRow.createCell(7).setCellValue(statistics.getCloseCount());
 			
 		}
-		Row tempRow = sheet.createRow(1);
-		tempRow.createCell(0).setCellValue(community.getName());
-		tempRow.createCell(1).setCellValue(totalCount);
+		CellRangeAddress cra1 = new CellRangeAddress(1, list.size(), 0, 0);
+		CellRangeAddress cra2 = new CellRangeAddress(1, list.size(), 1, 1);
+		sheet.addMergedRegion(cra1);
+		sheet.addMergedRegion(cra2);
+		Row tempRow = sheet.getRow(1);
+		tempRow.getCell(0).setCellValue(community.getName());
+		tempRow.getCell(1).setCellValue(totalCount);
 		
 //		for(int i=0;i<5;i++){
 //			evaluates.add(new EvaluateScoreDTO(i+1, stars[i]));
