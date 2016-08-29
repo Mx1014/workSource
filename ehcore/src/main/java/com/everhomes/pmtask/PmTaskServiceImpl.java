@@ -446,15 +446,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 				pmTaskLogDTO.setContent(null);
-//				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
-//				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
-//					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
-//					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
-//			                EntityType.USER.getCode(), r2.getCreatorUid());
-//					dto.setContentUrl(contentUrl);
-//					return dto;
-//				}).collect(Collectors.toList());
-//				pmTaskLogDTO.setAttachments(attachmentDtos);
+				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
+					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
+					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
+			                EntityType.USER.getCode(), r2.getCreatorUid());
+					dto.setContentUrl(contentUrl);
+					return dto;
+				}).collect(Collectors.toList());
+				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
 			}else{
 				
