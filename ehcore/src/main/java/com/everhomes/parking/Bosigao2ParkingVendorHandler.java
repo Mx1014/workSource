@@ -63,8 +63,6 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final String FLAG1 = "1"; //1:卡号
 	private static final String FLAG2 = "2"; //2:车牌
 	
-	private static String clientId;
-	
 	private static ParkWebService service = new ParkWebService();
 	private static ParkWebServiceSoap port = service.getParkWebServiceSoap();
 	
@@ -81,7 +79,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     private ConfigurationProvider configProvider;
 	
 	{
-		clientId = configProvider.getValue("parking.shenye.projectId", "");
+		
 	}
 	
 	@Override
@@ -127,7 +125,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
     	
     	Map<String, String> map = new HashMap<>();
-		map.put("clientID", clientId);
+		map.put("clientID", configProvider.getValue("parking.shenye.projectId", ""));
 		String data = StringHelper.toJsonString(map);
 		
 		String json = port.parkingSystemRequestService("", GET_TYPES, data, "");
@@ -145,7 +143,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     
     private ResultEntity getCard(String plateNumber){
     	GetCardCommand cmd = new GetCardCommand();
-    	cmd.setClientID(clientId);
+    	cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
     	cmd.setCardCode("");
     	cmd.setPlateNo(plateNumber);
     	cmd.setFlag(FLAG2);
@@ -204,7 +202,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     
     private boolean recharge(ParkingRechargeOrder order){
     	RechargeCommand cmd = new RechargeCommand();
-		cmd.setClientID(clientId);
+		cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
 		cmd.setCardCode(order.getCardNumber());
 		cmd.setPlateNo("");
 		cmd.setFlag(FLAG1);
