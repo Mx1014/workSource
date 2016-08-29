@@ -362,7 +362,7 @@ public class UserController extends ControllerBase {
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
-		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+		LOGGER.debug(String.format("Return login info. token: %s, login info: %s", tokenString, StringHelper.toJsonString(login)));
 		setCookieInResponse("token", tokenString, request, response);
         
         // 当从园区版登录时，有指定的namespaceId，需要对这些用户进行特殊处理
