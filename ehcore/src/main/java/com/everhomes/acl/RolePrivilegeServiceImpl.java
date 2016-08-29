@@ -936,18 +936,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         		
             	organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(memberDTO.getContactToken(), department.getId());
             	
-            	if(null != organizationMember){
-            		LOGGER.error("phone number already exists. organizationId = {}, contactToken = {}", department.getId(), memberDTO.getContactToken());
-    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
-    						"phone number already exists.");
+            	if(null == organizationMember){
+//            		LOGGER.error("phone number already exists. organizationId = {}, contactToken = {}", department.getId(), memberDTO.getContactToken());
+//    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+//    						"phone number already exists.");
+            		member.setOrganizationId(department.getId());
+            		member.setGroupPath(department.getPath());
+                	organizationProvider.createOrganizationMember(member);
             	}
-            	
-        		member.setOrganizationId(department.getId());
-        		member.setGroupPath(department.getPath());
+
         	}
-        	
-        	organizationProvider.createOrganizationMember(member);
-        	
         	RoleAssignment roleAssignment = new RoleAssignment();
     		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId());
     		
