@@ -592,26 +592,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		return organizationService.listOrganizationPersonnelsByRoleIds(ConvertHelper.convert(cmd, ListOrganizationPersonnelByRoleIdsCommand.class));
 	}
-	
-	@Override
-	public void deleteAclRoleAssignment(DeleteAclRoleAssignmentCommand cmd) {
-		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
-			LOGGER.error("delete acl role assignment error, cmd = {}", cmd);
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"delete acl role assignment error.");
-		}
-		
-		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
-		
-		if(null != roleAssignments && 0 < roleAssignments.size()){
-			for (RoleAssignment assignment : roleAssignments) {
-				if(assignment.getRoleId().equals(cmd.getRoleId())){
-					aclProvider.deleteRoleAssignment(assignment.getId());
-				}
-			}
-		}
-	}
-	
+
 	@Override
 	public void deleteAclRoleAssignment(DeleteAclRoleAssignmentCommand cmd) {
 		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
