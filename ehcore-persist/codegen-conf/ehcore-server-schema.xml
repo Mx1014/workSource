@@ -96,10 +96,15 @@
 		eh_rentalv2_default_rules | eh_rentalv2_time_interval | eh_rentalv2_close_dates | eh_rentalv2_resources | eh_rentalv2_resource_ranges | eh_rentalv2_resource_pics |
 		eh_rentalv2_cells | eh_rentalv2_config_attachments | eh_rentalv2_items | eh_rentalv2_orders |eh_rentalv2_resource_orders |
 		eh_rentalv2_items_orders | eh_rentalv2_order_attachments | eh_rentalv2_order_payorder_map | eh_rentalv2_refund_orders | eh_rentalv2_resource_types | eh_rentalv2_resource_numbers |
+		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | 
+        eh_journals | eh_journal_configs |
+		eh_community_services |
+		eh_pm_tasks | eh_pm_task_logs | eh_pm_task_attachments | eh_pm_task_statistics |
+		eh_rich_texts |
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | eh_rich_texts | eh_user_impersonations |
         eh_journals | eh_journal_configs |
 		eh_community_services |
-
+        eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments 
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

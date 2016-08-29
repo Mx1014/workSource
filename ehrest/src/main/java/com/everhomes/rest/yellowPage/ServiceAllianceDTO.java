@@ -72,8 +72,8 @@ public class ServiceAllianceDTO {
 	
 	private String   serviceType;
 	
-	@ItemType(YellowPageAattchmentDTO.class)
-	private List<YellowPageAattchmentDTO> attachments;
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> attachments;
 	
 	private Long discount;
 	
@@ -193,10 +193,10 @@ public class ServiceAllianceDTO {
 	public void setServiceType(String serviceType) {
 		this.serviceType = serviceType;
 	}
-	public List<YellowPageAattchmentDTO> getAttachments() {
+	public List<ServiceAllianceAttachmentDTO> getAttachments() {
 		return attachments;
 	}
-	public void setAttachments(List<YellowPageAattchmentDTO> attachments) {
+	public void setAttachments(List<ServiceAllianceAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 	public Long getDiscount() {

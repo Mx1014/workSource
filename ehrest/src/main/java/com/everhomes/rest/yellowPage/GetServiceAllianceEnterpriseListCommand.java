@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId: 拥有者ID</li>
  *  <li>keywords: 关键字 企业名称</li>
  *  <li>parentId: 父id</li>
+ *  <li>type:类型  </li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>nextPageAnchor: 下一页锚点</li>
  *  <li>pageSize: 每页的数量</li>
@@ -32,6 +33,8 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private Integer pageSize;
 
 	private Long categoryId;
+	
+	private Long type;
 	
 	public Long getCommunityId() {
 		return communityId;
@@ -96,6 +99,14 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Long getType() {
+		return type;
+	}
+
+	public void setType(Long type) {
+		this.type = type;
 	}
 
 	@Override

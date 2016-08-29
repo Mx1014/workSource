@@ -26,12 +26,16 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.videoconf.ConfAccountDTO;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
@@ -41,6 +45,7 @@ import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.mysql.jdbc.StringUtils;
 
@@ -64,6 +69,12 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	
 	@Autowired
     private RolePrivilegeService rolePrivilegeService;
+	
+	@Autowired
+    private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -139,10 +150,10 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
             builder.addHighlightedField("enterpriseId").addHighlightedField("enterpriseName").addHighlightedField("enterpriseDisplayName");
         }
 
-        FilterBuilder fb = null;
+        FilterBuilder fb = FilterBuilders.termFilter("deleteStatus", 1);
         
         if(cmd.getStatus() != null) {
-        	fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -175,6 +186,17 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
         	ConfEnterprises confEnterprise = vcProvider.findConfEnterpriseById(id);
         	dto.setId(confEnterprise.getId());
 	    	dto.setEnterpriseId(confEnterprise.getEnterpriseId());
+	    	dto.setNamespaceId(confEnterprise.getNamespaceId());
+	    	if(dto.getNamespaceId() == 0) {
+	    		dto.setNamespaceName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+						String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+						UserContext.current().getUser().getLocale(),"ZUOLIN"));
+			} else {
+		    	Namespace ns = nsProvider.findNamespaceById(confEnterprise.getNamespaceId());
+				if(ns != null)
+					dto.setNamespaceName(ns.getName());
+			}
+			
 //	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
 	    	Organization org = organizationProvider.findOrganizationById(confEnterprise.getEnterpriseId());
 	    	
@@ -232,6 +254,7 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("enterpriseId", enterprise.getEnterpriseId());
+            b.field("deleteStatus", enterprise.getStatus());
             
             //status: 状态 0-formally use 1-on trial 2-overdue
             if(enterprise.getActiveAccountAmount() == null)

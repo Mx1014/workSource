@@ -140,7 +140,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -397,6 +399,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
@@ -493,6 +496,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -682,8 +686,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private void inActiveEquipmentStandardRelations(EquipmentInspectionEquipments equipment) {
 		equipment.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
+		equipment.setReviewResult(ReviewResult.INACTIVE.getCode());
 		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 		equipmentSearcher.feedDoc(equipment);
+		
+		inactiveTasks(equipment.getId());
 	}
 
 	@Override
@@ -949,7 +956,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<Long> roles = new ArrayList<Long>();
 		roles.add(RoleConstants.EQUIPMENT_MANAGER);
 		
-		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
+		ListOrganizationPersonnelByRoleIdsCommand cmd = new ListOrganizationPersonnelByRoleIdsCommand();
 		
 		cmd.setRoleIds(roles);
 		cmd.setOrganizationId(equipment.getTargetId());
@@ -1032,6 +1039,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setReviewTime(null);
 				equipment.setReviewResult(ReviewResult.NONE.getCode());
 				equipment.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+				
+				inactiveTasks(equipment.getId());
 			}
 			
 			if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
@@ -1161,7 +1170,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		inActiveEquipmentStandardRelations(equipment);
 		
-		inactiveTasks(equipment.getId());
 	}
 	
 	private void inactiveTasks(Long equipmentId) {
@@ -1398,6 +1406,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
+		if(EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+			LOGGER.error("task is inactive");
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_INACTIVE,
+ 				"该任务已失效");
+		}
+		
 		//process_time operator_type operator_id
 		if(EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.WAITING_FOR_EXECUTING 
 				|| EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.IN_MAINTENANCE) {
@@ -1551,6 +1566,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         if(null != equipment) {
         	dto.setEquipmentName(equipment.getName());
         	dto.setEquipmentLocation(equipment.getLocation());
+        	dto.setQrCodeFlag(equipment.getQrCodeFlag());
         }
         
     	Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());

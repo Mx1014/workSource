@@ -30,6 +30,8 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
@@ -159,8 +161,8 @@ public class YellowPageController  extends ControllerBase {
 	 * <p> 列出服务联盟类型 </p>
 	 */
 	@RequestMapping("listServiceAllianceCategories")
-	@RestReturn(value = CategoryDTO.class, collection = true)
-	public RestResponse listServiceAllianceCategories() {
+	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
+	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
@@ -183,11 +185,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("getServiceAllianceEnterpriseDetail")
     @RestReturn(value=ServiceAllianceDTO.class)
     public RestResponse getServiceAllianceEnterpriseDetail(@Valid GetServiceAllianceEnterpriseDetailCommand cmd) {
+    	
     	ServiceAllianceDTO res = this.yellowPageService.getServiceAllianceEnterpriseDetail(cmd);
-    	 RestResponse response = new RestResponse(res);
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	 
+    	RestResponse response = new RestResponse(res);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 
     /**

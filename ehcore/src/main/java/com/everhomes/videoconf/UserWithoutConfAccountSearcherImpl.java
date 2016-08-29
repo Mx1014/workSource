@@ -3,6 +3,7 @@ package com.everhomes.videoconf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -15,10 +16,12 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.EnterpriseContact;
@@ -30,6 +33,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeCommand;
@@ -56,6 +62,9 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	
 	@Autowired
     private OrganizationProvider organizationProvider;
+	
+	@Autowired
+    private OrganizationService organizationService;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -85,7 +94,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	public void feedDoc(OrganizationMember member) {
 		XContentBuilder source = createDoc(member);
         
-        feedDoc(member.getId().toString(), source);
+        feedDoc("" + member.getOrganizationId() + "-" + member.getTargetId(), source);
 	}
 
 	@Override
@@ -150,33 +159,38 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         builder.setQuery(qb);
         
         SearchResponse rsp = builder.execute().actionGet();
-
-        List<Long> ids = getIds(rsp);
         
         ListUsersWithoutVideoConfPrivilegeResponse listUsers = new ListUsersWithoutVideoConfPrivilegeResponse();
-        if(ids.size() > pageSize) {
-        	listUsers.setNextPageAnchor(anchor + 1);
-            ids.remove(ids.size() - 1);
-         } else {
-        	 listUsers.setNextPageAnchor(null);
-            }
-        
+        //直接从搜索引擎里面获取信息 by sfyan 20160815
         List<EnterpriseUsersDTO> enterpriseUsers = new ArrayList<EnterpriseUsersDTO>();
-        for(Long id : ids) {
-        	EnterpriseUsersDTO user = new EnterpriseUsersDTO();
-        	OrganizationMember member = organizationProvider.findOrganizationMemberById(id);
-        	if(member != null) {
-	        	user.setUserId(member.getTargetId());
-				user.setUserName(member.getContactName());
-				user.setEnterpriseId(member.getOrganizationId());
-				user.setMobile(member.getContactToken());
-				if(member.getGroupId() != null && member.getGroupId() != 0) {
-					Organization group = organizationProvider.findOrganizationById(member.getGroupId());
-					if(group != null) {
-						user.setDepartment(group.getName());
-					} 
-					
-				} 
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            try {
+            	EnterpriseUsersDTO user = new EnterpriseUsersDTO();
+            	Map<String, Object> source = sd.getSource();
+            	user.setUserId(SearchUtils.getLongField(source.get("userId")));
+				user.setUserName(String.valueOf(source.get("userName")));
+				user.setEnterpriseId(SearchUtils.getLongField(source.get("enterpriseId")));
+				user.setMobile(String.valueOf(source.get("contact")));
+				user.setDepartment(String.valueOf(source.get("department")));
+				enterpriseUsers.add(user);
+            }catch(Exception ex) {
+            	LOGGER.error("query organization member error, cmd = {}", cmd);
+            }
+        }
+        
+       
+//        for(Long id : ids) {
+//        	
+//        	
+//        	EnterpriseUsersDTO user = new EnterpriseUsersDTO();
+//        	OrganizationMember member = organizationProvider.findOrganizationMemberById(id);
+//        	if(member != null) {
+//	        	user.setUserId(member.getTargetId());
+//				user.setUserName(member.getContactName());
+//				user.setEnterpriseId(member.getOrganizationId());
+//				user.setMobile(member.getContactToken());
+//				
 //        	EnterpriseContact contact = enterpriseContactProvider.getContactById(id);
 //        	user.setUserId(contact.getUserId());
 //			user.setUserName(contact.getName());
@@ -195,9 +209,9 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 //			if(entry != null && entry.size() >0)
 //				user.setMobile(entry.get(0).getEntryValue());
 			
-				enterpriseUsers.add(user);
-        	}
-        }
+//				enterpriseUsers.add(user);
+//        	}
+//        }
         listUsers.setEnterpriseUsers(enterpriseUsers);
         
         return listUsers;
@@ -217,19 +231,19 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	            b.field("enterpriseId", member.getOrganizationId());
 	            b.field("userName", member.getContactName());
 	            b.field("contact", member.getContactToken());
-	            if(member.getGroupId() != null && member.getGroupId() != 0) {
-					Organization group = organizationProvider.findOrganizationById(member.getGroupId());
-					if(group != null) {
-						b.field("department", group.getName());
-					} else {
-						b.field("department", "");
+	            String department = "";
+	            Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+	            if(null != organization){
+	            	List<OrganizationDTO> organizationDTOs = organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, member.getContactToken(), organization.getPath());
+	            	for (OrganizationDTO organizationDTO : organizationDTOs) {
+	            		department += "|" + organizationDTO.getName();
 					}
-					
-				} else {
-					b.field("department", "");
-				}
+	            	if(!StringUtils.isEmpty(department)){
+	            		department = department.substring(1);
+	            	}
+	            }
+	            b.field("department", department);
             }
-            
             
             b.endObject();
             return b;

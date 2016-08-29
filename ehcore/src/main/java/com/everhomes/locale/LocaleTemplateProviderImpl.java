@@ -15,6 +15,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLocaleTemplatesDao;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
@@ -30,6 +32,9 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
     
     @Autowired
     private CacheProvider cacheProvice;
+    
+    @Autowired
+    private SequenceProvider sequenceProvider;
     
     @PostConstruct
     public void setup() {
@@ -85,5 +90,15 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
         dao.delete(template);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLocaleTemplates.class, template.getId());
+    }
+    
+    @Override
+    public void createLocaleTemplate(LocaleTemplate template){
+    	Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhLocaleTemplates.class));
+    	template.setId(id);
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhLocaleTemplatesDao dao = new EhLocaleTemplatesDao(context.configuration());
+        dao.insert(template);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhLocaleTemplates.class, template.getId());
     }
 }

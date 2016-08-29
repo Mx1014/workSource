@@ -522,5 +522,20 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /punch/refreshMonthDayLogs</b>
+	 * <p>
+	 * 刷新统计结果 前一天的
+	 * </p>
+	 */
+	@RequestMapping("refreshMonthDayLogs")
+	@RestReturn(value = String.class)
+	public RestResponse refreshMonthDayLogs(@Valid ListPunchMonthLogsCommand cmd) {
+		punchService.refreshMonthDayLogs(cmd.getPunchMonth());
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }

@@ -150,4 +150,6 @@ public interface PunchService {
 	void dayRefreshLogScheduled();
 
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
+
+	void refreshMonthDayLogs(String month);
 }

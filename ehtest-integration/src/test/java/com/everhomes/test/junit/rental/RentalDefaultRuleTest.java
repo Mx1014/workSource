@@ -1,4 +1,4 @@
-package com.everhomes.test.junit.rental;
+/*package com.everhomes.test.junit.rental;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -164,3 +164,4 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 	
 	
 }
+*/

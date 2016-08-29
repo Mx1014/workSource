@@ -4,10 +4,9 @@ package com.everhomes.organization;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 
-
-
-
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.entity.EntityType;
@@ -34,6 +33,7 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
@@ -53,6 +53,8 @@ import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
+import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
@@ -62,7 +64,6 @@ import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
@@ -70,6 +71,7 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
 import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
 import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
@@ -240,10 +242,10 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
 			ListOrganizationContactCommand cmd, boolean pinyinFlag);
-	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationAdministratorCommand cmd);
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
-	ListOrganizationMemberCommandResponse ListParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
+	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
 	void leaveForEnterpriseContact(LeaveEnterpriseCommand cmd);
@@ -325,7 +327,37 @@ public interface OrganizationService {
 
 	CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd);
 	CheckOfficalPrivilegeResponse checkOfficalPrivilege(CheckOfficalPrivilegeCommand cmd);
+	
+	/**
+	 * 获取通讯录的部门或者群组
+	 * @param organizationGroupType
+	 * @param token
+	 * @param orgPath
+	 * @return
+	 */
+	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath);
+	
+	/**
+	 * 导出通讯录
+	 * @param cmd
+	 * @param httpResponse
+	 */
+	void exportRoleAssignmentPersonnelXls(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
+	
+	/**
+	 * 删除机构人员 包括子部门
+	 * @param cmd
+	 */
+	void deleteOrganizationPersonnelByContactToken(DeleteOrganizationPersonnelByContactTokenCommand cmd);
+	
+	/**
+	 * 生产excel
+	 * @param members
+	 * @return
+	 */
+	XSSFWorkbook createXSSFWorkbook(List<OrganizationMemberDTO> members);
 
 	List<Long> getOrganizationIdsTreeUpToRoot(Long communityId);
-
+	
+	void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd);
 }

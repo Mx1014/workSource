@@ -201,13 +201,18 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
+    
+    List<OrganizationMember> listOrganizationMemberByTokens(String contactPhone, List<Long> organizationIds);
+    
+    Organization findOrganizationByParentAndName(Long parentId, String name);
 
   //根据第三方机构token获取organization
     Organization findOrganizationByOrganizationToken(String organizationToken);
 	List<Organization> listOrganizationsByIds(List<Long> ids);
 	List<Organization> listOrganizationsByIds(Long... ids);
 	List<Organization> listOrganizationsByIds(Set<Long> ids);
+	
+	Organization findOrganizationByNameAndNamespaceId(String name, Integer namespaceId);
 
 	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
-
 }
