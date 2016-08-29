@@ -613,6 +613,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 	
 	@Override
+	public void deleteAclRoleAssignment(DeleteAclRoleAssignmentCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
+			LOGGER.error("delete acl role assignment error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"delete acl role assignment error.");
+		}
+		
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		if(null != roleAssignments && 0 < roleAssignments.size()){
+			for (RoleAssignment assignment : roleAssignments) {
+				if(assignment.getRoleId().equals(cmd.getRoleId())){
+					aclProvider.deleteRoleAssignment(assignment.getId());
+				}
+			}
+		}
+	}
+	
+	@Override
 	public void addAclRoleAssignment(AddAclRoleAssignmentCommand cmd) {
 		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
 			LOGGER.error("invalid parameter error, cmd = {}", cmd);
@@ -660,27 +679,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Long> roleIds = cmd.getRoleIds();
 		dbProvider.execute((TransactionStatus status) -> {
 
+			for (RoleAssignment assignment : roleAssignments) {
+				aclProvider.deleteRoleAssignment(assignment.getId());
+			}
 			for (Long roleId : roleIds) {
-				boolean flag = true;
-				if(null != roleAssignments && 0 < roleAssignments.size()){
-					for (RoleAssignment assignment : roleAssignments) {
-						if(assignment.getRoleId().equals(roleId)){
-							flag = false;
-							break;
-						}
-					}
-				}
-				
-				if(flag){
-					roleAssignment.setRoleId(roleId);
-					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-					roleAssignment.setOwnerId(cmd.getOrganizationId());
-					roleAssignment.setTargetType(cmd.getTargetType());
-					roleAssignment.setTargetId(cmd.getTargetId());
-					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-					aclProvider.createRoleAssignment(roleAssignment);
-				}
-				
+				roleAssignment.setRoleId(roleId);
+				roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+				roleAssignment.setOwnerId(cmd.getOrganizationId());
+				roleAssignment.setTargetType(cmd.getTargetType());
+				roleAssignment.setTargetId(cmd.getTargetId());
+				roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+				aclProvider.createRoleAssignment(roleAssignment);				
 			}
 			
 			return null;
@@ -875,7 +884,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				try {
 					this.createMemberAndRoleAssignment(organizationMemberDTO, organization.getId(), cmd.getRoleId());
 				} catch (Exception e) {
-					logs.add(StringHelper.toJsonString(organizationMemberDTO));
+					logs.add(StringHelper.toJsonString(organizationMemberDTO) + "Exception:" + e);
 				}
 			}
 			
@@ -943,21 +952,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         		member.setOrganizationId(departmentDTO.getId());
         		member.setGroupPath(departmentDTO.getPath());
         	}else{
-        		
             	organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(memberDTO.getContactToken(), department.getId());
-            	
-            	if(null != organizationMember){
-            		LOGGER.error("phone number already exists. organizationId = {}, contactToken = {}", department.getId(), memberDTO.getContactToken());
-    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
-    						"phone number already exists.");
+            	if(null == organizationMember){
+//            		LOGGER.error("phone number already exists. organizationId = {}, contactToken = {}", department.getId(), memberDTO.getContactToken());
+//    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+//    						"phone number already exists.");
+            		member.setOrganizationId(department.getId());
+            		member.setGroupPath(department.getPath());
+                	organizationProvider.createOrganizationMember(member);
             	}
-            	
-        		member.setOrganizationId(department.getId());
-        		member.setGroupPath(department.getPath());
+
         	}
-        	
-        	organizationProvider.createOrganizationMember(member);
-        	
         	RoleAssignment roleAssignment = new RoleAssignment();
     		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId());
     		
@@ -996,9 +1001,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(!StringUtils.isEmpty(r.getA())){
 				dto.setEmployeeNo(Long.valueOf(r.getA()));
 			}
-			dto.setContactName(r.getB());
-			dto.setContactToken(r.getC());
-			dto.setGroupName(r.getD());
+			dto.setGroupName(r.getB());
+			dto.setContactName(r.getC());
+			Byte gender = 0;
+			if(!StringUtils.isEmpty(r.getD()) && r.getD().equals("男")){
+				gender = 1;
+			}else if(!StringUtils.isEmpty(r.getD()) && r.getD().equals("女")){
+				gender = 2;
+			}
+			dto.setGender(gender);
+			dto.setContactToken(r.getE());
+			
 			result.add(dto);
 		}
 		return result;

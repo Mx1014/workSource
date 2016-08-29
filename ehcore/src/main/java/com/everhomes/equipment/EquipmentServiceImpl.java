@@ -140,7 +140,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -397,6 +399,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
@@ -493,6 +496,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -952,7 +956,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<Long> roles = new ArrayList<Long>();
 		roles.add(RoleConstants.EQUIPMENT_MANAGER);
 		
-		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
+		ListOrganizationPersonnelByRoleIdsCommand cmd = new ListOrganizationPersonnelByRoleIdsCommand();
 		
 		cmd.setRoleIds(roles);
 		cmd.setOrganizationId(equipment.getTargetId());
