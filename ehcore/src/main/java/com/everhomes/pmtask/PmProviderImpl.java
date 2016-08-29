@@ -126,6 +126,7 @@ public class PmProviderImpl implements PmTaskProvider{
         if(null != pageAnchor && pageAnchor != 0)
         	query.addConditions(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
         
+        query.addConditions(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
         query.addOrderBy(Tables.EH_PM_TASKS.CREATE_TIME.asc());
         if(null != pageSize)
         	query.addLimit(pageSize);
@@ -240,14 +241,14 @@ public class PmProviderImpl implements PmTaskProvider{
                 	if(null != status)
                 		condition = condition.and(Tables.EH_PM_TASKS.STATUS.equal(status));
                     if(null != star)
-                    	condition = condition.and(Tables.EH_PM_TASKS.STAR.equal(status));
+                    	condition = condition.and(Tables.EH_PM_TASKS.STAR.equal(star));
                 	if(null != startDate){
                     	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.gt(startDate));
                 	}
                 	if(null != endDate){
                     	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.lt(endDate));
                 	}
-                    count[0] = query.fetchOneInto(Integer.class);
+                    count[0] = query.where(condition).fetchOneInto(Integer.class);
                     return true;
                 });
 		return count[0];

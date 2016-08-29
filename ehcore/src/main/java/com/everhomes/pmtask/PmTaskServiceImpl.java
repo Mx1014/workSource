@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -677,12 +678,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PmTaskDTO task = list.get(i);
-			tempRow.createCell(0).setCellValue(task.getParentCategoryName());
+			Category category = checkCategory(task.getCategoryId());
+			tempRow.createCell(0).setCellValue(category.getName());
 			tempRow.createCell(1).setCellValue(task.getContent());
-			tempRow.createCell(2).setCellValue(task.getCreatorUid());
+			User user = userProvider.findUserById(task.getCreatorUid());
+			tempRow.createCell(2).setCellValue(user.getNickName());
 			tempRow.createCell(3).setCellValue(task.getMobile());
 			tempRow.createCell(4).setCellValue(datetimeSF.format(task.getCreateTime()));
-			tempRow.createCell(5).setCellValue(task.getStatus());
+			tempRow.createCell(5).setCellValue(convertStatus(task.getStatus()));
 			
 		}
 		ByteArrayOutputStream out = null;
@@ -691,12 +694,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
+			LOGGER.error("ExportTasks is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"exportParkingRechageOrders is fail.");
+					"ExportTasks is fail.");
 		}
 	}
-
+	private String convertStatus(Byte status){
+		if(status.byteValue() == 1)
+			return "未处理";
+		else if(status.byteValue() == 2)
+			return "已分派";
+		else if(status.byteValue() == 3)
+			return "已完成";
+		else if(status.byteValue() == 4)
+			return "已关闭";
+		else
+			return "";
+	}
 	private HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response) {
         try {
 
@@ -740,9 +754,9 @@ public class PmTaskServiceImpl implements PmTaskService {
     			Community community = communityProvider.findCommunityById(r.getOwnerId());
     			dto.setOwnerName(community.getName());
     			dto.setUnProcessedCount(r.getUnprocessCount());
-    			dto.setCompletePercent((float)r.getProcessedCount()/r.getTotalCount());
-    			dto.setClosePercent((float)r.getCloseCount()/r.getTotalCount());
-    			float avgStar = (float) (calculateStar(r)) / (calculatePerson(r));
+    			dto.setCompletePercent(r.getTotalCount()!=null&&!r.getTotalCount().equals(0)?(float)r.getProcessedCount()/r.getTotalCount():0);
+    			dto.setClosePercent(r.getTotalCount()!=null&&!r.getTotalCount().equals(0)?(float)r.getCloseCount()/r.getTotalCount():0);
+    			float avgStar = calculatePerson(r)!=0?(float) (calculateStar(r)) / (calculatePerson(r)):0;
     			dto.setAvgStar(avgStar);
     			Integer totalCount = pmTaskProvider.countTaskStatistics(r.getOwnerId(), r.getCategoryId(), null);
     			dto.setTotalCount(totalCount);
@@ -786,7 +800,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		int[] stars = new int[5];
 		
 		List<EvaluateScoreDTO> evaluates = new ArrayList<EvaluateScoreDTO>();
-		List<CategoryTaskStatisticsDTO> CategoryTaskStatistics = new ArrayList<CategoryTaskStatisticsDTO>();
+		List<CategoryTaskStatisticsDTO> categoryTaskStatistics = new ArrayList<CategoryTaskStatisticsDTO>();
 		
 		for(PmTaskStatistics statistics: list){
 			totalCount += statistics.getTotalCount();
@@ -808,7 +822,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dto.setTotalCount(statistics.getTotalCount());
 			dto.setUnprocesseCount(statistics.getUnprocessCount());
 			
-			CategoryTaskStatistics.add(dto);
+			categoryTaskStatistics.add(dto);
 		}
 		
 		for(int i=0;i<5;i++){
@@ -819,6 +833,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		response.setEvaluateCount(evaluateCount);
 		response.setAvgScore((float) totalStar/evaluateCount);
 		response.setEvaluates(evaluates);
+		response.setCategoryTaskStatistics(categoryTaskStatistics);
 		
 		return response;
 	}
@@ -830,6 +845,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		long now = System.currentTimeMillis();
 		Timestamp startDate = getBeginOfMonth(now);
 		Timestamp endDate = getEndOfMonth(now);
+		
 		for(Namespace n: namepaces){
 			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
 			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), defaultName);
@@ -847,14 +863,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 							Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), category.getId(), null, startDate, endDate);
 							Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.OTHER.getCode(), category.getId(), null, startDate, endDate);
 							
-							Integer star1 = pmTaskProvider.countTask(community.getId(), null, null, (byte)1, startDate, endDate);
-							Integer star2 = pmTaskProvider.countTask(community.getId(), null, null, (byte)2, startDate, endDate);
-							Integer star3 = pmTaskProvider.countTask(community.getId(), null, null, (byte)3, startDate, endDate);
-							Integer star4 = pmTaskProvider.countTask(community.getId(), null, null, (byte)4, startDate, endDate);
-							Integer star5 = pmTaskProvider.countTask(community.getId(), null, null, (byte)5, startDate, endDate);
+							Integer star1 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)1, startDate, endDate);
+							Integer star2 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)2, startDate, endDate);
+							Integer star3 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)3, startDate, endDate);
+							Integer star4 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)4, startDate, endDate);
+							Integer star5 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)5, startDate, endDate);
 							
 							
-							statistics.setCategoryId(category.getParentId());
+							statistics.setCategoryId(category.getId());
 							statistics.setCreateTime(new Timestamp(now));
 							statistics.setDateStr(startDate);
 							statistics.setNamespaceId(n.getId());
@@ -1020,6 +1036,97 @@ public class PmTaskServiceImpl implements PmTaskService {
         
         return url;
     }
+
+	@Override
+	public void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp) {
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		
+		Workbook wb = new XSSFWorkbook();
+		if(null != cmd.getOwnerId()){
+			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+		
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, cmd.getDateStr(),
+				null, null);
+		int totalCount = 0;
+		//评价人数
+		int evaluateCount = 0;
+		int totalStar = 0;
+		int[] stars = new int[5];
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("task");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("园区名称");
+		row.createCell(1).setCellValue("服务总数量");
+		row.createCell(2).setCellValue("服务类型");
+		row.createCell(3).setCellValue("总量");
+		row.createCell(4).setCellValue("未处理数量");
+		row.createCell(5).setCellValue("处理中数量");
+		row.createCell(6).setCellValue("已完成数量");
+		row.createCell(7).setCellValue("已关闭数量");
+		
+		
+		int i = 0;
+		for(PmTaskStatistics statistics: list){
+			i++;
+			totalCount += statistics.getTotalCount();
+			evaluateCount += calculatePerson(statistics);
+			totalStar += calculateStar(statistics);
+			stars[0] += statistics.getStar1();
+			stars[1] += statistics.getStar2();
+			stars[2] += statistics.getStar3();
+			stars[3] += statistics.getStar4();
+			stars[4] += statistics.getStar5();
+			
+			Category category = checkCategory(statistics.getCategoryId());
+			Row tempRow = sheet.createRow(i);
+			
+			tempRow.createCell(0);
+			tempRow.createCell(1);
+			tempRow.createCell(2).setCellValue(category.getName());
+			tempRow.createCell(3).setCellValue(statistics.getTotalCount());
+			tempRow.createCell(4).setCellValue(statistics.getUnprocessCount());
+			tempRow.createCell(5).setCellValue(statistics.getProcessingCount());
+			tempRow.createCell(6).setCellValue(statistics.getProcessedCount());
+			tempRow.createCell(7).setCellValue(statistics.getCloseCount());
+			
+		}
+		CellRangeAddress cra1 = new CellRangeAddress(1, list.size(), 0, 0);
+		CellRangeAddress cra2 = new CellRangeAddress(1, list.size(), 1, 1);
+		sheet.addMergedRegion(cra1);
+		sheet.addMergedRegion(cra2);
+		Row tempRow = sheet.getRow(1);
+		tempRow.getCell(0).setCellValue(community.getName());
+		tempRow.getCell(1).setCellValue(totalCount);
+		
+//		for(int i=0;i<5;i++){
+//			evaluates.add(new EvaluateScoreDTO(i+1, stars[i]));
+//		}
+		
+//		response.setEvaluateCount(evaluateCount);
+//		response.setAvgScore((float) totalStar/evaluateCount);
+//		response.setEvaluates(evaluates);
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			download(out, resp);
+		} catch (IOException e) {
+			LOGGER.error("ExportTasks is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ExportTasks is fail.");
+		}
+		
+	}
 
 
 }
