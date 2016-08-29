@@ -214,7 +214,7 @@ public class PmTaskController extends ControllerBase {
 	 * <p>获取任务完成详情或任务关闭理由</p>
 	 */
 	@RequestMapping("getTaskLog")
-	@RestReturn(value=String.class)
+	@RestReturn(value=PmTaskLogDTO.class)
 	public RestResponse getTaskLog(GetTaskLogCommand cmd) {
 		PmTaskLogDTO dto = pmTaskService.getTaskLog(cmd);
 		RestResponse response = new RestResponse(dto);
