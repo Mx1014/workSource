@@ -50,9 +50,6 @@ update eh_service_alliance_categories SET parent_id = 2 WHERE namespace_id = 999
 update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
 update eh_service_alliance_categories SET parent_id = 3 WHERE namespace_id = 999999;
 
-update eh_service_alliances set type = 1 where namespace_id = 1000000;
-update eh_service_alliances set type = 2 where namespace_id = 999990;
-update eh_service_alliances set type = 3 where namespace_id = 999999;
 
 
 -- 物业报修2.0

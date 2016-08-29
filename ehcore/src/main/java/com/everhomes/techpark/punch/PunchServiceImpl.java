@@ -3718,7 +3718,6 @@ public class PunchServiceImpl implements PunchService {
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
 						if ( ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
 							exceptionStatus = ExceptionStatus.EXCEPTION;
-							break;
 						}
 							
 					}

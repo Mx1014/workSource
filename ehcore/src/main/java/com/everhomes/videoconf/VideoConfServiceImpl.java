@@ -1995,8 +1995,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 		 
 		order.setOwnerId(cmd.getEnterpriseId());
 		order.setQuantity(cmd.getQuantity());
-//		order.setPeriod(cmd.getPeriod());
-		order.setExpiredDate(new Timestamp(cmd.getExpiredDate()));
+		order.setPeriod(cmd.getPeriod());
+		if(cmd.getExpiredDate() != null)
+			order.setExpiredDate(new Timestamp(cmd.getExpiredDate()));
 		order.setAmount(cmd.getAmount());
 		order.setStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());

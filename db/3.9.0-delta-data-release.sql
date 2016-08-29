@@ -83,6 +83,7 @@ update eh_service_alliances set type = 3 where namespace_id = 999999
 
 
 
+
 -- merge from videoconf3.0-delta-data-release.sql 20160829
 update `eh_locale_strings` set `text` = "抱歉您当前不可更换此账号（最短更换频率为7天）" where `scope` = "videoConf" and `code` = "10005";
 
