@@ -88,13 +88,12 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
 VALUES ('5', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999991');
 
-SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pmtask', '10001', 'zh_CN', '任务分类已存在');
+	VALUES (250, 'pmtask', '10001', 'zh_CN', '任务分类已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pmtask', '10002', 'zh_CN', '服务类型不存在');
+	VALUES (251, 'pmtask', '10002', 'zh_CN', '服务类型不存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pmtask', '10003', 'zh_CN', '目标用户不存在');
+	VALUES (252, 'pmtask', '10003', 'zh_CN', '目标用户不存在');
 
 update eh_service_alliances set type = 3 where namespace_id = 999999
 
@@ -207,9 +206,14 @@ DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` IN (SELECT `id`  FROM `eh_web_m
 -- fix bug 1184
 update eh_activities a set signup_attendee_count = (select count(id) from eh_activity_roster where activity_id = a.id)
 
+
 -- 储能交流大厅改官方活动
 update eh_launch_pad_items set item_name = '园区活动' where id in(10617, 10635);
 update eh_launch_pad_items set item_label = '园区活动' where id in(10617, 10635);
 update eh_launch_pad_items set action_type = '50' where id in(10617, 10635);
 update eh_launch_pad_items set action_data = '' where id in(10617, 10635);
 -- update eh_launch_pad_items set icon_uri = '' where id in(10617, 10635);
+
+-- 海岸取消服务热线的屏蔽
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 46000 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999993;
+
