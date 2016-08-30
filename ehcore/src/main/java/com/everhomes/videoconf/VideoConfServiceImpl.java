@@ -853,7 +853,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
 		
 //		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
-		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), (byte) 0, 0, Integer.MAX_VALUE);
+		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), null, 0, Integer.MAX_VALUE);
 		if(rules != null && rules.size() > 0)
 			account.setAccountCategoryId(rules.get(0).getId());
 
@@ -867,6 +867,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		vcProvider.updateConfAccounts(account);
+		confAccountSearcher.feedDoc(account);
 
 	}
 
@@ -1060,6 +1061,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		confEnterprise.setContactName(cmd.getContactor());
 		confEnterprise.setContact(cmd.getMobile());
 		vcProvider.updateVideoconfEnterprise(confEnterprise);
+		confEnterpriseSearcher.feedDoc(confEnterprise);
 		
 		ConfOrders order = vcProvider.findOredrById(cmd.getId());
 		
@@ -1067,7 +1069,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
 		order.setOnlineFlag(cmd.getBuyChannel());
+		
 		vcProvider.updateConfOrders(order);
+		confOrderSearcher.feedDoc(order);
 
 	}
 
@@ -1366,7 +1370,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			VerifyVideoConfAccountCommand cmd) {
 		User user = UserContext.current().getUser();
 		UserAccountDTO userAccount = new UserAccountDTO();
-		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+		ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
 		
 		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
 		userAccount.setPurchaseAuthority(privilege);
@@ -1775,7 +1779,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(phones != null && phones.size() > 0)
 			reservation.setCreatorPhone(phones.get(0));
 		
-		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+		ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
 		LOGGER.info("reserveVideoConf account = " + account + ", current user = " + user.getId());
 		if(account == null) {
 			LOGGER.error("account is null");
@@ -1819,7 +1823,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 	    
-		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+	    ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
 		
 		if(account != null) {
 			List<ConfReservations> reservations = vcProvider.findReservationConfByAccountId(account.getId(), locator, pageSize+1);
@@ -2687,6 +2691,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfOrders confOrder = vcProvider.findOredrById(orderId);
 		confOrder.setEmail(cmd.getMailAddress());
 		vcProvider.updateConfOrders(confOrder);
+		confOrderSearcher.feedDoc(confOrder);
 		
 		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
 		dto.setBillId(orderId);
