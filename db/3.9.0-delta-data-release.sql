@@ -205,3 +205,6 @@ DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` IN (SELECT `id`  FROM `eh_web_m
 
 -- fix bug 1184
 update eh_activities a set signup_attendee_count = (select count(id) from eh_activity_roster where activity_id = a.id)
+
+-- 海岸取消服务热线的屏蔽
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 46000 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999993;
