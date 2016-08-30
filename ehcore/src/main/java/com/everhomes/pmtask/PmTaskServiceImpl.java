@@ -256,6 +256,11 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"OrganizationId cannot be null.");
 		}
+		if(StringUtils.isBlank(content)) {
+        	LOGGER.error("Content cannot be null.");
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
+    				"Content cannot be null.");
+        }
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(status);
@@ -340,7 +345,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Task cannot be closed.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be closed.");
-		} 
+		}
 		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
 				null, PmTaskStatus.OTHER.getCode());
 		
