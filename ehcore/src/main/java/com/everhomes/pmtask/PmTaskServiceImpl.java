@@ -256,6 +256,11 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"OrganizationId cannot be null.");
 		}
+		if(StringUtils.isBlank(content)) {
+        	LOGGER.error("Content cannot be null.");
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
+    				"Content cannot be null.");
+        }
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(status);
@@ -340,7 +345,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Task cannot be closed.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be closed.");
-		} 
+		}
 		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
 				null, PmTaskStatus.OTHER.getCode());
 		
@@ -909,7 +914,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		long now = System.currentTimeMillis();
 		Timestamp startDate = getBeginOfMonth(now);
 		Timestamp endDate = getEndOfMonth(now);
-		
+		boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
+		if(isOperateByAdmin){
+			startDate = getEndOfMonth(now);
+			endDate = null;
+		}
 		for(Namespace n: namepaces){
 			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
 			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), defaultName);
@@ -1041,13 +1050,19 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Content cannot be null.");
         }
-    	checkCategory(categoryId);
+    	Category child = checkCategory(categoryId);
+    	Category parent = checkCategory(child.getParentId());
+    	if(parent.getParentId().equals(0)){
+    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"CategoryId is not correctly.");
+    	}
     }
 	
 	private Category checkCategory(Long id){
 		Category category = categoryProvider.findCategoryById(id);
 		if(null == category) {
-        	LOGGER.error("Category not found, id={}", id);
+        	LOGGER.error("Category not found, categoryId={}", id);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Category not found.");
         }
