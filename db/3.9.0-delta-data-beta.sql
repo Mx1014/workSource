@@ -109,8 +109,8 @@ update eh_launch_pad_items set item_name = '园区活动' where id in(10617, 106
 update eh_launch_pad_items set item_label = '园区活动' where id in(10617, 10635);
 update eh_launch_pad_items set action_type = '50' where id in(10617, 10635);
 update eh_launch_pad_items set action_data = '' where id in(10617, 10635);
--- update eh_launch_pad_items set icon_uri = '' where id in(10617, 10635);
-delete from eh_launch_pad_items where id in(10613, 10631, 10614, 10632);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk9ETTNZMk14TVRFeVl6bGlZek5pTVRnNFlUQXpOV0ZrWWpabE4yVXpOUQ' where id in(10617, 10635);
+-- delete from eh_launch_pad_items where id in(10613, 10631, 10614, 10632);
 
 -- 海岸会议室预约和广告租赁
 
