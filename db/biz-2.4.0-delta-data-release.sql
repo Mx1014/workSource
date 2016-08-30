@@ -1,3 +1,3 @@
 set @version_upgrade_rules_id = (SELECT MAX(id) FROM `eh_version_upgrade_rules`);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES ((@version_upgrade_rules_id := @version_upgrade_rules_id + 1),49,'2100223.9','2101248','0','2.4.0','0',UTC_TIMESTAMP());
-update eh_configurations set value='https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%3Fpos%3D1%23%2Fstore%2Fdefault%3F_k%3Dzlbiz' where name = 'business.url';
+update eh_configurations set value='https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%3Fpos%3D1%23%2Fstore%2Fdefault%3F_k%3Dzlbiz#sign_suffix' where name = 'business.url';
