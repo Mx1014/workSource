@@ -87,13 +87,13 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
 VALUES ('5', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999991');
 
-SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pmtask', '10001', 'zh_CN', '任务分类已存在');
+	VALUES (250, 'pmtask', '10001', 'zh_CN', '任务分类已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pmtask', '10002', 'zh_CN', '服务类型不存在');
+	VALUES (251, 'pmtask', '10002', 'zh_CN', '服务类型不存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pmtask', '10003', 'zh_CN', '目标用户不存在');
+	VALUES (252, 'pmtask', '10003', 'zh_CN', '目标用户不存在');
 
 -- merge from videoconf3.0-delta-data-release.sql 20160829
 update `eh_locale_strings` set `text` = "抱歉您当前不可更换此账号（最短更换频率为7天）" where `scope` = "videoConf" and `code` = "10005";
