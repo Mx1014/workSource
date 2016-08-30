@@ -1955,7 +1955,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         	List<String> doorplateAddresses = new ArrayList<String>();
         	for (OrganizationAddress organizationAddress : organizationAddresses) {
         		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
-        		doorplateAddresses.add(address.getAddress());
+        		if(null != address){
+        			doorplateAddresses.add(address.getAddress());
+        		}
+        		
 			}
         	
         	if(0 < doorplateAddresses.size()){
@@ -7038,23 +7041,29 @@ public class OrganizationServiceImpl implements OrganizationService {
 			List<Long> childOrganizationIds = cmd.getChildOrganizationIds();
 			
 			OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), finalOrganizationId);
-			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
-				if(null != desOrgMember){
-					LOGGER.error("phone number already exists. organizationId = {}", finalOrganizationId);
-					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
-							"phone number already exists.");
-				}
-				organizationMember.setOrganizationId(finalOrganizationId);
-				organizationProvider.createOrganizationMember(organizationMember);
-				return null;
-			}
+//			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
+//				if(null == desOrgMember){
+////					LOGGER.error("phone number already exists. organizationId = {}", finalOrganizationId);
+////					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+////							"phone number already exists.");
+//				}
+//				organizationMember.setOrganizationId(finalOrganizationId);
+//				organizationProvider.createOrganizationMember(organizationMember);
+//				return null;
+//			}
 		
 			// 公司没有此通讯录，则添加 by sfyan 20160829
+			organizationMember.setOrganizationId(finalOrganizationId);
 			if(null == desOrgMember){
-				organizationMember.setOrganizationId(finalOrganizationId);
 				organizationProvider.createOrganizationMember(organizationMember);
+			}else{
+				organizationProvider.updateOrganizationMember(organizationMember);
 			}
 			
+			//没有部门要添加
+			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
+				return null;
+			}
 			// 先把把成员从公司所有部门都删除掉
 			for (Organization organization : childOrganizations) {
 				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
@@ -7088,7 +7097,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-//			userSearcher.feedDoc(organizationMember);
+			userSearcher.feedDoc(organizationMember);
 		}
 		sendMessageForContactApproved(organizationMember);
 		return dto;

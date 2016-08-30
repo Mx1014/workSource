@@ -8,8 +8,5 @@ public interface PmTaskErrorCode {
 	
     int ERROR_CATEGORY_NULL = 10002;  //服务类型不存在
     
-    int ERROR_PLATE_APPLIED = 10003;  //车牌已申请
-    int ERROR_PLATE_NULL = 10005;  //车牌号为空
-    
-    int ERROR_PLATE_APPLIED_SERVER = 10004;  //服务器忙
+    int ERROR_USER_NULL = 10003; //目标用户不存在
 }

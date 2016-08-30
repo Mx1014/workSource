@@ -5,11 +5,12 @@ package com.everhomes.rest.parking;
  * <p>停车场厂商</p>
  * <ul>
  * <li>BOSIGAO("BOSIGAO"): 博思高</li>
+ * <li>BOSIGAO2("BOSIGAO2"): 博思高新接口</li>
  * <li>ETCP("ETCP"): ETCP</li>
  * </ul>
  */
 public enum ParkingLotVendor {
-    BOSIGAO("BOSIGAO"), ETCP("ETCP");
+    BOSIGAO("BOSIGAO"), ETCP("ETCP"), BOSIGAO2("BOSIGAO2");
     
     private String code;
     private ParkingLotVendor(String code) {

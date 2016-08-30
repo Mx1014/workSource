@@ -340,6 +340,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"TargetId cannot be null.");
 		}
+		User targetUser = userProvider.findUserById(cmd.getTargetId());
+		if(null == targetUser){
+			LOGGER.error("TargetUser not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_NULL,
+    				"TargetUser not found");
+		}
 		
     	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
     	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
@@ -445,23 +451,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
-				pmTaskLogDTO.setContent(null);
-//				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
-//				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
-//					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
-//					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
-//			                EntityType.USER.getCode(), r2.getCreatorUid());
-//					dto.setContentUrl(contentUrl);
-//					return dto;
-//				}).collect(Collectors.toList());
-//				pmTaskLogDTO.setAttachments(attachmentDtos);
+				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
+					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
+					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
+			                EntityType.USER.getCode(), r2.getCreatorUid());
+					dto.setContentUrl(contentUrl);
+					return dto;
+				}).collect(Collectors.toList());
+				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
 			}else{
-				
 				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
-				pmTaskLogDTO.setContent(null);
 			}
 			
 			return pmTaskLogDTO;

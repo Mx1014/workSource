@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,14 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.bosigao.cxf.Service1;
-import com.bosigao.cxf.Service1Soap;
+import com.bosigao2.ParkWebService;
+import com.bosigao2.ParkWebServiceSoap;
+import com.bosigao2.rest.CardInfo;
+import com.bosigao2.rest.GetCardCommand;
+import com.bosigao2.rest.RechargeCommand;
+import com.bosigao2.rest.ResultEntity;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -42,17 +44,28 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateStatus;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.techpark.park.GetAllCardDescriptDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
-// "BOSIGAO"需与ParkingLotVendor.BOSIGAO的枚举值保持一致
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO")
-public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BosigaoParkingVendorHandler.class);
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
+public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao2ParkingVendorHandler.class);
+	
+	private static SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
 
+	private static final String RECHARGE = "Parking_MonthlyFee";
+	private static final String GET_CARD = "Parking_GetMonthCard";
+	private static final String GET_TYPES = "Parking_GetMonthCardDescript";
+	
+	private static final String FLAG1 = "1"; //1:卡号
+	private static final String FLAG2 = "2"; //2:车牌
+	
+	private static ParkWebService service = new ParkWebService();
+	private static ParkWebServiceSoap port = service.getParkWebServiceSoap();
+	
 	@Autowired
 	private ParkingProvider parkingProvider;
 	
@@ -65,83 +78,85 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	@Autowired
     private ConfigurationProvider configProvider;
 	
-    @SuppressWarnings("unchecked")
+	{
+		
+	}
+	
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	URL wsdlURL = Service1.WSDL_LOCATION;
-		
-		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
-        Service1Soap port = ss.getService1Soap12();
-        LOGGER.info("verifyRechargedPlate");
-        String json = port.getCardInfo("", plateNumber, "2", "sign");
-        
-        ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-        this.checkResultHolderIsNull(resultHolder,plateNumber);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.error("resultHolder="+resultHolder.isSuccess());
+    	
+        ResultEntity result = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
-		if(resultHolder.isSuccess()){
-			Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
-			Map<String,Object> card = (Map<String, Object>) data.get("card");
-			Boolean validStatus =  (Boolean) card.get("valid");
-			this.checkValidStatusIsNull(validStatus,plateNumber);
+		if(result.isSuccess()){
+			CardInfo cardInfo = (CardInfo) result.getResult();
+			String expireDate =  cardInfo.getExpireDate();
+			this.checkExpireDateIsNull(expireDate,plateNumber);
 
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("validStatus="+validStatus);
+			long expireTime = strToLong(expireDate);
+			long now = System.currentTimeMillis();
 			
-			String plateOwnerName = (String) card.get("userName");
-			String carNumber = (String) card.get("carNumber");
-			
-			String validEnd = (String) card.get("validEnd");
-			String cardNumber = (String) card.get("cardCode");
-			String cardType = (String) card.get("cardDescript");
-			String plateOwnerPhone = (String) card.get("mobile");
-			Timestamp endTime = strToTimestamp(validEnd);
-			
-			if(!validStatus){
+			if(expireTime < now){
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
-			parkingCardDTO.setPlateOwnerName(StringUtils.isBlank(plateOwnerName)?configProvider.getValue("parking.default.nickname", ""):plateOwnerName);
-			parkingCardDTO.setPlateNumber(carNumber);
+			parkingCardDTO.setPlateOwnerName(StringUtils.isBlank(cardInfo.getUserName())?configProvider.getValue("parking.default.nickname", ""):cardInfo.getUserName());
+			parkingCardDTO.setPlateNumber(cardInfo.getPlateNo());
 			//parkingCardDTO.setStartTime(startTime);
-			parkingCardDTO.setEndTime(endTime.getTime());
-			parkingCardDTO.setCardType(cardType);
-			parkingCardDTO.setCardNumber(cardNumber);
-			parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
+			parkingCardDTO.setEndTime(expireTime);
+			parkingCardDTO.setCardType(cardInfo.getCardDescript());
+			parkingCardDTO.setCardNumber(cardInfo.getCardCode());
+			parkingCardDTO.setPlateOwnerPhone(cardInfo.getMobile());
+			parkingCardDTO.setIsValid(true);
 			
-				parkingCardDTO.setIsValid(true);
-				resultList.add(parkingCardDTO);
-				
+			resultList.add(parkingCardDTO);
 		}
         
         return resultList;
     }
 
-    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+    @SuppressWarnings("unchecked")
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
-    	URL wsdlURL = Service1.WSDL_LOCATION;
-    	 
-		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
-        Service1Soap port = ss.getService1Soap12();
-        String json = port.getAllCardDescript();
+    	
+    	Map<String, String> map = new HashMap<>();
+		map.put("clientID", configProvider.getValue("parking.shenye.projectId", ""));
+		String data = StringHelper.toJsonString(map);
+		
+		String json = port.parkingSystemRequestService("", GET_TYPES, data, "");
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Card type from bosigao={}", json);
         
-        GetAllCardDescriptDTO cardDescriptDTO = GsonUtil.fromJson(json, GetAllCardDescriptDTO.class);
+        ResultEntity result = GsonUtil.fromJson(json, ResultEntity.class);
 
-		if(cardDescriptDTO.isSuccess()){
-			ret.setCardTypes(cardDescriptDTO.getCardDescript());
+		if(result.isSuccess()){
+			ret.setCardTypes((List<String>)result.getResult());
 		}
     	return ret;
+    }
+    
+    private ResultEntity getCard(String plateNumber){
+    	GetCardCommand cmd = new GetCardCommand();
+    	cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
+    	cmd.setCardCode("");
+    	cmd.setPlateNo(plateNumber);
+    	cmd.setFlag(FLAG2);
+
+        String json = port.parkingSystemRequestService("", GET_CARD, cmd.toString(), "");
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.debug("Result={}", json);
+        
+        ResultEntity result = GsonUtil.fromJson(json, ResultEntity.class);
+        this.checkResultHolderIsNull(result,plateNumber);
+        
+        return result;
     }
     
     @Override
@@ -152,27 +167,16 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,null);
     		
     	}else{
-    		URL wsdlURL = Service1.WSDL_LOCATION;
-            Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
-            Service1Soap port = ss.getService1Soap12();
-            LOGGER.info("verifyRechargedPlate");
-            String json = port.getCardInfo("", plateNumber, "2", "sign");
-            
-            ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-            this.checkResultHolderIsNull(resultHolder,plateNumber);
-            Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
-    		Map<String,Object> card = (Map<String, Object>) data.get("card");
-    		Boolean validStatus =  (Boolean) card.get("valid");
-    		this.checkValidStatusIsNull(validStatus,plateNumber);
-
-    		String cardType = (String) card.get("cardDescript");
+    		ResultEntity resultEntity = getCard(plateNumber);           
+			CardInfo cardInfo = (CardInfo) resultEntity.getResult();
+    		String cardType = cardInfo.getCardDescript();
     		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
     	}
 		result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setRateToken(r.getId().toString());
-			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
+			dto.setVendorName(ParkingLotVendor.BOSIGAO2.getCode());
 			return dto;
 		}
 		).collect(Collectors.toList());
@@ -181,37 +185,38 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     }
 
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order,String payStatus) {
+    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
     	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
 			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed.orderNo ="+order.getId());
+				LOGGER.error("pay failed, orderNo={}", order.getId());
 			}
 			else {
-				String carNumber = order.getPlateNumber();
-				String cost = (order.getPrice().intValue()*100) + "";
-				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
-				String payTime = order.getPaidTime().toString();
-				String validStart = timestampToStr(order.getOldExpiredTime());
-				String validEnd = timestampToStr(order.getNewExpiredTime());
-				
-				URL wsdlURL = Service1.WSDL_LOCATION;
-				
-				Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
-		        Service1Soap port = ss.getService1Soap12();
-		        LOGGER.info("refreshParkingSystem");
-		        
-		        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
-				
-				ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-				checkResultHolderIsNull(resultHolder,carNumber);
-				
-				if(resultHolder.isSuccess()){
+				if(recharge(order)){
 					order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
 					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 					parkingProvider.updateParkingRechargeOrder(order);
 				}
 			}
 		}
+    }
+    
+    private boolean recharge(ParkingRechargeOrder order){
+    	RechargeCommand cmd = new RechargeCommand();
+		cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
+		cmd.setCardCode(order.getCardNumber());
+		cmd.setPlateNo("");
+		cmd.setFlag(FLAG1);
+		cmd.setPayMos(order.getMonthCount().toString());
+		cmd.setAmount((order.getPrice().intValue()*100) + "");
+		cmd.setPayDate(sdf1.format(order.getPaidTime()));
+		cmd.setChargePaidNo(order.getId().toString());
+		
+        String json = port.parkingSystemRequestService("", RECHARGE, cmd.toString(), "");
+
+		ResultEntity result = GsonUtil.fromJson(json, ResultEntity.class);
+		checkResultHolderIsNull(result, order.getPlateNumber());
+		
+		return result.isSuccess();
     }
     
     @Override
@@ -245,82 +250,69 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     	try {
     		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
     		if(rate == null){
-    			LOGGER.error("remote search pay order return null.rateId="+cmd.getRateToken());
-    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    					"remote search pay order return null.");
+    			LOGGER.error("Rate not found"+cmd.getRateToken());
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    					"Rate not found");
     		}else{
     			parkingProvider.deleteParkingRechargeRate(rate);
     		}
     	} catch (Exception e) {
-			LOGGER.error("delete parkingRechargeRate fail."+cmd.getRateToken());
+			LOGGER.error("Delete parkingRechargeRate fail, cmd={}", cmd.getRateToken());
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
-    				"delete parkingRechargeRate fail."+cmd.getRateToken());
+    				"Delete parkingRechargeRate fail.");
 		}
     }
     
-    private void checkResultHolderIsNull(ResultHolder resultHolder,String plateNo) {
-		if(resultHolder == null){
-			LOGGER.error("remote search pay order return null.plateNo="+plateNo);
+    private void checkResultHolderIsNull(ResultEntity result,String plateNo) {
+		if(null == result){
+			LOGGER.error("remote request from bosigao2 return null, plateNo={}", plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"remote search pay order return null.");
+					"remote request from bosigao2 return null.");
 		}
 	}
     
-    private void checkValidStatusIsNull(Boolean validStatus,String plateNo) {
-		if(validStatus == null){
-			LOGGER.error("validStatus is null.plateNo="+plateNo);
+    private void checkExpireDateIsNull(String expireDate,String plateNo) {
+		if(StringUtils.isBlank(expireDate)){
+			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validStatus is null.");
+					"ExpireDate is null.");
 		}
 	}
     
-    private Timestamp strToTimestamp(String str) {
+    private long strToLong(String str) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		
-		Timestamp ts = null;
+		long ts;
 		try {
-			ts = new Timestamp(sdf.parse(str).getTime());
+			ts = sdf.parse(str).getTime();
 		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			LOGGER.error("data format is not yyyymmdd.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
+					"data format is not yyyymmdd.");
 		}
-		
 		return ts;
 	}
     
-	private String timestampToStr(Timestamp time) {
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		String str = sdf.format(time);
-		return str;
-	}
-	
 	@Override
 	public ParkingCardRequestDTO getRequestParkingCard(RequestParkingCardCommand cmd) {
         List<ParkingCardDTO> cardList = getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
         		cmd.getPlateNumber());
         User user = UserContext.current().getUser();
 		if(cardList.size()>0){
-			LOGGER.error("the plateNumber card is existed .");
+			LOGGER.error("PlateNumber card is existed .");
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
-					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-							String.valueOf(ParkingErrorCode.ERROR_PLATE_EXIST),
-							UserContext.current().getUser().getLocale(),"the plateNumber card is existed."));
+					"PlateNumber card is existed.");
 		}
 
         if(cardList.size() == 0){
-        	
-        	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(),cmd.getOwnerType(), 
-        			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null,
+        	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+        			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
         	if(list.size()>0){
-        		LOGGER.error("the plateNumber is already applied.");
+        		LOGGER.error("PlateNumber is already applied.");
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
-    					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-    							String.valueOf(ParkingErrorCode.ERROR_PLATE_APPLIED),
-    							UserContext.current().getUser().getLocale(),"the plateNumber is already applied."));
+    					"PlateNumber is already applied.");
         	}
         }
 		
@@ -346,13 +338,14 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			
 			parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
 			
-			Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), 
-					cmd.getOwnerId(), cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
+			Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(), 
+					cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
+			
 			parkingCardRequestDTO.setRanking(count);
 		} catch(Exception e) {
-			LOGGER.error("requestParkingCard is fail.");
+			LOGGER.error("ApplyParkingCard is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
-					"requestParkingCard is fail." + e.toString());
+					"ApplyParkingCard is fail.");
 		}
 		return parkingCardRequestDTO;
 	}
@@ -361,27 +354,10 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public void refreshParkingRechargeOrderStatus() {
 		LOGGER.info("refresh recharge status.");
-		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.BOSIGAO);
+		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.BOSIGAO2);
 		orderList.stream().map(order -> {
-			String carNumber = order.getPlateNumber();
-			String cost = order.getPrice().intValue() + "";
-			String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
-			String payTime = order.getPaidTime().toString();
-			String validStart = timestampToStr(order.getOldExpiredTime());
-			String validEnd = timestampToStr(order.getNewExpiredTime());
 			
-			URL wsdlURL = Service1.WSDL_LOCATION;
-			
-			Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
-	        Service1Soap port = ss.getService1Soap12();
-	        LOGGER.info("refreshParkingSystem");
-	        
-	        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
-			
-			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-			checkResultHolderIsNull(resultHolder,carNumber);
-			
-			if(resultHolder.isSuccess()){
+			if(recharge(order)){
 				order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 				parkingProvider.updateParkingRechargeOrder(order);
