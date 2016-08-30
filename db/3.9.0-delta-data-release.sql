@@ -213,6 +213,7 @@ update eh_launch_pad_items set item_label = '园区活动' where id in(10617, 10
 update eh_launch_pad_items set action_type = '50' where id in(10617, 10635);
 update eh_launch_pad_items set action_data = '' where id in(10617, 10635);
 -- update eh_launch_pad_items set icon_uri = '' where id in(10617, 10635);
+delete from eh_launch_pad_items where id in(10613, 10631, 10614, 10632);
 
 -- 海岸取消服务热线的屏蔽
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 46000 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999993;

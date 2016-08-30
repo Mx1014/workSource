@@ -104,3 +104,12 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('vid
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500001', 'zh_CN', '该域下该公司已存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500002', 'zh_CN', '公司类型错误，只能为普通公司或物业公司');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500003', 'zh_CN', '手机号只能为11位的数字');
+
+
+-- 储能交流大厅改官方活动
+update eh_launch_pad_items set item_name = '园区活动' where id in(10617, 10635);
+update eh_launch_pad_items set item_label = '园区活动' where id in(10617, 10635);
+update eh_launch_pad_items set action_type = '50' where id in(10617, 10635);
+update eh_launch_pad_items set action_data = '' where id in(10617, 10635);
+-- update eh_launch_pad_items set icon_uri = '' where id in(10617, 10635);
+delete from eh_launch_pad_items where id in(10613, 10631, 10614, 10632);
