@@ -1043,10 +1043,23 @@ public class EquipmentServiceImpl implements EquipmentService {
 				inactiveTasks(equipment.getId());
 			}
 			
-			if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
-				throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-						EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
-	 				"设备经纬度不能修改");
+			if(exist.getLatitude() != null && equipment.getLongitude() != null) {
+				if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
+					throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+							EquipmentServiceErrorCode.ERROR_EQUIPMENT_LOCATION_CANNOT_MODIFY,
+		 				"设备经纬度不能修改");
+				}
+			} else {
+				equipment.setLatitude(cmd.getLatitude());
+				equipment.setLongitude(cmd.getLongitude());
+				if(equipment.getLongitude() == null || equipment.getLatitude() == null ) {
+					throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+							EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_SET_LOCATION,
+		 				"设备没有设置经纬度");
+				}
+				
+				String geohash=GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
+				equipment.setGeohash(geohash);
 			}
 			
 			equipment.setOperatorUid(user.getId());
