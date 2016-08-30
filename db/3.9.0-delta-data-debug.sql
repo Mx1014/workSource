@@ -86,6 +86,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES (251, 'pmtask', '10002', 'zh_CN', '服务类型不存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
 	VALUES (252, 'pmtask', '10003', 'zh_CN', '目标用户不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+  VALUES (253, 'pmtask', '10004', 'zh_CN', '内容不能为空');
 
 -- 物业保修2.0的菜单权限 by sunwen 20160830
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
