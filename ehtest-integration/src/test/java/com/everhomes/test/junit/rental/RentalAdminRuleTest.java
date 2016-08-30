@@ -163,7 +163,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		assertEquals(dateSF.format(new Date(cmd.getEndDate())), dateSF.format(resource.getEndDate()));
 		assertEquals(cmd.getWorkdayPrice().doubleValue(), resource.getWorkdayPrice().doubleValue());
 		assertEquals(cmd.getWeekendPrice().doubleValue(), resource.getWeekendPrice().doubleValue());
-		assertEquals(cmd.getSiteCounts(), resource.getCounts()); 
+		assertEquals(cmd.getSiteCounts(), resource.getResourceCounts()); 
 		assertEquals("1111111", resource.getOpenWeekday()); 
 
 		List<EhRentalv2ConfigAttachments> resultConfigAttach1 = new ArrayList<EhRentalv2ConfigAttachments>();
