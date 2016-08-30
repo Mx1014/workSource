@@ -853,7 +853,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
 		
 //		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
-		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), (byte) 0, 0, Integer.MAX_VALUE);
+		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), null, 0, Integer.MAX_VALUE);
 		if(rules != null && rules.size() > 0)
 			account.setAccountCategoryId(rules.get(0).getId());
 
@@ -867,6 +867,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		vcProvider.updateConfAccounts(account);
+		confAccountSearcher.feedDoc(account);
 
 	}
 
@@ -1060,6 +1061,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		confEnterprise.setContactName(cmd.getContactor());
 		confEnterprise.setContact(cmd.getMobile());
 		vcProvider.updateVideoconfEnterprise(confEnterprise);
+		confEnterpriseSearcher.feedDoc(confEnterprise);
 		
 		ConfOrders order = vcProvider.findOredrById(cmd.getId());
 		
@@ -1067,7 +1069,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
 		order.setOnlineFlag(cmd.getBuyChannel());
+		
 		vcProvider.updateConfOrders(order);
+		confOrderSearcher.feedDoc(order);
 
 	}
 
@@ -2687,6 +2691,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfOrders confOrder = vcProvider.findOredrById(orderId);
 		confOrder.setEmail(cmd.getMailAddress());
 		vcProvider.updateConfOrders(confOrder);
+		confOrderSearcher.feedDoc(confOrder);
 		
 		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
 		dto.setBillId(orderId);
