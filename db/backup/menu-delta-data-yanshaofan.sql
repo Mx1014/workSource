@@ -938,9 +938,6 @@ set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),310,11100,'官方活动',0,1,'官方活动',16);
 
-<<<<<<< HEAD
-
-
 
 DELETE FROM `eh_web_menus` WHERE `id` IN (51000, 51100, 52000, 52100, 52200, 52300, 54000, 54100);
 
@@ -1153,7 +1150,7 @@ VALUES (802,0,'设备列表','设备列表',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (803,0,'备品备件','备品备件',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (804,0,'任务列表','任务列表',null);
+VALUES (804,0,'设备 任务列表','任务列表',null);
 
 
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
