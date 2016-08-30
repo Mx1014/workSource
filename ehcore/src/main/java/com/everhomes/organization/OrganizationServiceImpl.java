@@ -7057,6 +7057,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null == desOrgMember){
 				organizationProvider.createOrganizationMember(organizationMember);
 			}else{
+				organizationMember.setId(desOrgMember.getId());
 				organizationProvider.updateOrganizationMember(organizationMember);
 			}
 			
@@ -7097,7 +7098,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			userSearcher.feedDoc(organizationMember);
+//			userSearcher.feedDoc(organizationMember);
 		}
 		sendMessageForContactApproved(organizationMember);
 		return dto;
