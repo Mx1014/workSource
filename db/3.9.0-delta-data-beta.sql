@@ -166,3 +166,6 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 update eh_launch_pad_items set action_type = 49 where id in(1768, 1769, 1773, 1774);
 update eh_launch_pad_items set action_type = '{"resourceTypeId":10,"pageType":0}' where id in(1768, 1769);
 update eh_launch_pad_items set action_type = '{"resourceTypeId":11,"pageType":0}' where id in(1773, 1774);
+
+-- 生成设备巡检任务时间配置
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'equipment.task.schedule.time','0 0 0 * * ? ','schedule equipment task time');
