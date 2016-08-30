@@ -5,3 +5,4 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('vid
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500001', 'zh_CN', '该域下该公司已存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500002', 'zh_CN', '公司类型错误，只能为普通公司或物业公司');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '500003', 'zh_CN', '手机号只能为11位的数字');
