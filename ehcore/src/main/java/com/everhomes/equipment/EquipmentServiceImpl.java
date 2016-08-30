@@ -1034,7 +1034,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
 			
-			if(equipment.getStandardId() != exist.getStandardId()) {
+			if(equipment.getStandardId() != null && equipment.getStandardId() != exist.getStandardId()) {
 				equipment.setReviewerUid(0L);
 				equipment.setReviewTime(null);
 				equipment.setReviewResult(ReviewResult.NONE.getCode());
