@@ -1370,7 +1370,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			VerifyVideoConfAccountCommand cmd) {
 		User user = UserContext.current().getUser();
 		UserAccountDTO userAccount = new UserAccountDTO();
-		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+		ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
 		
 		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
 		userAccount.setPurchaseAuthority(privilege);
@@ -1779,7 +1779,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(phones != null && phones.size() > 0)
 			reservation.setCreatorPhone(phones.get(0));
 		
-		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+		ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
 		LOGGER.info("reserveVideoConf account = " + account + ", current user = " + user.getId());
 		if(account == null) {
 			LOGGER.error("account is null");
@@ -1823,7 +1823,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 	    
-		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+	    ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
 		
 		if(account != null) {
 			List<ConfReservations> reservations = vcProvider.findReservationConfByAccountId(account.getId(), locator, pageSize+1);
