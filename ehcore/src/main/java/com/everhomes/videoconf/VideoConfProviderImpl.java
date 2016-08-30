@@ -16,12 +16,14 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -1488,8 +1490,30 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		
 		return trial;
 	}
-	
-	
 
+	@Override
+	public ConfAccounts findAccountByUserIdAndEnterpriseId(Long userId,
+			Long enterpriseId) {
+		final ConfAccounts[] result = new ConfAccounts[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
+							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
+							.and(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
+							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfAccounts.class);
+							});
 
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
+	}
+	
 }
