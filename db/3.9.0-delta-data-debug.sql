@@ -95,6 +95,34 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
 	VALUES (252, 'pmtask', '10003', 'zh_CN', '目标用户不存在');
 
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (24000,'任务列表',20000,NULL,'task_management_list',0,2,'/20000/24000','park',456);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (25000,'服务类型设置',20000,NULL,'service_type_setting',0,2,'/20000/25000','park',457);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (26000,'分类设置',20000,NULL,'classify_setting',0,2,'/20000/26000','park',458);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (27000,'统计',20000,NULL,'task_statistics',0,2,'/20000/27000','park',459);
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (904,0,'任务管理 任务列表','任务管理 任务列表 全部权限',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (905,0,'任务管理 服务类型设置','任务管理 服务类型设置 全部权限',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (906,0,'任务管理 分类设置','任务管理 分类设置 全部权限',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (907,0,'任务管理 统计','任务管理 统计 全部权限',NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),904,24000,'任务列表',1,1,'任务列表 全部权限',603);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),905,25000,'服务类型设置',1,1,'服务类型设置 全部权限',604);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),906,26000,'分类设置',1,1,'分类设置 全部权限',605);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),907,27000,'统计',1,1,'统计 全部权限',606);
+
 -- merge from videoconf3.0-delta-data-release.sql 20160829
 update `eh_locale_strings` set `text` = "抱歉您当前不可更换此账号（最短更换频率为7天）" where `scope` = "videoConf" and `code` = "10005";
 
@@ -114,6 +142,7 @@ update eh_launch_pad_items set action_data = '' where id in(10617, 10635);
 -- update eh_launch_pad_items set icon_uri = '' where id in(10617, 10635);
 delete from eh_launch_pad_items where id in(10613, 10631, 10614, 10632);
 
+
 -- 海岸会议室预约和广告租赁
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
@@ -124,3 +153,4 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 update eh_launch_pad_items set action_type = 49 where id in(1768, 1769, 1773, 1774);
 update eh_launch_pad_items set action_type = '{"resourceTypeId":10,"pageType":0}' where id in(1768, 1769);
 update eh_launch_pad_items set action_type = '{"resourceTypeId":11,"pageType":0}' where id in(1773, 1774);
+

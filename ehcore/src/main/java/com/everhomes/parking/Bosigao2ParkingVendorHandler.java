@@ -136,7 +136,8 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
         ResultEntity result = GsonUtil.fromJson(json, ResultEntity.class);
 
 		if(result.isSuccess()){
-			ret.setCardTypes((List<String>)result.getResult());
+			Map<String, List<String>> cardTypeMap = (Map<String, List<String>>) result.getResult();
+			ret.setCardTypes(cardTypeMap.get("cardDescript"));
 		}
     	return ret;
     }
