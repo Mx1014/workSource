@@ -96,13 +96,13 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES (252, 'pmtask', '10003', 'zh_CN', '目标用户不存在');
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-  VALUES (24000,'任务列表',20000,NULL,'service_type_management',0,2,'/20000/24000','park',456);
+  VALUES (24000,'任务列表',20000,NULL,'task_management_list',0,2,'/20000/24000','park',456);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-  VALUES (25000,'服务类型设置',20000,NULL,'service_type_management',0,2,'/20000/25000','park',457);
+  VALUES (25000,'服务类型设置',20000,NULL,'service_type_setting',0,2,'/20000/25000','park',457);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-  VALUES (26000,'分类设置',20000,NULL,'service_type_management',0,2,'/20000/26000','park',458);
+  VALUES (26000,'分类设置',20000,NULL,'classify_setting',0,2,'/20000/26000','park',458);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-  VALUES (27000,'统计',20000,NULL,'service_alliance',0,2,'/20000/27000','park',459);
+  VALUES (27000,'统计',20000,NULL,'task_statistics',0,2,'/20000/27000','park',459);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
   VALUES (904,0,'任务管理 任务列表','任务管理 任务列表 全部权限',NULL);
