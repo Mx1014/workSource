@@ -6755,6 +6755,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void addNewOrganizationInZuolin(AddNewOrganizationInZuolinCommand cmd) {
 
+		if(cmd.getMobile().length() != 11 || !org.apache.commons.lang.StringUtils.isNumeric(cmd.getMobile())) {
+			LOGGER.error("mobile is wrong!");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MOBILE_NUM, 
+					"mobile is wrong!");
+		}
 		//没传namespaceId和communityId时加到左邻域空间的左邻园区内
 		if(null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(0);

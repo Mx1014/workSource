@@ -15,13 +15,13 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddNewOrganizationInZuolinCommand {
-	
+	@NotNull
 	private String orgName;
-	
+	@NotNull
 	private String contactor;
 
 	private String organizationType;
-	
+	@NotNull
 	private String mobile;
 	
 	private Integer namespaceId;
