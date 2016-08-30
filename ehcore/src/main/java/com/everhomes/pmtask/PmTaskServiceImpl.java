@@ -43,12 +43,19 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
@@ -86,6 +93,7 @@ import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
 import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -124,6 +132,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private RolePrivilegeService rolePrivilegeService;
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	@Autowired
+	private MessagingService messagingService;
 	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -249,16 +259,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User user = UserContext.current().getUser();
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		task.setStatus(status);
+		 int code = 0;
 		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
+	    	code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 		}
 			
-		if(status.equals(PmTaskStatus.OTHER.getCode()))
+		if(status.equals(PmTaskStatus.OTHER.getCode())){
 			task.setClosedTime(now);
+			code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+		}
 		pmTaskProvider.updateTask(task);
 		
 		PmTaskLog pmTaskLog = new PmTaskLog();
@@ -273,8 +287,35 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskProvider.createTaskLog(pmTaskLog);
 		
 		addAttachments(attachments, user.getId(), pmTaskLog.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+		
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		Map<String, Object> map = new HashMap<String, Object>();
+	    map.put("operatorName", user.getNickName());
+	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+	    
+	    String scope = PmTaskNotificationTemplateCode.SCOPE;
+	    String locale = PmTaskNotificationTemplateCode.LOCALE;
+    	
+		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		
+		sendMessageToUser(task.getCreatorUid(), text);
 	}
 
+	private void sendMessageToUser(Long userId, String content) {
+//		User user = UserContext.current().getUser();
+		MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
+	
 	@Override
 	public void completeTask(CompleteTaskCommand cmd) {
 		checkId(cmd.getId());
@@ -372,6 +413,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
 		pmTaskLog.setTaskId(task.getId());
 		pmTaskProvider.createTaskLog(pmTaskLog);
+		
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		Map<String, Object> map = new HashMap<String, Object>();
+	    map.put("operatorName", user.getNickName());
+	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+	    
+		UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(targetUser.getId(), IdentifierType.MOBILE.getCode());
+		map.put("targetName", targetUser.getNickName());
+	    map.put("targetPhone", targetIdentifier.getIdentifierToken());
+	    
+	    String scope = PmTaskNotificationTemplateCode.SCOPE;
+	    String locale = PmTaskNotificationTemplateCode.LOCALE;
+    	
+	    int code = PmTaskNotificationTemplateCode.PROCESSING_TASK_LOG;
+		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		
+		sendMessageToUser(task.getCreatorUid(), text);
 	}
 
 	private void returnNoPrivileged(List<Long> privileges, User user){
