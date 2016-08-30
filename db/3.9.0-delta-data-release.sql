@@ -215,6 +215,18 @@ update eh_launch_pad_items set action_data = '' where id in(10617, 10635);
 -- update eh_launch_pad_items set icon_uri = '' where id in(10617, 10635);
 delete from eh_launch_pad_items where id in(10613, 10631, 10614, 10632);
 
+
 -- 海岸取消服务热线的屏蔽
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 46000 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999993;
+
+-- 海岸会议室预约和广告租赁
+
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
+	VALUES(10,'会议室预约','0',NULL,'0', 999993);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
+	VALUES(11,'广告租赁','0',NULL,'0', 999993);
+    
+update eh_launch_pad_items set action_type = 49 where id in(1768, 1769, 1773, 1774);
+update eh_launch_pad_items set action_type = '{"resourceTypeId":10,"pageType":0}' where id in(1768, 1769);
+update eh_launch_pad_items set action_type = '{"resourceTypeId":11,"pageType":0}' where id in(1773, 1774);
 
