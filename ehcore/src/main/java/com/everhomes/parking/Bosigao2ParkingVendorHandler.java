@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bosigao2.ParkWebService;
 import com.bosigao2.ParkWebServiceSoap;
 import com.bosigao2.rest.CardInfo;
@@ -92,7 +93,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(result.isSuccess()){
-			CardInfo cardInfo = (CardInfo) result.getResult();
+			CardInfo cardInfo = JSONObject.parseObject(result.getResult().toString(), CardInfo.class);
 			String expireDate =  cardInfo.getExpireDate();
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
@@ -154,7 +155,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}", json);
         
-        ResultEntity result = GsonUtil.fromJson(json, ResultEntity.class);
+        ResultEntity result = JSONObject.parseObject(json, ResultEntity.class);
         this.checkResultHolderIsNull(result,plateNumber);
         
         return result;
@@ -169,7 +170,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     		
     	}else{
     		ResultEntity resultEntity = getCard(plateNumber);           
-			CardInfo cardInfo = (CardInfo) resultEntity.getResult();
+			CardInfo cardInfo = JSONObject.parseObject(resultEntity.getResult().toString(), CardInfo.class);
     		String cardType = cardInfo.getCardDescript();
     		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
     	}
@@ -204,10 +205,10 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     private boolean recharge(ParkingRechargeOrder order){
     	RechargeCommand cmd = new RechargeCommand();
 		cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
-		cmd.setCardCode(order.getCardNumber());
-		cmd.setPlateNo("");
-		cmd.setFlag(FLAG1);
-		cmd.setPayMos(order.getMonthCount().toString());
+		cmd.setCardCode("");
+		cmd.setPlateNo(order.getPlateNumber());
+		cmd.setFlag(FLAG2);
+		cmd.setPayMos(order.getMonthCount().intValue()+"");
 		cmd.setAmount((order.getPrice().intValue()*100) + "");
 		cmd.setPayDate(sdf1.format(order.getPaidTime()));
 		cmd.setChargePaidNo(order.getId().toString());
