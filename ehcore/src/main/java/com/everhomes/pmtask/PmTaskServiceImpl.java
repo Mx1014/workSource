@@ -340,6 +340,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"TargetId cannot be null.");
 		}
+		User targetUser = userProvider.findUserById(cmd.getTargetId());
+		if(null == targetUser){
+			LOGGER.error("TargetUser not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_NULL,
+    				"TargetUser not found");
+		}
 		
     	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
     	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
