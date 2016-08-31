@@ -15,7 +15,7 @@ CREATE TABLE `eh_aclink_logs` (
     `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'user_id of user key',
     `key_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'key_id of auth',
     `auth_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'auth id of user key',
-    `user_name` VARCHAR(128) COMMENT 'username of logs',
+    `user_name` VARCHAR(128) COMMENT 'username of logs'
     `user_identifier` VARCHAR(128) COMMENT 'useridentifier of user',
 
     `string_tag1` VARCHAR(128),
