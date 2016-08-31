@@ -39,8 +39,8 @@ update eh_service_alliances set type = 1 where owner_id = 240111044331048623;
 update eh_service_alliances set type = 2 where owner_id = 240111044331051500;
 update eh_service_alliances set type = 3 where owner_id = 240111044331049963;
 
-INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`)
-SELECT `id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id` FROM `eh_categories` WHERE `parent_id` = 100001;
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+SELECT `id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id` FROM `eh_categories` WHERE `parent_id` = 100001;
 
 update eh_service_alliance_categories SET owner_type = 'community';
 update eh_service_alliance_categories SET owner_id = 240111044331048623 WHERE namespace_id = 1000000;
@@ -270,6 +270,6 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 	VALUES(11,'广告租赁','0',NULL,'0', 999993);
     
 update eh_launch_pad_items set action_type = 49 where id in(1768, 1769, 1773, 1774);
-update eh_launch_pad_items set action_type = '{"resourceTypeId":10,"pageType":0}' where id in(1768, 1769);
-update eh_launch_pad_items set action_type = '{"resourceTypeId":11,"pageType":0}' where id in(1773, 1774);
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10,"pageType":0}' where id in(1768, 1769);
+update eh_launch_pad_items set action_data = '{"resourceTypeId":11,"pageType":0}' where id in(1773, 1774);
 
