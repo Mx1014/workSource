@@ -1597,14 +1597,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			dto.setGroupName(group.getName());
     	
     	if(task.getExecutorId() != null && task.getExecutorId() != 0) {
-        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getExecutiveGroupId());
+        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
         	if(executor != null) {
         		dto.setExecutorName(executor.getContactName());
         	}
     	}
     	
     	if(task.getOperatorId() != null && task.getOperatorId() != 0) {
-    		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+    		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getOwnerId());
         	if(operator != null) {
         		dto.setOperatorName(operator.getContactName());
         	}
