@@ -1500,7 +1500,6 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
 							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
 							.and(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
-							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfAccounts.class);
 							});

@@ -1057,14 +1057,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
-		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
-		confEnterprise.setContactName(cmd.getContactor());
-		confEnterprise.setContact(cmd.getMobile());
-		vcProvider.updateVideoconfEnterprise(confEnterprise);
-		confEnterpriseSearcher.feedDoc(confEnterprise);
+//		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+//		confEnterprise.setContactName(cmd.getContactor());
+//		confEnterprise.setContact(cmd.getMobile());
+//		vcProvider.updateVideoconfEnterprise(confEnterprise);
+//		confEnterpriseSearcher.feedDoc(confEnterprise);
 		
 		ConfOrders order = vcProvider.findOredrById(cmd.getId());
-		
+		order.setBuyerContact(cmd.getMobile());
+		order.setBuyerName(cmd.getContactor());
 		order.setAmount(cmd.getAmount());
 //		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());

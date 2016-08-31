@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -79,12 +81,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+    private ConfigurationProvider configurationProvider;
+	
 	@PostConstruct
 	public void init() {
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 			String EQUIPMENT_INSPECTION_TRIGGER_NAME = "EquipmentInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(EQUIPMENT_INSPECTION_TRIGGER_NAME, EQUIPMENT_INSPECTION_TRIGGER_NAME,
-					"0 0 0 * * ? ", EquipmentInspectionScheduleJob.class, null);
+					cronExpression, EquipmentInspectionScheduleJob.class, null);
         });
 		
 	}
