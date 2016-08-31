@@ -1034,7 +1034,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
 			
-			if(equipment.getStandardId() != exist.getStandardId()) {
+			if(equipment.getStandardId() != null && equipment.getStandardId() != exist.getStandardId()) {
 				equipment.setReviewerUid(0L);
 				equipment.setReviewTime(null);
 				equipment.setReviewResult(ReviewResult.NONE.getCode());
@@ -2140,7 +2140,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         	
         	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), task.getExecutiveGroupId());
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), task.getOwnerId());
             	if(operator != null) {
             		dto.setOperatorName(operator.getContactName());
             	}
