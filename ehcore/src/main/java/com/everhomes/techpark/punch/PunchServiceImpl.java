@@ -616,6 +616,7 @@ public class PunchServiceImpl implements PunchService {
 		//非工作日按照两次计算工作时长
 		if(!isWorkDay(logDay.getTime(),pr) || PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 			if (punchLogs.size() == 1) {
+				punchDayLog.setArriveTime(getDAOTime(punchLogs.get(0).getPunchTime().getTime()));
 				// 如果只有一次打卡:工作日忘打卡,休息日正常
 //				PunchLogDTO arriveLogDTO = new PunchLogDTO();
 //				arriveLogDTO.setPunchTime(punchLogs.get(0).getPunchTime().getTime());
@@ -624,7 +625,7 @@ public class PunchServiceImpl implements PunchService {
 //				pdl.getPunchLogs().add(noPunchLogDTO2);
 				if (!isWorkDay(logDay.getTime(),pr)){
 					// 如果非工作日 NORMAL
-					pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+					pdl.setPunchStatus(PunchStatus.NORMAL.getCode()); 
 					pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 					pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
 					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
@@ -768,12 +769,14 @@ public class PunchServiceImpl implements PunchService {
  
 			// 如果上午1次打卡记录
 			if ( morningLogs.size() == 1) {
+				punchDayLog.setArriveTime(getDAOTime(morningLogs.get(0).getPunchTime().getTime()));
 				punchDayLog.setWorkTime(convertTime(0L));
 				pdl.setMorningPunchStatus(PunchStatus.FORGOT.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 
 			}
 			// 如果下午1次打卡记录
 			if ( afternoonLogs.size() == 1) {
+				punchDayLog.setAfternoonArriveTime(getDAOTime(afternoonLogs.get(0).getPunchTime().getTime()));
 				punchDayLog.setWorkTime(convertTime(0L));
 				pdl.setAfternoonPunchStatus(PunchStatus.FORGOT.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 	
