@@ -42,13 +42,13 @@ public class PunchLogsDay{
     @ItemType(PunchExceptionDTO.class)
     private List<PunchExceptionDTO> punchExceptionDTOs;
     private Long workTime;
-    //modify by wh 增加忘打卡 为了兼容之前版本的打卡操作
-    private Byte newPunchStatus ;
-	private Byte newMorningPunchStatus;
-	private Byte newAfternoonPunchStatus;
-    private Byte newApprovalStatus ;
-	private Byte newMorningApprovalStatus;
-	private Byte newAfternoonApprovalStatus;
+    //modify by wh 增加忘打卡 为了兼容之前版本的打卡操作 
+    private Byte punchStatusNew ;
+	private Byte morningPunchStatusNew;
+	private Byte afternoonPunchStatusNew;
+    private Byte approvalStatusNew ;
+	private Byte morningApprovalStatusNew;
+	private Byte afternoonApprovalStatusNew;
  
 
 
@@ -205,76 +205,78 @@ public class PunchLogsDay{
 
 
 
-	public Byte getNewPunchStatus() {
-		return newPunchStatus;
+	public Byte getPunchStatusNew() {
+		return punchStatusNew;
 	}
 
 
 
-	public void setNewPunchStatus(Byte newPunchStatus) {
-		this.newPunchStatus = newPunchStatus;
+	public void setPunchStatusNew(Byte punchStatusNew) {
+		this.punchStatusNew = punchStatusNew;
 	}
 
 
 
-	public Byte getNewMorningPunchStatus() {
-		return newMorningPunchStatus;
+	public Byte getMorningPunchStatusNew() {
+		return morningPunchStatusNew;
 	}
 
 
 
-	public void setNewMorningPunchStatus(Byte newMorningPunchStatus) {
-		this.newMorningPunchStatus = newMorningPunchStatus;
+	public void setMorningPunchStatusNew(Byte morningPunchStatusNew) {
+		this.morningPunchStatusNew = morningPunchStatusNew;
 	}
 
 
 
-	public Byte getNewAfternoonPunchStatus() {
-		return newAfternoonPunchStatus;
+	public Byte getAfternoonPunchStatusNew() {
+		return afternoonPunchStatusNew;
 	}
 
 
 
-	public void setNewAfternoonPunchStatus(Byte newAfternoonPunchStatus) {
-		this.newAfternoonPunchStatus = newAfternoonPunchStatus;
+	public void setAfternoonPunchStatusNew(Byte afternoonPunchStatusNew) {
+		this.afternoonPunchStatusNew = afternoonPunchStatusNew;
 	}
 
 
 
-	public Byte getNewApprovalStatus() {
-		return newApprovalStatus;
+	public Byte getApprovalStatusNew() {
+		return approvalStatusNew;
 	}
 
 
 
-	public void setNewApprovalStatus(Byte newApprovalStatus) {
-		this.newApprovalStatus = newApprovalStatus;
+	public void setApprovalStatusNew(Byte approvalStatusNew) {
+		this.approvalStatusNew = approvalStatusNew;
 	}
 
 
 
-	public Byte getNewMorningApprovalStatus() {
-		return newMorningApprovalStatus;
+	public Byte getMorningApprovalStatusNew() {
+		return morningApprovalStatusNew;
 	}
 
 
 
-	public void setNewMorningApprovalStatus(Byte newMorningApprovalStatus) {
-		this.newMorningApprovalStatus = newMorningApprovalStatus;
+	public void setMorningApprovalStatusNew(Byte morningApprovalStatusNew) {
+		this.morningApprovalStatusNew = morningApprovalStatusNew;
 	}
 
 
 
-	public Byte getNewAfternoonApprovalStatus() {
-		return newAfternoonApprovalStatus;
+	public Byte getAfternoonApprovalStatusNew() {
+		return afternoonApprovalStatusNew;
 	}
 
 
 
-	public void setNewAfternoonApprovalStatus(Byte newAfternoonApprovalStatus) {
-		this.newAfternoonApprovalStatus = newAfternoonApprovalStatus;
+	public void setAfternoonApprovalStatusNew(Byte afternoonApprovalStatusNew) {
+		this.afternoonApprovalStatusNew = afternoonApprovalStatusNew;
 	}
 
+
+ 
 
  
 
