@@ -1446,6 +1446,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			log.setOperatorType(OwnerType.USER.getCode());
 			log.setOperatorId(user.getId());
 	 
+			task.setReviewResult(ReviewResult.NONE.getCode());
 			if(EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
