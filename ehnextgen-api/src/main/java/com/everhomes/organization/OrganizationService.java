@@ -367,4 +367,22 @@ public interface OrganizationService {
 	 * @param cmd
 	 */
 	OrganizationMemberDTO addOrganizationPersonnel(AddOrganizationPersonnelCommand cmd);
+	
+	/**
+	 * 获取最顶级部门
+	 * @param organizationGroupType
+	 * @param token
+	 * @param orgPath
+	 * @return
+	 */
+	OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId);
+	
+	/**
+	 * 获取机构下面所有人员
+	 * @param organizationId
+	 * @param groupTypes
+	 * @param userName
+	 * @return
+	 */
+	List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes,String userName);
 }

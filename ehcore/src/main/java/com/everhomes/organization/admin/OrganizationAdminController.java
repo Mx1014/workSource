@@ -46,10 +46,12 @@ import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
 import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
+import com.everhomes.rest.organization.GetMemberTopDepartmentCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
 import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
+import com.everhomes.rest.organization.ListAllChildOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
@@ -1104,6 +1106,35 @@ public class OrganizationAdminController extends ControllerBase {
           @RestReturn(value=OrganizationDTO.class)
           public RestResponse addOrganizationPersonnel(@Valid AddOrganizationPersonnelCommand cmd) {
               RestResponse response = new RestResponse(organizationService.addOrganizationPersonnel(cmd));
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;
+          }
+          
+          /**
+           * <b>URL: /admin/org/getMemberTopDepartment</b>
+           * <p>获取人员当前部门的顶级部门</p>
+           */
+          @RequestMapping("getMemberTopDepartment")
+          @RestReturn(value=OrganizationDTO.class)
+          public RestResponse getMemberTopDepartment(@Valid GetMemberTopDepartmentCommand cmd) {
+        	  
+        	  OrganizationGroupType groupType = OrganizationGroupType.fromCode(cmd.getGroupType());
+        	  
+              RestResponse response = new RestResponse(organizationService.getMemberTopDepartment(groupType, cmd.getContactToken(), cmd.getOrganizationId()));
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;
+          }
+          
+          /**
+           * <b>URL: /admin/org/listAllChildOrganizationPersonnel</b>
+           * <p>查询机构下面全部子机构的所有人员</p>
+           */
+          @RequestMapping("listAllChildOrganizationPersonnel")
+          @RestReturn(value=OrganizationDTO.class)
+          public RestResponse listAllChildOrganizationPersonnel(@Valid ListAllChildOrganizationPersonnelCommand cmd) {
+              RestResponse response = new RestResponse(organizationService.listAllChildOrganizationPersonnel(cmd.getOrganizationId(), cmd.getGroupTypes() , cmd.getContactName()));
               response.setErrorCode(ErrorCodes.SUCCESS);
               response.setErrorDescription("OK");
               return response;
