@@ -39,6 +39,7 @@ public interface EquipmentProvider {
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
 	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, Byte processType);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
+	List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(Long logId);
 	
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandards(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionAccessories> listEquipmentInspectionAccessories(CrossShardListingLocator locator, Integer pageSize);

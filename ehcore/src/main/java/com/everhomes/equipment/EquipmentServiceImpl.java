@@ -142,7 +142,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -403,6 +407,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -457,6 +463,7 @@ import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
@@ -2160,6 +2167,17 @@ public class EquipmentServiceImpl implements EquipmentService {
             	if(target != null) {
             		dto.setTargetName(target.getContactName());
             	}
+        	}
+        	
+        	List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
+        	if(attachmentLists != null && attachmentLists.size() > 0) {
+	        	populateLogAttachements(r, attachmentLists);
+	        	List<EquipmentTaskAttachmentDTO> attachments = new ArrayList<EquipmentTaskAttachmentDTO>();
+	        	for(EquipmentInspectionTasksAttachments attachment :  attachmentLists) {
+	        		EquipmentTaskAttachmentDTO attDto = ConvertHelper.convert(attachment, EquipmentTaskAttachmentDTO.class);
+	        		attachments.add(attDto);
+	        	}
+	        	dto.setAttachments(attachments);
         	}
         	return dto;
         }).collect(Collectors.toList());
