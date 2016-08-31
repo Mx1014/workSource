@@ -516,6 +516,18 @@ public class PunchServiceImpl implements PunchService {
 			}
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
+		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
+				dateSF.format(logDay.getTime()));
+		if (null != exceptionApproval) {
+			pdl.setMorningApprovalStatus(exceptionApproval.getMorningApprovalStatus());
+			pdl.setAfternoonApprovalStatus(exceptionApproval.getAfternoonApprovalStatus());
+			if (calculateExceptionCode(pdl.getAfternoonApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())
+					&&calculateExceptionCode(pdl.getMorningApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())) {
+			 
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			}
+		}
+
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		pdl.setMorningPunchStatus(punchDayLog.getMorningStatus());
 		pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus()); 
