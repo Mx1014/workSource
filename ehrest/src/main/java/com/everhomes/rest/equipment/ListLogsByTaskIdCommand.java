@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -24,7 +25,7 @@ public class ListLogsByTaskIdCommand {
 	
 	@NotNull
 	private String ownerType;
-	
+	@ItemType(Byte.class)
 	private List<Byte> processType;
 	
 	private Long pageAnchor;
