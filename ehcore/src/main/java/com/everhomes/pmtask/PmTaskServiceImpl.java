@@ -152,9 +152,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     			dto.setNickName(user.getNickName());
     			dto.setMobile(userIdentifier.getIdentifierToken());
     			
-    			Category category = checkCategory(r.getCategoryId());
-    			Category parentCategory = checkCategory(category.getParentId());
-    			dto.setCategoryName(category.getName());
+    			Category parentCategory = checkCategory(r.getCategoryId());
     			dto.setParentCategoryId(parentCategory.getId());
     			dto.setParentCategoryName(parentCategory.getName());
     			
@@ -167,7 +165,6 @@ public class PmTaskServiceImpl implements PmTaskService {
         	}
     	}
 		
-		response.setRequests(list);
 		return response;
 	}
 

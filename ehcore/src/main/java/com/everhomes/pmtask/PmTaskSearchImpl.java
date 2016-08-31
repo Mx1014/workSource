@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskProvider;
@@ -55,6 +57,9 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     
     @Autowired
 	private UserProvider userProvider;
+    
+    @Autowired
+	private CategoryProvider categoryProvider;
 	@Override
 	public String getIndexType() {
 		return SearchUtils.PMTASK;
@@ -69,7 +74,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("ownerType", task.getOwnerType());
             b.field("content", task.getContent());
             b.field("creatorUid", task.getCreatorUid());
-            b.field("categoryId", task.getCategoryId());
+            Category category = categoryProvider.findCategoryById(task.getCategoryId());
+            b.field("categoryId", category.getParentId());
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
             b.field("nickName", task.getNickName());
