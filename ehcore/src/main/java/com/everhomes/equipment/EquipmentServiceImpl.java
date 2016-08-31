@@ -141,7 +141,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -400,6 +402,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
@@ -1501,20 +1505,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 				log.setProcessMessage(cmd.getMessage());
 			}
-			
-			if(cmd.getEqParameters() != null) {
-				String paraText = localeStringService.getLocalizedString(
-						String.valueOf(EquipmentServiceErrorCode.SCOPE),
-						String.valueOf(EquipmentServiceErrorCode.EQUIPMENT_PARAMETER_RECORD),
-						UserContext.current().getUser().getLocale(),
-						"设备参数:");
-				StringBuilder sb = new StringBuilder();
-				for(EquipmentParameterDTO para : cmd.getEqParameters()) {
-					sb.append(para.getParameterName() + ": " + para.getParameterValue() + para.getParameterUnit() + "   ");
-				}
-				
-				String paraValue = paraText + sb;
-				log.setParameterValue(paraValue);
+			//改成json
+			if(cmd.getEqParameters() != null && cmd.getEqParameters().size() > 0) {
+//				String paraText = localeStringService.getLocalizedString(
+//						String.valueOf(EquipmentServiceErrorCode.SCOPE),
+//						String.valueOf(EquipmentServiceErrorCode.EQUIPMENT_PARAMETER_RECORD),
+//						UserContext.current().getUser().getLocale(),
+//						"设备参数:");
+//				StringBuilder sb = new StringBuilder();
+//				for(EquipmentParameterDTO para : cmd.getEqParameters()) {
+//					sb.append(para.getParameterName() + ": " + para.getParameterValue() + para.getParameterUnit() + "   ");
+//				}
+//				
+//				String paraValue = paraText + sb;
+				String json = JSONArray.toJSONString(cmd.getEqParameters()).toString();
+				log.setParameterValue(json);
 			}
 			
 			EquipmentTaskDTO dto = updateEquipmentTasks(task, log, cmd.getAttachments());
@@ -2136,6 +2141,11 @@ public class EquipmentServiceImpl implements EquipmentService {
         
         response.setNextPageAnchor(nextPageAnchor);
         
+        EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId(),
+				task.getOwnerType(), task.getOwnerId());
+		if(standard != null) {
+			response.setTaskType(standard.getStandardType());
+		} 
         List<EquipmentTaskLogsDTO> dtos = logs.stream().map((r) -> {
         	
         	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
