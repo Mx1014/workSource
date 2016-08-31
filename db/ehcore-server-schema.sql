@@ -6353,7 +6353,9 @@ CREATE TABLE `eh_version_urls` (
   `download_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk',
   `info_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-
+  `upgrade_description` TEXT,
+  `app_name` VARCHAR(50),
+  `publish_time` DATETIME,
   PRIMARY KEY(`id`),
   UNIQUE KEY `u_eh_ver_url`(`realm_id`, `target_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
