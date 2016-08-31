@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,6 +40,8 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 @RequestMapping("/approval")
 public class ApprovalController extends ControllerBase {
 	
+	@Autowired
+	private ApprovalService approvalService;
 
 	/**
 	 * 
@@ -48,7 +51,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("createAbsentCategory")
 	@RestReturn(CreateAbsentCategoryResponse.class)
 	public RestResponse createAbsentCategory(CreateAbsentCategoryCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.createAbsentCategory(cmd));
 	}
 	
 	/**
@@ -59,7 +62,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("updateAbsentCategory")
 	@RestReturn(UpdateAbsentCategoryResponse.class)
 	public RestResponse updateAbsentCategory(UpdateAbsentCategoryCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.updateAbsentCategory(cmd));
 	}
 
 	/**
@@ -70,7 +73,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listAbsentTypes")
 	@RestReturn(ListAbsentTypesResponse.class)
 	public RestResponse listAbsentTypes(ListAbsentTypesCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listAbsentTypes(cmd));
 	}
 
 	/**
@@ -81,6 +84,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("deleteAbsentType")
 	@RestReturn(String.class)
 	public RestResponse deleteAbsentType(DeleteAbsentTypeCommand cmd){
+		approvalService.deleteAbsentType(cmd);
 		return new RestResponse();
 	}
 	
@@ -92,7 +96,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("createApprovalFlowName")
 	@RestReturn(CreateApprovalFlowNameResponse.class)
 	public RestResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.createApprovalFlowName(cmd));
 	}
 	
 	/**
@@ -103,7 +107,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("updateApprovalFlowName")
 	@RestReturn(UpdateApprovalFlowNameResponse.class)
 	public RestResponse updateApprovalFlowName(UpdateApprovalFlowNameCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.updateApprovalFlowName(cmd));
 	}
 
 	/**
@@ -114,7 +118,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("createApprovalFlowLevel")
 	@RestReturn(CreateApprovalFlowLevelResponse.class)
 	public RestResponse createApprovalFlowLevel(CreateApprovalFlowLevelCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.createApprovalFlowLevel(cmd));
 	}
 
 	/**
@@ -125,7 +129,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("updateApprovalFlowLevel")
 	@RestReturn(UpdateApprovalFlowLevelResponse.class)
 	public RestResponse updateApprovalFlowLevel(UpdateApprovalFlowLevelCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.updateApprovalFlowLevel(cmd));
 	}
 
 	/**
@@ -136,7 +140,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalFlows")
 	@RestReturn(ListApprovalFlowsResponse.class)
 	public RestResponse listApprovalFlows(ListApprovalFlowsCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listApprovalFlows(cmd));
 	}
 
 	/**
@@ -147,6 +151,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("deleteApprovalFlow")
 	@RestReturn(String.class)
 	public RestResponse deleteApprovalFlow(DeleteApprovalFlowCommand cmd){
+		approvalService.deleteApprovalFlow(cmd);
 		return new RestResponse();
 	}
 	
@@ -158,7 +163,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("createApprovalRule")
 	@RestReturn(CreateApprovalRuleResponse.class)
 	public RestResponse createApprovalRule(CreateApprovalRuleCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.createApprovalRule(cmd));
 	}
 
 	/**
@@ -169,7 +174,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("updateApprovalRule")
 	@RestReturn(UpdateApprovalRuleResponse.class)
 	public RestResponse updateApprovalRule(UpdateApprovalRuleCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.updateApprovalRule(cmd));
 	}
 
 	/**
@@ -180,6 +185,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("deleteApprovalRule")
 	@RestReturn(String.class)
 	public RestResponse deleteApprovalRule(DeleteApprovalRuleCommand cmd){
+		approvalService.deleteApprovalRule(cmd);
 		return new RestResponse();
 	}
 	
@@ -191,6 +197,6 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalRules")
 	@RestReturn(ListApprovalRulesResponse.class)
 	public RestResponse listApprovalRules(ListApprovalRulesCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listApprovalRules(cmd));
 	}
 }
