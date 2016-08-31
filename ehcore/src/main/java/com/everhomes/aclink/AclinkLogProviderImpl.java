@@ -109,7 +109,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         return objs;
     }
 
-    private void prepareObj(AclinkLog obj) {
+    private void prepareObj(AclinkLog obj) 
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
     }
