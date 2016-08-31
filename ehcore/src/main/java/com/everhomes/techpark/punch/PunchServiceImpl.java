@@ -1931,10 +1931,8 @@ public class PunchServiceImpl implements PunchService {
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, pr);
 		
 		statistic.setUserName(member.getContactName());
-		statistic.setDeptId(member.getGroupId());
-		Organization dept = this.organizationProvider.findOrganizationById(member.getGroupId());
-		if(null == dept)
-			dept = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+		OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());   
+		statistic.setDeptId(dept.getId());
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.format(startCalendar.getTime()),
@@ -3906,9 +3904,7 @@ public class PunchServiceImpl implements PunchService {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 			if (null != member) {
 				dto.setUserName(member.getContactName());
-				Organization dept = this.organizationProvider.findOrganizationById(member.getGroupId());
-				if(null == dept)
-					dept = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());  
 				dto.setDeptName(dept.getName());
 				   
 //				dto.setUserPhoneNumber(member.getContactToken());

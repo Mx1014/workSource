@@ -14,12 +14,12 @@ import com.everhomes.util.StringHelper;
  * <li>approvalStatus：审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
  * <li>morningApprovalStatus：早上审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
  * <li>afternoonApprovalStatus：下午审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
- * <li>newPunchStatus：打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>newMorningPunchStatus：早上打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>newAfternoonPunchStatus：下午打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>newApprovalStatus：审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
- * <li>newMorningApprovalStatus：早上审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
- * <li>newAfternoonApprovalStatus：下午审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>punchStatusNew：打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>morningPunchStatusNew：早上打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>afternoonPunchStatusNew：下午打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>approvalStatusNew：审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>morningApprovalStatusNew：早上审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>afternoonApprovalStatusNew：下午审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
  * <li>exceptionStatus：异常状态:1-异常0-正常 参考{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>PunchLogs: 打卡记录list {@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * <li>workTime: 工作时长 Long</li>
