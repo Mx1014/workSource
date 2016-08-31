@@ -38,7 +38,7 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 
 	protected void initCustomData() {
 
-		String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+		String userInfoFilePath = "data/json/2.0.0-punch-data-userinfo_160830.txt";
 		String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 
@@ -94,7 +94,8 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			// 8月10 上午缺勤 下午忘打卡
 			if (dayLog.getPunchDay().equals("10")) {
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewAfternoonPunchStatus()));
 			}
 			// 8月9 上午早退 下午迟到
 			else if (dayLog.getPunchDay().equals("9")) {
@@ -106,11 +107,11 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 				assertEquals(PunchStatus.BELATE, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
 				assertEquals(PunchStatus.NORMAL, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
 			}
-			// 8月5 加班 加班
+			// 8月5 加班 加班要减去午休时间
 			if (dayLog.getPunchDay().equals("5")) {
 				assertEquals(PunchStatus.OVERTIME, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
 				assertEquals(PunchStatus.OVERTIME, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
-				assertEquals((10*60*60+2)*1000, dayLog.getWorkTime().intValue());
+				assertEquals((8*60*60+2)*1000, dayLog.getWorkTime().intValue());
 			}
 			// 8月4 上午 早退且迟到 下午 早退且迟到
 			if (dayLog.getPunchDay().equals("4")) {
@@ -154,7 +155,8 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			// 8月10 上午缺勤 下午忘打卡
 			if (dayLog.getPunchDay().equals("10")) {
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewAfternoonPunchStatus()));
 			}
 			// 8月9 上午早退 下午迟到
 			else if (dayLog.getPunchDay().equals("9")) {
@@ -168,8 +170,10 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			}
 			// 8月5 加班 加班
 			if (dayLog.getPunchDay().equals("5")) {
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewMorningPunchStatus()));
+				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewAfternoonPunchStatus()));
 			}
 			// 8月4 上午 早退且迟到 下午 早退且迟到
 			if (dayLog.getPunchDay().equals("4")) {
