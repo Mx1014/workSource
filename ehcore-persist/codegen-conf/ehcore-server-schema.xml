@@ -103,8 +103,9 @@
 		eh_rich_texts |
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | eh_rich_texts | eh_user_impersonations |
         eh_journals | eh_journal_configs |
-		eh_community_services |
         eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments 
+		eh_community_services | eh_aclink_logs |
+		eh_namespaces | eh_configurations
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
