@@ -24,6 +24,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,8 +205,12 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
         builder.setSize(pageSize);
-        builder.addSort("createTime", SortOrder.ASC);
         builder.setQuery(qb).setPostFilter(fb);
+        // builder.addSort("createTime", SortOrder.ASC);
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.ASC));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search pm tasks, builder={}", builder);
+        }
         
         SearchResponse rsp = builder.execute().actionGet();
         
