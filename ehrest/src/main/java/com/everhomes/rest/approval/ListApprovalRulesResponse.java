@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListApprovalRulesResponse {
 	private Long nextPageAnchor;
+	@ItemType(ApprovalRuleDTO.class)
 	private List<ApprovalRuleDTO> approvalRuleList;
 
 	public Long getNextPageAnchor() {

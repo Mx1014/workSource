@@ -1,5 +1,6 @@
 package com.everhomes.approval;
 
-public class ApprovalFlow {
 
+public class ApprovalFlow {
+	
 }

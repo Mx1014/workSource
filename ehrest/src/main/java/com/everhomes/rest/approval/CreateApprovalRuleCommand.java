@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -22,6 +23,7 @@ public class CreateApprovalRuleCommand {
 	private String ownerType;
 	private Long ownerId;
 	private String name;
+	@ItemType(RuleFlowMap.class)
 	private List<RuleFlowMap> ruleFlowMapList;
 
 	public Integer getNamespaceId() {
