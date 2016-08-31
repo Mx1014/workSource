@@ -5128,14 +5128,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
 			 	List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
 				
+			 	//退出企业  部门下的记录 都删除掉
 				for (Organization department : departments) {
 					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), department.getId());
-					organizationMember.setStatus(member.getStatus());
-					if(null != member){
-						organizationProvider.updateOrganizationMember(organizationMember);
+					if(null != organizationMember){
+						organizationProvider.deleteOrganizationMemberById(organizationMember.getId());
 					}
 				}
 				
+				// 公司下的记录改状态
 				if(null != member){
 					organizationProvider.updateOrganizationMember(member);
 				}
