@@ -349,3 +349,36 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 	VALUES(10001,'公共资源预订','0',NULL,2,999999);
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
 	VALUES(10002,'会议室预订','0',NULL,2,999999);
+	
+	
+	
+-- 把打卡考勤的老功能重新开放  by sfyan 20160831  
+DELETE FROM `eh_web_menu_privileges` WHERE `menu_id` IN (56172, 56174, 56176, 56111, 56112);
+DELETE FROM `eh_web_menus` WHERE `id` IN (56172, 56174, 56176, 56106, 56111, 56112);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56106,'打卡详情',56100,null,null,1,2,'/50000/56000/56100/56108','park',571);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56181,'打卡详情',56106,null,'punch_detail',0,2,'/50000/56000/56100/56106/56181','park',572);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56107,'异常申请处理',56100,null,null,1,2,'/50000/56000/56100/56107','park',573);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56186,'异常申请处理',56107,null,'attendance_manage',0,2,'/50000/56000/56100/56107/56186','park',574);
+
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56108,'考勤统计',56100,null,null,1,2,'/50000/56000/56100/56108','park',575);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (56191,'考勤统计',56108,null,'punch_statistics',0,2,'/50000/56000/56100/56108/56191','park',576);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),797,56181,'打卡详情',1,1,'打卡详情  全部权限',577);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),799,56186,'异常处理',1,1,'异常处理 全部权限',578);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),820,56191,'考勤统计',1,1,'考勤统计  全部权限',579);
+
