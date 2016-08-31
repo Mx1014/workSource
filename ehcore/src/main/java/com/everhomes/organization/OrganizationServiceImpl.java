@@ -5119,8 +5119,26 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param member
 	 */
 	private void updateEnterpriseContactStatus(Long operatorUid, OrganizationMember member){
+		Organization organization = this.checkOrganization(member.getOrganizationId());
+		
+		List<String> groupTypes = new ArrayList<String>();
+		
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
 		 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
-			 this.organizationProvider.updateOrganizationMember(member);
+			 	List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+				
+				for (Organization department : departments) {
+					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), department.getId());
+					organizationMember.setStatus(member.getStatus());
+					if(null != member){
+						organizationProvider.updateOrganizationMember(organizationMember);
+					}
+				}
+				
+				if(null != member){
+					organizationProvider.updateOrganizationMember(member);
+				}
 	            return null;
 	        });
 		 userSearcher.feedDoc(member);
