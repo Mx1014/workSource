@@ -58,7 +58,7 @@ public class YellowPageController  extends ControllerBase {
     private YellowPageService yellowPageService;
 
 	@Autowired
-	private CategoryProvider categoryProvider;
+	private YellowPageProvider yellowPageProvider;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -165,13 +165,11 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
-		@SuppressWarnings("unchecked")
-		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, 
-				CategoryConstants.CATEGORY_ID_YELLOW_PAGE, CategoryAdminStatus.ACTIVE, orderBy);
+		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId, 
+				cmd.getParentId(), CategoryAdminStatus.ACTIVE);
 
-		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
-			return ConvertHelper.convert(r, CategoryDTO.class);
+		List<ServiceAllianceCategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+			return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
 		}).collect(Collectors.toList());
 
 		return new RestResponse(dtoResultList);

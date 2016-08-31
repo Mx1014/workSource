@@ -5,21 +5,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.common.lang3.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.SortField;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.category.Category;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.jooq.JooqHelper;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.sequence.SequenceProvider;
@@ -38,17 +47,23 @@ import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
+import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPagesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.Tuple;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageProviderImpl.class);
+	
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -451,5 +466,54 @@ public class YellowPageProviderImpl implements YellowPageProvider {
              return null;
          });
 		
+	}
+
+
+	@Override
+	public ServiceAllianceCategories findCategoryByName(Integer namespaceId,
+			String name) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAllianceCategories.class));
+        SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != name)
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAME.eq(name));
+        
+        return ConvertHelper.convert(query.fetchOne(), ServiceAllianceCategories.class);
+	}
+
+
+	@Override
+	public List<ServiceAllianceCategories> listChildCategories(
+			Integer namespaceId, Long parentId, CategoryAdminStatus status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
+        
+        SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
+        Condition condition = null;
+        
+        if(parentId != null)
+            condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(parentId.longValue());
+        else
+            condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.isNull().or(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
+            
+        if(status != null)
+            condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(status.getCode()));
+
+        condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(condition != null) {
+        	query.addConditions(condition);
+        }
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query child categories, namespaceId=" + namespaceId + ", parentId=" + parentId + ", status=" + status);
+        }
+
+        query.fetch().map((EhServiceAllianceCategoriesRecord record) -> {
+        	result.add(ConvertHelper.convert(record, ServiceAllianceCategories.class));
+            return null;
+        });
+        
+        return result;
 	}
 }

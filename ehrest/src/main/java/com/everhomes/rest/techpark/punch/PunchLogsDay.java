@@ -14,6 +14,12 @@ import com.everhomes.util.StringHelper;
  * <li>approvalStatus：审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
  * <li>morningApprovalStatus：早上审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
  * <li>afternoonApprovalStatus：下午审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>newPunchStatus：打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>newMorningPunchStatus：早上打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>newAfternoonPunchStatus：下午打卡状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>newApprovalStatus：审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>newMorningApprovalStatus：早上审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
+ * <li>newAfternoonApprovalStatus：下午审批状态  如 迟到 早退 参考{@link com.everhomes.rest.techpark.punch.ApprovalStatus}</li>
  * <li>exceptionStatus：异常状态:1-异常0-正常 参考{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>PunchLogs: 打卡记录list {@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * <li>workTime: 工作时长 Long</li>
@@ -36,7 +42,13 @@ public class PunchLogsDay{
     @ItemType(PunchExceptionDTO.class)
     private List<PunchExceptionDTO> punchExceptionDTOs;
     private Long workTime;
- 
+    //modify by wh 增加忘打卡 为了兼容之前版本的打卡操作
+    private Byte newPunchStatus ;
+	private Byte newMorningPunchStatus;
+	private Byte newAfternoonPunchStatus;
+    private Byte newApprovalStatus ;
+	private Byte newMorningApprovalStatus;
+	private Byte newAfternoonApprovalStatus;
  
 
 
@@ -189,6 +201,78 @@ public class PunchLogsDay{
 
 	public void setWorkTime(Long workTime) {
 		this.workTime = workTime;
+	}
+
+
+
+	public Byte getNewPunchStatus() {
+		return newPunchStatus;
+	}
+
+
+
+	public void setNewPunchStatus(Byte newPunchStatus) {
+		this.newPunchStatus = newPunchStatus;
+	}
+
+
+
+	public Byte getNewMorningPunchStatus() {
+		return newMorningPunchStatus;
+	}
+
+
+
+	public void setNewMorningPunchStatus(Byte newMorningPunchStatus) {
+		this.newMorningPunchStatus = newMorningPunchStatus;
+	}
+
+
+
+	public Byte getNewAfternoonPunchStatus() {
+		return newAfternoonPunchStatus;
+	}
+
+
+
+	public void setNewAfternoonPunchStatus(Byte newAfternoonPunchStatus) {
+		this.newAfternoonPunchStatus = newAfternoonPunchStatus;
+	}
+
+
+
+	public Byte getNewApprovalStatus() {
+		return newApprovalStatus;
+	}
+
+
+
+	public void setNewApprovalStatus(Byte newApprovalStatus) {
+		this.newApprovalStatus = newApprovalStatus;
+	}
+
+
+
+	public Byte getNewMorningApprovalStatus() {
+		return newMorningApprovalStatus;
+	}
+
+
+
+	public void setNewMorningApprovalStatus(Byte newMorningApprovalStatus) {
+		this.newMorningApprovalStatus = newMorningApprovalStatus;
+	}
+
+
+
+	public Byte getNewAfternoonApprovalStatus() {
+		return newAfternoonApprovalStatus;
+	}
+
+
+
+	public void setNewAfternoonApprovalStatus(Byte newAfternoonApprovalStatus) {
+		this.newAfternoonApprovalStatus = newAfternoonApprovalStatus;
 	}
 
 

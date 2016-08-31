@@ -1,5 +1,7 @@
 package com.everhomes.rest.equipment;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -23,7 +25,7 @@ public class ListLogsByTaskIdCommand {
 	@NotNull
 	private String ownerType;
 	
-	private Byte processType;
+	private List<Byte> processType;
 	
 	private Long pageAnchor;
 	
@@ -69,11 +71,11 @@ public class ListLogsByTaskIdCommand {
 		this.ownerType = ownerType;
 	}
 
-	public Byte getProcessType() {
+	public List<Byte> getProcessType() {
 		return processType;
 	}
 
-	public void setProcessType(Byte processType) {
+	public void setProcessType(List<Byte> processType) {
 		this.processType = processType;
 	}
 
