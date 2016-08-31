@@ -1877,7 +1877,7 @@ public class PunchServiceImpl implements PunchService {
 		return pdl;
 	}
 
-	private void addPunchStatistics(OrganizationMember member ,Long orgId,Calendar startCalendar,Calendar endCalendar){
+	private void addPunchStatistics(OrganizationMemberDTO member ,Long orgId,Calendar startCalendar,Calendar endCalendar){
 		
 		PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),orgId, member.getTargetId());
 		if(null == pr)
@@ -3704,10 +3704,10 @@ public class PunchServiceImpl implements PunchService {
 			List<String> groupTypeList = new ArrayList<String>();
 			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembersByName
-					 (org.getPath(), groupTypeList, cmd.getUserName());
+			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+					(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
 			if(null == organizationMembers)
-				return response;
+				return response;  
 			response.setUserLogs(new ArrayList<UserMonthLogsDTO>());
 			//取查询月的第一天和最后一天
 			Calendar monthBegin = Calendar.getInstance();
@@ -3721,7 +3721,7 @@ public class PunchServiceImpl implements PunchService {
 					//月末
 					monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
 				} 
-				for(OrganizationMember member : organizationMembers){
+				for(OrganizationMemberDTO member : organizationMembers){
 					if(null == member.getTargetType())
 						continue;
 					UserMonthLogsDTO userMonthLogsDTO = new UserMonthLogsDTO(); 
@@ -3957,9 +3957,14 @@ public class PunchServiceImpl implements PunchService {
 
 				List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
 				for(Long orgId : orgIds){
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(orgId);
+
+					List<String> groupTypeList = new ArrayList<String>();
+					groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+					groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+					List<OrganizationMemberDTO> members = this.organizationService.listAllChildOrganizationPersonnel
+							(orgId, groupTypeList, null);
 					//循环刷所有员工
-					for(OrganizationMember member : members){
+					for(OrganizationMemberDTO member : members){
 						if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
 							try {
 								//刷新 daylog
@@ -4004,9 +4009,14 @@ public class PunchServiceImpl implements PunchService {
 		
 		List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
 		for(Long orgId : orgIds){
-			List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(orgId);
+
+			List<String> groupTypeList = new ArrayList<String>();
+			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+			List<OrganizationMemberDTO> organizationMembers = organizationService.listAllChildOrganizationPersonnel
+					(orgId, groupTypeList, null) ;
 			//循环刷所有员工
-			for(OrganizationMember member : members){
+			for(OrganizationMemberDTO member : organizationMembers){
 				if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
 					try {
 						//刷新 daylog
