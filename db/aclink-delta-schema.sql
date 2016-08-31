@@ -39,11 +39,3 @@ CREATE TABLE `eh_aclink_logs` (
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-<<<<<<< HEAD
-
-ALTER TABLE `eh_version_urls` ADD COLUMN `upgrade_description` TEXT NULL DEFAULT NULL AFTER `info_url`;
-
--- 增加app名称和发布时间列
-ALTER TABLE `eh_version_urls` ADD COLUMN `app_name` VARCHAR(50) NULL,ADD COLUMN `publish_time` DATETIME NULL;
-=======
->>>>>>> support for aclink log
