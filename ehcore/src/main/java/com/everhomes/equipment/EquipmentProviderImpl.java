@@ -57,6 +57,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipment
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -846,6 +847,24 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		
         return map;
+	}
+
+	@Override
+	public List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(
+			Long logId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.LOG_ID.eq(logId));
+		 
+		List<EquipmentInspectionTasksAttachments> result = new ArrayList<EquipmentInspectionTasksAttachments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTasksAttachments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
 	}
 
 }
