@@ -36,7 +36,13 @@ public class PunchLogsDay{
     @ItemType(PunchExceptionDTO.class)
     private List<PunchExceptionDTO> punchExceptionDTOs;
     private Long workTime;
- 
+    //modify by wh 增加忘打卡 为了兼容之前版本的打卡操作
+    private Byte newPunchStatus ;
+	private Byte newMorningPunchStatus;
+	private Byte newAfternoonPunchStatus;
+    private Byte newApprovalStatus ;
+	private Byte newMorningApprovalStatus;
+	private Byte newAfternoonApprovalStatus;
  
 
 
@@ -189,6 +195,78 @@ public class PunchLogsDay{
 
 	public void setWorkTime(Long workTime) {
 		this.workTime = workTime;
+	}
+
+
+
+	public Byte getNewPunchStatus() {
+		return newPunchStatus;
+	}
+
+
+
+	public void setNewPunchStatus(Byte newPunchStatus) {
+		this.newPunchStatus = newPunchStatus;
+	}
+
+
+
+	public Byte getNewMorningPunchStatus() {
+		return newMorningPunchStatus;
+	}
+
+
+
+	public void setNewMorningPunchStatus(Byte newMorningPunchStatus) {
+		this.newMorningPunchStatus = newMorningPunchStatus;
+	}
+
+
+
+	public Byte getNewAfternoonPunchStatus() {
+		return newAfternoonPunchStatus;
+	}
+
+
+
+	public void setNewAfternoonPunchStatus(Byte newAfternoonPunchStatus) {
+		this.newAfternoonPunchStatus = newAfternoonPunchStatus;
+	}
+
+
+
+	public Byte getNewApprovalStatus() {
+		return newApprovalStatus;
+	}
+
+
+
+	public void setNewApprovalStatus(Byte newApprovalStatus) {
+		this.newApprovalStatus = newApprovalStatus;
+	}
+
+
+
+	public Byte getNewMorningApprovalStatus() {
+		return newMorningApprovalStatus;
+	}
+
+
+
+	public void setNewMorningApprovalStatus(Byte newMorningApprovalStatus) {
+		this.newMorningApprovalStatus = newMorningApprovalStatus;
+	}
+
+
+
+	public Byte getNewAfternoonApprovalStatus() {
+		return newAfternoonApprovalStatus;
+	}
+
+
+
+	public void setNewAfternoonApprovalStatus(Byte newAfternoonApprovalStatus) {
+		this.newAfternoonApprovalStatus = newAfternoonApprovalStatus;
 	}
 
 

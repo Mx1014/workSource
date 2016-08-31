@@ -312,6 +312,24 @@ public class PunchServiceImpl implements PunchService {
 				PunchLogsDay pdl = makePunchLogsDayStatus(userId,
 						CompanyId, start);
 				if (null != pdl) {
+					pdl.setNewPunchStatus(pdl.getPunchStatus());
+					pdl.setNewMorningPunchStatus(pdl.getMorningPunchStatus());
+					pdl.setNewAfternoonPunchStatus(pdl.getAfternoonPunchStatus());
+					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus())))
+						pdl.setPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus())))
+						pdl.setMorningPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus())))
+						pdl.setAfternoonPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+					pdl.setNewApprovalStatus(pdl.getApprovalStatus());
+					pdl.setNewMorningApprovalStatus(pdl.getMorningApprovalStatus());
+					pdl.setNewAfternoonApprovalStatus(pdl.getAfternoonApprovalStatus());
+					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus())))
+						pdl.setApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus())))
+						pdl.setMorningApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus())))
+						pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
 					pml.getPunchLogsDayList().add(pdl);
 				}
 			} catch (ParseException e) {
