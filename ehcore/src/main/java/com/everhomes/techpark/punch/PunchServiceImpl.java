@@ -315,20 +315,20 @@ public class PunchServiceImpl implements PunchService {
 					pdl.setNewPunchStatus(pdl.getPunchStatus());
 					pdl.setNewMorningPunchStatus(pdl.getMorningPunchStatus());
 					pdl.setNewAfternoonPunchStatus(pdl.getAfternoonPunchStatus());
-					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus())))
+					if(pdl.getPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus())))
 						pdl.setPunchStatus(ApprovalStatus.UNPUNCH.getCode());
-					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus())))
+					if(pdl.getMorningPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus())))
 						pdl.setMorningPunchStatus(ApprovalStatus.UNPUNCH.getCode());
-					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus())))
+					if(pdl.getAfternoonPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus())))
 						pdl.setAfternoonPunchStatus(ApprovalStatus.UNPUNCH.getCode());
 					pdl.setNewApprovalStatus(pdl.getApprovalStatus());
 					pdl.setNewMorningApprovalStatus(pdl.getMorningApprovalStatus());
 					pdl.setNewAfternoonApprovalStatus(pdl.getAfternoonApprovalStatus());
-					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus())))
+					if(pdl.getApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus())))
 						pdl.setApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
-					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus())))
+					if(pdl.getMorningApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus())))
 						pdl.setMorningApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
-					if(ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus())))
+					if(pdl.getAfternoonApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus())))
 						pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
 					pml.getPunchLogsDayList().add(pdl);
 				}
