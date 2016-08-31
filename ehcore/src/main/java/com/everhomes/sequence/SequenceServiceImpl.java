@@ -820,9 +820,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhUserImpersonations.class, Tables.EH_USER_IMPERSONATIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_USER_IMPERSONATIONS.ID.max()).from(Tables.EH_USER_IMPERSONATIONS).fetchOne().value1();
         });
-        syncTableSequence(null, EhOrganizationMembers.class, Tables.EH_ORGANIZATION_MEMBERS.getName(), (dbContext) -> { 
-            return dbContext.select(Tables.EH_ORGANIZATION_MEMBERS.ID.max()).from(Tables.EH_ORGANIZATION_MEMBERS).fetchOne().value1(); 
-        });
         syncTableSequence(null, EhStatTaskLogs.class, Tables.EH_STAT_TASK_LOGS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_STAT_TASK_LOGS.ID.max()).from(Tables.EH_STAT_TASK_LOGS).fetchOne().value1(); 
         });
@@ -849,6 +846,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhServiceAllianceAttachments.class, Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
         });
     }
     
