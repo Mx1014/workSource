@@ -273,3 +273,8 @@ update eh_launch_pad_items set action_type = 49 where id in(1768, 1769, 1773, 17
 update eh_launch_pad_items set action_data = '{"resourceTypeId":10,"pageType":0}' where id in(1768, 1769);
 update eh_launch_pad_items set action_data = '{"resourceTypeId":11,"pageType":0}' where id in(1773, 1774);
 
+
+-- 更新系统小助手、电商小助手默认头像（图片已经上传到alpha/beta/release） by lqs 20160831
+UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRwbE1UY3lOVFk0TVRZNU5HTXlPR014TVRSbU1UTTJNems1TmpVNE5UZzNZZw' WHERE `id`=2;
+UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRvNE0yWXdOVE15TlRJeE5UZzVPVFl3TjJFek5EZGpZemN4TURJMllUa3lZZw' WHERE `id`=3;
+

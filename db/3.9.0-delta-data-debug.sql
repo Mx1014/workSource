@@ -173,3 +173,7 @@ update eh_launch_pad_items set action_type = '{"resourceTypeId":11,"pageType":0}
 
 -- 生成设备巡检任务时间配置
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'equipment.task.schedule.time','0 0 0 * * ? ','schedule equipment task time');
+
+-- 更新系统小助手、电商小助手默认头像（图片已经上传到alpha/beta/release） by lqs 20160831
+UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRwbE1UY3lOVFk0TVRZNU5HTXlPR014TVRSbU1UTTJNems1TmpVNE5UZzNZZw' WHERE `id`=2;
+UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRvNE0yWXdOVE15TlRJeE5UZzVPVFl3TjJFek5EZGpZemN4TURJMllUa3lZZw' WHERE `id`=3;

@@ -121,7 +121,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                     filterDto.setName(organization.getName());
                     filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                     filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                    actionUrl = String.format("%s%s?forumId=%s&excludeCategories[0]=%s", serverContectPath, 
+                    actionUrl = String.format("%s%s?forumId=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath, 
                         "/forum/listTopics", group.getOwningForumId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
                     filterDto.setActionUrl(actionUrl);
                     avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
@@ -150,7 +150,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                             filterDto.setName(subOrg.getName());
                             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                             filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                            actionUrl = String.format("%s%s?forumId=%s&excludeCategories[0]=%s", serverContectPath, 
+                            actionUrl = String.format("%s%s?forumId=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath, 
                                 "/forum/listTopics", group.getOwningForumId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
                             filterDto.setActionUrl(actionUrl);
                             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
@@ -186,7 +186,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 orgAllFilterDto.setName(menuName);
                 orgAllFilterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                 orgAllFilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode()); // 整组菜单只有一个是默认的，改为默认管辖的小区全部
-                actionUrl = String.format("%s%s?organizationId=%s&mixType=%s&excludeCategories[0]=%s", serverContectPath, 
+                actionUrl = String.format("%s%s?organizationId=%s&mixType=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath, 
                     "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.CHILDREN_ALL.getCode(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
                 orgAllFilterDto.setActionUrl(actionUrl);
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.all", "");
@@ -213,7 +213,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 filterDto.setName(community.getName());
                 filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                 filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s", serverContectPath, 
+                actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath, 
                     "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
                 filterDto.setActionUrl(actionUrl);
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
@@ -248,7 +248,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                     cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
                     hasDefault = true;
                 }
-                actionUrl = String.format("%s%s?organizationId=%s&mixType=%s&excludeCategories[0]=%s", serverContectPath, 
+                actionUrl = String.format("%s%s?organizationId=%s&mixType=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath, 
                     "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.COMMUNITY_ALL.getCode(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
                 cmntyAllFilterDto.setActionUrl(actionUrl);
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
