@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.records.EhAclinkLogsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +110,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
     }
 
     private void prepareObj(AclinkLog obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
 }
