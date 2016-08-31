@@ -1450,12 +1450,18 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
-				.queryEnterpriseContactByKeyword(cmd.getKeyword());
+
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+				(cmd.getEnterpriseId(), groupTypeList, cmd.getKeyword()) ;
+		if(null == organizationMembers)
+			return response;
 		List<Long> userIds = new ArrayList<Long>();
-		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
-			userIds.add(enterpriseContact.getUserId());
-		}
+		for(OrganizationMemberDTO member : organizationMembers){
+			userIds.add(member.getTargetId());
+		} 
 		int totalCount = punchProvider.countExceptionRequests(userIds,
 				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getExceptionStatus(), cmd.getProcessCode(),
