@@ -224,4 +224,36 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 产业服务体系使用服务联盟V2.0（上面已进行数据迁移）
 -- 政府资源使用服务联盟V2.0
-UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":4,"parentId":100001}', action_type = 33 WHERE ID IN (10086, 10325);
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":14,"parentId":100001}', action_type = 33 WHERE ID IN (10086, 10325);
+
+-- 兼容服务联盟1.0 空出1-4的保留字段
+delete from eh_service_alliance_categories;
+
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('11', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '1000000');
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('12', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '999990');
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('13', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '999999');
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('14', '0', '政府资源类型', '政府资源类型', '2', '1', UTC_TIMESTAMP(), '999999');
+    
+
+update eh_service_alliances set type = 11 where owner_id = 240111044331048623;
+update eh_service_alliances set type = 12 where owner_id = 240111044331051500;
+update eh_service_alliances set type = 13 where owner_id = 240111044331049963;
+
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+SELECT `id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id` FROM `eh_categories` WHERE `parent_id` = 100001;
+
+update eh_service_alliance_categories SET owner_type = 'community';
+update eh_service_alliance_categories SET owner_id = 240111044331048623 WHERE namespace_id = 1000000;
+update eh_service_alliance_categories SET parent_id = 11 WHERE namespace_id = 1000000 and parent_id = 100001;
+update eh_service_alliance_categories SET owner_id = 240111044331051500 WHERE namespace_id = 999990;
+update eh_service_alliance_categories SET parent_id = 12 WHERE namespace_id = 999990 and parent_id = 100001;
+update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
+update eh_service_alliance_categories SET parent_id = 13 WHERE namespace_id = 999999 and parent_id = 100001;
+
+update eh_launch_pad_items set action_data = '{"type":11,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"type":12,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
+update eh_launch_pad_items set action_data = '{"type":13,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
