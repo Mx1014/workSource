@@ -18,7 +18,7 @@ public class AclinkLogCreateCommand {
     public void setItems(List<AclinkLogItem> items) {
         this.items = items;
     }
-
+	
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

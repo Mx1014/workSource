@@ -9,7 +9,10 @@ import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogDTO;
+<<<<<<< HEAD
 import com.everhomes.rest.aclink.AclinkLogListResponse;
+=======
+>>>>>>> support for aclink log
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
