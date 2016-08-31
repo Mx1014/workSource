@@ -15,46 +15,6 @@ UPDATE `eh_organization_members` SET `group_id` = 0 WHERE `group_id` IS NOT NULL
 
 
 
--- merge from  serviceAlliance3.0-delta-data-release.sql 20160826
--- 迁移yellowpage中的数据
-INSERT INTO `eh_service_alliances` (`id`,`parent_id`,`owner_type`,`owner_id`,`name`,`display_name`,`type`,`address`,`contact`,`description`,`poster_uri`,`status`,`default_order`,`longitude`,`latitude`,`geohash`,`discount`,`category_id`,`contact_name`,`contact_mobile`,`service_type`,`service_url`,`discount_desc`,`creator_uid`,`create_time`)
-SELECT `id`,`parent_id`,`owner_type`,`owner_id`,`name`,`nick_name`,`type`,`address`,`contact`,`description`,`poster_uri`,`status`,`default_order`,`longitude`,`latitude`,`geohash`,`integral_tag1`,`integral_tag2`,`string_tag1`,`string_tag2`,`string_tag3`,`string_tag4`,`string_tag5`,`creator_uid`,`create_time` FROM `eh_yellow_pages` WHERE `type` = 2;
-
--- 迁移yellowpage attachment中的数据
-INSERT INTO `eh_service_alliance_attachments` (`id`,`owner_id`,`content_type`,`content_uri`,`creator_uid`,`create_time`)
-SELECT `id`,`owner_id`,`content_type`,`content_uri`,`creator_uid`,`create_time` FROM `eh_yellow_page_attachments`;
-
-
-INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
-    VALUES ('1', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '1000000');
-INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
-    VALUES ('2', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '999990');
-INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
-    VALUES ('3', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '999999');
-INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
-    VALUES ('4', '0', '政府资源类型', '政府资源类型', '2', '1', UTC_TIMESTAMP(), '999999');
-    
-
-update eh_service_alliances set type = 1 where owner_id = 240111044331048623;
-update eh_service_alliances set type = 2 where owner_id = 240111044331051500;
-update eh_service_alliances set type = 3 where owner_id = 240111044331049963;
-
-INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
-SELECT `id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id` FROM `eh_categories` WHERE `parent_id` = 100001;
-
-update eh_service_alliance_categories SET owner_type = 'community';
-update eh_service_alliance_categories SET owner_id = 240111044331048623 WHERE namespace_id = 1000000;
-update eh_service_alliance_categories SET parent_id = 1 WHERE namespace_id = 1000000;
-update eh_service_alliance_categories SET owner_id = 240111044331051500 WHERE namespace_id = 999990;
-update eh_service_alliance_categories SET parent_id = 2 WHERE namespace_id = 999990;
-update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
-update eh_service_alliance_categories SET parent_id = 3 WHERE namespace_id = 999999;
-
-update eh_launch_pad_items set action_data = '{"type":1,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"type":2,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
-update eh_launch_pad_items set action_data = '{"type":3,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
-
-
 
 -- 物业报修2.0
 SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
@@ -138,14 +98,45 @@ SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1001,0,1,
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1002,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%20000/%');
 
+-- merge from  serviceAlliance3.0-delta-data-release.sql 20160826
+-- 迁移yellowpage中的数据
+INSERT INTO `eh_service_alliances` (`id`,`parent_id`,`owner_type`,`owner_id`,`name`,`display_name`,`type`,`address`,`contact`,`description`,`poster_uri`,`status`,`default_order`,`longitude`,`latitude`,`geohash`,`discount`,`category_id`,`contact_name`,`contact_mobile`,`service_type`,`service_url`,`discount_desc`,`creator_uid`,`create_time`)
+SELECT `id`,`parent_id`,`owner_type`,`owner_id`,`name`,`nick_name`,`type`,`address`,`contact`,`description`,`poster_uri`,`status`,`default_order`,`longitude`,`latitude`,`geohash`,`integral_tag1`,`integral_tag2`,`string_tag1`,`string_tag2`,`string_tag3`,`string_tag4`,`string_tag5`,`creator_uid`,`create_time` FROM `eh_yellow_pages` WHERE `type` = 2;
+
+-- 迁移yellowpage attachment中的数据
+INSERT INTO `eh_service_alliance_attachments` (`id`,`owner_id`,`content_type`,`content_uri`,`creator_uid`,`create_time`)
+SELECT `id`,`owner_id`,`content_type`,`content_uri`,`creator_uid`,`create_time` FROM `eh_yellow_page_attachments`;
 
 
-update eh_service_alliances set type = 3 where namespace_id = 999999
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('11', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '1000000');
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('12', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '999990');
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('13', '0', '服务联盟类型', '服务联盟类型', '2', '1', UTC_TIMESTAMP(), '999999');
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `status`, `creator_uid`, `create_time`, `namespace_id`) 
+    VALUES ('14', '0', '政府资源类型', '政府资源类型', '2', '1', UTC_TIMESTAMP(), '999999');
+    
 
+update eh_service_alliances set type = 11 where owner_id = 240111044331048623;
+update eh_service_alliances set type = 12 where owner_id = 240111044331051500;
+update eh_service_alliances set type = 13 where owner_id = 240111044331049963;
 
-update eh_launch_pad_items set action_data = '{"type":1,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"type":2,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
-update eh_launch_pad_items set action_data = '{"type":3,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
+INSERT INTO `eh_service_alliance_categories` (`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+SELECT `id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id` FROM `eh_categories` WHERE `parent_id` = 100001;
+
+update eh_service_alliance_categories SET owner_type = 'community';
+update eh_service_alliance_categories SET owner_id = 240111044331048623 WHERE namespace_id = 1000000;
+update eh_service_alliance_categories SET parent_id = 11 WHERE namespace_id = 1000000 and parent_id = 100001;
+update eh_service_alliance_categories SET owner_id = 240111044331051500 WHERE namespace_id = 999990;
+update eh_service_alliance_categories SET parent_id = 12 WHERE namespace_id = 999990 and parent_id = 100001;
+update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
+update eh_service_alliance_categories SET parent_id = 13 WHERE namespace_id = 999999 and parent_id = 100001;
+
+update eh_launch_pad_items set action_data = '{"type":11,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"type":12,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
+update eh_launch_pad_items set action_data = '{"type":13,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
+
 
 -- merge from videoconf3.0-delta-data-release.sql 20160829
 update `eh_locale_strings` set `text` = "抱歉您当前不可更换此账号（最短更换频率为7天）" where `scope` = "videoConf" and `code` = "10005";
@@ -345,4 +336,4 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 产业服务体系使用服务联盟V2.0（上面已进行数据迁移）
 -- 政府资源使用服务联盟V2.0
-UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":4,"parentId":100001}', action_type = 33 WHERE ID IN (10086, 10325);
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":14,"parentId":100001}', action_type = 33 WHERE ID IN (10086, 10325);
