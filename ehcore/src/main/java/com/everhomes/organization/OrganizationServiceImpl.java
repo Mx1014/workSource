@@ -7190,7 +7190,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization orgCommoand = new Organization();
 			orgCommoand.setId(enterpriseId);
 			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			members = this.organizationProvider.listOrganizationPersonnels(null,orgCommoand, null, new CrossShardListingLocator(), 100000);
+			members = this.organizationProvider.listOrganizationPersonnels(userName,orgCommoand, null, new CrossShardListingLocator(), 100000);
 		}
 		
 		for (OrganizationMember organizationMember : members) {
