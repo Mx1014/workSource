@@ -1512,8 +1512,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(orgCommoand.getStatus()));
 		
 		if(!StringUtils.isEmpty(keywords)){
-			Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like("%"+keywords+"%");
-			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.eq(keywords));
+			Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
+			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+keywords+"%"));
 			cond = cond.and(cond1);
 		}
 
