@@ -227,7 +227,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 产业服务体系使用服务联盟V2.0（上面已进行数据迁移）
 -- 政府资源使用服务联盟V2.0
-UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":14,"parentId":100001}', action_type = 33 WHERE ID IN (10086, 10325);
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":14,"parentId":14}', action_type = 33 WHERE ID IN (10086, 10325);
 
 -- 兼容服务联盟1.0 空出1-4的保留字段
 delete from eh_service_alliance_categories;
@@ -257,6 +257,6 @@ update eh_service_alliance_categories SET parent_id = 12 WHERE namespace_id = 99
 update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
 update eh_service_alliance_categories SET parent_id = 13 WHERE namespace_id = 999999 and parent_id = 100001;
 
-update eh_launch_pad_items set action_data = '{"type":11,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"type":12,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
-update eh_launch_pad_items set action_data = '{"type":13,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
+update eh_launch_pad_items set action_data = '{"type":11,"parentId":11}' where action_type = 33 and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"type":12,"parentId":12}' where action_type = 33 and namespace_id = 999990;
+update eh_launch_pad_items set action_data = '{"type":13,"parentId":13}' where action_type = 33 and namespace_id = 999999;
