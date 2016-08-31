@@ -180,9 +180,9 @@ UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRvNE0yWXdOVE15TlRJeE5UZzV
 -- 更新讯美服务市场 by lqs 20160831
 -- 创客空间layout
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
-	VALUES (141, 999999, 'MakerLayout', '{"versionCode":"2016083101","versionName":"3.9.0","layoutName":"MakerLayout","displayName":"创客空间","groups":[{"groupName":"创客banner","widget":"Navigator","instanceConfig":{"itemGroup":"MakerBanners"},"style":"Gallery","defaultOrder":5,"separatorFlag":1,"separatorHeight":21,"columnCount":1},{"groupName":"创客空间","widget":"Navigator","instanceConfig":{"itemGroup":"MakerSpaces"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2016083101', '0', '2', '2016-08-31 13:40:30', 'pm_admin');
+	VALUES (141, 999999, 'MakerLayout', '{"versionCode":"2016083102","versionName":"3.9.0","layoutName":"MakerLayout","displayName":"创客空间","groups":[{"groupName":"创客banner","widget":"Navigator","instanceConfig":{"itemGroup":"MakerBanners"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"columnCount":1},{"groupName":"创客空间","widget":"Navigator","instanceConfig":{"itemGroup":"MakerSpaces"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2016083102', '0', '2', '2016-08-31 13:40:30', 'pm_admin');
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
-	VALUES (142, 999999, 'MakerLayout', '{"versionCode":"2016083101","versionName":"3.9.0","layoutName":"MakerLayout","displayName":"创客空间","groups":[{"groupName":"创客banner","widget":"Navigator","instanceConfig":{"itemGroup":"MakerBanners"},"style":"Gallery","defaultOrder":5,"separatorFlag":1,"separatorHeight":21,"columnCount":1},{"groupName":"创客空间","widget":"Navigator","instanceConfig":{"itemGroup":"MakerSpaces"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2016083101', '0', '2', '2016-08-31 13:40:30', 'park_tourist');
+	VALUES (142, 999999, 'MakerLayout', '{"versionCode":"2016083102","versionName":"3.9.0","layoutName":"MakerLayout","displayName":"创客空间","groups":[{"groupName":"创客banner","widget":"Navigator","instanceConfig":{"itemGroup":"MakerBanners"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"columnCount":1},{"groupName":"创客空间","widget":"Navigator","instanceConfig":{"itemGroup":"MakerSpaces"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2016083102', '0', '2', '2016-08-31 13:40:30', 'park_tourist');
 
 -- 删除掉Bizs中的免费wifi/
 DELETE FROM `eh_launch_pad_items` WHERE `id` IN (904, 911) AND `namespace_id`=999999;
@@ -195,20 +195,20 @@ INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, 
 INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (16002, 999999, '0', '0', '0', '/home', 'Bizs', 'RoutineBus', '通勤巴士', 'cs://1/image/aW1hZ2UvTVRvd056azNPVFkxWkRJMFpUZzFNR1JtWVRSak9EVTVaRFU0WkdSak1XSXdNQQ', '1', '1', '14', '{\"url\":\"http://wx.dudubashi.com\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id, scene_type) 
-	VALUES (16003, 999999, 0, '0', 0, '/home', 'Bizs', 'OfficePurchase', '办公采购', 'shop/3010/1471502227046-2040368847.jpg', 1, 1, 14, '', 1, 0, 1, 1, '', 0, NULL, 'biz', 105, 'park_tourist');
+	VALUES (16003, 999999, 0, '0', 0, '/home', 'Bizs', 'OfficePurchase', '办公采购', 'shop/3010/1471502227046-2040368847.jpg', 1, 1, 14, '', 0, 0, 1, 1, '', 0, NULL, 'biz', 105, 'park_tourist');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id, scene_type) 
-	VALUES (16004, 999999, 0, '0', 0, '/home', 'Bizs', 'OfficePurchase', '办公采购', 'shop/3010/1471502227046-2040368847.jpg', 1, 1, 14, '', 1, 0, 1, 1, '', 0, NULL, 'biz', 105, 'pm_admin');
+	VALUES (16004, 999999, 0, '0', 0, '/home', 'Bizs', 'OfficePurchase', '办公采购', 'shop/3010/1471502227046-2040368847.jpg', 1, 1, 14, '', 0, 0, 1, 1, '', 0, NULL, 'biz', 105, 'pm_admin');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id, scene_type) 
-	VALUES (16005, 999999, 0, '0', 0, '/home', 'Bizs', 'BizDrink', '饮品', 'shop/3007/14715010230651035403229.jpg', 1, 1, 14, '', 1, 0, 1, 1, '', 0, NULL, 'biz', 106, 'park_tourist');
+	VALUES (16005, 999999, 0, '0', 0, '/home', 'Bizs', 'BizDrink', '饮品', 'shop/3007/14715010230651035403229.jpg', 1, 1, 14, '', 0, 0, 1, 1, '', 0, NULL, 'biz', 106, 'park_tourist');
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id, scene_type) 
-	VALUES (16006, 999999, 0, '0', 0, '/home', 'Bizs', 'BizDrink', '饮品', 'shop/3007/14715010230651035403229.jpg', 1, 1, 14, '', 1, 0, 1, 1, '', 0, NULL, 'biz', 106, 'pm_admin');	
+	VALUES (16006, 999999, 0, '0', 0, '/home', 'Bizs', 'BizDrink', '饮品', 'shop/3007/14715010230651035403229.jpg', 1, 1, 14, '', 0, 0, 1, 1, '', 0, NULL, 'biz', 106, 'pm_admin');	
 	
 -- 更新讯美的创客空间为有layout形式的：一个大banner图和三个item
 UPDATE `eh_launch_pad_items` SET `action_type`=2, `action_data`='{"itemLocation":"/home/Makers","layoutName":"MakerLayout"}' WHERE `id` in (10088, 10327) AND `namespace_id`=999999;
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
-	VALUES (16021, 999999, '0', '0', '0', '/home/Makers', 'MakerBanners', 'MakerBanner', '', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', '1', '1', '0', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
+	VALUES (16021, 999999, '0', '0', '0', '/home/Makers', 'MakerBanners', 'MakerBanner', '', 'cs://1/image/aW1hZ2UvTVRwa1l6SmxaVGhrWXpoaE56TmtOR1F4WWpZME5ERmpOMk16TVRkak5qSTFaZw', '1', '1', '0', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
-	VALUES (16022, 999999, '0', '0', '0', '/home/Makers', 'MakerBanners', 'MakerBanner', '', 'cs://1/image/aW1hZ2UvTVRvell6RXlNVEE0TjJNelpEVTFPREZsWTJKaVptVXdNRFZtWm1FNVlUWTRZZw', '1', '1', '0', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
+	VALUES (16022, 999999, '0', '0', '0', '/home/Makers', 'MakerBanners', 'MakerBanner', '', 'cs://1/image/aW1hZ2UvTVRwa1l6SmxaVGhrWXpoaE56TmtOR1F4WWpZME5ERmpOMk16TVRkak5qSTFaZw', '1', '1', '0', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
 	VALUES (16023, 999999, '0', '0', '0', '/home/Makers', 'MakerSpaces', '工位预订', '工位预订', 'cs://1/image/aW1hZ2UvTVRvNU1ESXdPR1ZrTkdZNFltRm1Oams0TWpBM1pHUTRZMkZsWW1JeFptTmpOZw', '1', '1', '14', '{"url":"http://beta.zuolin.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
@@ -224,7 +224,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 产业服务体系使用服务联盟V2.0（上面已进行数据迁移）
 -- 政府资源使用服务联盟V2.0
-UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":14,"parentId":100001}', action_type = 33 WHERE ID IN (10086, 10325);
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"type":14,"parentId":14}', action_type = 33 WHERE ID IN (10086, 10325);
 
 -- 兼容服务联盟1.0 空出1-4的保留字段
 delete from eh_service_alliance_categories;
@@ -254,6 +254,6 @@ update eh_service_alliance_categories SET parent_id = 12 WHERE namespace_id = 99
 update eh_service_alliance_categories SET owner_id = 240111044331049963 WHERE namespace_id = 999999;
 update eh_service_alliance_categories SET parent_id = 13 WHERE namespace_id = 999999 and parent_id = 100001;
 
-update eh_launch_pad_items set action_data = '{"type":11,"parentId":100001}' where action_type = 33 and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"type":12,"parentId":100001}' where action_type = 33 and namespace_id = 999990;
-update eh_launch_pad_items set action_data = '{"type":13,"parentId":100001}' where action_type = 33 and namespace_id = 999999;
+update eh_launch_pad_items set action_data = '{"type":11,"parentId":11}' where action_type = 33 and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"type":12,"parentId":12}' where action_type = 33 and namespace_id = 999990;
+update eh_launch_pad_items set action_data = '{"type":13,"parentId":13}' where action_type = 33 and namespace_id = 999999;
