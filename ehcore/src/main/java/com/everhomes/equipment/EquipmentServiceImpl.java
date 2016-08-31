@@ -644,7 +644,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setStatus(exist.getStatus());
 			standard.setOperatorUid(user.getId());
 			
-			if(EquipmentStandardStatus.fromStatus(standard.getStatus()) == EquipmentStandardStatus.NOT_COMPLETED) {
+			if(EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
 				if(cmd.getRepeat() == null) {
 					throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
 							RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
@@ -700,7 +700,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId(), cmd.getOwnerType(), cmd.getOwnerId());
 
-		if(EquipmentStandardStatus.fromStatus(standard.getStatus()) == EquipmentStandardStatus.INACTIVE) {
+		if(EquipmentStandardStatus.INACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_STANDARD_ALREADY_DELETED,
  				"设备标准已删除");
@@ -835,11 +835,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(repeatService.getlimitTime(dto.getRepeat()));
 		row.createCell(++i).setCellValue(dto.getUpdateTime().toString());
 		row.createCell(++i).setCellValue(dto.getStandardSource());
-		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.INACTIVE)
+		if(EquipmentStandardStatus.INACTIVE.equals(EquipmentStandardStatus.fromStatus(dto.getStatus())))
 			row.createCell(++i).setCellValue("已失效");
-		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.NOT_COMPLETED)
+		if(EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(dto.getStatus())))
 			row.createCell(++i).setCellValue("未完成");
-		if(EquipmentStandardStatus.fromStatus(dto.getStatus()) == EquipmentStandardStatus.ACTIVE)
+		if(EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(dto.getStatus())))
 			row.createCell(++i).setCellValue("正常");
 		
 	}
@@ -904,13 +904,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
-		if(EquipmentStatus.fromStatus(equipment.getStatus()) == EquipmentStatus.INACTIVE) {
+		if(EquipmentStatus.INACTIVE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
  				"设备已删除");
 		}
 		
-		if(EquipmentReviewStatus.fromStatus(equipment.getReviewStatus()) == EquipmentReviewStatus.WAITING_FOR_APPROVAL) {
+		if(EquipmentReviewStatus.WAITING_FOR_APPROVAL.equals(EquipmentReviewStatus.fromStatus(equipment.getReviewStatus()))) {
 			equipment.setReviewerUid(user.getId());
 			equipment.setReviewResult(cmd.getReviewResult());
 			equipment.setReviewStatus(EquipmentReviewStatus.REVIEWED.getCode());
@@ -926,10 +926,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			Map<String, Object> notifyMap = new HashMap<String, Object>();
 			notifyMap.put("equipmentName", equipment.getName());
 			int code = 0;
-			if(ReviewResult.fromStatus(cmd.getReviewResult()) == ReviewResult.QUALIFIED)
+			if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())))
 				code = EquipmentNotificationTemplateCode.QUALIFIED_EQUIPMENT_NOTIFY_EXECUTOR;
 			
-			if(ReviewResult.fromStatus(cmd.getReviewResult()) == ReviewResult.UNQUALIFIED)
+			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())))
 				code = EquipmentNotificationTemplateCode.UNQUALIFIED_EQUIPMENT_NOTIFY_EXECUTOR;
 			
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
@@ -983,7 +983,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 // 				"设备已删除");
 //		}
 		
-		if(EquipmentReviewStatus.fromStatus(equipment.getReviewStatus()) == EquipmentReviewStatus.INACTIVE) {
+		if(EquipmentReviewStatus.INACTIVE.equals(EquipmentReviewStatus.fromStatus(equipment.getReviewStatus()))) {
 			equipment.setReviewStatus(EquipmentReviewStatus.DELETE.getCode());
 			equipment.setReviewResult(ReviewResult.NONE.getCode());
 			equipment.setStandardId(0L);
@@ -1003,7 +1003,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		User user = UserContext.current().getUser();
 		EquipmentInspectionEquipments equipment = null; 
 		if(cmd.getStatus() != null 
-				&& EquipmentStatus.fromStatus(cmd.getStatus()) == EquipmentStatus.IN_MAINTENANCE) {
+				&& EquipmentStatus.IN_MAINTENANCE.equals(EquipmentStatus.fromStatus(cmd.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_STATUS_CANNOT_SET_IN_MAINTENANCE,
  				"设备状态后台不能设为维修中");
@@ -1034,7 +1034,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
 			
-			if(equipment.getStandardId() != exist.getStandardId()) {
+			if(equipment.getStandardId() != null && equipment.getStandardId() != exist.getStandardId()) {
 				equipment.setReviewerUid(0L);
 				equipment.setReviewTime(null);
 				equipment.setReviewResult(ReviewResult.NONE.getCode());
@@ -1168,7 +1168,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
 
-		if(EquipmentStatus.fromStatus(equipment.getStatus()) == EquipmentStatus.INACTIVE) {
+		if(EquipmentStatus.INACTIVE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
  				"设备已删除");
@@ -1281,18 +1281,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 			row.createCell(++i).setCellValue("启用");
 		row.createCell(++i).setCellValue(dto.getStandardName());
 		row.createCell(++i).setCellValue(EquipmentStatus.fromStatus(dto.getStatus()).getName());
-		if(EquipmentReviewStatus.fromStatus(dto.getStatus()) == EquipmentReviewStatus.DELETE) {
+		if(EquipmentReviewStatus.DELETE.equals(EquipmentReviewStatus.fromStatus(dto.getStatus()))) {
 			row.createCell(++i).setCellValue("");
 		}
-		if(EquipmentReviewStatus.fromStatus(dto.getStatus()) != EquipmentReviewStatus.DELETE){
+		if(!EquipmentReviewStatus.DELETE.equals(EquipmentReviewStatus.fromStatus(dto.getStatus()))){
 			row.createCell(++i).setCellValue(EquipmentReviewStatus.fromStatus(dto.getReviewStatus()).getName());
 		}
 		
-		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.NONE)
+		if(ReviewResult.NONE.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("");
-		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.QUALIFIED)
+		if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("审核通过");
-		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.UNQUALIFIED)
+		if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("审核不通过");
 		
 	}
@@ -1427,15 +1427,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		//process_time operator_type operator_id
-		if(EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.WAITING_FOR_EXECUTING 
-				|| EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.IN_MAINTENANCE) {
+		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus())) 
+				|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			
 			EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
 			log.setTaskId(task.getId());
 			log.setOperatorType(OwnerType.USER.getCode());
 			log.setOperatorId(user.getId());
 	 
-			if(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()) == EquipmentTaskResult.COMPLETE_OK) {
+			if(EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setExecutiveTime(now);
@@ -1452,8 +1452,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 			}
 			
-			else if(EquipmentTaskResult.fromStatus(cmd.getVerificationResult())
-					== EquipmentTaskResult.NEED_MAINTENANCE_OK) {
+			else if(EquipmentTaskResult.NEED_MAINTENANCE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				task.setStatus(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 				task.setExecutiveTime(now);
 				task.setExecutorType(OwnerType.USER.getCode());
@@ -1468,8 +1467,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 			
-			else if(EquipmentTaskResult.fromStatus(cmd.getVerificationResult())
-					== EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK) {
+			else if(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setProcessTime(now);
 				task.setOperatorType(OwnerType.USER.getCode());
@@ -1484,8 +1482,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 			
-			else if(EquipmentTaskResult.fromStatus(cmd.getVerificationResult())
-					== EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK) {
+			else if(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
 				task.setProcessTime(now);
 				task.setOperatorType(OwnerType.USER.getCode());
@@ -1697,32 +1694,32 @@ public class EquipmentServiceImpl implements EquipmentService {
 			log.setProcessResult(EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.getCode());
 		}
 		//0:none, 1: qualified, 2: unqualified
-		if(EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.CLOSE) {
+		if(EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			
-			if(cmd.getReviewResult() == 2 &&
-					(EquipmentTaskResult.fromStatus(task.getResult()) == EquipmentTaskResult.COMPLETE_DELAY || 
-					EquipmentTaskResult.fromStatus(task.getResult()) == EquipmentTaskResult.COMPLETE_OK)) {
+			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())) &&
+					(EquipmentTaskResult.COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())) || 
+							EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())))) {
 				task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 				task.setResult(EquipmentTaskResult.NONE.getCode());
 			}
 			
-			if(cmd.getReviewResult() == 2 &&
-					(EquipmentTaskResult.fromStatus(task.getResult()) == EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY || 
-					EquipmentTaskResult.fromStatus(task.getResult()) == EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK || 
-					EquipmentTaskResult.fromStatus(task.getResult()) == EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK || 
-					EquipmentTaskResult.fromStatus(task.getResult()) == EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY)) {
+			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())) &&
+					(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())) || 
+							EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())) || 
+							EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(task.getResult())) || 
+							EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.equals(EquipmentTaskResult.fromStatus(task.getResult())))) {
 				task.setStatus(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 			}
 		}
 		
-		else if(EquipmentTaskStatus.fromStatus(task.getStatus()) == EquipmentTaskStatus.NEED_MAINTENANCE) {
+		else if(EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			
-			if(cmd.getReviewResult() == 2) {
+			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
 				task.setStatus(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 				task.setResult(EquipmentTaskResult.NONE.getCode());
 			}
 			
-			else if(cmd.getReviewResult() == 1) {
+			else if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
 				task.setStatus(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 			}
 		}
@@ -1799,12 +1796,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			
 			return ;
 		}
-		if(EquipmentStatus.fromStatus(equipment.getStatus()) == EquipmentStatus.IN_USE) {
+		if(EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
 			if(equipment.getStandardId() != null && equipment.getStandardId() != 0 &&
-					ReviewResult.fromStatus(equipment.getReviewResult()) == ReviewResult.QUALIFIED) {
+					ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(equipment.getReviewResult()))) {
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), cmd.getOwnerType(), cmd.getOwnerId());
 				if(standard == null || standard.getStatus() == null
-						|| EquipmentStandardStatus.fromStatus(standard.getStatus()) != EquipmentStandardStatus.ACTIVE) {
+						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
 					if(LOGGER.isInfoEnabled()) {
 						LOGGER.info("createEquipmentTask：standard is not exist or active. standardId = " + equipment.getStandardId());
 					}
@@ -2093,11 +2090,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		row.createCell(++i).setCellValue(dto.getEquipmentLocation());
 		row.createCell(++i).setCellValue(EquipmentTaskStatus.fromStatus(dto.getStatus()).getName());
-		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.NONE)
+		if(ReviewResult.NONE.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("");
-		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.QUALIFIED)
+		if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("审核通过");
-		if(ReviewResult.fromStatus(dto.getReviewResult()) == ReviewResult.UNQUALIFIED)
+		if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("审核不通过");
 		
 		row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
@@ -2143,7 +2140,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         	
         	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), task.getExecutiveGroupId());
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), task.getOwnerId());
             	if(operator != null) {
             		dto.setOperatorName(operator.getContactName());
             	}
@@ -2437,11 +2434,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        		dto = convertEquipmentTaskToDTO(r);
 	        	} else {
 	        	
-		        	if(EquipmentTaskStatus.fromStatus(r.getStatus()) == EquipmentTaskStatus.WAITING_FOR_EXECUTING) {
+		        	if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
 		
 		        		dto = convertEquipmentTaskToDTO(r);
 		        	}
-		        	if(EquipmentTaskStatus.fromStatus(r.getStatus()) == EquipmentTaskStatus.IN_MAINTENANCE && 
+		        	if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus())) && 
 		        			r.getOperatorId() == user.getId()) {
 		        		
 		        		dto = convertEquipmentTaskToDTO(r);
