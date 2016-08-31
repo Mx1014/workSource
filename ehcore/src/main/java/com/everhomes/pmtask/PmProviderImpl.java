@@ -194,7 +194,7 @@ public class PmProviderImpl implements PmTaskProvider{
         if(null != taskId)
         	query.addConditions(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(taskId));
         query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
-        query.addOrderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.asc());
+        query.addOrderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
         List<PmTaskLog> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskLog.class))
         		.collect(Collectors.toList());
         
