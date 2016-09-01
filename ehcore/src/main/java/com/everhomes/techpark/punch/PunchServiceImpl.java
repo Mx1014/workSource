@@ -912,8 +912,9 @@ public class PunchServiceImpl implements PunchService {
 				realWorkTime = realWorkTime + punchMinAndMaxTime.get(1).getTimeInMillis()- punchMinAndMaxTime.get(0).getTimeInMillis();
 				punchDayLog.setAfternoonArriveTime(getDAOTime(punchMinAndMaxTime.get(0).getTimeInMillis()));
 				punchDayLog.setLeaveTime(getDAOTime(punchMinAndMaxTime.get(1).getTimeInMillis()));
-				punchDayLog.setWorkTime(convertTime(realWorkTime));
+				
 			}
+			punchDayLog.setWorkTime(convertTime(realWorkTime));
 			// 如果是当日，则设置打卡考勤为正常并返回
 			if (!isWorkDay(logDay.getTime(),pr)){
 				pdl.setMorningPunchStatus(PunchStatus.OVERTIME.getCode());
