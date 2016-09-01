@@ -441,7 +441,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		pdl = calculateDayLog(userId, companyId, logDay, pdl,newPunchDayLog);
 		if (null == pdl) {
-			return newPunchDayLog;
+			return null;
 		}
 		
 		newPunchDayLog.setUserId(userId);
@@ -504,6 +504,8 @@ public class PunchServiceImpl implements PunchService {
 			// 插入数据
 			try {
 				punchDayLog = refreshPunchDayLog(userId, companyId, logDay);
+				 
+					
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(
 						PunchServiceErrorCode.SCOPE,
@@ -512,7 +514,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			if (null == punchDayLog) {
 				// 验证后为空
-				return null;
+				return new PunchLogsDay();
 			}
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
@@ -912,8 +914,9 @@ public class PunchServiceImpl implements PunchService {
 				realWorkTime = realWorkTime + punchMinAndMaxTime.get(1).getTimeInMillis()- punchMinAndMaxTime.get(0).getTimeInMillis();
 				punchDayLog.setAfternoonArriveTime(getDAOTime(punchMinAndMaxTime.get(0).getTimeInMillis()));
 				punchDayLog.setLeaveTime(getDAOTime(punchMinAndMaxTime.get(1).getTimeInMillis()));
-				punchDayLog.setWorkTime(convertTime(realWorkTime));
+				
 			}
+			punchDayLog.setWorkTime(convertTime(realWorkTime));
 			// 如果是当日，则设置打卡考勤为正常并返回
 			if (!isWorkDay(logDay.getTime(),pr)){
 				pdl.setMorningPunchStatus(PunchStatus.OVERTIME.getCode());

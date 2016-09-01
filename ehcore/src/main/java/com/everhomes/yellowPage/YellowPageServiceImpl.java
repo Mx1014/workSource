@@ -190,7 +190,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 			List<ServiceAllianceDTO> dtos = res.getDtos();
 			if(dtos != null && dtos.size() > 0) {
 				for(ServiceAllianceDTO dto : dtos) {
-					response.getYellowPages().add(ConvertHelper.convert(dto,YellowPageDTO.class) );
+					YellowPageDTO ypDto = ConvertHelper.convert(dto,YellowPageDTO.class);
+					if(null != ypDto) 
+						response.getYellowPages().add(ypDto);
 				}
 			}
 			
@@ -341,18 +343,44 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		ServiceAllianceCategories category = new ServiceAllianceCategories();
 		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
+		
+		if(null == parent) {
+			LOGGER.error("wrong parentId. parentId = " + cmd.getParentId());
+			throw RuntimeErrorException
+			.errorWith(
+					YellowPageServiceErrorCode.SCOPE,
+					YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT,
+					localeStringService.getLocalizedString(
+							String.valueOf(YellowPageServiceErrorCode.SCOPE),
+							String.valueOf(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT),
+							UserContext.current().getUser().getLocale(),
+							"parent category not found!"));
+		}
+		
 		if(cmd.getCategoryId() == null) {
-			category.setParentId(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
 			category.setName(cmd.getName());
 			category.setOwnerId(cmd.getOwnerId());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setNamespaceId(namespaceId);
 			category.setStatus((byte)2);
+//			if(null == parent) {
+//				category.setParentId(0L);
+//				category.setPath(cmd.getName());
+//			} else {
+//				category.setParentId(parent.getId());
+//				category.setPath(parent.getName() + "/" + cmd.getName());
+//			}
+			category.setParentId(parent.getId());
 			category.setPath(parent.getName() + "/" + cmd.getName());
 			yellowPageProvider.createCategory(category);
 		} else {
 			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			category.setName(cmd.getName());
+//			if(null == parent) {
+//				category.setPath(cmd.getName());
+//			} else {
+//				category.setPath(parent.getName() + "/" + cmd.getName());
+//			}
 			category.setPath(parent.getName() + "/" + cmd.getName());
 			yellowPageProvider.updateCategory(category);
 			
@@ -425,6 +453,19 @@ public class YellowPageServiceImpl implements YellowPageService {
 									String.valueOf(YellowPageServiceErrorCode.ERROR_CATEGORY_ALREADY_DELETED),
 									UserContext.current().getUser().getLocale(),
 									"category already deleted!"));
+		}
+		
+		if(category != null && category.getParentId() == 0) {
+			LOGGER.error("the category which parent id is 0!");
+			throw RuntimeErrorException
+					.errorWith(
+							YellowPageServiceErrorCode.SCOPE,
+							YellowPageServiceErrorCode.ERROR_DELETE_ROOT_CATEGORY,
+							localeStringService.getLocalizedString(
+									String.valueOf(YellowPageServiceErrorCode.SCOPE),
+									String.valueOf(YellowPageServiceErrorCode.ERROR_DELETE_ROOT_CATEGORY),
+									UserContext.current().getUser().getLocale(),
+									"cannot delete root category!"));
 		}
 		
 		//set status inactive and add log

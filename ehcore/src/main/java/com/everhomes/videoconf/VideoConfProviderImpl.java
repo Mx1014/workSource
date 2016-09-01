@@ -17,12 +17,14 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -528,6 +530,40 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //		return result[0];
 //	}
 //
+	@Override
+	public List<ConfAccounts> findAccountsByUserId(Long userId) {
+//		final ConfAccounts[] result = new ConfAccounts[1];
+		List<ConfAccounts> list = new ArrayList<ConfAccounts>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccounts.class));
+		 
+        SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+        
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0));
+        query.fetch().map((r) -> {
+        	list.add(ConvertHelper.convert(r, ConfAccounts.class));
+             return null;
+        });
+//		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
+//				(DSLContext context, Object reducingContext) -> {
+//					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
+//							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
+//							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+//							.fetch().map((r) -> {
+//								return ConvertHelper.convert(r, ConfAccounts.class);
+//							});
+
+//					if(list != null && !list.isEmpty()){
+//						result[0] = list.get(0);
+//						return false;
+//					}
+
+//					return true;
+//				});
+
+		return list;
+	}
+	
 	@Override
 	public ConfAccounts findAccountByUserId(Long userId) {
 		final ConfAccounts[] result = new ConfAccounts[1];

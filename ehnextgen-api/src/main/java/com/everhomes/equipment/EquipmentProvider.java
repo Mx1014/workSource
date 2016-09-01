@@ -58,4 +58,6 @@ public interface EquipmentProvider {
 	List<Long> listStandardIdsByType(Byte type);
 	
 	List<EquipmentInspectionAccessoryMap> listAccessoryMapByEquipmentId(Long equipmentId);
+	
+	EquipmentInspectionTasksLogs getNearestReviewLogAfterProcess(Long taskId, Long id);
 }

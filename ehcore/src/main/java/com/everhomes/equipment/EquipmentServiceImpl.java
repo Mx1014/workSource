@@ -144,7 +144,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -283,6 +285,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -2180,6 +2183,23 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        	}
 	        	dto.setAttachments(attachments);
         	}
+        	
+        	if(EquipmentTaskProcessType.COMPLETE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType())) 
+        			|| EquipmentTaskProcessType.COMPLETE_MAINTENANCE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))
+        			|| EquipmentTaskProcessType.NEED_MAINTENANCE.equals(EquipmentTaskProcessType.fromStatus(dto.getProcessType()))) {
+        		EquipmentInspectionTasksLogs reviewLog =  equipmentProvider.getNearestReviewLogAfterProcess(dto.getTaskId(), dto.getId());
+        		if(null == reviewLog) {
+        			dto.setReviewResult(ReviewResult.NONE.getCode());
+        		}
+        		if(reviewLog != null) {
+        			if(EquipmentTaskProcessResult.REVIEW_QUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
+        				dto.setReviewResult(ReviewResult.QUALIFIED.getCode());
+        			}
+        			else if(EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.equals(EquipmentTaskProcessResult.fromStatus(reviewLog.getProcessResult()))) {
+        				dto.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
+        			}
+        		}
+        	}
         	return dto;
         }).collect(Collectors.toList());
         
@@ -2497,18 +2517,20 @@ public class EquipmentServiceImpl implements EquipmentService {
         }
         
         List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
-//        eqAccessories: 备品配件信息 参考com.everhomes.rest.equipment.EquipmentAccessoriesDTO 
-//        quantity: 数量 
-//        equipmentId: 设备id 
-//        id: 主键id 
+
         List<EquipmentInspectionAccessoryMap> map = equipmentProvider.listAccessoryMapByEquipmentId(dto.getId());
         if(null != map) {
         	for(EquipmentInspectionAccessoryMap acMap : map) {
         		
         		EquipmentAccessoryMapDTO mapDto = ConvertHelper.convert(acMap, EquipmentAccessoryMapDTO.class);
         		EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(acMap.getAccessoryId());
-        		mapDto.setEqAccessories(ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class));
-        		
+        		EquipmentAccessoriesDTO accessoryDto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
+        		Organization target = organizationProvider.findOrganizationById(accessoryDto.getTargetId());
+        		if(target != null) {
+        			accessoryDto.setTargetName(target.getName());
+        		}
+        		mapDto.setEqAccessories(accessoryDto);
+
         		eqAccessoryMap.add(mapDto);
         	}
         }
