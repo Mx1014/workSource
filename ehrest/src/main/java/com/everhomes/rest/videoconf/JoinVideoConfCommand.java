@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>confId: 会议id或主持人手机号</li>
  *  <li>namespaceId: 命名空间</li>
+ *  <li>enterpriseId: 企业id</li>
  *
  */
 public class JoinVideoConfCommand {
@@ -15,6 +16,8 @@ public class JoinVideoConfCommand {
 	private String confId;
 	@NotNull
 	private Integer namespaceId;
+	
+	private Long enterpriseId;
 
 	public String getConfId() {
 		return confId;
@@ -30,6 +33,14 @@ public class JoinVideoConfCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	@Override

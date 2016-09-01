@@ -54,6 +54,7 @@ public interface VideoConfProvider {
 //	void updateEnterpriseVideoconfAccount(ConfAccountHistories account);
 //	ConfAccountHistories findEnterpriseAccountByAccountId(Long accountId);
 	ConfAccounts findAccountByUserId(Long userId);
+	List<ConfAccounts> findAccountsByUserId(Long userId);
 	ConfAccounts findAccountByUserIdAndEnterpriseId(Long userId, Long enterpriseId);
 	List<Long> findUsersByEnterpriseId(Long enterpriseId);
 //	

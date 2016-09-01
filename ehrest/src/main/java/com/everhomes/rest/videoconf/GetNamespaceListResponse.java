@@ -7,6 +7,10 @@ public class GetNamespaceListResponse {
 	private Integer namespaceId;
 	
 	private String name;
+	
+	private Long enterpriseId;
+	
+	private String enterpriseName;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -24,6 +28,23 @@ public class GetNamespaceListResponse {
 		this.name = name;
 	}
 	
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
