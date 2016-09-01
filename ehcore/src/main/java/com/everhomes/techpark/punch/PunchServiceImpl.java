@@ -441,7 +441,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		pdl = calculateDayLog(userId, companyId, logDay, pdl,newPunchDayLog);
 		if (null == pdl) {
-			return newPunchDayLog;
+			return null;
 		}
 		
 		newPunchDayLog.setUserId(userId);
@@ -504,6 +504,8 @@ public class PunchServiceImpl implements PunchService {
 			// 插入数据
 			try {
 				punchDayLog = refreshPunchDayLog(userId, companyId, logDay);
+				 
+					
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(
 						PunchServiceErrorCode.SCOPE,
@@ -512,7 +514,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			if (null == punchDayLog) {
 				// 验证后为空
-				return null;
+				return new PunchLogsDay();
 			}
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
