@@ -441,3 +441,7 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvd1pUVmtOekJrTjJNMl
 
 
 update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fpromotion%2Fall%3F_k%3Dzlbiz#sign_suffix"}' where id in(10380,10381);
+
+
+-- 储能园区活动换icon by xiongying20160901
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXVmtOMkprTnpKak1XTXhPVFJpTXprd01qa3pZamMyTkdSa05EWmhaZw' where id in( 10635, 10617);
