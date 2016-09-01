@@ -1530,25 +1530,21 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public ConfAccounts findAccountByUserIdAndEnterpriseId(Long userId,
 			Long enterpriseId) {
-		final ConfAccounts[] result = new ConfAccounts[1];
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
-				(DSLContext context, Object reducingContext) -> {
-					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
-							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
-							.and(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
-							.fetch().map((r) -> {
-								return ConvertHelper.convert(r, ConfAccounts.class);
-							});
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+		query.fetch().map((r) -> {
+			accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+		});
 
-					if(list != null && !list.isEmpty()){
-						result[0] = list.get(0);
-						return false;
-					}
+		if(accounts != null && accounts.size() > 0) {
+			return accounts.get(0);
+		}
 
-					return true;
-				});
-
-		return result[0];
+		return null;
 	}
 	
 }
