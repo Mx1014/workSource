@@ -190,7 +190,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 			List<ServiceAllianceDTO> dtos = res.getDtos();
 			if(dtos != null && dtos.size() > 0) {
 				for(ServiceAllianceDTO dto : dtos) {
-					response.getYellowPages().add(ConvertHelper.convert(dto,YellowPageDTO.class) );
+					YellowPageDTO ypDto = ConvertHelper.convert(dto,YellowPageDTO.class);
+					if(null != ypDto) 
+						response.getYellowPages().add(ypDto);
 				}
 			}
 			
