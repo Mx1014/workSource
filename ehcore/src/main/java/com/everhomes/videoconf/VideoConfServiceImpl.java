@@ -1709,9 +1709,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(user != null) {
 				ConfAccounts account = new ConfAccounts();
 				if(cmd.getEnterpriseId() != null && cmd.getEnterpriseId() != 0) {
-					account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+					account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getOwnerUid(), cmd.getEnterpriseId());
 				} else {
-					account = vcProvider.findAccountByUserId(user.getId());
+					account = vcProvider.findAccountByUserId(user.getOwnerUid());
 				}
 				if(LOGGER.isDebugEnabled())
 					LOGGER.error("joinVideoConf, account="+account);
