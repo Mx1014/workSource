@@ -18,12 +18,16 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -43,9 +47,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
-import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.OrderBriefDTO;
@@ -61,9 +63,7 @@ import com.everhomes.server.schema.tables.daos.EhConfOrderAccountMapDao;
 import com.everhomes.server.schema.tables.daos.EhConfOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhWarningContactsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
@@ -75,7 +75,6 @@ import com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap;
 import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
-import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
@@ -84,7 +83,6 @@ import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
-import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -93,6 +91,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class VideoConfProviderImpl implements VideoConfProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfProviderImpl.class);
 
 	@Autowired
     private DbProvider dbProvider;
@@ -1446,6 +1445,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             SelectQuery<EhConfConferencesRecord> query = context.selectQuery(Tables.EH_CONF_CONFERENCES);
             query.addConditions(Tables.EH_CONF_CONFERENCES.CONF_ACCOUNT_ID.eq(accountId));
             
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Query EquipmentInspectionTasksLogs by count, sql=" + query.getSQL());
+                LOGGER.debug("Query EquipmentInspectionTasksLogs by count, bindValues=" + query.getBindValues());
+            }
+            
             query.fetch().map((r) -> {
             	
             	realDurations.add(r.getRealDuration());
@@ -1535,6 +1539,14 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
 		query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
 		query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, bindValues=" + query.getBindValues());
+        }
+		
+		
 		query.fetch().map((r) -> {
 			accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
             return null;
