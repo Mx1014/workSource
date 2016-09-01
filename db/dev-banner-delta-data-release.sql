@@ -29,5 +29,5 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'banne
 UPDATE `ehcore`.`eh_banners` SET `status` = 3 WHERE `status` = 0;
 
 -- 修改场景类型的display_name
-UPDATE `ehcore`.`eh_scene_types` SET `id`='1', `namespace_id`='0', `name`='default', `display_name`='普通用户场景', `create_time`='2016-03-06 10:50:32', `parent_id`='0' WHERE (`id`='1');
-UPDATE `ehcore`.`eh_scene_types` SET `id`='2', `namespace_id`='0', `name`='pm_admin', `display_name`='管理公司场景', `create_time`='2016-03-06 10:50:32', `parent_id`='0' WHERE (`id`='2');
+UPDATE `ehcore`.`eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='default');
+UPDATE `ehcore`.`eh_scene_types` SET `display_name`='管理公司场景' WHERE (`name`='pm_admin');
