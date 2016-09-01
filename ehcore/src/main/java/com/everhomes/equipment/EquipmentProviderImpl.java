@@ -27,6 +27,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.EquipmentTaskProcessType;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
@@ -865,6 +866,33 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		
 		return result;
+	}
+
+	@Override
+	public EquipmentInspectionTasksLogs getNearestReviewLogAfterProcess(
+			Long taskId, Long id) {
+		List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTaskLogsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
+		
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.gt(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID.eq(taskId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
+		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.asc());
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query EquipmentInspectionTasksLogs by count, sql=" + query.getSQL());
+            LOGGER.debug("Query EquipmentInspectionTasksLogs by count, bindValues=" + query.getBindValues());
+        }
+        
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTasksLogs.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
 	}
 
 }

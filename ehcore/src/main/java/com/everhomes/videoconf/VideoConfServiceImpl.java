@@ -1707,7 +1707,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(LOGGER.isDebugEnabled())
 				LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
 			if(user != null) {
-				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+				ConfAccounts account = new ConfAccounts();
+				if(cmd.getEnterpriseId() != null && cmd.getEnterpriseId() != 0) {
+					account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+				} else {
+					account = vcProvider.findAccountByUserId(user.getId());
+				}
 				if(LOGGER.isDebugEnabled())
 					LOGGER.error("joinVideoConf, account="+account);
 				if(account != null) {
@@ -2580,28 +2585,38 @@ public class VideoConfServiceImpl implements VideoConfService {
 		List<UserIdentifier> userList = userProvider.findClaimedIdentifiersByToken(cmd.getUserIdentifier());
 		if(userList != null && userList.size() > 0) {
 			for(UserIdentifier user : userList) {
-				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+				List<ConfAccounts> accounts = vcProvider.findAccountsByUserId(user.getOwnerUid());
 				if(LOGGER.isDebugEnabled())
-					LOGGER.error("getConferenceNamespaceIdList, account="+account);
-				if(account != null) {
-					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-					if(LOGGER.isDebugEnabled())
-						LOGGER.error("getConferenceNamespaceIdList, conf="+conf);
-					if(conf != null) {
-						GetNamespaceListResponse namespace = new GetNamespaceListResponse();
-						namespace.setNamespaceId(user.getNamespaceId());
-						if(user.getNamespaceId() == 0) {
-							namespace.setName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
-									String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
-									UserContext.current().getUser().getLocale(),"ZUOLIN"));
-						} else {
-							Namespace ns = nsProvider.findNamespaceById(user.getNamespaceId());
-							if(ns != null)
-								namespace.setName(ns.getName());
+					LOGGER.error("getConferenceNamespaceIdList, accounts="+accounts);
+				if(accounts != null && accounts.size() > 0) {
+					for(ConfAccounts account : accounts) {
+						if(account != null) {
+							ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+							if(LOGGER.isDebugEnabled())
+								LOGGER.error("getConferenceNamespaceIdList, conf="+conf);
+							if(conf != null) {
+								GetNamespaceListResponse namespace = new GetNamespaceListResponse();
+								namespace.setEnterpriseId(account.getEnterpriseId());
+								Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
+								if(org != null) {
+									namespace.setEnterpriseName(org.getName());
+								}
+								namespace.setNamespaceId(user.getNamespaceId());
+								if(user.getNamespaceId() == 0) {
+									namespace.setName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+											String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+											UserContext.current().getUser().getLocale(),"ZUOLIN"));
+								} else {
+									Namespace ns = nsProvider.findNamespaceById(user.getNamespaceId());
+									if(ns != null)
+										namespace.setName(ns.getName());
+								}
+								namespaceIdList.add(namespace);
+							}
 						}
-						namespaceIdList.add(namespace);
 					}
 				}
+				
 			}
 		}
 		return namespaceIdList;
