@@ -2497,18 +2497,20 @@ public class EquipmentServiceImpl implements EquipmentService {
         }
         
         List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
-//        eqAccessories: 备品配件信息 参考com.everhomes.rest.equipment.EquipmentAccessoriesDTO 
-//        quantity: 数量 
-//        equipmentId: 设备id 
-//        id: 主键id 
+
         List<EquipmentInspectionAccessoryMap> map = equipmentProvider.listAccessoryMapByEquipmentId(dto.getId());
         if(null != map) {
         	for(EquipmentInspectionAccessoryMap acMap : map) {
         		
         		EquipmentAccessoryMapDTO mapDto = ConvertHelper.convert(acMap, EquipmentAccessoryMapDTO.class);
         		EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(acMap.getAccessoryId());
-        		mapDto.setEqAccessories(ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class));
-        		
+        		EquipmentAccessoriesDTO accessoryDto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
+        		Organization target = organizationProvider.findOrganizationById(accessoryDto.getTargetId());
+        		if(target != null) {
+        			accessoryDto.setTargetName(target.getName());
+        		}
+        		mapDto.setEqAccessories(accessoryDto);
+
         		eqAccessoryMap.add(mapDto);
         	}
         }
