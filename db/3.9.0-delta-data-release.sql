@@ -449,3 +449,8 @@ update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXVmtOMkpr
 -- 不能添加和删除服务联盟根类型 by xiongying20160901
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10004', 'zh_CN', '未找到上级类型');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10005', 'zh_CN', '不能删除根类型');
+
+-- 储能app升级规则
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(75,34,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (46, 34, '3.9.0', 'http://apk.zuolin.com/apk/UFinePark-3.9.0.2016090119-release.apk', '${homeurl}/web/download/apk/andriod-UFinePark-3-9-0.html', '0');
