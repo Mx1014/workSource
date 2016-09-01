@@ -445,3 +445,7 @@ update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-
 
 -- 储能园区活动换icon by xiongying20160901
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpXVmtOMkprTnpKak1XTXhPVFJpTXprd01qa3pZamMyTkdSa05EWmhaZw' where id in( 10635, 10617);
+
+-- 不能添加和删除服务联盟根类型 by xiongying20160901
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10004', 'zh_CN', '未找到上级类型');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10005', 'zh_CN', '不能删除根类型');
