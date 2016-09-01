@@ -441,7 +441,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		pdl = calculateDayLog(userId, companyId, logDay, pdl,newPunchDayLog);
 		if (null == pdl) {
-			return null;
+			return newPunchDayLog;
 		}
 		
 		newPunchDayLog.setUserId(userId);
@@ -508,7 +508,7 @@ public class PunchServiceImpl implements PunchService {
 				throw RuntimeErrorException.errorWith(
 						PunchServiceErrorCode.SCOPE,
 						PunchServiceErrorCode.ERROR_PUNCH_REFRESH_DAYLOG,
-						"ERROR IN REFRESHPUNCHDAYLOG  LINE 353");
+						"ERROR IN REFRESHPUNCHDAYLOG  ");
 			}
 			if (null == punchDayLog) {
 				// 验证后为空
