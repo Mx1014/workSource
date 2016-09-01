@@ -270,3 +270,28 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 	VALUES(10001,'公共资源预订','0',NULL,2,999999);
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
 	VALUES(10002,'会议室预订','0',NULL,2,999999);
+    
+    
+-- 海岸换icon by xiongying20160901
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveU1HRTVNVFZpT0dJMVpEYzJaalZoTWpJMU1qYzFOelZqTkRkaFpUQXdOZw' where id in(10376,10377);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveU5UaG1NV1E0TXpsa05UZGlZVGN3TXpGak1EY3haR1EyTmpObFlqRTJOQQ' where id in(1773,1774);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwak5qSmlORFJpWXpBd01tWXpOak0wTVdFeFlXRmpORGhpTlRWalkyUXdZdw' where id in(1768,1769);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa05EWmlOVE0zTTJFNU16WTBPR05sTXpGbU9XTXlZekUzTVdZMVlUbGtNUQ' where id in(1760,1761);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwak5qQm1ZemxrWXpaaU9XVXlaVEZqWVdFd1lUa3hPR0kxWldOaFpqazNNUQ' where id in(1764,1765);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME5XWTRPV1JrT1RobE5XUXhaVFptWWpZeVkyWmtOelUyTldVM05qVXdPUQ' where id in(10370,10371);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM05tRmlNR0V3TjJZMU1qZzNPVEl5WXpGa05UYzNNMlV4TVdKaFkyVmxOQQ' where id in(10372,10373);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd01HSmhaRGM1TTJFek9UZzNPVFkzWVRFNU1UZGhPRFpqT1RjeVlUUTNNdw' where id in(1762,1763);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvek5qWTFOekV6WlRJMFpEYzBaR1psTnpjNE9XSXlZV0UxTm1SbVlXUmhaZw' where id in(1766,1767);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk56QTJZbU5qTWpGa1pXWmhOalUyT1RCbFlUa3dNR1UyWWpSaE1UTmhPUQ' where id in(10374,10375);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpHVTROR0poWlRkaE1XUTJZemxsWXpnMU5EUTBZMlUyTXpoa01XRmpaQQ' where id in(10380,10381);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd1pUQTVZek5rTUdFNE9XUm1OelExT0RZeE5EZGpabVU0T0ROa1lUTTJNQQ' where id in(10382,10383);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME56ZzNNemt5TkdKa1pEZ3dZVEZsWldZeU9XVXlaREUxTjJJM05EYzRaUQ' where id in(10394,10395);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFkyUXlaalkyTldWaVptRXhZekZpT1RVME9EYzJZVFUwTkRVeU1UVXpZUQ' where id in(1785, 1905);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME5XWTRPV1JrT1RobE5XUXhaVFptWWpZeVkyWmtOelUyTldVM05qVXdPUQ' where id in(10700, 10702);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM05tRmlNR0V3TjJZMU1qZzNPVEl5WXpGa05UYzNNMlV4TVdKaFkyVmxOQQ' where id in(10704, 10706);
+
+
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvek0yTXhaamhtWldVNVpXTTFZbVF3TWpjMU1XTTVOR1ZoTWpRMlpqQmtaQQ' where id in(52, 85);
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbFlURTBNbU5tTkRJNU5qa3haamszWmpJd01tTTJaREEyTVdFeU1XVTFPQQ' where id in(57, 86);
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9UWmhZVGs1TXpOaFpUbGpNVEZtTnpGbE5URmhOakEwTXpWaU5HWmlZZw' where id in(83, 87);
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvd1pUVmtOekJrTjJNMlptWTVaV1kyWmpnek5UVmhOelU1T1RZNE1qUmhPUQ' where id in(84, 1012);
