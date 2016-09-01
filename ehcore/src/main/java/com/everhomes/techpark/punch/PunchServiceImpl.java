@@ -53,6 +53,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -124,8 +125,11 @@ import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -142,6 +146,9 @@ public class PunchServiceImpl implements PunchService {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Autowired
 	private PunchProvider punchProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
 
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
@@ -305,6 +312,24 @@ public class PunchServiceImpl implements PunchService {
 				PunchLogsDay pdl = makePunchLogsDayStatus(userId,
 						CompanyId, start);
 				if (null != pdl) {
+					pdl.setPunchStatusNew(pdl.getPunchStatus());
+					pdl.setMorningPunchStatusNew(pdl.getMorningPunchStatus());
+					pdl.setAfternoonPunchStatusNew(pdl.getAfternoonPunchStatus());
+					if(pdl.getPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus())))
+						pdl.setPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(pdl.getMorningPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus())))
+						pdl.setMorningPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(pdl.getAfternoonPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus())))
+						pdl.setAfternoonPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+					pdl.setApprovalStatusNew(pdl.getApprovalStatus());
+					pdl.setMorningApprovalStatusNew(pdl.getMorningApprovalStatus());
+					pdl.setAfternoonApprovalStatusNew(pdl.getAfternoonApprovalStatus());
+					if(pdl.getApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus())))
+						pdl.setApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(pdl.getMorningApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus())))
+						pdl.setMorningApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+					if(pdl.getAfternoonApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus())))
+						pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
 					pml.getPunchLogsDayList().add(pdl);
 				}
 			} catch (ParseException e) {
@@ -416,7 +441,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		pdl = calculateDayLog(userId, companyId, logDay, pdl,newPunchDayLog);
 		if (null == pdl) {
-			return null;
+			return newPunchDayLog;
 		}
 		
 		newPunchDayLog.setUserId(userId);
@@ -483,7 +508,7 @@ public class PunchServiceImpl implements PunchService {
 				throw RuntimeErrorException.errorWith(
 						PunchServiceErrorCode.SCOPE,
 						PunchServiceErrorCode.ERROR_PUNCH_REFRESH_DAYLOG,
-						"ERROR IN REFRESHPUNCHDAYLOG  LINE 353");
+						"ERROR IN REFRESHPUNCHDAYLOG  ");
 			}
 			if (null == punchDayLog) {
 				// 验证后为空
@@ -491,6 +516,18 @@ public class PunchServiceImpl implements PunchService {
 			}
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
+		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
+				dateSF.format(logDay.getTime()));
+		if (null != exceptionApproval) {
+			pdl.setMorningApprovalStatus(exceptionApproval.getMorningApprovalStatus());
+			pdl.setAfternoonApprovalStatus(exceptionApproval.getAfternoonApprovalStatus());
+			if (calculateExceptionCode(pdl.getAfternoonApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())
+					&&calculateExceptionCode(pdl.getMorningApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())) {
+			 
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			}
+		}
+
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		pdl.setMorningPunchStatus(punchDayLog.getMorningStatus());
 		pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus()); 
@@ -1425,12 +1462,18 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
-				.queryEnterpriseContactByKeyword(cmd.getKeyword());
+
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+				(cmd.getEnterpriseId(), groupTypeList, cmd.getKeyword()) ;
+		if(null == organizationMembers)
+			return response;
 		List<Long> userIds = new ArrayList<Long>();
-		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
-			userIds.add(enterpriseContact.getUserId());
-		}
+		for(OrganizationMemberDTO member : organizationMembers){
+			userIds.add(member.getTargetId());
+		} 
 		int totalCount = punchProvider.countExceptionRequests(userIds,
 				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getExceptionStatus(), cmd.getProcessCode(),
@@ -1609,8 +1652,16 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid company Id parameter in the command");
 		}
-		
-		if(cmd.getMorningApprovalStatus() == null && cmd.getAfternoonApprovalStatus() == null && cmd.getApprovalStatus() == null ) {
+
+		if(cmd.getStatus() == null){
+			LOGGER.error("Invalid Status parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid Status   parameter in the command");
+			
+		}
+		if(cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode()) 
+				&& cmd.getMorningApprovalStatus() == null && cmd.getAfternoonApprovalStatus() == null && cmd.getApprovalStatus() == null ) {
 			LOGGER.error("morningApprovalStatus、afternoonApprovalStatus、approvalStatus cannot be null at the same time!");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1688,6 +1739,9 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 
+	/**
+	 * 打卡1.0的统计,已经不用了
+	 * */
 	@Override
 	public ListPunchStatisticsCommandResponse listPunchStatistics(
 			ListPunchStatisticsCommand cmd) {
@@ -1696,13 +1750,13 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		ListOrganizationContactCommand orgCmd = new ListOrganizationContactCommand();
 		orgCmd.setOrganizationId(cmd.getEnterpriseId());
-		if(null != cmd.getEnterpriseGroupId()){
-			orgCmd.setOrganizationId(cmd.getEnterpriseGroupId());
-		}
+//		if(null != cmd.getEnterpriseGroupId()){
+//			orgCmd.setOrganizationId(cmd.getEnterpriseGroupId());
+//		}
 		orgCmd.setKeywords(cmd.getKeyword());
 		orgCmd.setPageSize(100000);
 		ListOrganizationMemberCommandResponse resp =  organizationService.listOrganizationPersonnels(orgCmd, false);
-		List<OrganizationMemberDTO> members = resp.getMembers();
+		List<OrganizationMemberDTO> members = resp.getMembers(); 
 		List<Long> userIds = new ArrayList<Long>();
 		if(null != members){
 			for (OrganizationMemberDTO member : members) {
@@ -1862,12 +1916,30 @@ public class PunchServiceImpl implements PunchService {
 		}
 		PunchLogsDay pdl = makePunchLogsDayListInfo(userId,
 				cmd.getEnterpirseId(), logDay);
+		pdl.setPunchStatusNew(pdl.getPunchStatus());
+		pdl.setMorningPunchStatusNew(pdl.getMorningPunchStatus());
+		pdl.setAfternoonPunchStatusNew(pdl.getAfternoonPunchStatus());
+		if(pdl.getPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getPunchStatus())))
+			pdl.setPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+		if(pdl.getMorningPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningPunchStatus())))
+			pdl.setMorningPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+		if(pdl.getAfternoonPunchStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonPunchStatus())))
+			pdl.setAfternoonPunchStatus(ApprovalStatus.UNPUNCH.getCode());
+		pdl.setApprovalStatusNew(pdl.getApprovalStatus());
+		pdl.setMorningApprovalStatusNew(pdl.getMorningApprovalStatus());
+		pdl.setAfternoonApprovalStatusNew(pdl.getAfternoonApprovalStatus());
+		if(pdl.getApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getApprovalStatus())))
+			pdl.setApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+		if(pdl.getMorningApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getMorningApprovalStatus())))
+			pdl.setMorningApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
+		if(pdl.getAfternoonApprovalStatus() != null && ApprovalStatus.FORGOT.equals(ApprovalStatus.fromCode(pdl.getAfternoonApprovalStatus())))
+			pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
 		punchProvider.viewDateFlags(userId, cmd.getEnterpirseId(),
 				dateSF.format(logDay.getTime()));
 		return pdl;
 	}
 
-	private void addPunchStatistics(OrganizationMember member ,Long orgId,Calendar startCalendar,Calendar endCalendar){
+	private void addPunchStatistics(OrganizationMemberDTO member ,Long orgId,Calendar startCalendar,Calendar endCalendar){
 		
 		PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),orgId, member.getTargetId());
 		if(null == pr)
@@ -1885,10 +1957,8 @@ public class PunchServiceImpl implements PunchService {
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, pr);
 		
 		statistic.setUserName(member.getContactName());
-		statistic.setDeptId(member.getGroupId());
-		Organization dept = this.organizationProvider.findOrganizationById(member.getGroupId());
-		if(null == dept)
-			dept = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+		OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());   
+		statistic.setDeptId(dept.getId());
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.format(startCalendar.getTime()),
@@ -3361,8 +3431,9 @@ public class PunchServiceImpl implements PunchService {
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
 				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
 				dto.setTargetName(member.getContactName());
-				Organization dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
-				dto.setTargetDept(dept.getName());
+				OrganizationDTO dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
+				if(null != dept)
+					dto.setTargetDept(dept.getName());
 				
 			}
 			response.getPunchRuleMaps().add(dto);
@@ -3370,28 +3441,36 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 	/**找到用户的部门-多部门取最上级第一个*/
-	private Organization findUserDepartment(Long userId, Long organizationId){
-		// 多部门找顶级部门
-		List<OrganizationMember> organizationMembers = this.organizationProvider.findOrganizationMembersByOrgIdAndUId( userId,  organizationId);
-		Organization result = null;
-		if(organizationMembers == null || organizationMembers.isEmpty())
+	private OrganizationDTO findUserDepartment(Long userId, Long organizationId){
+//		// 多部门找顶级部门
+//		List<OrganizationMember> organizationMembers = this.organizationProvider.findOrganizationMembersByOrgIdAndUId( userId,  organizationId);
+//		Organization result = null;
+//		if(organizationMembers == null || organizationMembers.isEmpty())
+//			return null;
+//		for(OrganizationMember member : organizationMembers){
+//			//groupid == 0 话直接返回总公司
+//			if(null == member.getGroupId() || member.getGroupId().equals(0L))
+//				return this.organizationProvider.findOrganizationById(member.getOrganizationId());
+//			if(result == null)
+//				result = this.organizationProvider.findOrganizationById(member.getGroupId());
+//			else{
+//				//多部门找顶级部门
+//				Organization org = this.organizationProvider.findOrganizationById(member.getGroupId());
+//				if(org.getLevel()<result.getLevel()){
+//					//取最顶层的  
+//					result = org;
+//				}
+//			}
+//		}
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
+		if(null == userIdentifier){
+			LOGGER.debug("userIdentifier is null...userId = " +userId);
 			return null;
-		for(OrganizationMember member : organizationMembers){
-			//groupid == 0 话直接返回总公司
-			if(null == member.getGroupId() || member.getGroupId().equals(0L))
-				return this.organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(result == null)
-				result = this.organizationProvider.findOrganizationById(member.getGroupId());
-			else{
-				//多部门找顶级部门
-				Organization org = this.organizationProvider.findOrganizationById(member.getGroupId());
-				if(org.getLevel()<result.getLevel()){
-					//取最顶层的  
-					result = org;
-				}
+		}else{
+			return this.organizationService.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT,
+					userIdentifier.getIdentifierToken(), organizationId);
 			}
-		}
-		return result;
+		 
 
 	}
 	/** 向上递归找规则*/
@@ -3424,7 +3503,8 @@ public class PunchServiceImpl implements PunchService {
 				return null;
 			//加循环限制
 			int loopMax = 10;
-			Organization dept = findUserDepartment(userId, ownerId);
+			OrganizationDTO deptDTO = findUserDepartment(userId, ownerId);
+			Organization dept =  ConvertHelper.convert(deptDTO, Organization.class);
 			map = getPunchRule(ownerId ,dept,loopMax);
 		}
 		return this.punchProvider.getPunchRuleById(map.getPunchRuleId());
@@ -3440,6 +3520,9 @@ public class PunchServiceImpl implements PunchService {
 //		return this.punchProvider.findPunchTimeRuleById(pr.getTimeRuleId());
 //	}
 
+	/**
+	 * 打卡2.0 的考勤统计月报
+	 * */
 	@Override
 	public ListPunchCountCommandResponse listPunchCount(
 			ListPunchCountCommand cmd) {
@@ -3457,12 +3540,12 @@ public class PunchServiceImpl implements PunchService {
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembersByName
-				 (org.getPath(), groupTypeList, cmd.getUserName());
+		List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+				(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
 		if(null == organizationMembers)
 			return response;
 		List<Long> userIds = new ArrayList<Long>();
-		for(OrganizationMember member : organizationMembers){
+		for(OrganizationMemberDTO member : organizationMembers){
 			if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
@@ -3502,6 +3585,10 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchCountList(punchCountDTOList);
 		return response;
 	}
+
+	/**
+	 * 打卡2.0 的考勤详情
+	 * */
 	@Override
 	public HttpServletResponse exportPunchDetails(ListPunchDetailsCommand cmd, HttpServletResponse response) {
 		// TODO Auto-generated method stub
@@ -3519,12 +3606,12 @@ public class PunchServiceImpl implements PunchService {
 			List<String> groupTypeList = new ArrayList<String>();
 			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembersByName
-					 (org.getPath(), groupTypeList, cmd.getUserName());
+			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+					(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
 			if(null == organizationMembers)
 				return null;
 			List<Long> userIds = new ArrayList<Long>();
-			for(OrganizationMember member : organizationMembers){
+			for(OrganizationMemberDTO member : organizationMembers){
 				userIds.add(member.getTargetId());
 			}
 			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
@@ -3677,10 +3764,10 @@ public class PunchServiceImpl implements PunchService {
 			List<String> groupTypeList = new ArrayList<String>();
 			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembersByName
-					 (org.getPath(), groupTypeList, cmd.getUserName());
+			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+					(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
 			if(null == organizationMembers)
-				return response;
+				return response;  
 			response.setUserLogs(new ArrayList<UserMonthLogsDTO>());
 			//取查询月的第一天和最后一天
 			Calendar monthBegin = Calendar.getInstance();
@@ -3694,7 +3781,7 @@ public class PunchServiceImpl implements PunchService {
 					//月末
 					monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
 				} 
-				for(OrganizationMember member : organizationMembers){
+				for(OrganizationMemberDTO member : organizationMembers){
 					if(null == member.getTargetType())
 						continue;
 					UserMonthLogsDTO userMonthLogsDTO = new UserMonthLogsDTO(); 
@@ -3719,7 +3806,7 @@ public class PunchServiceImpl implements PunchService {
 						pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
 						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
-						if ( ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
+						if (dayLog.getExceptionStatus() != null && ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
 							exceptionStatus = ExceptionStatus.EXCEPTION;
 						}
 							
@@ -3739,6 +3826,10 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return response;
 	}
+
+	/**
+	 * 打卡2.0 的考勤详情
+	 * */
 	@Override
 	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd) {
  
@@ -3758,12 +3849,12 @@ public class PunchServiceImpl implements PunchService {
 			List<String> groupTypeList = new ArrayList<String>();
 			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembersByName
-					 (org.getPath(), groupTypeList, cmd.getUserName());
+			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+					(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
 			if(null == organizationMembers)
 				return response;
 			List<Long> userIds = new ArrayList<Long>();
-			for(OrganizationMember member : organizationMembers){
+			for(OrganizationMemberDTO member : organizationMembers){
 				userIds.add(member.getTargetId());
 			}
 			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
@@ -3839,9 +3930,7 @@ public class PunchServiceImpl implements PunchService {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 			if (null != member) {
 				dto.setUserName(member.getContactName());
-				Organization dept = this.organizationProvider.findOrganizationById(member.getGroupId());
-				if(null == dept)
-					dept = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());  
 				dto.setDeptName(dept.getName());
 				   
 //				dto.setUserPhoneNumber(member.getContactToken());
@@ -3865,6 +3954,10 @@ public class PunchServiceImpl implements PunchService {
 			}
 			return dto;
 	}
+
+	/**
+	 * 打卡2.0 的考勤统计
+	 * */
 	@Override
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response) {
 
@@ -3873,12 +3966,12 @@ public class PunchServiceImpl implements PunchService {
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembersByName
-				 (org.getPath(), groupTypeList, cmd.getUserName());
+		List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+				(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
 		if(null == organizationMembers)
 			return response;
 		List<Long> userIds = new ArrayList<Long>();
-		for(OrganizationMember member : organizationMembers){
+		for(OrganizationMemberDTO member : organizationMembers){
 			if (null != member.getTargetType() && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
@@ -3922,9 +4015,14 @@ public class PunchServiceImpl implements PunchService {
 
 				List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
 				for(Long orgId : orgIds){
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(orgId);
+
+					List<String> groupTypeList = new ArrayList<String>();
+					groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+					groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+					List<OrganizationMemberDTO> members = this.organizationService.listAllChildOrganizationPersonnel
+							(orgId, groupTypeList, null);
 					//循环刷所有员工
-					for(OrganizationMember member : members){
+					for(OrganizationMemberDTO member : members){
 						if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
 							try {
 								//刷新 daylog
@@ -3969,9 +4067,14 @@ public class PunchServiceImpl implements PunchService {
 		
 		List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
 		for(Long orgId : orgIds){
-			List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(orgId);
+
+			List<String> groupTypeList = new ArrayList<String>();
+			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+			List<OrganizationMemberDTO> organizationMembers = organizationService.listAllChildOrganizationPersonnel
+					(orgId, groupTypeList, null) ;
 			//循环刷所有员工
-			for(OrganizationMember member : members){
+			for(OrganizationMemberDTO member : organizationMembers){
 				if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
 					try {
 						//刷新 daylog

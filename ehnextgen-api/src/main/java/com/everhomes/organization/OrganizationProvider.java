@@ -215,4 +215,6 @@ public interface OrganizationProvider {
 	Organization findOrganizationByNameAndNamespaceId(String name, Integer namespaceId);
 
 	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
+	
+	List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId);
 }

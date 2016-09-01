@@ -1513,7 +1513,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		if(!StringUtils.isEmpty(keywords)){
 			Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
-			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.eq(keywords));
+			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+keywords+"%"));
 			cond = cond.and(cond1);
 		}
 
@@ -2386,7 +2386,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(null != locator.getAnchor()){
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		}
-		query.addConditions(cond);
+		if(null != cond){
+			query.addConditions(cond);
+		}
 		query.addLimit(pageSize + 1);
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.desc());
 		query.fetch().map(r -> {
@@ -2400,6 +2402,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			locator.setAnchor(results.get(results.size() - 1).getCreateTime().getTime());
 		}
 		
+		return results;
+	}
+	
+	public List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> results = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.in(contactTokens));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
 		return results;
 	}
 

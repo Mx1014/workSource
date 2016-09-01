@@ -1371,7 +1371,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 			VerifyVideoConfAccountCommand cmd) {
 		User user = UserContext.current().getUser();
 		UserAccountDTO userAccount = new UserAccountDTO();
-		ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+		ConfAccounts account = new ConfAccounts();
+		if(cmd.getEnterpriseId() != null && cmd.getEnterpriseId() != 0) {
+			account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+		} else {
+			account = vcProvider.findAccountByUserId(user.getId());
+		}
 		
 		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
 		userAccount.setPurchaseAuthority(privilege);
@@ -1780,7 +1785,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(phones != null && phones.size() > 0)
 			reservation.setCreatorPhone(phones.get(0));
 		
-		ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+		ConfAccounts account = new ConfAccounts();
+		if(cmd.getEnterpriseId() != null && cmd.getEnterpriseId() != 0) {
+			account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+		} else {
+			account = vcProvider.findAccountByUserId(user.getId());
+		}
 		LOGGER.info("reserveVideoConf account = " + account + ", current user = " + user.getId());
 		if(account == null) {
 			LOGGER.error("account is null");
@@ -1824,7 +1834,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 	    
-	    ConfAccounts account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+	    ConfAccounts account = new ConfAccounts();
+		if(cmd.getEnterpriseId() != null && cmd.getEnterpriseId() != 0) {
+			account = vcProvider.findAccountByUserIdAndEnterpriseId(user.getId(), cmd.getEnterpriseId());
+		} else {
+			account = vcProvider.findAccountByUserId(user.getId());
+		}
 		
 		if(account != null) {
 			List<ConfReservations> reservations = vcProvider.findReservationConfByAccountId(account.getId(), locator, pageSize+1);

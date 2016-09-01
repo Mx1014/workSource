@@ -142,7 +142,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -403,6 +407,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -457,6 +463,7 @@ import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStandardsDTO;
 import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
 import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
@@ -1439,6 +1446,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			log.setOperatorType(OwnerType.USER.getCode());
 			log.setOperatorId(user.getId());
 	 
+			task.setReviewResult(ReviewResult.NONE.getCode());
 			if(EquipmentTaskResult.COMPLETE_OK.equals(EquipmentTaskResult.fromStatus(cmd.getVerificationResult()))) {
 				
 				task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
@@ -1589,14 +1597,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			dto.setGroupName(group.getName());
     	
     	if(task.getExecutorId() != null && task.getExecutorId() != 0) {
-        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getExecutiveGroupId());
+        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
         	if(executor != null) {
         		dto.setExecutorName(executor.getContactName());
         	}
     	}
     	
     	if(task.getOperatorId() != null && task.getOperatorId() != 0) {
-    		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+    		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getOwnerId());
         	if(operator != null) {
         		dto.setOperatorName(operator.getContactName());
         	}
@@ -2160,6 +2168,17 @@ public class EquipmentServiceImpl implements EquipmentService {
             	if(target != null) {
             		dto.setTargetName(target.getContactName());
             	}
+        	}
+        	
+        	List<EquipmentInspectionTasksAttachments> attachmentLists = equipmentProvider.listTaskAttachmentsByLogId(dto.getId());
+        	if(attachmentLists != null && attachmentLists.size() > 0) {
+	        	populateLogAttachements(r, attachmentLists);
+	        	List<EquipmentTaskAttachmentDTO> attachments = new ArrayList<EquipmentTaskAttachmentDTO>();
+	        	for(EquipmentInspectionTasksAttachments attachment :  attachmentLists) {
+	        		EquipmentTaskAttachmentDTO attDto = ConvertHelper.convert(attachment, EquipmentTaskAttachmentDTO.class);
+	        		attachments.add(attDto);
+	        	}
+	        	dto.setAttachments(attachments);
         	}
         	return dto;
         }).collect(Collectors.toList());

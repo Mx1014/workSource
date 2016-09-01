@@ -33,6 +33,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,6 +176,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
@@ -5117,8 +5119,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param member
 	 */
 	private void updateEnterpriseContactStatus(Long operatorUid, OrganizationMember member){
+		Organization organization = this.checkOrganization(member.getOrganizationId());
+		
+		List<String> groupTypes = new ArrayList<String>();
+		
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
 		 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
-			 this.organizationProvider.updateOrganizationMember(member);
+			 	List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+				
+			 	//退出企业  部门下的记录 都删除掉
+				for (Organization department : departments) {
+					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), department.getId());
+					if(null != organizationMember){
+						organizationProvider.deleteOrganizationMemberById(organizationMember.getId());
+					}
+				}
+				
+				// 公司下的记录改状态
+				if(null != member){
+					organizationProvider.updateOrganizationMember(member);
+				}
 	            return null;
 	        });
 		 userSearcher.feedDoc(member);
@@ -7108,4 +7129,75 @@ public class OrganizationServiceImpl implements OrganizationService {
 		sendMessageForContactApproved(organizationMember);
 		return dto;
 	}
+	
+	@Override
+	public OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId){
+		
+		Organization organization = checkOrganization(organizationId);
+		
+		List<OrganizationDTO> dtos = getOrganizationMemberGroups(organizationGroupType, token, organization.getPath());
+		
+		if(null == dtos || 0 == dtos.size()){
+			return ConvertHelper.convert(organization, OrganizationDTO.class);
+		}
+		OrganizationDTO topDepartment = null;
+		Integer topDepartmentNum = 10000;
+		for (OrganizationDTO dto : dtos) {
+			if(dto.getPath().split("/").length <  topDepartmentNum){
+				topDepartmentNum = dto.getPath().length();
+				topDepartment = dto;
+			}
+		}
+		
+	    return topDepartment;
+	}
+	
+	
+	@Override
+	public List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes,String userName){
+		
+		Organization organization = checkOrganization(organizationId);
+		List<OrganizationMemberDTO> dtos = new ArrayList<OrganizationMemberDTO>();
+		Long enterpriseId = organizationId;
+		
+		List<OrganizationMember> members = null;
+		if(OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			enterpriseId = organization.getDirectlyEnterpriseId();
+			
+			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+			organizations.add(organization);
+			
+			Condition cond = null;
+			List<Long> organizationIds = new ArrayList<Long>();
+			if(!StringUtils.isEmpty(userName))
+				cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+userName+"%");
+			
+			for (Organization org : organizations) {
+				organizationIds.add(org.getId());
+			}
+			
+			members = organizationProvider.listOrganizationMemberByOrganizationIds(new CrossShardListingLocator(), 1000000, cond, organizationIds);
+			
+			List<String> contactTokens = new ArrayList<String>();
+			for (OrganizationMember organizationMember : members) {
+				contactTokens.add(organizationMember.getContactToken());
+			}
+			
+			if(contactTokens.size() > 0){
+				members = organizationProvider.listOrganizationMemberByContactTokens(contactTokens, enterpriseId);
+			}
+		}else{
+			Organization orgCommoand = new Organization();
+			orgCommoand.setId(enterpriseId);
+			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+			members = this.organizationProvider.listOrganizationPersonnels(userName,orgCommoand, null, new CrossShardListingLocator(), 100000);
+		}
+		
+		for (OrganizationMember organizationMember : members) {
+			dtos.add(ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class));
+		}
+		
+		return dtos;
+	}
+	
 }

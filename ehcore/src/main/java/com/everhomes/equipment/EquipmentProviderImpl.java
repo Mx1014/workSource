@@ -57,6 +57,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipment
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -440,7 +441,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, Byte processType) {
+	public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType) {
 		
 		List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
 		assert(locator.getEntityId() != 0);
@@ -452,7 +453,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 		
 		if(processType != null) {
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(processType));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.in(processType));
 		}
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID.eq(taskId));
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.desc());
@@ -718,13 +719,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 		
 		Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
-		con2 = con2.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
-		
-		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
-		con3 = con3.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
+//		con2 = con2.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
+//		
+//		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
+//		con3 = con3.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
 		
 		Condition con = con1.or(con2);
-		con = con.or(con3);
+//		con = con.or(con3);
 		
 		query.addConditions(con);
 		
@@ -846,6 +847,24 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		
         return map;
+	}
+
+	@Override
+	public List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(
+			Long logId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.LOG_ID.eq(logId));
+		 
+		List<EquipmentInspectionTasksAttachments> result = new ArrayList<EquipmentInspectionTasksAttachments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTasksAttachments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
 	}
 
 }
