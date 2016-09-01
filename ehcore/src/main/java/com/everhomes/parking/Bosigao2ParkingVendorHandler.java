@@ -28,7 +28,12 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -42,11 +47,15 @@ import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateStatus;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -78,10 +87,11 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+    private UserProvider userProvider;
 	
-	{
-		
-	}
+	@Autowired
+	private OrderUtil commonOrderUtil;
 	
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -366,5 +376,63 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			}
 			return null;
 		});
+	}
+
+	@Override
+	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd, ParkingLot parkingLot) {
+		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
+		
+		User user = UserContext.current().getUser();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
+		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
+		parkingRechargeOrder.setParkingLotId(parkingLot.getId());
+		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
+		parkingRechargeOrder.setPlateOwnerName(cmd.getPlateOwnerName());
+		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
+		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
+		parkingRechargeOrder.setPayerUid(user.getId());
+		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
+		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
+		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
+		
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
+		parkingRechargeOrder.setRateToken(rate.getId().toString());
+		parkingRechargeOrder.setRateName(rate.getRateName());
+		parkingRechargeOrder.setMonthCount(rate.getMonthCount());
+		parkingRechargeOrder.setPrice(rate.getPrice());
+		
+		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
+		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		parkingRechargeOrder.setCreatorUid(user.getId());
+		parkingRechargeOrder.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
+//		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
+//		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
+		
+		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(parkingRechargeOrder.getRateName());
+		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		orderCmd.setSubject("停车充值订单简要描述");
+		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		return dto;
+	}
+	
+	private Long createOrderNo(Long time) {
+		String bill = String.valueOf(time) + (int) (Math.random()*1000);
+		return Long.valueOf(bill);
 	}
 }
