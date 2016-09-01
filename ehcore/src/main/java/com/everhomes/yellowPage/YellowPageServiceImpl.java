@@ -343,19 +343,30 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		ServiceAllianceCategories category = new ServiceAllianceCategories();
 		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
+		
 		if(cmd.getCategoryId() == null) {
-			category.setParentId(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
 			category.setName(cmd.getName());
 			category.setOwnerId(cmd.getOwnerId());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setNamespaceId(namespaceId);
 			category.setStatus((byte)2);
-			category.setPath(parent.getName() + "/" + cmd.getName());
+			if(null == parent) {
+				category.setParentId(0L);
+				category.setPath(cmd.getName());
+			} else {
+				category.setParentId(parent.getId());
+				category.setPath(parent.getName() + "/" + cmd.getName());
+			}
 			yellowPageProvider.createCategory(category);
 		} else {
 			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			category.setName(cmd.getName());
-			category.setPath(parent.getName() + "/" + cmd.getName());
+			if(null == parent) {
+				category.setPath(cmd.getName());
+			} else {
+				category.setPath(parent.getName() + "/" + cmd.getName());
+			}
+			
 			yellowPageProvider.updateCategory(category);
 			
 			//yellow page中引用该类型的记录的serviceType字段也要更新
