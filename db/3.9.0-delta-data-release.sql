@@ -440,4 +440,4 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9UWmhZVGs1TXpOaF
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvd1pUVmtOekJrTjJNMlptWTVaV1kyWmpnek5UVmhOelU1T1RZNE1qUmhPUQ' where id in(84, 1012);
 
 
-
+update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fpromotion%2Fall%3F_k%3Dzlbiz#sign_suffix"}' where id in(10380,10381);

@@ -295,3 +295,5 @@ update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvek0yTXhaamhtWldVNV
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbFlURTBNbU5tTkRJNU5qa3haamszWmpJd01tTTJaREEyTVdFeU1XVTFPQQ' where id in(57, 86);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvMU9UWmhZVGs1TXpOaFpUbGpNVEZtTnpGbE5URmhOakEwTXpWaU5HWmlZZw' where id in(83, 87);
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvd1pUVmtOekJrTjJNMlptWTVaV1kyWmpnek5UVmhOelU1T1RZNE1qUmhPUQ' where id in(84, 1012);
+
+update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fpromotion%2Fall%3F_k%3Dzlbiz#sign_suffix"}' where id in(10380,10381);
