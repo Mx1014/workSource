@@ -12,6 +12,11 @@ import com.everhomes.util.StringHelper;
 public class CreateApprovalFlowNameResponse {
 	private ApprovalFlowDTO approvalFlow;
 
+	public CreateApprovalFlowNameResponse(ApprovalFlowDTO approvalFlow) {
+		super();
+		this.approvalFlow = approvalFlow;
+	}
+
 	public ApprovalFlowDTO getApprovalFlow() {
 		return approvalFlow;
 	}

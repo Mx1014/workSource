@@ -11,6 +11,10 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateAbsentCategoryResponse {
 	private AbsentCategoryDTO category;
+	
+	public UpdateAbsentCategoryResponse(AbsentCategoryDTO category) {
+		this.category = category;
+	}
 
 	public AbsentCategoryDTO getCategory() {
 		return category;

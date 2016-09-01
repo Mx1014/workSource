@@ -13,4 +13,6 @@ public interface ApprovalRuleFlowMapProvider {
 
 	List<ApprovalRuleFlowMap> listApprovalRuleFlowMap();
 
+	ApprovalRuleFlowMap findOneApprovalRuleFlowMapByFlowId(Long flowId);
+
 }

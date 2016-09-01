@@ -13,4 +13,6 @@ public interface ApprovalFlowProvider {
 
 	List<ApprovalFlow> listApprovalFlow();
 
+	List<ApprovalFlow> listApprovalFlow(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, int pageSize);
+
 }

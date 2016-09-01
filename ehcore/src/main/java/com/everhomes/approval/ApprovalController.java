@@ -17,15 +17,15 @@ import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.DeleteAbsentTypeCommand;
+import com.everhomes.rest.approval.DeleteAbsentCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.ListAbsentTypesCommand;
-import com.everhomes.rest.approval.ListAbsentTypesResponse;
-import com.everhomes.rest.approval.ListApprovalFlowsCommand;
-import com.everhomes.rest.approval.ListApprovalFlowsResponse;
-import com.everhomes.rest.approval.ListApprovalRulesCommand;
-import com.everhomes.rest.approval.ListApprovalRulesResponse;
+import com.everhomes.rest.approval.ListAbsentCategoryCommand;
+import com.everhomes.rest.approval.ListAbsentCategoryResponse;
+import com.everhomes.rest.approval.ListApprovalFlowCommand;
+import com.everhomes.rest.approval.ListApprovalFlowResponse;
+import com.everhomes.rest.approval.ListApprovalRuleCommand;
+import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateAbsentCategoryCommand;
 import com.everhomes.rest.approval.UpdateAbsentCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
@@ -68,23 +68,23 @@ public class ApprovalController extends ControllerBase {
 	/**
 	 * 
 	 * <p>列出请假类型</p>
-	 * <b>URL: /approval/listAbsentTypes</b>
+	 * <b>URL: /approval/listAbsentCategory</b>
 	 */
-	@RequestMapping("listAbsentTypes")
-	@RestReturn(ListAbsentTypesResponse.class)
-	public RestResponse listAbsentTypes(ListAbsentTypesCommand cmd){
-		return new RestResponse(approvalService.listAbsentTypes(cmd));
+	@RequestMapping("listAbsentCategory")
+	@RestReturn(ListAbsentCategoryResponse.class)
+	public RestResponse listAbsentCategory(ListAbsentCategoryCommand cmd){
+		return new RestResponse(approvalService.listAbsentCategory(cmd));
 	}
 
 	/**
 	 * 
 	 * <p>删除请假类型</p>
-	 * <b>URL: /approval/deleteAbsentType</b>
+	 * <b>URL: /approval/deleteAbsentCategory</b>
 	 */
-	@RequestMapping("deleteAbsentType")
+	@RequestMapping("deleteAbsentCategory")
 	@RestReturn(String.class)
-	public RestResponse deleteAbsentType(DeleteAbsentTypeCommand cmd){
-		approvalService.deleteAbsentType(cmd);
+	public RestResponse deleteAbsentCategory(DeleteAbsentCategoryCommand cmd){
+		approvalService.deleteAbsentCategory(cmd);
 		return new RestResponse();
 	}
 	
@@ -135,12 +135,12 @@ public class ApprovalController extends ControllerBase {
 	/**
 	 * 
 	 * <p>审批流程列表</p>
-	 * <b>URL: /approval/listApprovalFlows</b>
+	 * <b>URL: /approval/listApprovalFlow</b>
 	 */
-	@RequestMapping("listApprovalFlows")
-	@RestReturn(ListApprovalFlowsResponse.class)
-	public RestResponse listApprovalFlows(ListApprovalFlowsCommand cmd){
-		return new RestResponse(approvalService.listApprovalFlows(cmd));
+	@RequestMapping("listApprovalFlow")
+	@RestReturn(ListApprovalFlowResponse.class)
+	public RestResponse listApprovalFlow(ListApprovalFlowCommand cmd){
+		return new RestResponse(approvalService.listApprovalFlow(cmd));
 	}
 
 	/**
@@ -192,11 +192,11 @@ public class ApprovalController extends ControllerBase {
 	/**
 	 * 
 	 * <p>审批规则列表</p>
-	 * <b>URL: /approval/listApprovalRules</b>
+	 * <b>URL: /approval/listApprovalRule</b>
 	 */
-	@RequestMapping("listApprovalRules")
-	@RestReturn(ListApprovalRulesResponse.class)
-	public RestResponse listApprovalRules(ListApprovalRulesCommand cmd){
-		return new RestResponse(approvalService.listApprovalRules(cmd));
+	@RequestMapping("listApprovalRule")
+	@RestReturn(ListApprovalRuleResponse.class)
+	public RestResponse listApprovalRule(ListApprovalRuleCommand cmd){
+		return new RestResponse(approvalService.listApprovalRule(cmd));
 	}
 }

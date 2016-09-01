@@ -1,9 +1,13 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +38,16 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 		getReadWriteDao().insert(approvalFlowLevel);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalFlowLevels.class, null);
 	}
+	
+//	@Override
+//	public void createApprovalFlowLevelList(List<ApprovalFlowLevel> approvalFlowLevelList) {
+//		List<EhApprovalFlowLevels> list = approvalFlowLevelList.stream().map(a->{
+//												a.setId(sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalFlowLevels.class)));
+//												return ConvertHelper.convert(a, EhApprovalFlowLevels.class);
+//											}).collect(Collectors.toList());
+//		getReadWriteDao().insert(list);
+//		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalFlowLevels.class, null);
+//	}
 
 	@Override
 	public void updateApprovalFlowLevel(ApprovalFlowLevel approvalFlowLevel) {
@@ -55,6 +69,42 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalFlowLevel.class));
 	}
 	
+	@Override
+	public List<ApprovalFlowLevel> listApprovalFlowLevel(Long flowId, Byte level) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS)
+									.where(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.eq(flowId))
+									.and(Tables.EH_APPROVAL_FLOW_LEVELS.LEVEL.eq(level))
+									.orderBy(Tables.EH_APPROVAL_FLOW_LEVELS.ID.asc())
+									.fetch();
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalFlowLevel.class));
+		}
+		
+		return new ArrayList<ApprovalFlowLevel>();
+	}
+
+	@Override
+	public void deleteApprovalLevels(Long flowId, Byte level) {
+		getReadWriteContext().delete(Tables.EH_APPROVAL_FLOW_LEVELS)
+			.where(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.eq(flowId))
+			.and(Tables.EH_APPROVAL_FLOW_LEVELS.LEVEL.eq(level))
+			.execute();
+	}
+
+	@Override
+	public List<ApprovalFlowLevel> listApprovalFlowLevelByFlowIds(List<Long> flowIdList) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS)
+									.where(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.in(flowIdList))
+									.orderBy(Tables.EH_APPROVAL_FLOW_LEVELS.LEVEL.asc(), Tables.EH_APPROVAL_FLOW_LEVELS.ID.asc())
+									.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalFlowLevel.class));
+		}
+		
+		return new ArrayList<ApprovalFlowLevel>();
+	}
+
 	private EhApprovalFlowLevelsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

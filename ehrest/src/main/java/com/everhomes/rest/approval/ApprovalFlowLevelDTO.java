@@ -18,6 +18,12 @@ public class ApprovalFlowLevelDTO {
 	@ItemType(ApprovalPerson.class)
 	private List<ApprovalPerson> approvalPersonList;
 
+	public ApprovalFlowLevelDTO(Byte level, List<ApprovalPerson> approvalPersonList) {
+		super();
+		this.level = level;
+		this.approvalPersonList = approvalPersonList;
+	}
+
 	public Byte getLevel() {
 		return level;
 	}

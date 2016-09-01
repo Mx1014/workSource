@@ -9,14 +9,14 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>flowId: 审批流程id</li>
+ * <li>id: 审批流程id</li>
  * </ul>
  */ 
 public class DeleteApprovalFlowCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long flowId;
+	private Long id;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -42,12 +42,12 @@ public class DeleteApprovalFlowCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getFlowId() {
-		return flowId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setFlowId(Long flowId) {
-		this.flowId = flowId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override

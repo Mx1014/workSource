@@ -12,9 +12,14 @@ import com.everhomes.util.StringHelper;
  * <li>categoryList: 请假类型列表，参考{@link com.everhomes.rest.approval.AbsentCategoryDTO}</li>
  * </ul>
  */
-public class ListAbsentTypesResponse {
+public class ListAbsentCategoryResponse {
 	@ItemType(AbsentCategoryDTO.class)
 	private List<AbsentCategoryDTO> categoryList;
+
+	public ListAbsentCategoryResponse(List<AbsentCategoryDTO> categoryList) {
+		super();
+		this.categoryList = categoryList;
+	}
 
 	public List<AbsentCategoryDTO> getCategoryList() {
 		return categoryList;

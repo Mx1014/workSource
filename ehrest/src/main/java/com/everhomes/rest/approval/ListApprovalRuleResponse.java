@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>approvalRuleList: 审批规则列表，参考{@link com.everhomes.rest.approval.ApprovalRuleDTO}</li>
  * </ul>
  */
-public class ListApprovalRulesResponse {
+public class ListApprovalRuleResponse {
 	private Long nextPageAnchor;
 	@ItemType(ApprovalRuleDTO.class)
 	private List<ApprovalRuleDTO> approvalRuleList;

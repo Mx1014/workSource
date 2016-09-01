@@ -13,4 +13,6 @@ public interface ApprovalCategoryProvider {
 
 	List<ApprovalCategory> listApprovalCategory();
 
+	List<ApprovalCategory> listApprovalCategory(Integer namespaceId, String ownerType, Long ownerId, Byte approvalType);
+
 }

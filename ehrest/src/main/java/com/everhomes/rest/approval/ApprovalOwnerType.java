@@ -12,7 +12,7 @@ public enum ApprovalOwnerType {
 		this.code = code;
 	}
 	
-	public ApprovalOwnerType fromCode(String code){
+	public static ApprovalOwnerType fromCode(String code){
 		if (StringUtils.isNotBlank(code)) {
 			for (ApprovalOwnerType absentOwnerType : ApprovalOwnerType.values()) {
 				if (absentOwnerType.getCode().equals(code)) {

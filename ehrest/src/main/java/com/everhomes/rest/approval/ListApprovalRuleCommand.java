@@ -5,26 +5,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>返回值:
- * <li>id: id</li>
+ * <ul>
+ * 参数:
  * <li>namespaceId: 域空间ID</li>
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}
+ * </li>
  * <li>ownerId: 所属者ID</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class DeleteAbsentTypeCommand {
-	private Long id;
+public class ListApprovalRuleCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
+	private Long pageAnchor;
+	private Integer pageSize;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -50,8 +46,25 @@ public class DeleteAbsentTypeCommand {
 		this.ownerId = ownerId;
 	}
 
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
 }

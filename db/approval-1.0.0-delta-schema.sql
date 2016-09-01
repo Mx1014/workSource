@@ -44,6 +44,7 @@ CREATE TABLE `eh_approval_rule_flow_map` (
 	`rule_id` BIGINT NOT NULL COMMENT 'id of rule',
 	`approval_type` TINYINT(4) NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
 	`flow_id` BIGINT NOT NULL COMMENT 'id of flow', 
+	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -73,8 +74,8 @@ CREATE TABLE `eh_approval_requests` (
 	`attachment_flag` TINYINT(4) NOT NULL DEFAULT '0' COMMENT 'if there are attachments, 0. no, 1. yes',
 	`time_flag` TINYINT(4) NOT NULL DEFAULT '0' COMMENT 'if there are time ranges, 0. no, 1. yes',
 	`flow_id` BIGINT COMMENT 'id of flow',
-	`current_level_id` BIGINT COMMENT 'id of current levle of flow',
-	`next_level_id` BIGINT COMMENT 'id of next level of flow',
+	`current_level` BIGINT COMMENT 'current levle of flow',
+	`next_level` BIGINT COMMENT 'next level of flow',
 	`approval_status` TINYINT(4) NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
 	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,

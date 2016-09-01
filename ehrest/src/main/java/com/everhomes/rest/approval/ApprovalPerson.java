@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>targetType: 目标类型，参考{@link com.everhomes.rest.approval.ApprovalTargetType}</li>
  * <li>targetId: 目标id</li>
- * <li>targetId: 目标名称</li>
+ * <li>targetName: 目标名称</li>
  * </ul>
  */
 public class ApprovalPerson {

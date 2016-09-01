@@ -13,4 +13,12 @@ public interface ApprovalFlowLevelProvider {
 
 	List<ApprovalFlowLevel> listApprovalFlowLevel();
 
+	List<ApprovalFlowLevel> listApprovalFlowLevel(Long flowId, Byte level);
+
+	void deleteApprovalLevels(Long flowId, Byte level);
+
+	List<ApprovalFlowLevel> listApprovalFlowLevelByFlowIds(List<Long> flowIdList);
+
+//	void createApprovalFlowLevelList(List<ApprovalFlowLevel> approvalFlowLevelList);
+
 }

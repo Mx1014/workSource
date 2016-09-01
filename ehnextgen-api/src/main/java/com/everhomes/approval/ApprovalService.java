@@ -9,15 +9,15 @@ import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.DeleteAbsentTypeCommand;
+import com.everhomes.rest.approval.DeleteAbsentCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.ListAbsentTypesCommand;
-import com.everhomes.rest.approval.ListAbsentTypesResponse;
-import com.everhomes.rest.approval.ListApprovalFlowsCommand;
-import com.everhomes.rest.approval.ListApprovalFlowsResponse;
-import com.everhomes.rest.approval.ListApprovalRulesCommand;
-import com.everhomes.rest.approval.ListApprovalRulesResponse;
+import com.everhomes.rest.approval.ListAbsentCategoryCommand;
+import com.everhomes.rest.approval.ListAbsentCategoryResponse;
+import com.everhomes.rest.approval.ListApprovalFlowCommand;
+import com.everhomes.rest.approval.ListApprovalFlowResponse;
+import com.everhomes.rest.approval.ListApprovalRuleCommand;
+import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateAbsentCategoryCommand;
 import com.everhomes.rest.approval.UpdateAbsentCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
@@ -33,9 +33,9 @@ public interface ApprovalService {
 
 	UpdateAbsentCategoryResponse updateAbsentCategory(UpdateAbsentCategoryCommand cmd);
 
-	ListAbsentTypesResponse listAbsentTypes(ListAbsentTypesCommand cmd);
+	ListAbsentCategoryResponse listAbsentCategory(ListAbsentCategoryCommand cmd);
 
-	void deleteAbsentType(DeleteAbsentTypeCommand cmd);
+	void deleteAbsentCategory(DeleteAbsentCategoryCommand cmd);
 
 	CreateApprovalFlowNameResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd);
 
@@ -45,7 +45,7 @@ public interface ApprovalService {
 
 	UpdateApprovalFlowLevelResponse updateApprovalFlowLevel(UpdateApprovalFlowLevelCommand cmd);
 
-	ListApprovalFlowsResponse listApprovalFlows(ListApprovalFlowsCommand cmd);
+	ListApprovalFlowResponse listApprovalFlow(ListApprovalFlowCommand cmd);
 
 	void deleteApprovalFlow(DeleteApprovalFlowCommand cmd);
 
@@ -55,6 +55,6 @@ public interface ApprovalService {
 
 	void deleteApprovalRule(DeleteApprovalRuleCommand cmd);
 
-	ListApprovalRulesResponse listApprovalRules(ListApprovalRulesCommand cmd);
+	ListApprovalRuleResponse listApprovalRule(ListApprovalRuleCommand cmd);
 
 }

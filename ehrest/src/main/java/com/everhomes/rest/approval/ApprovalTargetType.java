@@ -10,7 +10,7 @@ public enum ApprovalTargetType {
 		this.code = code;
 	}
 	
-	public ApprovalTargetType fromCode(Byte code){
+	public static ApprovalTargetType fromCode(Byte code){
 		if (code != null) {
 			for (ApprovalTargetType approvalTargetType : ApprovalTargetType.values()) {
 				if (approvalTargetType.getCode() == code.byteValue()) {

@@ -1,8 +1,32 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.cli.CliToolConfig.Cmd;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.AbsentCategoryDTO;
+import com.everhomes.rest.approval.ApprovalFlowDTO;
+import com.everhomes.rest.approval.ApprovalFlowLevelDTO;
+import com.everhomes.rest.approval.ApprovalOwnerType;
+import com.everhomes.rest.approval.ApprovalPerson;
+import com.everhomes.rest.approval.ApprovalTargetType;
+import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateAbsentCategoryCommand;
 import com.everhomes.rest.approval.CreateAbsentCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
@@ -11,15 +35,15 @@ import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.DeleteAbsentTypeCommand;
+import com.everhomes.rest.approval.DeleteAbsentCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.ListAbsentTypesCommand;
-import com.everhomes.rest.approval.ListAbsentTypesResponse;
-import com.everhomes.rest.approval.ListApprovalFlowsCommand;
-import com.everhomes.rest.approval.ListApprovalFlowsResponse;
-import com.everhomes.rest.approval.ListApprovalRulesCommand;
-import com.everhomes.rest.approval.ListApprovalRulesResponse;
+import com.everhomes.rest.approval.ListAbsentCategoryCommand;
+import com.everhomes.rest.approval.ListAbsentCategoryResponse;
+import com.everhomes.rest.approval.ListApprovalFlowCommand;
+import com.everhomes.rest.approval.ListApprovalFlowResponse;
+import com.everhomes.rest.approval.ListApprovalRuleCommand;
+import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateAbsentCategoryCommand;
 import com.everhomes.rest.approval.UpdateAbsentCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
@@ -28,60 +52,366 @@ import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.ListUtils;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class ApprovalServiceImpl implements ApprovalService {
+	
+	@Autowired
+	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ApprovalCategoryProvider approvalCategoryProvider;
+	
+	@Autowired
+	private ApprovalFlowProvider approvalFlowProvider;
+	
+	@Autowired
+	private ApprovalFlowLevelProvider approvalFlowLevelProvider;
+	
+	@Autowired
+	private ApprovalRuleFlowMapProvider approvalRuleFlowMapProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
 	@Override
 	public CreateAbsentCategoryResponse createAbsentCategory(CreateAbsentCategoryCommand cmd) {
-		return null;
+		Long userId = getUserId();
+		if (StringUtils.isBlank(cmd.getCategoryName())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"categoryName cannot be empty");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		ApprovalCategory category = ConvertHelper.convert(cmd, ApprovalCategory.class);
+		category.setApprovalType(ApprovalType.ASK_FOR_LEAVE.getCode());
+		category.setStatus(CommonStatus.ACTIVE.getCode());
+		category.setCreatorUid(userId);
+		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		approvalCategoryProvider.createApprovalCategory(category);
+		return new CreateAbsentCategoryResponse(ConvertHelper.convert(category, AbsentCategoryDTO.class));
 	}
 
 	@Override
 	public UpdateAbsentCategoryResponse updateAbsentCategory(UpdateAbsentCategoryCommand cmd) {
-		return null;
+		Long userId = getUserId();
+		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id and categoryName cannot be empty");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		category.setCategoryName(cmd.getCategoryName());
+		approvalCategoryProvider.updateApprovalCategory(category);
+		
+		return new UpdateAbsentCategoryResponse(ConvertHelper.convert(category, AbsentCategoryDTO.class));
+	}
+	
+	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId){
+		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
+		if (category.getNamespaceId().intValue() != namespaceId.intValue() || !ownerType.equals(category.getOwnerType())
+				|| category.getOwnerId().longValue() != ownerId.longValue() || category.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not exist category: categoryId="+id);
+		}
+		return category;
+	}
+	
+	@Override
+	public ListAbsentCategoryResponse listAbsentCategory(ListAbsentCategoryCommand cmd) {
+		Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalType.ASK_FOR_LEAVE.getCode());
+		
+		return new ListAbsentCategoryResponse(categoryList.stream().map(c->ConvertHelper.convert(c, AbsentCategoryDTO.class)).collect(Collectors.toList()));
 	}
 
 	@Override
-	public ListAbsentTypesResponse listAbsentTypes(ListAbsentTypesCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public void deleteAbsentType(DeleteAbsentTypeCommand cmd) {
+	public void deleteAbsentCategory(DeleteAbsentCategoryCommand cmd) {
+		Long userId = getUserId();
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id cannot be empty");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		category.setStatus(CommonStatus.INACTIVE.getCode());
+		approvalCategoryProvider.updateApprovalCategory(category);
 	}
 
 	@Override
 	public CreateApprovalFlowNameResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd) {
-		return null;
+		Long userId = getUserId();
+		if (StringUtils.isBlank(cmd.getName())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"name cannot be empty");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class);
+		approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
+		approvalFlow.setCreatorUid(userId);
+		approvalFlow.setOperatorUid(userId);
+		approvalFlow.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalFlow.setUpdateTime(approvalFlow.getCreateTime());
+		approvalFlowProvider.createApprovalFlow(approvalFlow);
+		
+		return new CreateApprovalFlowNameResponse(ConvertHelper.convert(approvalFlow, ApprovalFlowDTO.class));
 	}
 
 	@Override
 	public UpdateApprovalFlowNameResponse updateApprovalFlowName(UpdateApprovalFlowNameCommand cmd) {
-		return null;
+		Long userId = getUserId();
+		if (cmd.getId() == null || StringUtils.isBlank(cmd.getName())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id and name cannot be empty");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		approvalFlow.setName(cmd.getName());
+		approvalFlow.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalFlow.setOperatorUid(userId);
+		approvalFlowProvider.updateApprovalFlow(approvalFlow);
+		
+		return new UpdateApprovalFlowNameResponse(ConvertHelper.convert(approvalFlow, ApprovalFlowDTO.class));
+	}
+
+	private ApprovalFlow checkApprovalFlowExist(Long id, Integer namespaceId, String ownerType, Long ownerId) {
+		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowById(id);
+		if (approvalFlow.getNamespaceId().intValue() != namespaceId.intValue() || !ownerType.equals(approvalFlow.getOwnerType())
+				|| approvalFlow.getOwnerId().longValue() != ownerId.longValue() || approvalFlow.getStatus() != CommonStatus.ACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not exist approvalFlow: approvalFlowId="+id);
+		}
+		return approvalFlow;
 	}
 
 	@Override
 	public CreateApprovalFlowLevelResponse createApprovalFlowLevel(CreateApprovalFlowLevelCommand cmd) {
-		return null;
+		Long userId = getUserId();
+		if (cmd.getFlowId() == null || cmd.getLevel() == null || ListUtils.isEmpty(cmd.getApprovalPersonList())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: cmd="+cmd);
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if (checkCurrentLevelExist(cmd.getFlowId(), cmd.getLevel())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"current level exists, so you cannot create it again: flowId"+cmd.getFlowId()+", level="+cmd.getLevel());
+		}
+		if (!checkPreviousLevelExist(cmd.getFlowId(), cmd.getLevel())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"previous level does not exist, so you cannot create current level: flowId"+cmd.getFlowId()+", level="+cmd.getLevel());
+		}
+		
+		dbProvider.execute(s->{
+			createApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel(), cmd.getApprovalPersonList());
+			return true;
+		});
+		
+		processTargetName(cmd.getApprovalPersonList());
+		
+		return new CreateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalPersonList()));
+	}
+
+	private void createApprovalFlowLevel(Long flowId, Byte level, List<ApprovalPerson> approvalPersonList) {
+		approvalPersonList.forEach(a->{
+			if (ApprovalTargetType.fromCode(a.getTargetType()) == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"error target type: targetType="+a.getTargetType()+", targetId="+a.getTargetId());
+			}
+			ApprovalFlowLevel ap = new ApprovalFlowLevel();
+			ap.setFlowId(flowId);
+			ap.setLevel(level);
+			ap.setTargetType(a.getTargetType());
+			ap.setTargetId(a.getTargetId());
+			approvalFlowLevelProvider.createApprovalFlowLevel(ap);
+		});
+	}
+
+	private void processTargetName(List<ApprovalPerson> approvalPersonList) {
+		if (ListUtils.isEmpty(approvalPersonList)) {
+			return;
+		}
+		approvalPersonList.forEach(a->{
+			a.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));
+		});
+	}
+	
+	private String getTargetName(Byte targetType, Long targetId){
+		ApprovalTargetType approvalTargetType = ApprovalTargetType.fromCode(targetType);
+		switch (approvalTargetType) {
+		case USER:
+			User user = userProvider.findUserById(targetId);
+			if (user != null) {
+				return user.getNickName();
+			}
+			break;
+		default:
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error target type: targetType="+targetType+", targetId="+targetId);
+		}
+		return "";
+	}
+
+	private boolean checkCurrentLevelExist(Long flowId, Byte level) {
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(flowId, level);
+		if (ListUtils.isNotEmpty(approvalFlowLevelList)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkPreviousLevelExist(Long flowId, Byte level) {
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(flowId, (byte) (level-1));
+		if (ListUtils.isNotEmpty(approvalFlowLevelList)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkNextLevelExist(Long flowId, Byte level) {
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(flowId, (byte) (level+1));
+		if (ListUtils.isNotEmpty(approvalFlowLevelList)) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public UpdateApprovalFlowLevelResponse updateApprovalFlowLevel(UpdateApprovalFlowLevelCommand cmd) {
-		return null;
+		Long userId = getUserId();
+		if (cmd.getFlowId() == null || cmd.getLevel() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: cmd="+cmd);
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if (!checkCurrentLevelExist(cmd.getFlowId(), cmd.getLevel())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"current level does not exist, so you cannot update it: flowId"+cmd.getFlowId()+", level="+cmd.getLevel());
+		}
+		
+		dbProvider.execute(s->{
+			approvalFlowLevelProvider.deleteApprovalLevels(cmd.getFlowId(), cmd.getLevel());
+			if (ListUtils.isNotEmpty(cmd.getApprovalPersonList())) {
+				createApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel(), cmd.getApprovalPersonList());
+			}else {
+				if (checkNextLevelExist(cmd.getFlowId(), cmd.getLevel())) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"next level exists, so you cannot update this level to empty: flowId"+cmd.getFlowId()+", level="+cmd.getLevel());
+				}
+			}
+			return true;
+		});
+
+		processTargetName(cmd.getApprovalPersonList());
+		
+		return new UpdateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalPersonList()));
 	}
 
 	@Override
-	public ListApprovalFlowsResponse listApprovalFlows(ListApprovalFlowsCommand cmd) {
-		return null;
+	public ListApprovalFlowResponse listApprovalFlow(ListApprovalFlowCommand cmd) {
+		Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<ApprovalFlow> approvalFlowList = approvalFlowProvider.listApprovalFlow(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
+		
+		Long nextPageAnchor = null;
+		if (approvalFlowList.size() > pageSize) {
+			approvalFlowList.remove(approvalFlowList.size()-1);
+			nextPageAnchor = approvalFlowList.get(approvalFlowList.size()-1).getId();
+		}
+		
+		//处理每个审批流程中每级设置的人
+		List<ApprovalFlowDTO> list = processApprovalFlowLevelList(approvalFlowList);
+		
+		return new ListApprovalFlowResponse(nextPageAnchor, list);
+	}
+
+	private List<ApprovalFlowDTO> processApprovalFlowLevelList(final List<ApprovalFlow> approvalFlowList) {
+		final List<ApprovalFlowDTO> resultList = new ArrayList<>();
+		final List<Long> flowIdList = new ArrayList<>();
+		final Map<Long, ApprovalFlowDTO> flowMap = new HashMap<>();
+		approvalFlowList.forEach(a->{
+			ApprovalFlowDTO ad = ConvertHelper.convert(a, ApprovalFlowDTO.class);
+			flowIdList.add(a.getId());
+			//注意，resultList与flowMap中存储的是同样的对象
+			resultList.add(ad);
+			flowMap.put(a.getId(), ad);
+		});
+		
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByFlowIds(flowIdList);
+		//把平行的记录分组，先按flowId分组，再按level分组，最后的小分组中存储的就是每个flowId每个level中的人员
+		Map<Long, Map<Byte,List<ApprovalFlowLevel>>> map = approvalFlowLevelList.stream().collect(Collectors.groupingBy(ApprovalFlowLevel::getFlowId, Collectors.groupingBy(ApprovalFlowLevel::getLevel)));
+		map.forEach((k1, v1)->{
+			//k1为flowId
+			final List<ApprovalFlowLevelDTO> levelList = new ArrayList<>();
+			v1.forEach((k2,v2)->{
+				//k2为level
+				List<ApprovalPerson> approvalPersonList = v2.stream().map(a->{
+																ApprovalPerson approvalPerson = new ApprovalPerson();
+																approvalPerson.setTargetType(a.getTargetType());
+																approvalPerson.setTargetId(a.getId());
+																approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));
+																return approvalPerson;
+															}).collect(Collectors.toList());
+				levelList.add(new ApprovalFlowLevelDTO(k2, approvalPersonList));
+			});
+			flowMap.get(k1).setLevelList(levelList);
+		});
+		
+		//因为resultList与flowMap中存储的是同样的对象，所以flowMap处理完了，resultList也就处理完了
+		return resultList;
 	}
 
 	@Override
 	public void deleteApprovalFlow(DeleteApprovalFlowCommand cmd) {
+		Long userId = getUserId();
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id cannot be empty");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalRuleFlowMapExists(cmd.getId());
+		approvalFlow.setStatus(CommonStatus.INACTIVE.getCode());
+		approvalFlow.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalFlowProvider.updateApprovalFlow(approvalFlow);
+	}
+
+	private void checkApprovalRuleFlowMapExists(Long flowId) {
+		ApprovalRuleFlowMap approvalRuleFlowMap= approvalRuleFlowMapProvider.findOneApprovalRuleFlowMapByFlowId(flowId);
+		if (approvalRuleFlowMap != null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"This flow has related to some rules, so you cannot delete it: flowId="+flowId);
+		}
 	}
 
 	@Override
 	public CreateApprovalRuleResponse createApprovalRule(CreateApprovalRuleCommand cmd) {
+		
 		return null;
 	}
 
@@ -95,8 +425,55 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public ListApprovalRulesResponse listApprovalRules(ListApprovalRulesCommand cmd) {
+	public ListApprovalRuleResponse listApprovalRule(ListApprovalRuleCommand cmd) {
 		return null;
 	}
+	
+	private Long getUserId(){
+		return UserContext.current().getUser().getId();
+	}
+	
+	private void checkPrivilege(Long userId, Integer namespaceId, String ownerType, Long ownerId){
+		if (namespaceId == null || StringUtils.isBlank(ownerType) || ownerId == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters, namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
+		}
+		
+		checkNamespaceExist(namespaceId);
+		checkOwnerExist(namespaceId, ownerType, ownerId);
+	}
 
+	private void checkNamespaceExist(Integer namespaceId) {
+		if (namespaceProvider.findNamespaceById(namespaceId) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not exist namespace: "+namespaceId);
+		}
+	}
+
+	private void checkOwnerExist(Integer namespaceId, String ownerType, Long ownerId) {
+		ApprovalOwnerType approvalOwnerType = null;
+
+		if ((approvalOwnerType = ApprovalOwnerType.fromCode(ownerType)) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Not exist ownerType: "+ownerType);
+		}
+		
+		switch (approvalOwnerType) {
+		case ORGANIZATION:
+			Organization organization = organizationProvider.findOrganizationById(ownerId);
+			if (organization == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Not exist organization: "+ownerId);
+			}
+			if (organization.getNamespaceId().intValue() != namespaceId.intValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the organization is beyond the namespace: namespaceId="+namespaceId+", organizationId"+ownerId);
+			}
+			break;
+		default:
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error ownerType: "+ownerType);
+		}
+		
+	}
 }

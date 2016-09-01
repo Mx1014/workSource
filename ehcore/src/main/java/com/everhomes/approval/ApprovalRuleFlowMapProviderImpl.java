@@ -4,6 +4,8 @@ package com.everhomes.approval;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +57,20 @@ public class ApprovalRuleFlowMapProviderImpl implements ApprovalRuleFlowMapProvi
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalRuleFlowMap.class));
 	}
 	
+	@Override
+	public ApprovalRuleFlowMap findOneApprovalRuleFlowMapByFlowId(Long flowId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULE_FLOW_MAP)
+				.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.FLOW_ID.eq(flowId))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, ApprovalRuleFlowMap.class);
+		}
+		
+		return null;
+	}
+
 	private EhApprovalRuleFlowMapDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
