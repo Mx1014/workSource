@@ -1286,7 +1286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
     public ListPostCommandResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
-	    
+		ListPostCommandResponse response = new ListPostCommandResponse();
 	    OrganizationTopicMixType mixType = OrganizationTopicMixType.fromCode(cmd.getMixType());
 	    if(mixType == null) {
 	        LOGGER.error("Invalid mix type, cmd=" + cmd);
@@ -1326,23 +1326,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                     forumIdList.add(groupDto.getOwningForumId());
                 }
             }
+    	    ListTopicByForumCommand forumCmd = new ListTopicByForumCommand();
+    	    forumCmd.setForumIdList(forumIdList);
+    	    forumCmd.setPageAnchor(cmd.getPageAnchor());
+    	    forumCmd.setPageSize(cmd.getPageSize());
+    	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
+    	    response = forumService.listTopicsByForums(forumCmd);
 	        break;
 	    case COMMUNITY_ALL:
-	        List<CommunityDTO> communities = listAllChildrenOrganizationCoummunities(organizationId);
-            for(CommunityDTO community : communities) {
-                if(community != null) {
-                    forumIdList.add(community.getDefaultForumId());
-                }
-            }
+	    	QueryOrganizationTopicCommand command = ConvertHelper.convert(cmd, QueryOrganizationTopicCommand.class);
+	    	command.setOrganizationId(organizationId);
+	    	response = forumService.listOrgTopics(command);
 	        break;
 	    }
 
-	    ListTopicByForumCommand forumCmd = new ListTopicByForumCommand();
-	    forumCmd.setForumIdList(forumIdList);
-	    forumCmd.setPageAnchor(cmd.getPageAnchor());
-	    forumCmd.setPageSize(cmd.getPageSize());
-	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
-	    return forumService.listTopicsByForums(forumCmd);
+	    return response;
 	}
 
 	@Override
@@ -7070,9 +7068,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), finalOrganizationId);
 //			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
 //				if(null == desOrgMember){
-////					LOGGER.error("phone number already exists. organizationId = {}", finalOrganizationId);
-////					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
-////							"phone number already exists.");
+//					LOGGER.error("phone number already exists. organizationId = {}", finalOrganizationId);
+//					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+//							"phone number already exists.");
 //				}
 //				organizationMember.setOrganizationId(finalOrganizationId);
 //				organizationProvider.createOrganizationMember(organizationMember);
@@ -7083,6 +7081,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationMember.setOrganizationId(finalOrganizationId);
 			if(null == desOrgMember){
 				organizationProvider.createOrganizationMember(organizationMember);
+				
+				// 设置成创建
+				organizationMember.setCreate(true);
 			}else{
 				organizationMember.setId(desOrgMember.getId());
 				organizationProvider.updateOrganizationMember(organizationMember);
@@ -7125,9 +7126,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-//			userSearcher.feedDoc(organizationMember);
+			userSearcher.feedDoc(organizationMember);
+			
+			// 如果是往公司添加新成员就需要发消息
+			if(organizationMember.isCreate())sendMessageForContactApproved(organizationMember);
 		}
-		sendMessageForContactApproved(organizationMember);
+		
 		return dto;
 	}
 	

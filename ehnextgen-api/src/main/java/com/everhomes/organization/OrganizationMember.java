@@ -16,6 +16,8 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	
 	private java.lang.Long creatorUid;
 	
+	private boolean isCreate;
+	
 	private static final long serialVersionUID = 2994038655987093227L;
 
 	public OrganizationMember() {
@@ -97,6 +99,20 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	public int compareTo(OrganizationMember organizationMember) {
 	    return this.initial.compareTo(organizationMember.getInitial());
 	}
+	
+	
+
+	public boolean isCreate() {
+		return isCreate;
+	}
+
+
+
+	public void setCreate(boolean isCreate) {
+		this.isCreate = isCreate;
+	}
+
+
 
 	@Override
     public String toString() {

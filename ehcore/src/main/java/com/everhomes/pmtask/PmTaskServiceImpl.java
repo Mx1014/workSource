@@ -897,7 +897,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		response.setTotalCount(totalCount);
 		response.setEvaluateCount(evaluateCount);
-		response.setAvgScore((float) totalStar/evaluateCount);
+		float avgStar = evaluateCount!=0?(float) (totalStar/evaluateCount):0;
+		response.setAvgScore(avgStar);
 		response.setEvaluates(evaluates);
 		response.setCategoryTaskStatistics(categoryTaskStatistics);
 		
