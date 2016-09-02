@@ -12,18 +12,16 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 参数：
  * <li>sceneToken: 场景</li>
- * <li>categoryId: 请假类型id</li>
- * <li>reason: 请假理由</li>
- * <li>timeRangeList: 时间列表，参考{@link com.everhomes.rest.approval.TimeRange}</li>
- * <li>attachmentList: 附件列表，参考{@link com.everhomes.rest.news.AttachmentDescriptor}</li>
+ * <li>punchDate: 打卡日期时间戳</li>
+ * <li>reason: 申请理由</li>
+ * <li>attachmentList: 附件列表，参考
+ * {@link com.everhomes.rest.news.AttachmentDescriptor}</li>
  * </ul>
  */
-public class CreateAskForLeaveRequestCommand {
+public class CreateForgetToPunchRequestBySceneCommand {
 	private String sceneToken;
-	private Long categoryId;
+	private Long punchDate;
 	private String reason;
-	@ItemType(TimeRange.class)
-	private List<TimeRange> timeRangeList;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachmentList;
 
@@ -35,12 +33,12 @@ public class CreateAskForLeaveRequestCommand {
 		this.sceneToken = sceneToken;
 	}
 
-	public Long getCategoryId() {
-		return categoryId;
+	public Long getPunchDate() {
+		return punchDate;
 	}
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setPunchDate(Long punchDate) {
+		this.punchDate = punchDate;
 	}
 
 	public String getReason() {
@@ -49,14 +47,6 @@ public class CreateAskForLeaveRequestCommand {
 
 	public void setReason(String reason) {
 		this.reason = reason;
-	}
-
-	public List<TimeRange> getTimeRangeList() {
-		return timeRangeList;
-	}
-
-	public void setTimeRangeList(List<TimeRange> timeRangeList) {
-		this.timeRangeList = timeRangeList;
 	}
 
 	public List<AttachmentDescriptor> getAttachmentList() {
@@ -70,5 +60,4 @@ public class CreateAskForLeaveRequestCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	}
-}
+	}}

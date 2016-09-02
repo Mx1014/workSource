@@ -102,6 +102,7 @@ CREATE TABLE `eh_approval_time_ranges` (
 	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g application_id',
 	`from_time` DATETIME NOT NULL COMMENT 'must store concrete time',
 	`end_time` DATETIME NOT NULL COMMENT 'must store concrete time',
+	`type` TINYINT NOT NULL COMMENT '1. all day, 2. morning half day, 3. afternoon half day, 4. time',
 	`creator_uid` BIGINT NOT NULL,
 	`create_time` DATETIME, 
 	PRIMARY KEY (`id`)

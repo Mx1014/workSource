@@ -49,7 +49,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>增加请假类型</p>
+	 * <p>1.增加请假类型</p>
 	 * <b>URL: /approval/createAskForLeaveCategory</b>
 	 */
 	@RequestMapping("createAskForLeaveCategory")
@@ -60,7 +60,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>更新请假类型</p>
+	 * <p>2.更新请假类型</p>
 	 * <b>URL: /approval/updateAskForLeaveCategory</b>
 	 */
 	@RequestMapping("updateAskForLeaveCategory")
@@ -71,7 +71,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>列出请假类型</p>
+	 * <p>3.列出请假类型</p>
 	 * <b>URL: /approval/listAskForLeaveCategory</b>
 	 */
 	@RequestMapping("listAskForLeaveCategory")
@@ -82,7 +82,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>删除请假类型</p>
+	 * <p>4.删除请假类型</p>
 	 * <b>URL: /approval/deleteAskForLeaveCategory</b>
 	 */
 	@RequestMapping("deleteAskForLeaveCategory")
@@ -94,7 +94,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>设置审批流程名称</p>
+	 * <p>5.设置审批流程名称</p>
 	 * <b>URL: /approval/createApprovalFlowName</b>
 	 */
 	@RequestMapping("createApprovalFlowName")
@@ -105,7 +105,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>更新审批流程名称</p>
+	 * <p>6.更新审批流程名称</p>
 	 * <b>URL: /approval/updateApprovalFlowName</b>
 	 */
 	@RequestMapping("updateApprovalFlowName")
@@ -116,7 +116,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>设置审批流程级别</p>
+	 * <p>7.设置审批流程级别</p>
 	 * <b>URL: /approval/createApprovalFlowLevel</b>
 	 */
 	@RequestMapping("createApprovalFlowLevel")
@@ -127,7 +127,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>更新审批流程级别</p>
+	 * <p>8.更新审批流程级别</p>
 	 * <b>URL: /approval/updateApprovalFlowLevel</b>
 	 */
 	@RequestMapping("updateApprovalFlowLevel")
@@ -138,7 +138,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>审批流程列表</p>
+	 * <p>9.审批流程列表</p>
 	 * <b>URL: /approval/listApprovalFlow</b>
 	 */
 	@RequestMapping("listApprovalFlow")
@@ -149,7 +149,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>审批流程简短列表</p>
+	 * <p>10.审批流程简短列表</p>
 	 * <b>URL: /approval/listBriefApprovalFlow</b>
 	 */
 	@RequestMapping("listBriefApprovalFlow")
@@ -160,7 +160,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>删除审批流程</p>
+	 * <p>11.删除审批流程</p>
 	 * <b>URL: /approval/deleteApprovalFlow</b>
 	 */
 	@RequestMapping("deleteApprovalFlow")
@@ -172,7 +172,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>增加审批规则</p>
+	 * <p>12.增加审批规则</p>
 	 * <b>URL: /approval/createApprovalRule</b>
 	 */
 	@RequestMapping("createApprovalRule")
@@ -183,7 +183,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>增加审批规则</p>
+	 * <p>13.更新审批规则</p>
 	 * <b>URL: /approval/updateApprovalRule</b>
 	 */
 	@RequestMapping("updateApprovalRule")
@@ -194,7 +194,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>删除审批规则</p>
+	 * <p>14.删除审批规则</p>
 	 * <b>URL: /approval/deleteApprovalRule</b>
 	 */
 	@RequestMapping("deleteApprovalRule")
@@ -206,7 +206,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>审批规则列表</p>
+	 * <p>15.审批规则列表</p>
 	 * <b>URL: /approval/listApprovalRule</b>
 	 */
 	@RequestMapping("listApprovalRule")
@@ -217,7 +217,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>审批规则简短列表</p>
+	 * <p>16.审批规则简短列表</p>
 	 * <b>URL: /approval/listBriefApprovalRule</b>
 	 */
 	@RequestMapping("listBriefApprovalRule")
