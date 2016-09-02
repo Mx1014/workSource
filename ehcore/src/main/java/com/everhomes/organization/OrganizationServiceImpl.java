@@ -7126,10 +7126,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			userSearcher.feedDoc(organizationMember);
+//			userSearcher.feedDoc(organizationMember);
 			
 			// 如果是往公司添加新成员就需要发消息
-			if(organizationMember.isCreate())sendMessageForContactApproved(organizationMember);
+			if(organizationMember.isCreate()){
+				organizationMember.setOrganizationId(finalOrganizationId);
+				sendMessageForContactApproved(organizationMember);
+			}
 		}
 		
 		return dto;
