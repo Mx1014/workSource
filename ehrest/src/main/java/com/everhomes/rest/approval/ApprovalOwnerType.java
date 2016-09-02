@@ -3,6 +3,12 @@ package com.everhomes.rest.approval;
 
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * 
+ * <ul>审批所属者类型
+ * <li>ORGANIZATION: organization，组织</li>
+ * </ul>
+ */
 public enum ApprovalOwnerType {
 	ORGANIZATION("organization");
 	

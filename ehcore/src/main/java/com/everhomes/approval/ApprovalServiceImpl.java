@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,6 @@ import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.approval.AbsentCategoryDTO;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
 import com.everhomes.rest.approval.ApprovalFlowLevelDTO;
 import com.everhomes.rest.approval.ApprovalOwnerType;
@@ -30,33 +28,34 @@ import com.everhomes.rest.approval.ApprovalRuleDTO;
 import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.AskForLeaveCategoryDTO;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.CreateAbsentCategoryCommand;
-import com.everhomes.rest.approval.CreateAbsentCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.DeleteAbsentCategoryCommand;
+import com.everhomes.rest.approval.CreateAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.CreateAskForLeaveCategoryResponse;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.ListAbsentCategoryCommand;
-import com.everhomes.rest.approval.ListAbsentCategoryResponse;
+import com.everhomes.rest.approval.DeleteAskForLeaveCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
+import com.everhomes.rest.approval.ListAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.ListAskForLeaveCategoryResponse;
 import com.everhomes.rest.approval.RuleFlowMap;
-import com.everhomes.rest.approval.UpdateAbsentCategoryCommand;
-import com.everhomes.rest.approval.UpdateAbsentCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.UpdateAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.UpdateAskForLeaveCategoryResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -102,7 +101,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private ConfigurationProvider configurationProvider;
 
 	@Override
-	public CreateAbsentCategoryResponse createAbsentCategory(CreateAbsentCategoryCommand cmd) {
+	public CreateAskForLeaveCategoryResponse createAskForLeaveCategory(CreateAskForLeaveCategoryCommand cmd) {
 		Long userId = getUserId();
 		if (StringUtils.isBlank(cmd.getCategoryName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -117,11 +116,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
 		approvalCategoryProvider.createApprovalCategory(category);
-		return new CreateAbsentCategoryResponse(ConvertHelper.convert(category, AbsentCategoryDTO.class));
+		return new CreateAskForLeaveCategoryResponse(ConvertHelper.convert(category, AskForLeaveCategoryDTO.class));
 	}
 
 	@Override
-	public UpdateAbsentCategoryResponse updateAbsentCategory(UpdateAbsentCategoryCommand cmd) {
+	public UpdateAskForLeaveCategoryResponse updateAskForLeaveCategory(UpdateAskForLeaveCategoryCommand cmd) {
 		Long userId = getUserId();
 		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -132,13 +131,14 @@ public class ApprovalServiceImpl implements ApprovalService {
 		category.setCategoryName(cmd.getCategoryName());
 		approvalCategoryProvider.updateApprovalCategory(category);
 		
-		return new UpdateAbsentCategoryResponse(ConvertHelper.convert(category, AbsentCategoryDTO.class));
+		return new UpdateAskForLeaveCategoryResponse(ConvertHelper.convert(category, AskForLeaveCategoryDTO.class));
 	}
 	
 	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId){
 		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
 		if (category == null || category.getNamespaceId().intValue() != namespaceId.intValue() || !ownerType.equals(category.getOwnerType())
-				|| category.getOwnerId().longValue() != ownerId.longValue() || category.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
+				|| category.getOwnerId().longValue() != ownerId.longValue() || category.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()
+				|| category.getApprovalType().byteValue() != ApprovalType.ASK_FOR_LEAVE.getCode()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not exist category: categoryId="+id+", namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
 		}
@@ -146,17 +146,17 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 	
 	@Override
-	public ListAbsentCategoryResponse listAbsentCategory(ListAbsentCategoryCommand cmd) {
+	public ListAskForLeaveCategoryResponse listAskForLeaveCategory(ListAskForLeaveCategoryCommand cmd) {
 		Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalType.ASK_FOR_LEAVE.getCode());
 		
-		return new ListAbsentCategoryResponse(categoryList.stream().map(c->ConvertHelper.convert(c, AbsentCategoryDTO.class)).collect(Collectors.toList()));
+		return new ListAskForLeaveCategoryResponse(categoryList.stream().map(c->ConvertHelper.convert(c, AskForLeaveCategoryDTO.class)).collect(Collectors.toList()));
 	}
 
 	@Override
-	public void deleteAbsentCategory(DeleteAbsentCategoryCommand cmd) {
+	public void deleteAskForLeaveCategory(DeleteAskForLeaveCategoryCommand cmd) {
 		Long userId = getUserId();
 		if (cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -427,7 +427,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"Invalid parameters: cmd="+cmd);
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		
+		checkApprovalRuleNameRepetition(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
 		final ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
 		dbProvider.execute(s->{
 			createApprovalRule(userId, approvalRule);
@@ -441,6 +441,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalRuleDTO.setRuleFlowMapList(cmd.getRuleFlowMapList());
 		
 		return new CreateApprovalRuleResponse(approvalRuleDTO);
+	}
+
+	private void checkApprovalRuleNameRepetition(Long userId, Integer namespaceId, String ownerType, Long ownerId,
+			String ruleName) {
+		ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleByName(namespaceId, ownerType, ownerId, ruleName);
+		if (approvalRule != null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"repeated rule name, ruleName="+ruleName);
+		}
 	}
 
 	private void processApprovalTypeName(List<RuleFlowMap> ruleFlowMapList) {

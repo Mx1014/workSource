@@ -15,4 +15,6 @@ public interface ApprovalRuleProvider {
 
 	List<ApprovalRule> listApprovalRule(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, int pageSize);
 
+	ApprovalRule findApprovalRuleByName(Integer namespaceId, String ownerType, Long ownerId, String ruleName);
+
 }

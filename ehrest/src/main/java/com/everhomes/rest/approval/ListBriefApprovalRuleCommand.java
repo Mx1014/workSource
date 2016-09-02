@@ -5,26 +5,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>返回值:
- * <li>id: id</li>
+ * <ul>
+ * 参数:
  * <li>namespaceId: 域空间ID</li>
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}
+ * </li>
  * <li>ownerId: 所属者ID</li>
  * </ul>
  */
-public class DeleteAbsentCategoryCommand {
-	private Long id;
+public class ListBriefApprovalRuleCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -54,4 +46,5 @@ public class DeleteAbsentCategoryCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
 }

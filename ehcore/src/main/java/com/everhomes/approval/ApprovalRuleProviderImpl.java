@@ -85,6 +85,22 @@ public class ApprovalRuleProviderImpl implements ApprovalRuleProvider {
 		return new ArrayList<ApprovalRule>();
 	}
 
+	@Override
+	public ApprovalRule findApprovalRuleByName(Integer namespaceId, String ownerType, Long ownerId, String ruleName) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULES)
+							.where(Tables.EH_APPROVAL_RULES.NAMESPACE_ID.eq(namespaceId))
+							.and(Tables.EH_APPROVAL_RULES.OWNER_TYPE.eq(ownerType))
+							.and(Tables.EH_APPROVAL_RULES.OWNER_ID.eq(ownerId))
+							.and(Tables.EH_APPROVAL_RULES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+							.and(Tables.EH_APPROVAL_RULES.NAME.eq(ruleName))
+							.limit(1)
+							.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, ApprovalRule.class);
+		}
+		return null;
+	}
+
 	private EhApprovalRulesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -1,25 +1,25 @@
 // @formatter:off
 package com.everhomes.approval;
 
-import com.everhomes.rest.approval.CreateAbsentCategoryCommand;
-import com.everhomes.rest.approval.CreateAbsentCategoryResponse;
+import com.everhomes.rest.approval.CreateAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.CreateAskForLeaveCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.DeleteAbsentCategoryCommand;
+import com.everhomes.rest.approval.DeleteAskForLeaveCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.ListAbsentCategoryCommand;
-import com.everhomes.rest.approval.ListAbsentCategoryResponse;
+import com.everhomes.rest.approval.ListAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.ListAskForLeaveCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
-import com.everhomes.rest.approval.UpdateAbsentCategoryCommand;
-import com.everhomes.rest.approval.UpdateAbsentCategoryResponse;
+import com.everhomes.rest.approval.UpdateAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.UpdateAskForLeaveCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
@@ -29,13 +29,13 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 
 public interface ApprovalService {
 
-	CreateAbsentCategoryResponse createAbsentCategory(CreateAbsentCategoryCommand cmd);
+	CreateAskForLeaveCategoryResponse createAskForLeaveCategory(CreateAskForLeaveCategoryCommand cmd);
 
-	UpdateAbsentCategoryResponse updateAbsentCategory(UpdateAbsentCategoryCommand cmd);
+	UpdateAskForLeaveCategoryResponse updateAskForLeaveCategory(UpdateAskForLeaveCategoryCommand cmd);
 
-	ListAbsentCategoryResponse listAbsentCategory(ListAbsentCategoryCommand cmd);
+	ListAskForLeaveCategoryResponse listAskForLeaveCategory(ListAskForLeaveCategoryCommand cmd);
 
-	void deleteAbsentCategory(DeleteAbsentCategoryCommand cmd);
+	void deleteAskForLeaveCategory(DeleteAskForLeaveCategoryCommand cmd);
 
 	CreateApprovalFlowNameResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd);
 

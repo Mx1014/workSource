@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListApprovalFlowResponse {
 	private Long nextPageAnchor;
+	@ItemType(ApprovalFlowDTO.class)
 	private List<ApprovalFlowDTO> approvalFlowList;
 
 	public ListApprovalFlowResponse(Long nextPageAnchor, List<ApprovalFlowDTO> approvalFlowList) {

@@ -5,18 +5,29 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>参数:
+ * <ul>
+ * <li>id: id</li>
  * <li>namespaceId: 域空间ID</li>
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}
+ * </li>
  * <li>ownerId: 所属者ID</li>
- * <li>categoryName: 类别名称</li>
+ * <li>name: 审批规则名称</li>
  * </ul>
  */
-public class CreateAbsentCategoryCommand {
+public class BriefApprovalRuleDTO {
+	private Long id;
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private String categoryName;
+	private String name;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -42,12 +53,12 @@ public class CreateAbsentCategoryCommand {
 		this.ownerId = ownerId;
 	}
 
-	public String getCategoryName() {
-		return categoryName;
+	public String getName() {
+		return name;
 	}
 
-	public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override
