@@ -477,8 +477,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	        addCmd.setOwnerId(cmd.getOwnerId());
 	        addCmd.setResourceTypeId(cmd.getResourceTypeId());
 	        addCmd.setExclusiveFlag(NormalFlag.NONEED.getCode());
-	        addCmd.setUnit(0.5);
-	        addCmd.setAutoAssign(NormalFlag.NEED.getCode());
+	        addCmd.setUnit(1.0);
+	        addCmd.setAutoAssign(NormalFlag.NONEED.getCode());
 	        addCmd.setMultiUnit(NormalFlag.NEED.getCode());
 	        addCmd.setNeedPay(NormalFlag.NEED.getCode());
 	        addCmd.setMultiTimeInterval(NormalFlag.NEED.getCode());
