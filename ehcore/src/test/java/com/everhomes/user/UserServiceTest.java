@@ -98,7 +98,7 @@ public class UserServiceTest extends CoreServerTestCase {
     
     @Ignore @Test
     public void testLoginToken() {
-        LoginToken token = new LoginToken(1, 1, 100);
+        LoginToken token = new LoginToken(1, 1, 100, null);
         String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
         
         LoginToken token2 = WebTokenGenerator.getInstance().fromWebToken(tokenString, LoginToken.class);
@@ -145,7 +145,7 @@ public class UserServiceTest extends CoreServerTestCase {
         cmd.setDeviceIdentifier("virtual device");
         UserLogin login = this.userService.verifyAndLogon(cmd);
         
-        LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+        LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
         System.out.println("Login token: " + WebTokenGenerator.getInstance().toWebToken(loginToken));
     }
     

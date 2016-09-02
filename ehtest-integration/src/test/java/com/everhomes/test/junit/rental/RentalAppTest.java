@@ -1,4 +1,4 @@
-package com.everhomes.test.junit.rental;
+/*package com.everhomes.test.junit.rental;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -582,3 +582,4 @@ public class RentalAppTest extends BaseLoginAuthTestCase {
 	}
 
 }
+*/

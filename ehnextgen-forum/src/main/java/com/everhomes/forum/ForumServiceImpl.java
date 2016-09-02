@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -320,9 +321,9 @@ public class ForumServiceImpl implements ForumService {
          */
         if(null != cmd.getEmbeddedAppId() && AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId()){
         	if(VisibleRegionType.COMMUNITY == VisibleRegionType.fromCode(cmd.getVisibleRegionType())) {
-				this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.COMMUNITY.getCode(), communityId);
+				this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.COMMUNITY.getCode(), communityId, post.getSubject());
             }else if(VisibleRegionType.REGION == VisibleRegionType.fromCode(cmd.getVisibleRegionType())){
-            	this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), cmd.getVisibleRegionId());
+            	this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), cmd.getVisibleRegionId(), post.getSubject());
             }
         	
         }
@@ -370,17 +371,18 @@ public class ForumServiceImpl implements ForumService {
 		return null;
 	}
     
-    private void sendTaskMsgToMembers(String taskType, String ownerType, Long ownerId){
+    private void sendTaskMsgToMembers(String taskType, String ownerType, Long ownerId, String subject){
     	
     	User user = UserContext.current().getUser();
     	Integer namespaceId = UserContext.getCurrentNamespaceId();
     	
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
     	
-    	Map<String,Object> map = new HashMap<String, Object>();
+    	Map<String,Object> map = new LinkedHashMap<String, Object>();
     	
     	map.put("createUName", user.getNickName());
     	map.put("createUToken", userIdentifier.getIdentifierToken());
+    	map.put("subject", subject);
     	
     	String msg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_NEW, user.getLocale(), map, "");
     	
@@ -1300,7 +1302,7 @@ public class ForumServiceImpl implements ForumService {
         
         if(null != cmd.getEmbeddedAppId()){
         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
-        		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+        		categorys = CategoryConstants.GA_PRIVACY_CATEGORIES;
         	}
         	
         }

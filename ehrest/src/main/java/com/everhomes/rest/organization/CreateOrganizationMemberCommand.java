@@ -1,8 +1,11 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -32,10 +35,10 @@ public class CreateOrganizationMemberCommand {
 	private Byte   contactType;
 	private String contactToken;
 	private String contactDescription;
-	
-	private Long groupId;
 	private Byte gender;
 	private String employeeNo;
+	
+	private Long groupId;
 	
 	public CreateOrganizationMemberCommand() {
     }
@@ -92,16 +95,6 @@ public class CreateOrganizationMemberCommand {
 	public void setContactDescription(String contactDescription) {
 		this.contactDescription = contactDescription;
 	}
-	
-	
-	public Long getGroupId() {
-		return groupId;
-	}
-
-	public void setGroupId(Long groupId) {
-		this.groupId = groupId;
-	}
-	
 
 	public Byte getGender() {
 		return gender;
@@ -117,6 +110,15 @@ public class CreateOrganizationMemberCommand {
 
 	public void setEmployeeNo(String employeeNo) {
 		this.employeeNo = employeeNo;
+	}
+
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
 	}
 
 	@Override

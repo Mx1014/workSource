@@ -19,6 +19,10 @@ public class BizRefundOrder {
 	private Byte payType;
 	
 	private Byte shopCreateType;
+	
+	private Long modelId;
+	
+	private Integer refundQuantity;
 
 	public String getRefundOrderNo() {
 		return refundOrderNo;
@@ -82,6 +86,22 @@ public class BizRefundOrder {
 
 	public void setShopCreateType(Byte shopCreateType) {
 		this.shopCreateType = shopCreateType;
+	}
+
+	public Long getModelId() {
+		return modelId;
+	}
+
+	public void setModelId(Long modelId) {
+		this.modelId = modelId;
+	}
+
+	public Integer getRefundQuantity() {
+		return refundQuantity;
+	}
+
+	public void setRefundQuantity(Integer refundQuantity) {
+		this.refundQuantity = refundQuantity;
 	}
 
 	

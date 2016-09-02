@@ -24,6 +24,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
@@ -38,6 +39,8 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
@@ -142,21 +145,31 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public YellowPageDTO getYellowPageDetail(GetYellowPageDetailCommand cmd) { 
-		 
-		YellowPage yellowPage = this.yellowPageProvider.getYellowPageById(cmd.getId());
-	
-		populateYellowPage(yellowPage);
 		YellowPageDTO response = null;
-		if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
-			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-			response = ConvertHelper.convert(serviceAlliance,YellowPageDTO.class);
-		} 
-		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
-			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
-			response = ConvertHelper.convert(makerZone,YellowPageDTO.class);
-		} 
-		else{
-				response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
+		if(cmd.getType() != null && cmd.getType().byteValue() > 10) {
+			GetServiceAllianceEnterpriseDetailCommand command = ConvertHelper.convert(cmd, GetServiceAllianceEnterpriseDetailCommand.class);
+			ServiceAllianceDTO sa = getServiceAllianceEnterpriseDetail(command);
+					
+			response = ConvertHelper.convert(sa,YellowPageDTO.class);
+			
+			
+		} else {
+		 
+			YellowPage yellowPage = this.yellowPageProvider.getYellowPageById(cmd.getId());
+		
+			populateYellowPage(yellowPage);
+			
+			if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
+				ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+				response = ConvertHelper.convert(serviceAlliance,YellowPageDTO.class);
+			} 
+			else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+				MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
+				response = ConvertHelper.convert(makerZone,YellowPageDTO.class);
+			} 
+			else{
+					response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
+			}
 		}
 		return response;
 	}
@@ -164,41 +177,61 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public YellowPageListResponse getYellowPageList(
 			GetYellowPageListCommand cmd) { 
-		//做兼容
-		if(null != cmd.getCommunityId()){
-			cmd.setOwnerId(cmd.getCommunityId());
-		}else if(null != cmd.getOwnerId()){
-			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
-			if(null != communities && 0 != communities.size()){
-				cmd.setOwnerId(communities.get(0).getId());
-				cmd.setOwnerType("community");
-			}
-		}
 		YellowPageListResponse response = new YellowPageListResponse();
-		response.setYellowPages(new ArrayList<YellowPageDTO>());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-        List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType(),cmd.getServiceType(),cmd.getKeywords());
-        if(null == yellowPages || yellowPages.size() == 0)
-        	return response;
-      
-        for (YellowPage yellowPage : yellowPages){
-        	populateYellowPage(yellowPage);
-        	if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
-    			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-    			response.getYellowPages().add( ConvertHelper.convert(serviceAlliance,YellowPageDTO.class) );
-    		} 
-
-    		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
-    			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
-    			response.getYellowPages().add(ConvertHelper.convert(makerZone,YellowPageDTO.class));
-    		} 
-
-    		else{
-    			response.getYellowPages().add(ConvertHelper.convert(yellowPage,YellowPageDTO.class));
-    		}
-        }
+		if(cmd.getType() != null && cmd.getType().byteValue() > 10) {
+			GetServiceAllianceEnterpriseListCommand command = ConvertHelper.convert(cmd, GetServiceAllianceEnterpriseListCommand.class);
+			command.setPageSize(AppConstants.PAGINATION_MAX_SIZE);
+			command.setNextPageAnchor(cmd.getPageAnchor());
+			if(!StringUtils.isEmpty(cmd.getServiceType())) {
+				ServiceAllianceCategories category = yellowPageProvider.findCategoryByName(UserContext.getCurrentNamespaceId(), cmd.getServiceType());
+				command.setCategoryId(category.getId());
+			}
+			ServiceAllianceListResponse res = this.getServiceAllianceEnterpriseList(command);
+			List<ServiceAllianceDTO> dtos = res.getDtos();
+			if(dtos != null && dtos.size() > 0) {
+				for(ServiceAllianceDTO dto : dtos) {
+					YellowPageDTO ypDto = ConvertHelper.convert(dto,YellowPageDTO.class);
+					if(null != ypDto) 
+						response.getYellowPages().add(ypDto);
+				}
+			}
+			
+		} else {
+			//做兼容
+			if(null != cmd.getCommunityId()){
+				cmd.setOwnerId(cmd.getCommunityId());
+			}else if(null != cmd.getOwnerId()){
+				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
+				if(null != communities && 0 != communities.size()){
+					cmd.setOwnerId(communities.get(0).getId());
+					cmd.setOwnerType("community");
+				}
+			}
+			response.setYellowPages(new ArrayList<YellowPageDTO>());
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	        CrossShardListingLocator locator = new CrossShardListingLocator();
+	        locator.setAnchor(cmd.getPageAnchor());
+	        List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType(),cmd.getServiceType(),cmd.getKeywords());
+	        if(null == yellowPages || yellowPages.size() == 0)
+	        	return response;
+	      
+	        for (YellowPage yellowPage : yellowPages){
+	        	populateYellowPage(yellowPage);
+	        	if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
+	    			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+	    			response.getYellowPages().add( ConvertHelper.convert(serviceAlliance,YellowPageDTO.class) );
+	    		} 
+	
+	    		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+	    			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
+	    			response.getYellowPages().add(ConvertHelper.convert(makerZone,YellowPageDTO.class));
+	    		} 
+	
+	    		else{
+	    			response.getYellowPages().add(ConvertHelper.convert(yellowPage,YellowPageDTO.class));
+	    		}
+	        }
+		}
         return response;
 	}
 	
@@ -272,24 +305,34 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public YellowPageDTO getYellowPageTopic(GetYellowPageTopicCommand cmd) {
 		 
-		YellowPage yellowPage = this.yellowPageProvider.queryYellowPageTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
-		if (null == yellowPage)
-			{
-			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = "+cmd.getType()); 
-			return null;
-			}
-		populateYellowPage(yellowPage);
 		YellowPageDTO response = null;
-		if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
-			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-			response = ConvertHelper.convert(serviceAlliance,YellowPageDTO.class);
-		} 
-		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
-			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
-			response = ConvertHelper.convert(makerZone,YellowPageDTO.class);
-		} 
-		else{
-				response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
+		if(cmd.getType() != null && cmd.getType().byteValue() > 10) {
+			GetServiceAllianceCommand command = ConvertHelper.convert(cmd, GetServiceAllianceCommand.class);
+			ServiceAllianceDTO sa = getServiceAlliance(command);
+					
+			response = ConvertHelper.convert(sa,YellowPageDTO.class);
+			
+			
+		} else {
+		 
+			YellowPage yellowPage = this.yellowPageProvider.queryYellowPageTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
+			if (null == yellowPage)
+				{
+				LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = "+cmd.getType()); 
+				return null;
+				}
+			populateYellowPage(yellowPage);
+			if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
+				ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+				response = ConvertHelper.convert(serviceAlliance,YellowPageDTO.class);
+			} 
+			else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+				MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
+				response = ConvertHelper.convert(makerZone,YellowPageDTO.class);
+			} 
+			else{
+					response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
+			}
 		}
 		return response;
 	}
@@ -297,21 +340,49 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		Category category = new Category();
-		Category parent = categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
+		
+		ServiceAllianceCategories category = new ServiceAllianceCategories();
+		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
+		
+		if(null == parent) {
+			LOGGER.error("wrong parentId. parentId = " + cmd.getParentId());
+			throw RuntimeErrorException
+			.errorWith(
+					YellowPageServiceErrorCode.SCOPE,
+					YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT,
+					localeStringService.getLocalizedString(
+							String.valueOf(YellowPageServiceErrorCode.SCOPE),
+							String.valueOf(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT),
+							UserContext.current().getUser().getLocale(),
+							"parent category not found!"));
+		}
+		
 		if(cmd.getCategoryId() == null) {
-			category.setParentId(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
 			category.setName(cmd.getName());
+			category.setOwnerId(cmd.getOwnerId());
+			category.setOwnerType(cmd.getOwnerType());
 			category.setNamespaceId(namespaceId);
 			category.setStatus((byte)2);
-			category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			if(null == parent) {
+//				category.setParentId(0L);
+//				category.setPath(cmd.getName());
+//			} else {
+//				category.setParentId(parent.getId());
+//				category.setPath(parent.getName() + "/" + cmd.getName());
+//			}
+			category.setParentId(parent.getId());
 			category.setPath(parent.getName() + "/" + cmd.getName());
-			categoryProvider.createCategory(category);
+			yellowPageProvider.createCategory(category);
 		} else {
-			category = categoryProvider.findCategoryById(cmd.getCategoryId());
+			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			category.setName(cmd.getName());
+//			if(null == parent) {
+//				category.setPath(cmd.getName());
+//			} else {
+//				category.setPath(parent.getName() + "/" + cmd.getName());
+//			}
 			category.setPath(parent.getName() + "/" + cmd.getName());
-			categoryProvider.updateCategory(category);
+			yellowPageProvider.updateCategory(category);
 			
 			//yellow page中引用该类型的记录的serviceType字段也要更新
 			List<YellowPage> yps = yellowPageProvider.getYellowPagesByCategoryId(cmd.getCategoryId());
@@ -322,6 +393,32 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 			}
 		}
+		
+//		Category category = new Category();
+//		Category parent = categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
+//		if(cmd.getCategoryId() == null) {
+//			category.setParentId(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
+//			category.setName(cmd.getName());
+//			category.setNamespaceId(namespaceId);
+//			category.setStatus((byte)2);
+//			category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			category.setPath(parent.getName() + "/" + cmd.getName());
+//			categoryProvider.createCategory(category);
+//		} else {
+//			category = categoryProvider.findCategoryById(cmd.getCategoryId());
+//			category.setName(cmd.getName());
+//			category.setPath(parent.getName() + "/" + cmd.getName());
+//			categoryProvider.updateCategory(category);
+//			
+//			//yellow page中引用该类型的记录的serviceType字段也要更新
+//			List<YellowPage> yps = yellowPageProvider.getYellowPagesByCategoryId(cmd.getCategoryId());
+//			if(yps != null && yps.size() > 0) {
+//				for(YellowPage yp : yps) {
+//					yp.setStringTag3(category.getName());
+//					yellowPageProvider.updateYellowPage(yp);
+//				}
+//			}
+//		}
 		
 	}
 
@@ -344,7 +441,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 									"category is in use!"));
 		}
 		
-		Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
+		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 		if(null == category || category.getStatus() == 0) {
 			LOGGER.error("the category which id = "+cmd.getCategoryId()+" is already deleted!");
 			throw RuntimeErrorException
@@ -358,14 +455,27 @@ public class YellowPageServiceImpl implements YellowPageService {
 									"category already deleted!"));
 		}
 		
+		if(category != null && category.getParentId() == 0) {
+			LOGGER.error("the category which parent id is 0!");
+			throw RuntimeErrorException
+					.errorWith(
+							YellowPageServiceErrorCode.SCOPE,
+							YellowPageServiceErrorCode.ERROR_DELETE_ROOT_CATEGORY,
+							localeStringService.getLocalizedString(
+									String.valueOf(YellowPageServiceErrorCode.SCOPE),
+									String.valueOf(YellowPageServiceErrorCode.ERROR_DELETE_ROOT_CATEGORY),
+									UserContext.current().getUser().getLocale(),
+									"cannot delete root category!"));
+		}
+		
 		//set status inactive and add log
 		category.setStatus((byte) 0);
-		categoryProvider.updateCategory(category);
+		yellowPageProvider.updateCategory(category);
 		
 		AuditLog log = new AuditLog();
 		log.setOperatorUid(user.getId());
 		log.setOperationType("DELETE");
-		log.setResourceType(EntityType.CATEGORY.getCode());
+		log.setResourceType(EntityType.SACATEGORY.getCode());
 		log.setResourceId(category.getId());
 		log.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		auditLogProvider.createAuditLog(log);
@@ -374,31 +484,43 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceDTO getServiceAllianceEnterpriseDetail(
 			GetServiceAllianceEnterpriseDetailCommand cmd) {
-		YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		
+//		populateYellowPage(yellowPage);
 		
-		populateYellowPage(yellowPage);
+		ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		populateServiceAlliance(sa);
+		
 		ServiceAllianceDTO response = null;
 		
-		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-		response = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
-		response.setDisplayName(serviceAlliance.getNickName());
+//		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+//		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
 	}
 
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
-		YellowPage yellowPage = this.yellowPageProvider.queryYellowPageTopic(cmd.getOwnerType(),cmd.getOwnerId(),YellowPageType.SERVICEALLIANCE.getCode());
-		if (null == yellowPage)
-		{
-			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + YellowPageType.SERVICEALLIANCE.getCode()); 
-			return null;
-		}
-		populateYellowPage(yellowPage);
+//		YellowPage yellowPage = this.yellowPageProvider.queryYellowPageTopic(cmd.getOwnerType(),cmd.getOwnerId(),YellowPageType.SERVICEALLIANCE.getCode());
+//		if (null == yellowPage)
+//		{
+//			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + YellowPageType.SERVICEALLIANCE.getCode()); 
+//			return null;
+//		}
+//		populateYellowPage(yellowPage);
+		
+		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
+		if (null == sa)
+			{
+				LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + cmd.getType()); 
+				return null;
+			}
+		populateServiceAlliance(sa);
 		ServiceAllianceDTO response = null;
-		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-		response = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
-		response.setDisplayName(serviceAlliance.getNickName());
+//		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+//		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
 	}
@@ -421,25 +543,28 @@ public class YellowPageServiceImpl implements YellowPageService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getNextPageAnchor());
-        List<YellowPage> yellowPages = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
+//        List<YellowPage> yellowPages = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
+//        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+        List<ServiceAlliances> sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
         		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
-        if(null == yellowPages || yellowPages.size() == 0)
+        if(null == sas || sas.size() == 0)
         	return response;
       
-        if(yellowPages.size() > pageSize) {
-        	yellowPages.remove(yellowPages.size() - 1);
-        	response.setNextPageAnchor(yellowPages.get(yellowPages.size() - 1).getId());
+        if(sas.size() > pageSize) {
+        	sas.remove(sas.size() - 1);
+        	response.setNextPageAnchor(sas.get(sas.size() - 1).getId());
         }
         
-        for (YellowPage yellowPage : yellowPages){
-        	populateYellowPage(yellowPage);
-			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-			if(null == serviceAlliance.getServiceType() && null != serviceAlliance.getCategoryId()) {
-				Category category = categoryProvider.findCategoryById(serviceAlliance.getCategoryId());
-				serviceAlliance.setServiceType(category.getName());
+        for (ServiceAlliances sa : sas){
+//        	populateYellowPage(yellowPage);
+//			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+        	populateServiceAlliance(sa);
+			if(null == sa.getServiceType() && null != sa.getCategoryId()) {
+				ServiceAllianceCategories category = yellowPageProvider.findCategoryById(sa.getCategoryId());
+				sa.setServiceType(category.getName());
 			}
-			ServiceAllianceDTO dto = ConvertHelper.convert(serviceAlliance,ServiceAllianceDTO.class);
-			dto.setDisplayName(serviceAlliance.getNickName());
+			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+//			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
 
         }
@@ -448,95 +573,231 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateServiceAlliance(UpdateServiceAllianceCommand cmd) {
-		YellowPage yp = null;
+		ServiceAlliances sa = null;
 		
 		if(cmd.getId() == null) {
-			ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
-			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
-			yp.setType(YellowPageType.SERVICEALLIANCE.getCode());
-			yp.setCreatorUid(UserContext.current().getUser().getId());
-			this.yellowPageProvider.createYellowPage(yp);
+			sa =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
+			sa.setCreatorUid(UserContext.current().getUser().getId());
+			this.yellowPageProvider.createServiceAlliances(sa);
 		} else {
-			yp = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+			sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			
-			yp.setName(cmd.getName());
-			yp.setNickName(cmd.getDisplayName());
-			yp.setContact(cmd.getContact());
-			yp.setDescription(cmd.getDescription());
-			yp.setPosterUri(cmd.getPosterUri());
-			this.yellowPageProvider.updateYellowPage(yp);
+			sa.setName(cmd.getName());
+			sa.setDisplayName(cmd.getDisplayName());
+			sa.setContact(cmd.getContact());
+			sa.setDescription(cmd.getDescription());
+			sa.setPosterUri(cmd.getPosterUri());
+			this.yellowPageProvider.updateServiceAlliances(sa);
 		}
+		
+//		YellowPage yp = null;
+//		
+//		if(cmd.getId() == null) {
+//			ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
+//			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
+//			yp.setType(YellowPageType.SERVICEALLIANCE.getCode());
+//			yp.setCreatorUid(UserContext.current().getUser().getId());
+//			this.yellowPageProvider.createYellowPage(yp);
+//		} else {
+//			yp = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+//			
+//			yp.setName(cmd.getName());
+//			yp.setNickName(cmd.getDisplayName());
+//			yp.setContact(cmd.getContact());
+//			yp.setDescription(cmd.getDescription());
+//			yp.setPosterUri(cmd.getPosterUri());
+//			this.yellowPageProvider.updateYellowPage(yp);
+//		}
 		
 		
 	}
 	
-	private YellowPage verifyYellowPage(Long id, String ownerType, Long ownerId) {
+//	private YellowPage verifyYellowPage(Long id, String ownerType, Long ownerId) {
+//		
+//		YellowPage yellowPage = this.yellowPageProvider.findYellowPageById(id, ownerType, ownerId);
+//		if (null == yellowPage || YellowPageStatus.INACTIVE.equals(YellowPageStatus.fromCode(yellowPage.getStatus()))) {
+//			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + id );
+//			 throw RuntimeErrorException
+//				.errorWith(
+//						YellowPageServiceErrorCode.SCOPE,
+//						YellowPageServiceErrorCode.ERROR_YELLOWPAGE_ALREADY_DELETED,
+//						localeStringService.getLocalizedString(
+//								String.valueOf(YellowPageServiceErrorCode.SCOPE),
+//								String.valueOf(YellowPageServiceErrorCode.ERROR_YELLOWPAGE_ALREADY_DELETED),
+//								UserContext.current().getUser().getLocale(),
+//								"YellowPage already deleted!"));
+//		}
+//
+//		return yellowPage;
+//	}
+	
+	private ServiceAlliances verifyServiceAlliance(Long id, String ownerType, Long ownerId) {
 		
-		YellowPage yellowPage = this.yellowPageProvider.findYellowPageById(id, ownerType, ownerId);
-		if (null == yellowPage || YellowPageStatus.INACTIVE.equals(YellowPageStatus.fromCode(yellowPage.getStatus()))) {
-			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + id );
+		ServiceAlliances sa = this.yellowPageProvider.findServiceAllianceById(id, ownerType, ownerId);
+		if (null == sa || YellowPageStatus.INACTIVE.equals(YellowPageStatus.fromCode(sa.getStatus()))) {
+			 LOGGER.error("ServiceAlliance already deleted , ServiceAlliance Id =" + id );
 			 throw RuntimeErrorException
 				.errorWith(
 						YellowPageServiceErrorCode.SCOPE,
-						YellowPageServiceErrorCode.ERROR_YELLOWPAGE_ALREADY_DELETED,
+						YellowPageServiceErrorCode.ERROR_SERVICEALLIANCE_ALREADY_DELETED,
 						localeStringService.getLocalizedString(
 								String.valueOf(YellowPageServiceErrorCode.SCOPE),
-								String.valueOf(YellowPageServiceErrorCode.ERROR_YELLOWPAGE_ALREADY_DELETED),
+								String.valueOf(YellowPageServiceErrorCode.ERROR_SERVICEALLIANCE_ALREADY_DELETED),
 								UserContext.current().getUser().getLocale(),
-								"YellowPage already deleted!"));
+								"ServiceAlliance already deleted!"));
 		}
 
-		return yellowPage;
+		return sa;
 	}
 
 	@Override
 	public void deleteServiceAllianceEnterprise(
 			DeleteServiceAllianceEnterpriseCommand cmd) {
 		
-		YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
-		yellowPage.setStatus(YellowPageStatus.INACTIVE.getCode());
-		this.yellowPageProvider.updateYellowPage(yellowPage);
+		sa.setStatus(YellowPageStatus.INACTIVE.getCode());
+		this.yellowPageProvider.updateServiceAlliances(sa);
 	}
 
 	@Override
 	public void updateServiceAllianceEnterprise(
 			UpdateServiceAllianceEnterpriseCommand cmd) {
-		YellowPage yp = null;
-		ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
+		
+		ServiceAlliances serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
 		
 		if(null != serviceAlliance.getCategoryId()) {
-			Category category = categoryProvider.findCategoryById(serviceAlliance.getCategoryId());
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceAlliance.getCategoryId());
 			serviceAlliance.setServiceType(category.getName());
 		}
 		
 		if(cmd.getId() == null) {
-			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
-			yp.setType(YellowPageType.SERVICEALLIANCE.getCode());
-			yp.setNickName(cmd.getDisplayName());
-			yp.setCreatorUid(UserContext.current().getUser().getId());
-			if(yp.getLatitude() != null && yp.getLongitude() != null) {
-				yp.setGeohash(GeoHashUtils.encode(yp.getLatitude(), yp.getLongitude()));
+			serviceAlliance.setCreatorUid(UserContext.current().getUser().getId());
+			if(serviceAlliance.getLatitude() != null && serviceAlliance.getLongitude() != null) {
+				serviceAlliance.setGeohash(GeoHashUtils.encode(serviceAlliance.getLatitude(), serviceAlliance.getLongitude()));
 			}
 			
-			this.yellowPageProvider.createYellowPage(yp);
-			createYellowPageAttachments(cmd.getAttachments(),yp.getId());
+			this.yellowPageProvider.createServiceAlliances(serviceAlliance);
+			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId());
 		} else {
-			YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
-			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
-			yp.setNickName(cmd.getDisplayName());
-			if(yp.getLatitude() != null && yp.getLongitude() != null) {
-				yp.setGeohash(GeoHashUtils.encode(yp.getLatitude(), yp.getLongitude()));
+			ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+			if(sa.getLatitude() != null && sa.getLongitude() != null) {
+				sa.setGeohash(GeoHashUtils.encode(sa.getLatitude(), sa.getLongitude()));
 			}
-			yp.setType(yellowPage.getType());
-			yp.setCreateTime(yellowPage.getCreateTime());
-			yp.setCreatorUid(yellowPage.getCreatorUid());
+			serviceAlliance.setType(sa.getType());
+			serviceAlliance.setCreateTime(sa.getCreateTime());
+			serviceAlliance.setCreatorUid(sa.getCreatorUid());
 			
-			this.yellowPageProvider.updateYellowPage(yp);
-			this.yellowPageProvider.deleteYellowPageAttachmentsByOwnerId(yp.getId());
-			createYellowPageAttachments(cmd.getAttachments(),yp.getId());
+			this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
+			this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
+			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId());
 		}
+//		YellowPage yp = null;
+//		ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
+//		
+//		if(null != serviceAlliance.getCategoryId()) {
+//			Category category = categoryProvider.findCategoryById(serviceAlliance.getCategoryId());
+//			serviceAlliance.setServiceType(category.getName());
+//		}
+//		
+//		if(cmd.getId() == null) {
+//			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
+//			yp.setType(YellowPageType.SERVICEALLIANCE.getCode());
+//			yp.setNickName(cmd.getDisplayName());
+//			yp.setCreatorUid(UserContext.current().getUser().getId());
+//			if(yp.getLatitude() != null && yp.getLongitude() != null) {
+//				yp.setGeohash(GeoHashUtils.encode(yp.getLatitude(), yp.getLongitude()));
+//			}
+//			
+//			this.yellowPageProvider.createYellowPage(yp);
+//			createYellowPageAttachments(cmd.getAttachments(),yp.getId());
+//		} else {
+//			YellowPage yellowPage = verifyYellowPage(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+//			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
+//			yp.setNickName(cmd.getDisplayName());
+//			if(yp.getLatitude() != null && yp.getLongitude() != null) {
+//				yp.setGeohash(GeoHashUtils.encode(yp.getLatitude(), yp.getLongitude()));
+//			}
+//			yp.setType(yellowPage.getType());
+//			yp.setCreateTime(yellowPage.getCreateTime());
+//			yp.setCreatorUid(yellowPage.getCreatorUid());
+//			
+//			this.yellowPageProvider.updateYellowPage(yp);
+//			this.yellowPageProvider.deleteYellowPageAttachmentsByOwnerId(yp.getId());
+//			createYellowPageAttachments(cmd.getAttachments(),yp.getId());
+//		}
 		
 	}
+	
+	private void createServiceAllianceAttachments(
+			List<ServiceAllianceAttachmentDTO> attachments,Long ownerId) {
+		if(null == attachments)
+			return;
+		for (ServiceAllianceAttachmentDTO dto:attachments ){
+			if(null == dto.getContentUri())
+				continue;
+			ServiceAllianceAttachment attachment =  ConvertHelper.convert(dto,ServiceAllianceAttachment.class);
+			attachment.setOwnerId(ownerId);
+			attachment.setContentType(PostContentType.IMAGE.getCode());
+			this.yellowPageProvider.createServiceAllianceAttachments(attachment);
+		}
+	}
+	
+	private void populateServiceAlliance(ServiceAlliances sa) { 
+		this.yellowPageProvider.populateServiceAlliancesAttachment(sa);
+		 
+		populateServiceAllianceUrl(sa);
+		populateServiceAllianceAttachements(sa,sa.getAttachments());
+	 
+		
+	}
+
+	private void populateServiceAllianceUrl(ServiceAlliances sa) { 
+		 
+		 String posterUri = sa.getPosterUri();
+	        if(posterUri != null && posterUri.length() > 0) {
+	            try{
+	                String posterUrl = contentServerService.parserUri(sa.getPosterUri(), EntityType.USER.getCode(),UserContext.current().getUser().getId());
+	                sa.setPosterUrl(posterUrl);
+	            }catch(Exception e){
+	                LOGGER.error("Failed to parse poster uri of ServiceAlliances, ServiceAlliances =" + sa, e);
+	            }
+	        }	 
+	}
+	 private void populateServiceAllianceAttachements(ServiceAlliances sa, List<ServiceAllianceAttachment> attachmentList) {
+		 
+		 if(attachmentList == null || attachmentList.size() == 0) {
+	            if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("The ServiceAlliances attachment list is empty, ServiceAlliancesId=" + sa.getId());
+	            }
+		 } else {
+	            for(ServiceAllianceAttachment attachment : attachmentList) {
+	            	populateServiceAllianceAttachement(sa, attachment);
+	            }
+		 }
+	 }
+	 
+	 private void populateServiceAllianceAttachement(ServiceAlliances sa, ServiceAllianceAttachment attachment) {
+        
+		 if(attachment == null) {
+			 if(LOGGER.isInfoEnabled()) {
+				 LOGGER.info("The ServiceAlliances attachment is null, ServiceAlliancesId=" + sa.getId());
+			 }
+		 } else {
+			 String contentUri = attachment.getContentUri();
+			 if(contentUri != null && contentUri.length() > 0) {
+				 try{
+					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(),UserContext.current().getUser().getId());
+					 attachment.setContentUrl(url);
+				 }catch(Exception e){
+					 LOGGER.error("Failed to parse attachment uri, ServiceAlliancesId=" + sa.getId() + ", attachmentId=" + attachment.getId(), e);
+				 }
+			 } else {
+				 if(LOGGER.isWarnEnabled()) {
+					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
+				 }
+			 }
+		 }
+	 }
 
 }

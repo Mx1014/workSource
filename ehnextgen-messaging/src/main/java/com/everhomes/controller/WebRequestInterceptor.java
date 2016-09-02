@@ -210,7 +210,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			if(user != null) {
 				userId = user.getId();
 			}
-			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+//			It's ok when using signature
+//			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
 			return false;
 		}
 
@@ -423,7 +424,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
 			String pusherIdentify = null;
 			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
-			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
 			setCookieInResponse("token", tokenString, request, response);
 			return logintoken;

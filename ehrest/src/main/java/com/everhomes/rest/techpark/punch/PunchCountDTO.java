@@ -1,7 +1,8 @@
 package com.everhomes.rest.techpark.punch;
 
-
 import com.everhomes.util.StringHelper;
+
+
 
 /**
  * <ul>
@@ -27,7 +28,7 @@ public class PunchCountDTO {
 	private String token;
 	private String deptName;
     private Integer workDayCount;
-    private Integer workCount;
+    private Double workCount;
     private Integer belateCount;
     private Integer leaveEarlyCount;
     private Double unpunchCount;
@@ -36,7 +37,7 @@ public class PunchCountDTO {
     private Double sickCount;
     private Double exchangeCount;
     private Double outworkCount;
-    private Long overTimeSum;
+    private Double overTimeSum;
 	private java.lang.Byte     punchTimesPerDay;
 	private String userEnterpriseGroup;
 	
@@ -46,13 +47,7 @@ public class PunchCountDTO {
 	}
 	public void setWorkDayCount(Integer workDayCount) {
 		this.workDayCount = workDayCount;
-	}
-	public Integer getWorkCount() {
-		return workCount;
-	}
-	public void setWorkCount(Integer workCount) {
-		this.workCount = workCount;
-	}
+	} 
 	public Integer getBelateCount() {
 		return belateCount;
 	}
@@ -120,16 +115,10 @@ public class PunchCountDTO {
 	public void setToken(String token) {
 		this.token = token;
 	}
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-	public Long getOverTimeSum() {
-		return overTimeSum;
-	}
-	public void setOverTimeSum(Long overTimeSum) {
-		this.overTimeSum = overTimeSum;
-	}
+    } 
 	public java.lang.Byte getPunchTimesPerDay() {
 		return punchTimesPerDay;
 	}
@@ -147,5 +136,17 @@ public class PunchCountDTO {
 	}
 	public void setDeptName(String deptName) {
 		this.deptName = deptName;
+	}
+	public Double getWorkCount() {
+		return workCount;
+	}
+	public void setWorkCount(Double workCount) {
+		this.workCount = workCount;
+	}
+	public Double getOverTimeSum() {
+		return overTimeSum;
+	}
+	public void setOverTimeSum(Double overTimeSum) {
+		this.overTimeSum = overTimeSum;
 	}
 }

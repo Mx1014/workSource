@@ -23,13 +23,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.GroupQueryFilter;
 import com.everhomes.search.OrganizationSearcher;
@@ -46,6 +53,15 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     
     @Autowired
     private ConfigurationProvider  configProvider;
+	
+	@Autowired
+    private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
+	
+	@Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Override
     public String getIndexType() {
@@ -230,7 +246,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
                     .field("name.pinyin_gram", 1.0f);      
         }
         
-//        FilterBuilder fb = null;
+        FilterBuilder fb = null;
 //
 //        if(null == fb) {
 //            fb = FilterBuilders.termFilter("communityType", t.getCode());
@@ -242,20 +258,29 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //            qb = QueryBuilders.filteredQuery(qb, fb);
 //        }
         
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+//        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        if(null != cmd.getNamespaceId())
+        	fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
         if(cmd.getCommunityId() != null) {
-            FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        	if(null == fb)
+        		fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+        	else {
+        		FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+        		fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        	}
         }
         
         // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
         if(!StringUtils.isEmpty(cmd.getOrganizationType())) {
-        	//转小写查 by xiongying 20160524
-            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        	if(null == fb)
+        		fb = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
+        	else {
+	        	//转小写查 by xiongying 20160524
+	            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
+	            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        	}
         }
         qb = QueryBuilders.filteredQuery(qb, fb);
        
@@ -272,7 +297,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         List<OrganizationDTO> dtos = this.getDTOs(rsp);
         
         if(dtos.size() > pageSize){
-        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
+//        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
+        	//用的是offset不是锚点
+        	result.setPageAnchor((long)(pageNum+1));
         }
         
         result.setDtos(this.getDTOs(rsp));
@@ -292,6 +319,27 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             	dto.setName(String.valueOf(source.get("name")));
             	dto.setCommunityId(SearchUtils.getLongField(source.get("communityId")));
             	dto.setDescription(String.valueOf(source.get("description")));
+            	dto.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+            	
+    	    	if(dto.getNamespaceId() == 0) {
+    	    		dto.setNamespaceName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+    						String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+    						UserContext.current().getUser().getLocale(),"ZUOLIN"));
+    			} else {
+    		    	Namespace ns = nsProvider.findNamespaceById(dto.getNamespaceId());
+    				if(ns != null)
+    					dto.setNamespaceName(ns.getName());
+    			}
+    	    	
+    	    	ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
+		    	orgAdminCmd.setOrganizationId(dto.getId());
+		    	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
+		    	if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
+		    		OrganizationMemberDTO member = res.getMembers().get(0);
+		    		dto.setEnterpriseContactor(member.getContactName());
+			    	dto.setMobile(member.getContactToken());
+		    	}
+    			
             	dtos.add(dto);
             	
             }

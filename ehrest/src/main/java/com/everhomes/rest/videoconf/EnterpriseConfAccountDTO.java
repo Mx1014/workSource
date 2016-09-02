@@ -17,6 +17,8 @@ import com.everhomes.util.StringHelper;
  *  <li>totalAccount: 账号总数</li>
  *  <li>validAccount: 有效账号数</li>
  *  <li>buyChannel: 购买渠道 0-offline 1-online</li>
+ *  <li>namespaceName: 所属域空间名称</li>
+ *  <li>namespaceId: 所属域空间id</li>
  * </ul>
  *
  */
@@ -44,6 +46,10 @@ public class EnterpriseConfAccountDTO {
 	private Integer validAccount;
 	
 	private Byte buyChannel;
+	
+	private String namespaceName;
+	
+	private Integer namespaceId;
 
 	public Long getId() {
 		return id;
@@ -131,6 +137,22 @@ public class EnterpriseConfAccountDTO {
 
 	public void setBuyChannel(Byte buyChannel) {
 		this.buyChannel = buyChannel;
+	}
+
+	public String getNamespaceName() {
+		return namespaceName;
+	}
+
+	public void setNamespaceName(String namespaceName) {
+		this.namespaceName = namespaceName;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

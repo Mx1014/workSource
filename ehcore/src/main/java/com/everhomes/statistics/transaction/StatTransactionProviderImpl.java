@@ -15,8 +15,10 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
+import com.everhomes.rest.statistics.transaction.StatServiceStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatOrdersDao;
@@ -33,6 +35,7 @@ import com.everhomes.server.schema.tables.pojos.EhStatTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhStatTransactions;
 import com.everhomes.server.schema.tables.records.EhStatOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhStatRefundsRecord;
+import com.everhomes.server.schema.tables.records.EhStatServiceRecord;
 import com.everhomes.server.schema.tables.records.EhStatServiceSettlementResultsRecord;
 import com.everhomes.server.schema.tables.records.EhStatSettlementsRecord;
 import com.everhomes.server.schema.tables.records.EhStatTaskLogsRecord;
@@ -341,7 +344,6 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		return null;
 	}
 	
-	
 	@Override
 	public List<StatServiceSettlementResult> listStatServiceSettlementResult(
 			Condition cond, String startDate, String endDate) {
@@ -368,7 +370,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
 				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
 				.where(condition)
-				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID)
+				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE,Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID)
 				.fetch().map((r) -> {
 					StatServiceSettlementResult statServiceSettlementResult = new StatServiceSettlementResult();
 					statServiceSettlementResult.setServiceType(String.valueOf(r.getValue(0)));
@@ -507,4 +509,115 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		return null;
 	}
 	
+	@Override
+	public List<StatService> listStatServices(Integer namespaceId,
+			String ownerType, Long ownerId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatService> results = new ArrayList<StatService>();
+		SelectQuery<EhStatServiceRecord> query = context.selectQuery(Tables.EH_STAT_SERVICE);
+		query.addConditions(Tables.EH_STAT_SERVICE.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_STAT_SERVICE.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_STAT_SERVICE.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_STAT_SERVICE.STATUS.eq(StatServiceStatus.ACTIVE.getCode()));
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatService.class));
+			return null;
+		});
+		return results;
+	}
+	
+	@Override
+	public List<StatService> listStatServiceGroupByServiceTypes() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatService> results = new ArrayList<StatService>();
+		SelectQuery<EhStatServiceRecord> query = context.selectQuery(Tables.EH_STAT_SERVICE);
+		query.addConditions(Tables.EH_STAT_SERVICE.STATUS.eq(StatServiceStatus.ACTIVE.getCode()));
+		query.addGroupBy(Tables.EH_STAT_SERVICE.SERVICE_TYPE);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatService.class));
+			return null;
+		});
+		return results;
+	}
+	
+	@Override
+	public List<StatTransaction> listStatTransactions(CrossShardListingLocator locator, Integer pageSize, String startDate,
+			String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatTransaction> results = new ArrayList<StatTransaction>();
+		Condition condition = Tables.EH_STAT_TRANSACTIONS.PAID_DATE.ge(startDate);
+		condition = condition.and(Tables.EH_STAT_TRANSACTIONS.PAID_DATE.le(endDate));
+		
+		if(null != namespaceId){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId));
+		}
+		
+		
+		if(null != locator.getAnchor()){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.PAID_TIME.gt(new Timestamp(locator.getAnchor())));
+		}
+		
+		if(null != serviceType){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.SERVICE_TYPE.eq(serviceType));
+		}
+		if(!StringUtils.isEmpty(wareId)){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.WARE_JSON.like("%" + wareId + "%"));
+		}
+		SelectQuery<EhStatTransactionsRecord> query = context.selectQuery(Tables.EH_STAT_TRANSACTIONS);
+		query.addConditions(condition);
+		query.addOrderBy(Tables.EH_STAT_TRANSACTIONS.PAID_TIME);
+		query.addLimit(pageSize + 1);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatTransaction.class));
+			return null;
+		});
+		
+		locator.setAnchor(null);
+		if(results.size() > pageSize){
+			results.remove(results.size() -1);
+			locator.setAnchor(results.get(results.size() - 1).getPaidTime().getTime());
+		}
+		
+		return results;
+	}
+	
+	@Override
+	public List<StatRefund> listStatRefunds(CrossShardListingLocator locator, Integer pageSize, String startDate,
+			String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<StatRefund> results = new ArrayList<StatRefund>();
+		Condition condition = Tables.EH_STAT_REFUNDS.REFUND_DATE.ge(startDate);
+		condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_DATE.le(endDate));
+		
+		if(null != namespaceId){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId));
+		}
+		
+		if(null != locator.getAnchor()){
+			condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_TIME.gt(new Timestamp(locator.getAnchor())));
+		}
+		
+		if(null != serviceType){
+			condition = condition.and(Tables.EH_STAT_REFUNDS.SERVICE_TYPE.eq(serviceType));
+		}
+		if(!StringUtils.isEmpty(wareId)){
+			condition = condition.and(Tables.EH_STAT_REFUNDS.WARE_JSON.like("%" + wareId + "%"));
+		}
+		SelectQuery<EhStatRefundsRecord> query = context.selectQuery(Tables.EH_STAT_REFUNDS);
+		query.addConditions(condition);
+		query.addOrderBy(Tables.EH_STAT_REFUNDS.REFUND_TIME);
+		query.addLimit(pageSize + 1);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, StatRefund.class));
+			return null;
+		});
+		
+		locator.setAnchor(null);
+		if(results.size() > pageSize){
+			results.remove(results.size() -1);
+			locator.setAnchor(results.get(results.size() - 1).getRefundTime().getTime());
+		}
+		return results;
+	}
 }

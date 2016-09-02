@@ -201,3 +201,6 @@ CREATE TABLE `eh_punch_statistics` (
 -- 打卡每日统计表应该加入异常状态的字段 
 
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `exception_status` TINYINT COMMENT '异常状态: 0-正常;1-异常';
+
+
+ALTER TABLE `eh_punch_statistics` CHANGE `work_count` `work_count` DOUBLE DEFAULT NULL COMMENT '实际上班天数';

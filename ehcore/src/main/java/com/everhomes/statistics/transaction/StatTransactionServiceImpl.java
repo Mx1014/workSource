@@ -92,6 +92,8 @@ import com.everhomes.rest.payment.CardTransactionStatus;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyOwnerType;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
+import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
+import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.statistics.transaction.SettlementOrderType;
@@ -103,11 +105,15 @@ import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
 import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskStatus;
+import com.everhomes.rest.statistics.transaction.StatShopTransactionDTO;
+import com.everhomes.rest.statistics.transaction.StatWareDTO;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -232,23 +238,74 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
 		
-		List<StatServiceSettlementResult> results = statTransactionProvider.listStatServiceSettlementResult(cond, sStartDate, sEndDate);
+		List<StatServiceSettlementResult> results = new ArrayList<StatServiceSettlementResult>();
+		
+		List<String> serviceTypes = new ArrayList<String>();
+		serviceTypes.add(SettlementServiceType.ZUOLIN_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.OTHER_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+		
+		for (String serviceType : serviceTypes) {
+			Condition serviceCond = null;
+			if(null == cond)
+				serviceCond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType);
+			else
+				serviceCond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE.eq(serviceType));
+			
+			if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.ZUOLIN_SHOP){
+				Condition neCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.ne("-1"));
+				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(neCond, sStartDate, sEndDate);
+				results.addAll(shopSettlementResults);
+				
+				//乱数据全部统计在临时店铺下面
+				Condition eqCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq("-1"));
+				StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(eqCond, sStartDate, sEndDate);
+				result.setServiceType(serviceType);
+				result.setResourceType(SettlementResourceType.SHOP.getCode());
+				result.setResourceId("-1");
+				results.add(result);
+			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
+				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(serviceCond, sStartDate, sEndDate);
+				results.addAll(shopSettlementResults);
+			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.COMMUNITY_SERVICE){
+				List<StatService> statServices = null;
+				if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+					statServices = statTransactionProvider.listStatServices(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+				}else{
+					statServices = statTransactionProvider.listStatServiceGroupByServiceTypes();
+				}
+				for (StatService statService : statServices) {
+					Condition resCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
+					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(resCond, sStartDate, sEndDate);
+					result.setResourceName(statService.getServiceName());
+					result.setServiceType(serviceType);
+					results.add(result);
+				}
+			}
+		}
 		
 		return results.stream().map(r ->{
 			return this.convertStatServiceSettlementResultDTO(r);
 		}).collect(Collectors.toList());
 	}
 	
+
+	
 	private StatServiceSettlementResultDTO convertStatServiceSettlementResultDTO(StatServiceSettlementResult statServiceSettlementResult){
 		StatServiceSettlementResultDTO dto = ConvertHelper.convert(statServiceSettlementResult, StatServiceSettlementResultDTO.class);
 		dto.setServiceName(this.getServiceName(dto.getServiceType()));
 		if(SettlementResourceType.fromCode(dto.getResourceType()) == SettlementResourceType.SHOP){
-			Business business = businessProvider.findBusinessByTargetId(dto.getResourceId());
-			if(null != business){
-				dto.setResourceName(business.getName());
+			if(!StringUtils.isEmpty(dto.getResourceId()) && dto.getResourceId().equals("-1")){
+				dto.setResourceName("临时店铺");
+			}else{
+				Business business = businessProvider.findBusinessByTargetId(dto.getResourceId());
+				if(null != business){
+					dto.setResourceName(business.getName());
+				}
 			}
 		}
-		dto.setResourceName(this.getResourceName(dto.getResourceType(), dto.getResourceName()));
+		
+//		dto.setResourceName(this.getResourceName(dto.getResourceType(), dto.getResourceName()));
 		
 		if(null == dto.getCommunityId()){
 			dto.setCommunityName("-");
@@ -260,7 +317,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				dto.setCommunityName("-");
 			}
 		}
-		
 		
 		dto.setAlipayPaidAmount(statServiceSettlementResult.getAlipayPaidAmount().doubleValue());
 		dto.setAlipayRefundAmount(statServiceSettlementResult.getAlipayRefundAmount().doubleValue());
@@ -300,13 +356,31 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
 		
+		List<StatService> statServices = null;
+		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
+			statServices = statTransactionProvider.listStatServices(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		}else{
+			statServices = statTransactionProvider.listStatServiceGroupByServiceTypes();
+		}
+		
+		Condition servCond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(SettlementResourceType.SHOP.getCode());
+		for (StatService statService : statServices) {
+			servCond = servCond.or(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
+		}
+		
+		cond = cond.and(servCond);
+		
 		List<StatServiceSettlementResult> results = statTransactionProvider.listCountStatServiceSettlementResultByService(cond, sStartDate, sEndDate);
 		
 		StatServiceSettlementResult total = statTransactionProvider.getStatServiceSettlementResultTotal(cond, sStartDate, sEndDate);
 		
+		results = this.processStatServiceSettlementAmounts(results);
+		
 		List<StatServiceSettlementResultDTO> dtos = results.stream().map(r ->{
 			return this.convertStatServiceSettlementResultDTO(r);
 		}).collect(Collectors.toList());
+		
+		
 		
 		StatServiceSettlementResultDTO totalDTO = new StatServiceSettlementResultDTO();
 		if(null != total){
@@ -320,32 +394,41 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		return dtos;
 	}
 	
+	private List<StatServiceSettlementResult> processStatServiceSettlementAmounts(List<StatServiceSettlementResult> results){
+		List<StatServiceSettlementResult> statServiceSettlementResults= new ArrayList<StatServiceSettlementResult>();
+		Map<String, StatServiceSettlementResult> resultMap = new HashMap<String, StatServiceSettlementResult>();
+		for (StatServiceSettlementResult statServiceSettlementResult : results) {
+			resultMap.put(statServiceSettlementResult.getServiceType(), statServiceSettlementResult);
+		}
+		
+		List<String> serviceTypes = new ArrayList<String>();
+		serviceTypes.add(SettlementServiceType.ZUOLIN_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.OTHER_SHOP.getCode());
+		serviceTypes.add(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+		
+		for (String serviceType : serviceTypes) {
+			StatServiceSettlementResult result = resultMap.get(serviceType);
+			if(null == result){
+				result = new StatServiceSettlementResult();
+				result.setServiceType(serviceType);
+				result.setAlipayPaidAmount(new BigDecimal(0.00));
+				result.setAlipayRefundAmount(new BigDecimal(0.00));
+				result.setWechatPaidAmount(new BigDecimal(0.00));
+				result.setWechatRefundAmount(new BigDecimal(0.00));
+				result.setPaymentCardPaidAmount(new BigDecimal(0.00));
+				result.setPaymentCardRefundAmount(new BigDecimal(0.00));
+				result.setTotalPaidAmount(new BigDecimal(0.00));
+				result.setTotalRefundAmount(new BigDecimal(0.00));
+			}
+			statServiceSettlementResults.add(result);
+		}
+		
+		return statServiceSettlementResults;
+	}
+	
 	@Override
 	public void exportStatServiceSettlementAmounts(
 			ListStatServiceSettlementAmountsCommand cmd, HttpServletResponse response) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, -1);
-		Long startDate = cmd.getStartDate();
-		Long endDate = cmd.getEndDate();
-		if(null == startDate || null == endDate){
-			startDate = calendar.getTimeInMillis();
-			endDate = calendar.getTimeInMillis();
-		}
-		
-		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
-		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
-		
-		Condition cond = null;
-		if(!StringUtils.isEmpty(cmd.getNamespaceId())){
-			cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(cmd.getNamespaceId());
-		}
-		
-		if(!StringUtils.isEmpty(cmd.getCommunityId())){
-			if(null == cond)
-				cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId());
-			else
-				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
-		}
 		
 		List<StatServiceSettlementResultDTO> statServiceSettlementResultsDTOs = this.listStatServiceSettlementAmounts(cmd);
 		
@@ -472,6 +555,175 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		
 	}
 	
+	@Override
+	public ListStatShopTransactionsResponse listStatShopTransactions(
+			ListStatTransactionCommand cmd) {
+		
+		ListStatShopTransactionsResponse response = new ListStatShopTransactionsResponse();
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Long startDate = cmd.getStartDate();
+		Long endDate = cmd.getEndDate();
+		if(null == startDate || null == endDate){
+			startDate = calendar.getTimeInMillis();
+			endDate = calendar.getTimeInMillis();
+		}
+		
+		String sStartDate = DateUtil.dateToStr(new Date(startDate), DateUtil.YMR_SLASH);
+		String sEndDate = DateUtil.dateToStr(new Date(endDate), DateUtil.YMR_SLASH);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<StatShopTransactionDTO> dtos = null;
+		if(SettlementOrderType.TRANSACTION == SettlementOrderType.fromCode(cmd.getOrderType())){
+			List<StatTransaction> statTransactions = statTransactionProvider.listStatTransactions(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			dtos = convertTransactionDTOByPaid(statTransactions);
+		}else{
+			List<StatRefund> statRefunds = statTransactionProvider.listStatRefunds(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			dtos = convertTransactionDTOByRefund(statRefunds);
+		}
+		response.setNextPageAnchor(locator.getAnchor());
+		response.setDtos(dtos);
+		
+		return response;
+	}
+	
+	private List<StatShopTransactionDTO> convertTransactionDTOByPaid(List<StatTransaction> statTransactions){
+		List<StatShopTransactionDTO> dtos = new ArrayList<StatShopTransactionDTO>();
+		for (StatTransaction statTransaction : statTransactions) {
+			StatShopTransactionDTO dto = ConvertHelper.convert(statTransaction, StatShopTransactionDTO.class);
+			dto.setPaidTime(statTransaction.getPaidTime().getTime());
+			dto.setPaidAmount(statTransaction.getPaidAmount().doubleValue());
+			if(null != statTransaction.getPayerUid()){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(statTransaction.getPayerUid(), IdentifierType.MOBILE.getCode());
+				if(null != userIdentifier){
+					dto.setUserPhone(userIdentifier.getIdentifierToken());
+				}
+			}
+			
+			String wareJson = statTransaction.getWareJson();
+			List<StatWareDTO> statWareDTOs =  new ArrayList<StatWareDTO>();
+			
+			if(!StringUtils.isEmpty(wareJson)){
+				Ware[] wares = (Ware[])StringHelper.fromJsonString(wareJson, Ware[].class);
+				if(null != wares){
+					for (Ware ware : wares) {
+						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
+						wareDTO.setNumber(ware.getNumber());
+						statWareDTOs.add(wareDTO);
+					}
+				}
+			}
+			dto.setWares(statWareDTOs);
+			
+			StatOrder order = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statTransaction.getOrderNo(), SettlementResourceType.SHOP.getCode());
+			
+			if(null != order){
+				dto.setStatus(order.getStatus());
+			}
+			
+			dtos.add(dto);
+		}
+		
+		return dtos;
+	}
+	
+	private List<StatShopTransactionDTO> convertTransactionDTOByRefund(List<StatRefund> statRefunds){
+		List<StatShopTransactionDTO> dtos = new ArrayList<StatShopTransactionDTO>();
+		for (StatRefund statRefund : statRefunds) {
+			StatShopTransactionDTO dto = ConvertHelper.convert(statRefund, StatShopTransactionDTO.class);
+			dto.setPaidAmount(statRefund.getRefundAmount().doubleValue());
+			dto.setPaidTime(statRefund.getRefundTime().getTime());
+			if(null != statRefund.getPayerUid()){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(statRefund.getPayerUid(), IdentifierType.MOBILE.getCode());
+				if(null != userIdentifier){
+					dto.setUserPhone(userIdentifier.getIdentifierToken());
+				}
+			}
+			String wareJson = statRefund.getWareJson();
+			List<StatWareDTO> statWareDTOs =  new ArrayList<StatWareDTO>();
+			
+			if(!StringUtils.isEmpty(wareJson)){
+				List<Ware> wares = (List<Ware>)StringHelper.fromJsonString(wareJson, List.class);
+				if(null != wares){
+					for (Ware ware : wares) {
+						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
+						wareDTO.setNumber(ware.getNumber());
+						statWareDTOs.add(wareDTO);
+					}
+				}
+			}
+			dto.setWares(statWareDTOs);
+			StatOrder order = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), SettlementResourceType.SHOP.getCode());
+			if(null != order){
+				dto.setStatus(order.getStatus());
+			}
+			dtos.add(dto);
+		}
+		
+		return dtos;
+	}
+	
+	private StatWareDTO getWareInfo(Long modelId){
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
+		if(StringUtils.isEmpty(serverURL)){
+			LOGGER.error("biz serverURL not configured, param = {}", StatTransactionConstant.BIZ_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz serverURL not configured.");
+		}
+		
+		String paidOrderApi = configurationProvider.getValue(StatTransactionConstant.BIZ_WARE_INFO_API, "");
+		
+		if(StringUtils.isEmpty(paidOrderApi)){
+			LOGGER.error("biz paid ware info api not configured, param = {}", StatTransactionConstant.BIZ_WARE_INFO_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz paid  ware info api not configured.");
+		}
+		
+		try {
+			String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
+	        String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
+	        List<Long> modelIds = new ArrayList<Long>();
+	        modelIds.add(modelId);
+	        Integer nonce = (int)(Math.random()*1000);
+		    Long timestamp = System.currentTimeMillis();       
+		    Map<String,Object> params = new HashMap<String, Object>();
+		    params.put("nonce", nonce);
+		    params.put("timestamp", timestamp);
+		    params.put("appKey", appKey);
+		    params.put("modelIds", modelIds);
+		    Map<String, String> mapForSignature = new HashMap<String, String>();
+	        for(Map.Entry<String, Object> entry : params.entrySet()) {
+	        	if(!entry.getKey().equals("modelIds")) {
+	        		mapForSignature.put(entry.getKey(), entry.getValue().toString());
+	        	}
+	        }
+	        mapForSignature.put("modelIds", org.apache.commons.lang.StringUtils.join(modelIds, ","));
+		    String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+		    params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		    String url = serverURL + paidOrderApi;
+		    
+		    String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
+		    
+		    ListModelInfoResponse response = (ListModelInfoResponse)StringHelper.fromJsonString(result, ListModelInfoResponse.class);
+		    
+		    if(null != response){
+		    	List<Model> models = response.getResponse();
+		    	if(null != models && 0 < models.size()){
+		    		Model model = models.get(0);
+		    		StatWareDTO dto = new StatWareDTO();
+		    		dto.setWareName(model.getCommoName());
+		    		dto.setWareId(model.getCommoNo());
+		    		return dto;
+		    	}
+		    }
+		} catch (Exception e) {
+			LOGGER.error("Get ware info error e = {}");
+		}
+		
+	    return null;
+	}
+	
 	private String getServiceName(String serviceType){
 		if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.COMMUNITY_SERVICE){
 			return "社区服务";
@@ -485,21 +737,21 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		return "其他服务";
 	}
 	
-	private String getResourceName(String resourceType, String resourceName){
-		if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.SHOP){
-			return resourceName;
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PARKING_RECHARGE){
-			return "停车充值";
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PAYMENT_CARD){
-			return "一卡通";
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PMSY){
-			return "物业缴费";
-		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.RENTAL_SITE){
-			return "资源预定";
-		}
-		
-		return "其他服务";
-	}
+//	private String getResourceName(String resourceType, String resourceName){
+//		if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.SHOP){
+//			return resourceName;
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PARKING_RECHARGE){
+//			return "停车充值";
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PAYMENT_CARD){
+//			return "一卡通";
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.PMSY){
+//			return "物业缴费";
+//		}else if(SettlementResourceType.fromCode(resourceType) == SettlementResourceType.RENTAL_SITE){
+//			return "资源预定";
+//		}
+//		
+//		return "其他服务";
+//	}
 	
 	/**
 	 * 按天生成结算
@@ -553,7 +805,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}			
 			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_CARD_ORDER){
-				this.syncPaymentToStatOrderByDate(date);
+//				this.syncPaymentToStatOrderByDate(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.SYNC_PAID_PLATFORM_TRANSACTION.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
@@ -565,7 +817,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_CARD_TRANSACTION){
-				this.syncPaymentToStatTransaction(date);
+//				this.syncPaymentToStatTransaction(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.SYNC_PAID_PLATFORM_REFUND.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
@@ -577,7 +829,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			}
 			
 			if(StatTaskStatus.fromCode(statTaskLog.getStatus()) == StatTaskStatus.SYNC_PAYMENT_REFUND){
-				this.syncPaymentToStatRefund(date);
+//				this.syncPaymentToStatRefund(date);   //屏蔽一卡通
 				statTaskLog.setStatus(StatTaskStatus.GENERATE_SETTLEMENT_DETAIL.getCode());
 				statTransactionProvider.updateStatTaskLog(statTaskLog);
 			}
@@ -815,12 +1067,27 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != user){
 					order.setNamespaceId(user.getNamespaceId());
 				}
+			}else{
+				order.setNamespaceId(1000000);
 			}
 			order.setShopType(bizPaidOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
 			order.setResourceId(bizPaidOrder.getShopNo());
 			order.setOrderTime(new Timestamp(bizPaidOrder.getPaidTime()));
 			order.setOrderDate(DateUtil.dateToStr(new Date(bizPaidOrder.getPaidTime()), DateUtil.YMR_SLASH));
+			
+			
+			List<Ware> wares = new ArrayList<Ware>();
+			if(null != bizPaidOrder.getModels() && 0 < bizPaidOrder.getModels().size()){
+				for (BizOrderModel model : bizPaidOrder.getModels()) {
+					Ware ware = new Ware();
+					ware.setWareId(model.getId());
+					ware.setNumber(model.getQuantity());
+					wares.add(ware);
+				}
+			}
+			order.setWareJson(StringHelper.toJsonString(wares));
+			
 			statTransactionProvider.createStatOrder(order);
 		}
 	}
@@ -841,12 +1108,22 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != user){
 					order.setNamespaceId(user.getNamespaceId());
 				}
+			}else{
+				order.setNamespaceId(1000000);
 			}
 			order.setShopType(bizRefundOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
 			order.setResourceId(bizRefundOrder.getShopNo());
 			order.setOrderTime(new Timestamp(bizRefundOrder.getRefundTime()));
 			order.setOrderDate(DateUtil.dateToStr(new Date(bizRefundOrder.getRefundTime()), DateUtil.YMR_SLASH));
+			
+			List<Ware> wares = new ArrayList<Ware>();
+			Ware ware = new Ware();
+			ware.setWareId(bizRefundOrder.getModelId());
+			ware.setNumber(bizRefundOrder.getRefundQuantity());
+			wares.add(ware);
+			order.setWareJson(StringHelper.toJsonString(wares));
+			
 			statTransactionProvider.createStatOrder(order);
 		}
 	}
@@ -1077,10 +1354,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			
 			StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statTransaction.getOrderNo(), statTransaction.getResourceType());
 			
-			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidTransaction.getOrderType())){
-				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
-			}
-			
 			if(null != statOrder){
 				statTransaction.setCommunityId(statOrder.getCommunityId());
 				statTransaction.setNamespaceId(statOrder.getNamespaceId());
@@ -1093,10 +1366,22 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					}
 					statTransaction.setResourceId(statOrder.getResourceId());
 				}
+				statTransaction.setWareJson(statOrder.getWareJson());
 			}else{
 				statTransaction.setCommunityId(0L);
-				statTransaction.setNamespaceId(0);
+				statTransaction.setNamespaceId(1000000);
+				statTransaction.setResourceId("-1");
+				statTransaction.setPayerUid(0L);
 			}
+			
+			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidTransaction.getOrderType())){
+				statTransaction.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+			}else{
+				statTransaction.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
+			}
+			
+			
+			
 			statTransaction.setPaidDate(DateUtil.dateToStr(new Date(paidTransaction.getPaidTime()), DateUtil.YMR_SLASH));
 			statTransactionProvider.createStatTransaction(statTransaction);
 		}
@@ -1295,9 +1580,6 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			
 			StatOrder statOrder = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), statRefund.getResourceType());
 			
-			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidRefund.getOrderType())){
-				statRefund.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
-			}
 			
 			if(null != statOrder){
 				statRefund.setCommunityId(statOrder.getCommunityId());
@@ -1311,9 +1593,18 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 						statRefund.setServiceType(SettlementServiceType.OTHER_SHOP.getCode());
 					}
 				}
+				statRefund.setWareJson(statOrder.getWareJson());
 			}else{
 				statRefund.setCommunityId(0L);
-				statRefund.setNamespaceId(0);
+				statRefund.setNamespaceId(1000000);
+				statRefund.setResourceId("-1");
+				statRefund.setPayerUid(0L);
+			}
+			
+			if(StatTransactionConstant.COMMUNITY_SERVICES.contains(paidRefund.getOrderType())){
+				statRefund.setServiceType(SettlementServiceType.COMMUNITY_SERVICE.getCode());
+			}else{
+				statRefund.setServiceType(SettlementServiceType.ZUOLIN_SHOP.getCode());
 			}
 			statRefund.setRefundDate(DateUtil.dateToStr(new Date(paidRefund.getRefundTime()), DateUtil.YMR_SLASH));
 			statTransactionProvider.createStatRefund(statRefund);
@@ -1516,8 +1807,13 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		PaidOrderResponse res = response.getResponse();
 		List<BizPaidOrder> list  = res.getList();
 		Integer s = 200;
-		System.out.println(Timestamp.valueOf("2016-08-03" + " 00:00:00").getTime());
+		System.out.println(Timestamp.valueOf("2016-08-01" + " 00:00:00").getTime());
 		
-		System.out.println(Long.valueOf("14598342843426081282"));
+		
+		List<Date> dDates = DateUtil.getStartToEndDates(new Date(1422025100000L), new Date(1472065200001L));
+		for (Date date : dDates) {
+			System.out.println(DateUtil.dateToStr(date, DateUtil.YMR_SLASH));
+
+		}
 	}
 }

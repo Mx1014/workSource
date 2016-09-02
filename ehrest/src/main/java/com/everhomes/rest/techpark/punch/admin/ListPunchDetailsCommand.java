@@ -30,7 +30,7 @@ public class ListPunchDetailsCommand {
 	@NotNull
 	private Long ownerId;
 	 
-	private Long userName;
+	private String userName;
 	private Byte exceptionStatus;
 
 	private Long startDay;
@@ -81,16 +81,7 @@ public class ListPunchDetailsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
- 
-
-	public Long getUserName() {
-		return userName;
-	}
-
-	public void setUserName(Long userName) {
-		this.userName = userName;
-	}
-
+  
 	public Byte getExceptionStatus() {
 		return exceptionStatus;
 	}
@@ -161,6 +152,14 @@ public class ListPunchDetailsCommand {
 
 	public void setWorkTime(Long workTime) {
 		this.workTime = workTime;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
  
 
