@@ -13,4 +13,6 @@ public interface ConfServiceErrorCode {
     static final int CONF_NOT_OPEN=10007; 
     static final int CONF_INVOICE_SUBJECT=10008; 
     static final int CONF_INVOICE_BODY=10009; 
+    static final int ERROR_INVALID_ENTERPRISE=10010; 
+    static final int CONF_ENTERPRISE_HAS_ACTIVE_ACCOUNT=10011; 
 }

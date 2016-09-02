@@ -3,6 +3,8 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -30,4 +32,6 @@ public interface ParkingVendorHandler {
     ParkingCardRequestDTO getRequestParkingCard(RequestParkingCardCommand cmd);
     
     ListCardTypeResponse listCardType(ListCardTypeCommand cmd);
+    
+    CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd, ParkingLot parkingLot);
 }

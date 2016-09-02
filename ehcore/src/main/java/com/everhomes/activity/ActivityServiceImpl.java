@@ -6,18 +6,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
-import org.jooq.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +31,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -49,7 +47,6 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -70,7 +67,6 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.GeoLocation;
-import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -84,7 +80,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.GetTopicCommand;
@@ -95,8 +90,6 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -106,14 +99,12 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -288,45 +279,48 @@ public class ActivityServiceImpl implements ActivityService {
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         ActivityRoster roster = createRoster(cmd, user, activity);
-        dbProvider.execute((status) -> {
-        	//去掉报名评论 by xiongying 20160615
-//            Post comment = new Post();
-//            comment.setParentPostId(post.getId());
-//            comment.setForumId(post.getForumId());
-//            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//            comment.setCreatorUid(user.getId());
-//            comment.setContentType(PostContentType.TEXT.getCode());
-////            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
-//            String template = localeStringService.getLocalizedString(
-//            		ActivityLocalStringCode.SCOPE,
-//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
-//                    UserContext.current().getUser().getLocale(),
-//                    "");
-//
-//            if (!StringUtils.isEmpty(template)) {
-//                comment.setContent(template);
-//                forumProvider.createPost(comment);
-//            }
-            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
-                RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
-                joinCmd.setGroupId(activity.getGroupId());
-                joinCmd.setRequestText("request to join activity group");
-                try{
-                    groupService.requestToJoinGroup(joinCmd);
-                }catch(Exception e){
-                    LOGGER.error("join to group failed",e);
-                }
-               
-            }
-            int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
-            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
-            if(user.getAddressId()!=null){
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
-            }
-            activityProvider.createActivityRoster(roster);
-            activityProvider.updateActivity(activity);
-            return status;
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+	        dbProvider.execute((status) -> {
+	        	//去掉报名评论 by xiongying 20160615
+	//            Post comment = new Post();
+	//            comment.setParentPostId(post.getId());
+	//            comment.setForumId(post.getForumId());
+	//            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	//            comment.setCreatorUid(user.getId());
+	//            comment.setContentType(PostContentType.TEXT.getCode());
+	////            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
+	//            String template = localeStringService.getLocalizedString(
+	//            		ActivityLocalStringCode.SCOPE,
+	//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
+	//                    UserContext.current().getUser().getLocale(),
+	//                    "");
+	//
+	//            if (!StringUtils.isEmpty(template)) {
+	//                comment.setContent(template);
+	//                forumProvider.createPost(comment);
+	//            }
+	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
+	                RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
+	                joinCmd.setGroupId(activity.getGroupId());
+	                joinCmd.setRequestText("request to join activity group");
+	                try{
+	                    groupService.requestToJoinGroup(joinCmd);
+	                }catch(Exception e){
+	                    LOGGER.error("join to group failed",e);
+	                }
+	               
+	            }
+	            int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
+	            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
+	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
+	            if(user.getAddressId()!=null){
+	                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+	            }
+	            activityProvider.createActivityRoster(roster);
+	            activityProvider.updateActivity(activity);
+	            return status;
+	        });
+	        return null;
         });
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
@@ -384,6 +378,9 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setActivityId(activity.getId());
         roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         roster.setConfirmFamilyId(user.getAddressId());
+        if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
+        	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        }
         return roster;
     }
 

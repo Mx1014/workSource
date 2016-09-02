@@ -1,6 +1,7 @@
 package com.everhomes.statistics.transaction;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class BizPaidOrder {
 
@@ -19,6 +20,8 @@ public class BizPaidOrder {
 	private Byte payType;
 	
 	private Byte shopCreateType;
+	
+	private List<BizOrderModel> models;
 
 	public String getOrderNo() {
 		return orderNo;
@@ -82,6 +85,14 @@ public class BizPaidOrder {
 
 	public void setShopCreateType(Byte shopCreateType) {
 		this.shopCreateType = shopCreateType;
+	}
+
+	public List<BizOrderModel> getModels() {
+		return models;
+	}
+
+	public void setModels(List<BizOrderModel> models) {
+		this.models = models;
 	}
 	
 	

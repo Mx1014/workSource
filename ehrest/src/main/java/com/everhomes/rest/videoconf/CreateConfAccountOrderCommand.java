@@ -2,6 +2,8 @@ package com.everhomes.rest.videoconf;
 
 import java.math.BigDecimal;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,6 +20,7 @@ import com.everhomes.util.StringHelper;
  *  <li>buyChannel: 购买渠道0-offline 1-online</li>
  *  <li>accountCategoryId: 购买的账号类型</li>
  *  <li>invoice: 发票信息，参考{@link com.everhomes.rest.videoconf.InvoiceDTO}</li>
+ *  <li>expiredDate: 到期时间</li>
  * </ul>
  *
  */
@@ -46,6 +49,17 @@ public class CreateConfAccountOrderCommand {
 	
 	private Long accountCategoryId;
 	
+	@NotNull
+	private Long expiredDate;
+	
+	public Long getExpiredDate() {
+		return expiredDate;
+	}
+
+	public void setExpiredDate(Long expiredDate) {
+		this.expiredDate = expiredDate;
+	}
+
 	public Long getEnterpriseId() {
 		return enterpriseId;
 	}

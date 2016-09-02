@@ -1,6 +1,7 @@
 package com.everhomes.techpark.punch;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.List;
 
@@ -258,6 +259,11 @@ public interface PunchProvider {
 	public void deletePunchStatisticByUser(String ownerType, Long ownerId, String punchMonth, Long userId);
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
+
+	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
+			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
+			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
+ 
  
  
 }

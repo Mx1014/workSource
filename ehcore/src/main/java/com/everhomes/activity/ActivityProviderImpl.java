@@ -19,6 +19,8 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -61,6 +63,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Autowired
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
     
     @Override
     public void createActity(Activity activity) {
@@ -106,17 +111,21 @@ public class ActivityProviderImpl implements ActivityProivider {
                 rosters[0].getActivityId()));
         if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())||rosters[0].getCheckinFlag()==null) {
             LOGGER.warn("the user does not signin,can cancel the operation");
-            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
-            dao.delete(rosters[0]);
-            // decrease count
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
-                    - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
-            if (familyId != null)
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
-            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
-            self.updateActivity(activity);
-            // update dao and push event
-            DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+	            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
+	            dao.delete(rosters[0]);
+	            // decrease count
+	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
+	                    - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
+	            if (familyId != null)
+	                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
+	            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
+	            self.updateActivity(activity);
+	            // update dao and push event
+	            DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
+	            
+	            return null;
+            });
             return rosters[0];
         }
         LOGGER.error("the user was checkin,cannot cancel operation.activityId={},uid={}", activity.getId(), uid);

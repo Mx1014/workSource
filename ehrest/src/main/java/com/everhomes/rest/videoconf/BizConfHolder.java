@@ -4,15 +4,15 @@ import com.everhomes.util.StringHelper;
 
 public class BizConfHolder {
 	
-	private Object data;
+	private BizConfDTO data;
 	
 	private Integer status;
 
-	public Object getData() {
+	public BizConfDTO getData() {
 		return data;
 	}
 
-	public void setData(Object data) {
+	public void setData(BizConfDTO data) {
 		this.data = data;
 	}
 

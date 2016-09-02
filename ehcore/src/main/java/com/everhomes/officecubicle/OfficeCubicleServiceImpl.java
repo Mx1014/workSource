@@ -528,7 +528,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		StringBuffer sb = new StringBuffer();
 		sb.append("您收到一条");
 		sb.append(space.getName());
-		sb.append("的工位预定订单:\n工位类型:");
+		sb.append("的工位续订订单:\n工位类型:");
 		sb.append(OfficeRentType.fromCode(order.getRentType()).getMsg());
 		sb.append("(");
 		sb.append(order.getSpaceSize());

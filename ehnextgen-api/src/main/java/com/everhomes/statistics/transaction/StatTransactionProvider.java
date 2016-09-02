@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.jooq.Condition;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
+
 public interface StatTransactionProvider {
 	
 	void createStatOrder(StatOrder statOrder);
@@ -82,4 +85,12 @@ public interface StatTransactionProvider {
 	
 	StatServiceSettlementResult getStatServiceSettlementResultTotal(Condition cond, String startDate, String endDate);
 	
+	List<StatService> listStatServices(Integer namespaceId, String ownerType, Long ownerId);
+	
+	List<StatService> listStatServiceGroupByServiceTypes();
+	
+	List<StatTransaction> listStatTransactions(CrossShardListingLocator locator, Integer pageSize, String startDate, String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType);
+	
+	
+	List<StatRefund> listStatRefunds(CrossShardListingLocator locator, Integer pageSize, String startDate,String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType);
 }

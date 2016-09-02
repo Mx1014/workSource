@@ -416,15 +416,6 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public void deleteParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder){
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
-        
-        dao.update(parkingRechargeOrder);	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeOrders.class, parkingRechargeOrder.getId());
-    }
-    
-    @Override
     public ParkingRechargeRate findParkingRechargeRatesById(Long id){
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
     	EhParkingRechargeRatesDao dao = new EhParkingRechargeRatesDao(context.configuration());

@@ -23,6 +23,10 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
  * <li>status：状态</li>
+ * <li>roles：角色列表</li>
+ * <li>departments：部门列表</li>
+ * <li>groups：群组列表</li>
+ * <li>employeeNo：工号</li>
  * <li>initial：首字母</li>
  * </ul>
  */
@@ -61,7 +65,11 @@ public class OrganizationMemberDTO {
 	private Long   employeeNo;
 	private Byte   gender;
 	
+	@ItemType(OrganizationDTO.class)
+	private List<OrganizationDTO> groups;
 	
+	@ItemType(OrganizationDTO.class)
+	private List<OrganizationDTO> departments;
 	
 	public OrganizationMemberDTO() {
     }
@@ -243,6 +251,25 @@ public class OrganizationMemberDTO {
 
 	public void setFullInitial(String fullInitial) {
 		this.fullInitial = fullInitial;
+	}
+	
+	
+	public List<OrganizationDTO> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(List<OrganizationDTO> groups) {
+		this.groups = groups;
+	}
+	
+	
+
+	public List<OrganizationDTO> getDepartments() {
+		return departments;
+	}
+
+	public void setDepartments(List<OrganizationDTO> departments) {
+		this.departments = departments;
 	}
 
 	@Override
