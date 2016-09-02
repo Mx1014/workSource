@@ -1050,21 +1050,21 @@ public class UserServiceImpl implements UserService {
 			kickoffLoginByDevice(foundLogin);
 		}
 		
-		if(!ref.getOldDeviceId().isEmpty()) {
-		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
-	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
-	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
-	            locale = user.getLocale(); 
-	        }
-	        
-	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
-		    String msg = this.localeStringService.getLocalizedString(
-	                MessagingLocalStringCode.SCOPE,
-	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
-	                locale,
-	                "kickoff other devices");
-		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
-		}
+//		if(!ref.getOldDeviceId().isEmpty()) {
+//		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+//	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+//	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
+//	            locale = user.getLocale(); 
+//	        }
+//	        
+//	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
+//		    String msg = this.localeStringService.getLocalizedString(
+//	                MessagingLocalStringCode.SCOPE,
+//	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
+//	                locale,
+//	                "kickoff other devices");
+//		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
+//		}
 
 		return foundLogin;
 	}

@@ -21,6 +21,8 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.parking.etcp.ETCPCar;
 import com.everhomes.parking.etcp.ETCPJsonRsult;
 import com.everhomes.parking.etcp.ETCPLocation;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -203,6 +205,12 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 
 	@Override
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd, ParkingLot parkingLot) {
 		// TODO Auto-generated method stub
 		return null;
 	}

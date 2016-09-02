@@ -37,8 +37,9 @@ public interface EquipmentProvider {
 	void updateEquipmentTask(EquipmentInspectionTasks task);
 	
 	void createEquipmentInspectionTasksLogs(EquipmentInspectionTasksLogs log);
-	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, Byte processType);
+	List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType);
 	void createEquipmentInspectionTasksAttachment(EquipmentInspectionTasksAttachments attachment);
+	List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(Long logId);
 	
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandards(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionAccessories> listEquipmentInspectionAccessories(CrossShardListingLocator locator, Integer pageSize);
@@ -57,4 +58,6 @@ public interface EquipmentProvider {
 	List<Long> listStandardIdsByType(Byte type);
 	
 	List<EquipmentInspectionAccessoryMap> listAccessoryMapByEquipmentId(Long equipmentId);
+	
+	EquipmentInspectionTasksLogs getNearestReviewLogAfterProcess(Long taskId, Long id);
 }

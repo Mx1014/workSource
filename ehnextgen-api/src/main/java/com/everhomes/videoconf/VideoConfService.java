@@ -13,6 +13,7 @@ import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
+import com.everhomes.rest.videoconf.DeleteConfEnterpriseCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
 import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
@@ -90,7 +91,7 @@ public interface VideoConfService {
 	void extendedSourceAccountPeriod(ExtendedSourceAccountPeriodCommand cmd);
 	ListSourceVideoConfAccountResponse listSourceVideoConfAccount(ListSourceVideoConfAccountCommand cmd);
 	
-	ListEnterpriseWithVideoConfAccountResponse listEnterpriseWithVideoConfAccount(ListEnterpriseWithVideoConfAccountCommand cmd);
+//	ListEnterpriseWithVideoConfAccountResponse listEnterpriseWithVideoConfAccount(ListEnterpriseWithVideoConfAccountCommand cmd);
 
 	void updateContactor(UpdateContactorCommand cmd);
 	void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd);
@@ -152,4 +153,6 @@ public interface VideoConfService {
 	ConfAccountOrderDTO createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd);
 	
 	VerifyPurchaseAuthorityResponse verifyPurchaseAuthority(VerifyPurchaseAuthorityCommand cmd);
+	
+	void deleteConfEnterprise(DeleteConfEnterpriseCommand cmd);
 }

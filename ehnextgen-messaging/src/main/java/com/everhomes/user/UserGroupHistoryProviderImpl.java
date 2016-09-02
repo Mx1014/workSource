@@ -14,12 +14,14 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.group.Group;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhUserGroupHistoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhUserGroupHistories;
@@ -60,24 +62,27 @@ public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
     
     @Override
     public UserGroupHistory getHistoryById(Long id) {
-        UserGroupHistory[] result = new UserGroupHistory[1];
-        
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_USER_GROUP_HISTORIES)
-                    .where(Tables.EH_USER_GROUP_HISTORIES.ID.eq(id))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, UserGroupHistory.class);
-                    });
-
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-        
-        return result[0];
+//        UserGroupHistory[] result = new UserGroupHistory[1];
+//        
+//        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+//            (DSLContext context, Object reducingContext) -> {
+//                result[0] = context.select().from(Tables.EH_USER_GROUP_HISTORIES)
+//                    .where(Tables.EH_USER_GROUP_HISTORIES.ID.eq(id))
+//                    .fetchAny().map((r) -> {
+//                        return ConvertHelper.convert(r, UserGroupHistory.class);
+//                    });
+//
+//                if (result[0] != null) {
+//                    return false;
+//                } else {
+//                    return true;
+//                }
+//            });
+//        
+//        return result[0];
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserGroupHistories.class, id));
+    	EhUserGroupHistoriesDao dao = new EhUserGroupHistoriesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), UserGroupHistory.class);
     }
     
     @Override

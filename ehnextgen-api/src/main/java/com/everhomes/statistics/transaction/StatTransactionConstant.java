@@ -13,6 +13,8 @@ public interface StatTransactionConstant {
 	
 	String BIZ_REFUND_ORDER_API = "get.refund.order.api";
 	
+	String BIZ_WARE_INFO_API = "get.ware.info.api";
+	
 	String PAID_TRANSACTION_API = "get.transaction.api";
 	
 	String PAID_REFUND_API = "get.refund.api";

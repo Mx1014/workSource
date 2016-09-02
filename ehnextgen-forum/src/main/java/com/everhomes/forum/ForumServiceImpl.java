@@ -1302,7 +1302,7 @@ public class ForumServiceImpl implements ForumService {
         
         if(null != cmd.getEmbeddedAppId()){
         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
-        		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+        		categorys = CategoryConstants.GA_PRIVACY_CATEGORIES;
         	}
         	
         }

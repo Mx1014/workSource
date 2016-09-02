@@ -13,15 +13,14 @@ import com.everhomes.util.StringHelper;
 public class OrganizationMenuResponse {
 	
 	
-	private OrganizationDTO OrganizationMenu;
-
+	private OrganizationDTO organizationMenu;
 
 	public OrganizationDTO getOrganizationMenu() {
-		return OrganizationMenu;
+		return organizationMenu;
 	}
 
 	public void setOrganizationMenu(OrganizationDTO organizationMenu) {
-		OrganizationMenu = organizationMenu;
+		this.organizationMenu = organizationMenu;
 	}
 
 	@Override

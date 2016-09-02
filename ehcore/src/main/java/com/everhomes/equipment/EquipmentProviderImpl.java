@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -25,6 +27,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.EquipmentTaskProcessType;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
@@ -55,6 +58,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipment
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -79,12 +83,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+    private ConfigurationProvider configurationProvider;
+	
 	@PostConstruct
 	public void init() {
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 			String EQUIPMENT_INSPECTION_TRIGGER_NAME = "EquipmentInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(EQUIPMENT_INSPECTION_TRIGGER_NAME, EQUIPMENT_INSPECTION_TRIGGER_NAME,
-					"0 0 0 * * ? ", EquipmentInspectionScheduleJob.class, null);
+					cronExpression, EquipmentInspectionScheduleJob.class, null);
         });
 		
 	}
@@ -434,7 +442,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, Byte processType) {
+	public List<EquipmentInspectionTasksLogs> listLogsByTaskId(ListingLocator locator, int count, Long taskId, List<Byte> processType) {
 		
 		List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
 		assert(locator.getEntityId() != 0);
@@ -446,7 +454,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
 		
 		if(processType != null) {
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(processType));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.in(processType));
 		}
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID.eq(taskId));
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.desc());
@@ -712,13 +720,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 		
 		Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
-		con2 = con2.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
-		
-		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
-		con3 = con3.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
+//		con2 = con2.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
+//		
+//		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
+//		con3 = con3.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
 		
 		Condition con = con1.or(con2);
-		con = con.or(con3);
+//		con = con.or(con3);
 		
 		query.addConditions(con);
 		
@@ -840,6 +848,51 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		
         return map;
+	}
+
+	@Override
+	public List<EquipmentInspectionTasksAttachments> listTaskAttachmentsByLogId(
+			Long logId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_ATTACHMENTS.LOG_ID.eq(logId));
+		 
+		List<EquipmentInspectionTasksAttachments> result = new ArrayList<EquipmentInspectionTasksAttachments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTasksAttachments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
+	}
+
+	@Override
+	public EquipmentInspectionTasksLogs getNearestReviewLogAfterProcess(
+			Long taskId, Long id) {
+		List<EquipmentInspectionTasksLogs> result = new ArrayList<EquipmentInspectionTasksLogs>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTaskLogsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
+		
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.gt(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.TASK_ID.eq(taskId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
+		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.ID.asc());
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query EquipmentInspectionTasksLogs by count, sql=" + query.getSQL());
+            LOGGER.debug("Query EquipmentInspectionTasksLogs by count, bindValues=" + query.getBindValues());
+        }
+        
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTasksLogs.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
 	}
 
 }
