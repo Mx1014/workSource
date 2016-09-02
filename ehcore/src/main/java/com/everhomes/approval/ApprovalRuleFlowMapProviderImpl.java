@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -14,6 +15,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRuleFlowMapDao;
@@ -61,6 +63,7 @@ public class ApprovalRuleFlowMapProviderImpl implements ApprovalRuleFlowMapProvi
 	public ApprovalRuleFlowMap findOneApprovalRuleFlowMapByFlowId(Long flowId) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULE_FLOW_MAP)
 				.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.FLOW_ID.eq(flowId))
+				.and(Tables.EH_APPROVAL_RULE_FLOW_MAP.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.limit(1)
 				.fetchOne();
 		
@@ -69,6 +72,36 @@ public class ApprovalRuleFlowMapProviderImpl implements ApprovalRuleFlowMapProvi
 		}
 		
 		return null;
+	}
+
+	@Override
+	public void deleteRuleFlowMapByRuleId(Long ruleId) {
+		getReadWriteContext().delete(Tables.EH_APPROVAL_RULE_FLOW_MAP)
+			.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.RULE_ID.eq(ruleId))
+			.execute();
+	}
+
+	@Override
+	public void updateApprovalRuleFlowMapByRuleId(Long ruleId) {
+		getReadWriteContext().update(Tables.EH_APPROVAL_RULE_FLOW_MAP)
+			.set(Tables.EH_APPROVAL_RULE_FLOW_MAP.STATUS, CommonStatus.INACTIVE.getCode())
+			.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.RULE_ID.eq(ruleId))
+			.execute();
+	}
+
+	@Override
+	public List<ApprovalRuleFlowMap> listApprovalRuleFlowMapByRuleIds(List<Long> ruleIdList) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULE_FLOW_MAP)
+				.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.RULE_ID.in(ruleIdList))
+				.and(Tables.EH_APPROVAL_RULE_FLOW_MAP.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_APPROVAL_RULE_FLOW_MAP.ID.asc())
+				.fetch();
+
+		if (result != null && result.isNotEmpty()) {
+		return result.map(r->ConvertHelper.convert(r, ApprovalRuleFlowMap.class));
+		}
+		
+		return new ArrayList<ApprovalRuleFlowMap>();
 	}
 
 	private EhApprovalRuleFlowMapDao getReadWriteDao() {

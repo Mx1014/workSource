@@ -15,4 +15,10 @@ public interface ApprovalRuleFlowMapProvider {
 
 	ApprovalRuleFlowMap findOneApprovalRuleFlowMapByFlowId(Long flowId);
 
+	void deleteRuleFlowMapByRuleId(Long ruleId);
+
+	void updateApprovalRuleFlowMapByRuleId(Long ruleId);
+
+	List<ApprovalRuleFlowMap> listApprovalRuleFlowMapByRuleIds(List<Long> ruleIdList);
+
 }

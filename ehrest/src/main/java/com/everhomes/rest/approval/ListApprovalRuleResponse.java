@@ -18,6 +18,12 @@ public class ListApprovalRuleResponse {
 	@ItemType(ApprovalRuleDTO.class)
 	private List<ApprovalRuleDTO> approvalRuleList;
 
+	public ListApprovalRuleResponse(Long nextPageAnchor, List<ApprovalRuleDTO> approvalRuleList) {
+		super();
+		this.nextPageAnchor = nextPageAnchor;
+		this.approvalRuleList = approvalRuleList;
+	}
+
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

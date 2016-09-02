@@ -13,6 +13,11 @@ import com.everhomes.util.StringHelper;
 public class CreateApprovalRuleResponse {
 	private ApprovalRuleDTO approvalRule;
 
+	public CreateApprovalRuleResponse(ApprovalRuleDTO approvalRule) {
+		super();
+		this.approvalRule = approvalRule;
+	}
+
 	public ApprovalRuleDTO getApprovalRule() {
 		return approvalRule;
 	}

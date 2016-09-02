@@ -13,4 +13,6 @@ public interface ApprovalRuleProvider {
 
 	List<ApprovalRule> listApprovalRule();
 
+	List<ApprovalRule> listApprovalRule(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, int pageSize);
+
 }
