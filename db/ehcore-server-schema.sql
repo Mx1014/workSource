@@ -1179,7 +1179,7 @@ CREATE TABLE `eh_conf_orders` (
   `buyer_contact` VARCHAR(128),
   `vendor_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'vendor type 0: none, 1: Alipay, 2: Wechat',
   `email` VARCHAR(128),
-  
+  `expired_date` DATETIME,
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -3137,7 +3137,8 @@ CREATE TABLE `eh_organization_addresses` (
   `building_id` BIGINT NOT NULL DEFAULT 0,
   `building_name` VARCHAR(128),
   
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_orgaddr_owner` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -3851,6 +3852,90 @@ CREATE TABLE `eh_payment_cards` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_pm_task_attachments`;
+CREATE TABLE `eh_pm_task_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) COMMENT 'attachment object owner type',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g comment_id',
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_pm_task_logs`;
+CREATE TABLE `eh_pm_task_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `task_id` BIGINT NOT NULL DEFAULT 0,
+
+  `content` TEXT COMMENT 'content data',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
+  `target_type` VARCHAR(32) COMMENT 'user',
+  `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'target user id if target_type is a user',
+
+  `operator_uid` BIGINT NOT NULL DEFAULT 0,
+  `operator_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_pm_task_statistics`;
+CREATE TABLE `eh_pm_task_statistics` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `category_id` BIGINT NOT NULL DEFAULT 0,
+  `total_count` INTEGER NOT NULL DEFAULT 0,
+  `unprocess_count` INTEGER NOT NULL DEFAULT 0,
+  `processing_count` INTEGER NOT NULL DEFAULT 0,
+  `processed_count` INTEGER NOT NULL DEFAULT 0,
+  `close_count` INTEGER NOT NULL DEFAULT 0,
+  `star1` INTEGER NOT NULL DEFAULT 0,
+  `star2` INTEGER NOT NULL DEFAULT 0,
+  `star3` INTEGER NOT NULL DEFAULT 0,
+  `star4` INTEGER NOT NULL DEFAULT 0,
+  `star5` INTEGER NOT NULL DEFAULT 0,
+  `date_str` DATETIME,
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_pm_tasks`;
+CREATE TABLE `eh_pm_tasks` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `category_id` BIGINT NOT NULL DEFAULT 0,
+  `address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
+  `content` TEXT COMMENT 'content data',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
+  `star` TINYINT COMMENT 'evaluate score',
+  `unprocessed_time` DATETIME,
+  `processing_time` DATETIME,
+  `processed_time` DATETIME,
+  `closed_time` DATETIME,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `delete_uid` BIGINT NOT NULL DEFAULT 0,
+  `delete_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `eh_pmsy_communities`;
 CREATE TABLE `eh_pmsy_communities` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -4206,7 +4291,7 @@ CREATE TABLE `eh_punch_statistics` (
   `dept_id` BIGINT COMMENT 'user department id',
   `dept_name` VARCHAR(128) COMMENT 'user department name',
   `work_day_count` INTEGER COMMENT '应上班天数',
-  `work_count` INTEGER COMMENT '实际上班天数',
+  `work_count` DOUBLE COMMENT '实际上班天数',
   `belate_count` INTEGER COMMENT '迟到次数',
   `leave_early_count` INTEGER COMMENT '早退次数',
   `blandle_count` INTEGER COMMENT '迟到且早退次数',
@@ -5542,6 +5627,80 @@ CREATE TABLE `eh_servers`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_service_alliance_attachments`;
+CREATE TABLE `eh_service_alliance_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id reference to eh_service_alliances',
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_service_alliance_categories`;
+CREATE TABLE `eh_service_alliance_categories` (
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128),
+  `default_order` INTEGER,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+  `create_time` DATETIME,
+  `delete_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record deleter user id',
+  `delete_time` DATETIME,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_service_alliances`;
+CREATE TABLE `eh_service_alliances` (
+  `id` BIGINT NOT NULL,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community;group,organaization,exhibition,',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'organization name',
+  `display_name` VARCHAR(128) NOT NULL DEFAULT '',
+  `type` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id reference to eh_service_alliance_categories',
+  `address` VARCHAR(255) NOT NULL DEFAULT '',
+  `contact` VARCHAR(64),
+  `description` TEXT,
+  `poster_uri` VARCHAR(128),
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `default_order` INTEGER,
+  `longitude` DOUBLE,
+  `latitude` DOUBLE,
+  `geohash` VARCHAR(32),
+  `discount` BIGINT,
+  `category_id` BIGINT,
+  `contact_name` VARCHAR(128),
+  `contact_mobile` VARCHAR(128),
+  `service_type` VARCHAR(128),
+  `service_url` VARCHAR(128),
+  `discount_desc` VARCHAR(128),
+  `integral_tag1` BIGINT,
+  `integral_tag2` BIGINT,
+  `integral_tag3` BIGINT,
+  `integral_tag4` BIGINT,
+  `integral_tag5` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `eh_shards`;
 CREATE TABLE `eh_shards`(
   `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
@@ -5581,7 +5740,7 @@ CREATE TABLE `eh_stat_orders` (
   `resource_type` VARCHAR(64) COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` VARCHAR(64) COMMENT '来源实体店ID',
   `payer_uid` BIGINT COMMENT '支付用户编号',
-  `item_code` VARCHAR(64) COMMENT '商品编号',
+  `ware_json` TEXT COMMENT '商品',
   `vendor_code` VARCHAR(64) COMMENT '供应商编号',
   `order_no` VARCHAR(100) COMMENT '订单号',
   `order_type` VARCHAR(64) COMMENT '订单类型  transaction refund',
@@ -5605,6 +5764,7 @@ CREATE TABLE `eh_stat_refunds` (
   `resource_type` VARCHAR(64) COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` VARCHAR(64) COMMENT '来源实体店ID',
   `paid_channel` TINYINT COMMENT '支付渠道类型 0支付宝 1微信',
+  `ware_json` TEXT COMMENT '商品',
   `payer_uid` BIGINT COMMENT '支付用户编号',
   `refund_no` VARCHAR(100) COMMENT '平台退款流水号',
   `order_no` VARCHAR(100) COMMENT '订单号',
@@ -5616,6 +5776,21 @@ CREATE TABLE `eh_stat_refunds` (
   `settlement_amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT '交易总结算金额，交易总金额-交易总手续费',
   `refund_time` DATETIME,
   `update_time` DATETIME,
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_stat_service`;
+CREATE TABLE `eh_stat_service` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `owner_id` BIGINT,
+  `service_type` VARCHAR(64) NOT NULL,
+  `service_name` VARCHAR(64),
+  `status` TINYINT DEFAULT 0 COMMENT '0 无效 1 正常',
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
@@ -5699,7 +5874,7 @@ CREATE TABLE `eh_stat_transactions` (
   `service_type` VARCHAR(64) COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` VARCHAR(64) COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` VARCHAR(64) COMMENT '来源实体店ID',
-  `item_code` VARCHAR(64) COMMENT '商品编号',
+  `ware_json` TEXT COMMENT '商品',
   `vendor_code` VARCHAR(64) COMMENT '供应商编号',
   `payer_uid` BIGINT COMMENT '支付用户编号',
   `transaction_no` VARCHAR(100) COMMENT '平台流水号',
@@ -6027,7 +6202,28 @@ CREATE TABLE `eh_user_identifiers` (
   KEY `i_eh_user_idf_owner`(`owner_uid`),
   KEY `i_eh_user_idf_type_token`(`identifier_type`, `identifier_token`),
   KEY `i_eh_user_idf_create_time`(`create_time`),
-  KEY `i_eh_user_idf_notify_time`(`notify_time`)
+  KEY `i_eh_user_idf_notify_time` (`notify_time`),
+  KEY `i_eh_user_owner_status` (`owner_uid`,`claim_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+--
+-- member of global sharding group
+-- Pretending someone to login and operate as real user
+--
+DROP TABLE IF EXISTS  `eh_user_impersonations`;
+CREATE TABLE `eh_user_impersonations`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'USER',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(64) NOT NULL COMMENT 'USER',
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `description` TEXT,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -6352,10 +6548,12 @@ CREATE TABLE `eh_version_urls` (
   `target_version` VARCHAR(128),
   `download_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk',
   `info_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html',
+  `upgrade_description` TEXT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-   
-  PRIMARY KEY(`id`),
-  UNIQUE KEY `u_eh_ver_url`(`realm_id`, `target_version`)
+  `app_name` VARCHAR(50),
+  `publish_time` DATETIME,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_ver_url` (`realm_id`,`target_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -6505,25 +6703,6 @@ CREATE TABLE `eh_yellow_pages` (
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
   `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- member of eh_users sharding group
--- Pretending someone to login and operate as real user
---
-DROP TABLE IF EXISTS `eh_user_impersonations`;
-CREATE TABLE `eh_user_impersonations`(
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'USER',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `target_type` VARCHAR(64) NOT NULL COMMENT 'USER',
-  `target_id` BIGINT NOT NULL DEFAULT 0,
-  `description` TEXT,
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)

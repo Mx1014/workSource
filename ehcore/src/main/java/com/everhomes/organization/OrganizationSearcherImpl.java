@@ -297,7 +297,11 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         List<OrganizationDTO> dtos = this.getDTOs(rsp);
         
         if(dtos.size() > pageSize){
-        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
+//        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
+        	//用的是offset不是锚点 by xiongying20160902
+        	result.setPageAnchor((long)(pageNum+1));
+        	//移除多查的那个 by xiongying20160902
+        	dtos.remove(dtos.size() - 1);
         }
         
         result.setDtos(this.getDTOs(rsp));
