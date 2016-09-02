@@ -1336,6 +1336,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    case COMMUNITY_ALL:
 	    	QueryOrganizationTopicCommand command = ConvertHelper.convert(cmd, QueryOrganizationTopicCommand.class);
 	    	command.setOrganizationId(organizationId);
+	    	command.setPrivateFlag(PostPrivacy.PRIVATE.getCode());
 	    	response = forumService.listOrgTopics(command);
 	        break;
 	    }
