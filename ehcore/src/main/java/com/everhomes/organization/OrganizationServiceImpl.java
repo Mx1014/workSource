@@ -6813,32 +6813,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null != identifier) {
 			LOGGER.warn("User identifier token has already been claimed.");
 		}
-		
-		this.dbProvider.execute((TransactionStatus status) -> {
-			
-			if(null == identifier) {
-				createUser(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile());
-			}
-			
-			//create group
-			Group group = createGroup(cmd.getOrgName(), cmd.getNamespaceId());
-    
-            // create the group owned forum and save it
-            Forum forum = createGroupForum(group);
-            group.setOwningForumId(forum.getId());
-            this.groupProvider.updateGroup(group);
-            
-            //create organization
-            Organization organization = createOrganization(cmd.getOrgName(), cmd.getNamespaceId(), 
-            		cmd.getOrganizationType(), group.getId(), cmd.getCommunityId());
-	        
-	        //create administrator: add user group; add in organization member; add acl
-            OrganizationMember orgMember = addIntoOrgAndAssignRole(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile(), 
-            		cmd.getOrganizationType(), organization.getId());
-	        
-	        organizationSearcher.feedDoc(organization);
-	        userSearcher.feedDoc(orgMember);
-			return null;
+		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_NEW_ORG.getCode()).tryEnter(()-> {
+			this.dbProvider.execute((TransactionStatus status) -> {
+				
+				if(null == identifier) {
+					createUser(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile());
+				}
+				
+				//create group
+				Group group = createGroup(cmd.getOrgName(), cmd.getNamespaceId());
+	    
+	            // create the group owned forum and save it
+	            Forum forum = createGroupForum(group);
+	            group.setOwningForumId(forum.getId());
+	            this.groupProvider.updateGroup(group);
+	            
+	            //create organization
+	            Organization organization = createOrganization(cmd.getOrgName(), cmd.getNamespaceId(), 
+	            		cmd.getOrganizationType(), group.getId(), cmd.getCommunityId());
+		        
+		        //create administrator: add user group; add in organization member; add acl
+	            OrganizationMember orgMember = addIntoOrgAndAssignRole(cmd.getNamespaceId(), cmd.getContactor(), cmd.getMobile(), 
+	            		cmd.getOrganizationType(), organization.getId());
+		        
+		        organizationSearcher.feedDoc(organization);
+		        userSearcher.feedDoc(orgMember);
+				return null;
+			});
 		});
 	}
 	
@@ -6949,7 +6950,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private void createUser(Integer namespaceId, String nickName, String identifierToken) {
 		
 		User user = new User();
-		String password = "123456";
+		String password = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 		user.setStatus(UserStatus.ACTIVE.getCode());
 		user.setNamespaceId(namespaceId);
 		user.setNickName(nickName);
