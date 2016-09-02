@@ -459,6 +459,7 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
 
 
 -- 讯美屏蔽菜单 by sfyan 20160902
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 41000,'', 'EhNamespaces', 999999 , 0);
 INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),id,'EhNamespaces',999999,0  FROM `eh_web_menus` WHERE `path` LIKE '%41000/%';
 
