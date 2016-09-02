@@ -7061,8 +7061,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long finalOrganizationId = organizationId;
 		String finalGroupType = groupType;
 		
-		boolean isSend = false;
-		
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			List<Long> childOrganizationIds = cmd.getChildOrganizationIds();
@@ -7083,7 +7081,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationMember.setOrganizationId(finalOrganizationId);
 			if(null == desOrgMember){
 				organizationProvider.createOrganizationMember(organizationMember);
-				isSend = true;
+				
+				// 设置成创建
+				organizationMember.setCreate(true);
 			}else{
 				organizationMember.setId(desOrgMember.getId());
 				organizationProvider.updateOrganizationMember(organizationMember);
@@ -7126,9 +7126,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-//			userSearcher.feedDoc(organizationMember);
+			userSearcher.feedDoc(organizationMember);
 		}
-		sendMessageForContactApproved(organizationMember);
+		
+		// 如果是往公司添加新成员就需要发消息
+		if(organizationMember.isCreate())sendMessageForContactApproved(organizationMember);
 		return dto;
 	}
 	
