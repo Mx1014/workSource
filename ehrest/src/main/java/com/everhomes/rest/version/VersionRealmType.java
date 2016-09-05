@@ -67,7 +67,9 @@ public enum VersionRealmType {
     IOS_WEIXINLINK("iOS_WeixinLink"),
     ANDROID_IBASE("Android_Ibase"), 
     IOS_IBASE("iOS_Ibase"),
-    BIZ("biz");
+    BIZ("biz"),
+    ANDROID_ATMINI("Android_AtMini"),
+    IOS_ATMINI("iOS_AtMini");
     
     private String code;
     private VersionRealmType(String code) {

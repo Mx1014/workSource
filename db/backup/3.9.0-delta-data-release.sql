@@ -501,3 +501,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 
 
+-- 退款host和API的配置 add by wuhan  date:2016-9-2
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES('pay.zuolin.refound','POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record','退款的api','0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES('pay.zuolin.host','https://pay.zuolin.com','退款的host','0');

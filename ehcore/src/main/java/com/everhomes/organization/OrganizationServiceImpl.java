@@ -1336,6 +1336,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    case COMMUNITY_ALL:
 	    	QueryOrganizationTopicCommand command = ConvertHelper.convert(cmd, QueryOrganizationTopicCommand.class);
 	    	command.setOrganizationId(organizationId);
+	    	command.setPrivateFlag(PostPrivacy.PRIVATE.getCode());
 	    	response = forumService.listOrgTopics(command);
 	        break;
 	    }
@@ -7126,11 +7127,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			userSearcher.feedDoc(organizationMember);
+			organizationMember.setOrganizationId(finalOrganizationId);
+//			userSearcher.feedDoc(organizationMember);
+			
+			// 如果是往公司添加新成员就需要发消息
+			if(organizationMember.isCreate()){
+				sendMessageForContactApproved(organizationMember);
+			}
 		}
 		
-		// 如果是往公司添加新成员就需要发消息
-		if(organizationMember.isCreate())sendMessageForContactApproved(organizationMember);
 		return dto;
 	}
 	
