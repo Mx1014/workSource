@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -50,6 +52,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
 
 
 
@@ -101,6 +105,8 @@ import com.everhomes.rest.statistics.transaction.SettlementResourceType;
 import com.everhomes.rest.statistics.transaction.SettlementServiceType;
 import com.everhomes.rest.statistics.transaction.SettlementStatOrderStatus;
 import com.everhomes.rest.statistics.transaction.SettlementStatTransactionPaidStatus;
+import com.everhomes.rest.statistics.transaction.StatPaidOrderStatus;
+import com.everhomes.rest.statistics.transaction.StatRefundOrderStatus;
 import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
 import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
@@ -588,6 +594,82 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		return response;
 	}
 	
+	@Override
+	public void exportStatShopTransactions(ListStatTransactionCommand cmd,
+			HttpServletResponse response) {
+		//导出100条
+		cmd.setPageSize(100);
+		ListStatShopTransactionsResponse res = this.listStatShopTransactions(cmd);
+		List<StatShopTransactionDTO> dtos = res.getDtos();
+		this.exportStatShopTransactionsFile(dtos, response);
+	}
+	
+	private void exportStatShopTransactionsFile(List<StatShopTransactionDTO> dtos, HttpServletResponse response){
+		XSSFWorkbook wb = new XSSFWorkbook();
+		ByteArrayOutputStream out = null;
+		try {
+			String sheetName = "流水数据";
+			XSSFSheet sheet = wb.createSheet(sheetName);
+			
+			// 创建单元格样式
+			XSSFCellStyle style = wb.createCellStyle();// 样式对象
+			
+			//设置标题字体格式  
+	        Font font = wb.createFont();
+	        font.setFontHeightInPoints((short)20);  
+	        font.setFontName("Courier New");
+	        
+	        style.setFont(font);
+	        
+	        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+	        titleStyle.setFont(font);
+	        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER); 
+	        
+	        int rowNum = 0;
+	        XSSFRow row1 = sheet.createRow(rowNum ++);
+	        row1.setRowStyle(style);
+	        row1.createCell(0).setCellValue("订单编号");
+	        row1.createCell(1).setCellValue("支付时间");
+	        row1.createCell(2).setCellValue("订单状态");
+	        row1.createCell(3).setCellValue("支付金额");
+	        row1.createCell(4).setCellValue("支付通道");
+	        row1.createCell(5).setCellValue("联系人");
+	        row1.createCell(6).setCellValue("联系电话");
+	        row1.createCell(7).setCellValue("购买商品");
+	        
+	        for (StatShopTransactionDTO statShopTransactionDTO : dtos) {
+	        	
+	        	XSSFRow row = sheet.createRow(rowNum ++);
+	        	row.setRowStyle(style);
+	        	row.createCell(0).setCellValue(statShopTransactionDTO.getOrderNo());
+	        	row.createCell(1).setCellValue(DateUtil.dateToStr(new Date(statShopTransactionDTO.getPaidTime()), DateUtil.DATE_TIME_LINE));
+	            row.createCell(2).setCellValue(statShopTransactionDTO.getStatusName());
+	            row.createCell(3).setCellValue(statShopTransactionDTO.getPaidAmount());
+	            row.createCell(4).setCellValue(statShopTransactionDTO.getPaidChannelName());
+	            row.createCell(5).setCellValue(statShopTransactionDTO.getUserName());
+	            row.createCell(6).setCellValue(statShopTransactionDTO.getUserPhone());
+	            List<StatWareDTO> wareDTOs = statShopTransactionDTO.getWares();
+	            String wareInfo = "";
+	            for (StatWareDTO statWareDTO : wareDTOs) {
+	            	wareInfo = statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
+				}
+	            row.createCell(7).setCellValue(wareInfo);
+			}
+	        out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtil.download(out, response);
+		} catch (Exception e) {
+			LOGGER.error("export excel error", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("export excel error", e);
+			}
+		}
+		
+	}
 	private List<StatShopTransactionDTO> convertTransactionDTOByPaid(List<StatTransaction> statTransactions){
 		List<StatShopTransactionDTO> dtos = new ArrayList<StatShopTransactionDTO>();
 		for (StatTransaction statTransaction : statTransactions) {
@@ -598,6 +680,11 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(statTransaction.getPayerUid(), IdentifierType.MOBILE.getCode());
 				if(null != userIdentifier){
 					dto.setUserPhone(userIdentifier.getIdentifierToken());
+				}
+				
+				User user = userProvider.findUserById(statTransaction.getPayerUid());
+				if(null != user){
+					dto.setUserName(user.getNickName());
 				}
 			}
 			
@@ -620,12 +707,58 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			
 			if(null != order){
 				dto.setStatus(order.getStatus());
+				dto.setStatusName(this.getPaidStatusName(order.getStatus()));
 			}
-			
+			dto.setPaidChannelName(this.getPaidChannelName(dto.getPaidChannel()));
 			dtos.add(dto);
 		}
 		
 		return dtos;
+	}
+	
+	private String getPaidStatusName(Byte status){
+		if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.WAITING_PAID){
+			return "待支付";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.WAITING_DELIVER){
+			return "待发货";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.DELIVERED){
+			return "已发货";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.FINISH){
+			return "已完成";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.CLOSE){
+			return "已关闭";
+		}
+		return "未知";
+	}
+	
+	private String getRefundStatusName(Byte status){
+		if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.UN_APPLY){
+			return "未申请";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.WAITING){
+			return "待处理";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.REJECT){
+			return "已拒绝";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.REFUNDING){
+			return "退款中";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.SUCCESS){
+			return "成功";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.CLOSE){
+			return "已关闭";
+		}
+		return "未知";
+	}
+	
+	private String getPaidChannelName(Byte paidChannel){
+		if(PaidChannel.fromCode(paidChannel) == PaidChannel.ALIPAY){
+			return "支付宝";
+		}else if(PaidChannel.fromCode(paidChannel) == PaidChannel.WECHAT){
+			return "微信";
+		}else if(PaidChannel.fromCode(paidChannel) == PaidChannel.PAYMENT){
+			return "一卡通";
+		}else if(PaidChannel.fromCode(paidChannel) == PaidChannel.OHTER){
+			return "其他";
+		}
+		return "未知";
 	}
 	
 	private List<StatShopTransactionDTO> convertTransactionDTOByRefund(List<StatRefund> statRefunds){
@@ -657,6 +790,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			StatOrder order = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), SettlementResourceType.SHOP.getCode());
 			if(null != order){
 				dto.setStatus(order.getStatus());
+				dto.setStatusName(this.getRefundStatusName(order.getStatus()));
 			}
 			dtos.add(dto);
 		}

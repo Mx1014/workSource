@@ -9,5 +9,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- 统计
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 27000,'', 'EhNamespaces', 0 , 0);
 
-
+-- 现网删掉门牌地址  by sfyan 20160905
+DELETE FROM `eh_addresses` WHERE `community_id` = 240111044331051500 AND `building_name` = '中国储能大厦' AND `apartment_name` in ('B1','B2','B3','B4');
 

@@ -15,6 +15,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.statistics.transaction.ExecuteTaskCommand;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
+import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
 import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
 import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatShopTransactionDTO;
@@ -90,9 +91,23 @@ public class StatTransactionController extends ControllerBase {
      * <p>查询商铺订单</p>
      */
     @RequestMapping("listStatShopTransactions")
-    @RestReturn(value=StatShopTransactionDTO.class, collection = true)
+    @RestReturn(value=ListStatShopTransactionsResponse.class)
     public RestResponse listStatShopTransactions(@Valid ListStatTransactionCommand cmd) {
     	RestResponse response = new RestResponse(statTransactionService.listStatShopTransactions(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /stat/transaction/exportStatShopTransactions</b>
+     * <p>导出商铺订单</p>
+     */
+    @RequestMapping("exportStatShopTransactions")
+    @RestReturn(value=StatShopTransactionDTO.class, collection = true)
+    public RestResponse exportStatShopTransactions(@Valid ListStatTransactionCommand cmd, HttpServletResponse res) {
+    	statTransactionService.exportStatShopTransactions(cmd, res);
+    	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
