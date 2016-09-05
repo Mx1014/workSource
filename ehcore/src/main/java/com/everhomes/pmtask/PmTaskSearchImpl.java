@@ -76,7 +76,15 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("content", task.getContent());
             b.field("creatorUid", task.getCreatorUid());
             Category category = categoryProvider.findCategoryById(task.getCategoryId());
-            b.field("categoryId", category.getParentId());
+            
+            Category parent = categoryProvider.findCategoryById(category.getParentId());
+        	if(parent.getParentId().equals(0)){
+        		b.field("categoryId", category.getId());
+        	}else{
+        		b.field("categoryId", category.getParentId());
+        	}
+            
+            
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
             b.field("nickName", task.getNickName());

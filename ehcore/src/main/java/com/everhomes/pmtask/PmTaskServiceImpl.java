@@ -1049,12 +1049,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Content cannot be null.");
         }
     	Category child = checkCategory(categoryId);
-    	Category parent = checkCategory(child.getParentId());
-    	if(parent.getParentId().equals(0)){
-    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"CategoryId is not correctly.");
-    	}
+//    	Category parent = checkCategory(child.getParentId());
+//    	if(parent.getParentId().equals(0)){
+//    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
+//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//    				"CategoryId is not correctly.");
+//    	}
     }
 	
 	private Category checkCategory(Long id){
