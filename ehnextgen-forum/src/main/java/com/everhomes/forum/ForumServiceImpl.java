@@ -1187,7 +1187,7 @@ public class ForumServiceImpl implements ForumService {
          locator.setAnchor(cmd.getPageAnchor());
          
          if(null != privateCond){
-        	 condition.and(privateCond);
+        	 condition = condition.and(privateCond);
          }
          
          List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
