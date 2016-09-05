@@ -97,4 +97,18 @@ public class StatTransactionController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /stat/transaction/exportStatShopTransactions</b>
+     * <p>导出商铺订单</p>
+     */
+    @RequestMapping("exportStatShopTransactions")
+    @RestReturn(value=StatShopTransactionDTO.class, collection = true)
+    public RestResponse exportStatShopTransactions(@Valid ListStatTransactionCommand cmd, HttpServletResponse res) {
+    	statTransactionService.exportStatShopTransactions(cmd, res);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

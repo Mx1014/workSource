@@ -29,11 +29,18 @@ public class StatShopTransactionDTO {
 	
 	private Byte paidChannel;
 	
+	private String paidChannelName;
+	
 	private String userPhone;
 	
 	private Long paidTime;
 	
 	private String orderType;
+	
+	private String userName;
+	
+	private String statusName;
+	
 	
 	@ItemType(StatWareDTO.class)
 	private List<StatWareDTO> wares;
@@ -108,6 +115,30 @@ public class StatShopTransactionDTO {
 
 	public void setOrderType(String orderType) {
 		this.orderType = orderType;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getStatusName() {
+		return statusName;
+	}
+
+	public void setStatusName(String statusName) {
+		this.statusName = statusName;
+	}
+
+	public String getPaidChannelName() {
+		return paidChannelName;
+	}
+
+	public void setPaidChannelName(String paidChannelName) {
+		this.paidChannelName = paidChannelName;
 	}
  
 	
