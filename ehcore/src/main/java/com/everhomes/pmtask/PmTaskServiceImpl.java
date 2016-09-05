@@ -760,7 +760,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("ExportTasks is fail. {}",e);
+			LOGGER.error("ExportTasks is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"ExportTasks is fail.");
 		}
@@ -897,7 +897,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		response.setTotalCount(totalCount);
 		response.setEvaluateCount(evaluateCount);
-		response.setAvgScore((float) totalStar/evaluateCount);
+		float avgStar = evaluateCount!=0?(float) (totalStar/evaluateCount):0;
+		response.setAvgScore(avgStar);
 		response.setEvaluates(evaluates);
 		response.setCategoryTaskStatistics(categoryTaskStatistics);
 		
@@ -1143,9 +1144,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("ExportTasks is fail. {}",e);
+			LOGGER.error("ExportStatistics is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"ExportTasks is fail.");
+					"ExportStatistics is fail.");
 		}
 		
 	}
@@ -1308,7 +1309,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("ExportListStatistics is fail. {}",e);
+			LOGGER.error("ExportListStatistics is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"ExportListStatistics is fail.");
 		}

@@ -499,6 +499,13 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- 统计
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 27000,'', 'EhNamespaces', 0 , 0);
 
+
+
+-- 退款host和API的配置 add by wuhan  date:2016-9-2
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES('pay.zuolin.refound','POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record','退款的api','0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES('pay.zuolin.host','https://pay.zuolin.com','退款的host','0');
+
+
 -- 深业更换广场icon图 by xujuan 20160902
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME9UWTJNemszT0RRd1l6WmtNell6TXprMVpEVTNPV1UzWkdObE1UbG1OUQ' where item_label = "任务管理" and namespace_id=999992;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ' where item_label = "停车充值" and namespace_id=999992;
@@ -551,5 +558,3 @@ update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMFpUVTJaV1kxW
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "报修" and namespace_id=999992;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE0yTmlOVEZtTjJSaU56YzVZV1U1WkdabVlURmxNMk5pTldVME5XSXlOQQ' where item_label = "紧急求助" and namespace_id=999992;	
 		
-	
-	

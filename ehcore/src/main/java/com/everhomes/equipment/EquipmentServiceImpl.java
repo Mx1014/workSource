@@ -2448,8 +2448,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 					targetIds.add(dto.getId());
 				}
 			}
-			
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), targetTypes, targetIds, locator, pageSize + 1);
+			if(targetIds.size() > 0) {
+				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), targetTypes, targetIds, locator, pageSize + 1);
+			}
 		}
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);

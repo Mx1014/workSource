@@ -1148,6 +1148,17 @@ public class ForumServiceImpl implements ForumService {
          	forumIds.add(community.getDefaultForumId());
          }
          
+         Condition privateCond = null;
+         if(PostPrivacy.PRIVATE == PostPrivacy.fromCode(cmd.getPrivateFlag())){
+        	 Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(operator.getId());
+             
+             // 只有公开的帖子才能查到
+        	 privateCond = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+        	 privateCond = creatorCondition.or(privateCond);
+         }
+         
+        
+         
          Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
          
          Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
@@ -1174,6 +1185,10 @@ public class ForumServiceImpl implements ForumService {
          int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
          CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
          locator.setAnchor(cmd.getPageAnchor());
+         
+         if(null != privateCond){
+        	 condition = condition.and(privateCond);
+         }
          
          List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
     	 if(LOGGER.isInfoEnabled()) {
