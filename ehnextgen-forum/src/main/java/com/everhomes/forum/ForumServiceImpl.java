@@ -1149,7 +1149,7 @@ public class ForumServiceImpl implements ForumService {
          }
          
          Condition privateCond = null;
-         if(PostPrivacy.PRIVATE != PostPrivacy.fromCode(cmd.getPrivateFlag())){
+         if(PostPrivacy.PRIVATE == PostPrivacy.fromCode(cmd.getPrivateFlag())){
         	 Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(operator.getId());
              
              // 只有公开的帖子才能查到
