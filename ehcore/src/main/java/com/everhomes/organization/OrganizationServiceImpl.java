@@ -6069,9 +6069,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		map.put("targetUToken", member.getContactToken());
 	    		User create = userProvider.findUserById(task.getCreatorUid());
 	    		UserIdentifier createIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(task.getCreatorUid(), IdentifierType.MOBILE.getCode());
-	    		if(null == createIdentifier){
-	    			map.put("createUName", null != create ? create.getNickName() : "");
-		    		map.put("createUToken", null != create ? create.getNickName() : "");
+	    		if(null != createIdentifier){
+	    			map.put("createUName", null != create ? create.getNickName() : "[无]");
+		    		map.put("createUToken", createIdentifier.getIdentifierToken());
 	    		}
 	    		
 	    		task.setTargetName(member.getContactName());
