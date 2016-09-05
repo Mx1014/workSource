@@ -103,8 +103,9 @@ CREATE TABLE `eh_approval_time_ranges` (
 	`from_time` DATETIME NOT NULL COMMENT 'must store concrete time',
 	`end_time` DATETIME NOT NULL COMMENT 'must store concrete time',
 	`type` TINYINT NOT NULL COMMENT '1. all day, 2. morning half day, 3. afternoon half day, 4. time',
+	`actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours',
 	`creator_uid` BIGINT NOT NULL,
-	`create_time` DATETIME, 
+	`create_time` DATETIME NOT NULL,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -116,6 +117,6 @@ CREATE TABLE `eh_approval_op_requests` (
 	`process_message` TEXT COMMENT 'process message',
 	`operator_uid` BIGINT,
 	`create_time` DATETIME,
-	`status` TINYINT(4) NOT NULL COMMENT 'process result, 1. agreement, 2. rejection', 
+	`approval_status` TINYINT(4) NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

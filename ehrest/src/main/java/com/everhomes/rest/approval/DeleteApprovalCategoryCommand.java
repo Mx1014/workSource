@@ -10,15 +10,23 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>categoryName: 类别名称</li>
+ * <li>approvalType: 审批类型，参考{@link com.everhomes.rest.approval.ApprovalType}</li>
  * </ul>
  */
-public class AskForLeaveCategoryDTO {
+public class DeleteApprovalCategoryCommand {
 	private Long id;
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private String categoryName;
+	private Byte approvalType;
+
+	public Byte getApprovalType() {
+		return approvalType;
+	}
+
+	public void setApprovalType(Byte approvalType) {
+		this.approvalType = approvalType;
+	}
 
 	public Long getId() {
 		return id;
@@ -50,14 +58,6 @@ public class AskForLeaveCategoryDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-
-	public String getCategoryName() {
-		return categoryName;
-	}
-
-	public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
 	}
 
 	@Override

@@ -6,20 +6,18 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * 参数:
+ * 参数：
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页大小</li>
+ * <li>requestId: 申请ID</li>
  * </ul>
  */
-public class ListApprovalRuleCommand {
+public class GetApprovalBasicInfoOfRequestCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long pageAnchor;
-	private Integer pageSize;
+	private Long requestId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -45,25 +43,16 @@ public class ListApprovalRuleCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Long getRequestId() {
+		return requestId;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+	public void setRequestId(Long requestId) {
+		this.requestId = requestId;
 	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

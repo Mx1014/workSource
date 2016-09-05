@@ -5,21 +5,28 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>
- * 参数:
+ * <ul>参数:
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页大小</li>
+ * <li>approvalType: 审批类型，参考{@link com.everhomes.rest.approval.ApprovalType}</li>
+ * <li>categoryName: 类别名称</li>
  * </ul>
  */
-public class ListApprovalRuleCommand {
+public class CreateApprovalCategoryCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long pageAnchor;
-	private Integer pageSize;
+	private Byte approvalType;
+	private String categoryName;
+
+	public Byte getApprovalType() {
+		return approvalType;
+	}
+
+	public void setApprovalType(Byte approvalType) {
+		this.approvalType = approvalType;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -45,20 +52,12 @@ public class ListApprovalRuleCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public String getCategoryName() {
+		return categoryName;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
 	}
 
 	@Override

@@ -9,20 +9,38 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>requestToken: 申请的token</li>
- * <li>categoryName: 请假类型</li>
- * <li>reason: 请假理由</li>
- * <li>timeTotal: 请假总时长</li>
+ * <li>approvalType: 审批类型</li>
+ * <li>categoryName: 具体类型，忘打卡申请时为忘打卡，请假申请时公出、事假等</li>
+ * <li>reason: 申请理由</li>
+ * <li>description: 描述，请假总时长等</li>
  * <li>timeRangeList: 时间列表，参考{@link com.everhomes.rest.approval.TimeRange}</li>
  * <li>approvalStatus: 审批状态</li>
  * </ul>
  */
-public class AskForLeaveRequestDTO {
+public class ApprovalRequestDTO {
 	private String requestToken;
+	private Byte approvalType;
 	private String categoryName;
-	private String reason;
-	private String timeTotal;
+	private String description;
 	private List<TimeRange> timeRangeList;
+	private String reason;
 	private Byte approvalStatus;
+
+	public Byte getApprovalType() {
+		return approvalType;
+	}
+
+	public void setApprovalType(Byte approvalType) {
+		this.approvalType = approvalType;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	public String getRequestToken() {
 		return requestToken;
@@ -46,14 +64,6 @@ public class AskForLeaveRequestDTO {
 
 	public void setReason(String reason) {
 		this.reason = reason;
-	}
-
-	public String getTimeTotal() {
-		return timeTotal;
-	}
-
-	public void setTimeTotal(String timeTotal) {
-		this.timeTotal = timeTotal;
 	}
 
 	public List<TimeRange> getTimeRangeList() {

@@ -1,25 +1,25 @@
 // @formatter:off
 package com.everhomes.approval;
 
-import com.everhomes.rest.approval.CreateAskForLeaveCategoryCommand;
-import com.everhomes.rest.approval.CreateAskForLeaveCategoryResponse;
+import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
+import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.DeleteAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.ListAskForLeaveCategoryCommand;
-import com.everhomes.rest.approval.ListAskForLeaveCategoryResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
-import com.everhomes.rest.approval.UpdateAskForLeaveCategoryCommand;
-import com.everhomes.rest.approval.UpdateAskForLeaveCategoryResponse;
+import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
+import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
@@ -29,13 +29,13 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 
 public interface ApprovalService {
 
-	CreateAskForLeaveCategoryResponse createAskForLeaveCategory(CreateAskForLeaveCategoryCommand cmd);
+	CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd);
 
-	UpdateAskForLeaveCategoryResponse updateAskForLeaveCategory(UpdateAskForLeaveCategoryCommand cmd);
+	UpdateApprovalCategoryResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd);
 
-	ListAskForLeaveCategoryResponse listAskForLeaveCategory(ListAskForLeaveCategoryCommand cmd);
+	ListApprovalCategoryResponse listApprovalCategory(ListApprovalCategoryCommand cmd);
 
-	void deleteAskForLeaveCategory(DeleteAskForLeaveCategoryCommand cmd);
+	void deleteApprovalCategory(DeleteApprovalCategoryCommand cmd);
 
 	CreateApprovalFlowNameResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd);
 

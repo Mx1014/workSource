@@ -1,20 +1,27 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>参数:
+ * <ul>
+ * 参数：
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
+ * <li>requestIdList: 申请ID列表</li>
  * </ul>
  */
-public class ListAskForLeaveCategoryCommand {
+public class AgreeRequestCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
+	@ItemType(Long.class)
+	private List<Long> requestIdList;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -38,6 +45,14 @@ public class ListAskForLeaveCategoryCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public List<Long> getRequestIdList() {
+		return requestIdList;
+	}
+
+	public void setRequestIdList(List<Long> requestIdList) {
+		this.requestIdList = requestIdList;
 	}
 
 	@Override

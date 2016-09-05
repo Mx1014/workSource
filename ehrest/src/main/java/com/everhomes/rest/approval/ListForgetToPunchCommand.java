@@ -5,21 +5,28 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>
- * 参数:
+ * <ul>参数：
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>pageAnchor: 锚点</li>
+ * <li>fromDate: 搜索开始日期</li>
+ * <li>endDate: 搜索结束日期</li>
+ * <li>nickName: 姓名</li>
+ * <li>queryType: 查询类型，1待审批，2已审批</li>
  * <li>pageSize: 每页大小</li>
+ * <li>pageAnchor: 锚点</li>
  * </ul>
  */
-public class ListApprovalRuleCommand {
+public class ListForgetToPunchCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private Long pageAnchor;
+	private Long fromDate;
+	private Long endDate;
+	private String nickName;
+	private Byte queryType;
 	private Integer pageSize;
+	private Long pageAnchor;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -45,12 +52,36 @@ public class ListApprovalRuleCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Byte getQueryType() {
+		return queryType;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setQueryType(Byte queryType) {
+		this.queryType = queryType;
+	}
+
+	public Long getFromDate() {
+		return fromDate;
+	}
+
+	public void setFromDate(Long fromDate) {
+		this.fromDate = fromDate;
+	}
+
+	public Long getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Long endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getNickName() {
+		return nickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
 	}
 
 	public Integer getPageSize() {
@@ -61,9 +92,16 @@ public class ListApprovalRuleCommand {
 		this.pageSize = pageSize;
 	}
 
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

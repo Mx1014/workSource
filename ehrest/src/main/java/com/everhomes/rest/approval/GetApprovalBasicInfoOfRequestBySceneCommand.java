@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestToken: 申请的token</li>
  * </ul>
  */
-public class ListApprovalLogBySceneCommand {
+public class GetApprovalBasicInfoOfRequestBySceneCommand {
 	private String sceneToken;
 	private String requestToken;
 

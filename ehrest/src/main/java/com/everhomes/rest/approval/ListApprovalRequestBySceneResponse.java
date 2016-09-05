@@ -10,12 +10,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 返回值：
  * <li>nextPageAnchor: 下页锚点</li>
- * <li>askForLeaveRequestList: 请假列表，参考{@link com.everhomes.rest.approval.AskForLeaveRequestDTO}</li>
+ * <li>askForLeaveRequestList: 请假列表，参考{@link com.everhomes.rest.approval.ApprovalRequestDTO}</li>
  * </ul>
  */
-public class ListAskForLeaveRequestBySceneResponse {
+public class ListApprovalRequestBySceneResponse {
 	private Long nextPageAnchor;
-	private List<AskForLeaveRequestDTO> askForLeaveRequestList;
+	private List<ApprovalRequestDTO> approvalRequestList;
 
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
@@ -25,12 +25,12 @@ public class ListAskForLeaveRequestBySceneResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<AskForLeaveRequestDTO> getAskForLeaveRequestList() {
-		return askForLeaveRequestList;
+	public List<ApprovalRequestDTO> getApprovalRequestList() {
+		return approvalRequestList;
 	}
 
-	public void setAskForLeaveRequestList(List<AskForLeaveRequestDTO> askForLeaveRequestList) {
-		this.askForLeaveRequestList = askForLeaveRequestList;
+	public void setApprovalRequestList(List<ApprovalRequestDTO> approvalRequestList) {
+		this.approvalRequestList = approvalRequestList;
 	}
 
 	@Override

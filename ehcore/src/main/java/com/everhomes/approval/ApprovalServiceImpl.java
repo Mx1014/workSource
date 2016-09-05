@@ -28,7 +28,7 @@ import com.everhomes.rest.approval.ApprovalRuleDTO;
 import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
-import com.everhomes.rest.approval.AskForLeaveCategoryDTO;
+import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
@@ -36,17 +36,17 @@ import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
-import com.everhomes.rest.approval.CreateAskForLeaveCategoryCommand;
-import com.everhomes.rest.approval.CreateAskForLeaveCategoryResponse;
+import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
+import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.DeleteAskForLeaveCategoryCommand;
+import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
-import com.everhomes.rest.approval.ListAskForLeaveCategoryCommand;
-import com.everhomes.rest.approval.ListAskForLeaveCategoryResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.RuleFlowMap;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
@@ -54,8 +54,8 @@ import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowNameResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
-import com.everhomes.rest.approval.UpdateAskForLeaveCategoryCommand;
-import com.everhomes.rest.approval.UpdateAskForLeaveCategoryResponse;
+import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
+import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -101,44 +101,54 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private ConfigurationProvider configurationProvider;
 
 	@Override
-	public CreateAskForLeaveCategoryResponse createAskForLeaveCategory(CreateAskForLeaveCategoryCommand cmd) {
+	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
-		if (StringUtils.isBlank(cmd.getCategoryName())) {
+		if (StringUtils.isBlank(cmd.getCategoryName()) || cmd.getApprovalType() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"categoryName cannot be empty");
+					"Invalid parameters: cmd="+cmd);
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalType(cmd.getApprovalType());
 		
 		ApprovalCategory category = ConvertHelper.convert(cmd, ApprovalCategory.class);
-		category.setApprovalType(ApprovalType.ASK_FOR_LEAVE.getCode());
+		category.setApprovalType(cmd.getApprovalType());
 		category.setStatus(CommonStatus.ACTIVE.getCode());
 		category.setCreatorUid(userId);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
 		approvalCategoryProvider.createApprovalCategory(category);
-		return new CreateAskForLeaveCategoryResponse(ConvertHelper.convert(category, AskForLeaveCategoryDTO.class));
+		return new CreateApprovalCategoryResponse(ConvertHelper.convert(category, ApprovalCategoryDTO.class));
+	}
+
+	private void checkApprovalType(Byte approvalType) {
+		if (ApprovalType.fromCode(approvalType) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist approvalType");
+		}
 	}
 
 	@Override
-	public UpdateAskForLeaveCategoryResponse updateAskForLeaveCategory(UpdateAskForLeaveCategoryCommand cmd) {
+	public UpdateApprovalCategoryResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
 		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id and categoryName cannot be empty");
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalType(cmd.getApprovalType());
+		
+		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		category.setCategoryName(cmd.getCategoryName());
 		approvalCategoryProvider.updateApprovalCategory(category);
 		
-		return new UpdateAskForLeaveCategoryResponse(ConvertHelper.convert(category, AskForLeaveCategoryDTO.class));
+		return new UpdateApprovalCategoryResponse(ConvertHelper.convert(category, ApprovalCategoryDTO.class));
 	}
 	
-	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId){
+	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId, Byte approvalType){
 		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
 		if (category == null || category.getNamespaceId().intValue() != namespaceId.intValue() || !ownerType.equals(category.getOwnerType())
 				|| category.getOwnerId().longValue() != ownerId.longValue() || category.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()
-				|| category.getApprovalType().byteValue() != ApprovalType.ASK_FOR_LEAVE.getCode()) {
+				|| category.getApprovalType().byteValue() != approvalType.byteValue()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not exist category: categoryId="+id+", namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
 		}
@@ -146,24 +156,25 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 	
 	@Override
-	public ListAskForLeaveCategoryResponse listAskForLeaveCategory(ListAskForLeaveCategoryCommand cmd) {
+	public ListApprovalCategoryResponse listApprovalCategory(ListApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalType(cmd.getApprovalType());
 		
-		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalType.ASK_FOR_LEAVE.getCode());
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		
-		return new ListAskForLeaveCategoryResponse(categoryList.stream().map(c->ConvertHelper.convert(c, AskForLeaveCategoryDTO.class)).collect(Collectors.toList()));
+		return new ListApprovalCategoryResponse(categoryList.stream().map(c->ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
 	}
 
 	@Override
-	public void deleteAskForLeaveCategory(DeleteAskForLeaveCategoryCommand cmd) {
+	public void deleteApprovalCategory(DeleteApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
 		if (cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id cannot be empty");
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		category.setStatus(CommonStatus.INACTIVE.getCode());
 		approvalCategoryProvider.updateApprovalCategory(category);
 	}

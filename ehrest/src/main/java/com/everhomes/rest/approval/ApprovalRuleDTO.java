@@ -11,12 +11,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: id</li>
  * <li>namespaceId: 域空间ID</li>
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}
- * </li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
  * <li>name: 审批规则名称</li>
- * <li>ruleFlowMapList: 审批规则与审批流程关联列表，参考
- * {@link com.everhomes.rest.approval.RuleFlowMap}</li>
+ * <li>ruleFlowMapList: 审批规则与审批流程关联列表，参考{@link com.everhomes.rest.approval.RuleFlowMap}</li>
  * </ul>
  */
 public class ApprovalRuleDTO {

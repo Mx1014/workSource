@@ -6,17 +6,17 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值：
- * <li>askForLeaveRequest: 请假信息，参考{@link com.everhomes.rest.approval.AskForLeaveRequestDTO}</li>
+ * <li>askForLeaveRequest: 请假信息，参考{@link com.everhomes.rest.approval.ApprovalRequestDTO}</li>
  * </ul>
  */
 public class CreateAskForLeaveRequestResponse {
-	private AskForLeaveRequestDTO askForLeaveRequest;
+	private ApprovalRequestDTO askForLeaveRequest;
 
-	public AskForLeaveRequestDTO getAskForLeaveRequest() {
+	public ApprovalRequestDTO getAskForLeaveRequest() {
 		return askForLeaveRequest;
 	}
 
-	public void setAskForLeaveRequest(AskForLeaveRequestDTO askForLeaveRequest) {
+	public void setAskForLeaveRequest(ApprovalRequestDTO askForLeaveRequest) {
 		this.askForLeaveRequest = askForLeaveRequest;
 	}
 

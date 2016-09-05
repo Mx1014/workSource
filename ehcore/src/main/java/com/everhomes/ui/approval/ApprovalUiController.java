@@ -11,16 +11,16 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CreateAskForLeaveRequestCommand;
 import com.everhomes.rest.approval.CreateAskForLeaveRequestResponse;
 import com.everhomes.rest.approval.CreateForgetToPunchRequestBySceneCommand;
-import com.everhomes.rest.approval.GetApprovalBasicInfoBySceneCommand;
-import com.everhomes.rest.approval.GetApprovalBasicInfoBySceneResponse;
-import com.everhomes.rest.approval.ListApprovalFlowBySceneCommand;
-import com.everhomes.rest.approval.ListApprovalFlowBySceneResponse;
-import com.everhomes.rest.approval.ListApprovalLogAndFlowBySceneCommand;
-import com.everhomes.rest.approval.ListApprovalLogAndFlowBySceneResponse;
-import com.everhomes.rest.approval.ListApprovalLogBySceneCommand;
-import com.everhomes.rest.approval.ListApprovalLogBySceneResponse;
-import com.everhomes.rest.approval.ListAskForLeaveRequestBySceneCommand;
-import com.everhomes.rest.approval.ListAskForLeaveRequestBySceneResponse;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
 
 /**
  * <ul>
@@ -45,12 +45,12 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>2.请假申请列表（客户端）</p>
-	 * <b>URL: /ui/approval/listAskForLeaveRequestByScene</b>
+	 * <p>2.申请列表（客户端）</p>
+	 * <b>URL: /ui/approval/listApprovalRequestByScene</b>
 	 */
-	@RequestMapping("listAskForLeaveRequestByScene")
-	@RestReturn(ListAskForLeaveRequestBySceneResponse.class)
-	public RestResponse listAskForLeaveRequestByScene(ListAskForLeaveRequestBySceneCommand cmd){
+	@RequestMapping("listApprovalRequestByScene")
+	@RestReturn(ListApprovalRequestBySceneResponse.class)
+	public RestResponse listApprovalRequestByScene(ListApprovalRequestBySceneCommand cmd){
 		return new RestResponse();
 	}
 
@@ -67,45 +67,45 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>4.获取审批基本信息（客户端）</p>
-	 * <b>URL: /ui/approval/getApprovalBasicInfoByScene</b>
+	 * <p>4.获取申请的审批基本信息（客户端）</p>
+	 * <b>URL: /ui/approval/getApprovalBasicInfoOfRequestByScene</b>
 	 */
-	@RequestMapping("getApprovalBasicInfoByScene")
-	@RestReturn(GetApprovalBasicInfoBySceneResponse.class)
-	public RestResponse getApprovalBasicInfoByScene(GetApprovalBasicInfoBySceneCommand cmd){
+	@RequestMapping("getApprovalBasicInfoOfRequestByScene")
+	@RestReturn(GetApprovalBasicInfoOfRequestBySceneResponse.class)
+	public RestResponse getApprovalBasicInfoOfRequestByScene(GetApprovalBasicInfoOfRequestBySceneCommand cmd){
 		return new RestResponse();
 	}
 
 	/**
 	 * 
-	 * <p>4.获取拼好的审批日志与审批流程列表（客户端）</p>
-	 * <b>URL: /ui/approval/listApprovalLogAndFlowByScene</b>
+	 * <p>5.获取申请的审批日志与审批流程列表（客户端）</p>
+	 * <b>URL: /ui/approval/listApprovalLogAndFlowOfRequestByScene</b>
 	 */
-	@RequestMapping("listApprovalLogAndFlowByScene")
-	@RestReturn(ListApprovalLogAndFlowBySceneResponse.class)
-	public RestResponse listApprovalLogAndFlowByScene(ListApprovalLogAndFlowBySceneCommand cmd){
+	@RequestMapping("listApprovalLogAndFlowOfRequestByScene")
+	@RestReturn(ListApprovalLogAndFlowOfRequestBySceneResponse.class)
+	public RestResponse listApprovalLogAndFlowOfRequestByScene(ListApprovalLogAndFlowOfRequestBySceneCommand cmd){
 		return new RestResponse();
 	}
 
 	/**
 	 * 
-	 * <p>4.获取单独的审批日志列表（客户端）</p>
-	 * <b>URL: /ui/approval/listApprovalLogByScene</b>
+	 * <p>6.获取申请的审批日志列表（客户端）</p>
+	 * <b>URL: /ui/approval/listApprovalLogOfRequestByScene</b>
 	 */
-	@RequestMapping("listApprovalLogByScene")
-	@RestReturn(ListApprovalLogBySceneResponse.class)
-	public RestResponse listApprovalLogByScene(ListApprovalLogBySceneCommand cmd){
+	@RequestMapping("listApprovalLogOfRequestByScene")
+	@RestReturn(ListApprovalLogOfRequestBySceneResponse.class)
+	public RestResponse listApprovalLogOfRequestByScene(ListApprovalLogOfRequestBySceneCommand cmd){
 		return new RestResponse();
 	}
 
 	/**
 	 * 
-	 * <p>4.获取单独的审批流程列表（客户端）</p>
-	 * <b>URL: /ui/approval/listApprovalFlowByScene</b>
+	 * <p>7.获取申请的审批流程列表（客户端）</p>
+	 * <b>URL: /ui/approval/listApprovalFlowOfRequestByScene</b>
 	 */
-	@RequestMapping("listApprovalFlowByScene")
-	@RestReturn(ListApprovalFlowBySceneResponse.class)
-	public RestResponse listApprovalFlowByScene(ListApprovalFlowBySceneCommand cmd){
+	@RequestMapping("listApprovalFlowOfRequestByScene")
+	@RestReturn(ListApprovalFlowOfRequestBySceneResponse.class)
+	public RestResponse listApprovalFlowOfRequestByScene(ListApprovalFlowOfRequestBySceneCommand cmd){
 		return new RestResponse();
 	}
 	

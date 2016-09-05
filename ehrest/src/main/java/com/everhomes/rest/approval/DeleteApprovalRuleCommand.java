@@ -8,8 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数：
  * <li>id: id</li>
  * <li>namespaceId: 域空间ID</li>
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}
- * </li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
  * </ul>
  */

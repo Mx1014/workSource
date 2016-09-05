@@ -7,22 +7,23 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>title: 标题</li>
+ * <li>approveType: 审批类型，{@link com.everhomes.rest.approval.ApprovalType}</li>
  * <li>descriptionJson: 描述内容，请假参考{@link com.everhomes.rest.approval.AskForLeaveBasicDescription}，忘打卡参考{@link com.everhomes.rest.approval.ForgetToPunchBasicDescription}</li>
  * <li>approvalStatus: 审批状态，参考{@link com.everhomes.rest.approval.ApprovalStatus}
  * </li>
  * </ul>
  */
-public class ApprovalBasicInfoDTO {
-	private String title;
+public class ApprovalBasicInfoOfRequestDTO {
+	private Byte approveType;
 	private String descriptionJson;
 	private Byte approvalStatus;
 
-	public String getTitle() {
-		return title;
+	public Byte getApproveType() {
+		return approveType;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setApproveType(Byte approveType) {
+		this.approveType = approveType;
 	}
 
 	public String getDescriptionJson() {
