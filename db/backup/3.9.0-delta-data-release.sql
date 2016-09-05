@@ -521,5 +521,55 @@ DELETE FROM `eh_addresses` WHERE `community_id` = 240111044331051500 AND `buildi
 
 
 
-
-
+-- 深业更换广场icon图 by xujuan 20160902
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME9UWTJNemszT0RRd1l6WmtNell6TXprMVpEVTNPV1UzWkdObE1UbG1OUQ' where item_label = "任务管理" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ' where item_label = "停车充值" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9HVmlNVFJpWlRGaU1tSmpZMkZsTXpWa01qSTRNemhsTW1NM016RXdaQQ' where item_label = "公告管理" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvd1pUSmlPREUwT1dWa1pqQmtOR1l6TUdVMVlXUTJNVEZrT0RSbFkyUmxZdw' where item_label = "品质核查" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbE9HSXpZelUzWlRaak9XTTVOekkyTVdRME1XWmhZalJrWXpFd01tRm1aUQ' where item_label = "场地预约" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMllXWXhZVFEwWXpkak9UazNPV0UzWkdNd1pHRTNOR1ptTkRoaVpqa3pNUQ' where item_label = "快递查询" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ' where item_label = "打卡" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE5qaGpNV05pWm1FMFpXSmlNbVUzT0RReVpqWmlNVFV5WkdOaU4ySXhOQQ' where item_label = "更多" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek5USmpZV1JtTm1FMll6UXdZVFpoWlRNeFlqVXdObU0xTXpRME16WmlPUQ' where item_label = "服务预约" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek56VTNPRE01WkdJeU1tRTFOVFl6WmpNMk5XUmxZMll4TWpSalpqZGxZdw' where item_label = "流程审批" and namespace_id=999992;	
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "物业报修" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvM05XUmlZbUZqTURGbU1HVXhaR1JsTVdJMU5EZGpOVE5tWW1VeU9UQmpNQQ' where item_label = "物业服务" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaU1tSTRNMkU1T1RNeU56aGlZV0ZsT1dWbE1XTmpNakZsTURVeU1XUmhNQQ' where item_label = "物业缴费" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpERTNOekUyWkRReE5UTTVabVJtT0dJMU1tVmlOR0UzWVRVNU5HVXlOZw' where item_label = "视频会议" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9UZzVOV001Wm1aaU5qSTJZamRoTXpRMVlXSXdOVGd4WmpFeE9XTXhOZw' where item_label = "企业通讯录" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvME56Y3dPRGN3TW1FeU9ERXdOR016WlRrd05UTXpNVGMyTURreFpUZzNNZw' where item_label = "设备巡检" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMVlXVTFNelJpWVdVeU1EY3pOREptTlRZeFlqaGlNV1k1TldZM1pEVTFOUQ' where item_label = "门禁" and namespace_id=999992;
+	
+-- 左邻更换广场icon图 by xujuan 20160902
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME5qYzVPVGxtTXpVMk56ZGpNV0U1WVRZeFpqUmpPRFUyTm1SalkyWXlZUQ' where item_label = "VIP车位" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvME9UWTJNemszT0RRd1l6WmtNell6TXprMVpEVTNPV1UzWkdObE1UbG1OUQ' where item_label = "任务管理" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvM1pUYzBaV1ZrT1RrMVlqRTROVFZoTVRFMk5EZGtOakl5TjJRNU1EUXhPUQ' where item_label = "会议室预订" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ' where item_label = "停车充值" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbE9EZGtNakJsT1dKbVl6STRZemczWW1ZMVpqUmhaVEJqTUdZM01EQXlPQQ' where item_label = "公共会议室" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9HVmlNVFJpWlRGaU1tSmpZMkZsTXpWa01qSTRNemhsTW1NM016RXdaQQ' where item_label = "公告管理" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE1tUmxOVE5oT1dJNVpUYzBNRE13WWpRMFlqQTBNRGt5WmpZek9HUTJaQQ' where item_label = "创客空间" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvd1pUSmlPREUwT1dWa1pqQmtOR1l6TUdVMVlXUTJNVEZrT0RSbFkyUmxZdw' where item_label = "品质核查" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbFpHRTRaRFkyWlRnM1pHVXhOekJpWW1Vell6ZzVZVEpsTXpnellUVXpNQQ' where item_label = "园区入驻" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFlXTm1ORFZsWWpSbFkyUmtPREkzTldWbE1qQTRZamhtTURVNE9ERTRaZw' where item_label = "家政服务" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMllXWXhZVFEwWXpkak9UazNPV0UzWkdNd1pHRTNOR1ptTkRoaVpqa3pNUQ' where item_label = "快递查询" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ' where item_label = "打卡" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE5qaGpNV05pWm1FMFpXSmlNbVUzT0RReVpqWmlNVFV5WkdOaU4ySXhOQQ' where item_label = "更多" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwa01qRTJOekl5TUdaaU9XSTBNRGc0WWpJd01HTXlNemhtTkdSa1l6TmxNQQ' where item_label = "服务热线" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek5USmpZV1JtTm1FMll6UXdZVFpoWlRNeFlqVXdObU0xTXpRME16WmlPUQ' where item_label = "服务预约" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvM05XUmlZbUZqTURGbU1HVXhaR1JsTVdJMU5EZGpOVE5tWW1VeU9UQmpNQQ' where item_label = "物业服务" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaU1tSTRNMkU1T1RNeU56aGlZV0ZsT1dWbE1XTmpNakZsTURVeU1XUmhNQQ' where item_label = "物业缴费" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVpqVTFZbUUwWm1SbE9HSTRNREZqTWpkbU1HRmpNV1ZpTVRFek5UTXdOZw' where item_label = "电子屏预订" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvNFlUVTJaVEUwTVRGaU16RmtNMll4T0RObVptWXpNVFV4WW1KbE5UWTFaQQ' where item_label = "管道疏通" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpERTNOekUyWkRReE5UTTVabVJtT0dJMU1tVmlOR0UzWVRVNU5HVXlOZw' where item_label = "视频会议" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9UZzVOV001Wm1aaU5qSTJZamRoTXpRMVlXSXdOVGd4WmpFeE9XTXhOZw' where item_label = "通讯录" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMVlXVTFNelJpWVdVeU1EY3pOREptTlRZeFlqaGlNV1k1TldZM1pEVTFOUQ' where item_label = "公共门禁" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbE9EYzJaREF6Tm1FMk1EUXhNekptTkRWbE9XSmhZekppTTJZMFlqVTRNQQ' where item_label = "预约参观" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpEZ3lNV0ZtWXpGbVpqVmpOVFpoTkRVNVpHRTRNREpqWVRrek5UbGlOZw' where item_label = "咨询求助" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMFpUVTJaV1kxWXpSaFkyWTRPVFV4T0RNeU9HUm1ZelkyWldFd05XUTBPQQ' where item_label = "投诉建议" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "报修" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE0yTmlOVEZtTjJSaU56YzVZV1U1WkdabVlURmxNMk5pTldVME5XSXlOQQ' where item_label = "紧急求助" and namespace_id=0;		
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpEZ3lNV0ZtWXpGbVpqVmpOVFpoTkRVNVpHRTRNREpqWVRrek5UbGlOZw' where item_label = "咨询求助" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMFpUVTJaV1kxWXpSaFkyWTRPVFV4T0RNeU9HUm1ZelkyWldFd05XUTBPQQ' where item_label = "投诉建议" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "报修" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE0yTmlOVEZtTjJSaU56YzVZV1U1WkdabVlURmxNMk5pTldVME5XSXlOQQ' where item_label = "紧急求助" and namespace_id=999992;	
+		
