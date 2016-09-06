@@ -8,9 +8,12 @@ import com.everhomes.discover.ItemType;
  *<ul>
  *<li>orderNo:订单ID</li>
  *<li>payerUid:用户编号</li>
+ *<li>userName:用户名称</li>
  *<li>status:状态 orderType=transaction 1-待支付,2-待发货,3-已发货,6-已完成,7-已关闭   orderType=refund 1-未申请退款,2-待处理,3-已拒绝,4-退款中,5-退款成功,6-已关闭</li>
+ *<li>statusName:状态名称</li>
  *<li>paidAmount: 支付金额</li>
  *<li>paidChannel: 支付渠道</li>
+ *<li>paidChannelName: 支付渠道名称</li>
  *<li>userPhone: 电话号码</li>
  *<li>paidTime: 支付时间</li>
  *<li>orderType: 订单类型 交易transaction  退款refund</li>
@@ -29,11 +32,18 @@ public class StatShopTransactionDTO {
 	
 	private Byte paidChannel;
 	
+	private String paidChannelName;
+	
 	private String userPhone;
 	
 	private Long paidTime;
 	
 	private String orderType;
+	
+	private String userName;
+	
+	private String statusName;
+	
 	
 	@ItemType(StatWareDTO.class)
 	private List<StatWareDTO> wares;
@@ -108,6 +118,30 @@ public class StatShopTransactionDTO {
 
 	public void setOrderType(String orderType) {
 		this.orderType = orderType;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getStatusName() {
+		return statusName;
+	}
+
+	public void setStatusName(String statusName) {
+		this.statusName = statusName;
+	}
+
+	public String getPaidChannelName() {
+		return paidChannelName;
+	}
+
+	public void setPaidChannelName(String paidChannelName) {
+		this.paidChannelName = paidChannelName;
 	}
  
 	

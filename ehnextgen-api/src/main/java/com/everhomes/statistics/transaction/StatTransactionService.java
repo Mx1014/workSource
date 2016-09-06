@@ -22,4 +22,5 @@ public interface StatTransactionService {
 	
 	ListStatShopTransactionsResponse listStatShopTransactions(ListStatTransactionCommand cmd);
 	
+	void exportStatShopTransactions(ListStatTransactionCommand cmd, HttpServletResponse response);
 }
