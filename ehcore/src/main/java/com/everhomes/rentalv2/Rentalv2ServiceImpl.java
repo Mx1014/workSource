@@ -2094,6 +2094,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 						signleCmd.setBeginTime(timeInterval.getBeginTime());
 						signleCmd.setEndTime(timeInterval.getEndTime());
+						if(null!=timeInterval.getTimeStep())
+							signleCmd.setTimeStep(timeInterval.getTimeStep());
 						signleCmd.setWeekendPrice(weekendPrice); 
 						signleCmd.setWorkdayPrice(workdayPrice);
 						addRentalSiteSingleSimpleRule(signleCmd);
@@ -2297,6 +2299,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					signleCmd.setEndDate(rs.getEndDate().getTime());
 					signleCmd.setBeginTime(timeInterval.getBeginTime());
 					signleCmd.setEndTime(timeInterval.getEndTime());
+					if(null!=timeInterval.getTimeStep())
+						signleCmd.setTimeStep(timeInterval.getTimeStep());
 					signleCmd.setWeekendPrice(weekendPrice); 
 					signleCmd.setWorkdayPrice(workdayPrice);
 					addRentalSiteSingleSimpleRule(signleCmd);
@@ -3139,6 +3143,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setSiteDays(new ArrayList<RentalSiteDayRulesDTO>());
 		
 		proccessDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs,   response.getAnchorTime());
+		//按小时预订的,给客户端找到每一个时间点
+		if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
+			List<Long> dayTimes = new ArrayList<Long>();
+			if(response.getSiteDays() !=null)
+				for(RentalSiteDayRulesDTO dayDTO : response.getSiteDays()){
+					if(dayDTO.getSiteRules() !=null)
+					for(RentalSiteRulesDTO ruleDTO : dayDTO.getSiteRules()){
+						if(!dayTimes.contains(ruleDTO.getBeginTime()))
+							dayTimes.add(ruleDTO.getBeginTime());
+						if(!dayTimes.contains(ruleDTO.getEndTime()))
+							dayTimes.add(ruleDTO.getEndTime());
+					}
+				}
+	 		Collections.sort(dayTimes);
+	 		response.setDayTimes(dayTimes);
+ 		}
 		return response;
 	}
 
@@ -3157,7 +3177,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dayDto.setSiteRules(new ArrayList<RentalSiteRulesDTO>());
 			dayDto.setRentalDate(start.getTimeInMillis());
 			List<RentalCell> rentalSiteRules =  findRentalSiteRules(siteId, dateSF.format(new java.util.Date(start.getTimeInMillis())),
-							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
+					beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalCell rsr : rentalSiteRules) {
@@ -3428,6 +3448,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			siteNumberMap.put(resourceNumber.getResourceNumber(), new ArrayList<RentalSiteRulesDTO>());
 		}
 		response.setSiteNumbers(new ArrayList<RentalSiteNumberRuleDTO>()); 
+		//按小时预订的,给客户端找到每一个时间点
+		List<Long> dayTimes = new ArrayList<Long>();
 		 
 		List<RentalCell> rentalSiteRules =  findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(cmd.getRuleDate() )),
 						beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
@@ -3441,6 +3463,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setTimeStep(rsr.getTimeStep());
 					dto.setBeginTime(rsr.getBeginTime().getTime());
 					dto.setEndTime(rsr.getEndTime().getTime());
+					//如果times里不包含起止时间,则加入times
+					if(!dayTimes.contains(dto.getBeginTime()))
+						dayTimes.add(dto.getBeginTime());
+					if(!dayTimes.contains(dto.getEndTime()))
+						dayTimes.add(dto.getEndTime());
 					if(response.getAnchorTime().equals(0L)){
 						response.setAnchorTime(dto.getBeginTime());
 					}else{
@@ -3509,7 +3536,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
 			response.getSiteNumbers().add(siteNumberRuleDTO);
 		}
-
+		Collections.sort(dayTimes);
+ 		response.setDayTimes(dayTimes);
 //		//即使单元格为空也会有sitenumbers不用担心空指针
 //		response.setSiteCounts(response.getSiteNumbers().size());
 		return response;
@@ -4021,6 +4049,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
 						signleCmd.setBeginTime(timeInterval.getBeginTime());
 						signleCmd.setEndTime(timeInterval.getEndTime());
+						if(null!=timeInterval.getTimeStep())
+							signleCmd.setTimeStep(timeInterval.getTimeStep());
 						signleCmd.setWeekendPrice(weekendPrice); 
 						signleCmd.setWorkdayPrice(workdayPrice);
 						addSingleRules.add(signleCmd);
