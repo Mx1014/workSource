@@ -552,7 +552,6 @@ update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvd1pUSmlPREUwT
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbFpHRTRaRFkyWlRnM1pHVXhOekJpWW1Vell6ZzVZVEpsTXpnellUVXpNQQ' where item_label = "园区入驻" and namespace_id=0;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFlXTm1ORFZsWWpSbFkyUmtPREkzTldWbE1qQTRZamhtTURVNE9ERTRaZw' where item_label = "家政服务" and namespace_id=0;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMllXWXhZVFEwWXpkak9UazNPV0UzWkdNd1pHRTNOR1ptTkRoaVpqa3pNUQ' where item_label = "快递查询" and namespace_id=0;
-update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ' where item_label = "打卡" and namespace_id=0;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE5qaGpNV05pWm1FMFpXSmlNbVUzT0RReVpqWmlNVFV5WkdOaU4ySXhOQQ' where item_label = "更多" and namespace_id=0;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwa01qRTJOekl5TUdaaU9XSTBNRGc0WWpJd01HTXlNemhtTkdSa1l6TmxNQQ' where item_label = "服务热线" and namespace_id=0;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek5USmpZV1JtTm1FMll6UXdZVFpoWlRNeFlqVXdObU0xTXpRME16WmlPUQ' where item_label = "服务预约" and namespace_id=0;
@@ -572,4 +571,7 @@ update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpEZ3lNV0ZtW
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMFpUVTJaV1kxWXpSaFkyWTRPVFV4T0RNeU9HUm1ZelkyWldFd05XUTBPQQ' where item_label = "投诉建议" and namespace_id=999992;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "报修" and namespace_id=999992;
 update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE0yTmlOVEZtTjJSaU56YzVZV1U1WkdabVlURmxNMk5pTldVME5XSXlOQQ' where item_label = "紧急求助" and namespace_id=999992;	
-		
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9UZzVOV001Wm1aaU5qSTJZamRoTXpRMVlXSXdOVGd4WmpFeE9XTXhOZw' where item_label = "企业通讯录" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveU5qTmtaakptTm1aaU5tUTBNVEUzT0dZd016QXpOamN6Tm1JeFkyVTJaQQ' where item_label = "预订工位" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ' where item_label = "打卡考勤" and namespace_id=0;		
+			

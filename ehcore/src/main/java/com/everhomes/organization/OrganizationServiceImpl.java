@@ -7090,16 +7090,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationProvider.updateOrganizationMember(organizationMember);
 			}
 			
-			//没有部门要添加
-			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
-				return null;
-			}
 			// 先把把成员从公司所有部门都删除掉
 			for (Organization organization : childOrganizations) {
 				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
 				if(null != groupMember){
 					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
 				}
+			}
+			
+			//没有部门要添加
+			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
+				return null;
 			}
 			
 			// 重新把成员添加到公司多个部门
