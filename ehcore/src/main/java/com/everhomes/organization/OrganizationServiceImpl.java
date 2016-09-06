@@ -4812,6 +4812,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		try {
 		    User user = userProvider.findUserById(identifier.getOwnerUid());
 	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
+	        OrganizationMember organizationMember = null;
 	        for (OrganizationMember member : members) {
 	        	Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
 	            if(org.getNamespaceId() == null || !org.getNamespaceId().equals(identifier.getNamespaceId())) {
@@ -4828,21 +4829,28 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	
                 	this.updateMemberUser(member);
                 	DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
-                    sendMessageForContactApproved(member);
-                    		
-                    userSearcher.feedDoc(member);
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
-                            + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
-                    }
+                	
+                	// 机构是公司的情况下 才发送短信
+                	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+                        sendMessageForContactApproved(member);
+                        userSearcher.feedDoc(member);
+                        //支持多部门 记录可能存在多条，故取公司这条
+                        organizationMember = member;
+                        if(LOGGER.isInfoEnabled()) {
+                            LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
+                                + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
+                        }
+                	}
+
                 } else {
                     if(LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
                             + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
                     }
                 }
-                return ConvertHelper.convert(member, OrganizationMemberDTO.class);
+                
 	        }
+	        return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 		} catch(Exception e) {
 		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
@@ -6069,9 +6077,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		map.put("targetUToken", member.getContactToken());
 	    		User create = userProvider.findUserById(task.getCreatorUid());
 	    		UserIdentifier createIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(task.getCreatorUid(), IdentifierType.MOBILE.getCode());
-	    		if(null == createIdentifier){
-	    			map.put("createUName", null != create ? create.getNickName() : "");
-		    		map.put("createUToken", null != create ? create.getNickName() : "");
+	    		if(null != createIdentifier){
+	    			map.put("createUName", null != create ? create.getNickName() : "[无]");
+		    		map.put("createUToken", createIdentifier.getIdentifierToken());
 	    		}
 	    		
 	    		task.setTargetName(member.getContactName());
@@ -7090,16 +7098,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationProvider.updateOrganizationMember(organizationMember);
 			}
 			
-			//没有部门要添加
-			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
-				return null;
-			}
 			// 先把把成员从公司所有部门都删除掉
 			for (Organization organization : childOrganizations) {
 				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
 				if(null != groupMember){
 					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
 				}
+			}
+			
+			//没有部门要添加
+			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
+				return null;
 			}
 			
 			// 重新把成员添加到公司多个部门

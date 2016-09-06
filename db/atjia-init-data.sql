@@ -1,0 +1,108 @@
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999988, '爱特家迷你居');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1031, 999988, 'community_residential', UTC_TIMESTAMP());
+    
+INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
+	VALUES (228854, UUID(), '19055783293', '孙海红', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
+	VALUES (225367, 228854,  '0',  '13331813881',  '221616',  3, UTC_TIMESTAMP(), 999988);
+
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
+	VALUES ('14989', '0', '辽宁', 'LIAONING', 'LN', '/辽宁', '1', '1', '', '', '2', '2', '999988');
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
+	VALUES ('14990', '14989', '沈阳市', 'SHENYANGSHI', 'SYS', '/辽宁/沈阳市', '2', '2', NULL, '024', '2', '1', '999988');
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
+	VALUES ('14991', '14990', '于洪区', 'YUHONGQU', 'YHQ', '/辽宁/沈阳市/于洪区', '3', '3', NULL, '024', '2', '0', '999988');
+
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES( 240111044331053633, UUID(), 14990, '沈阳市',  14991, '于洪区', '爱特家迷你居', '爱特家迷你居', '沈阳市于洪区文大路435', NULL, '总规划用地面积： 73.65万平方米，总计容建筑面积： 110.47万平方米(约2.4万户，4个幼儿园+1个小学）；其中住宅：101.57万平方米;商业：5.53万平方米;小学：1.62万平方米；幼儿园：1.75万平方米;项目规划贯彻以人为本的思想，在互联网井喷发展的今天，创造一个设施智能化、功能多元化，布局合理、交通便捷、生活方便、绿意盎然充满活力的现代住区。以现代设计理念，设计手法，极致创新适用型全能MINI住宅是规划设计、建筑设计的基本出发点和最终目的。完善的配套设施，方便的交通系统，智能化系统的引入，宜人的空间设计以及健身、休闲、娱乐场所的设置，将让社区充满活力。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 3, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', 1, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES(240111044331049236, 240111044331053633, '', 123.412761, 41.913723, 'wxry2q4mju22');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1003855, 240111044331053633);    
+
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1004258, UUID(), '万盈置业', '万盈置业', 1, 1, 1003855, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 181861, 1, 999988); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(181861, UUID(), 999988, 2, 'EhGroups', 1004258,'万盈置业','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
+
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
+	VALUES(1003855, 0, 'PM', '沈阳万盈置业有限公司', '沈阳万盈置业有限公司是一家专业开发房地产的中外合资企业，公司现正重金打造位于沈阳市于洪区超百万平米的大型居住区项目。本案规模宏大，理念超前，精品定位，技术领先，建成后必将成为本市新的市场热点。', '/1003855', 1, 2, 'ENTERPRISE', 999988, 1004258);
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
+	VALUES(1112283, 240111044331053633, 'organization', 1003855, 3, 0, UTC_TIMESTAMP());    
+  
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
+	VALUES(2109906, 1003855, 'USER', 228854, 'manager', '孙海红', 0, '13331813881', 3);	    
+
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES(11198, 'EhOrganizations', 1003855, 'EhUsers', 228854, 1001, 1, UTC_TIMESTAMP());
+
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES(1235, 999988, 'COMMUNITY', 240111044331053633, UTC_TIMESTAMP());	
+
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('163', 'app.agreements.url', '', 'the relative path for at mini ju app agreements', '999988', NULL);	
+	
+INSERT INTO `eh_version_realm` VALUES ('58', 'Android_AtMini', null, UTC_TIMESTAMP(), '999988');
+INSERT INTO `eh_version_realm` VALUES ('59', 'iOS_AtMini', null, UTC_TIMESTAMP(), '999988');
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(86,58,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(87,59,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+
+
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 1, 'zh_CN', '验证码-Ibase', '25889');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 4, 'zh_CN', '派单-Ibase', '25890');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 6, 'zh_CN', '任务2-Ibase', '25892');    
+
+
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(200993, 1, 0, '普通', '帖子/普通', 1, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(200994, 1, 0, '二手和租售', '帖子/二手和租售', 1, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(200995, 1, 0, '免费物品', '帖子/免费物品', 1, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(200996, 1, 0, '失物招领', '帖子/失物招领', 1, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(200997, 1, 0, '紧急通知', '帖子/紧急通知', 1, 2, UTC_TIMESTAMP(), 999988);
+
+
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) 
+    VALUES ('263', '0', 'ServiceMarketLayout', '{\"versionCode\":\"2016081701\",\"versionName\":\"3.3.0\",\"layoutName\":\"ServiceMarketLayout\",\"displayName\":\"服务市场\",\"groups\":[{\"groupName\":\"\",\"widget\":\"Banners\",\"instanceConfig\":{\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"滚动广告\",\"widget\":\"Bulletins\",\"instanceConfig\":{\"itemGroup\":\"\"},\"style\":\"Default\",\"defaultOrder\":4,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"\",\"widget\":\"Coupons\",\"instanceConfig\":{\"itemGroup\":\"Coupons\"},\"style\":\"Default\",\"defaultOrder\":3,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"商家服务\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"Bizs\"},\"style\":\"Default\",\"defaultOrder\":5,\"separatorFlag\":0,\"separatorHeight\":0,\"editFlag\":1}]}', '2016081701', '0', '2', '2016-06-01 10:41:25', 'default', '0', '0', '0');
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) 
+    VALUES ('264', '0', 'ServiceMarketLayout', '{\"versionCode\":\"2016081701\",\"versionName\":\"3.3.0\",\"layoutName\":\"ServiceMarketLayout\",\"displayName\":\"服务市场\",\"groups\":[{\"groupName\":\"\",\"widget\":\"Banners\",\"instanceConfig\":{\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"滚动广告\",\"widget\":\"Bulletins\",\"instanceConfig\":{\"itemGroup\":\"\"},\"style\":\"Default\",\"defaultOrder\":4,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"\",\"widget\":\"Coupons\",\"instanceConfig\":{\"itemGroup\":\"Coupons\"},\"style\":\"Default\",\"defaultOrder\":3,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"商家服务\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"Bizs\"},\"style\":\"Default\",\"defaultOrder\":5,\"separatorFlag\":0,\"separatorHeight\":0,\"editFlag\":1}]}', '2016081701', '0', '2', '2016-03-12 19:16:25', 'pm_admin', '0', '0', '0');
+
+    
+    
+    
+
+    
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
+	VALUES(179957, 240111044331053633, '19栋', '19栋', 0, '', '', 0, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
+	VALUES(179958, 240111044331053633, '20栋', '20栋', 0, '', '', 0, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) 
+    VALUES(239825274387102737,UUID(),240111044331053633, 14990, '沈阳市',  14991, '于洪区' ,'19栋-1-501','19栋','1-501','2','0',UTC_TIMESTAMP(), 999988);	
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) 
+    VALUES(239825274387102738,UUID(),240111044331053633, 14990, '沈阳市',  14991, '于洪区' ,'20栋-3-603','20栋','3-603','2','0',UTC_TIMESTAMP(), 999988);	
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) 
+    VALUES(239825274387102739,UUID(),240111044331053633, 14990, '沈阳市',  14991, '于洪区' ,'20栋-3-504','20栋','3-504','2','0',UTC_TIMESTAMP(), 999988);	
+    
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) 
+    VALUES (20482, 1003855, 240111044331053633, 239825274387102737, '19栋-1-501', '0');     
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) 
+    VALUES (20483, 1003855, 240111044331053633, 239825274387102738, '20栋-3-603', '0');     
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) 
+    VALUES (20484, 1003855, 240111044331053633, 239825274387102739, '20栋-3-504', '0');     
+
+
+
+
+
+
+
+
+
+    
