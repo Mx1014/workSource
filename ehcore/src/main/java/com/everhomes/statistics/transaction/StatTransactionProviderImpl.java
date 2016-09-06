@@ -561,11 +561,11 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.SERVICE_TYPE.eq(serviceType));
 		}
 		if(!StringUtils.isEmpty(resourceType)){
-			condition = condition.and(Tables.EH_STAT_REFUNDS.RESOURCE_TYPE.eq(resourceType));
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.RESOURCE_TYPE.eq(resourceType));
 		}
 		
 		if(!StringUtils.isEmpty(resourceId)){
-			condition = condition.and(Tables.EH_STAT_REFUNDS.RESOURCE_ID.eq(resourceId));
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.RESOURCE_ID.eq(resourceId));
 		}
 		SelectQuery<EhStatTransactionsRecord> query = context.selectQuery(Tables.EH_STAT_TRANSACTIONS);
 		query.addConditions(condition);
