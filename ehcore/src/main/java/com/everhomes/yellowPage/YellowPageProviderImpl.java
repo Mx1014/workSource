@@ -428,7 +428,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
     	if (!StringUtils.isEmpty(ownerType) )
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
         //topic
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(0L));
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.TYPE.eq(type));
