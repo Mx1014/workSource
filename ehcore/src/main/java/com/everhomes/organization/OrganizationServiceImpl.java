@@ -4812,6 +4812,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		try {
 		    User user = userProvider.findUserById(identifier.getOwnerUid());
 	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
+	        OrganizationMember organizationMember = null;
 	        for (OrganizationMember member : members) {
 	        	Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
 	            if(org.getNamespaceId() == null || !org.getNamespaceId().equals(identifier.getNamespaceId())) {
@@ -4828,21 +4829,28 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	
                 	this.updateMemberUser(member);
                 	DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
-                    sendMessageForContactApproved(member);
-                    		
-                    userSearcher.feedDoc(member);
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
-                            + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
-                    }
+                	
+                	// 机构是公司的情况下 才发送短信
+                	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+                        sendMessageForContactApproved(member);
+                        userSearcher.feedDoc(member);
+                        //支持多部门 记录可能存在多条，故取公司这条
+                        organizationMember = member;
+                        if(LOGGER.isInfoEnabled()) {
+                            LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
+                                + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
+                        }
+                	}
+
                 } else {
                     if(LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
                             + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
                     }
                 }
-                return ConvertHelper.convert(member, OrganizationMemberDTO.class);
+                
 	        }
+	        return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 		} catch(Exception e) {
 		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
