@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属者ID</li>
  * <li>flowId: 审批流程id</li>
  * <li>level: 级别，比如1，2，3，4，5</li>
- * <li>approvalPersonList: 审批人列表，参考{@link com.everhomes.rest.approval.ApprovalPerson}</li>
+ * <li>approvalUserList: 审批人列表，参考{@link com.everhomes.rest.approval.ApprovalUser}</li>
  * </ul>
  */
 public class CreateApprovalFlowLevelCommand {
@@ -23,8 +23,8 @@ public class CreateApprovalFlowLevelCommand {
 	private Long ownerId;
 	private Long flowId;
 	private Byte level;
-	@ItemType(ApprovalPerson.class)
-	private List<ApprovalPerson> approvalPersonList;
+	@ItemType(ApprovalUser.class)
+	private List<ApprovalUser> approvalUserList;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -66,12 +66,12 @@ public class CreateApprovalFlowLevelCommand {
 		this.level = level;
 	}
 
-	public List<ApprovalPerson> getApprovalPersonList() {
-		return approvalPersonList;
+	public List<ApprovalUser> getApprovalUserList() {
+		return approvalUserList;
 	}
 
-	public void setApprovalPersonList(List<ApprovalPerson> approvalPersonList) {
-		this.approvalPersonList = approvalPersonList;
+	public void setApprovalUserList(List<ApprovalUser> approvalUserList) {
+		this.approvalUserList = approvalUserList;
 	}
 
 	@Override

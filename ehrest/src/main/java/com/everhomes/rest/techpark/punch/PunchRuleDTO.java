@@ -22,7 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>workdayRuleId：排班规则id</li>
  * <li>timeRuleName：时间规则名称</li>
  * <li>locationRuleName：地点规则名称</li>
- * <li>wifiRuleName规则名称</li>
+ * <li>wifiRuleName: 规则名称</li>
  * <li>workdayRuleName：排班规则名称</li>
  * </ul>
  */

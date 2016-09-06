@@ -1,32 +1,27 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>参数：
- * <li>id: id</li>
- * <li>namespaceId: 域空间id</li>
+ * <ul>
+ * 参数：
+ * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
- * <li>ownerId: 所属类型id</li>
- * <li>name: 审批流程名称</li>
+ * <li>ownerId: 所属者ID</li>
+ * <li>requestIdList: 申请ID列表</li>
  * </ul>
  */
-public class UpdateApprovalFlowNameCommand {
-	private Long id;
+public class ApproveApprovalRequestCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	private String name;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
+	@ItemType(Long.class)
+	private List<Long> requestIdList;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -52,12 +47,12 @@ public class UpdateApprovalFlowNameCommand {
 		this.ownerId = ownerId;
 	}
 
-	public String getName() {
-		return name;
+	public List<Long> getRequestIdList() {
+		return requestIdList;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setRequestIdList(List<Long> requestIdList) {
+		this.requestIdList = requestIdList;
 	}
 
 	@Override

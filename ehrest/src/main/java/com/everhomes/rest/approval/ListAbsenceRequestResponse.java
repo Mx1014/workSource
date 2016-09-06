@@ -11,13 +11,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 返回值：
  * <li>nextPageAnchor: 下页锚点</li>
- * <li>askForLeaveList: 请假申请列表，参考{@link com.everhomes.rest.approval.AskForLeaveDTO}</li>
+ * <li>absenceRequestList: 请假申请列表，参考{@link com.everhomes.rest.approval.AbsenceRequestDTO}</li>
  * </ul>
  */
-public class ListAskForLeaveResponse {
+public class ListAbsenceRequestResponse {
 	private Long nextPageAnchor;
-	@ItemType(AskForLeaveDTO.class)
-	private List<AskForLeaveDTO> askForLeaveList;
+	@ItemType(AbsenceRequestDTO.class)
+	private List<AbsenceRequestDTO> absenceRequestList;
 
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
@@ -27,12 +27,12 @@ public class ListAskForLeaveResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<AskForLeaveDTO> getAskForLeaveList() {
-		return askForLeaveList;
+	public List<AbsenceRequestDTO> getAbsenceRequestList() {
+		return absenceRequestList;
 	}
 
-	public void setAskForLeaveList(List<AskForLeaveDTO> askForLeaveList) {
-		this.askForLeaveList = askForLeaveList;
+	public void setAbsenceRequestList(List<AbsenceRequestDTO> absenceRequestList) {
+		this.absenceRequestList = absenceRequestList;
 	}
 
 	@Override

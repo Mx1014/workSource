@@ -11,14 +11,24 @@ import com.everhomes.util.StringHelper;
  * <li>requestId: 申请ID</li>
  * <li>punchDate: 打卡日期</li>
  * <li>nickName: 姓名</li>
+ * <li>reason: 申请理由</li>
  * <li>punchStatusName: 打卡状态</li>
  * </ul>
  */
-public class ForgetToPunchDTO {
+public class ForgotRequestDTO {
 	private Long requestId;
 	private Timestamp punchDate;
 	private String nickName;
+	private String reason;
 	private String punchStatusName;
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 
 	public Long getRequestId() {
 		return requestId;

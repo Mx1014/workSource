@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetName: 目标名称</li>
  * </ul>
  */
-public class ApprovalPerson {
+public class ApprovalUser {
 	private Byte targetType;
 	private Long targetId;
 	private String targetName;

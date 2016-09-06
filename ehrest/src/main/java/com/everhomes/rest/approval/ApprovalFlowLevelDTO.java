@@ -10,18 +10,18 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>level: 级别，比如1，2，3，4，5</li>
- * <li>approvalPersonList: 审批人列表，参考{@link com.everhomes.rest.approval.ApprovalPerson}</li>
+ * <li>approvalUserList: 审批人列表，参考{@link com.everhomes.rest.approval.ApprovalUser}</li>
  * </ul>
  */
 public class ApprovalFlowLevelDTO {
 	private Byte level;
-	@ItemType(ApprovalPerson.class)
-	private List<ApprovalPerson> approvalPersonList;
+	@ItemType(ApprovalUser.class)
+	private List<ApprovalUser> approvalUserList;
 
-	public ApprovalFlowLevelDTO(Byte level, List<ApprovalPerson> approvalPersonList) {
+	public ApprovalFlowLevelDTO(Byte level, List<ApprovalUser> approvalUserList) {
 		super();
 		this.level = level;
-		this.approvalPersonList = approvalPersonList;
+		this.approvalUserList = approvalUserList;
 	}
 
 	public Byte getLevel() {
@@ -32,12 +32,12 @@ public class ApprovalFlowLevelDTO {
 		this.level = level;
 	}
 
-	public List<ApprovalPerson> getApprovalPersonList() {
-		return approvalPersonList;
+	public List<ApprovalUser> getApprovalUserList() {
+		return approvalUserList;
 	}
 
-	public void setApprovalPersonList(List<ApprovalPerson> approvalPersonList) {
-		this.approvalPersonList = approvalPersonList;
+	public void setApprovalUserList(List<ApprovalUser> approvalUserList) {
+		this.approvalUserList = approvalUserList;
 	}
 
 	@Override

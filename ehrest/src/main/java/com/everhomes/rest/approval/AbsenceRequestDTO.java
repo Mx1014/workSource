@@ -11,13 +11,15 @@ import com.everhomes.util.StringHelper;
  * <li>requestId: 申请ID</li>
  * <li>nickName: 姓名</li>
  * <li>categoryName: 请假类型名称</li>
+ * <li>reason: 申请理由</li>
  * <li>timeRangeList: 请假时间列表</li>
  * </ul>
  */
-public class AskForLeaveDTO {
+public class AbsenceRequestDTO {
 	private Long requestId;
 	private String nickName;
 	private String categoryName;
+	private String reason;
 	private List<TimeRange> timeRangeList;
 
 	public Long getRequestId() {

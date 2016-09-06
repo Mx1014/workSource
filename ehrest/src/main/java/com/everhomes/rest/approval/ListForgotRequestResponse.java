@@ -10,13 +10,13 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值：
  * <li>nextPageAnchor: 下页锚点</li>
- * <li>forgetToPunchList: 忘打卡申列表，参考{@link com.everhomes.rest.approval.ForgetToPunchDTO}</li>
+ * <li>forgotRequestList: 忘打卡申列表，参考{@link com.everhomes.rest.approval.ForgotRequestDTO}</li>
  * </ul>
  */
-public class ListForgetToPunchResponse {
+public class ListForgotRequestResponse {
 	private Long nextPageAnchor;
-	@ItemType(ForgetToPunchDTO.class)
-	private List<ForgetToPunchDTO> forgetToPunchList;
+	@ItemType(ForgotRequestDTO.class)
+	private List<ForgotRequestDTO> forgotRequestList;
 
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
@@ -26,12 +26,12 @@ public class ListForgetToPunchResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<ForgetToPunchDTO> getForgetToPunchList() {
-		return forgetToPunchList;
+	public List<ForgotRequestDTO> getForgotRequestList() {
+		return forgotRequestList;
 	}
 
-	public void setForgetToPunchList(List<ForgetToPunchDTO> forgetToPunchList) {
-		this.forgetToPunchList = forgetToPunchList;
+	public void setForgotRequestList(List<ForgotRequestDTO> forgotRequestList) {
+		this.forgotRequestList = forgotRequestList;
 	}
 
 	@Override

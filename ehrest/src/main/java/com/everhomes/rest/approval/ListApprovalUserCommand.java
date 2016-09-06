@@ -1,30 +1,63 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>参数：
+ * <ul>
+ * 参数：
  * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>flowId: 审批流程id</li>
- * <li>level: 级别，比如1，2，3，4，5</li>
- * <li>approvalUserList: 审批人列表，参考{@link com.everhomes.rest.approval.ApprovalUser}</li>
+ * <li>flowId: 审批流程ID</li>
+ * <li>level: 级别</li>
+ * <li>departmentId: 部门ID</li>
+ * <li>keyword: 姓名关键字</li>
  * </ul>
- */ 
-public class UpdateApprovalFlowLevelCommand {
+ */
+public class ListApprovalUserCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
 	private Long flowId;
 	private Byte level;
-	@ItemType(ApprovalUser.class)
-	private List<ApprovalUser> approvalUserList;
+	private Long departmentId;
+	private String keyword;
+	private Integer pageSize;
+	private Long pageAnchor;
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Long getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(Long departmentId) {
+		this.departmentId = departmentId;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -66,17 +99,8 @@ public class UpdateApprovalFlowLevelCommand {
 		this.level = level;
 	}
 
-	public List<ApprovalUser> getApprovalUserList() {
-		return approvalUserList;
-	}
-
-	public void setApprovalUserList(List<ApprovalUser> approvalUserList) {
-		this.approvalUserList = approvalUserList;
-	}
-
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

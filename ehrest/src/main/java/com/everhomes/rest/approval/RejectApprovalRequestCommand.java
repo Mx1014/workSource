@@ -14,14 +14,24 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
  * <li>requestIdList: 申请ID列表</li>
+ * <li>reason: 驳回理由</li>
  * </ul>
  */
-public class AgreeRequestCommand {
+public class RejectApprovalRequestCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
 	@ItemType(Long.class)
 	private List<Long> requestIdList;
+	private String reason;
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;

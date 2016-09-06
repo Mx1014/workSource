@@ -14,6 +14,14 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.CreateAbsenceRequestCommand;
+import com.everhomes.rest.approval.CreateAbsenceRequestResponse;
+import com.everhomes.rest.approval.CreateForgotRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateForgotRequestBySceneResponse;
+import com.everhomes.rest.approval.ListAbsenceRequestCommand;
+import com.everhomes.rest.approval.ListAbsenceRequestResponse;
+import com.everhomes.rest.approval.ListForgotRequestCommand;
+import com.everhomes.rest.approval.ListForgotRequestResponse;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -328,4 +336,28 @@ public class PunchController extends ControllerBase {
 ////		response.setErrorDescription("OK");
 //		return commandResponse;
 //	}
+	
+
+	/**
+	 * 
+	 * <p>1.忘打卡申请列表</p>
+	 * <b>URL: /techpark/punch/listForgotRequest</b>
+	 */
+	@RequestMapping("listForgotRequest")
+	@RestReturn(ListForgotRequestResponse.class)
+	public RestResponse listForgotRequest(ListForgotRequestCommand cmd){
+		return new RestResponse();
+	}
+
+	/**
+	 * 
+	 * <p>2.请假申请列表</p>
+	 * <b>URL: /techpark/punch/listAbsenceRequest</b>
+	 */
+	@RequestMapping("listAbsenceRequest")
+	@RestReturn(ListAbsenceRequestResponse.class)
+	public RestResponse listAbsenceRequest(ListAbsenceRequestCommand cmd){
+		return new RestResponse();
+	}
+
 }

@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 审批流程名称</li>
  * </ul>
  */
-public class CreateApprovalFlowNameCommand {
+public class CreateApprovalFlowInfoCommand {
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;

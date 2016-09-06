@@ -23,17 +23,18 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
 import com.everhomes.rest.approval.ApprovalFlowLevelDTO;
 import com.everhomes.rest.approval.ApprovalOwnerType;
-import com.everhomes.rest.approval.ApprovalPerson;
+import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApprovalRuleDTO;
 import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.BriefApprovalFlowDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
-import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
@@ -50,8 +51,8 @@ import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.RuleFlowMap;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
-import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowNameResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
@@ -180,7 +181,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public CreateApprovalFlowNameResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd) {
+	public CreateApprovalFlowInfoResponse createApprovalFlowInfo(CreateApprovalFlowInfoCommand cmd) {
 		Long userId = getUserId();
 		if (StringUtils.isBlank(cmd.getName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -196,11 +197,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalFlow.setUpdateTime(approvalFlow.getCreateTime());
 		approvalFlowProvider.createApprovalFlow(approvalFlow);
 		
-		return new CreateApprovalFlowNameResponse(ConvertHelper.convert(approvalFlow, ApprovalFlowDTO.class));
+		return new CreateApprovalFlowInfoResponse(ConvertHelper.convert(approvalFlow, BriefApprovalFlowDTO.class));
 	}
 
 	@Override
-	public UpdateApprovalFlowNameResponse updateApprovalFlowName(UpdateApprovalFlowNameCommand cmd) {
+	public UpdateApprovalFlowInfoResponse updateApprovalFlowInfo(UpdateApprovalFlowInfoCommand cmd) {
 		Long userId = getUserId();
 		if (cmd.getId() == null || StringUtils.isBlank(cmd.getName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -213,7 +214,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalFlow.setOperatorUid(userId);
 		approvalFlowProvider.updateApprovalFlow(approvalFlow);
 		
-		return new UpdateApprovalFlowNameResponse(ConvertHelper.convert(approvalFlow, ApprovalFlowDTO.class));
+		return new UpdateApprovalFlowInfoResponse(ConvertHelper.convert(approvalFlow, BriefApprovalFlowDTO.class));
 	}
 
 	private ApprovalFlow checkApprovalFlowExist(Long id, Integer namespaceId, String ownerType, Long ownerId) {
@@ -229,7 +230,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	@Override
 	public CreateApprovalFlowLevelResponse createApprovalFlowLevel(CreateApprovalFlowLevelCommand cmd) {
 		Long userId = getUserId();
-		if (cmd.getFlowId() == null || cmd.getLevel() == null || ListUtils.isEmpty(cmd.getApprovalPersonList())) {
+		if (cmd.getFlowId() == null || cmd.getLevel() == null || ListUtils.isEmpty(cmd.getApprovalUserList())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: cmd="+cmd);
 		}
@@ -245,16 +246,16 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		
 		dbProvider.execute(s->{
-			createApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel(), cmd.getApprovalPersonList());
+			createApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel(), cmd.getApprovalUserList());
 			return true;
 		});
 		
-		processTargetName(cmd.getApprovalPersonList());
+		processTargetName(cmd.getApprovalUserList());
 		
-		return new CreateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalPersonList()));
+		return new CreateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalUserList()));
 	}
 
-	private void createApprovalFlowLevel(Long flowId, Byte level, List<ApprovalPerson> approvalPersonList) {
+	private void createApprovalFlowLevel(Long flowId, Byte level, List<ApprovalUser> approvalPersonList) {
 		approvalPersonList.forEach(a->{
 			if (ApprovalTargetType.fromCode(a.getTargetType()) == null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -269,7 +270,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 	}
 
-	private void processTargetName(List<ApprovalPerson> approvalPersonList) {
+	private void processTargetName(List<ApprovalUser> approvalPersonList) {
 		if (ListUtils.isEmpty(approvalPersonList)) {
 			return;
 		}
@@ -334,8 +335,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		dbProvider.execute(s->{
 			approvalFlowLevelProvider.deleteApprovalLevels(cmd.getFlowId(), cmd.getLevel());
-			if (ListUtils.isNotEmpty(cmd.getApprovalPersonList())) {
-				createApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel(), cmd.getApprovalPersonList());
+			if (ListUtils.isNotEmpty(cmd.getApprovalUserList())) {
+				createApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel(), cmd.getApprovalUserList());
 			}else {
 				if (checkNextLevelExist(cmd.getFlowId(), cmd.getLevel())) {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -345,9 +346,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 			return true;
 		});
 
-		processTargetName(cmd.getApprovalPersonList());
+		processTargetName(cmd.getApprovalUserList());
 		
-		return new UpdateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalPersonList()));
+		return new UpdateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalUserList()));
 	}
 
 	@Override
@@ -391,8 +392,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 			final List<ApprovalFlowLevelDTO> levelList = new ArrayList<>();
 			v1.forEach((k2,v2)->{
 				//k2为level
-				List<ApprovalPerson> approvalPersonList = v2.stream().map(a->{
-																ApprovalPerson approvalPerson = new ApprovalPerson();
+				List<ApprovalUser> approvalPersonList = v2.stream().map(a->{
+																ApprovalUser approvalPerson = new ApprovalUser();
 																approvalPerson.setTargetType(a.getTargetType());
 																approvalPerson.setTargetId(a.getId());
 																approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));

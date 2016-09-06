@@ -1,36 +1,31 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>
- * 参数：
- * <li>namespaceId: 域空间ID</li>
+ * <ul>参数：
+ * <li>id: id</li>
+ * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
- * <li>ownerId: 所属者ID</li>
- * <li>requestIdList: 申请ID列表</li>
- * <li>reason: 驳回理由</li>
+ * <li>ownerId: 所属类型id</li>
+ * <li>name: 审批流程名称</li>
  * </ul>
  */
-public class RejectRequestCommand {
+public class UpdateApprovalFlowInfoCommand {
+	private Long id;
 	private Integer namespaceId;
 	private String ownerType;
 	private Long ownerId;
-	@ItemType(Long.class)
-	private List<Long> requestIdList;
-	private String reason;
+	private String name;
 
-	public String getReason() {
-		return reason;
+	public Long getId() {
+		return id;
 	}
 
-	public void setReason(String reason) {
-		this.reason = reason;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Integer getNamespaceId() {
@@ -57,12 +52,12 @@ public class RejectRequestCommand {
 		this.ownerId = ownerId;
 	}
 
-	public List<Long> getRequestIdList() {
-		return requestIdList;
+	public String getName() {
+		return name;
 	}
 
-	public void setRequestIdList(List<Long> requestIdList) {
-		this.requestIdList = requestIdList;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

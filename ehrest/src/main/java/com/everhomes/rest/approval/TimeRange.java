@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 /**
  * 
  * <ul>
- * <li>type: 类型</li>
+ * <li>type: 类型，参考{@link com.everhomes.rest.approval.TimeRangeType}</li>
  * <li>fromTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
  * </ul>

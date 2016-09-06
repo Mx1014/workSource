@@ -8,9 +8,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.approval.CreateAskForLeaveRequestCommand;
-import com.everhomes.rest.approval.CreateAskForLeaveRequestResponse;
-import com.everhomes.rest.approval.CreateForgetToPunchRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateAbsenceRequestCommand;
+import com.everhomes.rest.approval.CreateAbsenceRequestResponse;
+import com.everhomes.rest.approval.CreateForgotRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateForgotRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneCommand;
@@ -34,18 +35,7 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>1.创建请假申请（客户端）</p>
-	 * <b>URL: /ui/approval/createAskForLeaveRequestByScene</b>
-	 */
-	@RequestMapping("createAskForLeaveRequestByScene")
-	@RestReturn(CreateAskForLeaveRequestResponse.class)
-	public RestResponse createAskForLeaveRequestByScene(CreateAskForLeaveRequestCommand cmd){
-		return new RestResponse();
-	}
-
-	/**
-	 * 
-	 * <p>2.申请列表（客户端）</p>
+	 * <p>1.申请列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalRequestByScene</b>
 	 */
 	@RequestMapping("listApprovalRequestByScene")
@@ -56,18 +46,7 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>3.创建忘打卡申请（客户端）</p>
-	 * <b>URL: /ui/approval/createForgetToPunchRequestByScene</b>
-	 */
-	@RequestMapping("createForgetToPunchRequestByScene")
-	@RestReturn(String.class)
-	public RestResponse createForgetToPunchRequestByScene(CreateForgetToPunchRequestBySceneCommand cmd){
-		return new RestResponse();
-	}
-
-	/**
-	 * 
-	 * <p>4.获取申请的审批基本信息（客户端）</p>
+	 * <p>2.获取申请的审批基本信息（客户端）</p>
 	 * <b>URL: /ui/approval/getApprovalBasicInfoOfRequestByScene</b>
 	 */
 	@RequestMapping("getApprovalBasicInfoOfRequestByScene")
@@ -78,7 +57,7 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>5.获取申请的审批日志与审批流程列表（客户端）</p>
+	 * <p>3.获取申请的审批日志与审批流程列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalLogAndFlowOfRequestByScene</b>
 	 */
 	@RequestMapping("listApprovalLogAndFlowOfRequestByScene")
@@ -89,7 +68,7 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>6.获取申请的审批日志列表（客户端）</p>
+	 * <p>4.获取申请的审批日志列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalLogOfRequestByScene</b>
 	 */
 	@RequestMapping("listApprovalLogOfRequestByScene")
@@ -100,7 +79,7 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>7.获取申请的审批流程列表（客户端）</p>
+	 * <p>5.获取申请的审批流程列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalFlowOfRequestByScene</b>
 	 */
 	@RequestMapping("listApprovalFlowOfRequestByScene")

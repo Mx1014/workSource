@@ -12,26 +12,36 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 参数：
  * <li>sceneToken: 场景</li>
+ * <li>requestToken: 重新申请请带上之前申请的标识</li>
  * <li>punchDate: 打卡日期时间戳</li>
- * <li>forgetToPunchType: 忘打卡类型，{@link com.everhomes.rest.approval.ForgetToPunchType}</li>
+ * <li>forgotType: 忘打卡类型，{@link com.everhomes.rest.approval.ForgetToPunchType}</li>
  * <li>reason: 申请理由</li>
  * <li>attachmentList: 附件列表，参考{@link com.everhomes.rest.news.AttachmentDescriptor}</li>
  * </ul>
  */
-public class CreateForgetToPunchRequestBySceneCommand {
+public class CreateForgotRequestBySceneCommand {
 	private String sceneToken;
+	private String requestToken;
 	private Long punchDate;
-	private Byte forgetToPunchType;
+	private Byte forgotType;
 	private String reason;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachmentList;
 
-	public Byte getForgetToPunchType() {
-		return forgetToPunchType;
+	public String getRequestToken() {
+		return requestToken;
 	}
 
-	public void setForgetToPunchType(Byte forgetToPunchType) {
-		this.forgetToPunchType = forgetToPunchType;
+	public void setRequestToken(String requestToken) {
+		this.requestToken = requestToken;
+	}
+
+	public Byte getForgotType() {
+		return forgotType;
+	}
+
+	public void setForgotType(Byte forgotType) {
+		this.forgotType = forgotType;
 	}
 
 	public String getSceneToken() {

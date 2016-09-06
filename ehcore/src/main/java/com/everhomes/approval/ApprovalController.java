@@ -9,20 +9,22 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.approval.AgreeRequestCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
-import com.everhomes.rest.approval.CreateApprovalFlowNameCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowNameResponse;
-import com.everhomes.rest.approval.CreateApprovalRuleCommand;
-import com.everhomes.rest.approval.CreateApprovalRuleResponse;
+import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.CreateApprovalRuleCommand;
+import com.everhomes.rest.approval.CreateApprovalRuleResponse;
+import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowOfRequestCommand;
 import com.everhomes.rest.approval.ListApprovalFlowOfRequestResponse;
@@ -33,25 +35,21 @@ import com.everhomes.rest.approval.ListApprovalLogOfRequestCommand;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
-import com.everhomes.rest.approval.ListApprovalCategoryCommand;
-import com.everhomes.rest.approval.ListApprovalCategoryResponse;
-import com.everhomes.rest.approval.ListAskForLeaveCommand;
-import com.everhomes.rest.approval.ListAskForLeaveResponse;
+import com.everhomes.rest.approval.ListApprovalUserCommand;
+import com.everhomes.rest.approval.ListApprovalUserResponse;
 import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
 import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
-import com.everhomes.rest.approval.ListForgetToPunchCommand;
-import com.everhomes.rest.approval.ListForgetToPunchResponse;
-import com.everhomes.rest.approval.RejectRequestCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
-import com.everhomes.rest.approval.UpdateApprovalFlowNameCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowNameResponse;
-import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
-import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
+import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 
 @RestDoc("approval controller")
 @RestController
@@ -63,7 +61,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>1.增加审批类型的具体类型，如请假的公出、事假等</p>
+	 * <p>1.增加审批类别，如请假的公出、事假等</p>
 	 * <b>URL: /approval/createApprovalCategory</b>
 	 */
 	@RequestMapping("createApprovalCategory")
@@ -74,7 +72,7 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>2.更新审批类型的具体类型</p>
+	 * <p>2.更新审批类别</p>
 	 * <b>URL: /approval/updateApprovalCategory</b>
 	 */
 	@RequestMapping("updateApprovalCategory")
@@ -85,7 +83,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>3.列出审批类型的具体类型</p>
+	 * <p>3.列出审批类别</p>
 	 * <b>URL: /approval/listApprovalCategory</b>
 	 */
 	@RequestMapping("listApprovalCategory")
@@ -96,7 +94,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>4.删除审批类型的具体类型</p>
+	 * <p>4.删除审批类别</p>
 	 * <b>URL: /approval/deleteApprovalCategory</b>
 	 */
 	@RequestMapping("deleteApprovalCategory")
@@ -108,24 +106,24 @@ public class ApprovalController extends ControllerBase {
 	
 	/**
 	 * 
-	 * <p>5.设置审批流程名称</p>
-	 * <b>URL: /approval/createApprovalFlowName</b>
+	 * <p>5.设置审批流程信息</p>
+	 * <b>URL: /approval/createApprovalFlowInfo</b>
 	 */
-	@RequestMapping("createApprovalFlowName")
-	@RestReturn(CreateApprovalFlowNameResponse.class)
-	public RestResponse createApprovalFlowName(CreateApprovalFlowNameCommand cmd){
-		return new RestResponse(approvalService.createApprovalFlowName(cmd));
+	@RequestMapping("createApprovalFlowInfo")
+	@RestReturn(CreateApprovalFlowInfoResponse.class)
+	public RestResponse createApprovalFlowInfo(CreateApprovalFlowInfoCommand cmd){
+		return new RestResponse(approvalService.createApprovalFlowInfo(cmd));
 	}
 	
 	/**
 	 * 
-	 * <p>6.更新审批流程名称</p>
-	 * <b>URL: /approval/updateApprovalFlowName</b>
+	 * <p>6.更新审批流程信息</p>
+	 * <b>URL: /approval/updateApprovalFlowInfo</b>
 	 */
-	@RequestMapping("updateApprovalFlowName")
-	@RestReturn(UpdateApprovalFlowNameResponse.class)
-	public RestResponse updateApprovalFlowName(UpdateApprovalFlowNameCommand cmd){
-		return new RestResponse(approvalService.updateApprovalFlowName(cmd));
+	@RequestMapping("updateApprovalFlowInfo")
+	@RestReturn(UpdateApprovalFlowInfoResponse.class)
+	public RestResponse updateApprovalFlowInfo(UpdateApprovalFlowInfoCommand cmd){
+		return new RestResponse(approvalService.updateApprovalFlowInfo(cmd));
 	}
 
 	/**
@@ -242,51 +240,29 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>17.忘打卡申请列表</p>
-	 * <b>URL: /approval/listForgetToPunch</b>
+	 * <p>17.同意申请</p>
+	 * <b>URL: /approval/approveApprovalRequest</b>
 	 */
-	@RequestMapping("listForgetToPunch")
-	@RestReturn(ListForgetToPunchResponse.class)
-	public RestResponse listForgetToPunch(ListForgetToPunchCommand cmd){
-		return new RestResponse();
-	}
-
-	/**
-	 * 
-	 * <p>18.请假申请列表</p>
-	 * <b>URL: /approval/listAskForLeave</b>
-	 */
-	@RequestMapping("listAskForLeave")
-	@RestReturn(ListAskForLeaveResponse.class)
-	public RestResponse listAskForLeave(ListAskForLeaveCommand cmd){
-		return new RestResponse();
-	}
-
-	/**
-	 * 
-	 * <p>19.同意申请</p>
-	 * <b>URL: /approval/agreeRequest</b>
-	 */
-	@RequestMapping("agreeRequest")
+	@RequestMapping("approveApprovalRequest")
 	@RestReturn(String.class)
-	public RestResponse agreeRequest(AgreeRequestCommand cmd){
+	public RestResponse approveApprovalRequest(ApproveApprovalRequestCommand cmd){
 		return new RestResponse();
 	}
 
 	/**
 	 * 
-	 * <p>20.驳回申请</p>
-	 * <b>URL: /approval/rejectRequest</b>
+	 * <p>18.驳回申请</p>
+	 * <b>URL: /approval/rejectApprovalRequest</b>
 	 */
-	@RequestMapping("rejectRequest")
+	@RequestMapping("rejectApprovalRequest")
 	@RestReturn(String.class)
-	public RestResponse rejectRequest(RejectRequestCommand cmd){
+	public RestResponse rejectApprovalRequest(RejectApprovalRequestCommand cmd){
 		return new RestResponse();
 	}
 	
 	/**
 	 * 
-	 * <p>21.获取申请的审批基本信息</p>
+	 * <p>19.获取申请的审批基本信息</p>
 	 * <b>URL: /approval/getApprovalBasicInfoOfRequest</b>
 	 */
 	@RequestMapping("getApprovalBasicInfoOfRequest")
@@ -297,7 +273,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>22.获取申请的审批日志与审批流程列表</p>
+	 * <p>20.获取申请的审批日志与审批流程列表</p>
 	 * <b>URL: /approval/listApprovalLogAndFlowOfRequest</b>
 	 */
 	@RequestMapping("listApprovalLogAndFlowOfRequest")
@@ -308,7 +284,7 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>23.获取申请的审批日志列表</p>
+	 * <p>21.获取申请的审批日志列表</p>
 	 * <b>URL: /approval/listApprovalLogOfRequest</b>
 	 */
 	@RequestMapping("listApprovalLogOfRequest")
@@ -319,12 +295,23 @@ public class ApprovalController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>24.获取申请的审批流程列表</p>
+	 * <p>22.获取申请的审批流程列表</p>
 	 * <b>URL: /approval/listApprovalFlowOfRequest</b>
 	 */
 	@RequestMapping("listApprovalFlowOfRequest")
 	@RestReturn(ListApprovalFlowOfRequestResponse.class)
 	public RestResponse listApprovalFlowOfRequest(ListApprovalFlowOfRequestCommand cmd){
+		return new RestResponse();
+	}
+
+	/**
+	 * 
+	 * <p>23.人员列表，可按部门、姓名筛选</p>
+	 * <b>URL: /approval/listApprovalUser</b>
+	 */
+	@RequestMapping("listApprovalUser")
+	@RestReturn(ListApprovalUserResponse.class)
+	public RestResponse listApprovalUser(ListApprovalUserCommand cmd){
 		return new RestResponse();
 	}
 }
