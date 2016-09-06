@@ -3148,12 +3148,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<Long> dayTimes = new ArrayList<Long>();
 			if(response.getSiteDays() !=null)
 				for(RentalSiteDayRulesDTO dayDTO : response.getSiteDays()){
-					if(dayDTO.getSiteRules() !=null)
-					for(RentalSiteRulesDTO ruleDTO : dayDTO.getSiteRules()){
-						if(!dayTimes.contains(ruleDTO.getBeginTime()))
-							dayTimes.add(ruleDTO.getBeginTime());
-						if(!dayTimes.contains(ruleDTO.getEndTime()))
-							dayTimes.add(ruleDTO.getEndTime());
+					//循环每一天,如果有当天有rules则取daytimes,然后退出循环
+					if(dayDTO.getSiteRules() !=null){
+						for(RentalSiteRulesDTO ruleDTO : dayDTO.getSiteRules()){
+							if(!dayTimes.contains(ruleDTO.getBeginTime()))
+								dayTimes.add(ruleDTO.getBeginTime());
+							if(!dayTimes.contains(ruleDTO.getEndTime()))
+								dayTimes.add(ruleDTO.getEndTime());
+						}
+						break;
 					}
 				}
 	 		Collections.sort(dayTimes);
