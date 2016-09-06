@@ -642,7 +642,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        //organization.setCommunityId(cmd.getCommunityId());
 	        organization.setDescription(enterprise.getDescription());
 	        
-	        organizationSearcher.feedDoc(organization);
+//	        organizationSearcher.feedDoc(organization);
 			return null;
 		});
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
@@ -4781,7 +4781,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setTargetId(userIdentifier.getOwnerUid());
 				organizationProvider.updateOrganizationMember(m);
 				
-				userSearcher.feedDoc(m);
+//				userSearcher.feedDoc(m);
 			}
 			
 			if(null != cmd.getAssignmentId())
@@ -4916,8 +4916,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			importDataResponse.setFailCount((long)errorDataLogs.size());
 			importDataResponse.setLogs(errorDataLogs);
 		} catch (IOException e) {
-			LOGGER.error("File can not be resolved...");
-			e.printStackTrace();
+			LOGGER.error("File can not be resolved. e = {}", e);
 		}
 		return importDataResponse;
 	}
@@ -4988,7 +4987,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
 		for (String str : list) {
+			
 			String[] s = str.split("\\|\\|");
+			
+			if(s.length < 8){
+				LOGGER.debug("import enterprise data error. str = {}", str);
+				continue;
+			}
 			
 			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
 			enterpriseCommand.setName(s[0]);
@@ -7221,5 +7226,5 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		return dtos;
 	}
-	
+
 }
