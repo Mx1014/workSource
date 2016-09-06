@@ -4824,7 +4824,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                continue;
 	            }
 	            
-	            if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())) {
+	            if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE) {
                 	member.setTargetId(user.getId());
                 	
                 	this.updateMemberUser(member);
@@ -4839,6 +4839,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                         if(LOGGER.isInfoEnabled()) {
                             LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
                                 + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
+                        }
+                	}else{
+                        if(LOGGER.isInfoEnabled()) {
+                            LOGGER.debug("organization group type not enterprise, organizationId={}, groupType={}, memberId={}", member.getOrganizationId(), member.getStatus(), member.getId());
                         }
                 	}
 
