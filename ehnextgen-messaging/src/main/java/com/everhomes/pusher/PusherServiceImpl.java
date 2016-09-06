@@ -289,6 +289,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                                 LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
                                     + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
                                     }
+                     } else {
+                         LOGGER.warn("Pushing apnsServer not found");
                      }
             } catch (NetworkIOException e) {
                 LOGGER.warn("apns error and stop it", e);
