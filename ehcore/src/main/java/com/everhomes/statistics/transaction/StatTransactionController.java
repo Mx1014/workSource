@@ -19,7 +19,6 @@ import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmount
 import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
 import com.everhomes.rest.statistics.transaction.ListStatTransactionCommand;
 import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
-import com.everhomes.rest.statistics.transaction.StatShopTransactionDTO;
 
 /**
  * <ul>
