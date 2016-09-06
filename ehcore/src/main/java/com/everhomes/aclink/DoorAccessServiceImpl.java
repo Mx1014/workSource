@@ -566,7 +566,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
-            sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING.getCode()); 
+            sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING_GROUP.getCode()); 
         } else {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ZLACLINK_WIFI.getCode());    
         }
