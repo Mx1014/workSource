@@ -13,6 +13,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.statistics.transaction.ExecuteTaskCommand;
 import com.everhomes.rest.statistics.transaction.ListStatServiceSettlementAmountsCommand;
 import com.everhomes.rest.statistics.transaction.ListStatShopTransactionsResponse;
@@ -104,10 +105,23 @@ public class StatTransactionController extends ControllerBase {
      * <p>导出商铺订单</p>
      */
     @RequestMapping("exportStatShopTransactions")
-    @RestReturn(value=StatShopTransactionDTO.class, collection = true)
+    @RestReturn(value=String.class)
     public RestResponse exportStatShopTransactions(@Valid ListStatTransactionCommand cmd, HttpServletResponse res) {
     	statTransactionService.exportStatShopTransactions(cmd, res);
     	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /stat/transaction/listZuoLinBusinesses</b>
+     * <p>左邻店铺</p>
+     */
+    @RequestMapping("listZuoLinBusinesses")
+    @RestReturn(value=BusinessDTO.class, collection = true)
+    public RestResponse listZuoLinBusinesses() {
+    	RestResponse response = new RestResponse(statTransactionService.listZuoLinBusinesses());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

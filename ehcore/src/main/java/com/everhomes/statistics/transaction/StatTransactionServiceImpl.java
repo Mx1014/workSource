@@ -38,6 +38,12 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
+
+
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -72,8 +78,15 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
+
+
+
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
+import com.everhomes.business.BusinessService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -90,6 +103,11 @@ import com.everhomes.payment.PaymentCardProvider;
 import com.everhomes.payment.PaymentCardRechargeOrder;
 import com.everhomes.payment.PaymentCardTransaction;
 import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.business.BusinessDTO;
+import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.business.ListBusinessByKeywordCommand;
+import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardTransactionStatus;
@@ -164,6 +182,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+	private BusinessService businessService;
 	
 	@PostConstruct
 	public void setup(){
@@ -582,10 +602,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<StatShopTransactionDTO> dtos = null;
 		if(SettlementOrderType.TRANSACTION == SettlementOrderType.fromCode(cmd.getOrderType())){
-			List<StatTransaction> statTransactions = statTransactionProvider.listStatTransactions(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			List<StatTransaction> statTransactions = statTransactionProvider.listStatTransactions(locator, pageSize, sStartDate, sEndDate, cmd.getResourceId(), cmd.getResourceType(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
 			dtos = convertTransactionDTOByPaid(statTransactions);
 		}else{
-			List<StatRefund> statRefunds = statTransactionProvider.listStatRefunds(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			List<StatRefund> statRefunds = statTransactionProvider.listStatRefunds(locator, pageSize, sStartDate, sEndDate, cmd.getResourceId(), cmd.getResourceType(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
 			dtos = convertTransactionDTOByRefund(statRefunds);
 		}
 		response.setNextPageAnchor(locator.getAnchor());
@@ -670,6 +690,33 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		}
 		
 	}
+	
+	@Override
+	public List<BusinessDTO> listZuoLinBusinesses() {
+		ListBusinessByKeywordCommand cmd = new ListBusinessByKeywordCommand();
+		cmd.setPageOffset(1);
+		cmd.setPageSize(1000);
+		ListBusinessByKeywordCommandResponse res = businessService.listBusinessByKeyword(cmd);
+		List<BusinessDTO> businessDTOs = res.getList();
+		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
+		
+		if(null != businessDTOs){
+			for (BusinessDTO businessDTO : businessDTOs) {
+				if(BusinessTargetType.fromCode(businessDTO.getTargetType()) == BusinessTargetType.ZUOLIN){
+					dtos.add(businessDTO);
+				}
+			}
+		}
+		//固定添加一个临时店铺 值为-1
+		BusinessDTO businessDTO = new BusinessDTO();
+		businessDTO.setTargetType(BusinessTargetType.ZUOLIN.getCode());
+		businessDTO.setTargetId("-1");
+		businessDTO.setName("临时店铺");
+		businessDTO.setDisplayName("临时店铺");
+		dtos.add(businessDTO);
+		return dtos;
+	}
+	
 	private List<StatShopTransactionDTO> convertTransactionDTOByPaid(List<StatTransaction> statTransactions){
 		List<StatShopTransactionDTO> dtos = new ArrayList<StatShopTransactionDTO>();
 		for (StatTransaction statTransaction : statTransactions) {
@@ -1934,6 +1981,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					"Failed to get data.");
 		}
 	}
+	
 	
 	public static void main(String[] args) {
 		String json = "{\"version\" : \"1\",\"response\" : {\"nextAnchor\" : \"1\",list:[{\"orderNo\" : \"1\"}]}}";
