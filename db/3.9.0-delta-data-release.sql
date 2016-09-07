@@ -34,3 +34,29 @@ INSERT INTO `eh_web_menu_scopes` (`id`,`menu_id`,`owner_type`,`owner_id`,`apply_
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 43400 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999992;
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` IN (SELECT `id`  FROM `eh_web_menus` WHERE `path` LIKE '%43400/%') AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999992;
 
+-- 升级规则：海岸、深业、ibase、左邻、讯美 3.9.0 Android版；储能 3.9.0 IOS版 add by xiongying20160907
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(81,27,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES (51, 27, '3.9.0', 'http://apk.zuolin.com/apk/HaianPark-3.9.0.2016090606-release.apk', '${homeurl}/web/download/apk/andriod-haian-3-9-0.html', '0');
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(82,30,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES (52, 30, '3.9.0', 'http://apk.zuolin.com/apk/ShenyeProperty-3.9.0.2016090606-release.apk', '${homeurl}/web/download/apk/andriod-sywy-3-9-0.html', '0');
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(83,38,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES (53, 38, '3.9.0', 'http://apk.zuolin.com/apk/IBase-3.9.0.2016090606-release.apk', '${homeurl}/web/download/apk/andriod-ibase-3-9-0.html', '0');
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(84,1,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES (54, 1, '3.9.0', 'http://apk.zuolin.com/apk/Zuolin-3.9.0.2016090606-release.apk	', '${homeurl}/web/download/apk/andriod-everhomes-3-9-0.html', '0');
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(85,5,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES (55, 5, '3.9.0', 'http://apk.zuolin.com/apk/XmTecPark-3.9.0.2016090606-release.apk', '${homeurl}/web/download/apk/andriod-xunmei-3-9-0.html', '0');
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(85,35,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
+    VALUES (55, 35, '3.9.0', '', '${homeurl}/web/download/apk/iOS-UFinePark-3-9-0.html', '0');    
