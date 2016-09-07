@@ -172,7 +172,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     }
 
     @Override
-    public List<PmTaskDTO> searchDocsByType(String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
+    public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
     		Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
@@ -209,6 +209,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
         if(null != categoryId){
         	QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("categoryId");
+            qb = qb.must(sb);	
+        }
+        
+        if(null != status){
+        	QueryStringQueryBuilder sb = QueryBuilders.queryString(status.toString()).field("status");
             qb = qb.must(sb);	
         }
         

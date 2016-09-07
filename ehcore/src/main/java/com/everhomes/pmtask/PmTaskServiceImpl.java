@@ -141,7 +141,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), pageSize);
 		
 		if(list.size() > 0){
@@ -497,6 +497,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			User user = userProvider.findUserById(r.getOperatorUid());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			pmTaskLogDTO.setOperatorName(user.getNickName());
 			
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("operatorName", user.getNickName());
