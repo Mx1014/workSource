@@ -2284,6 +2284,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 
+		signleCmd.setBeginDate(rs.getBeginDate().getTime());
+		signleCmd.setEndDate(rs.getEndDate().getTime());
+		signleCmd.setWeekendPrice(weekendPrice); 
+		signleCmd.setWorkdayPrice(workdayPrice);
 		if (rs.getRentalType().equals(RentalType.HOUR.getCode()))  {
 			if(signleCmd.getTimeIntervals() != null){
 				Double beginTime = null;
@@ -2295,20 +2299,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						beginTime=timeInterval.getBeginTime();
 					if(endTime==null||endTime<timeInterval.getEndTime())
 						endTime=timeInterval.getEndTime();
-					signleCmd.setBeginDate(rs.getBeginDate().getTime());
-					signleCmd.setEndDate(rs.getEndDate().getTime());
 					signleCmd.setBeginTime(timeInterval.getBeginTime());
 					signleCmd.setEndTime(timeInterval.getEndTime());
 					if(null!=timeInterval.getTimeStep())
-						signleCmd.setTimeStep(timeInterval.getTimeStep());
-					signleCmd.setWeekendPrice(weekendPrice); 
-					signleCmd.setWorkdayPrice(workdayPrice);
+						signleCmd.setTimeStep(timeInterval.getTimeStep()); 
 					addRentalSiteSingleSimpleRule(signleCmd);
 				}
 			}
 		} else {  
-			signleCmd.setWeekendPrice(weekendPrice); 
-			signleCmd.setWorkdayPrice(workdayPrice);
 			addRentalSiteSingleSimpleRule(signleCmd);
 		}	
 	}
@@ -2371,7 +2369,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) ); 
 						}
 						rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start
-								.getTime())));
+								.getTime())));	
 						rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
 						rsr.setCreateTime(new Timestamp(DateHelper
 								.currentGMTTime().getTime()));
