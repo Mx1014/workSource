@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListApprovalFlowOfRequestBySceneResponse {
+	@ItemType(ApprovalFlowOfRequestDTO.class)
 	private List<ApprovalFlowOfRequestDTO> approvalFlowOfRequestList;
 
 	public List<ApprovalFlowOfRequestDTO> getApprovalFlowOfRequestList() {

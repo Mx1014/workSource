@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,6 +22,7 @@ public class AbsenceRequestDTO {
 	private String nickName;
 	private String categoryName;
 	private String reason;
+	@ItemType(TimeRange.class)
 	private List<TimeRange> timeRangeList;
 	private String timeTotal;
 

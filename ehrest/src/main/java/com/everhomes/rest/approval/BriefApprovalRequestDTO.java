@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -22,6 +23,7 @@ public class BriefApprovalRequestDTO {
 	private Byte approvalType;
 	private String categoryName;
 	private String description;
+	@ItemType(TimeRange.class)
 	private List<TimeRange> timeRangeList;
 	private String reason;
 	private Byte approvalStatus;

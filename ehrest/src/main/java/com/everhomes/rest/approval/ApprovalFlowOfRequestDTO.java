@@ -2,6 +2,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,6 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ApprovalFlowOfRequestDTO {
 	private Byte currentFlag;
+	@ItemType(String.class)
 	private List<String> nickNameList;
 
 	public Byte getCurrentFlag() {

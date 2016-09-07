@@ -4,6 +4,7 @@ package com.everhomes.rest.approval;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
@@ -24,6 +25,7 @@ public class ApprovalLogOfRequestDTO {
 	private String avatarUrl;
 	private String nickName;
 	private String categoryName;
+	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachmentList;
 	private Byte approvalStatus;
 	private String remark;

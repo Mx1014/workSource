@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
@@ -40,7 +41,9 @@ public class ApprovalRequestDTO {
 	private Long currentLevel;
 	private Long nextLevel;
 	private Byte approvalStatus;
+	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachmentList;
+	@ItemType(TimeRange.class)
 	private List<TimeRange> timeRangeList;
 
 	public Long getId() {
