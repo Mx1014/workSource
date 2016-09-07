@@ -2302,7 +2302,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					signleCmd.setBeginTime(timeInterval.getBeginTime());
 					signleCmd.setEndTime(timeInterval.getEndTime());
 					if(null!=timeInterval.getTimeStep())
-						signleCmd.setTimeStep(timeInterval.getTimeStep()); 
+						signleCmd.setTimeStep(timeInterval.getTimeStep());
 					addRentalSiteSingleSimpleRule(signleCmd);
 				}
 			}
