@@ -186,9 +186,16 @@ public class PmTaskServiceImpl implements PmTaskService {
     			
     			Category category = checkCategory(r.getCategoryId());
     			Category parentCategory = checkCategory(category.getParentId());
-    			dto.setCategoryName(category.getName());
-    			dto.setParentCategoryId(parentCategory.getId());
-    			dto.setParentCategoryName(parentCategory.getName());
+    			if(parentCategory.getParentId().equals(0L)){
+    	    		dto.setCategoryId(null);
+    	    		dto.setCategoryName(null);
+    	    		dto.setParentCategoryId(category.getId());
+    	    		dto.setParentCategoryName(category.getName());
+    	    	}else{
+    	    		dto.setCategoryName(category.getName());
+    	    		dto.setParentCategoryId(parentCategory.getId());
+    	    		dto.setParentCategoryName(parentCategory.getName());
+    	    	}
     			
     			return dto;
     		}).collect(Collectors.toList()));
