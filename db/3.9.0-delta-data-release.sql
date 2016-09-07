@@ -60,3 +60,20 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
     VALUES(85,35,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
     VALUES (55, 35, '3.9.0', '', '${homeurl}/web/download/apk/iOS-UFinePark-3-9-0.html', '0');    
+
+-- 迅美更新banner 和添加左邻小店
+UPDATE eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwa01tRmtaakV6TTJaaU5qRTNaR1pqWmpGa04yRmpNamt5TVRRM01XVXlPQQ',action_type='0',action_data='' where id in (19,1007);
+
+UPDATE eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvd1lUWmtObU01T1dFd056RmpaR1kxWWpNMU5ERTNNRE00T1dFeVptTTNNQQ',action_type='0',action_data='' where id in (20,1008);
+
+UPDATE eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRveU5qTXlNRE0wTWpNNE1UZzRNR1UxTmpkbE5UTTFNRGhrTldJeU1UbGtaUQ',action_type='0',action_data='' where id in (21,1009);
+
+UPDATE eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwbE1EZG1ZelV3TW1Sa1lXTmlOV0k1Wm1FelkySTNaak0yTldFNE5UUTJOQQ',action_type='0',action_data='' where id in (22,1010);
+
+UPDATE eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwak4yRmhNVGsyT1RNNE9HSTFNamN6WVdRd1ptUmhORFkxTm1Ka09UZ3lZZw',action_type='0',action_data='' where id in (23,1011);
+
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+    VALUES ('(@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1)', '999999', '0', '0', '0', '/home/life', 'Lifes', '左邻小店', '左邻小店', 'shop/3005/1462962042600874121332.jpg', '1', '1', '14', '', '1', '0', '1', '1', '', '0', NULL, 'biz', '93', '1', 'park_tourist', '0');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+    VALUES ('(@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1)', '999999', '0', '0', '0', '/home/life', 'Lifes', '左邻小店', '左邻小店', 'shop/3005/1462962042600874121332.jpg', '1', '1', '14', '', '1', '0', '1', '1', '', '0', NULL, 'biz', '93', '1', 'pm_admin', '0');

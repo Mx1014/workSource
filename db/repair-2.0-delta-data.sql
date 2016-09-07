@@ -10,4 +10,4 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
   VALUES (280, 'pmtask', '10005', 'zh_CN', '服务类型已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-  VALUES (280, 'pmtask', '10006', 'zh_CN', '服务类型不存在');
+  VALUES (281, 'pmtask', '10006', 'zh_CN', '服务类型不存在');
