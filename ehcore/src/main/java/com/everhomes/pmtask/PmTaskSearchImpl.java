@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.category.CategoryDTO;
@@ -45,6 +46,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSearch{
@@ -253,13 +255,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 //            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());
             
             return doc;
-        }
-        catch (Exception ex) {
+        }catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             LOGGER.error(source.toString());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"readDoc Exception.");
         }
 
-        return null;
     }
     
 }
