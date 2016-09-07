@@ -86,7 +86,6 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         		b.field("categoryId", category.getParentId());
         	}
             
-            
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
             b.field("nickName", task.getNickName());
@@ -95,8 +94,9 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create pmtask " + task.getId() + " error");
-            return null;
+            LOGGER.error("Create pmtask error, taskId={}", task.getId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Create pmtask error.");
         }
     }
     
