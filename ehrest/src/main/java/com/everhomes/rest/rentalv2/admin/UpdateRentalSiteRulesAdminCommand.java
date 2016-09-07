@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateRentalSiteRulesAdminCommand {
+	private Long resourceId;
 	private Long ruleId;
 	//按小时或者半天
 	private Double beginTime;
@@ -111,6 +112,12 @@ public class UpdateRentalSiteRulesAdminCommand {
 	}
 	public void setRuleId(Long ruleId) {
 		this.ruleId = ruleId;
+	}
+	public Long getResourceId() {
+		return resourceId;
+	}
+	public void setResourceId(Long resourceId) {
+		this.resourceId = resourceId;
 	}
 	
 }

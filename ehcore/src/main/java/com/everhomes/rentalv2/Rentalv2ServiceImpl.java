@@ -1174,7 +1174,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Long userId = UserContext.current().getUser().getId(); 
 		RentalBillDTO billDTO = new RentalBillDTO();
 		RentalResource rs =this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId());
-		
+		proccessCells(rs);
 		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalCell> rentalSiteRules = new ArrayList<RentalCell>();
@@ -1207,8 +1207,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rentalBill.setRentalCount(1.0);
 				if (null == siteRule)
 					continue;
-				RentalCell rentalSiteRule = rentalProvider
-						.findRentalSiteRuleById(siteRule.getRuleId());
+				RentalCell rentalSiteRule =  findRentalSiteRuleById(siteRule.getRuleId());
 				//TODO:不允许一个用户预约多时段的情况
 				
 				//不允许一个用户预约一个时段多个资源的情况
@@ -1369,7 +1368,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			Collections.sort(siteRuleIds);
 			// 循环存site订单
 			for (Long siteRuleId : siteRuleIds)  { 
-				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRuleId);
+				RentalCell  rsr =  findRentalSiteRuleById(siteRuleId);
 				if(useDetailSB.length()>1)
 					useDetailSB.append("\n");
 				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
@@ -1480,7 +1479,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			for (RentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
-				RentalCell  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
+				RentalCell  rsr =  findRentalSiteRuleById(siteRule.getRuleId() );
 				if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
 					//有半个
 					//整数部分计算
@@ -1707,8 +1706,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for (RentalBillRuleDTO dto  : ruleDTOs) {
 			if (dto == null)
 				continue;
-			Double totalCount = Double.valueOf(this.rentalProvider
-					.findRentalSiteRuleById(dto.getRuleId()).getCounts());
+			Double totalCount = Double.valueOf( findRentalSiteRuleById(dto.getRuleId()).getCounts());
 			Double rentaledCount = this.rentalProvider
 					.sumRentalRuleBillSumCounts(dto.getRuleId());
 			if (null == rentaledCount)
@@ -4261,23 +4259,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void updateRentalSiteSimpleRules(
 			UpdateRentalSiteRulesAdminCommand cmd) { 
-		
-		if(null==cmd.getRuleId())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid ruleId   parameter in the command");
-		RentalCell choseRSR = this.rentalProvider.findRentalSiteRuleById(cmd.getRuleId());
-		if(null==choseRSR)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid ruleId   parameter in the command");
-		
-		RentalResource rs=this.rentalProvider.getRentalSiteById(choseRSR.getRentalResourceId());
+		RentalResource rs=this.rentalProvider.getRentalSiteById(cmd.getResourceId());
 		if(rs==null)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"rental resource (site) cannot found ");
 		proccessCells(rs);
+		if(null==cmd.getRuleId())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid ruleId   parameter in the command");
+		RentalCell choseRSR = findRentalSiteRuleById(cmd.getRuleId());
+		if(null==choseRSR)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid ruleId   parameter in the command");
+		
+		
 		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED)){
 			cmd.setCounts(1.0);
 		}
@@ -4407,6 +4405,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 		
 		
+	}
+
+	private RentalCell findRentalSiteRuleById(Long ruleId) {
+		for( RentalCell cell : cellList.get()){
+			if (cell.getId().equals(ruleId))
+				return cell;
+		}
+		return null;
 	}
 
 	@Override
