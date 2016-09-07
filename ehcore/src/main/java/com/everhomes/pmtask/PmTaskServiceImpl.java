@@ -449,9 +449,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		//查询服务类型
 		Category category = checkCategory(task.getCategoryId());
 		Category parentCategory = checkCategory(category.getParentId());
-		dto.setCategoryName(category.getName());
-		dto.setParentCategoryId(parentCategory.getId());
-		dto.setParentCategoryName(parentCategory.getName());
+		if(parentCategory.getParentId().equals(0L)){
+    		dto.setCategoryId(null);
+    		dto.setCategoryName(null);
+    		dto.setParentCategoryId(category.getId());
+    		dto.setParentCategoryName(category.getName());
+    	}else{
+    		dto.setCategoryName(category.getName());
+    		dto.setParentCategoryId(parentCategory.getId());
+    		dto.setParentCategoryName(parentCategory.getName());
+    	}
+		
 		//查询图片
 		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
 		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
