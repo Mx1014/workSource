@@ -256,8 +256,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             
             return doc;
         }catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
-            LOGGER.error(source.toString());
+            LOGGER.error("Pmtask readDoc failed, source={}, id={}", source, idAsStr);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"readDoc Exception.");
         }
