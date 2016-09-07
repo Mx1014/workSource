@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>timeRangeList: 请假时间列表</li>
  * </ul>
  */
-public class AskForLeaveBasicDescription {
+public class AbsenceBasicDescription {
 	private String timeTotal;
 	private String categoryName;
 	@ItemType(TimeRange.class)

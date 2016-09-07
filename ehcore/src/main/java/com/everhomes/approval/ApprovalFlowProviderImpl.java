@@ -84,6 +84,23 @@ public class ApprovalFlowProviderImpl implements ApprovalFlowProvider {
 		return new ArrayList<ApprovalFlow>();
 	}
 
+	@Override
+	public ApprovalFlow findApprovalFlowByName(Integer namespaceId, String ownerType, Long ownerId, String name) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOWS)
+							.where(Tables.EH_APPROVAL_FLOWS.NAMESPACE_ID.eq(namespaceId))
+							.and(Tables.EH_APPROVAL_FLOWS.OWNER_TYPE.eq(ownerType))
+							.and(Tables.EH_APPROVAL_FLOWS.OWNER_ID.eq(ownerId))
+							.and(Tables.EH_APPROVAL_FLOWS.NAME.eq(name))
+							.and(Tables.EH_APPROVAL_FLOWS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+							.limit(1)
+							.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, ApprovalFlow.class);
+		}
+		
+		return null;
+	}
+
 	private EhApprovalFlowsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

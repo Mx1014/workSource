@@ -101,4 +101,22 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 		return new ArrayList<ApprovalCategory>();
 	}
 
+	@Override
+	public ApprovalCategory findApprovalCategoryByName(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, String categoryName) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_CATEGORIES)
+							.where(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+							.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_TYPE.eq(ownerType))
+							.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(ownerId))
+							.and(Tables.EH_APPROVAL_CATEGORIES.APPROVAL_TYPE.eq(approvalType))
+							.and(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME.eq(categoryName))
+							.and(Tables.EH_APPROVAL_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+							.limit(1)
+							.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, ApprovalCategory.class);
+		}
+		return null;
+	}
+
 }

@@ -17,4 +17,6 @@ public interface ApprovalRuleProvider {
 
 	ApprovalRule findApprovalRuleByName(Integer namespaceId, String ownerType, Long ownerId, String ruleName);
 
+	List<ApprovalRule> listApprovalRule(Integer namespaceId, String ownerType, Long ownerId);
+
 }

@@ -235,7 +235,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listBriefApprovalRule")
 	@RestReturn(ListBriefApprovalRuleResponse.class)
 	public RestResponse listBriefApprovalRule(ListBriefApprovalRuleCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listBriefApprovalRule(cmd));
 	}
 
 	/**
@@ -246,6 +246,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("approveApprovalRequest")
 	@RestReturn(String.class)
 	public RestResponse approveApprovalRequest(ApproveApprovalRequestCommand cmd){
+		approvalService.approveApprovalRequest(cmd);
 		return new RestResponse();
 	}
 

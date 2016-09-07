@@ -6,17 +6,17 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值：
- * <li>approvalRequest: 申请信息，参考{@link com.everhomes.rest.approval.ApprovalRequestDTO}</li>
+ * <li>approvalRequest: 申请信息，参考{@link com.everhomes.rest.approval.BriefApprovalRequestDTO}</li>
  * </ul>
  */
 public class CreateAbsenceRequestResponse {
-	private ApprovalRequestDTO approvalRequest;
+	private BriefApprovalRequestDTO approvalRequest;
 
-	public ApprovalRequestDTO getApprovalRequest() {
+	public BriefApprovalRequestDTO getApprovalRequest() {
 		return approvalRequest;
 	}
 
-	public void setApprovalRequest(ApprovalRequestDTO approvalRequest) {
+	public void setApprovalRequest(BriefApprovalRequestDTO approvalRequest) {
 		this.approvalRequest = approvalRequest;
 	}
 

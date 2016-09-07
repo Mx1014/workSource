@@ -5,7 +5,7 @@ CREATE TABLE `eh_approval_flows` (
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
 	`name` VARCHAR(64) NOT NULL COMMENT 'name of flow',
-	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME,
 	`update_time` DATETIME,
@@ -17,8 +17,8 @@ CREATE TABLE `eh_approval_flows` (
 CREATE TABLE `eh_approval_flow_levels` (
 	`id` BIGINT NOT NULL,
 	`flow_id` BIGINT NOT NULL COMMENT 'id of flow',
-	`level` TINYINT(4) NOT NULL COMMENT '1,2,3,4,5...',
-	`target_type` TINYINT(4) NOT NULL COMMENT '1. user, 2. role',
+	`level` TINYINT NOT NULL COMMENT '1,2,3,4,5...',
+	`target_type` TINYINT NOT NULL COMMENT '1. user, 2. role',
 	`target_id` BIGINT NOT NULL COMMENT 'id of target, e.g id of user', 
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -30,7 +30,7 @@ CREATE TABLE `eh_approval_rules` (
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
 	`name` VARCHAR(64) NOT NULL COMMENT 'name of approval rule',
-	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME,
 	`update_time` DATETIME,
@@ -42,9 +42,9 @@ CREATE TABLE `eh_approval_rules` (
 CREATE TABLE `eh_approval_rule_flow_map` (
 	`id` BIGINT NOT NULL,
 	`rule_id` BIGINT NOT NULL COMMENT 'id of rule',
-	`approval_type` TINYINT(4) NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
+	`approval_type` TINYINT NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
 	`flow_id` BIGINT NOT NULL COMMENT 'id of flow', 
-	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -54,9 +54,9 @@ CREATE TABLE `eh_approval_categories` (
 	`namespace_id` INT NOT NULL DEFAULT '0',
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
-	`approval_type` TINYINT(4) NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
+	`approval_type` TINYINT NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
 	`category_name` VARCHAR(64) NOT NULL COMMENT 'name of category',
-	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME, 
 	PRIMARY KEY (`id`)
@@ -68,16 +68,16 @@ CREATE TABLE `eh_approval_requests` (
 	`namespace_id` INT NOT NULL DEFAULT '0',
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
-	`approval_type` TINYINT(4) NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
+	`approval_type` TINYINT NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
 	`category_id` BIGINT COMMENT 'concrete category id',
 	`content_json` LONGTEXT COMMENT 'json of concrete category content',
-	`attachment_flag` TINYINT(4) NOT NULL DEFAULT '0' COMMENT 'if there are attachments, 0. no, 1. yes',
-	`time_flag` TINYINT(4) NOT NULL DEFAULT '0' COMMENT 'if there are time ranges, 0. no, 1. yes',
+	`attachment_flag` TINYINT NOT NULL DEFAULT '0' COMMENT 'if there are attachments, 0. no, 1. yes',
+	`time_flag` TINYINT NOT NULL DEFAULT '0' COMMENT 'if there are time ranges, 0. no, 1. yes',
 	`flow_id` BIGINT COMMENT 'id of flow',
 	`current_level` BIGINT COMMENT 'current levle of flow',
 	`next_level` BIGINT COMMENT 'next level of flow',
-	`approval_status` TINYINT(4) NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
-	`status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
+	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME,
 	`update_time` DATETIME,
@@ -117,6 +117,6 @@ CREATE TABLE `eh_approval_op_requests` (
 	`process_message` TEXT COMMENT 'process message',
 	`operator_uid` BIGINT,
 	`create_time` DATETIME,
-	`approval_status` TINYINT(4) NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
+	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -4,59 +4,70 @@ package com.everhomes.approval;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.locale.LocaleTemplateProvider;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
 import com.everhomes.rest.approval.ApprovalFlowLevelDTO;
 import com.everhomes.rest.approval.ApprovalOwnerType;
-import com.everhomes.rest.approval.ApprovalUser;
+import com.everhomes.rest.approval.ApprovalRequestDTO;
 import com.everhomes.rest.approval.ApprovalRuleDTO;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.ApprovalUser;
+import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.BriefApprovalFlowDTO;
-import com.everhomes.rest.approval.ApprovalCategoryDTO;
+import com.everhomes.rest.approval.BriefApprovalRuleDTO;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
-import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
-import com.everhomes.rest.approval.CreateApprovalRuleCommand;
-import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.CreateApprovalRuleCommand;
+import com.everhomes.rest.approval.CreateApprovalRuleResponse;
+import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
-import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
-import com.everhomes.rest.approval.ListApprovalCategoryCommand;
-import com.everhomes.rest.approval.ListApprovalCategoryResponse;
+import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
+import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.RuleFlowMap;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
-import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
-import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
-import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
+import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -65,6 +76,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class ApprovalServiceImpl implements ApprovalService {
@@ -91,7 +103,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private ApprovalRuleProvider approvalRuleProvider;
 	
 	@Autowired
-	private LocaleTemplateProvider localeTemplateProvider;
+	private ApprovalRequestProvider approvalRequestProvider;
+	
+	@Autowired
+	private LocaleStringProvider localeStringProvider;
+	
 	@Autowired
 	private UserProvider userProvider;
 	
@@ -100,6 +116,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Override
 	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
@@ -110,6 +129,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkApprovalType(cmd.getApprovalType());
+		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryName());
 		
 		ApprovalCategory category = ConvertHelper.convert(cmd, ApprovalCategory.class);
 		category.setApprovalType(cmd.getApprovalType());
@@ -119,6 +139,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		approvalCategoryProvider.createApprovalCategory(category);
 		return new CreateApprovalCategoryResponse(ConvertHelper.convert(category, ApprovalCategoryDTO.class));
+	}
+
+	private void checkApprovalCategoryNameDuplication(Integer namespaceId, String ownerType, Long ownerId, Byte approvalType,
+			String categoryName) {
+		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryByName(namespaceId, ownerType, ownerId, approvalType, categoryName);
+		if (category != null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"exist category name: categoryName="+categoryName);
+		}
 	}
 
 	private void checkApprovalType(Byte approvalType) {
@@ -138,11 +167,14 @@ public class ApprovalServiceImpl implements ApprovalService {
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkApprovalType(cmd.getApprovalType());
 		
-		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
-		category.setCategoryName(cmd.getCategoryName());
-		approvalCategoryProvider.updateApprovalCategory(category);
+		Tuple<ApprovalCategory, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode()+cmd.getId()).enter(()->{
+			ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
+			category.setCategoryName(cmd.getCategoryName());
+			approvalCategoryProvider.updateApprovalCategory(category);
+			return category;
+		});
 		
-		return new UpdateApprovalCategoryResponse(ConvertHelper.convert(category, ApprovalCategoryDTO.class));
+		return new UpdateApprovalCategoryResponse(ConvertHelper.convert(tuple.first(), ApprovalCategoryDTO.class));
 	}
 	
 	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId, Byte approvalType){
@@ -175,9 +207,14 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"id cannot be empty");
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
-		category.setStatus(CommonStatus.INACTIVE.getCode());
-		approvalCategoryProvider.updateApprovalCategory(category);
+		
+
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode()+cmd.getId()).enter(()->{
+			ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
+			category.setStatus(CommonStatus.INACTIVE.getCode());
+			approvalCategoryProvider.updateApprovalCategory(category);
+			return null;
+		});
 	}
 
 	@Override
@@ -187,7 +224,13 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"name cannot be empty");
 		}
+		if (cmd.getName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"length of name cannot be greater than 8 words, name="+cmd.getName());
+		}
+		
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalFlowNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
 		
 		ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class);
 		approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
@@ -200,6 +243,14 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return new CreateApprovalFlowInfoResponse(ConvertHelper.convert(approvalFlow, BriefApprovalFlowDTO.class));
 	}
 
+	private void checkApprovalFlowNameDuplication(Integer namespaceId, String ownerType, Long ownerId, String name) {
+		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowByName(namespaceId, ownerType, ownerId, name);
+		if (approvalFlow != null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"exist name, name="+name);
+		}
+	}
+
 	@Override
 	public UpdateApprovalFlowInfoResponse updateApprovalFlowInfo(UpdateApprovalFlowInfoCommand cmd) {
 		Long userId = getUserId();
@@ -207,14 +258,23 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id and name cannot be empty");
 		}
+		if (cmd.getName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"length of name cannot be greater than 8 words, name="+cmd.getName());
+		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		approvalFlow.setName(cmd.getName());
-		approvalFlow.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		approvalFlow.setOperatorUid(userId);
-		approvalFlowProvider.updateApprovalFlow(approvalFlow);
+		checkApprovalFlowNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
 		
-		return new UpdateApprovalFlowInfoResponse(ConvertHelper.convert(approvalFlow, BriefApprovalFlowDTO.class));
+		Tuple<ApprovalFlow, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_FLOW.getCode()+cmd.getId()).enter(()->{
+			ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+			approvalFlow.setName(cmd.getName());
+			approvalFlow.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			approvalFlow.setOperatorUid(userId);
+			approvalFlowProvider.updateApprovalFlow(approvalFlow);
+			return approvalFlow;
+		});
+		
+		return new UpdateApprovalFlowInfoResponse(ConvertHelper.convert(tuple.first(), BriefApprovalFlowDTO.class));
 	}
 
 	private ApprovalFlow checkApprovalFlowExist(Long id, Integer namespaceId, String ownerType, Long ownerId) {
@@ -416,11 +476,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"id cannot be empty");
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalRuleFlowMapExist(cmd.getId());
-		approvalFlow.setStatus(CommonStatus.INACTIVE.getCode());
-		approvalFlow.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		approvalFlowProvider.updateApprovalFlow(approvalFlow);
+
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_FLOW.getCode()+cmd.getId()).enter(()->{
+			ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+			checkApprovalRuleFlowMapExist(cmd.getId());
+			approvalFlow.setStatus(CommonStatus.INACTIVE.getCode());
+			approvalFlow.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			approvalFlowProvider.updateApprovalFlow(approvalFlow);
+			return null;
+		});
 	}
 
 	private void checkApprovalRuleFlowMapExist(Long flowId) {
@@ -438,8 +502,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: cmd="+cmd);
 		}
+		if (cmd.getName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"length of name cannot be greater than 8: name="+cmd.getName());
+		}
+		
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalRuleNameRepetition(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkApprovalRuleNameDuplication(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkRuleFlowMap(cmd.getRuleFlowMapList());
+		
 		final ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
 		dbProvider.execute(s->{
 			createApprovalRule(userId, approvalRule);
@@ -454,8 +525,48 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		return new CreateApprovalRuleResponse(approvalRuleDTO);
 	}
+	
+	private void checkRuleFlowMap(List<RuleFlowMap> list){
+		//1. 每一个对象中的approvalType和flowId必须不为空且存在
+		list.forEach(r->{
+			if (r.getApprovalType() == null || r.getFlowId() == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"approvalType and flowId cannot be empty: approvalType="+r.getApprovalType()+", flowId="+r.getFlowId());
+			}
+			if (ApprovalType.fromCode(r.getApprovalType()) == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"not exist approvalType: approvalType="+r.getApprovalType());
+			}
+			if (approvalFlowProvider.findApprovalFlowById(r.getFlowId()) == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"not exist flow: flowId="+r.getFlowId());
+			}
+		});
+		
+		//2. list中不能存在相同的审批类型
+		Set<Byte> set = new HashSet<>();
+		list.forEach(r->set.add(r.getApprovalType()));
+		if (list.size() > set.size()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cannot contain same approval type");
+		}
+		
+		//3. list中必须存在产品规定必填的审批规则
+		checkMustExistApprovalType(list, ApprovalType.ABSENCE.getCode());
+		checkMustExistApprovalType(list, ApprovalType.FORGOT.getCode());
+	}
+	
+	private void checkMustExistApprovalType(List<RuleFlowMap> list, Byte approvalType){
+		for (RuleFlowMap ruleFlowMap : list) {
+			if (ruleFlowMap.getApprovalType().byteValue() == approvalType.byteValue()) {
+				return;
+			}
+		}
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				"parameters must contain specific approval type, approvalType="+approvalType);
+	}
 
-	private void checkApprovalRuleNameRepetition(Long userId, Integer namespaceId, String ownerType, Long ownerId,
+	private void checkApprovalRuleNameDuplication(Long userId, Integer namespaceId, String ownerType, Long ownerId,
 			String ruleName) {
 		ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleByName(namespaceId, ownerType, ownerId, ruleName);
 		if (approvalRule != null) {
@@ -466,9 +577,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	private void processApprovalTypeName(List<RuleFlowMap> ruleFlowMapList) {
 		ruleFlowMapList.forEach(r->{
-			LocaleTemplate localeTemplate = localeTemplateProvider.findLocaleTemplateByScope(0, ApprovalTypeTemplateCode.SCOPE, r.getApprovalType(), UserContext.current().getUser().getLocale());
-			if (localeTemplate != null) {
-				r.setApprovalTypeName(localeTemplate.getText());
+			LocaleString localeString = localeStringProvider.find(ApprovalTypeTemplateCode.SCOPE, r.getApprovalType().toString(), UserContext.current().getUser().getLocale());
+			if (localeString != null) {
+				r.setApprovalTypeName(localeString.getText());
 			}
 		});
 	}
@@ -496,7 +607,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalRule.setOperatorUid(userId);
 		approvalRuleProvider.createApprovalRule(approvalRule);
 	}
-	
 
 	@Override
 	public UpdateApprovalRuleResponse updateApprovalRule(UpdateApprovalRuleCommand cmd) {
@@ -505,24 +615,33 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: cmd="+cmd);
 		}
+		if (cmd.getName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"length of name cannot be greater than 8: name="+cmd.getName());
+		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalRule approvalRule = checkApprovalRuleExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		dbProvider.execute(s->{
-			approvalRule.setName(cmd.getName());
-			updateApprovalRule(approvalRule, userId);
-			deleteApprovalRuleFlowMap(cmd.getId());
-			createApprovalRuleFlowMap(cmd.getId(), cmd.getRuleFlowMapList());
-			return true;
+		checkApprovalRuleNameDuplication(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkRuleFlowMap(cmd.getRuleFlowMapList());
+
+		Tuple<ApprovalRule, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_FLOW.getCode()+cmd.getId()).enter(()->{
+			ApprovalRule approvalRule = checkApprovalRuleExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+			dbProvider.execute(s->{
+				approvalRule.setName(cmd.getName());
+				updateApprovalRule(approvalRule, userId);
+				deleteApprovalRuleFlowMap(cmd.getId());
+				createApprovalRuleFlowMap(cmd.getId(), cmd.getRuleFlowMapList());
+				return true;
+			});
+			return approvalRule;
 		});
 
 		processApprovalTypeName(cmd.getRuleFlowMapList());
 		
-		ApprovalRuleDTO approvalRuleDTO = ConvertHelper.convert(approvalRule, ApprovalRuleDTO.class);
+		ApprovalRuleDTO approvalRuleDTO = ConvertHelper.convert(tuple.first(), ApprovalRuleDTO.class);
 		approvalRuleDTO.setRuleFlowMapList(cmd.getRuleFlowMapList());
 		
 		return new UpdateApprovalRuleResponse(approvalRuleDTO);
 	}
-
 
 	private void deleteApprovalRuleFlowMap(Long ruleId) {
 		approvalRuleFlowMapProvider.deleteRuleFlowMapByRuleId(ruleId);
@@ -544,7 +663,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		return approvalRule;
 	}
-	
 
 	@Override
 	public void deleteApprovalRule(DeleteApprovalRuleCommand cmd) {
@@ -554,19 +672,22 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"Invalid parameters: cmd="+cmd);
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ApprovalRule approvalRule = checkApprovalRuleExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		dbProvider.execute(s->{
-			approvalRule.setStatus(CommonStatus.INACTIVE.getCode());
-			updateApprovalRule(approvalRule, userId);
-			updateApprovalRuleFlowMap(cmd.getId());
-			return true;
+
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_FLOW.getCode()+cmd.getId()).enter(()->{
+			ApprovalRule approvalRule = checkApprovalRuleExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+			dbProvider.execute(s->{
+				approvalRule.setStatus(CommonStatus.INACTIVE.getCode());
+				updateApprovalRule(approvalRule, userId);
+				updateApprovalRuleFlowMap(cmd.getId());
+				return true;
+			});
+			return null;
 		});
 	}
 
 	private void updateApprovalRuleFlowMap(Long ruleId) {
 		approvalRuleFlowMapProvider.updateApprovalRuleFlowMapByRuleId(ruleId);
 	}
-	
 
 	@Override
 	public ListApprovalRuleResponse listApprovalRule(ListApprovalRuleCommand cmd) {
@@ -658,4 +779,89 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		
 	}
+
+
+	@Override
+	public ListBriefApprovalRuleResponse listBriefApprovalRule(ListBriefApprovalRuleCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<ApprovalRule> approvalRuleList = approvalRuleProvider.listApprovalRule(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		return new ListBriefApprovalRuleResponse(approvalRuleList.stream().map(a->ConvertHelper.convert(a, BriefApprovalRuleDTO.class)).collect(Collectors.toList()));
+	}
+
+
+	@Override
+	public void approveApprovalRequest(ApproveApprovalRequestCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		dbProvider.execute(s->{
+			
+			return true;
+		});
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Override
+	public ApprovalRequestDTO createApprovalRequest(ApprovalRequestDTO approvalRequestDTO){
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequestDTO.getApprovalType());
+		
+		if (handler != null) {
+			handler.preProcess(approvalRequestDTO);
+			processCreateApprovalRequest(approvalRequestDTO);
+			handler.postProcess(approvalRequestDTO);
+		} else {
+			processCreateApprovalRequest(approvalRequestDTO);
+		}
+		
+		processAttachment(approvalRequestDTO);
+		processTimeRange(approvalRequestDTO);
+		
+		return approvalRequestDTO;
+	}
+	
+	private void processCreateApprovalRequest(ApprovalRequestDTO approvalRequestDTO) {
+		ApprovalRequest approvalRequest = ConvertHelper.convert(approvalRequestDTO, ApprovalRequest.class);
+		approvalRequest.setApprovalStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+		approvalRequest.setStatus(CommonStatus.ACTIVE.getCode());
+		approvalRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalRequest.setCreatorUid(UserContext.current().getUser().getId());
+		approvalRequest.setUpdateTime(approvalRequest.getCreateTime());
+		approvalRequest.setOperatorUid(approvalRequest.getCreatorUid());
+		approvalRequestProvider.createApprovalRequest(approvalRequest);
+	}
+
+	private void processAttachment(ApprovalRequestDTO approvalRequestDTO) {
+	}
+
+	private void processTimeRange(ApprovalRequestDTO approvalRequestDTO) {
+	}
+
+	private ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType){
+		if (approvalType != null) {
+			ApprovalRequestHandler handler = PlatformContext.getComponent(ApprovalRequestHandler.APPROVAL_REQUEST_OBJECT_PREFIX + approvalType);
+			if (handler != null) {
+				return handler;
+			}
+		}
+		
+		return PlatformContext.getComponent(ApprovalRequestDefaultHandler.APPROVAL_REQUEST_DEFAULT_HANDLER_NAME);
+	}
+	
+	
+	
+	
+	
+	
+	
 }

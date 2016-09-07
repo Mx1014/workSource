@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryName: 请假类型名称</li>
  * <li>reason: 申请理由</li>
  * <li>timeRangeList: 请假时间列表</li>
+ * <li>timeTotal: 时间总计</li>
  * </ul>
  */
 public class AbsenceRequestDTO {
@@ -21,6 +22,23 @@ public class AbsenceRequestDTO {
 	private String categoryName;
 	private String reason;
 	private List<TimeRange> timeRangeList;
+	private String timeTotal;
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
+	public String getTimeTotal() {
+		return timeTotal;
+	}
+
+	public void setTimeTotal(String timeTotal) {
+		this.timeTotal = timeTotal;
+	}
 
 	public Long getRequestId() {
 		return requestId;

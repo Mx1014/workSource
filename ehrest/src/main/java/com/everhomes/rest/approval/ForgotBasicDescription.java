@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchStatusName: 打卡状态名称</li>
  * </ul>
  */
-public class ForgetToPunchBasicDescription {
+public class ForgotBasicDescription {
 	private String nickName;
 	private Timestamp punchDate;
 	private String punchDetail;

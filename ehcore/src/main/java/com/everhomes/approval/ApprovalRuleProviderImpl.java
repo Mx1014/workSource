@@ -71,10 +71,10 @@ public class ApprovalRuleProviderImpl implements ApprovalRuleProvider {
 				.and(Tables.EH_APPROVAL_RULES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
 		if (pageAnchor != null) {
-		step = step.and(Tables.EH_APPROVAL_RULES.ID.lt(pageAnchor));
+		step = step.and(Tables.EH_APPROVAL_RULES.ID.gt(pageAnchor));
 		}
 		
-		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_RULES.ID.desc())
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_RULES.ID.asc())
 			.limit(pageSize)
 			.fetch();
 		
@@ -99,6 +99,23 @@ public class ApprovalRuleProviderImpl implements ApprovalRuleProvider {
 			return ConvertHelper.convert(record, ApprovalRule.class);
 		}
 		return null;
+	}
+
+	@Override
+	public List<ApprovalRule> listApprovalRule(Integer namespaceId, String ownerType, Long ownerId) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULES)
+									.where(Tables.EH_APPROVAL_RULES.NAMESPACE_ID.eq(namespaceId))
+									.and(Tables.EH_APPROVAL_RULES.OWNER_TYPE.eq(ownerType))
+									.and(Tables.EH_APPROVAL_RULES.OWNER_ID.eq(ownerId))
+									.and(Tables.EH_APPROVAL_RULES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+									.orderBy(Tables.EH_APPROVAL_RULES.ID.asc())
+									.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalRule.class));
+		}
+		
+		return new ArrayList<ApprovalRule>();
 	}
 
 	private EhApprovalRulesDao getReadWriteDao() {

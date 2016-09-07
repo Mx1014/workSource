@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import com.everhomes.rest.approval.ApprovalRequestDTO;
+import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
@@ -18,6 +20,8 @@ import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
+import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
+import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
@@ -56,5 +60,11 @@ public interface ApprovalService {
 	void deleteApprovalRule(DeleteApprovalRuleCommand cmd);
 
 	ListApprovalRuleResponse listApprovalRule(ListApprovalRuleCommand cmd);
+
+	ListBriefApprovalRuleResponse listBriefApprovalRule(ListBriefApprovalRuleCommand cmd);
+
+	void approveApprovalRequest(ApproveApprovalRequestCommand cmd);
+
+	ApprovalRequestDTO createApprovalRequest(ApprovalRequestDTO approvalRequestDTO);
 
 }
