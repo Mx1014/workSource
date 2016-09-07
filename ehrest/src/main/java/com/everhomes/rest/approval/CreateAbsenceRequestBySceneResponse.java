@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>approvalRequest: 申请信息，参考{@link com.everhomes.rest.approval.BriefApprovalRequestDTO}</li>
  * </ul>
  */
-public class CreateAbsenceRequestResponse {
+public class CreateAbsenceRequestBySceneResponse {
 	private BriefApprovalRequestDTO approvalRequest;
 
 	public BriefApprovalRequestDTO getApprovalRequest() {

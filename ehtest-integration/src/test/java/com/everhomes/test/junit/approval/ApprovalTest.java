@@ -3,7 +3,95 @@ package com.everhomes.test.junit.approval;
 import org.junit.After;
 import org.junit.Before;
 
+import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
+import com.everhomes.rest.approval.CreateAbsenceRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateAbsenceRequestBySceneResponse;
+import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
+import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
+import com.everhomes.rest.approval.CreateApprovalCategoryRestResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoRestResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelRestResponse;
+import com.everhomes.rest.approval.CreateApprovalRuleCommand;
+import com.everhomes.rest.approval.CreateApprovalRuleResponse;
+import com.everhomes.rest.approval.CreateApprovalRuleRestResponse;
+import com.everhomes.rest.approval.CreateForgotRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateForgotRequestBySceneResponse;
+import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
+import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
+import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestRestResponse;
+import com.everhomes.rest.approval.ListAbsenceRequestCommand;
+import com.everhomes.rest.approval.ListAbsenceRequestResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryRestResponse;
+import com.everhomes.rest.approval.ListApprovalFlowCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestRestResponse;
+import com.everhomes.rest.approval.ListApprovalFlowResponse;
+import com.everhomes.rest.approval.ListApprovalFlowRestResponse;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestRestResponse;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestCommand;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestRestResponse;
+import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalRuleCommand;
+import com.everhomes.rest.approval.ListApprovalRuleResponse;
+import com.everhomes.rest.approval.ListApprovalRuleRestResponse;
+import com.everhomes.rest.approval.ListApprovalUserCommand;
+import com.everhomes.rest.approval.ListApprovalUserResponse;
+import com.everhomes.rest.approval.ListApprovalUserRestResponse;
+import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
+import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
+import com.everhomes.rest.approval.ListBriefApprovalFlowRestResponse;
+import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
+import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
+import com.everhomes.rest.approval.ListBriefApprovalRuleRestResponse;
+import com.everhomes.rest.approval.ListForgotRequestCommand;
+import com.everhomes.rest.approval.ListForgotRequestResponse;
+import com.everhomes.rest.approval.RejectApprovalRequestCommand;
+import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
+import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
+import com.everhomes.rest.approval.UpdateApprovalCategoryRestResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowInfoRestResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelRestResponse;
+import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
+import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.UpdateApprovalRuleRestResponse;
+import com.everhomes.rest.techpark.punch.PunchListAbsenceRequestRestResponse;
+import com.everhomes.rest.techpark.punch.PunchListForgotRequestRestResponse;
+import com.everhomes.rest.ui.approval.ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse;
+import com.everhomes.rest.ui.approval.ApprovalListApprovalFlowOfRequestBySceneRestResponse;
+import com.everhomes.rest.ui.approval.ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse;
+import com.everhomes.rest.ui.approval.ApprovalListApprovalLogOfRequestBySceneRestResponse;
+import com.everhomes.rest.ui.approval.ApprovalListApprovalRequestBySceneRestResponse;
+import com.everhomes.rest.ui.techpark.punch.TechparkPunchCreateAbsenceRequestBySceneRestResponse;
+import com.everhomes.rest.ui.techpark.punch.TechparkPunchCreateForgotRequestBySceneRestResponse;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
+import com.everhomes.util.StringHelper;
 
 public class ApprovalTest extends BaseLoginAuthTestCase {
 	//增加审批类别，如请假的公出、事假等
@@ -61,7 +149,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateApprovalCategoryCommand cmd = new CreateApprovalCategoryCommand();
 
-		CreateApprovalCategoryRestResponse response = httpClientService.restPost(uri, cmd, CreateApprovalCategoryRestResponse.class);
+		CreateApprovalCategoryRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalCategoryRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -78,7 +166,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		UpdateApprovalCategoryCommand cmd = new UpdateApprovalCategoryCommand();
 
-		UpdateApprovalCategoryRestResponse response = httpClientService.restPost(uri, cmd, UpdateApprovalCategoryRestResponse.class);
+		UpdateApprovalCategoryRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalCategoryRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -95,7 +183,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalCategoryCommand cmd = new ListApprovalCategoryCommand();
 
-		ListApprovalCategoryRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalCategoryRestResponse.class);
+		ListApprovalCategoryRestResponse response = httpClientService.restPost(url, cmd, ListApprovalCategoryRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -112,12 +200,10 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		DeleteApprovalCategoryCommand cmd = new DeleteApprovalCategoryCommand();
 
-		DeleteApprovalCategoryRestResponse response = httpClientService.restPost(uri, cmd, DeleteApprovalCategoryRestResponse.class);
+		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		DeleteApprovalCategoryResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
 
 
 	}
@@ -129,7 +215,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateApprovalFlowInfoCommand cmd = new CreateApprovalFlowInfoCommand();
 
-		CreateApprovalFlowInfoRestResponse response = httpClientService.restPost(uri, cmd, CreateApprovalFlowInfoRestResponse.class);
+		CreateApprovalFlowInfoRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalFlowInfoRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -146,7 +232,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		UpdateApprovalFlowInfoCommand cmd = new UpdateApprovalFlowInfoCommand();
 
-		UpdateApprovalFlowInfoRestResponse response = httpClientService.restPost(uri, cmd, UpdateApprovalFlowInfoRestResponse.class);
+		UpdateApprovalFlowInfoRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalFlowInfoRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -163,7 +249,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateApprovalFlowLevelCommand cmd = new CreateApprovalFlowLevelCommand();
 
-		CreateApprovalFlowLevelRestResponse response = httpClientService.restPost(uri, cmd, CreateApprovalFlowLevelRestResponse.class);
+		CreateApprovalFlowLevelRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalFlowLevelRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -180,7 +266,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		UpdateApprovalFlowLevelCommand cmd = new UpdateApprovalFlowLevelCommand();
 
-		UpdateApprovalFlowLevelRestResponse response = httpClientService.restPost(uri, cmd, UpdateApprovalFlowLevelRestResponse.class);
+		UpdateApprovalFlowLevelRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalFlowLevelRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -197,7 +283,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalFlowCommand cmd = new ListApprovalFlowCommand();
 
-		ListApprovalFlowRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalFlowRestResponse.class);
+		ListApprovalFlowRestResponse response = httpClientService.restPost(url, cmd, ListApprovalFlowRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -214,7 +300,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListBriefApprovalFlowCommand cmd = new ListBriefApprovalFlowCommand();
 
-		ListBriefApprovalFlowRestResponse response = httpClientService.restPost(uri, cmd, ListBriefApprovalFlowRestResponse.class);
+		ListBriefApprovalFlowRestResponse response = httpClientService.restPost(url, cmd, ListBriefApprovalFlowRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -231,12 +317,10 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		DeleteApprovalFlowCommand cmd = new DeleteApprovalFlowCommand();
 
-		DeleteApprovalFlowRestResponse response = httpClientService.restPost(uri, cmd, DeleteApprovalFlowRestResponse.class);
+		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		DeleteApprovalFlowResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
 
 
 	}
@@ -248,7 +332,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateApprovalRuleCommand cmd = new CreateApprovalRuleCommand();
 
-		CreateApprovalRuleRestResponse response = httpClientService.restPost(uri, cmd, CreateApprovalRuleRestResponse.class);
+		CreateApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalRuleRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -265,7 +349,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		UpdateApprovalRuleCommand cmd = new UpdateApprovalRuleCommand();
 
-		UpdateApprovalRuleRestResponse response = httpClientService.restPost(uri, cmd, UpdateApprovalRuleRestResponse.class);
+		UpdateApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalRuleRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -282,12 +366,10 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		DeleteApprovalRuleCommand cmd = new DeleteApprovalRuleCommand();
 
-		DeleteApprovalRuleRestResponse response = httpClientService.restPost(uri, cmd, DeleteApprovalRuleRestResponse.class);
+		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		DeleteApprovalRuleResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
 
 
 	}
@@ -299,7 +381,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalRuleCommand cmd = new ListApprovalRuleCommand();
 
-		ListApprovalRuleRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalRuleRestResponse.class);
+		ListApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, ListApprovalRuleRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -316,7 +398,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListBriefApprovalRuleCommand cmd = new ListBriefApprovalRuleCommand();
 
-		ListBriefApprovalRuleRestResponse response = httpClientService.restPost(uri, cmd, ListBriefApprovalRuleRestResponse.class);
+		ListBriefApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, ListBriefApprovalRuleRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -333,12 +415,10 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ApproveApprovalRequestCommand cmd = new ApproveApprovalRequestCommand();
 
-		ApproveApprovalRequestRestResponse response = httpClientService.restPost(uri, cmd, ApproveApprovalRequestRestResponse.class);
+		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		ApproveApprovalRequestResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
 
 
 	}
@@ -350,12 +430,10 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		RejectApprovalRequestCommand cmd = new RejectApprovalRequestCommand();
 
-		RejectApprovalRequestRestResponse response = httpClientService.restPost(uri, cmd, RejectApprovalRequestRestResponse.class);
+		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		RejectApprovalRequestResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
 
 
 	}
@@ -367,7 +445,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		GetApprovalBasicInfoOfRequestCommand cmd = new GetApprovalBasicInfoOfRequestCommand();
 
-		GetApprovalBasicInfoOfRequestRestResponse response = httpClientService.restPost(uri, cmd, GetApprovalBasicInfoOfRequestRestResponse.class);
+		GetApprovalBasicInfoOfRequestRestResponse response = httpClientService.restPost(url, cmd, GetApprovalBasicInfoOfRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -384,7 +462,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalLogAndFlowOfRequestCommand cmd = new ListApprovalLogAndFlowOfRequestCommand();
 
-		ListApprovalLogAndFlowOfRequestRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalLogAndFlowOfRequestRestResponse.class);
+		ListApprovalLogAndFlowOfRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalLogAndFlowOfRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -401,7 +479,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalLogOfRequestCommand cmd = new ListApprovalLogOfRequestCommand();
 
-		ListApprovalLogOfRequestRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalLogOfRequestRestResponse.class);
+		ListApprovalLogOfRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalLogOfRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -418,7 +496,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalFlowOfRequestCommand cmd = new ListApprovalFlowOfRequestCommand();
 
-		ListApprovalFlowOfRequestRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalFlowOfRequestRestResponse.class);
+		ListApprovalFlowOfRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalFlowOfRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -435,7 +513,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalUserCommand cmd = new ListApprovalUserCommand();
 
-		ListApprovalUserRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalUserRestResponse.class);
+		ListApprovalUserRestResponse response = httpClientService.restPost(url, cmd, ListApprovalUserRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -459,7 +537,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListForgotRequestCommand cmd = new ListForgotRequestCommand();
 
-		ListForgotRequestRestResponse response = httpClientService.restPost(uri, cmd, ListForgotRequestRestResponse.class);
+		PunchListForgotRequestRestResponse response = httpClientService.restPost(url, cmd, PunchListForgotRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -476,7 +554,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListAbsenceRequestCommand cmd = new ListAbsenceRequestCommand();
 
-		ListAbsenceRequestRestResponse response = httpClientService.restPost(uri, cmd, ListAbsenceRequestRestResponse.class);
+		PunchListAbsenceRequestRestResponse response = httpClientService.restPost(url, cmd, PunchListAbsenceRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -500,7 +578,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateAbsenceRequestBySceneCommand cmd = new CreateAbsenceRequestBySceneCommand();
 
-		CreateAbsenceRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, CreateAbsenceRequestBySceneRestResponse.class);
+		TechparkPunchCreateAbsenceRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, TechparkPunchCreateAbsenceRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -517,7 +595,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateForgotRequestBySceneCommand cmd = new CreateForgotRequestBySceneCommand();
 
-		CreateForgotRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, CreateForgotRequestBySceneRestResponse.class);
+		TechparkPunchCreateForgotRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, TechparkPunchCreateForgotRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -547,7 +625,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalRequestBySceneCommand cmd = new ListApprovalRequestBySceneCommand();
 
-		ListApprovalRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalRequestBySceneRestResponse.class);
+		ApprovalListApprovalRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -564,7 +642,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		GetApprovalBasicInfoOfRequestBySceneCommand cmd = new GetApprovalBasicInfoOfRequestBySceneCommand();
 
-		GetApprovalBasicInfoOfRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, GetApprovalBasicInfoOfRequestBySceneRestResponse.class);
+		ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -581,7 +659,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalLogAndFlowOfRequestBySceneCommand cmd = new ListApprovalLogAndFlowOfRequestBySceneCommand();
 
-		ListApprovalLogAndFlowOfRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalLogAndFlowOfRequestBySceneRestResponse.class);
+		ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -598,7 +676,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalLogOfRequestBySceneCommand cmd = new ListApprovalLogOfRequestBySceneCommand();
 
-		ListApprovalLogOfRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalLogOfRequestBySceneRestResponse.class);
+		ApprovalListApprovalLogOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalLogOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -615,7 +693,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		logon();
 		ListApprovalFlowOfRequestBySceneCommand cmd = new ListApprovalFlowOfRequestBySceneCommand();
 
-		ListApprovalFlowOfRequestBySceneRestResponse response = httpClientService.restPost(uri, cmd, ListApprovalFlowOfRequestBySceneRestResponse.class);
+		ApprovalListApprovalFlowOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalFlowOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 

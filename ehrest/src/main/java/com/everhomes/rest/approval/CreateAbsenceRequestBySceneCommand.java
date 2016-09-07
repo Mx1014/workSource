@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>attachmentList: 附件列表，参考{@link com.everhomes.rest.news.AttachmentDescriptor}</li>
  * </ul>
  */
-public class CreateAbsenceRequestCommand {
+public class CreateAbsenceRequestBySceneCommand {
 	private String sceneToken;
 	private Long categoryId;
 	private String reason;

@@ -8,8 +8,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.approval.CreateAbsenceRequestCommand;
-import com.everhomes.rest.approval.CreateAbsenceRequestResponse;
+import com.everhomes.rest.approval.CreateAbsenceRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateAbsenceRequestBySceneResponse;
 import com.everhomes.rest.approval.CreateForgotRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateForgotRequestBySceneResponse;
 
@@ -24,8 +24,8 @@ public class PunchUiController extends ControllerBase {
 	 * <b>URL: /ui/techpark/punch/createAbsenceRequestByScene</b>
 	 */
 	@RequestMapping("createAbsenceRequestByScene")
-	@RestReturn(CreateAbsenceRequestResponse.class)
-	public RestResponse createAbsenceRequestByScene(CreateAbsenceRequestCommand cmd){
+	@RestReturn(CreateAbsenceRequestBySceneResponse.class)
+	public RestResponse createAbsenceRequestByScene(CreateAbsenceRequestBySceneCommand cmd){
 		return new RestResponse();
 	}
 
