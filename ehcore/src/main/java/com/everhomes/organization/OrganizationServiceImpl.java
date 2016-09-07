@@ -642,7 +642,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        //organization.setCommunityId(cmd.getCommunityId());
 	        organization.setDescription(enterprise.getDescription());
 	        
-	        organizationSearcher.feedDoc(organization);
+//	        organizationSearcher.feedDoc(organization);
 			return null;
 		});
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
@@ -4781,7 +4781,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setTargetId(userIdentifier.getOwnerUid());
 				organizationProvider.updateOrganizationMember(m);
 				
-				userSearcher.feedDoc(m);
+//				userSearcher.feedDoc(m);
 			}
 			
 			if(null != cmd.getAssignmentId())
@@ -4824,7 +4824,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                continue;
 	            }
 	            
-	            if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())) {
+	            if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE) {
                 	member.setTargetId(user.getId());
                 	
                 	this.updateMemberUser(member);
@@ -4839,6 +4839,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                         if(LOGGER.isInfoEnabled()) {
                             LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
                                 + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
+                        }
+                	}else{
+                        if(LOGGER.isInfoEnabled()) {
+                            LOGGER.debug("organization group type not enterprise, organizationId={}, groupType={}, memberId={}", member.getOrganizationId(), member.getStatus(), member.getId());
                         }
                 	}
 
@@ -4912,8 +4916,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			importDataResponse.setFailCount((long)errorDataLogs.size());
 			importDataResponse.setLogs(errorDataLogs);
 		} catch (IOException e) {
-			LOGGER.error("File can not be resolved...");
-			e.printStackTrace();
+			LOGGER.error("File can not be resolved. e = {}", e);
 		}
 		return importDataResponse;
 	}
@@ -4984,7 +4987,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
 		for (String str : list) {
+			
 			String[] s = str.split("\\|\\|");
+			
+			if(s.length < 8){
+				LOGGER.debug("import enterprise data error. str = {}", str);
+				continue;
+			}
 			
 			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
 			enterpriseCommand.setName(s[0]);
@@ -7217,5 +7226,5 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		return dtos;
 	}
-	
+
 }
