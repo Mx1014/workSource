@@ -642,7 +642,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        //organization.setCommunityId(cmd.getCommunityId());
 	        organization.setDescription(enterprise.getDescription());
 	        
-//	        organizationSearcher.feedDoc(organization);
+	        organizationSearcher.feedDoc(organization);
 			return null;
 		});
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
@@ -4586,7 +4586,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-//			userSearcher.feedDoc(organizationMember);
+			userSearcher.feedDoc(organizationMember);
 		}
 		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
@@ -7146,7 +7146,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			organizationMember.setOrganizationId(finalOrganizationId);
-//			userSearcher.feedDoc(organizationMember);
+			userSearcher.feedDoc(organizationMember);
 			
 			// 如果是往公司添加新成员就需要发消息
 			if(organizationMember.isCreate()){
