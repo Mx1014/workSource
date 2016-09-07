@@ -552,7 +552,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
 		task.setUnprocessedTime(now);
 		pmTaskProvider.createTask(task);
-		addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
+//		addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 		
 		PmTaskLog pmTaskLog = new PmTaskLog();
 		pmTaskLog.setNamespaceId(task.getNamespaceId());
@@ -656,20 +656,28 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Category ancestor = categoryProvider.findCategoryByPath(namespaceId, defaultName);
 			parentId = ancestor.getId();
 			path = ancestor.getPath() + CATEGORY_SEPARATOR + cmd.getName();
+			
+			category = categoryProvider.findCategoryByPath(namespaceId, path);
+			if(category != null) {
+				LOGGER.error("PmTask category have been in existing");
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SERVICE_CATEGORY_EXIST,
+						"PmTask category have been in existing");
+			}
 		}else{
 			category = categoryProvider.findCategoryById(parentId);
 			if(category == null) {
 				LOGGER.error("PmTask parent category not found, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SERVICE_CATEGORY_NULL,
 						"PmTask parent category not found");
 			}
 			path = category.getPath() + CATEGORY_SEPARATOR + cmd.getName();
-		}
-		category = categoryProvider.findCategoryByPath(namespaceId, path);
-		if(category != null) {
-			LOGGER.error("PmTask category have been in existing");
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
-					"PmTask category have been in existing");
+			
+			category = categoryProvider.findCategoryByPath(namespaceId, path);
+			if(category != null) {
+				LOGGER.error("PmTask category have been in existing");
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
+						"PmTask category have been in existing");
+			}
 		}
 		
 		category = new Category();

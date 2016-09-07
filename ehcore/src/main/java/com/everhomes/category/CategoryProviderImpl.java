@@ -74,7 +74,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }
 
-    @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
+    @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
@@ -90,7 +90,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, category.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
+    @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
@@ -113,7 +113,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         }
     }
 
-    @Cacheable(value="Category", key="#id", unless="#result == null")
+//    @Cacheable(value="Category", key="#id", unless="#result == null")
     @Override
     public Category findCategoryById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -396,7 +396,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         if(null != path)
         	query.addConditions(Tables.EH_CATEGORIES.PATH.eq(path));
-        
+        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         return ConvertHelper.convert(query.fetchOne(), Category.class);
 	}
 }

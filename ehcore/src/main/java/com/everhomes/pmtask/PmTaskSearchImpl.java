@@ -78,7 +78,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             Category category = categoryProvider.findCategoryById(task.getCategoryId());
             
             Category parent = categoryProvider.findCategoryById(category.getParentId());
-        	if(parent.getParentId().equals(0)){
+        	if(parent.getParentId().equals(0L)){
         		b.field("categoryId", category.getId());
         	}else{
         		b.field("categoryId", category.getParentId());
