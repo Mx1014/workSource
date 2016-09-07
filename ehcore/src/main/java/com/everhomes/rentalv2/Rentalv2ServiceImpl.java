@@ -3146,19 +3146,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//按小时预订的,给客户端找到每一个时间点
 		if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
 			List<Long> dayTimes = new ArrayList<Long>();
-			if(response.getSiteDays() !=null)
-				for(RentalSiteDayRulesDTO dayDTO : response.getSiteDays()){
-					//循环每一天,如果有当天有rules则取daytimes,然后退出循环
-					if(dayDTO.getSiteRules() !=null){
-						for(RentalSiteRulesDTO ruleDTO : dayDTO.getSiteRules()){
-							if(!dayTimes.contains(ruleDTO.getBeginTime()))
-								dayTimes.add(ruleDTO.getBeginTime());
-							if(!dayTimes.contains(ruleDTO.getEndTime()))
-								dayTimes.add(ruleDTO.getEndTime());
-						}
-						break;
+			List<RentalTimeInterval> timeIntervals = this.rentalProvider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
+			if(null!=timeIntervals){
+				for(RentalTimeInterval timeInterval : timeIntervals){
+
+					dayTimes.add(Timestamp.valueOf(dateSF.format(new java.util.Date())
+							+ " "
+							+ String.valueOf((int) timeInterval.getBeginTime().doubleValue() / 1)
+							+ ":"
+							+ String.valueOf((int) (( timeInterval.getBeginTime() % 1) * 60))
+							+ ":00").getTime());
+				 
+					for (double i = timeInterval.getBeginTime(); i < timeInterval.getEndTime();) {
+						i = i + timeInterval.getTimeStep();
+						dayTimes.add(Timestamp.valueOf(dateSF.format(new java.util.Date())
+								+ " "
+								+ String.valueOf((int) i / 1)
+								+ ":"
+								+ String.valueOf((int) ((i % 1) * 60))
+								+ ":00").getTime());
 					}
 				}
+			}
 	 		Collections.sort(dayTimes);
 	 		response.setDayTimes(dayTimes);
  		}
@@ -3453,7 +3462,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setSiteNumbers(new ArrayList<RentalSiteNumberRuleDTO>()); 
 		//按小时预订的,给客户端找到每一个时间点
 		List<Long> dayTimes = new ArrayList<Long>();
-		 
+		List<RentalTimeInterval> timeIntervals = this.rentalProvider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
+		if(null!=timeIntervals){
+			for(RentalTimeInterval timeInterval : timeIntervals){
+
+				dayTimes.add(Timestamp.valueOf(dateSF.format(new java.util.Date())
+						+ " "
+						+ String.valueOf((int) timeInterval.getBeginTime().doubleValue() / 1)
+						+ ":"
+						+ String.valueOf((int) (( timeInterval.getBeginTime() % 1) * 60))
+						+ ":00").getTime());
+			 
+				for (double i = timeInterval.getBeginTime(); i < timeInterval.getEndTime();) {
+					i = i + timeInterval.getTimeStep();
+					dayTimes.add(Timestamp.valueOf(dateSF.format(new java.util.Date())
+							+ " "
+							+ String.valueOf((int) i / 1)
+							+ ":"
+							+ String.valueOf((int) ((i % 1) * 60))
+							+ ":00").getTime());
+				}
+			}
+		}
+		
 		List<RentalCell> rentalSiteRules =  findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(cmd.getRuleDate() )),
 						beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
 		// 查sitebills
@@ -3465,12 +3496,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 					dto.setTimeStep(rsr.getTimeStep());
 					dto.setBeginTime(rsr.getBeginTime().getTime());
-					dto.setEndTime(rsr.getEndTime().getTime());
-					//如果times里不包含起止时间,则加入times
-					if(!dayTimes.contains(dto.getBeginTime()))
-						dayTimes.add(dto.getBeginTime());
-					if(!dayTimes.contains(dto.getEndTime()))
-						dayTimes.add(dto.getEndTime());
+					dto.setEndTime(rsr.getEndTime().getTime()); 
 					if(response.getAnchorTime().equals(0L)){
 						response.setAnchorTime(dto.getBeginTime());
 					}else{
