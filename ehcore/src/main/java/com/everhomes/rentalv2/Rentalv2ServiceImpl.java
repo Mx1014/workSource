@@ -4338,11 +4338,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 
 			else {
-				//	每天的
+				//需要循环的
 				Calendar chooseCalendar = Calendar.getInstance();
 				Calendar start = Calendar.getInstance();
 				Calendar end = Calendar.getInstance();
-				chooseCalendar.setTime(new Date(choseRSR.getBeginTime().getTime()));
+				chooseCalendar.setTime(new Date(choseRSR.getResourceRentalDate().getTime()));
 				 
 				start.setTime(new Date(cmd.getBeginDate()));
 				end.setTime(new Date(cmd.getEndDate()));
@@ -4358,7 +4358,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					if(cmd.getLoopType().equals(LoopType.EVERYMONTH.getCode())&&
 							!monthDay.equals( chooseCalendar.get(Calendar.DAY_OF_MONTH) ))
 						continue;
-					//当天的
+					//每天循环的
 					if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
 						//按小时
 						Timestamp beginTime = Timestamp.valueOf(dateSF.format(start.getTime().getTime())+ " "
