@@ -32,6 +32,7 @@ public class QueryOrganizationTopicCommand {
     private Integer pageSize;
     private Long embeddedAppId; 
     private Byte officialFlag;
+    private Byte privateFlag;
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
@@ -150,6 +151,16 @@ public class QueryOrganizationTopicCommand {
 		this.excludeCategories = excludeCategories;
 	}
 
+
+
+	public Byte getPrivateFlag() {
+		return privateFlag;
+	}
+
+
+	public void setPrivateFlag(Byte privateFlag) {
+		this.privateFlag = privateFlag;
+	}
 
 
 	@Override

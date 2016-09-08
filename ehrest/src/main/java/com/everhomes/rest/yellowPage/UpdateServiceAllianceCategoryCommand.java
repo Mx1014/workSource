@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li> name: 类型名称</li>
  *  <li> ownerType: 拥有者类型：现在是community</li>
  *  <li> ownerId: 拥有者ID</li>
+ *  <li> parentId: 父id</li>
  * </ul>
  */
 public class UpdateServiceAllianceCategoryCommand {
@@ -20,6 +21,8 @@ public class UpdateServiceAllianceCategoryCommand {
 	
 	private Long ownerId;
 
+	private Long parentId;
+	
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -50,6 +53,14 @@ public class UpdateServiceAllianceCategoryCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 
 	@Override

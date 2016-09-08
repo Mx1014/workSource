@@ -1,10 +1,14 @@
 package com.everhomes.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +26,8 @@ import com.everhomes.util.SignatureHelper;
 
 @Component
 public class HttpRestCallProviderImpl implements HttpRestCallProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpRestCallProviderImpl.class);
+    
     @Value("${border.id}")
     private int borderId;
     
@@ -56,7 +62,7 @@ public class HttpRestCallProviderImpl implements HttpRestCallProvider {
         
         params.put("appKey", this.appKey);
         String signature = SignatureHelper.computeSignature(params, this.secretKey);
-        params.put("signature", signature);
+        params.put("signature", signature);//Do not use UrlEncoder.encode when using http post in java.
         
         MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
         for(Map.Entry<String, String> entry: params.entrySet()) {
@@ -69,7 +75,7 @@ public class HttpRestCallProviderImpl implements HttpRestCallProvider {
     }
     
     @Override
-    public ResponseEntity<String> syncRestCall(String cmd, Map<String, String> params) throws InterruptedException, ExecutionException, TimeoutException {
+    public ResponseEntity<String> syncRestCall(String cmd, Map<String, String> params) throws InterruptedException, ExecutionException, TimeoutException, UnsupportedEncodingException {
         AsyncRestTemplate template = new AsyncRestTemplate();
         String url = getRestUri(cmd);
         HttpHeaders headers = new HttpHeaders();

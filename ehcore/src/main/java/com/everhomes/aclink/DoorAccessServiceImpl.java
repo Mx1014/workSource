@@ -566,7 +566,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
-            sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING.getCode()); 
+            sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING_GROUP.getCode()); 
         } else {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ZLACLINK_WIFI.getCode());    
         }
@@ -1960,7 +1960,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             auth.setOrganization(cmd.getOrganization());
             auth.setPhone(cmd.getPhone());
             auth.setNickname(cmd.getUserName());
-            auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
+            auth.setKeyValidTime(System.currentTimeMillis() + 24* 60*60 * 1000l);
             auth.setValidFromMs(System.currentTimeMillis());
             auth.setValidEndMs(System.currentTimeMillis() + 24* 60*60*1000l);
             auth.setUserId(0l);
@@ -2033,7 +2033,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
+        auth.setKeyValidTime(System.currentTimeMillis() + 24* 60*60 * 1000l);
         
         List<DoorAccess> childs = null;
         
@@ -2072,7 +2072,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         AclinkLinglingQrCodeRequest qrRequest = new AclinkLinglingQrCodeRequest();
         qrRequest.setEffecNumber(2l);
-        qrRequest.setEndTime(30l);
+        qrRequest.setEndTime(24*60l);
         qrRequest.setStartTime(Long.toString(System.currentTimeMillis() - 5000));
         
         List<Long> floorIds = new ArrayList<Long>();

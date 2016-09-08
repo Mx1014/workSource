@@ -319,6 +319,8 @@ public class QualityServiceImpl implements QualityService {
 		
 		qualityProvider.updateQualityInspectionStandards(standard);
 		
+		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.DELETE.getCode(), user.getId());
+		
 	}
 
 	@Override
@@ -1670,13 +1672,13 @@ public class QualityServiceImpl implements QualityService {
         	List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(
         			orgIds, QualityGroupType.REVIEW_GROUP.getCode());
         	
-        	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
+        	tasks = qualityProvider.listVerificationTasks(locator, pageSize, ownerId, ownerType, 
             		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, standardIds, cmd.getManualFlag());
 
         	
         } else {
-        	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
+        	tasks = qualityProvider.listVerificationTasks(locator, pageSize, ownerId, ownerType, 
         		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
         		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, null, cmd.getManualFlag());
         }
@@ -1767,18 +1769,31 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue(dto.getCategoryName());
 		row.createCell(++i).setCellValue(dto.getExecutorName());
 		row.createCell(++i).setCellValue(dto.getOperatorName());
-		row.createCell(++i).setCellValue(dto.getExecutiveStartTime());
-		row.createCell(++i).setCellValue(dto.getExecutiveExpireTime());
+		row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
+		if(dto.getExecutiveExpireTime() != null) {
+			row.createCell(++i).setCellValue(dto.getExecutiveExpireTime().toString());
+		}
+		else {
+			row.createCell(++i).setCellValue("");
+		}
 		
-		if(dto.getStatus() != null)
+		if(dto.getStatus() != null) {
 			row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
-		else
+		}
+			
+		else {
 			row.createCell(++i).setCellValue("");
+		}
+			
 		
-		if(dto.getResult() != null)
+		if(dto.getResult() != null) {
 			row.createCell(++i).setCellValue(resultToString(dto.getResult()));
-		else
+		}
+			
+		else {
 			row.createCell(++i).setCellValue("");
+		}
+			
 		
 		if(dto.getReviewResult() != null) {
 			if(dto.getReviewResult().equals(QualityInspectionTaskReviewResult.NONE.getCode())) {
@@ -1797,6 +1812,9 @@ public class QualityServiceImpl implements QualityService {
 			row.createCell(++i).setCellValue("");
 			row.createCell(++i).setCellValue("");
 		}
+		
+		row.createCell(++i).setCellValue(dto.getReviewerName());
+		
 		if(dto.getManualFlag() != null) {
 			if(dto.getManualFlag() == 0)
 				row.createCell(++i).setCellValue("否");
@@ -1808,7 +1826,7 @@ public class QualityServiceImpl implements QualityService {
 			row.createCell(++i).setCellValue("");
 		}
 		
-		row.createCell(++i).setCellValue(dto.getReviewerName());
+		
 		
 	}
 	

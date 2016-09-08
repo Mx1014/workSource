@@ -21,6 +21,8 @@ import com.everhomes.util.StringHelper;
  *  <li>invoiceFlag: 是否需要发票 0-dont need 1-need</li>
  *  <li>makeOutFlag: 是否已开票 0-uninvoice 1-invoiced</li>
  *  <li>buyChannel: 购买渠道 0-offline 1-online</li>
+ *  <li>confType: 是否支持电话</li>
+ *  <li>confCapacity: 账号类型</li>
  * </ul>
  *
  */
@@ -54,7 +56,11 @@ public class ConfOrderDTO {
 	private Byte invoiceFlag;
 	
 	private Byte makeOutFlag;
-
+	
+	private String confType;
+	
+	private String confCapacity;
+	
 	public Long getId() {
 		return id;
 	}
@@ -167,6 +173,22 @@ public class ConfOrderDTO {
 		this.makeOutFlag = makeOutFlag;
 	}
 	
+	public String getConfType() {
+		return confType;
+	}
+
+	public void setConfType(String confType) {
+		this.confType = confType;
+	}
+
+	public String getConfCapacity() {
+		return confCapacity;
+	}
+
+	public void setConfCapacity(String confCapacity) {
+		this.confCapacity = confCapacity;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

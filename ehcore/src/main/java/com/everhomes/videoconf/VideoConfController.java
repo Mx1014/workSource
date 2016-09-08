@@ -28,6 +28,7 @@ import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
+import com.everhomes.rest.videoconf.DeleteConfEnterpriseCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
 import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
@@ -1410,4 +1411,19 @@ public class VideoConfController  extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /conf/deleteConfEnterprise</b>
+	 * 删除视频会议公司
+	 */
+	@RequestMapping("deleteConfEnterprise")
+	@RestReturn(String.class)
+	public RestResponse deleteConfEnterprise(DeleteConfEnterpriseCommand cmd){
+		
+		videoConfService.deleteConfEnterprise(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

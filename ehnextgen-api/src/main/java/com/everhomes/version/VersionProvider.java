@@ -2,6 +2,7 @@ package com.everhomes.version;
 
 import java.util.List;
 
+import com.everhomes.rest.version.VersionInfoDTO;
 import com.everhomes.util.Version;
 
 public interface VersionProvider {
@@ -35,4 +36,5 @@ public interface VersionProvider {
     void deleteVersionUrlById(long id);
     VersionUrl findVersionUrlById(long id);
     VersionUrl findVersionUrlByVersion(String realmName, String targetVersion);
+	List<VersionInfoDTO> listVersionInfo(Long pageAnchor, int pageSize);
 }

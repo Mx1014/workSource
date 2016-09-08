@@ -22,7 +22,9 @@ public enum CoordinationLocks {
 	SCHEDULE_EQUIPMENT_TASK("equipment.task.schedule"),
     CREATE_EQUIPMENT_TASK("equipment.task.create"),
 	WANKE_LOGIN("wanke.login"),
-    STAT_SETTLEMENT("stat.settlement");
+    STAT_SETTLEMENT("stat.settlement"),
+    UPDATE_ACTIVITY("activity.update"),
+    CREATE_NEW_ORG("org.create");
     
 
     private String code;

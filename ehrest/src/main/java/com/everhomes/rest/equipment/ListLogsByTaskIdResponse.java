@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>logs: 任务操作记录列表 参考{@link com.everhomes.rest.equipment.EquipmentTaskLogsDTO}</li>
+ *  <li>taskType: 任务类型</li>
  *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  */
@@ -16,6 +17,8 @@ public class ListLogsByTaskIdResponse {
 	private List<EquipmentTaskLogsDTO> logs;
 	
 	private Long nextPageAnchor;
+	
+	private Byte taskType;
 	
 	public List<EquipmentTaskLogsDTO> getLogs() {
 		return logs;
@@ -31,6 +34,14 @@ public class ListLogsByTaskIdResponse {
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public Byte getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(Byte taskType) {
+		this.taskType = taskType;
 	}
 
 	@Override

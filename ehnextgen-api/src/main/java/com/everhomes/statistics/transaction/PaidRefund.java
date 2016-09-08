@@ -23,6 +23,7 @@ public class PaidRefund {
 	private String refundRecordNo;
 	
 	private String refundOrderNo;
+	
 
 	public String getPayNo() {
 		return payNo;

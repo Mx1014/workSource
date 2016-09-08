@@ -1050,21 +1050,21 @@ public class UserServiceImpl implements UserService {
 			kickoffLoginByDevice(foundLogin);
 		}
 		
-		if(!ref.getOldDeviceId().isEmpty()) {
-		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
-	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
-	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
-	            locale = user.getLocale(); 
-	        }
-	        
-	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
-		    String msg = this.localeStringService.getLocalizedString(
-	                MessagingLocalStringCode.SCOPE,
-	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
-	                locale,
-	                "kickoff other devices");
-		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
-		}
+//		if(!ref.getOldDeviceId().isEmpty()) {
+//		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+//	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+//	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
+//	            locale = user.getLocale(); 
+//	        }
+//	        
+//	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
+//		    String msg = this.localeStringService.getLocalizedString(
+//	                MessagingLocalStringCode.SCOPE,
+//	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
+//	                locale,
+//	                "kickoff other devices");
+//		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
+//		}
 
 		return foundLogin;
 	}
@@ -2969,7 +2969,11 @@ public class UserServiceImpl implements UserService {
         msg.setContent("test push " + Double.valueOf(Math.random()));
         msg.setMetaAppId(AppConstants.APPID_MESSAGING);
         msg.setCreateTime(System.currentTimeMillis());
-        msg.setNamespaceId(cmd.getNamespaceId());
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = 0;
+        }
+        msg.setNamespaceId(namespaceId);
         
         Map<String, String> meta = new HashMap<String, String>();
         meta.put("bodyType", "TEXT");

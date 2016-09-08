@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>endTime: 结束时间</li>
  *  <li>description: 会议描述</li>
  *  <li>hostKey: 会议密码</li>
+ *  <li>enterpriseId: 公司id</li>
  * </ul>
  */
 public class ReserveVideoConfCommand {
@@ -28,6 +29,8 @@ public class ReserveVideoConfCommand {
 	private String description;
 	
 	private String hostKey;
+	
+	private Long enterpriseId;
 
 	public Long getId() {
 		return id;
@@ -85,6 +88,14 @@ public class ReserveVideoConfCommand {
 		this.hostKey = hostKey;
 	}
 	
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
