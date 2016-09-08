@@ -1973,7 +1973,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
+			//初始化
 			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
+			seqNum.set(0L);
 			//设置默认规则，删除所有的单元格
 //			Integer deleteCount = rentalProvider.deleteResourceCells(cmd.getRentalSiteId(), null, null);
 //			LOGGER.debug("delete count = " + String.valueOf(deleteCount)+ "  from rental site rules  ");
@@ -2233,6 +2235,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		cellList.set(new ArrayList<RentalCell>());
 		currentId.set(rs.getCellBeginId());
+		seqNum.set(0L);
 		BigDecimal weekendPrice = rs.getWeekendPrice() == null ? new BigDecimal(0) : rs.getWeekendPrice(); 
 		BigDecimal workdayPrice = rs.getWorkdayPrice() == null ? new BigDecimal(0) : rs.getWorkdayPrice();
 //		List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
@@ -4118,6 +4121,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
 					
 			} 
+			seqNum.set(0L);
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
 				//在这里统一处理 
 				signleCmd.setRentalSiteId(resource.getId()); 
