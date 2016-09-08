@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 给资源增加单元格
  * <li>ruleId: 选取单元格id</li> 
+ * <li>resourceId: 资源id</li> 
  * <li>beginTime: 开始时间对于按小时则是N或者N.5，对于半天则是0早上1下午2晚上</li>
  * <li>endTime: 结束时间对于按小时则是N或者N.5，对于半天则是0早上1下午2晚上</li>
  * <li>status: 状态，0启用 -1停用参考{@link com.everhomes.rest.rentalv2.RentalSiteStatus}</li>
