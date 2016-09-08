@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>返回值
+ * <ul>返回值:
  * <li>approvalFlowList: 简短的审批流程列表，参考{@link com.everhomes.rest.approval.BriefApprovalFlowDTO}</li>
  * </ul>
  */

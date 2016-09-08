@@ -35,7 +35,7 @@ public class ApprovalUiController extends ControllerBase {
 
 	/**
 	 * 
-	 * <p>1.申请列表（客户端）</p>
+	 * <p>1.个人申请列表（客户端）</p>
 	 * <b>URL: /ui/approval/listApprovalRequestByScene</b>
 	 */
 	@RequestMapping("listApprovalRequestByScene")
