@@ -23,7 +23,6 @@ public class CreateTaskCommand {
 	private String content;
 	private String nickName;
 	private String mobile;
-	private Integer namespaceId;
 	
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
@@ -80,10 +79,5 @@ public class CreateTaskCommand {
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+	
 }
