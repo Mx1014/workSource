@@ -194,7 +194,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         RangeQueryBuilder rb = null;
         if(null !=pageAnchor){
-        	rb = QueryBuilders.rangeQuery("createTime").gt(pageAnchor);
+        	rb = QueryBuilders.rangeQuery("createTime").lt(pageAnchor);
             qb = qb.must(rb);	
         }
         if(null != startDate){
@@ -222,7 +222,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         builder.setSize(pageSize);
         builder.setQuery(qb).setPostFilter(fb);
         // builder.addSort("createTime", SortOrder.ASC);
-        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.ASC));
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Search pm tasks, builder={}", builder);
         }
