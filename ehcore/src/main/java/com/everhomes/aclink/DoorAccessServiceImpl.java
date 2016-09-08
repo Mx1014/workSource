@@ -1960,7 +1960,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             auth.setOrganization(cmd.getOrganization());
             auth.setPhone(cmd.getPhone());
             auth.setNickname(cmd.getUserName());
-            auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
+            auth.setKeyValidTime(System.currentTimeMillis() + 24* 60*60 * 1000l);
             auth.setValidFromMs(System.currentTimeMillis());
             auth.setValidEndMs(System.currentTimeMillis() + 24* 60*60*1000l);
             auth.setUserId(0l);
@@ -2033,7 +2033,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
+        auth.setKeyValidTime(System.currentTimeMillis() + 24* 60*60 * 1000l);
         
         List<DoorAccess> childs = null;
         
