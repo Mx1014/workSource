@@ -610,6 +610,7 @@ INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_t
     
     
 -- 微信link的短信通知 by sfyan 20160908   
+SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',225500,'REPAIRS','sms');
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',225500,'REPAIRS','push');
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',228432,'REPAIRS','sms');
