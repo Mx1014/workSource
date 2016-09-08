@@ -6552,8 +6552,9 @@ CREATE TABLE `eh_version_urls` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `app_name` VARCHAR(50),
   `publish_time` DATETIME,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_ver_url` (`realm_id`,`target_version`)
+  
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `u_eh_ver_url`(`realm_id`, `target_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
