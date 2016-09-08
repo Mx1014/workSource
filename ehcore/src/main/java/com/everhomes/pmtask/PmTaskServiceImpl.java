@@ -308,6 +308,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		
 		sendMessageToUser(task.getCreatorUid(), text);
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	private void sendMessageToUser(Long userId, String content) {
@@ -373,6 +377,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setDeleteTime(now);
 		pmTaskProvider.updateTask(task);
 		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 	
 	@Override
@@ -439,6 +446,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		
 		sendMessageToUser(task.getCreatorUid(), text);
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	private void returnNoPrivileged(List<Long> privileges, User user){
