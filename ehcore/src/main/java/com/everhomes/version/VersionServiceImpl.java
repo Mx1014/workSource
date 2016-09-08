@@ -131,36 +131,44 @@ public class VersionServiceImpl implements VersionService {
         if(cmd.getCurrentVersion() != null && cmd.getCurrentVersion().getTag() == null) {
         	cmd.getCurrentVersion().setTag("");
         }
-        Version version = ConvertHelper.convert(cmd.getCurrentVersion(), Version.class);
-        VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(cmd.getRealm(), version.toString());
-        if(versionUrl == null) {
-        	//找不到版本，返回最新版本 modified by xiongying 20160730
-        	WithoutCurrentVersionRequestCommand command = new WithoutCurrentVersionRequestCommand();
-        	command.setRealm(cmd.getRealm());
-        	command.setLocale(cmd.getLocale());
-        	VersionUrlResponse resp = getVersionUrlsWithoutCurrentVersion(command);
-        	return resp;
-        }
         
-        //如果InfoUrl为空则从configuration表中取
-        if(StringUtils.isBlank(versionUrl.getInfoUrl())){
-        	versionUrl.setInfoUrl("${homeurl}"+getUpgradeUrl()+"?id="+versionUrl.getId());
-        }
-        
-        VersionUrlResponse response = new VersionUrlResponse();
-        Map<String, String> params = new HashMap<String, String>();
-        if(cmd.getLocale() == null || cmd.getLocale().isEmpty())
-            params.put("locale", "en_US");
-        else
-            params.put("locale", cmd.getLocale());
-        
-        params.put("major", String.valueOf(version.getMajor()));
-        params.put("minor", String.valueOf(version.getMinor()));
-        params.put("revision", String.valueOf(version.getRevision()));
-        params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
-        response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
-        response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
-        return response;
+        //由于客户端在获取电商离线包的时候，并不调用getUpgradeInfo接口，而是直接调用本接口；
+        //故本接口改成不管客户端传了什么版本，本接口都返回最新版本。modified by lqs 20160908
+        WithoutCurrentVersionRequestCommand command = new WithoutCurrentVersionRequestCommand();
+    	command.setRealm(cmd.getRealm());
+    	command.setLocale(cmd.getLocale());
+    	VersionUrlResponse resp = getVersionUrlsWithoutCurrentVersion(command);
+    	return resp;
+//        Version version = ConvertHelper.convert(cmd.getCurrentVersion(), Version.class);
+//        VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(cmd.getRealm(), version.toString());
+//        if(versionUrl == null) {
+//        	//找不到版本，返回最新版本 modified by xiongying 20160730
+//        	WithoutCurrentVersionRequestCommand command = new WithoutCurrentVersionRequestCommand();
+//        	command.setRealm(cmd.getRealm());
+//        	command.setLocale(cmd.getLocale());
+//        	VersionUrlResponse resp = getVersionUrlsWithoutCurrentVersion(command);
+//        	return resp;
+//        }
+//        
+//        //如果InfoUrl为空则从configuration表中取
+//        if(StringUtils.isBlank(versionUrl.getInfoUrl())){
+//        	versionUrl.setInfoUrl("${homeurl}"+getUpgradeUrl()+"?id="+versionUrl.getId());
+//        }
+//        
+//        VersionUrlResponse response = new VersionUrlResponse();
+//        Map<String, String> params = new HashMap<String, String>();
+//        if(cmd.getLocale() == null || cmd.getLocale().isEmpty())
+//            params.put("locale", "en_US");
+//        else
+//            params.put("locale", cmd.getLocale());
+//        
+//        params.put("major", String.valueOf(version.getMajor()));
+//        params.put("minor", String.valueOf(version.getMinor()));
+//        params.put("revision", String.valueOf(version.getRevision()));
+//        params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
+//        response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
+//        response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
+//        return response;
     }
 
 	@Override
