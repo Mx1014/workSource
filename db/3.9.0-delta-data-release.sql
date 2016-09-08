@@ -57,9 +57,9 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
     VALUES (55, 5, '3.9.0', 'http://apk.zuolin.com/apk/XmTecPark-3.9.0.2016090606-release.apk', '${homeurl}/web/download/apk/andriod-xunmei-3-9-0.html', '0');
 
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
-    VALUES(85,35,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+    VALUES(86,35,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) 
-    VALUES (55, 35, '3.9.0', '', '${homeurl}/web/download/apk/iOS-UFinePark-3-9-0.html', '0');    
+    VALUES (56, 35, '3.9.0', '', '${homeurl}/web/download/apk/iOS-UFinePark-3-9-0.html', '0');    
 
 -- 迅美更新banner 和添加左邻小店
 UPDATE eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwa01tRmtaakV6TTJaaU5qRTNaR1pqWmpGa04yRmpNamt5TVRRM01XVXlPQQ',action_type='0',action_data='' where id in (19,1007);
