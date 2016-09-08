@@ -579,7 +579,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
 		task.setUnprocessedTime(now);
 		pmTaskProvider.createTask(task);
-//		addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
+		addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 		
 		PmTaskLog pmTaskLog = new PmTaskLog();
 		pmTaskLog.setNamespaceId(task.getNamespaceId());
@@ -614,7 +614,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Mobile cannot be null.");
 		}
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getMobile());
+		if(null == cmd.getNamespaceId()){
+			LOGGER.error("NamespaceId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"NamespaceId cannot be null.");
+		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getMobile());
 		if(null == userIdentifier){
 			LOGGER.error("UserIdentifier not register.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

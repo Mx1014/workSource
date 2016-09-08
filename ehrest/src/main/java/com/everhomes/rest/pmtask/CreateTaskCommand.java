@@ -23,9 +23,10 @@ public class CreateTaskCommand {
 	private String content;
 	private String nickName;
 	private String mobile;
+	private Integer namespaceId;
 	
-//	@ItemType(AttachmentDescriptor.class)
-//	private List<AttachmentDescriptor> attachments;
+	@ItemType(AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachments;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -57,12 +58,12 @@ public class CreateTaskCommand {
 	public void setContent(String content) {
 		this.content = content;
 	}
-//	public List<AttachmentDescriptor> getAttachments() {
-//		return attachments;
-//	}
-//	public void setAttachments(List<AttachmentDescriptor> attachments) {
-//		this.attachments = attachments;
-//	}
+	public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -78,5 +79,11 @@ public class CreateTaskCommand {
 	}
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
+	}
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }
