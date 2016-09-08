@@ -128,18 +128,24 @@ public class DateUtil {
      */
     public static List<Date> getStartToEndDates(Date dBegin, Date dEnd){
     	List<Date> lDate = new ArrayList<Date>();  
-        lDate.add(dBegin);  
         Calendar calBegin = Calendar.getInstance();  
         // 使用给定的 Date 设置此 Calendar 的时间    
         calBegin.setTime(dBegin);  
         Calendar calEnd = Calendar.getInstance();  
         // 使用给定的 Date 设置此 Calendar 的时间    
         calEnd.setTime(dEnd);  
-        // 测试此日期是否在指定日期之后    
+        
+        calBegin.set(Calendar.HOUR_OF_DAY, 0);
+        calBegin.set(Calendar.MINUTE, 0);
+        calBegin.set(Calendar.SECOND, 0);
+        calBegin.set(Calendar.MILLISECOND, 0);
+        
+        // 测试此日期是否在指定日期之后   
         while (dEnd.after(calBegin.getTime())) {  
-            // 根据日历的规则，为给定的日历字段添加或减去指定的时间量    
+            // 根据日历的规则，为给定的日历字段添加或减去指定的时间量   
+        	lDate.add(calBegin.getTime());  
             calBegin.add(Calendar.DAY_OF_MONTH, 1);  
-            lDate.add(calBegin.getTime());  
+ 
         }  
         return lDate;  
     }

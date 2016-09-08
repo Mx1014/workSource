@@ -1350,11 +1350,12 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
 		
-		
+		// 有重复的用户，需要过滤 by lqs 20160831
+		List<Long> userIdList = new ArrayList<Long>();
 		for (GroupMember member : groupMembers) {
 			User user = userProvider.findUserById(member.getMemberId());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getMemberId(), IdentifierType.MOBILE.getCode());
-			if(null != user){
+			if(null != user && !userIdList.contains(user.getId())){
 				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 				dto.setUserId(user.getId());
 				dto.setUserName(user.getNickName());
@@ -1366,6 +1367,7 @@ public class CommunityServiceImpl implements CommunityService {
 				if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.ACTIVE)
 					dto.setIsAuth(1);
 				
+				userIdList.add(user.getId());
 				dtos.add(dto);
 			}
 		}

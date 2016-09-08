@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>id : 组织id</li>
  * <li>name : 组织名称</li>
  * <li>organizationType : 组织类型</li>
+ * <li>groupType：机构类别，需要首先用该值来判断是否是一个机构（其还有可能是部门、群组等），在该值为机构的情况下，OrganizationType才有意义，{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
+ * <li>directlyEnterpriseId：如果本身是机构，则此值无效；如果本身是部门、群组（可能多层），则其层次结构上最近的一个直属机构</li>
  * 物业或业委 需要附加字段 :
  * <li>communityId : 小区id</li>
  * <li>communityName : 小区name</li> 
@@ -25,6 +27,10 @@ public class OrganizationSimpleDTO {
 	private Long communityId;
 	
 	private String communityName;
+	
+	private Long directlyEnterpriseId;
+	
+	private String groupType;
 
 	public Long getId() {
 		return id;
@@ -64,6 +70,22 @@ public class OrganizationSimpleDTO {
 
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
+	}
+
+	public Long getDirectlyEnterpriseId() {
+		return directlyEnterpriseId;
+	}
+
+	public void setDirectlyEnterpriseId(Long directlyEnterpriseId) {
+		this.directlyEnterpriseId = directlyEnterpriseId;
+	}
+
+	public String getGroupType() {
+		return groupType;
+	}
+
+	public void setGroupType(String groupType) {
+		this.groupType = groupType;
 	}
 
 	@Override

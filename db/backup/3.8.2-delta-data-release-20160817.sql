@@ -664,3 +664,8 @@ INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `targe
 	VALUES (11067, 'EhOrganizations', 1002796, 'EhUsers', 227447, 1005, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`)
     VALUES(1111263,240111044331051380, 'organization', 1002796, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+    
+    
+-- 储能屏蔽 服务热线
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 46000,'', 'EhNamespaces', 999990 , 0);
+

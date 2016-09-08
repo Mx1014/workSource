@@ -1,4 +1,7 @@
+
+-- 结算表  by sfyan 2016010
 -- 订单交易流水表
+DROP TABLE IF EXISTS `eh_stat_orders`;
 CREATE TABLE `eh_stat_orders` (
   `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
@@ -7,7 +10,7 @@ CREATE TABLE `eh_stat_orders` (
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
   `payer_uid` bigint(20) COMMENT '支付用户编号',
-  `item_code` varchar(64) DEFAULT null COMMENT '商品编号',
+  `ware_json` text  COMMENT '商品',
   `vendor_code` varchar(64) DEFAULT null COMMENT '供应商编号',
   `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
   `order_type` varchar(64) DEFAULT NULL COMMENT '订单类型  transaction refund',
@@ -20,6 +23,7 @@ CREATE TABLE `eh_stat_orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算交易流水表
+DROP TABLE IF EXISTS `eh_stat_transactions`;
 CREATE TABLE `eh_stat_transactions` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
@@ -28,7 +32,7 @@ CREATE TABLE `eh_stat_transactions` (
   `service_type` varchar(64) DEFAULT NULL COMMENT '0 左邻小站 1其他店铺 3第三方服务 4社区服务',
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
-  `item_code` varchar(64) DEFAULT null COMMENT '商品编号',
+  `ware_json` text  COMMENT '商品',
   `vendor_code` varchar(64) DEFAULT null COMMENT '供应商编号',
   `payer_uid` bigint(20) COMMENT '支付用户编号',
   `transaction_no` varchar(100) DEFAULT NULL COMMENT '平台流水号',
@@ -50,6 +54,7 @@ CREATE TABLE `eh_stat_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算退款流水表
+DROP TABLE IF EXISTS `eh_stat_refunds`;
 CREATE TABLE `eh_stat_refunds` (
   `id` bigint(20) NOT NULL,
   `community_id` bigint(20) DEFAULT 0,
@@ -59,6 +64,7 @@ CREATE TABLE `eh_stat_refunds` (
   `resource_type` varchar(64) DEFAULT NULL COMMENT '交易来源类型 0电商 1停车充值 2资源预定 3物业缴费',
   `resource_id` varchar(64) DEFAULT NULL COMMENT '来源实体店ID',
   `paid_channel` tinyint(4) DEFAULT NULL COMMENT '支付渠道类型 0支付宝 1微信',
+  `ware_json` text  COMMENT '商品',
   `payer_uid` bigint(20) COMMENT '支付用户编号',
   `refund_no` varchar(100) DEFAULT NULL COMMENT '平台退款流水号',
   `order_no` varchar(100) DEFAULT NULL COMMENT '订单号',
@@ -75,6 +81,7 @@ CREATE TABLE `eh_stat_refunds` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算支付退款详情表
+DROP TABLE IF EXISTS `eh_stat_settlements`;
 CREATE TABLE `eh_stat_settlements` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
@@ -101,6 +108,7 @@ CREATE TABLE `eh_stat_settlements` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 结算統計結果表
+DROP TABLE IF EXISTS `eh_stat_service_settlement_results`;
 CREATE TABLE `eh_stat_service_settlement_results` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT 0,
@@ -122,6 +130,7 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_stat_task_logs`;
 CREATE TABLE `eh_stat_task_logs` (
   `id` bigint(20) NOT NULL,
   `task_no` varchar(20) NOT NULL,
@@ -132,3 +141,18 @@ CREATE TABLE `eh_stat_task_logs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `task_no` (`task_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_stat_service`;
+CREATE TABLE `eh_stat_service` (
+  `id` bigint(20) NOT NULL,
+   `namespace_id` int(11) NOT NULL,
+  `owner_type` varchar(64) NOT NULL ,
+  `owner_id` bigint(20) DEFAULT NULL,
+  `service_type` varchar(64) NOT NULL ,
+  `service_name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0' COMMENT '0 无效 1 正常',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+

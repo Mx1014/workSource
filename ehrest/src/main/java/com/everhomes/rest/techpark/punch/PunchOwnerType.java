@@ -21,7 +21,7 @@ public enum PunchOwnerType {
     
     public static PunchOwnerType fromCode(String code) {
         for(PunchOwnerType t : PunchOwnerType.values()) {
-            if (t.code == code) {
+            if (t.code.equals(code)) {
                 return t;
             }
         }

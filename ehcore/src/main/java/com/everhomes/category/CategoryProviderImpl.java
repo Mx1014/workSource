@@ -3,12 +3,14 @@ package com.everhomes.category;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
 import org.jooq.SortField;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -32,8 +34,6 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
@@ -46,18 +46,22 @@ public class CategoryProviderImpl implements CategoryProvider {
     
     @Autowired
     private DbProvider dbProvider;
-    
+
     @Autowired
     private SequenceProvider sequenceProvider;
     
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories") })
+            @CacheEvict(value="listBusinessSubCategories")})
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
+        long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhCategories.class));
+        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
+        category.setId(id);
 //        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
 //        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
 //        query.setRecord(record);
@@ -65,18 +69,12 @@ public class CategoryProviderImpl implements CategoryProvider {
 //        query.execute();
 //        
 //        category.setId(query.getReturnedRecord().getId());
-        
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCategories.class));
-		
-        category.setId(id);
-        
-        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }
 
-    @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
+    @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
@@ -92,11 +90,11 @@ public class CategoryProviderImpl implements CategoryProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, category.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
+    @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories") })
+            @CacheEvict(value="listBusinessSubCategories")})
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -115,7 +113,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         }
     }
 
-    @Cacheable(value="Category", key="#id", unless="#result == null")
+//    @Cacheable(value="Category", key="#id", unless="#result == null")
     @Override
     public Category findCategoryById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -365,4 +363,40 @@ public class CategoryProviderImpl implements CategoryProvider {
         List<Long> categoryIds = selectStep.where(condition).fetch().map(r -> r.getValue(Tables.EH_CATEGORIES.ID));
         return categoryIds;
     }
+    
+//    @Cacheable(value = "listTaskCategories", unless="#result.size() == 0")
+	@Override
+	public List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, 
+			Long pageAnchor, Integer pageSize){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != parentId)
+        	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
+        if(StringUtils.isNotBlank(keyword))
+        	query.addConditions(Tables.EH_CATEGORIES.NAME.like("%" + keyword + "%"));
+        if(null != pageAnchor && pageAnchor != 0)
+        	query.addConditions(Tables.EH_CATEGORIES.ID.gt(pageAnchor));
+        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_CATEGORIES.ID.asc());
+        if(null != pageSize)
+        	query.addLimit(pageSize);
+        List<Category> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, Category.class))
+        		.collect(Collectors.toList());
+        
+        return result;
+	}
+    
+    @Override
+	public Category findCategoryByPath(Integer namespaceId, String path){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != path)
+        	query.addConditions(Tables.EH_CATEGORIES.PATH.eq(path));
+        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+        return ConvertHelper.convert(query.fetchOne(), Category.class);
+	}
 }

@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,25 +29,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.AclProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -79,7 +71,6 @@ import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
@@ -87,14 +78,11 @@ import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -103,35 +91,15 @@ public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    @Autowired
-    private AclProvider aclProvider;
-    
-    @Autowired
-    private DbProvider dbProvider;
     
     @Autowired
     private ParkingProvider parkingProvider;
-    
-    @Autowired
-    private UserService userService;
     
     @Autowired
     private UserProvider userProvider;
     
     @Autowired
     private ConfigurationProvider configProvider;
-    
-    @Autowired
-    private CoordinationProvider coordinationProvider;
-    
-    @Autowired
-    private OrganizationService organizationService;
-    
-    @Autowired
-    private OrganizationProvider organizationProvider;
-    
-    @Autowired
-	private LocaleStringService localeStringService;
     
     @Autowired
 	private OrderUtil commonOrderUtil;
@@ -150,20 +118,23 @@ public class ParkingServiceImpl implements ParkingService {
 
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        
         List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
         
         return cardList;
     }
     
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-    	ListCardTypeResponse ret = null;
+    	
     	Long parkingLotId = cmd.getParkingLotId();
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
-        ret = handler.listCardType(cmd);
-    	return ret;
+        
+        ListCardTypeResponse response = handler.listCardType(cmd);
+        
+    	return response;
     }
     
     @Override
@@ -174,6 +145,7 @@ public class ParkingServiceImpl implements ParkingService {
         
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        
         parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId,cmd.getPlateNumber(),cmd.getCardNo());
         
         return parkingRechargeRateList;
@@ -250,59 +222,12 @@ public class ParkingServiceImpl implements ParkingService {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
-		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
+		String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+		return handler.createParkingRechargeOrder(cmd, parkingLot);
 		
-		User user = UserContext.current().getUser();
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		
-		try{
-		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
-		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
-		parkingRechargeOrder.setParkingLotId(cmd.getParkingLotId());
-		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
-		parkingRechargeOrder.setPlateOwnerName(cmd.getPlateOwnerName());
-		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
-		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
-		parkingRechargeOrder.setPayerUid(user.getId());
-		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
-		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
-		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
-		parkingRechargeOrder.setRateToken(cmd.getRateToken());
-		parkingRechargeOrder.setRateName(cmd.getRateName());
-		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
-		parkingRechargeOrder.setPrice(cmd.getPrice());
-		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
-		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
-		parkingRechargeOrder.setCreatorUid(user.getId());
-		parkingRechargeOrder.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
-		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
-		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
-		
-		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
-		}catch(Exception e) {
-			LOGGER.error("createParkingRechargeOrder is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"createParkingRechargeOrder is fail.");
-		}
-		
-		
-		//调用统一处理订单接口，返回统一订单格式
-		CommonOrderCommand orderCmd = new CommonOrderCommand();
-		orderCmd.setBody(parkingRechargeOrder.getRateName());
-		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
-		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-		orderCmd.setSubject("停车充值订单简要描述");
-		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
-		CommonOrderDTO dto = null;
-		try {
-			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
-		} catch (Exception e) {
-			LOGGER.error("convertToCommonOrder is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"convertToCommonOrder is fail.");
-		}
-		return dto;
+
 	}
 	
 	@Override
@@ -423,21 +348,21 @@ public class ParkingServiceImpl implements ParkingService {
 		
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         if(cmd.getId() == null){
-        	LOGGER.error("SetParkingCardIssueFlagCommand id cannot be null.");
+        	LOGGER.error("Id cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"SetParkingCardIssueFlagCommand id cannot be null.");
+    				"Id cannot be null.");
         }
         
         ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
         if(parkingCardRequest == null){
-        	LOGGER.error("parkingCardRequest {} is not exist.",cmd.getId());
+        	LOGGER.error("ParkingCardRequest not found, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"parkingCardRequest is not exist.");
+				"ParkingCardRequest not found");
         }
         if(parkingCardRequest.getStatus() != ParkingCardRequestStatus.NOTIFIED.getCode()){
-        	LOGGER.error("parkingCardRequest {} status is not notified.",cmd.getId());
+        	LOGGER.error("ParkingCardRequest status is not notified, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"parkingCardRequest status is not notified.");
+				"ParkingCardRequest status is not notified.");
         }
         //设置已领取状态和 领取时间
         parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
@@ -450,9 +375,9 @@ public class ParkingServiceImpl implements ParkingService {
 	public void issueParkingCards(IssueParkingCardsCommand cmd) {
 		
 		if(cmd.getCount() == null) {
-        	LOGGER.error("count cannot be null.");
+        	LOGGER.error("Count cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"count cannot be null.");
+    				"Count cannot be null.");
         }
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
@@ -509,7 +434,9 @@ public class ParkingServiceImpl implements ParkingService {
 	public void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
 		
 		OrderEmbeddedHandler orderEmbeddedHandler = this.getOrderHandler(cmd.getOrderType());
-		LOGGER.debug("OrderEmbeddedHandler="+orderEmbeddedHandler.getClass().getName());
+		
+		LOGGER.debug("OrderEmbeddedHandler={}", orderEmbeddedHandler.getClass().getName());
+		
 		if(cmd.getPayStatus().equalsIgnoreCase("success"))
 			orderEmbeddedHandler.paySuccess(cmd);
 		if(cmd.getPayStatus().equalsIgnoreCase("fail"))
@@ -549,56 +476,49 @@ public class ParkingServiceImpl implements ParkingService {
 	
     private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
     	if(ownerId == null ) {
-        	LOGGER.error("ownerId cannot be null.");
+        	LOGGER.error("OwnerId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"ownerId cannot be null.");
+    				"OwnerId cannot be null.");
         }
     	
     	if(StringUtils.isBlank(ownerType)) {
-        	LOGGER.error("ownerType cannot be null.");
+        	LOGGER.error("OwnerType cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"ownerType cannot be null.");
+    				"OwnerType cannot be null.");
         }
     	
     	if(parkingLotId == null ) {
-        	LOGGER.error("parkingLotId cannot be null.");
+        	LOGGER.error("ParkingLotId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"parkingLotId cannot be null.");
+    				"ParkingLotId cannot be null.");
         }
     	
     	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
         if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist {}.",parkingLotId);
+        	LOGGER.error("ParkingLot not found, parkingLotId={}", parkingLotId);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
+    			"ParkingLot not found");
         }
         // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
         if(ownerId != null && ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
-        	LOGGER.error("ownerId {} is not match with parkingLot ownerId.",ownerId);
+        	LOGGER.error("OwnerId is not match with parkingLot ownerId, ownerId={}", ownerId);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId is not match with parkingLot ownerId.");
+    				"OwnerId is not match with parkingLot ownerId.");
         }
         if(ParkingOwnerType.fromCode(parkingLot.getOwnerType()) != ParkingOwnerType.fromCode(ownerType)){
-            LOGGER.error("ownertype {} is not match with parkingLot ownertype.",ownerType);
+            LOGGER.error("Ownertype is not match with parkingLot ownertype, ownerType={}", ownerType);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownertype is not match with parkingLot ownertype.");
+    				"Ownertype is not match with parkingLot ownertype.");
         }
         return parkingLot;
     }
     
     private void checkPlateNumber(String plateNumber){
     	if(StringUtils.isBlank(plateNumber)) {
-        	LOGGER.error("plateNumber cannot be null.");
+        	LOGGER.error("PlateNumber cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"plateNumber cannot be null.");
+    				"PlateNumber cannot be null.");
         }
-    	/*if(plateNumber.length() != 7) {
-			LOGGER.error("the length of plateNumber is wrong.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
-					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
-							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
-		}*/
     }
     
     @Scheduled(cron="0 0 2 * * ? ")
@@ -614,30 +534,6 @@ public class ParkingServiceImpl implements ParkingService {
    		
    	}
     
-    private Long createOrderNo(Long time) {
-		String bill = String.valueOf(time) + (int) (Math.random()*1000);
-		return Long.valueOf(bill);
-	}
-    
-	private Timestamp addDays(Long oldPeriod, int days) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Timestamp(oldPeriod));
-		calendar.add(Calendar.DATE, days);
-		Timestamp time = new Timestamp(calendar.getTimeInMillis());
-		
-		return time;
-	}
-	
-	private Timestamp addMonth(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Timestamp(oldPeriod));
-		calendar.add(Calendar.MONTH, month);
-		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
-		
-		return newPeriod;
-	}
-	
 	private OrderEmbeddedHandler getOrderHandler(String orderType) {
 		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
 	}
@@ -645,11 +541,10 @@ public class ParkingServiceImpl implements ParkingService {
 	private String getOrderTypeCode(String orderType) {
 		Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
 		if(code==null){
-			LOGGER.error("Invalid parameter,orderType not found in OrderType.orderType="+orderType);
+			LOGGER.error("Invalid parameter,orderType not found, orderType={}", orderType);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter,orderType not found in OrderType");
+					"Invalid parameter,orderType not found");
 		}
-		LOGGER.debug("orderTypeCode="+code);
 		return String.valueOf(code);
 	}
 	@Override
@@ -746,12 +641,12 @@ public class ParkingServiceImpl implements ParkingService {
 	public void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd) {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getId());
 		if(order == null){
-			LOGGER.error("order {} is not exist",cmd.getId());
+			LOGGER.error("Order not found, cmd={}", cmd);
  			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
  					ErrorCodes.ERROR_GENERAL_EXCEPTION,
- 					"order is not exist");
+ 					"Order not found");
 		}
 		order.setIsDelete(IsOrderDelete.DELETED.getCode());
-		parkingProvider.deleteParkingRechargeOrder(order);
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 }

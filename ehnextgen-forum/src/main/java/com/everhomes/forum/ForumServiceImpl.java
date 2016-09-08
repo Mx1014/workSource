@@ -1148,6 +1148,17 @@ public class ForumServiceImpl implements ForumService {
          	forumIds.add(community.getDefaultForumId());
          }
          
+         Condition privateCond = null;
+         if(PostPrivacy.PRIVATE == PostPrivacy.fromCode(cmd.getPrivateFlag())){
+        	 Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(operator.getId());
+             
+             // 只有公开的帖子才能查到
+        	 privateCond = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+        	 privateCond = creatorCondition.or(privateCond);
+         }
+         
+        
+         
          Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
          
          Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
@@ -1174,6 +1185,10 @@ public class ForumServiceImpl implements ForumService {
          int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
          CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
          locator.setAnchor(cmd.getPageAnchor());
+         
+         if(null != privateCond){
+        	 condition = condition.and(privateCond);
+         }
          
          List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
     	 if(LOGGER.isInfoEnabled()) {
@@ -1302,7 +1317,7 @@ public class ForumServiceImpl implements ForumService {
         
         if(null != cmd.getEmbeddedAppId()){
         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
-        		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+        		categorys = CategoryConstants.GA_PRIVACY_CATEGORIES;
         	}
         	
         }
@@ -2429,7 +2444,7 @@ public class ForumServiceImpl implements ForumService {
         PostPrivacy privateFlag = PostPrivacy.fromCode(cmd.getPrivateFlag());
         if(privateFlag == null) {
             // 政府机构发的维修之类的帖，默认不公开
-            if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(post.getContentCategory())) {
+            if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(post.getCategoryId())) {
                 privateFlag =  PostPrivacy.PRIVATE;
             } else {
                 privateFlag =  PostPrivacy.PUBLIC;
