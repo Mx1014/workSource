@@ -105,8 +105,7 @@
         eh_journals | eh_journal_configs |
 		eh_community_services |
 
-        eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments 
-		eh_namespaces | eh_configurations |
+        eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments |
 		eh_approval_flows | eh_approval_flow_levels | eh_approval_rules | eh_approval_rule_flow_map | eh_approval_categories | eh_approval_requests | eh_approval_attachments | eh_approval_time_ranges | eh_approval_op_requests
         </includes>
             <!-- All elements that are excluded from your schema
