@@ -167,7 +167,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listBriefApprovalFlow")
 	@RestReturn(ListBriefApprovalFlowResponse.class)
 	public RestResponse listBriefApprovalFlow(ListBriefApprovalFlowCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listBriefApprovalFlow(cmd));
 	}
 	
 	/**

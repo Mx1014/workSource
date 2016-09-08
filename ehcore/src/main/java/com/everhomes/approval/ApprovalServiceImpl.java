@@ -57,6 +57,8 @@ import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
+import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
+import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.RuleFlowMap;
@@ -300,7 +302,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"current level exists, so you cannot create it again: flowId"+cmd.getFlowId()+", level="+cmd.getLevel());
 		}
-		if (!checkPreviousLevelExist(cmd.getFlowId(), cmd.getLevel())) {
+		if (cmd.getLevel().byteValue() != (byte)1 && !checkPreviousLevelExist(cmd.getFlowId(), cmd.getLevel())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"previous level does not exist, so you cannot create current level: flowId"+cmd.getFlowId()+", level="+cmd.getLevel());
 		}
@@ -494,6 +496,16 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"This flow has related to some rules, so you cannot delete it: flowId="+flowId);
 		}
 	}
+	
+	@Override
+	public ListBriefApprovalFlowResponse listBriefApprovalFlow(ListBriefApprovalFlowCommand cmd) {
+		Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<ApprovalFlow> approvalFlowList = approvalFlowProvider.listApprovalFlow(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		return new ListBriefApprovalFlowResponse(approvalFlowList.stream().map(a->ConvertHelper.convert(a, BriefApprovalFlowDTO.class)).collect(Collectors.toList()));
+	}
 
 	@Override
 	public CreateApprovalRuleResponse createApprovalRule(CreateApprovalRuleCommand cmd) {
@@ -519,6 +531,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 		
 		processApprovalTypeName(cmd.getRuleFlowMapList());
+		processFlowName(cmd.getRuleFlowMapList());
 		
 		ApprovalRuleDTO approvalRuleDTO = ConvertHelper.convert(approvalRule, ApprovalRuleDTO.class);
 		approvalRuleDTO.setRuleFlowMapList(cmd.getRuleFlowMapList());
@@ -584,6 +597,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 	}
 
+	private void processFlowName(List<RuleFlowMap> ruleFlowMapList) {
+		ruleFlowMapList.forEach(r->{
+			ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowById(r.getFlowId());
+			if (approvalFlow != null) {
+				r.setFlowName(approvalFlow.getName());
+			}
+		});
+	}
+
 	private void createApprovalRuleFlowMap(final Long ruleId, List<RuleFlowMap> ruleFlowMapList) {
 		ruleFlowMapList.forEach(r->{
 			if (ApprovalType.fromCode(r.getApprovalType()) == null) {
@@ -636,6 +658,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 
 		processApprovalTypeName(cmd.getRuleFlowMapList());
+		processFlowName(cmd.getRuleFlowMapList());
 		
 		ApprovalRuleDTO approvalRuleDTO = ConvertHelper.convert(tuple.first(), ApprovalRuleDTO.class);
 		approvalRuleDTO.setRuleFlowMapList(cmd.getRuleFlowMapList());
@@ -726,6 +749,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		map.forEach((key,value)->{
 			List<RuleFlowMap> ruleFlowMapList = value.stream().map(v->ConvertHelper.convert(v, RuleFlowMap.class)).collect(Collectors.toList());
 			processApprovalTypeName(ruleFlowMapList);
+			processFlowName(ruleFlowMapList);
 			ruleMap.get(key).setRuleFlowMapList(ruleFlowMapList);
 		});
 		

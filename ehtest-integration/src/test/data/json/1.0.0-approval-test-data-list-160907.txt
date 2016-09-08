@@ -1,0 +1,249 @@
+{
+  "eh_approval_categories":
+	[
+		{
+			"id": 1,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"approval_type": 1,
+			"category_name": "公出",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 15:39:55"
+		},
+		{
+			"id": 2,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"approval_type": 1,
+			"category_name": "事假",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 15:39:55"
+		},
+		{
+			"id": 3,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"approval_type": 1,
+			"category_name": "病假",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 15:39:55"
+		},
+		{
+			"id": 4,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"approval_type": 1,
+			"category_name": "调休",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 15:39:55"
+		},
+		{
+			"id": 5,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"approval_type": 1,
+			"category_name": "年休",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 15:39:55"
+		}
+	],
+	"eh_approval_flows":
+	[
+		{
+			"id": 1,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "小彤彤专属流程",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 17:06:24",
+			"update_time": "2016-09-07 17:06:24",
+			"operator_uid": 1
+		},
+		{
+			"id": 2,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "小tt专属流程",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 17:06:24",
+			"update_time": "2016-09-07 17:06:24",
+			"operator_uid": 1
+		},
+		{
+			"id": 3,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "小唐唐专属流程",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-07 17:06:24",
+			"update_time": "2016-09-07 17:06:24",
+			"operator_uid": 1
+		}
+	],
+	"eh_approval_flow_levels":
+	[
+		{
+			"id": 1,
+			"flow_id": 1,
+			"level": 1,
+			"target_type": 1,
+			"target_id": 1
+		},
+		{
+			"id": 2,
+			"flow_id": 1,
+			"level": 1,
+			"target_type": 1,
+			"target_id": 2
+		},
+		{
+			"id": 3,
+			"flow_id": 1,
+			"level": 2,
+			"target_type": 1,
+			"target_id": 2
+		},
+		{
+			"id": 4,
+			"flow_id": 1,
+			"level": 2,
+			"target_type": 1,
+			"target_id": 3
+		},
+		{
+			"id": 5,
+			"flow_id": 2,
+			"level": 1,
+			"target_type": 1,
+			"target_id": 1
+		},
+		{
+			"id": 6,
+			"flow_id": 2,
+			"level": 1,
+			"target_type": 1,
+			"target_id": 2
+		},
+		{
+			"id": 7,
+			"flow_id": 2,
+			"level": 2,
+			"target_type": 1,
+			"target_id": 2
+		},
+		{
+			"id": 8,
+			"flow_id": 3,
+			"level": 1,
+			"target_type": 1,
+			"target_id": 1
+		},
+		{
+			"id": 9,
+			"flow_id": 3,
+			"level": 2,
+			"target_type": 1,
+			"target_id": 3
+		}
+	],
+	"eh_approval_rules":
+	[
+		{
+			"id": 11,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "小彤彤1规则",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-08 10:01:19",
+			"update_time": "2016-09-08 10:01:19",
+			"operator_uid": 1
+		},
+		{
+			"id": 12,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "小彤彤2规则",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-08 10:01:19",
+			"update_time": "2016-09-08 10:01:19",
+			"operator_uid": 1
+		},
+		{
+			"id": 13,
+			"namespace_id": 999995,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "小彤彤3规则",
+			"status": 2,
+			"creator_uid": 1,
+			"create_time": "2016-09-08 10:01:19",
+			"update_time": "2016-09-08 10:01:19",
+			"operator_uid": 1
+		}
+	],
+	"eh_approval_rule_flow_map":
+	[
+		{
+			"id": 121,
+			"rule_id": 11,
+			"approval_type": 1,
+			"flow_id": 1,
+			"status": 2
+		},
+		{
+			"id": 122,
+			"rule_id": 11,
+			"approval_type": 2,
+			"flow_id": 2,
+			"status": 2
+		},
+		{
+			"id": 123,
+			"rule_id": 12,
+			"approval_type": 1,
+			"flow_id": 2,
+			"status": 2
+		},
+		{
+			"id": 124,
+			"rule_id": 12,
+			"approval_type": 2,
+			"flow_id": 2,
+			"status": 2
+		},
+		{
+			"id": 125,
+			"rule_id": 13,
+			"approval_type": 1,
+			"flow_id": 3,
+			"status": 2
+		},
+		{
+			"id": 126,
+			"rule_id": 13,
+			"approval_type": 2,
+			"flow_id": 2,
+			"status": 2
+		}
+	]
+}

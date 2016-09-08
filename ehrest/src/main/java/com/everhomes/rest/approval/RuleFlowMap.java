@@ -9,12 +9,22 @@ import com.everhomes.util.StringHelper;
  * <li>approvalType: 审批类型，{@link com.everhomes.rest.approval.ApprovalType}</li>
  * <li>approvalTypeName: 审批类型名称</li>
  * <li>flowId: 审批流程id</li>
+ * <li>flowflowName: 审批流程名称</li>
  * </ul>
  */
 public class RuleFlowMap {
 	private Byte approvalType;
 	private String approvalTypeName;
 	private Long flowId;
+	private String flowName;
+
+	public String getFlowName() {
+		return flowName;
+	}
+
+	public void setFlowName(String flowName) {
+		this.flowName = flowName;
+	}
 
 	public String getApprovalTypeName() {
 		return approvalTypeName;

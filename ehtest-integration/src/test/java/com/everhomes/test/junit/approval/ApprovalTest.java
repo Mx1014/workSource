@@ -1,10 +1,22 @@
 package com.everhomes.test.junit.approval;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jooq.Record;
+import org.jooq.Result;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.approval.ApprovalOwnerType;
+import com.everhomes.rest.approval.ApprovalTargetType;
+import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateAbsenceRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateAbsenceRequestBySceneResponse;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
@@ -69,6 +81,8 @@ import com.everhomes.rest.approval.ListBriefApprovalRuleRestResponse;
 import com.everhomes.rest.approval.ListForgotRequestCommand;
 import com.everhomes.rest.approval.ListForgotRequestResponse;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
+import com.everhomes.rest.approval.RuleFlowMap;
+import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalCategoryRestResponse;
@@ -81,6 +95,7 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelRestResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleRestResponse;
+import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.techpark.punch.PunchListAbsenceRequestRestResponse;
 import com.everhomes.rest.techpark.punch.PunchListForgotRequestRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse;
@@ -90,64 +105,95 @@ import com.everhomes.rest.ui.approval.ApprovalListApprovalLogOfRequestBySceneRes
 import com.everhomes.rest.ui.approval.ApprovalListApprovalRequestBySceneRestResponse;
 import com.everhomes.rest.ui.techpark.punch.TechparkPunchCreateAbsenceRequestBySceneRestResponse;
 import com.everhomes.rest.ui.techpark.punch.TechparkPunchCreateForgotRequestBySceneRestResponse;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhApprovalCategories;
+import com.everhomes.server.schema.tables.pojos.EhApprovalFlowLevels;
+import com.everhomes.server.schema.tables.pojos.EhApprovalFlows;
+import com.everhomes.server.schema.tables.pojos.EhApprovalRuleFlowMap;
+import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 
 public class ApprovalTest extends BaseLoginAuthTestCase {
-	//增加审批类别，如请假的公出、事假等
+	//1. 增加审批类别，如请假的公出、事假等
 	private static final String CREATE_APPROVAL_CATEGORY_URL = "/approval/createApprovalCategory";
-	//更新审批类别
+	//2. 更新审批类别
 	private static final String UPDATE_APPROVAL_CATEGORY_URL = "/approval/updateApprovalCategory";
-	//列出审批类别
+	//3. 列出审批类别
 	private static final String LIST_APPROVAL_CATEGORY_URL = "/approval/listApprovalCategory";
-	//删除审批类别
+	//4. 删除审批类别
 	private static final String DELETE_APPROVAL_CATEGORY_URL = "/approval/deleteApprovalCategory";
-	//设置审批流程信息
+	//5. 设置审批流程信息
 	private static final String CREATE_APPROVAL_FLOW_INFO_URL = "/approval/createApprovalFlowInfo";
-	//更新审批流程信息
+	//6. 更新审批流程信息
 	private static final String UPDATE_APPROVAL_FLOW_INFO_URL = "/approval/updateApprovalFlowInfo";
-	//设置审批流程级别
+	//7. 设置审批流程级别
 	private static final String CREATE_APPROVAL_FLOW_LEVEL_URL = "/approval/createApprovalFlowLevel";
-	//更新审批流程级别
+	//8. 更新审批流程级别
 	private static final String UPDATE_APPROVAL_FLOW_LEVEL_URL = "/approval/updateApprovalFlowLevel";
-	//审批流程列表
+	//9. 审批流程列表
 	private static final String LIST_APPROVAL_FLOW_URL = "/approval/listApprovalFlow";
-	//审批流程简短列表
+	//10. 审批流程简短列表
 	private static final String LIST_BRIEF_APPROVAL_FLOW_URL = "/approval/listBriefApprovalFlow";
-	//删除审批流程
+	//11. 删除审批流程
 	private static final String DELETE_APPROVAL_FLOW_URL = "/approval/deleteApprovalFlow";
-	//增加审批规则
+	//12. 增加审批规则
 	private static final String CREATE_APPROVAL_RULE_URL = "/approval/createApprovalRule";
-	//更新审批规则
+	//13. 更新审批规则
 	private static final String UPDATE_APPROVAL_RULE_URL = "/approval/updateApprovalRule";
-	//删除审批规则
+	//14. 删除审批规则
 	private static final String DELETE_APPROVAL_RULE_URL = "/approval/deleteApprovalRule";
-	//审批规则列表
+	//15. 审批规则列表
 	private static final String LIST_APPROVAL_RULE_URL = "/approval/listApprovalRule";
-	//审批规则简短列表
+	//16. 审批规则简短列表
 	private static final String LIST_BRIEF_APPROVAL_RULE_URL = "/approval/listBriefApprovalRule";
-	//同意申请
+	//17. 同意申请
 	private static final String APPROVE_APPROVAL_REQUEST_URL = "/approval/approveApprovalRequest";
-	//驳回申请
+	//18. 驳回申请
 	private static final String REJECT_APPROVAL_REQUEST_URL = "/approval/rejectApprovalRequest";
-	//获取申请的审批基本信息
+	//19. 获取申请的审批基本信息
 	private static final String GET_APPROVAL_BASIC_INFO_OF_REQUEST_URL = "/approval/getApprovalBasicInfoOfRequest";
-	//获取申请的审批日志与审批流程列表
+	//20. 获取申请的审批日志与审批流程列表
 	private static final String LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_URL = "/approval/listApprovalLogAndFlowOfRequest";
-	//获取申请的审批日志列表
+	//21. 获取申请的审批日志列表
 	private static final String LIST_APPROVAL_LOG_OF_REQUEST_URL = "/approval/listApprovalLogOfRequest";
-	//获取申请的审批流程列表
+	//22. 获取申请的审批流程列表
 	private static final String LIST_APPROVAL_FLOW_OF_REQUEST_URL = "/approval/listApprovalFlowOfRequest";
-	//人员列表，可按部门、姓名筛选
+	//23. 人员列表，可按部门、姓名筛选
 	private static final String LIST_APPROVAL_USER_URL = "/approval/listApprovalUser";
+	//24. 忘打卡申请列表
+	private static final String LIST_FORGOT_REQUEST_URL = "/techpark/punch/listForgotRequest";
+	//25. 请假申请列表
+	private static final String LIST_ABSENCE_REQUEST_URL = "/techpark/punch/listAbsenceRequest";
+	//26. 创建请假申请（客户端）
+	private static final String CREATE_ABSENCE_REQUEST_BY_SCENE_URL = "/ui/techpark/punch/createAbsenceRequestByScene";
+	//27. 创建忘打卡申请（客户端）
+	private static final String CREATE_FORGOT_REQUEST_BY_SCENE_URL = "/ui/techpark/punch/createForgotRequestByScene";
+	//28. 申请列表（客户端）
+	private static final String LIST_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalRequestByScene";
+	//29. 获取申请的审批基本信息（客户端）
+	private static final String GET_APPROVAL_BASIC_INFO_OF_REQUEST_BY_SCENE_URL = "/ui/approval/getApprovalBasicInfoOfRequestByScene";
+	//30. 获取申请的审批日志与审批流程列表（客户端）
+	private static final String LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalLogAndFlowOfRequestByScene";
+	//31. 获取申请的审批日志列表（客户端）
+	private static final String LIST_APPROVAL_LOG_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalLogOfRequestByScene";
+	//32. 获取申请的审批流程列表（客户端）
+	private static final String LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalFlowOfRequestByScene";
 
 
-	//增加审批类别，如请假的公出、事假等
+	//1. 增加审批类别，如请假的公出、事假等
 	//@Test
 	public void testCreateApprovalCategory() {
 		String url = CREATE_APPROVAL_CATEGORY_URL;
 		logon();
 		CreateApprovalCategoryCommand cmd = new CreateApprovalCategoryCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setApprovalType(ApprovalType.ABSENCE.getCode());
+		cmd.setCategoryName("公出");
 
 		CreateApprovalCategoryRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalCategoryRestResponse.class);
 		assertNotNull(response);
@@ -155,16 +201,34 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		CreateApprovalCategoryResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getCategory());
+		assertNotNull(myResponse.getCategory().getId());
+		assertNotNull(myResponse.getCategory().getOwnerType());
+		assertNotNull(myResponse.getCategory().getCategoryName());
+		assertNotNull(myResponse.getCategory().getOwnerId());
+		assertNotNull(myResponse.getCategory().getNamespaceId());
+		assertNotNull(myResponse.getCategory().getApprovalType());
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_CATEGORIES).fetchOne();
+		assertNotNull(record);
+		EhApprovalCategories category = ConvertHelper.convert(record, EhApprovalCategories.class);
+		assertEquals(myResponse.getCategory().getId(), category.getId());
+		assertEquals(myResponse.getCategory().getCategoryName(), category.getCategoryName());
 	}
 
-	//更新审批类别
+	//2. 更新审批类别
 	//@Test
 	public void testUpdateApprovalCategory() {
 		String url = UPDATE_APPROVAL_CATEGORY_URL;
 		logon();
+		testCreateApprovalCategory();
 		UpdateApprovalCategoryCommand cmd = new UpdateApprovalCategoryCommand();
+		cmd.setId(1L);
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setApprovalType(ApprovalType.ABSENCE.getCode());
+		cmd.setCategoryName("事假");
 
 		UpdateApprovalCategoryRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalCategoryRestResponse.class);
 		assertNotNull(response);
@@ -172,16 +236,35 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		UpdateApprovalCategoryResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getCategory());
+		assertNotNull(myResponse.getCategory().getId());
+		assertNotNull(myResponse.getCategory().getOwnerType());
+		assertNotNull(myResponse.getCategory().getCategoryName());
+		assertNotNull(myResponse.getCategory().getOwnerId());
+		assertNotNull(myResponse.getCategory().getNamespaceId());
+		assertNotNull(myResponse.getCategory().getApprovalType());
 
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_CATEGORIES).fetchOne();
+		assertNotNull(record);
+		EhApprovalCategories category = ConvertHelper.convert(record, EhApprovalCategories.class);
+		assertEquals(myResponse.getCategory().getId(), category.getId());
+		assertEquals(myResponse.getCategory().getCategoryName(), category.getCategoryName());
+		assertEquals("事假", category.getCategoryName());
 
 	}
 
-	//列出审批类别
+	//3. 列出审批类别
 	//@Test
 	public void testListApprovalCategory() {
 		String url = LIST_APPROVAL_CATEGORY_URL;
 		logon();
+		initListData();
+		
 		ListApprovalCategoryCommand cmd = new ListApprovalCategoryCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setApprovalType(ApprovalType.ABSENCE.getCode());
 
 		ListApprovalCategoryRestResponse response = httpClientService.restPost(url, cmd, ListApprovalCategoryRestResponse.class);
 		assertNotNull(response);
@@ -189,31 +272,45 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListApprovalCategoryResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getCategoryList());
+		assertEquals(5, myResponse.getCategoryList().size());
+		assertEquals("公出", myResponse.getCategoryList().get(0).getCategoryName());
+		assertEquals("年休", myResponse.getCategoryList().get(4).getCategoryName());
 
 	}
 
-	//删除审批类别
+	//4. 删除审批类别
 	//@Test
 	public void testDeleteApprovalCategory() {
 		String url = DELETE_APPROVAL_CATEGORY_URL;
 		logon();
+		initListData();
 		DeleteApprovalCategoryCommand cmd = new DeleteApprovalCategoryCommand();
+		cmd.setId(2L);
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setApprovalType(ApprovalType.ABSENCE.getCode());
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Result<Record> result = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_CATEGORIES).where(Tables.EH_APPROVAL_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode())).fetch();
+		assertNotNull(result);
+		assertEquals(4, result.size());
 	}
 
-	//设置审批流程信息
+	//5. 设置审批流程信息
 	//@Test
-	public void testCreateApprovalFlowInfo() {
+	public Long testCreateApprovalFlowInfo() {
 		String url = CREATE_APPROVAL_FLOW_INFO_URL;
 		logon();
 		CreateApprovalFlowInfoCommand cmd = new CreateApprovalFlowInfoCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setName("小彤彤专属流程");
 
 		CreateApprovalFlowInfoRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalFlowInfoRestResponse.class);
 		assertNotNull(response);
@@ -221,16 +318,34 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		CreateApprovalFlowInfoResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getBriefApprovalFlow());
+		assertNotNull(myResponse.getBriefApprovalFlow().getId());
+		assertNotNull(myResponse.getBriefApprovalFlow().getOwnerType());
+		assertNotNull(myResponse.getBriefApprovalFlow().getName());
+		assertNotNull(myResponse.getBriefApprovalFlow().getOwnerId());
+		assertNotNull(myResponse.getBriefApprovalFlow().getNamespaceId());
 
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_FLOWS).fetchOne();
+		assertNotNull(record);
+		EhApprovalFlows flow = ConvertHelper.convert(record, EhApprovalFlows.class);
+		assertEquals(myResponse.getBriefApprovalFlow().getId(), flow.getId());
+		assertEquals(myResponse.getBriefApprovalFlow().getName(), flow.getName());
 
+		return myResponse.getBriefApprovalFlow().getId();
 	}
 
-	//更新审批流程信息
+	//6. 更新审批流程信息
 	//@Test
 	public void testUpdateApprovalFlowInfo() {
 		String url = UPDATE_APPROVAL_FLOW_INFO_URL;
 		logon();
+		testCreateApprovalFlowInfo();
 		UpdateApprovalFlowInfoCommand cmd = new UpdateApprovalFlowInfoCommand();
+		cmd.setId(1L);
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setName("小唐唐专属流程");
 
 		UpdateApprovalFlowInfoRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalFlowInfoRestResponse.class);
 		assertNotNull(response);
@@ -238,16 +353,46 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		UpdateApprovalFlowInfoResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getBriefApprovalFlow());
+		assertNotNull(myResponse.getBriefApprovalFlow().getId());
+		assertNotNull(myResponse.getBriefApprovalFlow().getOwnerType());
+		assertNotNull(myResponse.getBriefApprovalFlow().getName());
+		assertNotNull(myResponse.getBriefApprovalFlow().getOwnerId());
+		assertNotNull(myResponse.getBriefApprovalFlow().getNamespaceId());
 
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_FLOWS).fetchOne();
+		assertNotNull(record);
+		EhApprovalFlows flow = ConvertHelper.convert(record, EhApprovalFlows.class);
+		assertEquals(myResponse.getBriefApprovalFlow().getId(), flow.getId());
+		assertEquals(myResponse.getBriefApprovalFlow().getName(), flow.getName());
+		assertEquals("小唐唐专属流程", flow.getName());
 
 	}
 
-	//设置审批流程级别
+	//7. 设置审批流程级别
 	//@Test
 	public void testCreateApprovalFlowLevel() {
 		String url = CREATE_APPROVAL_FLOW_LEVEL_URL;
 		logon();
+		Long flowId = testCreateApprovalFlowInfo();
+		
+		//第一次请求
 		CreateApprovalFlowLevelCommand cmd = new CreateApprovalFlowLevelCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setFlowId(flowId);
+		cmd.setLevel((byte)1);
+		List<ApprovalUser> approvalUserList = new ArrayList<>();
+		ApprovalUser approvalUser = new ApprovalUser();
+		approvalUser.setTargetType(ApprovalTargetType.USER.getCode());
+		approvalUser.setTargetId(1L);
+		approvalUserList.add(approvalUser);
+		ApprovalUser approvalUser2 = new ApprovalUser();
+		approvalUser2.setTargetType(ApprovalTargetType.USER.getCode());
+		approvalUser2.setTargetId(2L);
+		approvalUserList.add(approvalUser2);
+		cmd.setApprovalUserList(approvalUserList);
 
 		CreateApprovalFlowLevelRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalFlowLevelRestResponse.class);
 		assertNotNull(response);
@@ -255,16 +400,59 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		CreateApprovalFlowLevelResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertEquals(flowId.longValue(), myResponse.getFlowId().longValue());
+		assertNotNull(myResponse.getApprovalFlowLevel());
+		assertEquals((byte)1, myResponse.getApprovalFlowLevel().getLevel().byteValue());
+		assertNotNull(myResponse.getApprovalFlowLevel().getApprovalUserList());
+		assertEquals(2, myResponse.getApprovalFlowLevel().getApprovalUserList().size());
+		assertNotNull(myResponse.getApprovalFlowLevel().getApprovalUserList().get(0).getTargetName());
+		
+		//第二次请求
+		cmd = new CreateApprovalFlowLevelCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setFlowId(flowId);
+		cmd.setLevel((byte)2);
+		approvalUserList = new ArrayList<>();
+		approvalUser = new ApprovalUser();
+		approvalUser.setTargetType(ApprovalTargetType.USER.getCode());
+		approvalUser.setTargetId(2L);
+		approvalUserList.add(approvalUser);
+		approvalUser2 = new ApprovalUser();
+		approvalUser2.setTargetType(ApprovalTargetType.USER.getCode());
+		approvalUser2.setTargetId(3L);
+		approvalUserList.add(approvalUser2);
+		cmd.setApprovalUserList(approvalUserList);
 
+		response = httpClientService.restPost(url, cmd, CreateApprovalFlowLevelRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
+		Result<Record> result = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS).fetch();
+		assertNotNull(result);
+		assertEquals(4, result.size());
+		
 	}
 
-	//更新审批流程级别
+	//8. 更新审批流程级别
 	//@Test
 	public void testUpdateApprovalFlowLevel() {
 		String url = UPDATE_APPROVAL_FLOW_LEVEL_URL;
 		logon();
+		initListData();
 		UpdateApprovalFlowLevelCommand cmd = new UpdateApprovalFlowLevelCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setFlowId(1L);
+		cmd.setLevel((byte)1);
+		List<ApprovalUser> approvalUserList = new ArrayList<>();
+		ApprovalUser approvalUser = new ApprovalUser();
+		approvalUser.setTargetType(ApprovalTargetType.USER.getCode());
+		approvalUser.setTargetId(3L);
+		approvalUserList.add(approvalUser);
+		cmd.setApprovalUserList(approvalUserList);
 
 		UpdateApprovalFlowLevelRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalFlowLevelRestResponse.class);
 		assertNotNull(response);
@@ -272,16 +460,26 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		UpdateApprovalFlowLevelResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertEquals(1L, myResponse.getFlowId().longValue());
+		assertNotNull(myResponse.getApprovalFlowLevel());
+		assertEquals((byte)1, myResponse.getApprovalFlowLevel().getLevel().byteValue());
+		assertNotNull(myResponse.getApprovalFlowLevel().getApprovalUserList());
+		assertEquals(1, myResponse.getApprovalFlowLevel().getApprovalUserList().size());
+		assertNotNull(myResponse.getApprovalFlowLevel().getApprovalUserList().get(0).getTargetName());
 
 	}
 
-	//审批流程列表
+	//9. 审批流程列表
 	//@Test
 	public void testListApprovalFlow() {
 		String url = LIST_APPROVAL_FLOW_URL;
 		logon();
+		initListData();
 		ListApprovalFlowCommand cmd = new ListApprovalFlowCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setPageSize(2);
 
 		ListApprovalFlowRestResponse response = httpClientService.restPost(url, cmd, ListApprovalFlowRestResponse.class);
 		assertNotNull(response);
@@ -289,16 +487,33 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListApprovalFlowResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertEquals(2L, myResponse.getNextPageAnchor().longValue());
+		assertNotNull(myResponse.getApprovalFlowList());
+		assertEquals(2, myResponse.getApprovalFlowList().size());
+		
+		cmd.setPageAnchor(myResponse.getNextPageAnchor().longValue());
+		response = httpClientService.restPost(url, cmd, ListApprovalFlowRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
+		myResponse = response.getResponse();
+		assertNotNull(myResponse);
+		assertNull(myResponse.getNextPageAnchor());
+		assertNotNull(myResponse.getApprovalFlowList());
+		assertEquals(1, myResponse.getApprovalFlowList().size());
 
 	}
 
-	//审批流程简短列表
+	//10. 审批流程简短列表
 	//@Test
 	public void testListBriefApprovalFlow() {
 		String url = LIST_BRIEF_APPROVAL_FLOW_URL;
 		logon();
+		initListData();
 		ListBriefApprovalFlowCommand cmd = new ListBriefApprovalFlowCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
 
 		ListBriefApprovalFlowRestResponse response = httpClientService.restPost(url, cmd, ListBriefApprovalFlowRestResponse.class);
 		assertNotNull(response);
@@ -306,31 +521,56 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListBriefApprovalFlowResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getApprovalFlowList());
+		assertEquals(3, myResponse.getApprovalFlowList().size());
+		assertNotNull(myResponse.getApprovalFlowList().get(0).getName());
 
 	}
 
-	//删除审批流程
+	//11. 删除审批流程
 	//@Test
 	public void testDeleteApprovalFlow() {
 		String url = DELETE_APPROVAL_FLOW_URL;
 		logon();
+		initListData();
 		DeleteApprovalFlowCommand cmd = new DeleteApprovalFlowCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_FLOWS).where(Tables.EH_APPROVAL_FLOWS.ID.eq(1L)).fetchOne();
+		assertNotNull(record);
+		EhApprovalFlows ehApprovalFlows = ConvertHelper.convert(record, EhApprovalFlows.class);
+		assertEquals(CommonStatus.INACTIVE.getCode(), ehApprovalFlows.getStatus().byteValue());
 
 	}
 
-	//增加审批规则
+	//12. 增加审批规则
 	//@Test
 	public void testCreateApprovalRule() {
 		String url = CREATE_APPROVAL_RULE_URL;
 		logon();
+		initListData();
 		CreateApprovalRuleCommand cmd = new CreateApprovalRuleCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setName("小彤彤规则");
+		List<RuleFlowMap> ruleFlowMapList = new ArrayList<>();
+		RuleFlowMap ruleFlowMap = new RuleFlowMap();
+		ruleFlowMap.setApprovalType(ApprovalType.ABSENCE.getCode());
+		ruleFlowMap.setFlowId(1L);
+		ruleFlowMapList.add(ruleFlowMap);
+		RuleFlowMap ruleFlowMap2 = new RuleFlowMap();
+		ruleFlowMap2.setApprovalType(ApprovalType.FORGOT.getCode());
+		ruleFlowMap2.setFlowId(2L);
+		ruleFlowMapList.add(ruleFlowMap2);
+		cmd.setRuleFlowMapList(ruleFlowMapList);
 
 		CreateApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, CreateApprovalRuleRestResponse.class);
 		assertNotNull(response);
@@ -338,16 +578,37 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		CreateApprovalRuleResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getApprovalRule());
+		assertNotNull(myResponse.getApprovalRule().getId());
+		assertNotNull(myResponse.getApprovalRule().getName());
+		assertNotNull(myResponse.getApprovalRule().getRuleFlowMapList());
+		assertEquals(2, myResponse.getApprovalRule().getRuleFlowMapList().size());
+		
 
 	}
 
-	//更新审批规则
+	//13. 更新审批规则
 	//@Test
 	public void testUpdateApprovalRule() {
 		String url = UPDATE_APPROVAL_RULE_URL;
 		logon();
+		initListData();
 		UpdateApprovalRuleCommand cmd = new UpdateApprovalRuleCommand();
+		cmd.setId(11L);
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setName("tt rules");
+		List<RuleFlowMap> ruleFlowMapList = new ArrayList<>();
+		RuleFlowMap ruleFlowMap = new RuleFlowMap();
+		ruleFlowMap.setApprovalType(ApprovalType.ABSENCE.getCode());
+		ruleFlowMap.setFlowId(3L);
+		ruleFlowMapList.add(ruleFlowMap);
+		RuleFlowMap ruleFlowMap2 = new RuleFlowMap();
+		ruleFlowMap2.setApprovalType(ApprovalType.FORGOT.getCode());
+		ruleFlowMap2.setFlowId(3L);
+		ruleFlowMapList.add(ruleFlowMap2);
+		cmd.setRuleFlowMapList(ruleFlowMapList);
 
 		UpdateApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, UpdateApprovalRuleRestResponse.class);
 		assertNotNull(response);
@@ -355,31 +616,55 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		UpdateApprovalRuleResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getApprovalRule());
+		assertNotNull(myResponse.getApprovalRule().getId());
+		assertNotNull(myResponse.getApprovalRule().getName());
+		assertEquals("tt rules", myResponse.getApprovalRule().getName());
+		assertNotNull(myResponse.getApprovalRule().getRuleFlowMapList());
+		assertEquals(2, myResponse.getApprovalRule().getRuleFlowMapList().size());
 
 	}
 
-	//删除审批规则
+	//14. 删除审批规则
 	//@Test
 	public void testDeleteApprovalRule() {
 		String url = DELETE_APPROVAL_RULE_URL;
 		logon();
+		initListData();
 		DeleteApprovalRuleCommand cmd = new DeleteApprovalRuleCommand();
+		cmd.setId(11L);
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_RULES).where(Tables.EH_APPROVAL_RULES.ID.eq(11L)).fetchOne();
+		assertNotNull(record);
+		EhApprovalRules ehApprovalRules = ConvertHelper.convert(record, EhApprovalRules.class);
+		assertEquals(CommonStatus.INACTIVE.getCode(), ehApprovalRules.getStatus().byteValue());
+		
+		Result<Record> result = dbProvider.getDslContext().select().from(Tables.EH_APPROVAL_RULE_FLOW_MAP).where(Tables.EH_APPROVAL_RULE_FLOW_MAP.RULE_ID.eq(11L)).fetch();
+		assertNotNull(record);
+		List<EhApprovalRuleFlowMap> list = result.map(r->ConvertHelper.convert(r, EhApprovalRuleFlowMap.class));
+		assertNotNull(list);
+		assertEquals(2, list.size());
+		assertEquals(CommonStatus.INACTIVE.getCode(), list.get(0).getStatus().byteValue());
 	}
 
-	//审批规则列表
+	//15. 审批规则列表
 	//@Test
 	public void testListApprovalRule() {
 		String url = LIST_APPROVAL_RULE_URL;
 		logon();
+		initListData();
 		ListApprovalRuleCommand cmd = new ListApprovalRuleCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setPageSize(2);
 
 		ListApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, ListApprovalRuleRestResponse.class);
 		assertNotNull(response);
@@ -387,16 +672,33 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListApprovalRuleResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getNextPageAnchor());
+		assertNotNull(myResponse.getApprovalRuleList());
+		assertEquals(2, myResponse.getApprovalRuleList().size());
+		
+		cmd.setPageAnchor(myResponse.getNextPageAnchor());
+		response = httpClientService.restPost(url, cmd, ListApprovalRuleRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		myResponse = response.getResponse();
+		assertNotNull(myResponse);
+		assertNull(myResponse.getNextPageAnchor());
+		assertNotNull(myResponse.getApprovalRuleList());
+		assertEquals(1, myResponse.getApprovalRuleList().size());
+		
 	}
 
-	//审批规则简短列表
+	//16. 审批规则简短列表
 	//@Test
 	public void testListBriefApprovalRule() {
 		String url = LIST_BRIEF_APPROVAL_RULE_URL;
 		logon();
+		initListData();
 		ListBriefApprovalRuleCommand cmd = new ListBriefApprovalRuleCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
 
 		ListBriefApprovalRuleRestResponse response = httpClientService.restPost(url, cmd, ListBriefApprovalRuleRestResponse.class);
 		assertNotNull(response);
@@ -404,16 +706,24 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListBriefApprovalRuleResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getApprovalRuleList());
+		assertEquals(3, myResponse.getApprovalRuleList().size());
+		assertNotNull(myResponse.getApprovalRuleList().get(0).getName());
 
 	}
 
-	//同意申请
-	//@Test
+	//17. 同意申请
+	@Test
 	public void testApproveApprovalRequest() {
 		String url = APPROVE_APPROVAL_REQUEST_URL;
 		logon();
 		ApproveApprovalRequestCommand cmd = new ApproveApprovalRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		List<Long> longList = new ArrayList<>();
+		longList.add(1L);
+		cmd.setRequestIdList(longList);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
@@ -423,12 +733,19 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//驳回申请
+	//18. 驳回申请
 	//@Test
 	public void testRejectApprovalRequest() {
 		String url = REJECT_APPROVAL_REQUEST_URL;
 		logon();
 		RejectApprovalRequestCommand cmd = new RejectApprovalRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		List<Long> longList = new ArrayList<>();
+		longList.add(1L);
+		cmd.setRequestIdList(longList);
+		cmd.setReason("");
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
@@ -438,12 +755,16 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批基本信息
+	//19. 获取申请的审批基本信息
 	//@Test
 	public void testGetApprovalBasicInfoOfRequest() {
 		String url = GET_APPROVAL_BASIC_INFO_OF_REQUEST_URL;
 		logon();
 		GetApprovalBasicInfoOfRequestCommand cmd = new GetApprovalBasicInfoOfRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setRequestId(1L);
 
 		GetApprovalBasicInfoOfRequestRestResponse response = httpClientService.restPost(url, cmd, GetApprovalBasicInfoOfRequestRestResponse.class);
 		assertNotNull(response);
@@ -455,12 +776,16 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批日志与审批流程列表
+	//20. 获取申请的审批日志与审批流程列表
 	//@Test
 	public void testListApprovalLogAndFlowOfRequest() {
 		String url = LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_URL;
 		logon();
 		ListApprovalLogAndFlowOfRequestCommand cmd = new ListApprovalLogAndFlowOfRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setRequestId(1L);
 
 		ListApprovalLogAndFlowOfRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalLogAndFlowOfRequestRestResponse.class);
 		assertNotNull(response);
@@ -472,12 +797,16 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批日志列表
+	//21. 获取申请的审批日志列表
 	//@Test
 	public void testListApprovalLogOfRequest() {
 		String url = LIST_APPROVAL_LOG_OF_REQUEST_URL;
 		logon();
 		ListApprovalLogOfRequestCommand cmd = new ListApprovalLogOfRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setRequestId(1L);
 
 		ListApprovalLogOfRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalLogOfRequestRestResponse.class);
 		assertNotNull(response);
@@ -489,12 +818,16 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批流程列表
+	//22. 获取申请的审批流程列表
 	//@Test
 	public void testListApprovalFlowOfRequest() {
 		String url = LIST_APPROVAL_FLOW_OF_REQUEST_URL;
 		logon();
 		ListApprovalFlowOfRequestCommand cmd = new ListApprovalFlowOfRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setRequestId(1L);
 
 		ListApprovalFlowOfRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalFlowOfRequestRestResponse.class);
 		assertNotNull(response);
@@ -506,12 +839,21 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//人员列表，可按部门、姓名筛选
+	//23. 人员列表，可按部门、姓名筛选
 	//@Test
 	public void testListApprovalUser() {
 		String url = LIST_APPROVAL_USER_URL;
 		logon();
 		ListApprovalUserCommand cmd = new ListApprovalUserCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setFlowId(1L);
+		cmd.setLevel((byte)1);
+		cmd.setDepartmentId(1L);
+		cmd.setKeyword("");
+		cmd.setPageSize(0);
+		cmd.setPageAnchor(1L);
 
 		ListApprovalUserRestResponse response = httpClientService.restPost(url, cmd, ListApprovalUserRestResponse.class);
 		assertNotNull(response);
@@ -523,19 +865,21 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-
-	//忘打卡申请列表
-	private static final String LIST_FORGOT_REQUEST_URL = "/techpark/punch/listForgotRequest";
-	//请假申请列表
-	private static final String LIST_ABSENCE_REQUEST_URL = "/techpark/punch/listAbsenceRequest";
-
-
-	//忘打卡申请列表
+	//24. 忘打卡申请列表
 	//@Test
 	public void testListForgotRequest() {
 		String url = LIST_FORGOT_REQUEST_URL;
 		logon();
 		ListForgotRequestCommand cmd = new ListForgotRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setFromDate(1L);
+		cmd.setEndDate(1L);
+		cmd.setNickName("");
+		cmd.setQueryType((byte)1);
+		cmd.setPageSize(0);
+		cmd.setPageAnchor(1L);
 
 		PunchListForgotRequestRestResponse response = httpClientService.restPost(url, cmd, PunchListForgotRequestRestResponse.class);
 		assertNotNull(response);
@@ -547,12 +891,20 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//请假申请列表
+	//25. 请假申请列表
 	//@Test
 	public void testListAbsenceRequest() {
 		String url = LIST_ABSENCE_REQUEST_URL;
 		logon();
 		ListAbsenceRequestCommand cmd = new ListAbsenceRequestCommand();
+		cmd.setNamespaceId(999995);
+		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		cmd.setOwnerId(1L);
+		cmd.setCategoryId(1L);
+		cmd.setNickName("");
+		cmd.setQueryType((byte)1);
+		cmd.setPageSize(0);
+		cmd.setPageAnchor(1L);
 
 		PunchListAbsenceRequestRestResponse response = httpClientService.restPost(url, cmd, PunchListAbsenceRequestRestResponse.class);
 		assertNotNull(response);
@@ -564,19 +916,29 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-
-	//创建请假申请（客户端）
-	private static final String CREATE_ABSENCE_REQUEST_BY_SCENE_URL = "/ui/techpark/punch/createAbsenceRequestByScene";
-	//创建忘打卡申请（客户端）
-	private static final String CREATE_FORGOT_REQUEST_BY_SCENE_URL = "/ui/techpark/punch/createForgotRequestByScene";
-
-
-	//创建请假申请（客户端）
+	//26. 创建请假申请（客户端）
 	//@Test
 	public void testCreateAbsenceRequestByScene() {
 		String url = CREATE_ABSENCE_REQUEST_BY_SCENE_URL;
 		logon();
 		CreateAbsenceRequestBySceneCommand cmd = new CreateAbsenceRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setCategoryId(1L);
+		cmd.setReason("");
+		List<TimeRange> timeRangeList = new ArrayList<>();
+		TimeRange timeRange = new TimeRange();
+		timeRange.setType((byte)1);
+		timeRange.setFromTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		timeRange.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		timeRangeList.add(timeRange);
+		cmd.setTimeRangeList(timeRangeList);
+		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
+		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
+		attachmentDescriptor.setContentType("");
+		attachmentDescriptor.setContentUri("");
+		attachmentDescriptor.setContentUrl("");
+		attachmentDescriptorList.add(attachmentDescriptor);
+		cmd.setAttachmentList(attachmentDescriptorList);
 
 		TechparkPunchCreateAbsenceRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, TechparkPunchCreateAbsenceRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -588,12 +950,24 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//创建忘打卡申请（客户端）
+	//27. 创建忘打卡申请（客户端）
 	//@Test
 	public void testCreateForgotRequestByScene() {
 		String url = CREATE_FORGOT_REQUEST_BY_SCENE_URL;
 		logon();
 		CreateForgotRequestBySceneCommand cmd = new CreateForgotRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setRequestToken("");
+		cmd.setPunchDate(1L);
+		cmd.setForgotType((byte)1);
+		cmd.setReason("");
+		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
+		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
+		attachmentDescriptor.setContentType("");
+		attachmentDescriptor.setContentUri("");
+		attachmentDescriptor.setContentUrl("");
+		attachmentDescriptorList.add(attachmentDescriptor);
+		cmd.setAttachmentList(attachmentDescriptorList);
 
 		TechparkPunchCreateForgotRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, TechparkPunchCreateForgotRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -605,25 +979,17 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-
-	//申请列表（客户端）
-	private static final String LIST_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalRequestByScene";
-	//获取申请的审批基本信息（客户端）
-	private static final String GET_APPROVAL_BASIC_INFO_OF_REQUEST_BY_SCENE_URL = "/ui/approval/getApprovalBasicInfoOfRequestByScene";
-	//获取申请的审批日志与审批流程列表（客户端）
-	private static final String LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalLogAndFlowOfRequestByScene";
-	//获取申请的审批日志列表（客户端）
-	private static final String LIST_APPROVAL_LOG_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalLogOfRequestByScene";
-	//获取申请的审批流程列表（客户端）
-	private static final String LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalFlowOfRequestByScene";
-
-
-	//申请列表（客户端）
+	//28. 申请列表（客户端）
 	//@Test
 	public void testListApprovalRequestByScene() {
 		String url = LIST_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
 		ListApprovalRequestBySceneCommand cmd = new ListApprovalRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setApprovalType((byte)1);
+		cmd.setCategoryId(1L);
+		cmd.setPageAnchor(1L);
+		cmd.setPageSize(0);
 
 		ApprovalListApprovalRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -635,12 +1001,14 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批基本信息（客户端）
+	//29. 获取申请的审批基本信息（客户端）
 	//@Test
 	public void testGetApprovalBasicInfoOfRequestByScene() {
 		String url = GET_APPROVAL_BASIC_INFO_OF_REQUEST_BY_SCENE_URL;
 		logon();
 		GetApprovalBasicInfoOfRequestBySceneCommand cmd = new GetApprovalBasicInfoOfRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setRequestToken("");
 
 		ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -652,12 +1020,14 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批日志与审批流程列表（客户端）
+	//30. 获取申请的审批日志与审批流程列表（客户端）
 	//@Test
 	public void testListApprovalLogAndFlowOfRequestByScene() {
 		String url = LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_BY_SCENE_URL;
 		logon();
 		ListApprovalLogAndFlowOfRequestBySceneCommand cmd = new ListApprovalLogAndFlowOfRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setRequestToken("");
 
 		ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -669,12 +1039,14 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批日志列表（客户端）
+	//31. 获取申请的审批日志列表（客户端）
 	//@Test
 	public void testListApprovalLogOfRequestByScene() {
 		String url = LIST_APPROVAL_LOG_OF_REQUEST_BY_SCENE_URL;
 		logon();
 		ListApprovalLogOfRequestBySceneCommand cmd = new ListApprovalLogOfRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setRequestToken("");
 
 		ApprovalListApprovalLogOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalLogOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -686,12 +1058,14 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//获取申请的审批流程列表（客户端）
+	//32. 获取申请的审批流程列表（客户端）
 	//@Test
 	public void testListApprovalFlowOfRequestByScene() {
 		String url = LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL;
 		logon();
 		ListApprovalFlowOfRequestBySceneCommand cmd = new ListApprovalFlowOfRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setRequestToken("");
 
 		ApprovalListApprovalFlowOfRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalFlowOfRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -724,7 +1098,13 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	@Override
 	protected void initCustomData() {
-		String jsonFilePath = "data/json/3.4.x-test-data-news-organization-160627.txt";
+		String jsonFilePath = "data/json/1.0.0-approval-test-data-160907.txt";
+		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+	}
+	
+	private void initListData() {
+		String jsonFilePath = "data/json/1.0.0-approval-test-data-list-160907.txt";
 		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 	}

@@ -20,6 +20,8 @@ import com.everhomes.rest.approval.ListApprovalFlowCommand;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
+import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
+import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
@@ -66,5 +68,7 @@ public interface ApprovalService {
 	void approveApprovalRequest(ApproveApprovalRequestCommand cmd);
 
 	ApprovalRequestDTO createApprovalRequest(ApprovalRequestDTO approvalRequestDTO);
+
+	ListBriefApprovalFlowResponse listBriefApprovalFlow(ListBriefApprovalFlowCommand cmd);
 
 }
