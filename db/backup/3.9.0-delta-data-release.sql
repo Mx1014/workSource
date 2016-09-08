@@ -283,6 +283,18 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),820,56111,'考勤
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),797,56112,'打卡详情',1,1,'打卡详情 全部权限',578);
 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1001,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56106/%');
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1002,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56106/%');
+
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56106/%');
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1006,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56106/%');
+
 -- 更新系统小助手、电商小助手默认头像（图片已经上传到alpha/beta/release） by lqs 20160831
 UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRwbE1UY3lOVFk0TVRZNU5HTXlPR014TVRSbU1UTTJNems1TmpVNE5UZzNZZw' WHERE `id`=2;
 UPDATE `eh_users` SET `avatar`='cs://1/image/aW1hZ2UvTVRvNE0yWXdOVE15TlRJeE5UZzVPVFl3TjJFek5EZGpZemN4TURJMllUa3lZZw' WHERE `id`=3;
@@ -381,6 +393,8 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),799,56186,'异常
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),820,56191,'考勤统计',1,1,'考勤统计  全部权限',579);
+
+
 
 -- 威新link 屏蔽
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 56000,'', 'EhNamespaces', 999991 , 0);
@@ -490,4 +504,118 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 27000,'', 'EhNamespaces', 999999 , 0);
 
 
+-- 任务列表
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 24000,'', 'EhNamespaces', 0 , 0);
+-- 服务类型设置
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 25000,'', 'EhNamespaces', 0 , 0);
+-- 分类设置
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 26000,'', 'EhNamespaces', 0 , 0);
+-- 统计
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 27000,'', 'EhNamespaces', 0 , 0);
 
+
+
+-- 退款host和API的配置 add by wuhan  date:2016-9-2
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES('pay.zuolin.refound','POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record','退款的api','0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES('pay.zuolin.host','https://pay.zuolin.com','退款的host','0');
+
+-- 屏蔽任务菜单 by sfyan 20160902
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+-- 任务列表
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 24000,'', 'EhNamespaces', 0 , 0);
+-- 服务类型设置
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 25000,'', 'EhNamespaces', 0 , 0);
+-- 分类设置
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 26000,'', 'EhNamespaces', 0 , 0);
+-- 统计
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 27000,'', 'EhNamespaces', 0 , 0);
+
+-- 现网删掉门牌地址  by sfyan 20160905
+DELETE FROM `eh_addresses` WHERE `community_id` = 240111044331051500 AND `building_name` = '中国储能大厦' AND `apartment_name` in ('B1','B2','B3','B4');
+
+
+
+-- 深业更换广场icon图 by xujuan 20160902
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME9UWTJNemszT0RRd1l6WmtNell6TXprMVpEVTNPV1UzWkdObE1UbG1OUQ' where item_label = "任务管理" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ' where item_label = "停车充值" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9HVmlNVFJpWlRGaU1tSmpZMkZsTXpWa01qSTRNemhsTW1NM016RXdaQQ' where item_label = "公告管理" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvd1pUSmlPREUwT1dWa1pqQmtOR1l6TUdVMVlXUTJNVEZrT0RSbFkyUmxZdw' where item_label = "品质核查" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbE9HSXpZelUzWlRaak9XTTVOekkyTVdRME1XWmhZalJrWXpFd01tRm1aUQ' where item_label = "场地预约" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMllXWXhZVFEwWXpkak9UazNPV0UzWkdNd1pHRTNOR1ptTkRoaVpqa3pNUQ' where item_label = "快递查询" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ' where item_label = "打卡" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE5qaGpNV05pWm1FMFpXSmlNbVUzT0RReVpqWmlNVFV5WkdOaU4ySXhOQQ' where item_label = "更多" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek5USmpZV1JtTm1FMll6UXdZVFpoWlRNeFlqVXdObU0xTXpRME16WmlPUQ' where item_label = "服务预约" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek56VTNPRE01WkdJeU1tRTFOVFl6WmpNMk5XUmxZMll4TWpSalpqZGxZdw' where item_label = "流程审批" and namespace_id=999992;	
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "物业报修" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvM05XUmlZbUZqTURGbU1HVXhaR1JsTVdJMU5EZGpOVE5tWW1VeU9UQmpNQQ' where item_label = "物业服务" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaU1tSTRNMkU1T1RNeU56aGlZV0ZsT1dWbE1XTmpNakZsTURVeU1XUmhNQQ' where item_label = "物业缴费" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpERTNOekUyWkRReE5UTTVabVJtT0dJMU1tVmlOR0UzWVRVNU5HVXlOZw' where item_label = "视频会议" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9UZzVOV001Wm1aaU5qSTJZamRoTXpRMVlXSXdOVGd4WmpFeE9XTXhOZw' where item_label = "企业通讯录" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvME56Y3dPRGN3TW1FeU9ERXdOR016WlRrd05UTXpNVGMyTURreFpUZzNNZw' where item_label = "设备巡检" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMVlXVTFNelJpWVdVeU1EY3pOREptTlRZeFlqaGlNV1k1TldZM1pEVTFOUQ' where item_label = "门禁" and namespace_id=999992;
+	
+-- 左邻更换广场icon图 by xujuan 20160902
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME5qYzVPVGxtTXpVMk56ZGpNV0U1WVRZeFpqUmpPRFUyTm1SalkyWXlZUQ' where item_label = "VIP车位" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvME9UWTJNemszT0RRd1l6WmtNell6TXprMVpEVTNPV1UzWkdObE1UbG1OUQ' where item_label = "任务管理" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvM1pUYzBaV1ZrT1RrMVlqRTROVFZoTVRFMk5EZGtOakl5TjJRNU1EUXhPUQ' where item_label = "会议室预订" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ' where item_label = "停车充值" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbE9EZGtNakJsT1dKbVl6STRZemczWW1ZMVpqUmhaVEJqTUdZM01EQXlPQQ' where item_label = "公共会议室" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9HVmlNVFJpWlRGaU1tSmpZMkZsTXpWa01qSTRNemhsTW1NM016RXdaQQ' where item_label = "公告管理" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE1tUmxOVE5oT1dJNVpUYzBNRE13WWpRMFlqQTBNRGt5WmpZek9HUTJaQQ' where item_label = "创客空间" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvd1pUSmlPREUwT1dWa1pqQmtOR1l6TUdVMVlXUTJNVEZrT0RSbFkyUmxZdw' where item_label = "品质核查" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbFpHRTRaRFkyWlRnM1pHVXhOekJpWW1Vell6ZzVZVEpsTXpnellUVXpNQQ' where item_label = "园区入驻" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFlXTm1ORFZsWWpSbFkyUmtPREkzTldWbE1qQTRZamhtTURVNE9ERTRaZw' where item_label = "家政服务" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMllXWXhZVFEwWXpkak9UazNPV0UzWkdNd1pHRTNOR1ptTkRoaVpqa3pNUQ' where item_label = "快递查询" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE5qaGpNV05pWm1FMFpXSmlNbVUzT0RReVpqWmlNVFV5WkdOaU4ySXhOQQ' where item_label = "更多" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwa01qRTJOekl5TUdaaU9XSTBNRGc0WWpJd01HTXlNemhtTkdSa1l6TmxNQQ' where item_label = "服务热线" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvek5USmpZV1JtTm1FMll6UXdZVFpoWlRNeFlqVXdObU0xTXpRME16WmlPUQ' where item_label = "服务预约" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvM05XUmlZbUZqTURGbU1HVXhaR1JsTVdJMU5EZGpOVE5tWW1VeU9UQmpNQQ' where item_label = "物业服务" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaU1tSTRNMkU1T1RNeU56aGlZV0ZsT1dWbE1XTmpNakZsTURVeU1XUmhNQQ' where item_label = "物业缴费" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVpqVTFZbUUwWm1SbE9HSTRNREZqTWpkbU1HRmpNV1ZpTVRFek5UTXdOZw' where item_label = "电子屏预订" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvNFlUVTJaVEUwTVRGaU16RmtNMll4T0RObVptWXpNVFV4WW1KbE5UWTFaQQ' where item_label = "管道疏通" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpERTNOekUyWkRReE5UTTVabVJtT0dJMU1tVmlOR0UzWVRVNU5HVXlOZw' where item_label = "视频会议" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9UZzVOV001Wm1aaU5qSTJZamRoTXpRMVlXSXdOVGd4WmpFeE9XTXhOZw' where item_label = "通讯录" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMVlXVTFNelJpWVdVeU1EY3pOREptTlRZeFlqaGlNV1k1TldZM1pEVTFOUQ' where item_label = "公共门禁" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwbE9EYzJaREF6Tm1FMk1EUXhNekptTkRWbE9XSmhZekppTTJZMFlqVTRNQQ' where item_label = "预约参观" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpEZ3lNV0ZtWXpGbVpqVmpOVFpoTkRVNVpHRTRNREpqWVRrek5UbGlOZw' where item_label = "咨询求助" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMFpUVTJaV1kxWXpSaFkyWTRPVFV4T0RNeU9HUm1ZelkyWldFd05XUTBPQQ' where item_label = "投诉建议" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "报修" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE0yTmlOVEZtTjJSaU56YzVZV1U1WkdabVlURmxNMk5pTldVME5XSXlOQQ' where item_label = "紧急求助" and namespace_id=0;		
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaFpEZ3lNV0ZtWXpGbVpqVmpOVFpoTkRVNVpHRTRNREpqWVRrek5UbGlOZw' where item_label = "咨询求助" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRvMFpUVTJaV1kxWXpSaFkyWTRPVFV4T0RNeU9HUm1ZelkyWldFd05XUTBPQQ' where item_label = "投诉建议" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ' where item_label = "报修" and namespace_id=999992;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveE0yTmlOVEZtTjJSaU56YzVZV1U1WkdabVlURmxNMk5pTldVME5XSXlOQQ' where item_label = "紧急求助" and namespace_id=999992;	
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRwaE9UZzVOV001Wm1aaU5qSTJZamRoTXpRMVlXSXdOVGd4WmpFeE9XTXhOZw' where item_label = "企业通讯录" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveU5qTmtaakptTm1aaU5tUTBNVEUzT0dZd016QXpOamN6Tm1JeFkyVTJaQQ' where item_label = "预订工位" and namespace_id=0;
+update eh_launch_pad_items set icon_uri ='cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ' where item_label = "打卡考勤" and namespace_id=0;		
+			
+
+-- 新建公司深圳正中置业有限公司 modified by xiongying 20160906
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1003275, UUID(), '深圳正中置业有限公司', '深圳正中置业有限公司', 1, 0, 0, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 180870, 1, 0);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(180870, UUID(), 0, 2, 'EhGroups', 1003275,'深圳正中置业有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `group_id`,  `region_scope`,  `region_scope_id`,  `member_role`,  `member_status`,  `create_time`)
+	VALUES (318600, 229376, 'enterprise', 1002875, 0, 0, 7, 3, UTC_TIMESTAMP());
+
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`,`level`, `status`, `group_type`, `group_id`, `namespace_id`)
+	VALUES(1002875, 0, 'ENTERPRISE', '深圳正中置业有限公司', 0, NULL, '/1002875', 1, 2, 'ENTERPRISE', 1003275, 0);
+INSERT INTO `eh_organization_members` (`id`,  `organization_id`,  `target_type`,  `target_id`,  `member_group`,  `contact_name`,  `contact_type`,  `contact_token`,  `contact_description`,  `status`)
+	VALUES (2107081, 1002875, 'USER', 229376, 'manager', '陈勇', 0, '13682339935', NULL, 3);
+INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `target_type`,  `target_id`,  `role_id`,  `creator_uid`,  `create_time`)
+	VALUES (11170, 'EhOrganizations', 1002875, 'EhUsers', 229376, 1005, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`)
+    VALUES(1111290,240111044331051380, 'organization', 1002875, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+    
+    
+-- 微信link的短信通知 by sfyan 20160908   
+SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',225500,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',225500,'REPAIRS','push');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',228432,'REPAIRS','sms');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',228432,'REPAIRS','push');
+
+
+
+    

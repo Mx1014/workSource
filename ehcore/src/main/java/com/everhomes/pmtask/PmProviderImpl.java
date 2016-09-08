@@ -146,7 +146,7 @@ public class PmProviderImpl implements PmTaskProvider{
         condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
         
         if(null != pageAnchor && pageAnchor != 0)
-        	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+        	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         
         if(null != status && status.equals(PmTaskProcessStatus.UNPROCESSED.getCode())){
         	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
@@ -177,7 +177,7 @@ public class PmProviderImpl implements PmTaskProvider{
     	}
         
         
-        query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.asc());
+        query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
         if(null != pageSize)
         	query.limit(pageSize);
         

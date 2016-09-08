@@ -160,7 +160,7 @@ public class YZXSmsHandler implements SmsHandler {
         headers.put("Authorization", auth);
         
         String result = channel.sendMessage(uri, SmsBuilder.HttpMethod.POST.val(), null, headers,entityJsonStr).getMessage();
-        LOGGER.info("Send sms, result={}, uri={}, headers={}", result, uri, headers);
+        LOGGER.info("Send sms, result={}, uri={}, headers={}, phone={}, text={}", result, uri, headers, StringUtils.join(phoneNumbers, ","), text);
     }
 
     private String createUrl(String accountSid, String authToken,String timestamp) {

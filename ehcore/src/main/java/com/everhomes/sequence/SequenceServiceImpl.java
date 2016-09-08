@@ -823,6 +823,33 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOrganizationMembers.class, Tables.EH_ORGANIZATION_MEMBERS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ORGANIZATION_MEMBERS.ID.max()).from(Tables.EH_ORGANIZATION_MEMBERS).fetchOne().value1(); 
         });
+        syncTableSequence(null, EhStatTaskLogs.class, Tables.EH_STAT_TASK_LOGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_STAT_TASK_LOGS.ID.max()).from(Tables.EH_STAT_TASK_LOGS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhStatOrders.class, Tables.EH_STAT_ORDERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_STAT_ORDERS.ID.max()).from(Tables.EH_STAT_ORDERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhStatRefunds.class, Tables.EH_STAT_REFUNDS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_STAT_REFUNDS.ID.max()).from(Tables.EH_STAT_REFUNDS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhStatTransactions.class, Tables.EH_STAT_TRANSACTIONS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_STAT_TRANSACTIONS.ID.max()).from(Tables.EH_STAT_TRANSACTIONS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhStatSettlements.class, Tables.EH_STAT_SETTLEMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_STAT_SETTLEMENTS.ID.max()).from(Tables.EH_STAT_SETTLEMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhStatServiceSettlementResults.class, Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.ID.max()).from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhServiceAlliances.class, Tables.EH_SERVICE_ALLIANCES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCES.ID.max()).from(Tables.EH_SERVICE_ALLIANCES).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhServiceAllianceCategories.class, Tables.EH_SERVICE_ALLIANCE_CATEGORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_CATEGORIES).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhServiceAllianceAttachments.class, Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")

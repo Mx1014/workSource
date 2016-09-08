@@ -570,7 +570,9 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
 							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
-							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+//							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+							.and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+							.orderBy(Tables.EH_CONF_ACCOUNTS.STATUS.desc())
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfAccounts.class);
 							});
@@ -1540,6 +1542,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
 		query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
 		query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+		
+		query.addOrderBy(Tables.EH_CONF_ACCOUNTS.STATUS.desc());
 		
 		if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());

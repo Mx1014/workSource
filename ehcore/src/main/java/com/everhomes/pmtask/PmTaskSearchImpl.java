@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.category.CategoryDTO;
@@ -45,6 +46,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSearch{
@@ -76,7 +78,14 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("content", task.getContent());
             b.field("creatorUid", task.getCreatorUid());
             Category category = categoryProvider.findCategoryById(task.getCategoryId());
-            b.field("categoryId", category.getParentId());
+            
+            Category parent = categoryProvider.findCategoryById(category.getParentId());
+        	if(parent.getParentId().equals(0L)){
+        		b.field("categoryId", category.getId());
+        	}else{
+        		b.field("categoryId", category.getParentId());
+        	}
+            
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
             b.field("nickName", task.getNickName());
@@ -85,8 +94,9 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create pmtask " + task.getId() + " error");
-            return null;
+            LOGGER.error("Create pmtask error, taskId={}", task.getId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Create pmtask error.");
         }
     }
     
@@ -162,7 +172,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     }
 
     @Override
-    public List<PmTaskDTO> searchDocsByType(String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
+    public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
     		Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
@@ -184,7 +194,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         RangeQueryBuilder rb = null;
         if(null !=pageAnchor){
-        	rb = QueryBuilders.rangeQuery("createTime").gt(pageAnchor);
+        	rb = QueryBuilders.rangeQuery("createTime").lt(pageAnchor);
             qb = qb.must(rb);	
         }
         if(null != startDate){
@@ -202,12 +212,17 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             qb = qb.must(sb);	
         }
         
+        if(null != status){
+        	QueryStringQueryBuilder sb = QueryBuilders.queryString(status.toString()).field("status");
+            qb = qb.must(sb);	
+        }
+        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
         builder.setSize(pageSize);
         builder.setQuery(qb).setPostFilter(fb);
         // builder.addSort("createTime", SortOrder.ASC);
-        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.ASC));
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Search pm tasks, builder={}", builder);
         }
@@ -245,13 +260,12 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 //            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());
             
             return doc;
-        }
-        catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
-            LOGGER.error(source.toString());
+        }catch (Exception ex) {
+            LOGGER.error("Pmtask readDoc failed, source={}, id={}", source, idAsStr);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"readDoc Exception.");
         }
 
-        return null;
     }
     
 }
