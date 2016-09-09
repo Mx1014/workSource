@@ -151,6 +151,7 @@ import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImperInfo;
 import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
@@ -3034,12 +3035,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd) {
         SearchUserImpersonationResponse resp = new SearchUserImpersonationResponse();
-        ListingLocator locator = new ListingLocator();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getAnchor());
         int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<UserImpersonation> impers = this.userImpersonationProvider.searchUserImpersonations(cmd.getUserId(), locator, count);
-        List<UserImpersonationDTO> impersonations = impers.stream().map((r) -> { return ConvertHelper.convert(r, UserImpersonationDTO.class); }).collect(Collectors.toList());;
-        resp.setImpersonations(impersonations);
+        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getPhone(), cmd.getImperOnly(), locator, count);
+        for(UserImperInfo info : impers) {
+            if(info.getOwnerId() != null && info.getTargetId() != null) {
+                UserInfo u1 = this.getUserInfo(info.getOwnerId());
+                UserInfo u2 = this.getUserInfo(info.getTargetId());
+                if(u1 != null && u2 != null) {
+                    if(u1.getId().equals(info.getId())) {
+                        //ownerId match
+                        info.setPhone(u1.getPhones().get(0));
+                        info.setTargetPhone(u2.getPhones().get(0));
+                    } else {
+                        //target match
+                        info.setPhone(u2.getPhones().get(0));
+                        info.setTargetPhone(u1.getPhones().get(0));
+                    }
+                }
+            }
+        }
+        resp.setImpersonations(impers);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }

@@ -6,17 +6,17 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class SearchUserImpersonationResponse {
-    @ItemType(UserImpersonationDTO.class)
-    private List<UserImpersonationDTO> impersonations;
+    @ItemType(UserImperInfo.class)
+    private List<UserImperInfo> impersonations;
     private Long nextPageAnchor;
 
-    
-    public List<UserImpersonationDTO> getImpersonations() {
+
+    public List<UserImperInfo> getImpersonations() {
         return impersonations;
     }
 
 
-    public void setImpersonations(List<UserImpersonationDTO> impersonations) {
+    public void setImpersonations(List<UserImperInfo> impersonations) {
         this.impersonations = impersonations;
     }
 

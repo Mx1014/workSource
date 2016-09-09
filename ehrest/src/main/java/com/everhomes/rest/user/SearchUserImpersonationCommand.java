@@ -2,9 +2,18 @@ package com.everhomes.rest.user;
 
 public class SearchUserImpersonationCommand {
     private String phone;
+    private Byte imperOnly;
     private Long anchor;
     
     private Integer pageSize;
+
+    public Byte getImperOnly() {
+        return imperOnly;
+    }
+
+    public void setImperOnly(Byte imperOnly) {
+        this.imperOnly = imperOnly;
+    }
 
     public String getPhone() {
         return phone;
