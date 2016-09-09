@@ -1312,32 +1312,34 @@ public class PmTaskServiceImpl implements PmTaskService {
 		sheet.setDefaultRowHeightInPoints(20); 
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("项目名称");
-		row.createCell(1).setCellValue("新增物业报修");
-		row.createCell(2).setCellValue("物业报修总量");
-		row.createCell(3).setCellValue("剩余未处理");
-		row.createCell(4).setCellValue("任务完成率");
-		row.createCell(5).setCellValue("任务关闭率");
-		row.createCell(6).setCellValue("客户评价均分");
+		row.createCell(1).setCellValue("服务类别");
+		row.createCell(2).setCellValue("新增");
+		row.createCell(3).setCellValue("总量");
+		row.createCell(4).setCellValue("剩余未处理");
+		row.createCell(5).setCellValue("任务完成率");
+		row.createCell(6).setCellValue("任务关闭率");
+		row.createCell(7).setCellValue("客户评价均分");
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PmTaskStatistics pts = list.get(i);
 			Category category = checkCategory(pts.getCategoryId());
-			tempRow.createCell(0).setCellValue(category.getName());
-			tempRow.createCell(1).setCellValue(pts.getTotalCount());
+			tempRow.createCell(0).setCellValue(cmd.getKeyword());
+			tempRow.createCell(1).setCellValue(category.getName());
+			tempRow.createCell(2).setCellValue(pts.getTotalCount());
 			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getCategoryId(), null);
-			tempRow.createCell(2).setCellValue(totalCount);
-			tempRow.createCell(3).setCellValue(pts.getUnprocessCount());
+			tempRow.createCell(3).setCellValue(totalCount);
+			tempRow.createCell(4).setCellValue(pts.getUnprocessCount());
 			CellStyle cellStyle = wb.createCellStyle();
 			XSSFDataFormat fmt = wb.createDataFormat(); 
 			cellStyle.setDataFormat(fmt.getFormat("0.00%"));
-			Cell cell4 = tempRow.createCell(4);
+			Cell cell4 = tempRow.createCell(5);
 			cell4.setCellStyle(cellStyle);
 			cell4.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getProcessedCount()/pts.getTotalCount():0);
-			Cell cell5 = tempRow.createCell(5);
+			Cell cell5 = tempRow.createCell(6);
 			cell5.setCellStyle(cellStyle);
 			cell5.setCellValue(pts.getTotalCount()!=null&&!pts.getTotalCount().equals(0)?(float)pts.getCloseCount()/pts.getTotalCount():0);
 			float avgStar = calculatePerson(pts)!=0?(float) (calculateStar(pts)) / (calculatePerson(pts)):0;
-			tempRow.createCell(6).setCellValue(avgStar);
+			tempRow.createCell(7).setCellValue(avgStar);
 		}
 		ByteArrayOutputStream out = null;
 		try {
