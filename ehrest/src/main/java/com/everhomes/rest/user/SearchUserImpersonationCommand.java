@@ -1,17 +1,17 @@
 package com.everhomes.rest.user;
 
 public class SearchUserImpersonationCommand {
-    private Long userId;
+    private String phone;
     private Long anchor;
     
     private Integer pageSize;
 
-    public Long getUserId() {
-        return userId;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Long getAnchor() {
