@@ -965,3 +965,7 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
   VALUES (20534, 1000750, 240111044331051304, 239825274387101802, '深业中心大厦-3107', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
   VALUES (20535, 1000750, 240111044331051304, 239825274387101803, '深业中心大厦-32F', '0');
+
+  
+-- delete shenye pm_admin scene_type tingche item add by xiongying20160909
+delete from eh_launch_pad_items where id = 10059;
