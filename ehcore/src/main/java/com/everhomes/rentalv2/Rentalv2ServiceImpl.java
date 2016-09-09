@@ -2081,7 +2081,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					Double endTime = null;
 					
 					for(TimeIntervalDTO timeInterval:cmd.getTimeIntervals()){
-						RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
+						RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class); 
 						timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
 						timeIntervalDB.setOwnerId(rs.getId());
 						this.rentalProvider.createTimeInterval(timeIntervalDB);
@@ -4036,25 +4036,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setWeekendPrice(defaultRule.getWeekendPrice()); 
 			
 			
-			if(null!=defaultRule.getAttachments())
-				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:defaultRule.getAttachments()){
-					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
-					rca.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-					rca.setOwnerId(resource.getId());
-					this.rentalProvider.createRentalConfigAttachment(rca);
-				}
-			
-
-		 
-			//close dates
-			if(null!=defaultRule.getCloseDates())
-				for(Long closedate:defaultRule.getCloseDates()){
-					RentalCloseDate rcd=new RentalCloseDate();
-					rcd.setCloseDate(new Date(closedate));
-					rcd.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-					rcd.setOwnerId(resource.getId());
-					this.rentalProvider.createRentalCloseDate(rcd);
-				} 
 			
 			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
@@ -4064,11 +4045,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					Double beginTime = null;
 					Double endTime = null;
 					for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
-						RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
-						timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-						timeIntervalDB.setOwnerId(resource.getId());
-						this.rentalProvider.createTimeInterval(timeIntervalDB);
-						
+						 
 						if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
 							continue;
 						if(beginTime==null||beginTime>timeInterval.getBeginTime())
@@ -4077,7 +4054,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							endTime=timeInterval.getEndTime();
 						AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
 						signleCmd.setBeginTime(timeInterval.getBeginTime());
-						signleCmd.setEndTime(timeInterval.getEndTime());
+						signleCmd.setEndTime(timeInterval.getEndTime()); 
 						if(null!=timeInterval.getTimeStep())
 							signleCmd.setTimeStep(timeInterval.getTimeStep());
 						signleCmd.setWeekendPrice(weekendPrice); 
@@ -4161,8 +4138,34 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					this.rentalProvider.createRentalSitePic(detailPic);
 				}
 			}
+
+			if(null!=defaultRule.getAttachments())
+				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:defaultRule.getAttachments()){
+					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
+					rca.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+					rca.setOwnerId(resource.getId());
+					this.rentalProvider.createRentalConfigAttachment(rca);
+				}
 			
-			
+
+		 
+			//close dates
+			if(null!=defaultRule.getCloseDates())
+				for(Long closedate:defaultRule.getCloseDates()){
+					RentalCloseDate rcd=new RentalCloseDate();
+					rcd.setCloseDate(new Date(closedate));
+					rcd.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+					rcd.setOwnerId(resource.getId());
+					this.rentalProvider.createRentalCloseDate(rcd);
+				} 
+			if(defaultRule.getTimeIntervals() != null){ 
+				for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
+					RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
+					timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+					timeIntervalDB.setOwnerId(resource.getId());
+					this.rentalProvider.createTimeInterval(timeIntervalDB);
+				}
+			}
 			return null;
 		});
 	}
