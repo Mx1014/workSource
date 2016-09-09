@@ -65,6 +65,8 @@ import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkFirmwareType;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkLogItem;
+import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkMessageMeta;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
@@ -2362,24 +2364,37 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
-    public AclinkLogDTO createAclinkLog(AclinkLogCreateCommand cmd) {
-        AclinkLog aclinkLog = ConvertHelper.convert(cmd, AclinkLog.class);
-        DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
-        if(cmd.getUserId() == null) {
-            cmd.setUserId(doorAuth.getUserId());
+    public AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmds) {
+        AclinkLogListResponse resp = new AclinkLogListResponse();
+        resp.setDtos(new ArrayList<AclinkLogDTO>());
+        for(int i = 0; i < cmds.getItems().size(); i++) {
+            AclinkLogItem cmd = cmds.getItems().get(i);
+            AclinkLog aclinkLog = ConvertHelper.convert(cmd, AclinkLog.class);
+            DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
+            if(cmd.getUserId() == null) {
+                cmd.setUserId(doorAuth.getUserId());
+            }
+            UserInfo user = userService.getUserInfo(cmd.getUserId());
+            DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            
+            aclinkLog.setDoorName(door.getName());
+            aclinkLog.setUserName(user.getNickName());
+            aclinkLog.setHardwareId(door.getHardwareId());
+            aclinkLog.setOwnerId(door.getOwnerId());
+            aclinkLog.setOwnerType(door.getOwnerType());
+            aclinkLog.setDoorType(door.getDoorType());
+            try {
+                aclinkLogProvider.createAclinkLog(aclinkLog);
+                AclinkLogDTO dto = ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
+                if(dto != null) {
+                    resp.getDtos().add(dto);
+                }
+            } catch(Exception ex) {
+                LOGGER.error("aclinklog error", ex);
+            }
         }
-        UserInfo user = userService.getUserInfo(cmd.getUserId());
-        DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         
-        aclinkLog.setDoorName(door.getName());
-        aclinkLog.setUserName(user.getNickName());
-        aclinkLog.setHardwareId(door.getHardwareId());
-        aclinkLog.setOwnerId(door.getOwnerId());
-        aclinkLog.setOwnerType(door.getOwnerType());
-        aclinkLog.setDoorType(door.getDoorType());
+        return resp;
         
-        aclinkLogProvider.createAclinkLog(aclinkLog);
-        
-        return ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
     }
 }

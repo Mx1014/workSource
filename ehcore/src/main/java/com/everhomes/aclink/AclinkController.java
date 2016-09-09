@@ -35,6 +35,7 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
@@ -527,7 +528,7 @@ public class AclinkController extends ControllerBase {
      * @return 门禁列表
      */
     @RequestMapping("createAclinkLog")
-    @RestReturn(value=AclinkLogDTO.class)
+    @RestReturn(value=AclinkLogListResponse.class)
     public RestResponse createAclinkLog(@Valid AclinkLogCreateCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.createAclinkLog(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
