@@ -672,7 +672,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            List<StatWareDTO> wareDTOs = statShopTransactionDTO.getWares();
 	            String wareInfo = "";
 	            for (StatWareDTO statWareDTO : wareDTOs) {
-	            	wareInfo = statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
+	            	wareInfo += statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
 				}
 	            row.createCell(7).setCellValue(wareInfo);
 			}
