@@ -1728,7 +1728,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for (RentalBillRuleDTO dto : ruleDTOs) {
 			if (dto.getRuleId() == null)
 				continue;
-			Double totalCount = Double.valueOf(this.rentalProvider
+			Double totalCount = Double.valueOf(this
 					.findRentalSiteRuleById(dto.getRuleId()).getCounts());
 			Double rentaledCount = this.rentalProvider
 					.sumRentalRuleBillSumCounts(dto.getRuleId());
