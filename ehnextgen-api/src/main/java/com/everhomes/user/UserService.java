@@ -142,4 +142,5 @@ public interface UserService {
     UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
     SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
     void deleteUserImpersonation(DeleteUserImpersonationCommand cmd);
+    
 }
