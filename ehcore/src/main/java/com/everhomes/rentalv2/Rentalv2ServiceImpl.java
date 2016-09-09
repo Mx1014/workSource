@@ -2074,6 +2074,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			BigDecimal weekendPrice = cmd.getWeekendPrice() == null ? new BigDecimal(0) : cmd.getWeekendPrice(); 
 			BigDecimal workdayPrice = cmd.getWorkdayPrice() == null ? new BigDecimal(0) : cmd.getWorkdayPrice();
 			if (cmd.getRentalType().equals(RentalType.HOUR.getCode()))  {
+				this.rentalProvider.deleteTimeIntervalsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
 				if(cmd.getTimeIntervals() != null) {
 					
 					Double beginTime = null;
@@ -4122,6 +4123,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					
 			} 
 			seqNum.set(0L);
+			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
 				//在这里统一处理 
 				signleCmd.setRentalSiteId(resource.getId()); 
