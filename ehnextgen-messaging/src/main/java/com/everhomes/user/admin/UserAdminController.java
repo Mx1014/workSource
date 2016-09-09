@@ -26,6 +26,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.EncriptInfoDTO;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
@@ -409,6 +410,30 @@ public class UserAdminController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         RestResponse response = new RestResponse(userService.createUserImpersonation(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        if(response.getResponseObject() == null) {
+            response.setErrorDescription("User not found");
+        } else {
+            response.setErrorDescription("OK");
+        }
+        
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 生成测试用户密码
+     * @return
+     */
+    @RequestMapping("deleteUserImpersonation")
+    @RestReturn(UserImpersonationDTO.class)
+    public RestResponse createUserImpersonation(@Valid DeleteUserImpersonationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        userService.deleteUserImpersonation(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         if(response.getResponseObject() == null) {
             response.setErrorDescription("User not found");

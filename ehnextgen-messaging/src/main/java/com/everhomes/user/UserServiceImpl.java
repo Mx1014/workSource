@@ -129,6 +129,7 @@ import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
@@ -3021,6 +3022,13 @@ public class UserServiceImpl implements UserService {
         this.userImpersonationProvider.createUserImpersonation(obj);
         
         return ConvertHelper.convert(obj, UserImpersonationDTO.class);
+    }
+    
+    @Override
+    public void deleteUserImpersonation(DeleteUserImpersonationCommand cmd) {
+        UserImpersonation obj = new UserImpersonation();
+        obj.setId(cmd.getUserImpersonationId());
+        this.userImpersonationProvider.deleteUserImpersonation(obj);
     }
     
     @Override
