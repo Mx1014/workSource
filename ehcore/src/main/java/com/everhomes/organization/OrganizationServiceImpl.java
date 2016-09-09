@@ -6813,6 +6813,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null != identifier) {
 			LOGGER.warn("User identifier token has already been claimed.");
 		}
+		try {
+			Thread.sleep(3000);
+			
+		} catch (Exception e) {
+			
+		}
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_NEW_ORG.getCode()).tryEnter(()-> {
 			this.dbProvider.execute((TransactionStatus status) -> {
 				
