@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -64,26 +66,34 @@ import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
+import com.everhomes.rest.ui.user.NewsFootnote;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.search.SearchProvider;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.SearchTypes;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -121,6 +131,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	private SearchProvider searchProvider;
+
+	@Autowired
+	private UserActivityProvider userActivityProvider;
 
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
@@ -347,13 +360,17 @@ public class NewsServiceImpl implements NewsService {
 		return searchNews(userId, namespaceId, cmd.getKeyword(), pageAnchor, pageSize);
 	}
 
-	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, String keyword, Long pageAnchor,
+	/**
+	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理
+	 * xiongying
+	 */
+	private String getSearchJson(Long userId, Integer namespaceId, String keyword, Long pageAnchor,
 			Integer pageSize) {
 		Long from = pageAnchor * pageSize;
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
 		JSONObject json = JSONObject.parseObject(
-				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}}}");
+				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":8,\"fields\":{\"title\":{},\"content\":{},\"sourceDesc\":{}}}}");
 		// 设置from和size
 		json.put("from", from);
 		json.put("size", pageSize + 1);
@@ -373,12 +390,20 @@ public class NewsServiceImpl implements NewsService {
 				.getJSONObject("bool").getJSONArray("must");
 		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
 		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
+		
+		return json.toJSONString();
+	}
+	
+	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, String keyword, Long pageAnchor,
+			Integer pageSize) {
+		
 
+		String jsonString = getSearchJson(userId, namespaceId, keyword, pageAnchor, pageSize);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 
 		// 从es查询
-		JSONArray result = searchProvider.query(SearchUtils.NEWS, json.toJSONString(), fields);
+		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
 
 		// 处理分页
 		Long nextPageAnchor = null;
@@ -897,6 +922,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getId() != null) {
 			syncNews(cmd.getId());
 		} else {
+			searchProvider.clearType(SearchUtils.NEWS);
 			// 一次同步200条，防止一次同步太多内存被压爆
 			Integer pageSize = 200;
 			int i = 0;
@@ -906,6 +932,10 @@ public class NewsServiceImpl implements NewsService {
 				if (list != null && list.size() > 0) {
 					StringBuilder sb = new StringBuilder();
 					list.forEach(n -> {
+						//正则表达式去掉content中的富文本内容 modified by xiongying20160908
+						String content = n.getContent();
+						content = removeTag(content);
+						n.setContent(content);
 						sb.append("{\"index\":{\"_id\":\"").append(n.getId()).append("\"}}\n")
 								.append(JSONObject.toJSONString(n)).append("\n");
 					});
@@ -922,15 +952,153 @@ public class NewsServiceImpl implements NewsService {
 			}
 		}
 	}
+	
+	public static String removeTag(String htmlStr) {
+        String regEx_script = "<script[^>]*?>[\\s\\S]*?<\\/script>"; // script
+        String regEx_style = "<style[^>]*?>[\\s\\S]*?<\\/style>"; // style
+        String regEx_html = "<[^>]+>"; // HTML tag
+        String regEx_space = "\\s+|\t|\r|\n";// other characters
+
+        Pattern p_script = Pattern.compile(regEx_script,
+                Pattern.CASE_INSENSITIVE);
+        Matcher m_script = p_script.matcher(htmlStr);
+        htmlStr = m_script.replaceAll("");
+
+        Pattern p_style = Pattern
+                .compile(regEx_style, Pattern.CASE_INSENSITIVE);
+        Matcher m_style = p_style.matcher(htmlStr);
+        htmlStr = m_style.replaceAll("");
+
+        Pattern p_html = Pattern.compile(regEx_html, Pattern.CASE_INSENSITIVE);
+        Matcher m_html = p_html.matcher(htmlStr);
+        htmlStr = m_html.replaceAll("");
+
+        Pattern p_space = Pattern
+                .compile(regEx_space, Pattern.CASE_INSENSITIVE);
+        Matcher m_space = p_space.matcher(htmlStr);
+        htmlStr = m_space.replaceAll(" ");
+
+        return htmlStr;
+
+    }
 
 	private void syncNews(Long id) {
 		News news = newsProvider.findNewsById(id);
 		if (news != null) {
+			//正则表达式去掉content中的富文本内容 modified by xiongying20160908
+			String content = news.getContent();
+			content = removeTag(content);
+			news.setContent(content);
 			searchProvider.insertOrUpdate(SearchUtils.NEWS, news.getId().toString(), JSONObject.toJSONString(news));
 		}
 	}
 
 	private void syncNewsWhenDelete(Long id) {
 		searchProvider.deleteById(SearchUtils.NEWS, id.toString());
+	}
+
+	@Override
+	public SearchContentsBySceneReponse searchNewsByScene(
+			SearchContentsBySceneCommand cmd) {
+		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = checkOwner(userId, sceneTokenDto.getEntityId(), sceneTokenDto.getEntityType()).getNamespaceId();
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
+		if (StringUtils.isEmpty(cmd.getKeyword())) {
+			ListNewsCommand command = new ListNewsCommand();
+			
+			command.setOwnerId(sceneTokenDto.getEntityId());
+			command.setOwnerType(sceneTokenDto.getEntityType());
+			command.setPageAnchor(cmd.getPageAnchor());
+			command.setPageSize(cmd.getPageSize());
+			ListNewsResponse news = listNews(command);
+			if(news != null) {
+				response.setNextPageAnchor(news.getNextPageAnchor());
+				if(news.getNewsList() != null && news.getNewsList().size() > 0) {
+					List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+					for (BriefNewsDTO briefNews : news.getNewsList()) {
+						ContentBriefDTO dto = new ContentBriefDTO();
+						dto.setContent(briefNews.getContentAbstract());
+						dto.setSubject(briefNews.getTitle());
+						dto.setPostUrl(briefNews.getCoverUri());
+						dto.setSearchTypeId(searchType.getId());
+						dto.setSearchTypeName(searchType.getName());
+						
+						NewsFootnote footNote = new NewsFootnote();
+						footNote.setAuthor(briefNews.getAuthor());
+						footNote.setCreateTime(briefNews.getPublishTime());
+						footNote.setSourceDesc(briefNews.getSourceDesc());
+						footNote.setNewsToken(briefNews.getNewsToken());
+						dto.setFootnoteJson(StringHelper.toJsonString(footNote));
+						
+						dtos.add(dto);
+					}
+					response.setDtos(dtos);
+				}
+			}
+			
+			return response;
+		}
+		
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+
+		String jsonString = getSearchJson(userId, namespaceId, cmd.getKeyword(), pageAnchor, pageSize);
+		// 需要查询的字段
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
+
+		// 从es查询
+		JSONArray result = searchProvider.queryTopHits(SearchUtils.NEWS, jsonString, fields);
+
+		// 处理分页
+		Long nextPageAnchor = null;
+		if (result.size() > pageSize) {
+			result.remove(result.size() - 1);
+			nextPageAnchor = pageAnchor + 1;
+		}
+
+		//处理返回的topHit
+		List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+		for (int i = 0; i < result.size(); i++) {
+			ContentBriefDTO dto = new ContentBriefDTO();
+			JSONObject highlight = result.getJSONObject(i).getJSONObject("highlight");
+			JSONObject source = result.getJSONObject(i).getJSONObject("_source");
+			
+			if(StringUtils.isEmpty(highlight.getString("title"))){
+				dto.setSubject(source.getString("title"));
+			} else {
+				dto.setSubject(highlight.getString("title"));
+			}
+			
+			if(StringUtils.isEmpty(highlight.getString("content"))){
+				dto.setContent(source.getString("content"));
+			} else {
+				dto.setContent(highlight.getString("content"));
+			}
+			
+			dto.setPostUrl(source.getString("coverUri"));
+			
+			dto.setSearchTypeId(searchType.getId());
+			dto.setSearchTypeName(searchType.getName());
+			NewsFootnote footNote = new NewsFootnote();
+			footNote.setAuthor(source.getString("author"));
+			footNote.setCreateTime(source.getTimestamp("publishTime"));
+			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
+			
+			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
+				footNote.setSourceDesc(source.getString("sourceDesc"));
+			} else {
+				footNote.setSourceDesc(highlight.getString("sourceDesc"));
+			}
+			
+			dto.setFootnoteJson(StringHelper.toJsonString(footNote));
+			
+			dtos.add(dto);
+		}
+
+		response.setDtos(dtos);
+		response.setNextPageAnchor(nextPageAnchor);
+		return response;
 	}
 }

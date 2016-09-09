@@ -29,12 +29,15 @@ import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
 import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
 import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 
 public interface ForumService {
@@ -105,4 +108,6 @@ public interface ForumService {
     ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd);
     ListPostCommandResponse listNoticeTopic(VisibleRegionType visibleRegionType, List<Long> visibleRegionIds, String publishStatus, Integer pageSize, Long pageAnchor);
     ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd);
+    
+    SearchContentsBySceneReponse searchContents(SearchContentsBySceneCommand cmd, SearchContentType contentType); 
 }

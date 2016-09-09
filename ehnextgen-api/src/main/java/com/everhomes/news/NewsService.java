@@ -29,6 +29,8 @@ import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 
 public interface NewsService {
 
@@ -65,5 +67,7 @@ public interface NewsService {
 	void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd);
 
 	void syncNews(SyncNewsCommand cmd);
+	
+	SearchContentsBySceneReponse searchNewsByScene(SearchContentsBySceneCommand cmd);
 	
 }

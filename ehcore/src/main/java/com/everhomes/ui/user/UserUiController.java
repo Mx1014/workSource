@@ -35,9 +35,13 @@ import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
@@ -249,5 +253,35 @@ public class UserUiController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
+    
+    /**
+	 * <b>URL: /ui/user/searchContentsByScene</b>
+	 * <p>根据场景、查询类型查询相应内容</p>
+	 */
+	@RequestMapping("searchContentsByScene")
+	@RestReturn(value=SearchContentsBySceneReponse.class)
+	public RestResponse searchContentsByScene(SearchContentsBySceneCommand cmd) {
+		SearchContentsBySceneReponse rsp = userService.searchContentsByScene(cmd);
+	    RestResponse response = new RestResponse(rsp);
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    response.setErrorDescription("OK");
 
+	    return response;
+	} 
+	
+	    /**
+	 * <b>URL: /ui/user/listSearchTypesByScene</b>
+	 * <p>根据场景、域空间查查询内容类型</p>
+	 */
+	@RequestMapping("listSearchTypesByScene")
+	@RestReturn(value=ListSearchTypesBySceneReponse.class)
+	public RestResponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd) {
+		ListSearchTypesBySceneReponse rsp = userService.listSearchTypesByScene(cmd);
+	    RestResponse response = new RestResponse(rsp);
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    response.setErrorDescription("OK");
+	       
+	    return response;
+	}
+    
 }

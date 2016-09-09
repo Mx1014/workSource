@@ -25,15 +25,21 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.SearchTypesStatus;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
+import com.everhomes.server.schema.tables.daos.EhSearchTypesDao;
 import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
 import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
@@ -45,6 +51,9 @@ import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
 import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
 import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
+import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
 import com.everhomes.server.schema.tables.pojos.EhUserContacts;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -54,6 +63,8 @@ import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
+import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
 import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
 import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -635,6 +646,71 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserProfiles.class, userProfile.getId());
 		
+	}
+
+	@Override
+	public List<SearchTypes> listByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhSearchTypesRecord> query = context.selectQuery(Tables.EH_SEARCH_TYPES);
+		query.addConditions(Tables.EH_SEARCH_TYPES.NAMESPACE_ID.eq(namespaceId));
+		
+		query.addConditions(Tables.EH_SEARCH_TYPES.STATUS.eq(SearchTypesStatus.ACTIVE.getCode()));
+		 
+		List<SearchTypes> result = new ArrayList<SearchTypes>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, SearchTypes.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
+	}
+
+	@Override
+	public SearchTypes findByContentAndNamespaceId(Integer namespaceId,
+			String contentType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhSearchTypesRecord> query = context.selectQuery(Tables.EH_SEARCH_TYPES);
+		query.addConditions(Tables.EH_SEARCH_TYPES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_SEARCH_TYPES.CONTENT_TYPE.eq(contentType));
+		
+		query.addConditions(Tables.EH_SEARCH_TYPES.STATUS.eq(SearchTypesStatus.ACTIVE.getCode()));
+		 
+		List<SearchTypes> result = new ArrayList<SearchTypes>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, SearchTypes.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
+	}
+
+	@Override
+	public void createSearchTypes(SearchTypes searchType) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSearchTypes.class));
+		
+		searchType.setId(id);
+		searchType.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		searchType.setStatus(SearchTypesStatus.ACTIVE.getCode());
+		LOGGER.info("createSearchTypes: " + searchType);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSearchTypes.class, id));
+		EhSearchTypesDao dao = new EhSearchTypesDao(context.configuration());
+        dao.insert(searchType);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSearchTypes.class, null);
+		
+	}
+
+	@Override
+	public void deleteSearchTypes(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSearchTypes.class));
+		EhSearchTypesDao dao = new EhSearchTypesDao(context.configuration());
+		dao.deleteById(id);
 	}
 
 

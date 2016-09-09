@@ -823,6 +823,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOrganizationMembers.class, Tables.EH_ORGANIZATION_MEMBERS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ORGANIZATION_MEMBERS.ID.max()).from(Tables.EH_ORGANIZATION_MEMBERS).fetchOne().value1(); 
         });
+        syncTableSequence(null, EhSearchTypes.class, Tables.EH_SEARCH_TYPES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_SEARCH_TYPES.ID.max()).from(Tables.EH_SEARCH_TYPES).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")
