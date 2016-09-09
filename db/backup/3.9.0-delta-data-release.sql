@@ -617,5 +617,6 @@ INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target
 INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',228432,'REPAIRS','push');
 
 
-
-    
+-- 政府资源首页
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+    VALUES ('200105', '0', 'community', '240111044331049963', '政府资源', '政府资源首页', '14', '', '0755-86620293', '公共服务联盟旨在集聚社会优质服务资源，为园区广大企业提供专业、高效、有保障的服务，以帮助广大企业畅通信息渠道，提升企业管理，降低经营成本，增强市场竞争能力。服务类型包括项目融资对接、人才招聘和培训、信息化建设、管理咨询、知识产权管理、质量管理、外贸事务、法律事务、 物流服务、场地装修等。', 'cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);    
