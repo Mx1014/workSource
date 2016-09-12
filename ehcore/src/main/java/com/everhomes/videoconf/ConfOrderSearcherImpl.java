@@ -130,24 +130,25 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
 
         }
 
-        FilterBuilder fb = null;
+        //只显示支付的订单 modified by xiongying 20160905
+        FilterBuilder fb = FilterBuilders.termFilter("status", 2);
         if(cmd.getEnterpriseId() != null)
-        	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
         
         if(cmd.getConfCapacity() != null) {
-        	if(null != fb)
+//        	if(null != fb)
         		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("confCapacity", cmd.getConfCapacity())); 
-        	else {
-        		fb = FilterBuilders.termFilter("confCapacity", cmd.getConfCapacity());
-        	}
+//        	else {
+//        		fb = FilterBuilders.termFilter("confCapacity", cmd.getConfCapacity());
+//        	}
         }
         
         if(cmd.getConfType() != null) {
-        	if(null != fb)
+//        	if(null != fb)
         		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("confType", cmd.getConfType())); 
-        	else {
-        		fb = FilterBuilders.termFilter("confType", cmd.getConfType());
-        	}
+//        	else {
+//        		fb = FilterBuilders.termFilter("confType", cmd.getConfType());
+//        	}
         }
         
         if(cmd.getStartTime() != null) {
@@ -207,6 +208,7 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("enterpriseId", order.getOwnerId());
             b.field("createTime", order.getCreateTime());
+            b.field("status", order.getStatus());
             
             ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
             if(null != category) {

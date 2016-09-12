@@ -141,7 +141,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), pageSize);
 		
 		if(list.size() > 0){
@@ -186,9 +186,16 @@ public class PmTaskServiceImpl implements PmTaskService {
     			
     			Category category = checkCategory(r.getCategoryId());
     			Category parentCategory = checkCategory(category.getParentId());
-    			dto.setCategoryName(category.getName());
-    			dto.setParentCategoryId(parentCategory.getId());
-    			dto.setParentCategoryName(parentCategory.getName());
+    			if(parentCategory.getParentId().equals(0L)){
+    	    		dto.setCategoryId(null);
+    	    		dto.setCategoryName(null);
+    	    		dto.setParentCategoryId(category.getId());
+    	    		dto.setParentCategoryName(category.getName());
+    	    	}else{
+    	    		dto.setCategoryName(category.getName());
+    	    		dto.setParentCategoryId(parentCategory.getId());
+    	    		dto.setParentCategoryName(parentCategory.getName());
+    	    	}
     			
     			return dto;
     		}).collect(Collectors.toList()));
@@ -301,6 +308,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		
 		sendMessageToUser(task.getCreatorUid(), text);
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	private void sendMessageToUser(Long userId, String content) {
@@ -366,6 +377,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setDeleteTime(now);
 		pmTaskProvider.updateTask(task);
 		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
 	}
 	
 	@Override
@@ -432,6 +445,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		
 		sendMessageToUser(task.getCreatorUid(), text);
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	private void returnNoPrivileged(List<Long> privileges, User user){
@@ -449,9 +466,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		//查询服务类型
 		Category category = checkCategory(task.getCategoryId());
 		Category parentCategory = checkCategory(category.getParentId());
-		dto.setCategoryName(category.getName());
-		dto.setParentCategoryId(parentCategory.getId());
-		dto.setParentCategoryName(parentCategory.getName());
+		if(parentCategory.getParentId().equals(0L)){
+    		dto.setCategoryId(null);
+    		dto.setCategoryName(null);
+    		dto.setParentCategoryId(category.getId());
+    		dto.setParentCategoryName(category.getName());
+    	}else{
+    		dto.setCategoryName(category.getName());
+    		dto.setParentCategoryId(parentCategory.getId());
+    		dto.setParentCategoryName(parentCategory.getName());
+    	}
+		
 		//查询图片
 		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
 		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
@@ -482,6 +507,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			User user = userProvider.findUserById(r.getOperatorUid());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			pmTaskLogDTO.setOperatorName(user.getNickName());
 			
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("operatorName", user.getNickName());
@@ -587,7 +613,8 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Mobile cannot be null.");
 		}
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getMobile());
+		
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.current().getUser().getNamespaceId(), cmd.getMobile());
 		if(null == userIdentifier){
 			LOGGER.error("UserIdentifier not register.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -656,20 +683,28 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Category ancestor = categoryProvider.findCategoryByPath(namespaceId, defaultName);
 			parentId = ancestor.getId();
 			path = ancestor.getPath() + CATEGORY_SEPARATOR + cmd.getName();
+			
+			category = categoryProvider.findCategoryByPath(namespaceId, path);
+			if(category != null) {
+				LOGGER.error("PmTask category have been in existing");
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SERVICE_CATEGORY_EXIST,
+						"PmTask category have been in existing");
+			}
 		}else{
 			category = categoryProvider.findCategoryById(parentId);
 			if(category == null) {
 				LOGGER.error("PmTask parent category not found, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SERVICE_CATEGORY_NULL,
 						"PmTask parent category not found");
 			}
 			path = category.getPath() + CATEGORY_SEPARATOR + cmd.getName();
-		}
-		category = categoryProvider.findCategoryByPath(namespaceId, path);
-		if(category != null) {
-			LOGGER.error("PmTask category have been in existing");
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
-					"PmTask category have been in existing");
+			
+			category = categoryProvider.findCategoryByPath(namespaceId, path);
+			if(category != null) {
+				LOGGER.error("PmTask category have been in existing");
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
+						"PmTask category have been in existing");
+			}
 		}
 		
 		category = new Category();
@@ -720,7 +755,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), pageSize);
 		
 		Workbook wb = new XSSFWorkbook();
@@ -760,7 +795,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("ExportTasks is fail. {}",e);
+			LOGGER.error("ExportTasks is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"ExportTasks is fail.");
 		}
@@ -897,7 +932,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		response.setTotalCount(totalCount);
 		response.setEvaluateCount(evaluateCount);
-		response.setAvgScore((float) totalStar/evaluateCount);
+		float avgStar = evaluateCount!=0?(float) (totalStar/evaluateCount):0;
+		response.setAvgScore(avgStar);
 		response.setEvaluates(evaluates);
 		response.setCategoryTaskStatistics(categoryTaskStatistics);
 		
@@ -1048,12 +1084,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Content cannot be null.");
         }
     	Category child = checkCategory(categoryId);
-    	Category parent = checkCategory(child.getParentId());
-    	if(parent.getParentId().equals(0)){
-    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"CategoryId is not correctly.");
-    	}
+//    	Category parent = checkCategory(child.getParentId());
+//    	if(parent.getParentId().equals(0)){
+//    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
+//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//    				"CategoryId is not correctly.");
+//    	}
     }
 	
 	private Category checkCategory(Long id){
@@ -1143,9 +1179,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("ExportTasks is fail. {}",e);
+			LOGGER.error("ExportStatistics is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"ExportTasks is fail.");
+					"ExportStatistics is fail.");
 		}
 		
 	}
@@ -1308,7 +1344,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			wb.write(out);
 			download(out, resp);
 		} catch (IOException e) {
-			LOGGER.error("ExportListStatistics is fail. {}",e);
+			LOGGER.error("ExportListStatistics is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"ExportListStatistics is fail.");
 		}
