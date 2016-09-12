@@ -196,11 +196,14 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		cmd.setTimeStep(2.0);
 		cmd.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
 		TimeIntervalDTO timeIntervalDTO = new TimeIntervalDTO();
+		timeIntervalDTO.setTimeStep(1.0);
 		timeIntervalDTO.setBeginTime(10.0);
+		
 		timeIntervalDTO.setEndTime(17.0);
 		cmd.getTimeIntervals().add(timeIntervalDTO);
 
 		timeIntervalDTO = new TimeIntervalDTO();
+		timeIntervalDTO.setTimeStep(0.5);
 		timeIntervalDTO.setBeginTime(18.0);
 		timeIntervalDTO.setEndTime(20.0);
 		cmd.getTimeIntervals().add(timeIntervalDTO);
@@ -247,7 +250,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		assertEquals(dateSF.format(new Date(cmd.getEndDate())), dateSF.format(resource.getEndDate()));
 		assertEquals(cmd.getWorkdayPrice().doubleValue(), resource.getWorkdayPrice().doubleValue());
 		assertEquals(cmd.getWeekendPrice().doubleValue(), resource.getWeekendPrice().doubleValue());
-		assertEquals(cmd.getSiteCounts(), resource.getCounts()); 
+		assertEquals(cmd.getSiteCounts(), resource.getResourceCounts()); 
 		assertEquals("1111111", resource.getOpenWeekday()); 
 
 		List<EhRentalv2ConfigAttachments> resultConfigAttach2 = new ArrayList<EhRentalv2ConfigAttachments>();
@@ -289,11 +292,13 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		timeIntervalDTO = new TimeIntervalDTO();
 		timeIntervalDTO.setBeginTime(10.0);
 		timeIntervalDTO.setEndTime(17.0);
+		timeIntervalDTO.setTimeStep(1.0);
 		cmd.getTimeIntervals().add(timeIntervalDTO);
 
 		timeIntervalDTO = new TimeIntervalDTO();
+		timeIntervalDTO.setTimeStep(2.0);
 		timeIntervalDTO.setBeginTime(18.0);
-		timeIntervalDTO.setEndTime(20.0);
+		timeIntervalDTO.setEndTime(22.0);
 		cmd.getTimeIntervals().add(timeIntervalDTO);
 		response = httpClientService.restGet(commandRelativeUri, cmd,
 				RestResponse.class, context);
@@ -338,7 +343,7 @@ public class RentalAdminRuleTest extends BaseLoginAuthTestCase {
 		assertEquals(dateSF.format(new Date(cmd.getEndDate())), dateSF.format(resource.getEndDate()));
 		assertEquals(cmd.getWorkdayPrice().doubleValue(), resource.getWorkdayPrice().doubleValue());
 		assertEquals(cmd.getWeekendPrice().doubleValue(), resource.getWeekendPrice().doubleValue());
-		assertEquals(cmd.getSiteCounts(), resource.getCounts()); 
+		assertEquals(cmd.getSiteCounts(), resource.getResourceCounts()); 
 		assertEquals("1111111", resource.getOpenWeekday()); 
 
 		List<EhRentalv2ConfigAttachments> resultConfigAttach3 = new ArrayList<EhRentalv2ConfigAttachments>();

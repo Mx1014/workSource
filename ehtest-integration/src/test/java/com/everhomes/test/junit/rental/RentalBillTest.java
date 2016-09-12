@@ -86,8 +86,8 @@ public class RentalBillTest extends BaseLoginAuthTestCase {
 		assertEquals(2, response.getResponse().getRentalBills().size());
 //		assertEquals(Double.valueOf(2), response.getResponse().getRentalSites().get(0).getTimeStep());
 	}
-	public void testFindUserCancelRentalBills() {
 
+	public void testFindUserCancelRentalBills() {
 		// 登录时不传namepsace，默认为左邻域空间
 		logon(null, userIdentifier, plainTexPassword);
 
