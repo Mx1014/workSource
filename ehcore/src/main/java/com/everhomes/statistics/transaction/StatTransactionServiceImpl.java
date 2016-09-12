@@ -744,8 +744,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != wares){
 					for (Ware ware : wares) {
 						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
-						wareDTO.setNumber(ware.getNumber());
-						statWareDTOs.add(wareDTO);
+						if(null != wareDTO){
+							wareDTO.setNumber(ware.getNumber());
+							statWareDTOs.add(wareDTO);
+						}
 					}
 				}
 			}
