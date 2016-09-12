@@ -23,6 +23,9 @@ import com.everhomes.util.StringHelper;
  * <li>exceptionStatus：异常状态:1-异常0-正常 参考{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>PunchLogs: 打卡记录list {@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * <li>workTime: 工作时长 Long</li>
+ * <li>requestFlag: 全天异常申请flag:1-有申请 0-无申请 空-无申请</li>
+ * <li>morningRequestFlag: 上午异常申请flag:1-有申请 0-无申请 空-无申请</li>
+ * <li>afternoonRequestFlag: 下午异常申请flag:1-有申请 0-无申请 空-无申请</li>
  * </ul>
  */
 public class PunchLogsDay{
@@ -49,7 +52,10 @@ public class PunchLogsDay{
     private Byte approvalStatusNew ;
 	private Byte morningApprovalStatusNew;
 	private Byte afternoonApprovalStatusNew;
- 
+	//added by wh 增加申请状态
+	private Byte requestFlag;
+	private Byte morningRequestFlag;
+	private Byte afternoonRequestFlag;
 
 
 	public Byte getMorningPunchStatus() {
@@ -273,6 +279,42 @@ public class PunchLogsDay{
 
 	public void setAfternoonApprovalStatusNew(Byte afternoonApprovalStatusNew) {
 		this.afternoonApprovalStatusNew = afternoonApprovalStatusNew;
+	}
+
+
+
+	public Byte getRequestFlag() {
+		return requestFlag;
+	}
+
+
+
+	public void setRequestFlag(Byte requestFlag) {
+		this.requestFlag = requestFlag;
+	}
+
+
+
+	public Byte getMorningRequestFlag() {
+		return morningRequestFlag;
+	}
+
+
+
+	public void setMorningRequestFlag(Byte morningRequestFlag) {
+		this.morningRequestFlag = morningRequestFlag;
+	}
+
+
+
+	public Byte getAfternoonRequestFlag() {
+		return afternoonRequestFlag;
+	}
+
+
+
+	public void setAfternoonRequestFlag(Byte afternoonRequestFlag) {
+		this.afternoonRequestFlag = afternoonRequestFlag;
 	}
 
 
