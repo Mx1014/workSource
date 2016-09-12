@@ -318,6 +318,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		sendMessageToUser(task.getCreatorUid(), text);
 		
 		//elasticsearch更新
+		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
+		PmTaskLog log = logs.get(0);
+		if(0L == log.getOperatorUid()){
+			task.setNickName(log.getOperatorName());
+			task.setMobile(log.getOperatorPhone());
+		}else{
+			User creator = userProvider.findUserById(log.getOperatorUid());
+			UserIdentifier creatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(creator.getId(), IdentifierType.MOBILE.getCode());
+			task.setNickName(creator.getNickName());
+			task.setMobile(creatorIdentifier.getIdentifierToken());
+		}
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
 	}
@@ -455,6 +466,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		sendMessageToUser(task.getCreatorUid(), text);
 		
 		//elasticsearch更新
+		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
+		PmTaskLog log = logs.get(0);
+		if(0L == log.getOperatorUid()){
+			task.setNickName(log.getOperatorName());
+			task.setMobile(log.getOperatorPhone());
+		}else{
+			User creator = userProvider.findUserById(log.getOperatorUid());
+			UserIdentifier creatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(creator.getId(), IdentifierType.MOBILE.getCode());
+			task.setNickName(creator.getNickName());
+			task.setMobile(creatorIdentifier.getIdentifierToken());
+		}
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
 	}
@@ -598,7 +620,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
 		task.setUnprocessedTime(now);
 		pmTaskProvider.createTask(task);
-//		addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
+		addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
 		
 		PmTaskLog pmTaskLog = new PmTaskLog();
 		pmTaskLog.setNamespaceId(task.getNamespaceId());
@@ -636,6 +658,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("Mobile cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Mobile cannot be null.");
+		}
+		if(cmd.getMobile().length() != 11){
+			LOGGER.error("Mobile is not correctly.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Mobile is not correctly.");
 		}
 		
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.current().getUser().getNamespaceId(), cmd.getMobile());
