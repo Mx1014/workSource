@@ -34,6 +34,8 @@ public class SearchByMultiForumAndCmntyCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private String searchContentType;
 
     public String getQueryString() {
 		return queryString;
@@ -89,6 +91,14 @@ public class SearchByMultiForumAndCmntyCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public String getSearchContentType() {
+		return searchContentType;
+	}
+
+	public void setSearchContentType(String searchContentType) {
+		this.searchContentType = searchContentType;
 	}
 
 	@Override

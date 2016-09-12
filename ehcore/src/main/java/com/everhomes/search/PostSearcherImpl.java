@@ -162,6 +162,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("visibleRegionType", post.getVisibleRegionType());
             b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("parentPostId", post.getParentPostId());
+            b.field("embeddedAppId", post.getEmbeddedAppId());
             Forum forum = forumProvider.findForumById(post.getForumId());
             Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
             if(forum != null) {
@@ -403,6 +404,44 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
            }
         
         FilterBuilder fb = getForumFilter(cmd);
+        
+        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
+        	if(SearchContentType.ACTIVITY.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		if(null == fb) {
+        			fb = FilterBuilders.termFilter("embeddedAppId", 3);
+        		} else {
+                    fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("embeddedAppId", 3));
+                }
+                
+            } 
+        }
+        
+        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
+        	if(SearchContentType.POLL.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		if(null == fb) {
+        			fb = FilterBuilders.termFilter("embeddedAppId", 14);
+        		} else {
+                    fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("embeddedAppId", 14));
+                }
+                
+            } 
+        }
+        
+        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
+        	if(SearchContentType.TOPIC.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		 int[] notEmbeddedAppIds = new int[2];
+        		 notEmbeddedAppIds[0] = 3;
+        		 notEmbeddedAppIds[1] = 14;
+        		 
+        		FilterBuilder nfb = FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds);
+        		if(null == fb) {
+        			fb = FilterBuilders.notFilter(nfb);
+        		} else {
+                    fb = FilterBuilders.boolFilter().mustNot(fb, nfb);
+                }
+                
+            } 
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -667,6 +706,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 cmntyTopicCmd.setNamespaceId(namespaceId);
                 cmntyTopicCmd.setCommunityId(community.getId());
                 cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
+                cmntyTopicCmd.setSearchContentType(cmd.getSearchContentType());
                 
                 SearchResponse searchResponse = getQuery(cmntyTopicCmd);
                 return searchResponse;
@@ -725,6 +765,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         orgTopicCmd.setCommunityIds(communityIdList);
         orgTopicCmd.setForumIds(forumIdList);
         orgTopicCmd.setRegionIds(organizationList);
+        orgTopicCmd.setSearchContentType(cmd.getSearchContentType());
         
         return orgTopicCmd;
     }
@@ -774,6 +815,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         FilterBuilder fb = null;
         
+        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
+        	fwef
+        }
         // 社区论坛里符合小区的过滤条件
         FilterBuilder cmntyFilter = null;
         if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
