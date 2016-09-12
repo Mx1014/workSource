@@ -414,9 +414,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 }
                 
             } 
-        }
         
-        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
         	if(SearchContentType.POLL.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
         		if(null == fb) {
         			fb = FilterBuilders.termFilter("embeddedAppId", 14);
@@ -425,9 +423,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 }
                 
             } 
-        }
         
-        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
         	if(SearchContentType.TOPIC.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
         		 int[] notEmbeddedAppIds = new int[2];
         		 notEmbeddedAppIds[0] = 3;
@@ -816,7 +812,33 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         FilterBuilder fb = null;
         
         if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
-        	fwef
+        	if(SearchContentType.ACTIVITY.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+
+        		fb = FilterBuilders.termFilter("embeddedAppId", 3);
+            } 
+        
+        	if(SearchContentType.POLL.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		if(null == fb) {
+        			fb = FilterBuilders.termFilter("embeddedAppId", 14);
+        		} else {
+                    fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("embeddedAppId", 14));
+                }
+                
+            } 
+        
+        	if(SearchContentType.TOPIC.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		 int[] notEmbeddedAppIds = new int[2];
+        		 notEmbeddedAppIds[0] = 3;
+        		 notEmbeddedAppIds[1] = 14;
+        		 
+        		FilterBuilder nfb = FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds);
+        		if(null == fb) {
+        			fb = FilterBuilders.notFilter(nfb);
+        		} else {
+                    fb = FilterBuilders.boolFilter().mustNot(fb, nfb);
+                }
+                
+            } 
         }
         // 社区论坛里符合小区的过滤条件
         FilterBuilder cmntyFilter = null;
