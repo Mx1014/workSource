@@ -969,3 +969,8 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
   
 -- delete shenye pm_admin scene_type tingche item add by xiongying20160909
 delete from eh_launch_pad_items where id = 10059;
+
+
+-- merge at 20160912
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+    VALUES ('110057', '999992', '0', '0', '0', '/home', 'Bizs', 'SERVICE_HOT_LINE', '服务热线', 'cs://1/image/aW1hZ2UvTVRveVlUVXdObVpoTlRCbFpqQmlZV1ZqTVdReU1qVmxabU0xTWpaa1pXSmhZdw', '1', '1', '45', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'default', '1');

@@ -387,7 +387,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
 	}
 	
 	@Override
