@@ -4,9 +4,6 @@ INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)V
 
 -- 物业报修 模版
 
-ALTER TABLE `eh_pm_task_logs` ADD COLUMN `operator_name` VARCHAR(64) COMMENT 'the name of user';
-ALTER TABLE `eh_pm_task_logs` ADD COLUMN `operator_phone` VARCHAR(64) COMMENT 'the phone of user';
-
 DELETE FROM eh_locale_templates where id in (180,181,182,183);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('180', 'pmtask.notification', '1', 'zh_CN', '任务操作模版', '任务已生成，${operatorName} ${operatorPhone}', '0');
