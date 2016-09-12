@@ -227,8 +227,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         }
         
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        
-        builder.setSize(pageSize);
+        if(null != pageSize)
+        	builder.setSize(pageSize);
         builder.setQuery(qb).setPostFilter(fb);
         // builder.addSort("createTime", SortOrder.ASC);
         builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
