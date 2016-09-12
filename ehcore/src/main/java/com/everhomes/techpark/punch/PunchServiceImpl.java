@@ -44,7 +44,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
@@ -82,6 +81,7 @@ import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchCountDTO;
@@ -572,9 +572,15 @@ public class PunchServiceImpl implements PunchService {
 						dateSF.format(logDay.getTime()));
 		if (exceptionRequests.size() > 0) {
 			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
-
+				//是否有请求的flag
+				if(exceptionRequest.getApprovalStatus() != null )
+					pdl.setRequestFlag(NormalFlag.YES.getCode());
+				if(exceptionRequest.getMorningApprovalStatus() != null )
+					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
+				if(exceptionRequest.getAfternoonApprovalStatus() != null )
+					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
 				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
-
+				
 				punchExceptionDTO.setRequestType(exceptionRequest
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
@@ -1939,6 +1945,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
 		punchProvider.viewDateFlags(userId, cmd.getEnterpirseId(),
 				dateSF.format(logDay.getTime()));
+		
 		return pdl;
 	}
 
