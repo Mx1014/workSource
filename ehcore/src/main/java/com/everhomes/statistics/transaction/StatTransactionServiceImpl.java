@@ -304,6 +304,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					Condition resCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
 					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(resCond, sStartDate, sEndDate);
 					result.setResourceName(statService.getServiceName());
+					result.setResourceType(statService.getServiceType());
 					result.setServiceType(serviceType);
 					results.add(result);
 				}
@@ -671,7 +672,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            List<StatWareDTO> wareDTOs = statShopTransactionDTO.getWares();
 	            String wareInfo = "";
 	            for (StatWareDTO statWareDTO : wareDTOs) {
-	            	wareInfo = statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
+	            	wareInfo += statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
 				}
 	            row.createCell(7).setCellValue(wareInfo);
 			}
