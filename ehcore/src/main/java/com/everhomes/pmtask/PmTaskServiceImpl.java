@@ -1393,7 +1393,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Row tempRow = sheet.createRow(i + 1);
 			PmTaskStatistics pts = list.get(i);
 			Category category = checkCategory(pts.getCategoryId());
-			tempRow.createCell(0).setCellValue(cmd.getKeyword());
+			Community community = communityProvider.findCommunityById(pts.getOwnerId());
+			tempRow.createCell(0).setCellValue(community.getName());
 			tempRow.createCell(1).setCellValue(category.getName());
 			tempRow.createCell(2).setCellValue(pts.getTotalCount());
 			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getCategoryId(), null);
