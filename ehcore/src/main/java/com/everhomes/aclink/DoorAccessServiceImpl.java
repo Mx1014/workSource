@@ -2437,6 +2437,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
                             .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
                 }
+                if(cmd.getDoorId() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.eq(cmd.getDoorId()));
+                }
                 
                 return query;
             }

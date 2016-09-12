@@ -9,6 +9,7 @@ public class AclinkQueryLogCommand {
     private String keyword;
     private Long pageAnchor;
     private Integer pageSize;
+    private Long doorId;
     
     public Long getEventType() {
         return eventType;
@@ -46,6 +47,13 @@ public class AclinkQueryLogCommand {
     }
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getDoorId() {
+        return doorId;
+    }
+    public void setDoorId(Long doorId) {
+        this.doorId = doorId;
     }
     @Override
     public String toString() {
