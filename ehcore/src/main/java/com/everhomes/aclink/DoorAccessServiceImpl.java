@@ -65,16 +65,8 @@ import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkFirmwareType;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogDTO;
-<<<<<<< HEAD
-<<<<<<< HEAD
 import com.everhomes.rest.aclink.AclinkLogItem;
 import com.everhomes.rest.aclink.AclinkLogListResponse;
-=======
->>>>>>> support for aclink log
-=======
-import com.everhomes.rest.aclink.AclinkLogItem;
-import com.everhomes.rest.aclink.AclinkLogListResponse;
->>>>>>> change create log to list
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkMessageMeta;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
@@ -2409,6 +2401,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         return resp;
+        
     }
     
     @Override

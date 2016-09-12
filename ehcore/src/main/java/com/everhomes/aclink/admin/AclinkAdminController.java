@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.aclink.AclinkLog;
+import com.everhomes.aclink.AclinkLogProvider;
 import com.everhomes.aclink.AesServerKeyProvider;
 import com.everhomes.aclink.AesUserKey;
 import com.everhomes.aclink.DoorAccess;
@@ -25,6 +27,7 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkLogDeleteCommand;
 import com.everhomes.rest.aclink.AclinkQueryLogCommand;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.rest.aclink.AclinkUserResponse;
@@ -66,6 +69,9 @@ public class AclinkAdminController extends ControllerBase {
     
     @Autowired
     private AesServerKeyProvider aesServerKeyProvider;
+    
+    @Autowired
+    private AclinkLogProvider aclinkLogProvider;
     
     @Autowired
     DoorAccessProvider doorAccessProvider;
@@ -361,4 +367,22 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/aclink/deleteLogById</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("deleteLogById")
+    @RestReturn(value=String.class)
+    public RestResponse deleteLogById(@Valid AclinkLogDeleteCommand cmd) {
+        AclinkLog obj = aclinkLogProvider.getAclinkLogById(cmd.getId());
+        if(obj != null) {
+            aclinkLogProvider.deleteAclinkLog(obj);
+        }
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }    
 }
