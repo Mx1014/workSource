@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -889,13 +890,36 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetStatisticsResponse response = new GetStatisticsResponse();
 		
 		response.setOwnerId(cmd.getOwnerId());
-		if(null != cmd.getOwnerId()){
-			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
-			response.setOwnerName(community.getName());
-		}
 		
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, cmd.getDateStr(),
 				null, null);
+		
+		if(null != cmd.getOwnerId()){
+			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+			response.setOwnerName(community.getName());
+		}else{
+			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
+			
+			for(PmTaskStatistics p: list){
+				Long id = p.getId();
+				PmTaskStatistics pts = null;
+				if(tempMap.containsKey(id)){
+					pts = tempMap.get(id);
+					pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
+					pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
+					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
+					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
+					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+					continue;
+				}
+				tempMap.put(id, p);
+			}
+			list.clear();
+			for(PmTaskStatistics p1:tempMap.values()){
+				list.add(p1);
+			}
+		}
+		
 		int totalCount = 0;
 		int evaluateCount = 0;
 		int totalStar = 0;
