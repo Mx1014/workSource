@@ -69,6 +69,7 @@ CREATE TABLE `eh_pm_task_logs` (
   `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'target user id if target_type is a user',
 
   `operator_uid` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(64) COMMENT 'the name of user',
   `operator_time` DATETIME,
 
     PRIMARY KEY (`id`)
