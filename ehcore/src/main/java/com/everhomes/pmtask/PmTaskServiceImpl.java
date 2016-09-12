@@ -1365,7 +1365,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
-
+		if(null == cmd.getPageSize())
+			cmd.setPageSize(100000);
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), cmd.getDateStr(),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
