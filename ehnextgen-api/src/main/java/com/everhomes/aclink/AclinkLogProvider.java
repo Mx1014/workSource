@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 
 public interface AclinkLogProvider {
 

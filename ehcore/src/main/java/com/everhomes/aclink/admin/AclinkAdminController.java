@@ -25,6 +25,8 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkLogCreateCommand;
 import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkQueryLogCommand;
+import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.rest.aclink.AclinkUserResponse;
 import com.everhomes.rest.aclink.AesUserKeyDTO;
 import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
@@ -341,6 +343,20 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=GetShortMessageResponse.class)
     public RestResponse getShortMessages(@Valid GetShortMessageCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.getShortMessages(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/queryLogs</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("queryLogs")
+    @RestReturn(value=AclinkQueryLogResponse.class)
+    public RestResponse queryLogs(@Valid AclinkQueryLogCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.queryLogs(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
