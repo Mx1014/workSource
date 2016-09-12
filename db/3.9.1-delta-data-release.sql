@@ -3,6 +3,10 @@ SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)VALUES((@configuration_id := @configuration_id + 1), 'get.ware.info.api','zl-ec/rest/openapi/model/listByCondition','获取商品信息',0);
 
 -- 物业报修 模版
+
+ALTER TABLE `eh_pm_task_logs` ADD COLUMN `operator_name` VARCHAR(64) COMMENT 'the name of user';
+ALTER TABLE `eh_pm_task_logs` ADD COLUMN `operator_phone` VARCHAR(64) COMMENT 'the phone of user';
+
 DELETE FROM eh_locale_templates where id in (180,181,182,183);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('180', 'pmtask.notification', '1', 'zh_CN', '任务操作模版', '任务已生成，${operatorName} ${operatorPhone}', '0');
@@ -25,3 +29,4 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES (280, 'pmtask', '10005', 'zh_CN', '服务类型已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
   VALUES (281, 'pmtask', '10006', 'zh_CN', '服务类型不存在');
+

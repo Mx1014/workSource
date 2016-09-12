@@ -187,13 +187,16 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public List<PmTaskLog> listPmTaskLogs(Long taskId){
+	public List<PmTaskLog> listPmTaskLogs(Long taskId, Byte status){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskLogs.class));
         
         SelectQuery<EhPmTaskLogsRecord> query = context.selectQuery(Tables.EH_PM_TASK_LOGS);
         if(null != taskId)
         	query.addConditions(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(taskId));
-        query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
+        if(null != status)
+        	query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.eq(status));
+        else
+        	query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
         query.addOrderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
         List<PmTaskLog> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskLog.class))
         		.collect(Collectors.toList());

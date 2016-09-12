@@ -148,10 +148,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-    			User user = userProvider.findUserById(r.getCreatorUid());
-    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-    			dto.setNickName(user.getNickName());
-    			dto.setMobile(userIdentifier.getIdentifierToken());
+//    			User user = userProvider.findUserById(r.getCreatorUid());
+//    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//    			dto.setNickName(user.getNickName());
+//    			dto.setMobile(userIdentifier.getIdentifierToken());
     			
     			Category parentCategory = checkCategory(r.getCategoryId());
     			dto.setParentCategoryId(parentCategory.getId());
@@ -180,10 +180,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-    			User user = userProvider.findUserById(r.getCreatorUid());
-    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-    			dto.setNickName(user.getNickName());
-    			dto.setMobile(userIdentifier.getIdentifierToken());
+				List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(r.getId(), PmTaskStatus.UNPROCESSED.getCode());
+				PmTaskLog log = logs.get(0);
+    			if(0L == log.getOperatorUid()){
+    				dto.setNickName(log.getOperatorName());
+        			dto.setMobile(log.getOperatorPhone());
+    			}else{
+    				User user = userProvider.findUserById(log.getOperatorUid());
+        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        			dto.setNickName(user.getNickName());
+        			dto.setMobile(userIdentifier.getIdentifierToken());
+    			}
     			
     			Category category = checkCategory(r.getCategoryId());
     			Category parentCategory = checkCategory(category.getParentId());
@@ -490,35 +497,46 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}).collect(Collectors.toList());
 		dto.setAttachments(attachmentDtos);
 		//查询task log
-		List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(task.getId());
+		List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
 		dto.setTaskLogs(taskLogDtos);
 		
-		User user = userProvider.findUserById(task.getCreatorUid());
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		dto.setNickName(user.getNickName());
-		dto.setMobile(userIdentifier.getIdentifierToken());
+//		User user = userProvider.findUserById(task.getCreatorUid());
+//		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//		dto.setNickName(user.getNickName());
+//		dto.setMobile(userIdentifier.getIdentifierToken());
 		
 		return dto;
 	}
 
-	private List<PmTaskLogDTO> listPmTaskLogs(Long taskId) {
-		List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(taskId);
+	private List<PmTaskLogDTO> listPmTaskLogs(PmTaskDTO task) {
+		List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(task.getId(), null);
 		List<PmTaskLogDTO> taskLogDtos = taskLogs.stream().map(r -> {
 			
 			PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
 			
-			User user = userProvider.findUserById(r.getOperatorUid());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			pmTaskLogDTO.setOperatorName(user.getNickName());
-			
 			Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("operatorName", user.getNickName());
-		    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+			if(0L != r.getOperatorUid()){
+				User user = userProvider.findUserById(r.getOperatorUid());
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+				pmTaskLogDTO.setOperatorName(user.getNickName());
+				task.setNickName(user.getNickName());
+				task.setMobile(userIdentifier.getIdentifierToken());
+				
+			    map.put("operatorName", user.getNickName());
+			    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+			}else{
+				pmTaskLogDTO.setOperatorName(r.getOperatorName());
+				pmTaskLogDTO.setOperatorPhone(r.getOperatorPhone());
+				task.setNickName(r.getOperatorName());
+				task.setMobile(r.getOperatorPhone());
+				map.put("operatorName", r.getOperatorName());
+			    map.put("operatorPhone", r.getOperatorPhone());
+			}
 		    String scope = PmTaskNotificationTemplateCode.SCOPE;
 		    String locale = PmTaskNotificationTemplateCode.LOCALE;
 		    
 			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-				
+			    
 				int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
@@ -560,7 +578,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return taskLogDtos;
 	}
 	
-	private PmTaskDTO createTask(CreateTaskCommand cmd, User user){
+	private PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String nickName, String mobile){
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
 		Long categoryId = cmd.getCategoryId();
@@ -573,6 +591,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setCategoryId(categoryId);
 		task.setContent(content);
 		task.setCreateTime(now);
+		User user = UserContext.current().getUser();
 		task.setCreatorUid(user.getId());
 		task.setNamespaceId(user.getNamespaceId());
 		task.setOwnerId(ownerId);
@@ -580,21 +599,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
 		task.setUnprocessedTime(now);
 		pmTaskProvider.createTask(task);
-		addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
+//		addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
 		
 		PmTaskLog pmTaskLog = new PmTaskLog();
 		pmTaskLog.setNamespaceId(task.getNamespaceId());
 		pmTaskLog.setOperatorTime(now);
-		pmTaskLog.setOperatorUid(user.getId());
+		pmTaskLog.setOperatorUid(userId);
+		//
+		pmTaskLog.setOperatorName(nickName);
+		pmTaskLog.setOperatorPhone(mobile);
 		pmTaskLog.setOwnerId(task.getOwnerId());
 		pmTaskLog.setOwnerType(task.getOwnerType());
 		pmTaskLog.setStatus(task.getStatus());
 		pmTaskLog.setTaskId(task.getId());
 		pmTaskProvider.createTaskLog(pmTaskLog);
 		
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		task.setNickName(user.getNickName());
-		task.setMobile(userIdentifier.getIdentifierToken());
+		//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		task.setNickName(nickName);
+		task.setMobile(mobile);
 		pmTaskSearch.feedDoc(task);
 		
 		return ConvertHelper.convert(task, PmTaskDTO.class);
@@ -604,8 +626,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
 		
 		User user = UserContext.current().getUser();
-		
-		return createTask(cmd, user);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+		return createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
 	}
 	
 	@Override
@@ -617,19 +640,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.current().getUser().getNamespaceId(), cmd.getMobile());
-		if(null == userIdentifier){
-			LOGGER.error("UserIdentifier not register.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"UserIdentifier not register.");
+		if(null != userIdentifier){
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			if(null == user){
+				LOGGER.error("User not found.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"User not found.");
+			}
+			return createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
 		}
-		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-		if(null == user){
-			LOGGER.error("User not found.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"User not found.");
-		}
-		
-		return createTask(cmd, user);
+		return createTask(cmd, null, cmd.getNickName(), cmd.getMobile());
 	}
 	
 	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
