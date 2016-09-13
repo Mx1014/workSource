@@ -3471,21 +3471,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null!=timeIntervals){
 			for(RentalTimeInterval timeInterval : timeIntervals){
 
-				dayTimes.add(Timestamp.valueOf(dateSF.format(new java.util.Date())
+				Long dayTimeBegin = Timestamp.valueOf(dateSF.format(new java.util.Date())
 						+ " "
 						+ String.valueOf((int) timeInterval.getBeginTime().doubleValue() / 1)
 						+ ":"
 						+ String.valueOf((int) (( timeInterval.getBeginTime() % 1) * 60))
-						+ ":00").getTime());
+						+ ":00").getTime();
+				if(!dayTimes.contains(dayTimeBegin))
+					dayTimes.add(dayTimeBegin);
 			 
 				for (double i = timeInterval.getBeginTime(); i < timeInterval.getEndTime();) {
+					
 					i = i + timeInterval.getTimeStep();
-					dayTimes.add(Timestamp.valueOf(dateSF.format(new java.util.Date())
+					Long dayTimeEnd = Timestamp.valueOf(dateSF.format(new java.util.Date())
 							+ " "
 							+ String.valueOf((int) i / 1)
 							+ ":"
-							+ String.valueOf((int) ((i % 1) * 60))
-							+ ":00").getTime());
+							+ String.valueOf((int) (( i % 1) * 60))
+							+ ":00").getTime();
+					if(!dayTimes.contains(dayTimeEnd))
+						dayTimes.add(dayTimeEnd);
+				 
 				}
 			}
 		}
