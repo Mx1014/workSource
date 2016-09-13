@@ -3163,9 +3163,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						i = i + timeInterval.getTimeStep();
 						Long dayTimeEnd = Timestamp.valueOf(dateSF.format(new java.util.Date())
 								+ " "
-								+ String.valueOf((int) timeInterval.getBeginTime().doubleValue() / 1)
+								+ String.valueOf((int) i / 1)
 								+ ":"
-								+ String.valueOf((int) (( timeInterval.getBeginTime() % 1) * 60))
+								+ String.valueOf((int) (( i % 1) * 60))
 								+ ":00").getTime();
 						if(!dayTimes.contains(dayTimeEnd))
 							dayTimes.add(dayTimeEnd);
