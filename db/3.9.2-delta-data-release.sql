@@ -365,3 +365,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 	VALUES((@menu_scope_id := @menu_scope_id + 1), 22000,'', 'EhNamespaces', 999992 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES((@menu_scope_id := @menu_scope_id + 1), 23000,'', 'EhNamespaces', 999992 , 0);
+
+delete  from eh_launch_pad_items where item_label = '任务管理' and namespace_id = 999992;
+delete  from eh_launch_pad_items where item_label = '物业服务' and namespace_id = 999992;
