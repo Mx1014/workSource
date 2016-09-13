@@ -39,6 +39,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.approval.ApprovalRule;
+import com.everhomes.approval.ApprovalRuleProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -164,7 +166,8 @@ public class PunchServiceImpl implements PunchService {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
-	
+	@Autowired
+	private ApprovalRuleProvider approvalRuleProvider;
 
     
     @Autowired
@@ -3528,6 +3531,25 @@ public class PunchServiceImpl implements PunchService {
 		return this.punchProvider.getPunchRuleById(map.getPunchRuleId());
 		
 	}
+	
+	//ownerType为组织，ownerId为组织id
+	@Override
+	public ApprovalRule getApprovalRule(String ownerType, Long ownerId,Long userId){
+		//如果有个人规则就返回个人规则
+		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
+		if (null == map){
+			//没有个人规则,向上递归找部门规则
+			if(!ownerType.equals(PunchOwnerType.ORGANIZATION.getCode()))
+				return null;
+			//加循环限制
+			int loopMax = 10;
+			OrganizationDTO deptDTO = findUserDepartment(userId, ownerId);
+			Organization dept =  ConvertHelper.convert(deptDTO, Organization.class);
+			map = getPunchRule(ownerId ,dept,loopMax);
+		}
+		return approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
+	}
+	
 //	/**找到用户的打卡时间规则*/
 //	private PunchTimeRule getTimeRule(String ownerType, Long ownerId ,Long  userId) {  
 //		PunchRule pr = this.getPunchRule(ownerType, ownerId, userId);

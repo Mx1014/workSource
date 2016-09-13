@@ -3,6 +3,7 @@ package com.everhomes.approval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -36,6 +37,17 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalTimeRanges.class));
 		approvalTimeRange.setId(id);
 		getReadWriteDao().insert(approvalTimeRange);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalTimeRanges.class, null);
+	}
+	
+	@Override
+	public void createApprovalTimeRanges(List<ApprovalTimeRange> approvalTimeRanges){
+		List<EhApprovalTimeRanges> list = approvalTimeRanges.stream().map(a->{
+			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalTimeRanges.class));
+			a.setId(id);
+			return ConvertHelper.convert(a, EhApprovalTimeRanges.class);
+		}).collect(Collectors.toList());
+		getReadWriteDao().insert(list);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalTimeRanges.class, null);
 	}
 

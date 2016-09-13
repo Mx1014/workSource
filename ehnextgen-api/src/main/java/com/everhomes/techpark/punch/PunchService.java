@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.approval.ApprovalRule;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -152,5 +153,7 @@ public interface PunchService {
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 
 	void refreshMonthDayLogs(String month);
+
+	ApprovalRule getApprovalRule(String ownerType, Long ownerId, Long userId);
 
 }

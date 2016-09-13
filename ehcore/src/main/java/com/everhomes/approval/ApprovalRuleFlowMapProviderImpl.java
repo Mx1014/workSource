@@ -104,6 +104,22 @@ public class ApprovalRuleFlowMapProviderImpl implements ApprovalRuleFlowMapProvi
 		return new ArrayList<ApprovalRuleFlowMap>();
 	}
 
+	@Override
+	public ApprovalRuleFlowMap findConcreteApprovalRuleFlowMap(Long ruleId, Byte approvalType) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULE_FLOW_MAP)
+				.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.RULE_ID.eq(ruleId))
+				.and(Tables.EH_APPROVAL_RULE_FLOW_MAP.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_RULE_FLOW_MAP.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, ApprovalRuleFlowMap.class);
+		}
+		
+		return null;
+	}
+
 	private EhApprovalRuleFlowMapDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

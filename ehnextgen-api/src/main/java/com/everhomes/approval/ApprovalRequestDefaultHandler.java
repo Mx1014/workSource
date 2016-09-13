@@ -1,12 +1,19 @@
 package com.everhomes.approval;
 
+import java.sql.Timestamp;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
-import com.everhomes.rest.approval.ApprovalRequestDTO;
+import com.everhomes.rest.approval.ApprovalOwnerInfo;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.ListUtils;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -25,14 +32,6 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	
 	@Autowired
 	private ApprovalService approvalService;
-	
-	@Override
-	public void preProcess(ApprovalRequestDTO approvalRequestDTO) {
-	}
-
-	@Override
-	public void postProcess(ApprovalRequestDTO approvalRequestDTO) {
-	}
 
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
@@ -61,5 +60,40 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		
 		return briefApprovalRequestDTO;
 	}
+
+	@Override
+	public ApprovalRequest preProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo,
+			CreateApprovalRequestBySceneCommand cmd) {
+		return generateApprovalRequest(userId, ownerInfo, cmd);
+	}
+
+	@Override
+	public void postProcessCreateApprovalRequest(ApprovalRequest approvalRequest,
+			CreateApprovalRequestBySceneCommand cmd) {
+	}
+	
+
+	private ApprovalRequest generateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, CreateApprovalRequestBySceneCommand cmd) {
+		ApprovalRequest approvalRequest = new ApprovalRequest();
+		approvalRequest.setNamespaceId(ownerInfo.getNamespaceId());
+		approvalRequest.setOwnerType(ownerInfo.getOwnerType());
+		approvalRequest.setOwnerId(ownerInfo.getOwnerId());
+		approvalRequest.setApprovalType(cmd.getApprovalType());
+		approvalRequest.setCategoryId(cmd.getCategoryId());
+		approvalRequest.setReason(cmd.getReason());
+		approvalRequest.setAttachmentFlag(ListUtils.isEmpty(cmd.getAttachmentList())?TrueOrFalseFlag.FALSE.getCode():TrueOrFalseFlag.TRUE.getCode());
+		approvalRequest.setTimeFlag(ListUtils.isEmpty(cmd.getTimeRangeList())?TrueOrFalseFlag.FALSE.getCode():TrueOrFalseFlag.TRUE.getCode());
+		approvalRequest.setApprovalStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+		approvalRequest.setStatus(CommonStatus.ACTIVE.getCode());
+		approvalRequest.setCreatorUid(userId);
+		approvalRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalRequest.setUpdateTime(approvalRequest.getCreateTime());
+		approvalRequest.setOperatorUid(userId);
+		approvalRequest.setFlowId(approvalService.getApprovalFlowByUser(ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), userId, cmd.getApprovalType()).getId());
+		approvalRequest.setCurrentLevel((byte) 0);
+		approvalRequest.setNextLevel((byte) 1);
+		return approvalRequest;
+	}
+	
 	
 }

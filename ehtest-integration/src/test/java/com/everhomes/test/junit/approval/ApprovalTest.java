@@ -1,6 +1,5 @@
 package com.everhomes.test.junit.approval;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +63,7 @@ import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalRequestCommand;
 import com.everhomes.rest.approval.ListApprovalRequestResponse;
+import com.everhomes.rest.approval.ListApprovalRequestRestResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalRuleRestResponse;
@@ -92,6 +92,7 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleRestResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
+import com.everhomes.rest.ui.approval.ApprovalCreateApprovalRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalFlowOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse;
@@ -992,8 +993,8 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		List<TimeRange> timeRangeList = new ArrayList<>();
 		TimeRange timeRange = new TimeRange();
 		timeRange.setType((byte)1);
-		timeRange.setFromTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		timeRange.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		timeRange.setFromTime(DateHelper.currentGMTTime().getTime());
+		timeRange.setEndTime(DateHelper.currentGMTTime().getTime());
 		timeRange.setActualResult("");
 		timeRangeList.add(timeRange);
 		cmd.setTimeRangeList(timeRangeList);

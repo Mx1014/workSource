@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
-import java.sql.Timestamp;
+import com.everhomes.util.StringHelper;
 
 /**
  * 
@@ -14,8 +14,8 @@ import java.sql.Timestamp;
  */
 public class TimeRange {
 	private Byte type;
-	private Timestamp fromTime;
-	private Timestamp endTime;
+	private Long fromTime;
+	private Long endTime;
 	private String actualResult;
 
 	public String getActualResult() {
@@ -34,20 +34,24 @@ public class TimeRange {
 		this.type = type;
 	}
 
-	public Timestamp getFromTime() {
+	public Long getFromTime() {
 		return fromTime;
 	}
 
-	public void setFromTime(Timestamp fromTime) {
+	public void setFromTime(Long fromTime) {
 		this.fromTime = fromTime;
 	}
 
-	public Timestamp getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Timestamp endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
-
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

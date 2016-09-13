@@ -121,3 +121,6 @@ CREATE TABLE `eh_approval_op_requests` (
 	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 原打卡异常申请表增加一个字段用于存储审批申请的id，便于审批那边可以找到
+ALTER TABLE `eh_punch_exception_requests`	ADD COLUMN `request_id` BIGINT NULL COMMENT 'approval request id';

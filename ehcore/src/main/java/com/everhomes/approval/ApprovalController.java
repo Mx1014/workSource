@@ -327,6 +327,6 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalRequest")
 	@RestReturn(ListApprovalRequestResponse.class)
 	public RestResponse listApprovalRequest(ListApprovalRequestCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listApprovalRequest(cmd));
 	}
 }

@@ -58,6 +58,8 @@ import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
@@ -85,6 +87,8 @@ import com.everhomes.rest.approval.ListApprovalLogOfRequestCommand;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalRequestCommand;
+import com.everhomes.rest.approval.ListApprovalRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalUserCommand;
@@ -108,10 +112,15 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.punch.PunchRule;
+import com.everhomes.techpark.punch.PunchRuleOwnerMap;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -166,6 +175,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	@Autowired
 	private FamilyProvider familyProvider;
+	
+	@Autowired
+	private PunchService punchService;
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -245,6 +257,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"Not exist category: categoryId="+id+", namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
 		}
 		return category;
+	}
+	
+	private ApprovalCategory checkCategoryExist(Long id, ApprovalOwnerInfo ownerInfo, Byte approvalType) {
+		return checkCategoryExist(id, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), approvalType);
 	}
 	
 	@Override
@@ -1011,8 +1027,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			}
 		}
 		return "";
-	}
-	
+	}	
 	
 	@Override
 	public ListApprovalFlowOfRequestResponse listApprovalFlowOfRequest(ListApprovalFlowOfRequestCommand cmd) {
@@ -1037,8 +1052,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 		
 		return resultList;
-	}
-	
+	}	
 
 	private List<String> getNickNameList(List<ApprovalFlowLevel> approvalFlowLevelList) {
 		return approvalFlowLevelList.stream().map(a->getTargetName(a.getTargetType(), a.getTargetId())).collect(Collectors.toList());
@@ -1057,8 +1071,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequestDTO = handler.processApprovalBasicInfoOfRequest(approvalRequest);
 		
 		return new GetApprovalBasicInfoOfRequestBySceneResponse(approvalBasicInfoOfRequestDTO);
-	}
-	
+	}	
 
 	@Override
 	public ListApprovalLogAndFlowOfRequestBySceneResponse listApprovalLogAndFlowOfRequestByScene(
@@ -1091,8 +1104,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
 		
 		return new ListApprovalFlowOfRequestBySceneResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel()));
-	}
-	
+	}	
 	
 	private ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString){
 		if (StringUtils.isBlank(sceneTokenString)) {
@@ -1143,6 +1155,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
 		checkPrivilege(userId, ownerInfo);
 		checkApprovalType(cmd.getApprovalType());
+		if (cmd.getCategoryId() != null) {
+			checkCategoryExist(cmd.getCategoryId(), ownerInfo, cmd.getApprovalType());
+		}
 		ApprovalRequestCondition condition = new ApprovalRequestCondition();
 		condition.setOwnerInfo(ownerInfo);
 		condition.setApprovalType(cmd.getApprovalType());
@@ -1167,7 +1182,105 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		return new ListApprovalRequestBySceneResponse(nextPageAnchor, resultList);
 	}
+
+	@Override
+	public CreateApprovalRequestBySceneResponse createApprovalRequestByScene(CreateApprovalRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		checkApprovalType(cmd.getApprovalType());
+		if (cmd.getCategoryId() != null) {
+			checkCategoryExist(cmd.getCategoryId(), ownerInfo, cmd.getApprovalType());
+		}
+		
+		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
+		
+		
+		dbProvider.execute(s->{
+			//1. 申请表增加一条记录
+			//前置处理器，处理一些特定审批类型的数据检查等操作，并返回内容
+			ApprovalRequest approvalRequest = handler.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
+			if (approvalRequest.getId() == null) {
+				approvalRequestProvider.createApprovalRequest(approvalRequest);
+			} else {
+				approvalRequestProvider.updateApprovalRequest(approvalRequest);
+			}
+			
+			//2. 处理附件，如果有的话
+			if (ListUtils.isEmpty(cmd.getAttachmentList())) {
+				createAttachment(userId, approvalRequest.getId(), cmd.getAttachmentList());
+			}
+			
+			//3. 后置处理器，处理日志，处理时间，回调考勤接口更新打卡相关接口
+			handler.postProcessCreateApprovalRequest(approvalRequest, cmd);
+
+			return true;
+		});
+		return null;
+	}
 	
+	private List<ApprovalTimeRange> createTimeRange(Long userId, ApprovalOwnerInfo ownerInfo, Long ownerId, List<TimeRange> timeRangeList) {
+		List<ApprovalTimeRange> approvalTimeRanges = timeRangeList.stream().map(t->{
+			ApprovalTimeRange approvalTimeRange = new ApprovalTimeRange();
+			approvalTimeRange.setOwnerId(ownerId);
+			approvalTimeRange.setFromTime(new Timestamp(t.getFromTime()));
+			approvalTimeRange.setEndTime(new Timestamp(t.getEndTime()));
+			approvalTimeRange.setType(t.getType());
+			approvalTimeRange.setActualResult(calculateActualResult(userId, ownerInfo, t.getFromTime(), t.getEndTime(), t.getType()));
+			approvalTimeRange.setCreatorUid(userId);
+			approvalTimeRange.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			return approvalTimeRange;
+		}).collect(Collectors.toList());
+		approvalTimeRangeProvider.createApprovalTimeRanges(approvalTimeRanges);
+		return approvalTimeRanges;
+	}
+
+	private String calculateActualResult(Long userId, ApprovalOwnerInfo ownerInfo, Long fromTime, Long endTime,
+			Byte type) {
+		
+		return null;
+	}
+
+	private List<Attachment> createAttachment(Long userId, Long ownerId, List<AttachmentDescriptor> attachmentList) {
+		List<Attachment> attachments = attachmentList.stream().map(a->{
+			Attachment attachment = new Attachment();
+			attachment.setOwnerId(ownerId);
+			attachment.setContentType(a.getContentType());
+			attachment.setContentUri(a.getContentUri());
+			attachment.setCreatorUid(userId);
+			return attachment;
+		}).collect(Collectors.toList());
+		
+		attachmentProvider.createAttachments(EhApprovalAttachments.class, attachments);
+		
+		return attachments;
+	}
+
+	@Override
+	public ApprovalFlow getApprovalFlowByUser(String ownerType, Long ownerId, Long userId, Byte approvalType){
+		ApprovalRule approvalRule= punchService.getApprovalRule(ownerType, ownerId, userId);
+		if (approvalRule == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist approval rule");
+		}
+		ApprovalRuleFlowMap approvalRuleFlowMap = approvalRuleFlowMapProvider.findConcreteApprovalRuleFlowMap(approvalRule.getId(), approvalType);
+		if (approvalRuleFlowMap == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist approval rule flow map");
+		}
+		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowById(approvalRuleFlowMap.getFlowId());
+		if (approvalFlow == null || approvalFlow.getStatus().byteValue() == CommonStatus.INACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist approval flow");
+		}
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByFlowId(approvalFlow.getId());
+		if (ListUtils.isEmpty(approvalFlowLevelList)) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist approval flow level");
+		}
+		return approvalFlow;
+	}
+
 	@Override
 	public void approveApprovalRequest(ApproveApprovalRequestCommand cmd) {
 		final Long userId = getUserId();
@@ -1188,36 +1301,35 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return null;
 	}
 
-
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	@Override
-	public ApprovalRequestDTO createApprovalRequest(ApprovalRequestDTO approvalRequestDTO){
-		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequestDTO.getApprovalType());
-		
-		if (handler != null) {
-			handler.preProcess(approvalRequestDTO);
-			processCreateApprovalRequest(approvalRequestDTO);
-			handler.postProcess(approvalRequestDTO);
-		} else {
-			processCreateApprovalRequest(approvalRequestDTO);
+	public ListApprovalRequestResponse listApprovalRequest(ListApprovalRequestCommand cmd) {
+		if (cmd.getQueryType() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"query type cannot be empty");
+		}
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalType(cmd.getApprovalType());
+		if (cmd.getCategoryId() != null) {
+			checkCategoryExist(cmd.getCategoryId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		}
 		
-		processAttachment(approvalRequestDTO);
-		processTimeRange(approvalRequestDTO);
-		
-		return approvalRequestDTO;
+		return null;
 	}
+
+
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
 	
 	private void processCreateApprovalRequest(ApprovalRequestDTO approvalRequestDTO) {
 		ApprovalRequest approvalRequest = ConvertHelper.convert(approvalRequestDTO, ApprovalRequest.class);
@@ -1262,6 +1374,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return getAttachments(requestId);
 	}
 
-	
+
 	
 }

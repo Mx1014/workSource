@@ -99,7 +99,7 @@ public class ApprovalUiController extends ControllerBase {
 	@RequestMapping("createApprovalRequestByScene")
 	@RestReturn(CreateApprovalRequestBySceneResponse.class)
 	public RestResponse createApprovalRequestByScene(CreateApprovalRequestBySceneCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.createApprovalRequestByScene(cmd));
 	}
 	
 }

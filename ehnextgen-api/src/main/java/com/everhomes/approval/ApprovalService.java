@@ -9,6 +9,8 @@ import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
@@ -38,6 +40,8 @@ import com.everhomes.rest.approval.ListApprovalLogOfRequestCommand;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalRequestCommand;
+import com.everhomes.rest.approval.ListApprovalRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalUserCommand;
@@ -92,8 +96,6 @@ public interface ApprovalService {
 
 	void approveApprovalRequest(ApproveApprovalRequestCommand cmd);
 
-	ApprovalRequestDTO createApprovalRequest(ApprovalRequestDTO approvalRequestDTO);
-
 	ListBriefApprovalFlowResponse listBriefApprovalFlow(ListBriefApprovalFlowCommand cmd);
 
 	void rejectApprovalRequest(RejectApprovalRequestCommand cmd);
@@ -121,5 +123,11 @@ public interface ApprovalService {
 	List<TimeRange> listTimeRangeByRequestId(Long requestId);
 
 	List<AttachmentDescriptor> listAttachmentByRequestId(Long requestId);
+
+	CreateApprovalRequestBySceneResponse createApprovalRequestByScene(CreateApprovalRequestBySceneCommand cmd);
+
+	ListApprovalRequestResponse listApprovalRequest(ListApprovalRequestCommand cmd);
+
+	ApprovalFlow getApprovalFlowByUser(String ownerType, Long ownerId, Long userId, Byte approvalType);
 
 }
