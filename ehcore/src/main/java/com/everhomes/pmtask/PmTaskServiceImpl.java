@@ -907,7 +907,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     			dto.setCompletePercent(r.getTotalCount()!=null&&!r.getTotalCount().equals(0)?(float)r.getProcessedCount()/r.getTotalCount():0);
     			dto.setClosePercent(r.getTotalCount()!=null&&!r.getTotalCount().equals(0)?(float)r.getCloseCount()/r.getTotalCount():0);
     			float avgStar = calculatePerson(r)!=0?(float) (calculateStar(r)) / (calculatePerson(r)):0;
-    			dto.setAvgStar(avgStar);
+    			dto.setAvgStar((float)Math.round(avgStar * 10)/10);
     			Integer totalCount = pmTaskProvider.countTaskStatistics(r.getOwnerId(), r.getCategoryId(), null);
     			dto.setTotalCount(totalCount);
     			
