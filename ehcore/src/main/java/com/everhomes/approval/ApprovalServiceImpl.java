@@ -1023,7 +1023,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return new ListApprovalFlowOfRequestResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel()));
 	}
 
-	private List<ApprovalFlowOfRequestDTO> listApprovalFlowUser(Long flowId, Long currentLevel) {
+	private List<ApprovalFlowOfRequestDTO> listApprovalFlowUser(Long flowId, Byte currentLevel) {
 		List<ApprovalFlowOfRequestDTO> resultList = new ArrayList<>();
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByFlowId(flowId);
 		
