@@ -4595,9 +4595,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		else{
 			LOGGER.error("refund order no =["+refundOrder.getRefundOrderNo()+"] refound error param is "+refundCmd.toString());
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
-							"bill  refound error"); 
+			if (null != refundResponse.getErrorDetails())
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+						refundResponse.getErrorDetails()); 
+			else
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+						"refund order error"); 
 		}	
 		 
 	}
