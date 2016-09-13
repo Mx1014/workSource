@@ -802,7 +802,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
+		if(null == cmd.getPageSize())
+			cmd.setPageSize(100000);
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), cmd.getPageSize());
 		
@@ -1365,8 +1366,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
-		if(null == cmd.getPageSize())
-			cmd.setPageSize(100000);
+		
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), cmd.getDateStr(),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
