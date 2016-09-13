@@ -504,7 +504,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
 		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
 		smsProvider.addToTupleList(variables, "categoryName", categoryName);
-		smsProvider.sendSms(Namespace.DEFAULT_NAMESPACE, targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
+		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
 
 		//elasticsearch更新
 		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
@@ -680,6 +680,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 		task.setNickName(nickName);
 		task.setMobile(mobile);
 		pmTaskSearch.feedDoc(task);
+		
+		Category category = categoryProvider.findCategoryById(task.getCategoryId());
+        Category parent = categoryProvider.findCategoryById(category.getParentId());
+        String categoryName = "";
+    	if(parent.getParentId().equals(0L)){
+    		categoryName = category.getName();
+    	}else{
+    		categoryName = parent.getName();
+    	}
+//		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
+//		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
+//		smsProvider.addToTupleList(variables, "categoryName", categoryName);
+//		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
+//		
+//		organizationProvider
 		
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
