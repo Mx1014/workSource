@@ -3881,7 +3881,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		else
 			row.createCell(++i).setCellValue("0");
 		//支付方式
-		row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
+		if(null != dto.getVendorType())
+			row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
+		else
+			row.createCell(++i).setCellValue("");
 		//订单状态
 		if(dto.getStatus() != null)
 			row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
