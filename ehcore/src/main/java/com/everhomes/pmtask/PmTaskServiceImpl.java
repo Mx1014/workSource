@@ -504,7 +504,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
 		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
 		smsProvider.addToTupleList(variables, "categoryName", categoryName);
-		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
+		smsProvider.sendSms(Namespace.DEFAULT_NAMESPACE, targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
 
 		//elasticsearch更新
 		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
