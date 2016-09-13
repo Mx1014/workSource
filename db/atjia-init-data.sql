@@ -51,9 +51,12 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(87,59,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 1, 'zh_CN', '验证码-Ibase', '25889');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 4, 'zh_CN', '派单-Ibase', '25890');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 6, 'zh_CN', '任务2-Ibase', '25892');    
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 1, 'zh_CN', '验证码-@家', '28964');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 4, 'zh_CN', '派单-@家', '28965');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 6, 'zh_CN', '任务2-@家', '28967');    
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 6, 'zh_CN', '门禁授权-@家', '28968');    
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 7, 'zh_CN', '看楼申请-@家', '28969');    
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 7, 'zh_CN', '新报修-@家', '28970');    
 
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
