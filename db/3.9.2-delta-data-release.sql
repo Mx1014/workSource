@@ -19,9 +19,9 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('196', 'pmtask.notification', '6', 'zh_CN', '任务操作模版', '业主<{creatorName}><{creatorPhone}>发起的服务单已由<{operatorName}><{operatorPhone}>完成', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('197', 'sms.default', '10', 'zh_CN', '任务操作模版', '<{operatorName}><{operatorPhone}}>已将一个<{categoryName}>单派发给你，请尽快处理', '0');
+	VALUES ('197', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '<{operatorName}><{operatorPhone}}>已将一个<{categoryName}>单派发给你，请尽快处理', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('198', 'sms.default', '11', 'zh_CN', '任务操作模版', '<{creatorName}><{creatorPhone}>已发起一个<{categoryName}>单，请尽快处理', '0');
+	VALUES ('198', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '<{creatorName}><{creatorPhone}>已发起一个<{categoryName}>单，请尽快处理', '0');
 
 
 
