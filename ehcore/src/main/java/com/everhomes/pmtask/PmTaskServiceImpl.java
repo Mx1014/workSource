@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,15 +94,18 @@ import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
 import com.everhomes.rest.pmtask.TaskStatisticsDTO;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -135,7 +139,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private OrganizationProvider organizationProvider;
 	@Autowired
 	private MessagingService messagingService;
-	
+	@Autowired
+	private SmsProvider smsProvider;
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -274,21 +279,20 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Content cannot be null.");
         }
 		User user = UserContext.current().getUser();
-		Timestamp now = new Timestamp(System.currentTimeMillis());
+		long time = System.currentTimeMillis();
+		Timestamp now = new Timestamp(time);
 		task.setStatus(status);
-		 int code = 0;
+		 
 		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
-	    	code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 		}
 			
 		if(status.equals(PmTaskStatus.OTHER.getCode())){
 			task.setClosedTime(now);
-			code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 		}
 		pmTaskProvider.updateTask(task);
 		
@@ -312,10 +316,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    
 	    String scope = PmTaskNotificationTemplateCode.SCOPE;
 	    String locale = PmTaskNotificationTemplateCode.LOCALE;
-    	
-		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+	    
 		
-		sendMessageToUser(task.getCreatorUid(), text);
+		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
+	    	int code = PmTaskNotificationTemplateCode.NOTIFY_TO_CREATOR;
+	    	Date d = new Date(time);
+	    	SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd");
+	    	SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
+	    	map.put("day", sdf1.format(d));
+		    map.put("hour", sdf2.format(d));
+		    String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(task.getCreatorUid(), text);
+			
+			code = PmTaskNotificationTemplateCode.NOTIFY_TO_ASSIGNER;
+			map.remove("day");
+			map.remove("hour");
+			User creator = userProvider.findUserById(task.getCreatorUid());
+			UserIdentifier creatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(creator.getId(), IdentifierType.MOBILE.getCode());
+			map.put("creatorName", creator.getNickName());
+			map.put("creatorPhone", creatorIdentifier.getIdentifierToken());
+			text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(user.getId(), text);
+		}
+		if(status.equals(PmTaskStatus.OTHER.getCode())){
+			int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+			String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(task.getCreatorUid(), text);
+		}
 		
 		//elasticsearch更新
 		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
@@ -465,6 +492,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		sendMessageToUser(task.getCreatorUid(), text);
 		
+		Category category = categoryProvider.findCategoryById(task.getCategoryId());
+        
+        Category parent = categoryProvider.findCategoryById(category.getParentId());
+        String categoryName = "";
+    	if(parent.getParentId().equals(0L)){
+    		categoryName = category.getName();
+    	}else{
+    		categoryName = parent.getName();
+    	}
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
+		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
+		smsProvider.addToTupleList(variables, "categoryName", categoryName);
+		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
+
 		//elasticsearch更新
 		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
 		PmTaskLog log = logs.get(0);
@@ -480,7 +521,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
 	}
-
+	
 	private void returnNoPrivileged(List<Long> privileges, User user){
     	LOGGER.error("non-privileged, privileges="+privileges + ", userId=" + user.getId());
 		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,

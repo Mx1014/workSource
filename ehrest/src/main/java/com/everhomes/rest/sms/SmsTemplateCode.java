@@ -37,4 +37,7 @@ public interface SmsTemplateCode {
     static final int PM_TASK_PUSH_MSG_CODE = 7; // 任务发布消息
     static final int ACLINK_VISITOR_MSG_CODE = 8; // 访客授权链接
     static final int WEIXIN_APPLY_RENEW_CODE = 9; // 威新-看楼申请
+    
+    int PM_TASK_ASSIGN_CODE = 10; //任务分配消息
+    int PM_TASK_CREATOR_CODE = 11;//任务创建消息
 }
