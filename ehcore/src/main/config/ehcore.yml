@@ -89,9 +89,9 @@ web.location: /resources/
 # Redis configuration
 #
 redis.bus.host: redis-server
-redis.bus.port: 6380
+redis.bus.port: 6379
 redis.store.master.host: redis-server
-redis.store.master.port: 6380
+redis.store.master.port: 6379
 
 #
 # Database configuration
