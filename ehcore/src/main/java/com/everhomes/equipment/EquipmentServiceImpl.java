@@ -1968,6 +1968,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		WebTokenGenerator webToken = WebTokenGenerator.getInstance();
 		EquipmentQrCodeTokenDTO qrCodeToken = webToken.fromWebToken(cmd.getQrCodeToken(), EquipmentQrCodeTokenDTO.class);
 		
+		if(!qrCodeToken.getEquipmentId().equals(cmd.getEquipmentId())) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_QRCODE,
+ 				"二维码和任务设备不对应");
+		}
+		
 		EquipmentInspectionEquipments equipment = verifyEquipment(qrCodeToken.getEquipmentId(), 
 				qrCodeToken.getOwnerType(), qrCodeToken.getOwnerId());
 		

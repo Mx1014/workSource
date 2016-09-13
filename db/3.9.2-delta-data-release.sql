@@ -340,3 +340,7 @@ INSERT INTO `eh_stat_service` (`id`,`namespace_id`,`owner_type`,`owner_id`,`serv
 
 INSERT INTO `eh_stat_service` (`id`,`namespace_id`,`owner_type`,`owner_id`,`service_type`,`service_name`,`status`,`create_time`) values (5, 999993, 'EhOrganizations', 1000631, 'parking_recharge','停车充值', 1, now());
 INSERT INTO `eh_stat_service` (`id`,`namespace_id`,`owner_type`,`owner_id`,`service_type`,`service_name`,`status`,`create_time`) values (6, 999993, 'EhOrganizations', 1000631, 'pmsy','物业缴费', 1, now());
+
+
+-- 任务设备和二维码不对应错误提示 add by xiongying20160913
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('equipment', '10019', 'zh_CN', '二维码和任务设备不对应');
