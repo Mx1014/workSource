@@ -26,6 +26,10 @@ import com.everhomes.util.StringHelper;
  * <li>requestFlag: 全天异常申请flag:1-有申请 0-无申请 空-无申请</li>
  * <li>morningRequestFlag: 上午异常申请flag:1-有申请 0-无申请 空-无申请</li>
  * <li>afternoonRequestFlag: 下午异常申请flag:1-有申请 0-无申请 空-无申请</li>
+ * <li>arriveTime:早上到达时间</li>
+ * <li>leaveTime:下午离开时间</li>
+ * <li>noonLeaveTime:早上离开时间-四次打卡</li>
+ * <li>afternoonArriveTime:下午到达时间-四次打卡</li>
  * </ul>
  */
 public class PunchLogsDay{
@@ -56,7 +60,11 @@ public class PunchLogsDay{
 	private Byte requestFlag;
 	private Byte morningRequestFlag;
 	private Byte afternoonRequestFlag;
-
+	//added by wh 为了审批增加4个时间戳
+    private Long arriveTime;
+    private Long leaveTime; 
+    private Long noonLeaveTime;
+    private Long afternoonArriveTime;
 
 	public Byte getMorningPunchStatus() {
 		return morningPunchStatus;
@@ -315,6 +323,54 @@ public class PunchLogsDay{
 
 	public void setAfternoonRequestFlag(Byte afternoonRequestFlag) {
 		this.afternoonRequestFlag = afternoonRequestFlag;
+	}
+
+
+
+	public Long getArriveTime() {
+		return arriveTime;
+	}
+
+
+
+	public void setArriveTime(Long arriveTime) {
+		this.arriveTime = arriveTime;
+	}
+
+
+
+	public Long getLeaveTime() {
+		return leaveTime;
+	}
+
+
+
+	public void setLeaveTime(Long leaveTime) {
+		this.leaveTime = leaveTime;
+	}
+
+
+
+	public Long getNoonLeaveTime() {
+		return noonLeaveTime;
+	}
+
+
+
+	public void setNoonLeaveTime(Long noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+
+
+	public Long getAfternoonArriveTime() {
+		return afternoonArriveTime;
+	}
+
+
+
+	public void setAfternoonArriveTime(Long afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
 	}
 
 

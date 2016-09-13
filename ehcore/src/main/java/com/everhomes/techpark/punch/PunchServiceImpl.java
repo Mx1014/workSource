@@ -518,6 +518,14 @@ public class PunchServiceImpl implements PunchService {
 			}
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
+		if(punchDayLog.getArriveTime()!=null)
+			pdl.setArriveTime(punchDayLog.getArriveTime().getTime());
+		if(punchDayLog.getLeaveTime()!=null)
+			pdl.setLeaveTime(punchDayLog.getLeaveTime().getTime());
+		if(punchDayLog.getAfternoonArriveTime()!=null)
+			pdl.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
+		if(punchDayLog.getNoonLeaveTime()!=null)
+			pdl.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
 		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
 				dateSF.format(logDay.getTime()));
 		if (null != exceptionApproval) {
