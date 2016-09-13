@@ -36,7 +36,7 @@ INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_i
 	VALUES(2109906, 1003855, 'USER', 228854, 'manager', '孙海红', 0, '13331813881', 3);	    
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(11198, 'EhOrganizations', 1003855, 'EhUsers', 228854, 1001, 1, UTC_TIMESTAMP());
+	VALUES(11407, 'EhOrganizations', 1003855, 'EhUsers', 228854, 1001, 1, UTC_TIMESTAMP());
 
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1235, 999988, 'COMMUNITY', 240111044331053633, UTC_TIMESTAMP());	
@@ -123,11 +123,11 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
     VALUES(239825274387102739,UUID(),240111044331053633, 14990, '沈阳市',  14991, '于洪区' ,'20栋-3-504','20栋','3-504','2','0',UTC_TIMESTAMP(), 999988);	
     
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) 
-    VALUES (20482, 1003855, 240111044331053633, 239825274387102737, '19栋-1-501', '0');     
+    VALUES (20590, 1003855, 240111044331053633, 239825274387102737, '19栋-1-501', '0');     
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) 
-    VALUES (20483, 1003855, 240111044331053633, 239825274387102738, '20栋-3-603', '0');     
+    VALUES (20591, 1003855, 240111044331053633, 239825274387102738, '20栋-3-603', '0');     
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) 
-    VALUES (20484, 1003855, 240111044331053633, 239825274387102739, '20栋-3-504', '0');     
+    VALUES (20592, 1003855, 240111044331053633, 239825274387102739, '20栋-3-504', '0');     
 
 
 
