@@ -17,8 +17,6 @@ import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.CreateAbsenceRequestBySceneCommand;
-import com.everhomes.rest.approval.CreateAbsenceRequestBySceneResponse;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalCategoryRestResponse;
@@ -28,11 +26,11 @@ import com.everhomes.rest.approval.CreateApprovalFlowInfoRestResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelRestResponse;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleRestResponse;
-import com.everhomes.rest.approval.CreateForgotRequestBySceneCommand;
-import com.everhomes.rest.approval.CreateForgotRequestBySceneResponse;
 import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
@@ -41,8 +39,6 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestRestResponse;
-import com.everhomes.rest.approval.ListAbsenceRequestCommand;
-import com.everhomes.rest.approval.ListAbsenceRequestResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryRestResponse;
@@ -66,6 +62,8 @@ import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestRestResponse;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalRequestCommand;
+import com.everhomes.rest.approval.ListApprovalRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalRuleRestResponse;
@@ -78,8 +76,6 @@ import com.everhomes.rest.approval.ListBriefApprovalFlowRestResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleRestResponse;
-import com.everhomes.rest.approval.ListForgotRequestCommand;
-import com.everhomes.rest.approval.ListForgotRequestResponse;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.RuleFlowMap;
 import com.everhomes.rest.approval.TimeRange;
@@ -96,18 +92,13 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleRestResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
-import com.everhomes.rest.techpark.punch.PunchListAbsenceRequestRestResponse;
-import com.everhomes.rest.techpark.punch.PunchListForgotRequestRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalFlowOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalLogOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalRequestBySceneRestResponse;
-import com.everhomes.rest.ui.techpark.punch.TechparkPunchCreateAbsenceRequestBySceneRestResponse;
-import com.everhomes.rest.ui.techpark.punch.TechparkPunchCreateForgotRequestBySceneRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhApprovalCategories;
-import com.everhomes.server.schema.tables.pojos.EhApprovalFlowLevels;
 import com.everhomes.server.schema.tables.pojos.EhApprovalFlows;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRuleFlowMap;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
@@ -163,24 +154,20 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	private static final String LIST_APPROVAL_FLOW_OF_REQUEST_URL = "/approval/listApprovalFlowOfRequest";
 	//23. 人员列表，可按部门、姓名筛选
 	private static final String LIST_APPROVAL_USER_URL = "/approval/listApprovalUser";
-	//24. 忘打卡申请列表
-	private static final String LIST_FORGOT_REQUEST_URL = "/techpark/punch/listForgotRequest";
-	//25. 请假申请列表
-	private static final String LIST_ABSENCE_REQUEST_URL = "/techpark/punch/listAbsenceRequest";
-	//26. 创建请假申请（客户端）
-	private static final String CREATE_ABSENCE_REQUEST_BY_SCENE_URL = "/ui/techpark/punch/createAbsenceRequestByScene";
-	//27. 创建忘打卡申请（客户端）
-	private static final String CREATE_FORGOT_REQUEST_BY_SCENE_URL = "/ui/techpark/punch/createForgotRequestByScene";
-	//28. 申请列表（客户端）
+	//24. 查询申请列表
+	private static final String LIST_APPROVAL_REQUEST_URL = "/approval/listApprovalRequest";
+	//25. 个人申请列表（客户端）
 	private static final String LIST_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalRequestByScene";
-	//29. 获取申请的审批基本信息（客户端）
+	//26. 获取申请的审批基本信息（客户端）
 	private static final String GET_APPROVAL_BASIC_INFO_OF_REQUEST_BY_SCENE_URL = "/ui/approval/getApprovalBasicInfoOfRequestByScene";
-	//30. 获取申请的审批日志与审批流程列表（客户端）
+	//27. 获取申请的审批日志与审批流程列表（客户端）
 	private static final String LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalLogAndFlowOfRequestByScene";
-	//31. 获取申请的审批日志列表（客户端）
+	//28. 获取申请的审批日志列表（客户端）
 	private static final String LIST_APPROVAL_LOG_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalLogOfRequestByScene";
-	//32. 获取申请的审批流程列表（客户端）
+	//29. 获取申请的审批流程列表（客户端）
 	private static final String LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalFlowOfRequestByScene";
+	//30. 创建申请（客户端）
+	private static final String CREATE_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/createApprovalRequestByScene";
 
 
 	//1. 增加审批类别，如请假的公出、事假等
@@ -567,7 +554,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		ruleFlowMap.setFlowId(1L);
 		ruleFlowMapList.add(ruleFlowMap);
 		RuleFlowMap ruleFlowMap2 = new RuleFlowMap();
-		ruleFlowMap2.setApprovalType(ApprovalType.FORGOT.getCode());
+		ruleFlowMap2.setApprovalType(ApprovalType.EXCEPTION.getCode());
 		ruleFlowMap2.setFlowId(2L);
 		ruleFlowMapList.add(ruleFlowMap2);
 		cmd.setRuleFlowMapList(ruleFlowMapList);
@@ -605,7 +592,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		ruleFlowMap.setFlowId(3L);
 		ruleFlowMapList.add(ruleFlowMap);
 		RuleFlowMap ruleFlowMap2 = new RuleFlowMap();
-		ruleFlowMap2.setApprovalType(ApprovalType.FORGOT.getCode());
+		ruleFlowMap2.setApprovalType(ApprovalType.EXCEPTION.getCode());
 		ruleFlowMap2.setFlowId(3L);
 		ruleFlowMapList.add(ruleFlowMap2);
 		cmd.setRuleFlowMapList(ruleFlowMapList);
@@ -865,15 +852,17 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//24. 忘打卡申请列表
+	//24. 查询申请列表
 	//@Test
-	public void testListForgotRequest() {
-		String url = LIST_FORGOT_REQUEST_URL;
+	public void testListApprovalRequest() {
+		String url = LIST_APPROVAL_REQUEST_URL;
 		logon();
-		ListForgotRequestCommand cmd = new ListForgotRequestCommand();
-		cmd.setNamespaceId(999995);
-		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		ListApprovalRequestCommand cmd = new ListApprovalRequestCommand();
+		cmd.setNamespaceId(0);
+		cmd.setOwnerType("");
 		cmd.setOwnerId(1L);
+		cmd.setApprovalType((byte)1);
+		cmd.setCategoryId(1L);
 		cmd.setFromDate(1L);
 		cmd.setEndDate(1L);
 		cmd.setNickName("");
@@ -881,105 +870,17 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		cmd.setPageSize(0);
 		cmd.setPageAnchor(1L);
 
-		PunchListForgotRequestRestResponse response = httpClientService.restPost(url, cmd, PunchListForgotRequestRestResponse.class);
+		ListApprovalRequestRestResponse response = httpClientService.restPost(url, cmd, ListApprovalRequestRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		ListForgotRequestResponse myResponse = response.getResponse();
+		ListApprovalRequestResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
 
 
 	}
 
-	//25. 请假申请列表
-	//@Test
-	public void testListAbsenceRequest() {
-		String url = LIST_ABSENCE_REQUEST_URL;
-		logon();
-		ListAbsenceRequestCommand cmd = new ListAbsenceRequestCommand();
-		cmd.setNamespaceId(999995);
-		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
-		cmd.setOwnerId(1L);
-		cmd.setCategoryId(1L);
-		cmd.setNickName("");
-		cmd.setQueryType((byte)1);
-		cmd.setPageSize(0);
-		cmd.setPageAnchor(1L);
-
-		PunchListAbsenceRequestRestResponse response = httpClientService.restPost(url, cmd, PunchListAbsenceRequestRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-
-		ListAbsenceRequestResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
-
-
-	}
-
-	//26. 创建请假申请（客户端）
-	//@Test
-	public void testCreateAbsenceRequestByScene() {
-		String url = CREATE_ABSENCE_REQUEST_BY_SCENE_URL;
-		logon();
-		CreateAbsenceRequestBySceneCommand cmd = new CreateAbsenceRequestBySceneCommand();
-		cmd.setSceneToken("");
-		cmd.setCategoryId(1L);
-		cmd.setReason("");
-		List<TimeRange> timeRangeList = new ArrayList<>();
-		TimeRange timeRange = new TimeRange();
-		timeRange.setType((byte)1);
-		timeRange.setFromTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		timeRange.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		timeRangeList.add(timeRange);
-		cmd.setTimeRangeList(timeRangeList);
-		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
-		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
-		attachmentDescriptor.setContentType("");
-		attachmentDescriptor.setContentUri("");
-		attachmentDescriptor.setContentUrl("");
-		attachmentDescriptorList.add(attachmentDescriptor);
-		cmd.setAttachmentList(attachmentDescriptorList);
-
-		TechparkPunchCreateAbsenceRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, TechparkPunchCreateAbsenceRequestBySceneRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-
-		CreateAbsenceRequestBySceneResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
-
-
-	}
-
-	//27. 创建忘打卡申请（客户端）
-	//@Test
-	public void testCreateForgotRequestByScene() {
-		String url = CREATE_FORGOT_REQUEST_BY_SCENE_URL;
-		logon();
-		CreateForgotRequestBySceneCommand cmd = new CreateForgotRequestBySceneCommand();
-		cmd.setSceneToken("");
-		cmd.setRequestToken("");
-		cmd.setPunchDate(1L);
-		cmd.setForgotType((byte)1);
-		cmd.setReason("");
-		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
-		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
-		attachmentDescriptor.setContentType("");
-		attachmentDescriptor.setContentUri("");
-		attachmentDescriptor.setContentUrl("");
-		attachmentDescriptorList.add(attachmentDescriptor);
-		cmd.setAttachmentList(attachmentDescriptorList);
-
-		TechparkPunchCreateForgotRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, TechparkPunchCreateForgotRequestBySceneRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-
-		CreateForgotRequestBySceneResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
-
-
-	}
-
-	//28. 申请列表（客户端）
+	//25. 个人申请列表（客户端）
 	//@Test
 	public void testListApprovalRequestByScene() {
 		String url = LIST_APPROVAL_REQUEST_BY_SCENE_URL;
@@ -1001,7 +902,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//29. 获取申请的审批基本信息（客户端）
+	//26. 获取申请的审批基本信息（客户端）
 	//@Test
 	public void testGetApprovalBasicInfoOfRequestByScene() {
 		String url = GET_APPROVAL_BASIC_INFO_OF_REQUEST_BY_SCENE_URL;
@@ -1020,7 +921,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//30. 获取申请的审批日志与审批流程列表（客户端）
+	//27. 获取申请的审批日志与审批流程列表（客户端）
 	//@Test
 	public void testListApprovalLogAndFlowOfRequestByScene() {
 		String url = LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_BY_SCENE_URL;
@@ -1039,7 +940,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//31. 获取申请的审批日志列表（客户端）
+	//28. 获取申请的审批日志列表（客户端）
 	//@Test
 	public void testListApprovalLogOfRequestByScene() {
 		String url = LIST_APPROVAL_LOG_OF_REQUEST_BY_SCENE_URL;
@@ -1058,7 +959,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//32. 获取申请的审批流程列表（客户端）
+	//29. 获取申请的审批流程列表（客户端）
 	//@Test
 	public void testListApprovalFlowOfRequestByScene() {
 		String url = LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL;
@@ -1078,6 +979,42 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 
+	//30. 创建申请（客户端）
+	//@Test
+	public void testCreateApprovalRequestByScene() {
+		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
+		logon();
+		CreateApprovalRequestBySceneCommand cmd = new CreateApprovalRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setApprovalType((byte)1);
+		cmd.setCategoryId(1L);
+		cmd.setReason("");
+		List<TimeRange> timeRangeList = new ArrayList<>();
+		TimeRange timeRange = new TimeRange();
+		timeRange.setType((byte)1);
+		timeRange.setFromTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		timeRange.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		timeRange.setActualResult("");
+		timeRangeList.add(timeRange);
+		cmd.setTimeRangeList(timeRangeList);
+		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
+		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
+		attachmentDescriptor.setContentType("");
+		attachmentDescriptor.setContentUri("");
+		attachmentDescriptor.setContentUrl("");
+		attachmentDescriptorList.add(attachmentDescriptor);
+		cmd.setAttachmentList(attachmentDescriptorList);
+		cmd.setContentJson("");
+
+		ApprovalCreateApprovalRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalCreateApprovalRequestBySceneRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+		CreateApprovalRequestBySceneResponse myResponse = response.getResponse();
+		assertNotNull(myResponse);
+
+
+	}
 
 	
 	

@@ -152,4 +152,5 @@ public interface PunchService {
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 
 	void refreshMonthDayLogs(String month);
+
 }

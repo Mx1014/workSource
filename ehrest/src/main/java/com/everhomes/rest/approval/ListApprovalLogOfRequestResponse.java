@@ -16,6 +16,11 @@ public class ListApprovalLogOfRequestResponse {
 	@ItemType(ApprovalLogOfRequestDTO.class)
 	private List<ApprovalLogOfRequestDTO> approvalLogOfRequestList;
 
+	public ListApprovalLogOfRequestResponse(List<ApprovalLogOfRequestDTO> approvalLogOfRequestList) {
+		super();
+		this.approvalLogOfRequestList = approvalLogOfRequestList;
+	}
+
 	public List<ApprovalLogOfRequestDTO> getApprovalLogOfRequestList() {
 		return approvalLogOfRequestList;
 	}

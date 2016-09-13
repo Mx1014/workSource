@@ -19,6 +19,8 @@ public interface ApprovalFlowLevelProvider {
 
 	List<ApprovalFlowLevel> listApprovalFlowLevelByFlowIds(List<Long> flowIdList);
 
+	List<ApprovalFlowLevel> listApprovalFlowLevelByFlowId(Long flowId);
+
 //	void createApprovalFlowLevelList(List<ApprovalFlowLevel> approvalFlowLevelList);
 
 }

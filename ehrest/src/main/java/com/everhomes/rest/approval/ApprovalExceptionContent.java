@@ -1,39 +1,37 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * 
  * <ul>
- * <li>nickName: 用户昵称</li>
  * <li>punchDate: 打卡日期</li>
+ * <li>exceptionRequestType: 异常类型，{@link com.everhomes.rest.approval.ExceptionRequestType}</li>
  * <li>punchDetail: 打卡详情</li>
  * <li>punchStatusName: 打卡状态名称</li>
  * </ul>
  */
-public class ForgotBasicDescription {
-	private String nickName;
-	private Timestamp punchDate;
+public class ApprovalExceptionContent {
+	private Long punchDate;
+	private Byte exceptionRequestType;
 	private String punchDetail;
 	private String punchStatusName;
 
-	public String getNickName() {
-		return nickName;
-	}
-
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
-
-	public Timestamp getPunchDate() {
+	public Long getPunchDate() {
 		return punchDate;
 	}
 
-	public void setPunchDate(Timestamp punchDate) {
+	public void setPunchDate(Long punchDate) {
 		this.punchDate = punchDate;
+	}
+
+	public Byte getExceptionRequestType() {
+		return exceptionRequestType;
+	}
+
+	public void setExceptionRequestType(Byte exceptionRequestType) {
+		this.exceptionRequestType = exceptionRequestType;
 	}
 
 	public String getPunchDetail() {

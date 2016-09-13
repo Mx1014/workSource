@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>timeTotal: 请假总时长</li>
  * <li>categoryName: 请假类型</li>
- * <li>timeRangeList: 请假时间列表</li>
+ * <li>timeRangeList: 请假时间列表，参考{@link com.everhomes.rest.approval.TimeRange}</li>
  * </ul>
  */
 public class AbsenceBasicDescription {

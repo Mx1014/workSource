@@ -12,6 +12,11 @@ import com.everhomes.util.StringHelper;
 public class GetApprovalBasicInfoOfRequestResponse {
 	private ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequest;
 
+	public GetApprovalBasicInfoOfRequestResponse(ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequest) {
+		super();
+		this.approvalBasicInfoOfRequest = approvalBasicInfoOfRequest;
+	}
+
 	public ApprovalBasicInfoOfRequestDTO getApprovalBasicInfo() {
 		return approvalBasicInfoOfRequest;
 	}

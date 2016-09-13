@@ -14,21 +14,32 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.news.Attachment;
+import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
 import com.everhomes.rest.approval.ApprovalFlowLevelDTO;
+import com.everhomes.rest.approval.ApprovalFlowOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalLogOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalOwnerType;
+import com.everhomes.rest.approval.ApprovalRequestCondition;
 import com.everhomes.rest.approval.ApprovalRequestDTO;
 import com.everhomes.rest.approval.ApprovalRuleDTO;
 import com.everhomes.rest.approval.ApprovalStatus;
@@ -38,6 +49,7 @@ import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.BriefApprovalFlowDTO;
+import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.BriefApprovalRuleDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
@@ -51,17 +63,40 @@ import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
 import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
+import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestCommand;
+import com.everhomes.rest.approval.ListApprovalFlowOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalFlowResponse;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestCommand;
+import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
+import com.everhomes.rest.approval.ListApprovalUserCommand;
+import com.everhomes.rest.approval.ListApprovalUserResponse;
 import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
 import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
+import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.RuleFlowMap;
+import com.everhomes.rest.approval.TimeRange;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
@@ -70,6 +105,12 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.news.AttachmentDescriptor;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -79,6 +120,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class ApprovalServiceImpl implements ApprovalService {
@@ -108,10 +150,22 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private ApprovalRequestProvider approvalRequestProvider;
 	
 	@Autowired
+	private ApprovalOpRequestProvider approvalOpRequestProvider;
+	
+	@Autowired
 	private LocaleStringProvider localeStringProvider;
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private AttachmentProvider attachmentProvider;
+
+	@Autowired
+	private ApprovalTimeRangeProvider approvalTimeRangeProvider;
+	
+	@Autowired
+	private FamilyProvider familyProvider;
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -121,6 +175,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+
+	@Autowired
+	private ContentServerService contentServerService;
 
 	@Override
 	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
@@ -455,12 +512,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 			v1.forEach((k2,v2)->{
 				//k2为level
 				List<ApprovalUser> approvalPersonList = v2.stream().map(a->{
-																ApprovalUser approvalPerson = new ApprovalUser();
-																approvalPerson.setTargetType(a.getTargetType());
-																approvalPerson.setTargetId(a.getId());
-																approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));
-																return approvalPerson;
-															}).collect(Collectors.toList());
+					ApprovalUser approvalPerson = new ApprovalUser();
+					approvalPerson.setTargetType(a.getTargetType());
+					approvalPerson.setTargetId(a.getId());
+					approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));
+					return approvalPerson;
+				}).collect(Collectors.toList());
 				levelList.add(new ApprovalFlowLevelDTO(k2, approvalPersonList));
 			});
 			flowMap.get(k1).setLevelList(levelList);
@@ -566,7 +623,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		//3. list中必须存在产品规定必填的审批规则
 		checkMustExistApprovalType(list, ApprovalType.ABSENCE.getCode());
-		checkMustExistApprovalType(list, ApprovalType.FORGOT.getCode());
+		checkMustExistApprovalType(list, ApprovalType.EXCEPTION.getCode());
 	}
 	
 	private void checkMustExistApprovalType(List<RuleFlowMap> list, Byte approvalType){
@@ -769,6 +826,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		checkNamespaceExist(namespaceId);
 		checkOwnerExist(namespaceId, ownerType, ownerId);
 	}
+	
+	private void checkPrivilege(Long userId, ApprovalOwnerInfo ownerInfo) {
+		checkPrivilege(userId, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
+	}
 
 	private void checkNamespaceExist(Integer namespaceId) {
 		if (namespaceProvider.findNamespaceById(namespaceId) == null) {
@@ -803,8 +864,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		
 	}
-
-
+	
 	@Override
 	public ListBriefApprovalRuleResponse listBriefApprovalRule(ListBriefApprovalRuleCommand cmd) {
 		final Long userId = getUserId();
@@ -815,7 +875,299 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return new ListBriefApprovalRuleResponse(approvalRuleList.stream().map(a->ConvertHelper.convert(a, BriefApprovalRuleDTO.class)).collect(Collectors.toList()));
 	}
 
+	@Override
+	public GetApprovalBasicInfoOfRequestResponse getApprovalBasicInfoOfRequest(
+			GetApprovalBasicInfoOfRequestCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRequestId());
+		
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+		
+		ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequestDTO = handler.processApprovalBasicInfoOfRequest(approvalRequest);
+		
+		return new GetApprovalBasicInfoOfRequestResponse(approvalBasicInfoOfRequestDTO);
+	}
 
+	private ApprovalRequest checkApprovalRequestExist(Integer namespaceId, String ownerType, Long ownerId, Long requestId) {
+		ApprovalRequest approvalRequest = approvalRequestProvider.findApprovalRequestById(requestId);
+		if (approvalRequest == null || approvalRequest.getNamespaceId().intValue() != namespaceId.intValue()
+				|| approvalRequest.getOwnerId().longValue() != ownerId.longValue()
+				|| !ownerType.equals(approvalRequest.getOwnerType())
+				|| approvalRequest.getStatus().byteValue() != CommonStatus.INACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist approval request, requestId="+requestId);
+		}
+		return approvalRequest;
+	}
+	
+	private ApprovalRequest checkApprovalRequestExist(ApprovalOwnerInfo ownerInfo, String requestToken) {
+		return checkApprovalRequestExist(ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), getRequestIdFromToken(requestToken));
+	}
+
+	private Long getRequestIdFromToken(String requestToken){
+		if (StringUtils.isBlank(requestToken)) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"requestToken cannot be empty");
+		}
+		return WebTokenGenerator.getInstance().fromWebToken(requestToken, Long.class);
+	}
+	
+	@Override
+	public ListApprovalLogAndFlowOfRequestResponse listApprovalLogAndFlowOfRequest(
+			ListApprovalLogAndFlowOfRequestCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRequestId());
+		
+		return new ListApprovalLogAndFlowOfRequestResponse(listApprovalLogAndFlow(approvalRequest));
+	}
+
+	private List<ApprovalLogAndFlowOfRequestDTO> listApprovalLogAndFlow(ApprovalRequest approvalRequest) {
+		List<ApprovalLogOfRequestDTO> logList = listApprovalLog(approvalRequest);
+		List<ApprovalFlowOfRequestDTO> flowList = listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel());
+		
+		//合并这两个列表为一个
+		List<ApprovalLogAndFlowOfRequestDTO> resultList = new ArrayList<>();
+		
+		//日志全部加入
+		resultList.addAll(logList.stream().map(l->{
+			ApprovalLogAndFlowOfRequestDTO approvalLogAndFlowOfRequestDTO = new ApprovalLogAndFlowOfRequestDTO();
+			approvalLogAndFlowOfRequestDTO.setType((byte) 1);
+			approvalLogAndFlowOfRequestDTO.setContentJson(JSON.toJSONString(l));
+			return approvalLogAndFlowOfRequestDTO;
+		}).collect(Collectors.toList()));
+		
+		//流程只取当前进行到的level后面的
+		boolean flag = false;
+		for (ApprovalFlowOfRequestDTO approvalFlowOfRequestDTO : flowList) {
+			if (flag) {
+				ApprovalLogAndFlowOfRequestDTO approvalLogAndFlowOfRequestDTO = new ApprovalLogAndFlowOfRequestDTO();
+				approvalLogAndFlowOfRequestDTO.setType((byte) 2);
+				approvalLogAndFlowOfRequestDTO.setContentJson(JSON.toJSONString(approvalFlowOfRequestDTO));
+				resultList.add(approvalLogAndFlowOfRequestDTO);
+			}
+			if (approvalFlowOfRequestDTO.getCurrentFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+				flag = true;
+			}
+		}
+		return resultList;
+	}
+
+	@Override
+	public ListApprovalLogOfRequestResponse listApprovalLogOfRequest(ListApprovalLogOfRequestCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRequestId());
+		
+		return new ListApprovalLogOfRequestResponse(listApprovalLog(approvalRequest));
+	}
+
+	private List<ApprovalLogOfRequestDTO> listApprovalLog(ApprovalRequest approvalRequest) {
+		List<ApprovalLogOfRequestDTO> resultList = new ArrayList<>();
+		
+		List<ApprovalOpRequest> approvalOpRequestList = approvalOpRequestProvider.listApprovalOpRequestByRequestId(approvalRequest.getId());
+		for (int i = 0; i < approvalOpRequestList.size(); i++) {
+			ApprovalOpRequest approvalOpRequest = approvalOpRequestList.get(i);
+			ApprovalLogOfRequestDTO approvalLog = new ApprovalLogOfRequestDTO();
+			approvalLog.setCreateTime(approvalOpRequest.getCreateTime());
+			User user = userProvider.findUserById(approvalOpRequest.getOperatorUid());
+			if (user != null) {
+				approvalLog.setNickName(user.getNickName());
+			}
+			approvalLog.setApprovalType(approvalRequest.getApprovalType());
+			if (approvalRequest.getCategoryId() != null) {
+				ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
+				if (approvalCategory != null) {
+					approvalLog.setCategoryName(approvalCategory.getCategoryName());
+				}
+			}
+			approvalLog.setRemark(approvalOpRequest.getProcessMessage());
+			approvalLog.setApprovalStatus(approvalOpRequest.getApprovalStatus());
+			
+			if (i == 0 && approvalRequest.getAttachmentFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+				approvalLog.setAttachmentList(getAttachments(approvalRequest.getId()));
+			}
+		}
+		
+		return resultList;
+	}
+
+	private List<AttachmentDescriptor> getAttachments(Long requestId) {
+		List<Attachment> attachmentList = attachmentProvider.listAttachmentByOwnerId(EhApprovalAttachments.class, requestId);
+		return attachmentList.stream().map(a->{
+			AttachmentDescriptor attachmentDescriptor = ConvertHelper.convert(a, AttachmentDescriptor.class);
+			attachmentDescriptor.setContentUrl(getUrl(a.getContentUri(), a.getOwnerId()));
+			return attachmentDescriptor;
+		}).collect(Collectors.toList());
+	}
+
+	private String getUrl(String uri, Long ownerId) {
+		if (uri != null && uri.length() > 0) {
+			try {
+				return contentServerService.parserUri(uri, "", ownerId);
+			} catch (Exception e) {
+				
+			}
+		}
+		return "";
+	}
+	
+	
+	@Override
+	public ListApprovalFlowOfRequestResponse listApprovalFlowOfRequest(ListApprovalFlowOfRequestCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRequestId());
+		
+		return new ListApprovalFlowOfRequestResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel()));
+	}
+
+	private List<ApprovalFlowOfRequestDTO> listApprovalFlowUser(Long flowId, Long currentLevel) {
+		List<ApprovalFlowOfRequestDTO> resultList = new ArrayList<>();
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByFlowId(flowId);
+		
+		Map<Byte, List<ApprovalFlowLevel>> map = approvalFlowLevelList.stream().collect(Collectors.groupingBy(ApprovalFlowLevel::getLevel));
+		//key为level
+		map.forEach((key, value)->{
+			ApprovalFlowOfRequestDTO approvalFlowOfRequestDTO = new ApprovalFlowOfRequestDTO();
+			approvalFlowOfRequestDTO.setCurrentFlag(currentLevel.byteValue()==key.byteValue()?TrueOrFalseFlag.TRUE.getCode():TrueOrFalseFlag.FALSE.getCode());
+			approvalFlowOfRequestDTO.setNickNameList(getNickNameList(value));
+			resultList.add(approvalFlowOfRequestDTO);
+		});
+		
+		return resultList;
+	}
+	
+
+	private List<String> getNickNameList(List<ApprovalFlowLevel> approvalFlowLevelList) {
+		return approvalFlowLevelList.stream().map(a->getTargetName(a.getTargetType(), a.getTargetId())).collect(Collectors.toList());
+	}
+
+	@Override
+	public GetApprovalBasicInfoOfRequestBySceneResponse getApprovalBasicInfoOfRequestByScene(
+			GetApprovalBasicInfoOfRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
+		
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+		
+		ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequestDTO = handler.processApprovalBasicInfoOfRequest(approvalRequest);
+		
+		return new GetApprovalBasicInfoOfRequestBySceneResponse(approvalBasicInfoOfRequestDTO);
+	}
+	
+
+	@Override
+	public ListApprovalLogAndFlowOfRequestBySceneResponse listApprovalLogAndFlowOfRequestByScene(
+			ListApprovalLogAndFlowOfRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
+		
+		return new ListApprovalLogAndFlowOfRequestBySceneResponse(listApprovalLogAndFlow(approvalRequest));
+	}
+
+	@Override
+	public ListApprovalLogOfRequestBySceneResponse listApprovalLogOfRequestByScene(
+			ListApprovalLogOfRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
+		
+		return new ListApprovalLogOfRequestBySceneResponse(listApprovalLog(approvalRequest));
+	}
+
+	@Override
+	public ListApprovalFlowOfRequestBySceneResponse listApprovalFlowOfRequestByScene(
+			ListApprovalFlowOfRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
+		
+		return new ListApprovalFlowOfRequestBySceneResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel()));
+	}
+	
+	
+	private ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString){
+		if (StringUtils.isBlank(sceneTokenString)) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"sceneToken cannot be null");
+		}
+		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(sceneTokenString, SceneTokenDTO.class);
+		Long organizationId = null;
+		Long communityId = null;
+	    SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+	    switch(sceneType) {
+	    case DEFAULT:
+	    case PARK_TOURIST:
+	        communityId = sceneTokenDTO.getEntityId();
+			List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+			if (list != null && list.size() > 0) {
+				organizationId = list.get(0).getOrganizationId();
+			}
+	        break;
+	    case FAMILY:
+	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+	        if(family != null) {
+	            communityId = family.getCommunityId();
+	            list = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+				if (list != null && list.size() > 0) {
+					organizationId = list.get(0).getOrganizationId();
+				}
+	        }
+	        break;
+        case ENTERPRISE: 
+        case ENTERPRISE_NOAUTH: 
+        	organizationId = sceneTokenDTO.getEntityId();
+            break;
+        case PM_ADMIN:
+        	organizationId = sceneTokenDTO.getEntityId();
+            break;
+	    default:
+	        break;
+	    }
+	    
+	    //鉴于目前审批的owner只有organization，所以这里只取organizationId
+	    return new ApprovalOwnerInfo(sceneTokenDTO.getNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId);
+	}
+
+	@Override
+	public ListApprovalRequestBySceneResponse listApprovalRequestByScene(ListApprovalRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		checkApprovalType(cmd.getApprovalType());
+		ApprovalRequestCondition condition = new ApprovalRequestCondition();
+		condition.setOwnerInfo(ownerInfo);
+		condition.setApprovalType(cmd.getApprovalType());
+		condition.setCategoryId(cmd.getCategoryId());
+		condition.setPageAnchor(cmd.getPageAnchor());
+		condition.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
+		
+		List<ApprovalRequest> approvalRequestList = approvalRequestProvider.listApprovalRequestByCondition(condition);
+		
+		Long nextPageAnchor = null;
+		if (approvalRequestList.size() > condition.getPageSize().intValue()) {
+			approvalRequestList.remove(approvalRequestList.size()-1);
+			nextPageAnchor = approvalRequestList.get(approvalRequestList.size()-1).getId();
+		}
+		
+		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
+		
+		List<BriefApprovalRequestDTO> resultList = approvalRequestList.stream().map(a->{
+			BriefApprovalRequestDTO briefApprovalRequestDTO = handler.processBriefApprovalRequest(a);
+			return briefApprovalRequestDTO;
+		}).collect(Collectors.toList());
+		
+		return new ListApprovalRequestBySceneResponse(nextPageAnchor, resultList);
+	}
+	
 	@Override
 	public void approveApprovalRequest(ApproveApprovalRequestCommand cmd) {
 		final Long userId = getUserId();
@@ -827,6 +1179,18 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 	}
 
+	@Override
+	public void rejectApprovalRequest(RejectApprovalRequestCommand cmd) {
+	}
+
+	@Override
+	public ListApprovalUserResponse listApprovalUser(ListApprovalUserCommand cmd) {
+		return null;
+	}
+
+
+	
+
 	
 	
 	
@@ -836,6 +1200,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	
 	
+
 	@Override
 	public ApprovalRequestDTO createApprovalRequest(ApprovalRequestDTO approvalRequestDTO){
 		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequestDTO.getApprovalType());
@@ -881,11 +1246,22 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		return PlatformContext.getComponent(ApprovalRequestDefaultHandler.APPROVAL_REQUEST_DEFAULT_HANDLER_NAME);
 	}
-	
-	
-	
-	
-	
+
+	@Override
+	public List<TimeRange> listTimeRangeByRequestId(Long requestId) {
+		List<ApprovalTimeRange> approvalTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(requestId);
+		List<TimeRange> timeRangeList = approvalTimeRangeList.stream().map(a->{
+			return ConvertHelper.convert(a, TimeRange.class);
+		}).collect(Collectors.toList());
+		
+		return timeRangeList;
+	}
+
+	@Override
+	public List<AttachmentDescriptor> listAttachmentByRequestId(Long requestId) {
+		return getAttachments(requestId);
+	}
+
 	
 	
 }

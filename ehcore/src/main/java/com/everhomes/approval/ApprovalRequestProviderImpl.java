@@ -1,9 +1,14 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +17,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalRequestCondition;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
@@ -55,6 +61,40 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalRequest.class));
 	}
 	
+	@Override
+	public List<ApprovalRequest> listApprovalRequestByCondition(ApprovalRequestCondition condition) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(condition.getNamespaceId()))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(condition.getOwnerType()))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(condition.getOwnerId()));
+		
+		if (condition.getApprovalType() != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(condition.getApprovalType()));
+		}
+		
+		if (condition.getCategoryId() != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(condition.getCategoryId()));
+		}
+		
+		if (condition.getCreatorUid() != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(condition.getCreatorUid()));
+		}
+		
+		if (condition.getPageAnchor() != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.ID.lt(condition.getPageAnchor()));
+		}
+		
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc())
+									.limit(condition.getPageSize()+1)
+									.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
+		}
+		
+		return new ArrayList<ApprovalRequest>();
+	}
+
 	private EhApprovalRequestsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

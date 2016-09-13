@@ -4,12 +4,12 @@ package com.everhomes.rest.approval;
 /**
  * 
  * <ul>审批类型
- * <li>ABSENCE: 1，请假类型</li>
- * <li>FORGOT: 2，忘打卡类型</li>
+ * <li>ABSENCE: 1，请假申请类型</li>
+ * <li>EXCEPTION: 2，异常申请类型</li>
  * </ul>
  */
 public enum ApprovalType {
-	ABSENCE((byte)1), FORGOT((byte)2);
+	ABSENCE((byte)1), EXCEPTION((byte)2);
 	
 	private byte code;
 	

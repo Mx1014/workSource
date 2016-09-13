@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +15,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalTimeRangesDao;
@@ -55,6 +59,20 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalTimeRange.class));
 	}
 	
+	@Override
+	public List<ApprovalTimeRange> listApprovalTimeRangeByOwnerId(Long ownerId) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_TIME_RANGES)
+														.where(Tables.EH_APPROVAL_TIME_RANGES.OWNER_ID.eq(ownerId))
+														.orderBy(Tables.EH_APPROVAL_TIME_RANGES.ID.asc())
+														.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalTimeRange.class));
+		}
+		
+		return new ArrayList<ApprovalTimeRange>();
+	}
+
 	private EhApprovalTimeRangesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

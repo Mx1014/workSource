@@ -3,6 +3,8 @@ package com.everhomes.approval;
 
 import java.util.List;
 
+import com.everhomes.rest.approval.ApprovalRequestCondition;
+
 public interface ApprovalRequestProvider {
 
 	void createApprovalRequest(ApprovalRequest approvalRequest);
@@ -12,5 +14,7 @@ public interface ApprovalRequestProvider {
 	ApprovalRequest findApprovalRequestById(Long id);
 
 	List<ApprovalRequest> listApprovalRequest();
+
+	List<ApprovalRequest> listApprovalRequestByCondition(ApprovalRequestCondition condition);
 
 }

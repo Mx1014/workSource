@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +58,20 @@ public class ApprovalOpRequestProviderImpl implements ApprovalOpRequestProvider 
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalOpRequest.class));
 	}
 	
+	@Override
+	public List<ApprovalOpRequest> listApprovalOpRequestByRequestId(Long requestId) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_OP_REQUESTS)
+				.where(Tables.EH_APPROVAL_OP_REQUESTS.REQUEST_ID.eq(requestId))
+				.orderBy(Tables.EH_APPROVAL_OP_REQUESTS.ID.asc())
+				.fetch();
+
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalOpRequest.class));
+		}
+		
+		return new ArrayList<ApprovalOpRequest>();
+	}
+
 	private EhApprovalOpRequestsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

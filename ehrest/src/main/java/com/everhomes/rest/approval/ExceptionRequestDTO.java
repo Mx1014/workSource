@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchStatusName: 打卡状态</li>
  * </ul>
  */
-public class ForgotRequestDTO {
+public class ExceptionRequestDTO {
 	private Long requestId;
 	private Timestamp punchDate;
 	private String nickName;

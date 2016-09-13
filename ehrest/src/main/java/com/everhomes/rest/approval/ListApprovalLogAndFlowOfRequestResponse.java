@@ -16,6 +16,12 @@ public class ListApprovalLogAndFlowOfRequestResponse {
 	@ItemType(ApprovalLogAndFlowOfRequestDTO.class)
 	private List<ApprovalLogAndFlowOfRequestDTO> approvalLogAndFlowOfRequestList;
 
+	public ListApprovalLogAndFlowOfRequestResponse(
+			List<ApprovalLogAndFlowOfRequestDTO> approvalLogAndFlowOfRequestList) {
+		super();
+		this.approvalLogAndFlowOfRequestList = approvalLogAndFlowOfRequestList;
+	}
+
 	public List<ApprovalLogAndFlowOfRequestDTO> getApprovalLogAndFlowOfRequestList() {
 		return approvalLogAndFlowOfRequestList;
 	}

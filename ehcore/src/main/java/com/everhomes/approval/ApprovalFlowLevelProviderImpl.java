@@ -104,6 +104,20 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 		
 		return new ArrayList<ApprovalFlowLevel>();
 	}
+	
+	@Override
+	public List<ApprovalFlowLevel> listApprovalFlowLevelByFlowId(Long flowId) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS)
+				.where(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.eq(flowId))
+				.orderBy(Tables.EH_APPROVAL_FLOW_LEVELS.LEVEL.asc(), Tables.EH_APPROVAL_FLOW_LEVELS.ID.asc())
+				.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalFlowLevel.class));
+		}
+		
+		return new ArrayList<ApprovalFlowLevel>();
+	}
 
 	private EhApprovalFlowLevelsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

@@ -16,6 +16,11 @@ public class ListApprovalFlowOfRequestBySceneResponse {
 	@ItemType(ApprovalFlowOfRequestDTO.class)
 	private List<ApprovalFlowOfRequestDTO> approvalFlowOfRequestList;
 
+	public ListApprovalFlowOfRequestBySceneResponse(List<ApprovalFlowOfRequestDTO> approvalFlowOfRequestList) {
+		super();
+		this.approvalFlowOfRequestList = approvalFlowOfRequestList;
+	}
+
 	public List<ApprovalFlowOfRequestDTO> getApprovalFlowOfRequestList() {
 		return approvalFlowOfRequestList;
 	}

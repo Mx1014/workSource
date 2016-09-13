@@ -13,4 +13,6 @@ public interface ApprovalTimeRangeProvider {
 
 	List<ApprovalTimeRange> listApprovalTimeRange();
 
+	List<ApprovalTimeRange> listApprovalTimeRangeByOwnerId(Long ownerId);
+
 }

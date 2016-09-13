@@ -33,6 +33,8 @@ import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestCommand;
 import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestResponse;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestCommand;
 import com.everhomes.rest.approval.ListApprovalLogOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalRequestCommand;
+import com.everhomes.rest.approval.ListApprovalRequestResponse;
 import com.everhomes.rest.approval.ListApprovalRuleCommand;
 import com.everhomes.rest.approval.ListApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalUserCommand;
@@ -258,6 +260,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("rejectApprovalRequest")
 	@RestReturn(String.class)
 	public RestResponse rejectApprovalRequest(RejectApprovalRequestCommand cmd){
+		approvalService.rejectApprovalRequest(cmd);
 		return new RestResponse();
 	}
 	
@@ -269,7 +272,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("getApprovalBasicInfoOfRequest")
 	@RestReturn(GetApprovalBasicInfoOfRequestResponse.class)
 	public RestResponse getApprovalBasicInfoOfRequest(GetApprovalBasicInfoOfRequestCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.getApprovalBasicInfoOfRequest(cmd));
 	}
 
 	/**
@@ -280,7 +283,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalLogAndFlowOfRequest")
 	@RestReturn(ListApprovalLogAndFlowOfRequestResponse.class)
 	public RestResponse listApprovalLogAndFlowOfRequest(ListApprovalLogAndFlowOfRequestCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listApprovalLogAndFlowOfRequest(cmd));
 	}
 
 	/**
@@ -291,7 +294,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalLogOfRequest")
 	@RestReturn(ListApprovalLogOfRequestResponse.class)
 	public RestResponse listApprovalLogOfRequest(ListApprovalLogOfRequestCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listApprovalLogOfRequest(cmd));
 	}
 
 	/**
@@ -302,7 +305,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalFlowOfRequest")
 	@RestReturn(ListApprovalFlowOfRequestResponse.class)
 	public RestResponse listApprovalFlowOfRequest(ListApprovalFlowOfRequestCommand cmd){
-		return new RestResponse();
+		return new RestResponse(approvalService.listApprovalFlowOfRequest(cmd));
 	}
 
 	/**
@@ -313,6 +316,17 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("listApprovalUser")
 	@RestReturn(ListApprovalUserResponse.class)
 	public RestResponse listApprovalUser(ListApprovalUserCommand cmd){
+		return new RestResponse(approvalService.listApprovalUser(cmd));
+	}
+
+	/**
+	 * 
+	 * <p>24.查询申请列表</p>
+	 * <b>URL: /approval/listApprovalRequest</b>
+	 */
+	@RequestMapping("listApprovalRequest")
+	@RestReturn(ListApprovalRequestResponse.class)
+	public RestResponse listApprovalRequest(ListApprovalRequestCommand cmd){
 		return new RestResponse();
 	}
 }

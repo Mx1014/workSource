@@ -1,21 +1,25 @@
 // @formatter:off
 package com.everhomes.rest.approval;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
  * <ul>
  * <li>requestToken: 申请的token</li>
- * <li>approvalType: 审批类型</li>
- * <li>categoryName: 具体类型，忘打卡申请时为忘打卡，请假申请时公出、事假等</li>
+ * <li>approveType: 审批类型，{@link com.everhomes.rest.approval.ApprovalType}</li>
+ * <li>categoryName: 具体类型，异常无，请假申请时公出、事假等</li>
  * <li>reason: 申请理由</li>
  * <li>description: 描述，请假总时长等</li>
+ * <li>approvalStatus: 审批状态，参考{@link com.everhomes.rest.approval.ApprovalStatus}</li>
+ * <li>createTime: 创建时间</li>
  * <li>timeRangeList: 时间列表，参考{@link com.everhomes.rest.approval.TimeRange}</li>
- * <li>approvalStatus: 审批状态</li>
+ * <li>attachmentList: 时间列表，参考{@link com.everhomes.rest.news.AttachmentDescriptor}</li>
  * </ul>
  */
 public class BriefApprovalRequestDTO {
@@ -27,6 +31,25 @@ public class BriefApprovalRequestDTO {
 	private List<TimeRange> timeRangeList;
 	private String reason;
 	private Byte approvalStatus;
+	private Timestamp createTime;
+	@ItemType(AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachmentList;
+
+	public List<AttachmentDescriptor> getAttachmentList() {
+		return attachmentList;
+	}
+
+	public void setAttachmentList(List<AttachmentDescriptor> attachmentList) {
+		this.attachmentList = attachmentList;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
 
 	public Byte getApprovalType() {
 		return approvalType;

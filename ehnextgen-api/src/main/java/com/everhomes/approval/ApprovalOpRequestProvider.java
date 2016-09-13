@@ -13,4 +13,6 @@ public interface ApprovalOpRequestProvider {
 
 	List<ApprovalOpRequest> listApprovalOpRequest();
 
+	List<ApprovalOpRequest> listApprovalOpRequestByRequestId(Long requestId);
+
 }
