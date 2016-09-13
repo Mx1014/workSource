@@ -2081,7 +2081,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					Double endTime = null;
 					
 					for(TimeIntervalDTO timeInterval:cmd.getTimeIntervals()){
-						RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class); 
+						if(null == timeInterval.getTimeStep())
+							timeInterval.setTimeStep(rs.getTimeStep());
+						RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
+						
 						timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
 						timeIntervalDB.setOwnerId(rs.getId());
 						this.rentalProvider.createTimeInterval(timeIntervalDB);
