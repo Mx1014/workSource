@@ -38,9 +38,9 @@ import com.everhomes.util.DateHelper;
  */
 @Component
 public class CoreServerBootstrapBean implements ApplicationListener<ApplicationEvent> {
-    
-    @Autowired
-    private PlatformBootstrap platformBootstrap;
+    //未用到这个依赖，先注释掉，否则生成rest包时报错，update by tt, 20160913
+//    @Autowired
+//    private PlatformBootstrap platformBootstrap;
     
     @Autowired
     private AclProvider aclProvider;
