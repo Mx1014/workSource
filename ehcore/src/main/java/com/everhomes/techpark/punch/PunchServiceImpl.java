@@ -1448,8 +1448,42 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
+	private boolean isWorkTime(Time time, PunchTimeRule punchTimeRule) {
+		if (time == null || punchTimeRule == null) {
+			return false;
+		}
+		time = Time.valueOf(timeSF.format(time));
+		//时间在最早上班时间到最晚下班时间之间且不在午休时间范围内
+		if (!time.before(punchTimeRule.getStartEarlyTime()) && !time.after(getEndTime(punchTimeRule.getStartLateTime(), punchTimeRule.getWorkTime()))
+				&& !(time.after(punchTimeRule.getNoonLeaveTime()) && time.before(punchTimeRule.getAfternoonArriveTime()))) {
+			return true;
+		}
+		return false;
+	}
+	
 	private Time getEndTime(Time startTime, Time workTime){
-		return new Time(convertTimeToGMTMillisecond(startTime) + convertTimeToGMTMillisecond(workTime));
+		return new Time(convertTimeToGMTMillisecond(startTime) + convertTimeToGMTMillisecond(workTime) + MILLISECONDGMT);
+	}
+	
+	@Override
+	public boolean isWorkTime(Time time, PunchRule punchRule) {
+		return isWorkTime(time, getPunchTimeRule(punchRule));
+	}
+	
+	private boolean isRestTime(Date fromTime, Date endTime, PunchTimeRule punchTimeRule){
+		return isSameDay(fromTime, endTime)
+				&& timeSF.format(fromTime).equals(timeSF.format(punchTimeRule.getNoonLeaveTime()))
+				&& timeSF.format(endTime).equals(timeSF.format(punchTimeRule.getAfternoonArriveTime()));
+	}
+	
+	@Override
+	public boolean isSameDay(Date date1, Date date2) {
+		return dateSF.format(date1).equals(dateSF.format(date2));
+	}
+	
+	@Override
+	public boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule) {
+		return isRestTime(fromTime, endTime, getPunchTimeRule(punchRule));
 	}
 	
 	@Override

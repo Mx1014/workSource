@@ -16,6 +16,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -82,6 +83,26 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 			return result.map(r->ConvertHelper.convert(r, ApprovalTimeRange.class));
 		}
 		
+		return new ArrayList<ApprovalTimeRange>();
+	}
+
+	@Override
+	public List<ApprovalTimeRange> listApprovalTimeRangeByUserId(Long userId, Integer namespaceId, String ownerType,
+			Long ownerId) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_TIME_RANGES)
+				.join(Tables.EH_APPROVAL_REQUESTS)
+				.on(Tables.EH_APPROVAL_TIME_RANGES.OWNER_ID.eq(Tables.EH_APPROVAL_REQUESTS.ID))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.fetch();
+				
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalTimeRange.class));
+		}
+				
 		return new ArrayList<ApprovalTimeRange>();
 	}
 

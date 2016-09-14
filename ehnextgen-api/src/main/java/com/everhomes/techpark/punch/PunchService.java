@@ -164,4 +164,10 @@ public interface PunchService {
 
 	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
 
+	boolean isWorkTime(Time time, PunchRule punchRule);
+
+	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule);
+
+	boolean isSameDay(Date date1, Date date2);
+
 }

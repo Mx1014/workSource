@@ -10,6 +10,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
@@ -101,5 +102,15 @@ public class ApprovalUiController extends ControllerBase {
 	public RestResponse createApprovalRequestByScene(CreateApprovalRequestBySceneCommand cmd){
 		return new RestResponse(approvalService.createApprovalRequestByScene(cmd));
 	}
-	
+
+	/**
+	 * 
+	 * <p>7.取消申请（客户端）</p>
+	 * <b>URL: /ui/approval/cancelApprovalRequestByScene</b>
+	 */
+	@RequestMapping("cancelApprovalRequestByScene")
+	@RestReturn(String.class)
+	public RestResponse cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd) {
+		return new RestResponse();
+	}
 }

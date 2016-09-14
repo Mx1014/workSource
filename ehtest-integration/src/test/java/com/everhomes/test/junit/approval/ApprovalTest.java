@@ -643,7 +643,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//15. 审批规则列表
-	//@Test
+	@Test
 	public void testListApprovalRule() {
 		String url = LIST_APPROVAL_RULE_URL;
 		logon();
@@ -701,7 +701,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//17. 同意申请
-	@Test
+	//@Test
 	public void testApproveApprovalRequest() {
 		String url = APPROVE_APPROVAL_REQUEST_URL;
 		logon();

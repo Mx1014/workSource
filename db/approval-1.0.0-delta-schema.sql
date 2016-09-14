@@ -103,8 +103,6 @@ CREATE TABLE `eh_approval_time_ranges` (
 	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g application_id',
 	`from_time` DATETIME NOT NULL COMMENT 'must store concrete time',
 	`end_time` DATETIME NOT NULL COMMENT 'must store concrete time',
-	`actual_from_time` DATETIME NOT NULL COMMENT 'actual from time, e.g from time less than work start time, then use work start time',
-	`actual_end_time` DATETIME NOT NULL COMMENT 'actual end time, e.g end time greater than work end time, then user work end time',
 	`type` TINYINT NOT NULL COMMENT '1. all day, 2. morning half day, 3. afternoon half day, 4. time',
 	`actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours',
 	`creator_uid` BIGINT NOT NULL,
