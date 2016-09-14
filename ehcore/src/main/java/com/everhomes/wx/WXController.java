@@ -36,7 +36,8 @@ public class WXController {
 
 	@Autowired
 	private UserService userService;
-	
+	private String appId= "wx58052b72c7579016";
+	private String sercret= "1ae8190351290501747a0829a24259ab";
 	/**
 	 * <b>URL: /wx/wxLogin</b>
 	 * <p>
@@ -71,7 +72,7 @@ public class WXController {
 			redirectUri += "?mallId=" + mallId;
 
 			String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
-					+ "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", "wx58052b72c7579016",
+					+ "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
 					URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
 			LOGGER.info("redirect url : "+authorizeUri );
 			response.sendRedirect(authorizeUri);
@@ -91,7 +92,10 @@ public class WXController {
 		String code = request.getParameter("code");
 		String mallIdStr = (String) request.getParameter("mallId");
 		String sourceUrl =  "http://beta.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service";
-		LOGGER.info("create a user ");
+		LOGGER.info("create a user +code = "+code);
+		LOGGER.info("url = :[https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appId+"&"
+				+ "secret="+sercret +"&code="+code+"&grant_type=authorization_code] " );
+		
 		response.sendRedirect(sourceUrl); 
 	}
 	private LoginToken getLoginToken(HttpServletRequest request) {

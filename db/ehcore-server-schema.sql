@@ -116,6 +116,50 @@ CREATE TABLE `eh_aclink_firmware` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_aclink_logs`;
+CREATE TABLE `eh_aclink_logs` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
+    `event_type` BIGINT DEFAULT 0,
+
+    `door_type` TINYINT NOT NULL COMMENT '0: Zuolin aclink with wifi, 1: Zuolink aclink without wifi',
+    `door_id` BIGINT NOT NULL DEFAULT 0,
+    `hardware_id` VARCHAR(64) NOT NULL COMMENT 'mac address of aclink',
+    `door_name` VARCHAR(128) COMMENT 'door name of aclink',
+
+    `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
+    `owner_id` BIGINT NOT NULL,
+    `owner_name` VARCHAR(128) COMMENT 'addition name for owner',
+
+    `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'user_id of user key',
+    `key_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'key_id of auth',
+    `auth_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'auth id of user key',
+    `user_name` VARCHAR(128) COMMENT 'username of logs',
+    `user_identifier` VARCHAR(128) COMMENT 'useridentifier of user',
+
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    `string_tag6` VARCHAR(128),
+
+    `integral_tag1` BIGINT DEFAULT 0,
+    `integral_tag2` BIGINT DEFAULT 0,
+    `integral_tag3` BIGINT DEFAULT 0,
+    `integral_tag4` BIGINT DEFAULT 0,
+    `integral_tag5` BIGINT DEFAULT 0,
+    `integral_tag6` BIGINT DEFAULT 0,
+
+    `remark` VARCHAR(1024) COMMENT 'extra information',
+
+    `log_time` BIGINT DEFAULT 0,
+    `create_time` DATETIME,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `eh_aclink_undo_key`;
 CREATE TABLE `eh_aclink_undo_key` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -583,6 +627,8 @@ CREATE TABLE `eh_banners` (
   `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
   `scene_type` VARCHAR(64) DEFAULT 'default',
   `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert 3:customized',
+  `update_time` DATETIME,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -3883,7 +3929,9 @@ CREATE TABLE `eh_pm_task_logs` (
 
   `operator_uid` BIGINT NOT NULL DEFAULT 0,
   `operator_time` DATETIME,
-
+  `operator_name` VARCHAR(64) COMMENT 'the name of user',
+  `operator_phone` VARCHAR(64) COMMENT 'the phone of user',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5364,7 +5412,15 @@ CREATE TABLE `eh_rentalv2_resources` (
   `day_end_time` TIME COMMENT '对于按小时预定的每天结束时间',
   `community_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `resource_counts` DOUBLE COMMENT '可预约个数',
-
+  `cell_begin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells begin id',
+  `cell_end_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells end id',
+  `unit` DOUBLE DEFAULT 1 COMMENT '1-整租, 0.5-可半个租',
+  `begin_date` DATE COMMENT '开始日期',
+  `end_date` DATE COMMENT '结束日期',
+  `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
+  `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
+  `weekend_price` DECIMAL(10,2) COMMENT '周末价格',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5379,7 +5435,7 @@ CREATE TABLE `eh_rentalv2_time_interval` (
   `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
   `begin_time` DOUBLE COMMENT '开始时间-24小时制',
   `end_time` DOUBLE COMMENT '结束时间-24小时制',
-
+  `time_step` DOUBLE COMMENT '按小时预约：最小单元格是多少小时，浮点型',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6705,25 +6761,6 @@ CREATE TABLE `eh_yellow_pages` (
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
   `creator_uid` BIGINT,
-  `create_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- global table
--- Pretending someone to login and operate as real user
---
-DROP TABLE IF EXISTS `eh_user_impersonations`;
-CREATE TABLE `eh_user_impersonations`(
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'USER',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `target_type` VARCHAR(64) NOT NULL COMMENT 'USER',
-  `target_id` BIGINT NOT NULL DEFAULT 0,
-  `description` TEXT,
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
