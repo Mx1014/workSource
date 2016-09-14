@@ -298,13 +298,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
-	    	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
+	    	if(!privileges.contains(PrivilegeConstants.COMPLETETASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
 		}
 			
 		if(status.equals(PmTaskStatus.OTHER.getCode())){
 			task.setClosedTime(now);
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+	    	if(!privileges.contains(PrivilegeConstants.CLOSETASK)){
+	    		returnNoPrivileged(privileges, user);
+			}
 		}
 		pmTaskProvider.updateTask(task);
 		
