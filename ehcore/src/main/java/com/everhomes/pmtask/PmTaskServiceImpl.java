@@ -712,18 +712,32 @@ public class PmTaskServiceImpl implements PmTaskService {
     		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
     	if(size > 0){
     		List<String> phones = new ArrayList<String>();
-        	String[] s = null;
+        	
+        	//消息推送
+        	String scope = PmTaskNotificationTemplateCode.SCOPE;
+    	    String locale = PmTaskNotificationTemplateCode.LOCALE;
         	for(Long id: ids) {
             	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(id, IdentifierType.MOBILE.getCode());
             	phones.add(sender.getIdentifierToken());
-            	s = new String[phones.size()];
-            	phones.toArray(s);
+            	//消息推送
+            	Map<String, Object> map = new HashMap<String, Object>();
+        	    map.put("creatorName", nickName);
+        	    map.put("creatorPhone", mobile);
+        		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
+        		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        		sendMessageToUser(id, text);
         	}
-    		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", nickName);
-    		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
-    		smsProvider.addToTupleList(variables, "categoryName", categoryName);
-    		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
-    				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
+        	int num = phones.size();
+        	if(num > 0) {
+        		String[] s = new String[num];
+            	phones.toArray(s);
+        		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", nickName);
+        		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
+        		smsProvider.addToTupleList(variables, "categoryName", categoryName);
+        		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
+        				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
+        	}
+        	
     	}
     	
 		return ConvertHelper.convert(task, PmTaskDTO.class);
