@@ -192,8 +192,6 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			ApprovalTimeRange approvalTimeRange = new ApprovalTimeRange();
 			approvalTimeRange.setFromTime(new Timestamp(t.getFromTime()));
 			approvalTimeRange.setEndTime(new Timestamp(t.getEndTime()));
-			approvalTimeRange.setActualFromTime(null);
-			approvalTimeRange.setActualEndTime(null);
 			approvalTimeRange.setType(t.getType());
 			approvalTimeRange.setActualResult(null);
 			approvalTimeRange.setCreatorUid(userId);
