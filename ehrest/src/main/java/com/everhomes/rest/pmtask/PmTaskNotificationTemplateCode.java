@@ -14,8 +14,10 @@ public interface PmTaskNotificationTemplateCode {
     
     int CLOSED_TASK_LOG = 4;
     
-    int NOTIFY_TO_CREATOR = 5;
+    int NOTIFY_TO_CREATOR = 5; //完成时通知任务创建者
     
-    int NOTIFY_TO_ASSIGNER = 6;
+    int NOTIFY_TO_ASSIGNER = 6;//完成时通知任务分配者
+    
+    int CREATE_PM_TASK = 7; //新建任务时通知物业负责人
     
 }
