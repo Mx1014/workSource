@@ -407,3 +407,20 @@ UPDATE `eh_banners` SET `status` = 3 WHERE `status` = 0;
 -- 修改场景类型的display_name
 UPDATE `eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='default');
 UPDATE `eh_scene_types` SET `display_name`='管理公司场景' WHERE (`name`='pm_admin');
+
+-- 修改物业报修2.0 消息 短信模版
+delete from eh_locale_templates where id in (195, 196 , 197 , 198, 205);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('195', 'pmtask.notification', '5', 'zh_CN', '任务操作模版', '您于${day}日${hour}时发起的服务已由 ${operatorName} ${operatorPhone} 完成，快去评价打分吧~', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('196', 'pmtask.notification', '6', 'zh_CN', '任务操作模版', '业主 ${creatorName} ${creatorPhone} 发起的服务单已由 ${operatorName} ${operatorPhone} 完成', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('205', 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个任务，请尽快处理', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('197', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '<{operatorName}><{operatorPhone}>已将一个<{categoryName}>单派发给你，请尽快处理', '999992');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('198', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '<{creatorName}><{creatorPhone}>已发起一个任务，请尽快处理', '999992');
+
+
+
