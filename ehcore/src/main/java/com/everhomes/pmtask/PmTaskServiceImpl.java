@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.Acl;
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Role;
+import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -44,9 +49,12 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
@@ -56,6 +64,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
@@ -141,6 +150,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private MessagingService messagingService;
 	@Autowired
 	private SmsProvider smsProvider;
+	@Autowired
+	private AclProvider aclProvider;
+	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -689,14 +701,59 @@ public class PmTaskServiceImpl implements PmTaskService {
     	}else{
     		categoryName = parent.getName();
     	}
-//		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
-//		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
-//		smsProvider.addToTupleList(variables, "categoryName", categoryName);
-//		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
-//		
-//		organizationProvider
-		
+    	
+    	List<Long> ids = getOrganizationMembers(null == cmd.getOrganizationId()? 1000750L: cmd.getOrganizationId());
+    	int size = ids.size();
+    	if(LOGGER.isDebugEnabled())
+    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
+    	if(size > 0){
+    		List<String> phones = new ArrayList<String>();
+        	String[] s = null;
+        	for(Long id: ids) {
+            	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(id, IdentifierType.MOBILE.getCode());
+            	phones.add(sender.getIdentifierToken());
+            	s = new String[phones.size()];
+            	phones.toArray(s);
+        	}
+    		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", nickName);
+    		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
+    		smsProvider.addToTupleList(variables, "categoryName", categoryName);
+    		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
+    				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
+    	}
+    	
 		return ConvertHelper.convert(task, PmTaskDTO.class);
+	}
+
+	private List<Long> getOrganizationMembers(Long organizationId){
+		List<Long> result = new ArrayList<>();
+		if(null == organizationId) {
+			return result;
+		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), organizationId);
+		Long roleId = null;
+		outer:
+		for(Role r: roles) {
+			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, r.getId());
+			for(Acl acl: acls) {
+				if(acl.getPrivilegeId().equals(PrivilegeConstants.ASSIGNTASK) ||
+						acl.getPrivilegeId().equals(PrivilegeConstants.COMPLETETASK) ||
+						acl.getPrivilegeId().equals(PrivilegeConstants.CLOSETASK)) {
+					roleId = r.getId();
+					break outer;
+				}
+			}
+		}
+		List<RoleAssignment> roleAssgnments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		for(RoleAssignment ra: roleAssgnments){
+			if(EntityType.USER.getCode().equals(ra.getTargetType()) &&
+					ra.getRoleId().longValue() == roleId.longValue()) {
+				result.add(ra.getTargetId());
+			}
+		}
+		return result;
 	}
 	
 	@Override
