@@ -6,6 +6,8 @@ package com.everhomes.rest.statistics.transaction;
  *<li>endDate:结束时间 到選擇日期當天凌晨+1天結束</li>
  *<li>communityId:小區ID</li>
  *<li>namespaceId:域id</li>
+ *<li>ownerId:机构</li>
+ *<li>ownerType: 类型 {@link com.everhomes.entity.EntityType}</li>
  *</ul>
  */
 public class ListStatServiceSettlementAmountsCommand {
@@ -17,6 +19,10 @@ public class ListStatServiceSettlementAmountsCommand {
 	private Long communityId;
 	
 	private Integer namespaceId;
+	
+	private Long ownerId;
+	
+	private String ownerType;
 
 	public Long getStartDate() {
 		return startDate;
@@ -48,6 +54,22 @@ public class ListStatServiceSettlementAmountsCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
 	
 }

@@ -15,12 +15,22 @@ import java.util.Set;
 
 
 
+
+
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
 
 
 
@@ -37,9 +47,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
-import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.OrderBriefDTO;
@@ -55,9 +63,7 @@ import com.everhomes.server.schema.tables.daos.EhConfOrderAccountMapDao;
 import com.everhomes.server.schema.tables.daos.EhConfOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhWarningContactsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
@@ -69,7 +75,6 @@ import com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap;
 import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
-import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
@@ -78,7 +83,6 @@ import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
-import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -87,6 +91,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class VideoConfProviderImpl implements VideoConfProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfProviderImpl.class);
 
 	@Autowired
     private DbProvider dbProvider;
@@ -525,13 +530,49 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //	}
 //
 	@Override
+	public List<ConfAccounts> findAccountsByUserId(Long userId) {
+//		final ConfAccounts[] result = new ConfAccounts[1];
+		List<ConfAccounts> list = new ArrayList<ConfAccounts>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccounts.class));
+		 
+        SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+        
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0));
+        query.fetch().map((r) -> {
+        	list.add(ConvertHelper.convert(r, ConfAccounts.class));
+             return null;
+        });
+//		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
+//				(DSLContext context, Object reducingContext) -> {
+//					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
+//							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
+//							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+//							.fetch().map((r) -> {
+//								return ConvertHelper.convert(r, ConfAccounts.class);
+//							});
+
+//					if(list != null && !list.isEmpty()){
+//						result[0] = list.get(0);
+//						return false;
+//					}
+
+//					return true;
+//				});
+
+		return list;
+	}
+	
+	@Override
 	public ConfAccounts findAccountByUserId(Long userId) {
 		final ConfAccounts[] result = new ConfAccounts[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
 							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
-							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+//							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+							.and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+							.orderBy(Tables.EH_CONF_ACCOUNTS.STATUS.desc())
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfAccounts.class);
 							});
@@ -772,13 +813,14 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             SelectQuery<EhConfReservationsRecord> query = context.selectQuery(Tables.EH_CONF_RESERVATIONS);
             query.addConditions(Tables.EH_CONF_RESERVATIONS.STATUS.eq((byte) 1));
             query.addConditions(Tables.EH_CONF_RESERVATIONS.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(Tables.EH_CONF_RESERVATIONS.START_TIME.gt(new Timestamp(DateHelper.currentGMTTime().getTime())));
             if(locator.getAnchor() != null)
-            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.lt(locator.getAnchor()));
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.START_TIME.gt(new Timestamp(locator.getAnchor())));
             
             if(accountId != null)
             	query.addConditions(Tables.EH_CONF_RESERVATIONS.CONF_ACCOUNT_ID.eq(accountId));
            
-            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.ID.desc());
+            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.START_TIME.asc());
             query.addLimit(pageSize - reservations.size());
             
             query.fetch().map((r) -> {
@@ -788,7 +830,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             });
 
             if (reservations.size() >= pageSize) {
-                locator.setAnchor(reservations.get(reservations.size() - 1).getId());
+            	locator.setAnchor(reservations.get(reservations.size() - 1).getCreateTime().getTime());
+ //               locator.setAnchor(reservations.get(reservations.size() - 1).getId());
                 return AfterAction.done;
             }
             return AfterAction.next;
@@ -1404,6 +1447,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             SelectQuery<EhConfConferencesRecord> query = context.selectQuery(Tables.EH_CONF_CONFERENCES);
             query.addConditions(Tables.EH_CONF_CONFERENCES.CONF_ACCOUNT_ID.eq(accountId));
             
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Query EquipmentInspectionTasksLogs by count, sql=" + query.getSQL());
+                LOGGER.debug("Query EquipmentInspectionTasksLogs by count, bindValues=" + query.getBindValues());
+            }
+            
             query.fetch().map((r) -> {
             	
             	realDurations.add(r.getRealDuration());
@@ -1453,8 +1501,66 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
         return conferences;
 	}
-	
-	
 
+	@Override
+	public boolean allTrialEnterpriseAccounts(Long enterpriseId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		boolean trial = true;
+		
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		List<Long> categories = findAccountCategoriesByConfType((byte) 4);
+		
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+            
+        if(enterpriseId != null)
+        	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+        
+        
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.ACCOUNT_CATEGORY_ID.notIn(categories));
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+       
+        
+        query.fetch().map((r) -> {
+        	accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+        });
+        
+        if(accounts != null && accounts.size() > 0) {
+        	trial = false;
+        }
+		
+		return trial;
+	}
 
+	@Override
+	public ConfAccounts findAccountByUserIdAndEnterpriseId(Long userId,
+			Long enterpriseId) {
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+		
+		query.addOrderBy(Tables.EH_CONF_ACCOUNTS.STATUS.desc());
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, bindValues=" + query.getBindValues());
+        }
+		
+		
+		query.fetch().map((r) -> {
+			accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+		});
+
+		if(accounts != null && accounts.size() > 0) {
+			return accounts.get(0);
+		}
+
+		return null;
+	}
+	
 }

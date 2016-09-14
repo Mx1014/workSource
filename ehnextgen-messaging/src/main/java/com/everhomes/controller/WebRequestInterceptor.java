@@ -210,7 +210,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			if(user != null) {
 				userId = user.getId();
 			}
-			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+//			It's ok when using signature
+//			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
 			return false;
 		}
 

@@ -4,22 +4,29 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>CONF_TYPE_VIDEO_ONLY: 仅视频</li>
- * <li>CONF_TYPE_PHONE_SUPPORT: 支持电话</li>
+ * <li>CONF_TYPE_VIDEO_ONLY: 仅视频 0</li>
+ * <li>CONF_TYPE_PHONE_SUPPORT: 支持电话 1</li>
  * </ul>
  */
 public enum ConfType {
 
-	CONF_TYPE_VIDEO_ONLY("仅视频"), CONF_TYPE_PHONE_SUPPORT("支持电话");
+	CONF_TYPE_VIDEO_ONLY("仅视频", (byte)0), CONF_TYPE_PHONE_SUPPORT("支持电话", (byte)1);
     
     private String code;
-    private ConfType(String code) {
+    private byte status;
+    
+    private ConfType(String code, byte status) {
         this.code = code;
+        this.status = status;
     }
     
     public String getCode() {
         return this.code;
     }
+
+	public byte getStatus() {
+		return status;
+	}
 
 	public static ConfType fromCode(String code) {
 		for(ConfType v :ConfType.values()){

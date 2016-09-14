@@ -145,7 +145,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 ByteArrayInputStream bis = new ByteArrayInputStream(cert.getData());
                 //.withCert("/home/janson/projects/pys/apns/apns_develop.p12", "123456")
                 ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5).asQueued();
-                if(certName.indexOf("develop") >= 0) {
+                if(partner.indexOf("develop") >= 0) {
                     builder = builder.withSandboxDestination();
                 } else {
                     builder = builder.withProductionDestination();
@@ -310,12 +310,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
 
         Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
+        String platform = null;
         if(d == null) {
-            LOGGER.error("Pushing message, dest device not found, destLogin=" + destLogin);
-            return null;
+            LOGGER.warn("Pushing message, dest device not found, using auto detect, destLogin=" + destLogin);
+            //auto detect by destLogin.getDeviceIdentifier()
+            if(destLogin.getDeviceIdentifier().indexOf(":") >= 0) {
+                platform = "android";
+            } else if(destLogin.getDeviceIdentifier().length() >= 60) {
+                platform = "iOS";
+            }
+            
+            return platform;
         }
         
-        String platform = d.getPlatform();
+        platform = d.getPlatform();
         if(platform == null || !(platform.equals("iOS") || platform.equals("android"))) {
             //platform != iOS && platform != "android", auto detect by deviceId
             if(d.getDeviceId() != null) {

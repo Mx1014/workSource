@@ -7,10 +7,11 @@ import com.everhomes.util.StringHelper;
  *  <li>0: none</li>
  *  <li>1: qualified</li>
  *  <li>2: unqualified</li>
+ *  <li>3: inactive</li>
  * </ul>
  */
 public enum ReviewResult {
-	NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2);
+	NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2), INACTIVE((byte)3);
 	
 	private byte code;
 	

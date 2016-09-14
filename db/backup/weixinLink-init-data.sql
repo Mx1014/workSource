@@ -58,7 +58,7 @@ INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_i
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, create_time)
 	VALUES(2105193, 1002757, 'USER', 225502, 'manager', '吴珊', 0, '13798204538', 3, UTC_TIMESTAMP());	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, create_time)
-	VALUES(2105194, 1002757, 'USER', 225500, 'manager', '吴珊', 0, '13798204538', 3, UTC_TIMESTAMP());
+	VALUES(2105194, 1002757, 'USER', 225500, 'manager', '苏娇娇', 0, '13760240661', 3, UTC_TIMESTAMP());
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(10995, 'EhOrganizations', 1002757, 'EhUsers', 225501, 1001, 1, UTC_TIMESTAMP());

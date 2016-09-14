@@ -31,6 +31,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -278,45 +279,48 @@ public class ActivityServiceImpl implements ActivityService {
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         ActivityRoster roster = createRoster(cmd, user, activity);
-        dbProvider.execute((status) -> {
-        	//去掉报名评论 by xiongying 20160615
-//            Post comment = new Post();
-//            comment.setParentPostId(post.getId());
-//            comment.setForumId(post.getForumId());
-//            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//            comment.setCreatorUid(user.getId());
-//            comment.setContentType(PostContentType.TEXT.getCode());
-////            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
-//            String template = localeStringService.getLocalizedString(
-//            		ActivityLocalStringCode.SCOPE,
-//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
-//                    UserContext.current().getUser().getLocale(),
-//                    "");
-//
-//            if (!StringUtils.isEmpty(template)) {
-//                comment.setContent(template);
-//                forumProvider.createPost(comment);
-//            }
-            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
-                RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
-                joinCmd.setGroupId(activity.getGroupId());
-                joinCmd.setRequestText("request to join activity group");
-                try{
-                    groupService.requestToJoinGroup(joinCmd);
-                }catch(Exception e){
-                    LOGGER.error("join to group failed",e);
-                }
-               
-            }
-            int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
-            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
-            if(user.getAddressId()!=null){
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
-            }
-            activityProvider.createActivityRoster(roster);
-            activityProvider.updateActivity(activity);
-            return status;
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+	        dbProvider.execute((status) -> {
+	        	//去掉报名评论 by xiongying 20160615
+	//            Post comment = new Post();
+	//            comment.setParentPostId(post.getId());
+	//            comment.setForumId(post.getForumId());
+	//            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	//            comment.setCreatorUid(user.getId());
+	//            comment.setContentType(PostContentType.TEXT.getCode());
+	////            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
+	//            String template = localeStringService.getLocalizedString(
+	//            		ActivityLocalStringCode.SCOPE,
+	//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
+	//                    UserContext.current().getUser().getLocale(),
+	//                    "");
+	//
+	//            if (!StringUtils.isEmpty(template)) {
+	//                comment.setContent(template);
+	//                forumProvider.createPost(comment);
+	//            }
+	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
+	                RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
+	                joinCmd.setGroupId(activity.getGroupId());
+	                joinCmd.setRequestText("request to join activity group");
+	                try{
+	                    groupService.requestToJoinGroup(joinCmd);
+	                }catch(Exception e){
+	                    LOGGER.error("join to group failed",e);
+	                }
+	               
+	            }
+	            int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
+	            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
+	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
+	            if(user.getAddressId()!=null){
+	                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+	            }
+	            activityProvider.createActivityRoster(roster);
+	            activityProvider.updateActivity(activity);
+	            return status;
+	        });
+	        return null;
         });
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
