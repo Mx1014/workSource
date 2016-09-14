@@ -47,8 +47,8 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_version_realm` VALUES ('58', 'Android_AtMini', null, UTC_TIMESTAMP(), '999988');
 INSERT INTO `eh_version_realm` VALUES ('59', 'iOS_AtMini', null, UTC_TIMESTAMP(), '999988');
 
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(86,58,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(87,59,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(90,58,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(91,59,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999988, 'sms.default.yzx', 1, 'zh_CN', '验证码-@家', '28964');
