@@ -400,8 +400,8 @@ VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'banner.max.active
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'banner', '10003', 'zh_CN', '广告激活数量超过最大值啦!');
 
 -- 修改banner的关闭状态从0变为3
-UPDATE `ehcore`.`eh_banners` SET `status` = 3 WHERE `status` = 0;
+UPDATE `eh_banners` SET `status` = 3 WHERE `status` = 0;
 
 -- 修改场景类型的display_name
-UPDATE `ehcore`.`eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='default');
-UPDATE `ehcore`.`eh_scene_types` SET `display_name`='管理公司场景' WHERE (`name`='pm_admin');
+UPDATE `eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='default');
+UPDATE `eh_scene_types` SET `display_name`='管理公司场景' WHERE (`name`='pm_admin');
