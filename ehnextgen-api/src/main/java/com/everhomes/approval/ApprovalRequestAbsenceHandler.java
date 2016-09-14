@@ -1,6 +1,10 @@
 package com.everhomes.approval;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +12,20 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.AbsenceBasicDescription;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
+import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.techpark.punch.PunchRule;
+import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.ListUtils;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
  * 
@@ -29,6 +41,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	
 	@Autowired
 	private ApprovalService approvalService;
+	
+	@Autowired
+	private ApprovalTimeRangeProvider approvalTimeRangeProvider;
+	
+	@Autowired
+	private PunchService punchService;
 	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
@@ -90,5 +108,77 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		
 		return days + "." + hours + "." + minutes;
 	}
-	
+
+
+	@Override
+	public ApprovalRequest preProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo,
+			CreateApprovalRequestBySceneCommand cmd) {
+		if (StringUtils.isBlank(cmd.getReason())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"reason cannot be empty");
+		}
+		if (ListUtils.isEmpty(cmd.getTimeRangeList()) || checkTimeEmpty(cmd.getTimeRangeList())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"time cannot be empty");
+		}
+		if (checkTimeFromGreaterThanEnd(cmd.getTimeRangeList())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"from time cannot be greater than end time");
+		}
+		PunchRule punchRule = punchService.getPunchRule(ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), userId);
+		calculateActualResult(punchRule, cmd.getTimeRangeList());
+		
+		
+		
+		return super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
+	}
+
+	private String calculateActualResult(PunchRule punchRule, List<TimeRange> timeRangeList) {
+		
+		return null;
+	}
+
+	private boolean checkTimeFromGreaterThanEnd(List<TimeRange> timeRangeList) {
+		for (TimeRange timeRange : timeRangeList) {
+			if (timeRange.getFromTime().longValue() >= timeRange.getEndTime().longValue()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private boolean checkTimeEmpty(List<TimeRange> timeRangeList) {
+		for (TimeRange timeRange : timeRangeList) {
+			if (timeRange.getFromTime() == null || timeRange.getEndTime() == null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	@Override
+	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+			CreateApprovalRequestBySceneCommand cmd) {
+		//添加请假时间
+		createTimeRange(userId, ownerInfo, approvalRequest.getId(), cmd.getTimeRangeList());
+	}
+
+	private List<ApprovalTimeRange> createTimeRange(Long userId, ApprovalOwnerInfo ownerInfo, Long requestId, List<TimeRange> timeRangeList) {
+		List<ApprovalTimeRange> approvalTimeRanges = timeRangeList.stream().map(t->{
+			ApprovalTimeRange approvalTimeRange = new ApprovalTimeRange();
+			approvalTimeRange.setOwnerId(requestId);
+			approvalTimeRange.setFromTime(new Timestamp(t.getFromTime()));
+			approvalTimeRange.setEndTime(new Timestamp(t.getEndTime()));
+			approvalTimeRange.setType(t.getType());
+			approvalTimeRange.setActualResult(t.getActualResult());  //实际时长在前置处理器中计算
+			approvalTimeRange.setCreatorUid(userId);
+			approvalTimeRange.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			return approvalTimeRange;
+		}).collect(Collectors.toList());
+		approvalTimeRangeProvider.createApprovalTimeRanges(approvalTimeRanges);
+		return approvalTimeRanges;
+	}
+
 }

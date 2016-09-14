@@ -263,6 +263,9 @@ public interface PunchProvider {
 	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
 			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
+
+	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
+			Byte exceptionRequestType);
  
  
  

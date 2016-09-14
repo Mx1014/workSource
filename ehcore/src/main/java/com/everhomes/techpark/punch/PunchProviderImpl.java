@@ -16,6 +16,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Record5;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
@@ -32,6 +33,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
@@ -2256,5 +2258,34 @@ long id = sequenceProvider.getNextSequence(key);
 			return null;
 		return result;
 	}
+
+	//用于查询是否有过异常申请
+	@Override
+	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
+			Byte exceptionRequestType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(new Date(punchDate)));
+				
+		if (exceptionRequestType.byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
+			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
+		}else if (exceptionRequestType.byteValue() == ExceptionRequestType.MORNING.getCode()) {
+			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.MORNING_APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
+		}else if (exceptionRequestType.byteValue() == ExceptionRequestType.AFTERNOON.getCode()) {
+			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.AFTERNOON_APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
+		}
+		
+		Record record = step.limit(1).fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchExceptionRequest.class);
+		}
+		
+		return null;
+	}
+	
+	
 }
 

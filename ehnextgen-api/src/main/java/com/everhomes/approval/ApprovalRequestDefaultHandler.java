@@ -68,7 +68,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	}
 
 	@Override
-	public void postProcessCreateApprovalRequest(ApprovalRequest approvalRequest,
+	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
 	}
 	

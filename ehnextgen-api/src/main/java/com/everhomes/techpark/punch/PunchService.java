@@ -1,7 +1,9 @@
 package com.everhomes.techpark.punch;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -155,5 +157,11 @@ public interface PunchService {
 	void refreshMonthDayLogs(String month);
 
 	ApprovalRule getApprovalRule(String ownerType, Long ownerId, Long userId);
+
+	PunchRule getPunchRule(String ownerType, Long ownerId, Long userId);
+
+	boolean isWorkDay(Date date1, PunchRule punchRule);
+
+	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
 
 }

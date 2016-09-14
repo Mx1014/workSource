@@ -21,7 +21,7 @@ public enum ExceptionRequestType {
 		return this.code;
 	}
 	
-	public ExceptionRequestType fromCode(Byte code){
+	public static ExceptionRequestType fromCode(Byte code){
 		if (code != null) {
 			for (ExceptionRequestType forgetToPunchType : ExceptionRequestType.values()) {
 				if (forgetToPunchType.getCode() == code.byteValue()) {

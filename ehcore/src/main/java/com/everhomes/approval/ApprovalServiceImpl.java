@@ -941,7 +941,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	private List<ApprovalLogAndFlowOfRequestDTO> listApprovalLogAndFlow(ApprovalRequest approvalRequest) {
 		List<ApprovalLogOfRequestDTO> logList = listApprovalLog(approvalRequest);
-		List<ApprovalFlowOfRequestDTO> flowList = listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel());
 		
 		//合并这两个列表为一个
 		List<ApprovalLogAndFlowOfRequestDTO> resultList = new ArrayList<>();
@@ -954,17 +953,24 @@ public class ApprovalServiceImpl implements ApprovalService {
 			return approvalLogAndFlowOfRequestDTO;
 		}).collect(Collectors.toList()));
 		
-		//流程只取当前进行到的level后面的
-		boolean flag = false;
-		for (ApprovalFlowOfRequestDTO approvalFlowOfRequestDTO : flowList) {
-			if (flag) {
-				ApprovalLogAndFlowOfRequestDTO approvalLogAndFlowOfRequestDTO = new ApprovalLogAndFlowOfRequestDTO();
-				approvalLogAndFlowOfRequestDTO.setType((byte) 2);
-				approvalLogAndFlowOfRequestDTO.setContentJson(JSON.toJSONString(approvalFlowOfRequestDTO));
-				resultList.add(approvalLogAndFlowOfRequestDTO);
-			}
-			if (approvalFlowOfRequestDTO.getCurrentFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+		//如果没有后续流程了，则不用再取流程
+		if (approvalRequest.getNextLevel() == null) {
+			List<ApprovalFlowOfRequestDTO> flowList = listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel());
+			//流程只取当前进行到的level后面的
+			boolean flag = false;
+			if (approvalRequest.getCurrentLevel().byteValue() == (byte)0) {
 				flag = true;
+			}
+			for (ApprovalFlowOfRequestDTO approvalFlowOfRequestDTO : flowList) {
+				if (flag) {
+					ApprovalLogAndFlowOfRequestDTO approvalLogAndFlowOfRequestDTO = new ApprovalLogAndFlowOfRequestDTO();
+					approvalLogAndFlowOfRequestDTO.setType((byte) 2);
+					approvalLogAndFlowOfRequestDTO.setContentJson(JSON.toJSONString(approvalFlowOfRequestDTO));
+					resultList.add(approvalLogAndFlowOfRequestDTO);
+				}
+				if (approvalFlowOfRequestDTO.getCurrentFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+					flag = true;
+				}
 			}
 		}
 		return resultList;
@@ -991,18 +997,21 @@ public class ApprovalServiceImpl implements ApprovalService {
 			if (user != null) {
 				approvalLog.setNickName(user.getNickName());
 			}
-			approvalLog.setApprovalType(approvalRequest.getApprovalType());
-			if (approvalRequest.getCategoryId() != null) {
-				ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
-				if (approvalCategory != null) {
-					approvalLog.setCategoryName(approvalCategory.getCategoryName());
-				}
-			}
+			
 			approvalLog.setRemark(approvalOpRequest.getProcessMessage());
 			approvalLog.setApprovalStatus(approvalOpRequest.getApprovalStatus());
 			
-			if (i == 0 && approvalRequest.getAttachmentFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
-				approvalLog.setAttachmentList(getAttachments(approvalRequest.getId()));
+			if (i == 0) {
+				approvalLog.setApprovalType(approvalRequest.getApprovalType());
+				if (approvalRequest.getCategoryId() != null) {
+					ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
+					if (approvalCategory != null) {
+						approvalLog.setCategoryName(approvalCategory.getCategoryName());
+					}
+				}
+				if (approvalRequest.getAttachmentFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+					approvalLog.setAttachmentList(getAttachments(approvalRequest.getId()));
+				}
 			}
 		}
 		
@@ -1195,7 +1204,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
 		
-		
 		dbProvider.execute(s->{
 			//1. 申请表增加一条记录
 			//前置处理器，处理一些特定审批类型的数据检查等操作，并返回内容
@@ -1211,34 +1219,28 @@ public class ApprovalServiceImpl implements ApprovalService {
 				createAttachment(userId, approvalRequest.getId(), cmd.getAttachmentList());
 			}
 			
-			//3. 后置处理器，处理日志，处理时间，回调考勤接口更新打卡相关接口
-			handler.postProcessCreateApprovalRequest(approvalRequest, cmd);
+			//3. 处理日志
+			createApprovalOpRequest(userId, approvalRequest.getId(), cmd.getReason());
+			
+			//4. 后置处理器，处理时间，回调考勤接口更新打卡相关接口
+			handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
 
 			return true;
 		});
-		return null;
-	}
-	
-	private List<ApprovalTimeRange> createTimeRange(Long userId, ApprovalOwnerInfo ownerInfo, Long ownerId, List<TimeRange> timeRangeList) {
-		List<ApprovalTimeRange> approvalTimeRanges = timeRangeList.stream().map(t->{
-			ApprovalTimeRange approvalTimeRange = new ApprovalTimeRange();
-			approvalTimeRange.setOwnerId(ownerId);
-			approvalTimeRange.setFromTime(new Timestamp(t.getFromTime()));
-			approvalTimeRange.setEndTime(new Timestamp(t.getEndTime()));
-			approvalTimeRange.setType(t.getType());
-			approvalTimeRange.setActualResult(calculateActualResult(userId, ownerInfo, t.getFromTime(), t.getEndTime(), t.getType()));
-			approvalTimeRange.setCreatorUid(userId);
-			approvalTimeRange.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			return approvalTimeRange;
-		}).collect(Collectors.toList());
-		approvalTimeRangeProvider.createApprovalTimeRanges(approvalTimeRanges);
-		return approvalTimeRanges;
-	}
-
-	private String calculateActualResult(Long userId, ApprovalOwnerInfo ownerInfo, Long fromTime, Long endTime,
-			Byte type) {
+		
+		
 		
 		return null;
+	}
+
+	private void createApprovalOpRequest(Long userId, Long requestId, String processMessage) {
+		ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();
+		approvalOpRequest.setRequestId(requestId);
+		approvalOpRequest.setProcessMessage(processMessage);
+		approvalOpRequest.setOperatorUid(userId);
+		approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalOpRequest.setApprovalStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+		approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest);
 	}
 
 	private List<Attachment> createAttachment(Long userId, Long ownerId, List<AttachmentDescriptor> attachmentList) {

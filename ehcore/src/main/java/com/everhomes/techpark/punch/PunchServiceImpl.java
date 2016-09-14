@@ -1399,6 +1399,7 @@ public class PunchServiceImpl implements PunchService {
 		} 
 	}
 
+	@Override
 	public boolean isWorkDay(Date date1,PunchRule punchRule) {
 		if (date1 == null)
 			return false;
@@ -1447,7 +1448,17 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	 
+	private Time getEndTime(Time startTime, Time workTime){
+		return new Time(convertTimeToGMTMillisecond(startTime) + convertTimeToGMTMillisecond(workTime));
+	}
+	
+	@Override
+	public PunchTimeRule getPunchTimeRule(PunchRule punchRule) {
+		if (punchRule != null && punchRule.getTimeRuleId() != null) {
+			return punchProvider.findPunchTimeRuleById(punchRule.getTimeRuleId());
+		}
+		return null;
+	}
 
 	@Override
 	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd) {
@@ -3515,7 +3526,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 	/**找到用户的打卡总规则*/
-	private PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
+	@Override
+	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
 		if (null == map){

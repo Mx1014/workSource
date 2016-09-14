@@ -1,8 +1,10 @@
 package com.everhomes.approval;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -12,13 +14,30 @@ import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
+import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.techpark.punch.PunchRquestType;
+import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.techpark.punch.PunchExceptionRequest;
+import com.everhomes.techpark.punch.PunchProvider;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+/**
+ * 
+ * <ul>
+ * 打卡异常申请handler
+ * </ul>
+ */
 @Component(ApprovalRequestHandler.APPROVAL_REQUEST_OBJECT_PREFIX + ApprovalTypeTemplateCode.EXCEPTION)
 public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandler {
 
+	@Autowired
+	private PunchProvider punchProvider;
+	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
@@ -35,18 +54,67 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	@Override
 	public ApprovalRequest preProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo,
 			CreateApprovalRequestBySceneCommand cmd) {
-		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		if (StringUtils.isBlank(cmd.getReason())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"reason cannot be empty");
 		}
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
+		if (ExceptionRequestType.fromCode(approvalExceptionContent.getExceptionRequestType()) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist exception request type");
+		}
+		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
 		
-		//异常申请的重新申请是同一张单据，所以需要检查一下是否之前申请过，如果申请过则更新之前的
-		
+		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
+		if (punchExceptionRequest != null) {
+			approvalRequest.setId(punchExceptionRequest.getRequestId());
+		}
 		
 		return approvalRequest;
 	}
+
+	@Override
+	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+			CreateApprovalRequestBySceneCommand cmd) {
+		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
+		//处理考勤
+		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
+		if (punchExceptionRequest != null) {
+			punchExceptionRequest.setDescription(approvalRequest.getReason());
+			punchProvider.updatePunchExceptionRequest(punchExceptionRequest);
+		} else {
+			createPunchExceptionRequest(userId, ownerInfo, approvalRequest, approvalExceptionContent);
+		}
+	}
+
+	private void createPunchExceptionRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+			ApprovalExceptionContent approvalExceptionContent) {
+		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
+		punchExceptionRequest.setUserId(userId);
+		punchExceptionRequest.setEnterpriseId(ownerInfo.getOwnerId());
+		punchExceptionRequest.setPunchDate(new Date(approvalExceptionContent.getPunchDate()));
+		punchExceptionRequest.setRequestType(PunchRquestType.REQUEST.getCode());
+		punchExceptionRequest.setDescription(approvalRequest.getReason());
+		punchExceptionRequest.setStatus(CommonStatus.ACTIVE.getCode());
+		punchExceptionRequest.setCreatorUid(userId);
+		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		punchExceptionRequest.setOperateTime(punchExceptionRequest.getCreateTime());
+		punchExceptionRequest.setOperatorUid(userId);
+		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode());
+		punchExceptionRequest.setRequestId(approvalRequest.getId());
+		if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
+			punchExceptionRequest.setApprovalStatus(PunchStatus.NORMAL.getCode());
+		}else if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.MORNING.getCode()) {
+				punchExceptionRequest.setMorningApprovalStatus(PunchStatus.NORMAL.getCode());
+		}else if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.AFTERNOON.getCode()) {
+				punchExceptionRequest.setAfternoonApprovalStatus(PunchStatus.NORMAL.getCode());
+		}
+		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
+	}
 	
+	private PunchExceptionRequest getPunchExceptionRequest(Long userId, Long ownerId, Long punchDate, Byte exceptionRequestType){
+		//异常申请的重新申请是同一张单据，所以需要检查一下是否之前申请过，如果申请过则更新之前的
+		return punchProvider.findPunchExceptionRequest(userId, ownerId, punchDate, exceptionRequestType);
+	}
 }
