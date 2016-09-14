@@ -505,7 +505,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /admin/createDoorVistor</b>
+     * <b>URL: /aclink/createDoorVistor</b>
      * <p>给令令访客授权</p>
      * @return OK 成功
      */
@@ -523,7 +523,7 @@ public class AclinkController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/createAclinkLog</b>
+     * <b>URL: /aclink/createAclinkLog</b>
      * <p>获取门禁列表</p>
      * @return 门禁列表
      */
