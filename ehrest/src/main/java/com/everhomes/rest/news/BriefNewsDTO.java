@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>childCount: 评论数量</li>
  * <li>topFlag: 置顶标记，0未置顶，1已置顶，参考{@link com.everhomes.rest.news.NewsTopFlag}</li>
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
+ * <li>newsUrl: 新闻链接(供分享)</li>
  * </ul>
  */
 public class BriefNewsDTO {
@@ -34,6 +35,7 @@ public class BriefNewsDTO {
 	private Long childCount;
 	private Byte topFlag;
 	private Byte likeFlag;
+	private String newsUrl;
 
 	public String getNewsToken() {
 		return newsToken;
@@ -127,6 +129,14 @@ public class BriefNewsDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getNewsUrl() {
+		return newsUrl;
+	}
+
+	public void setNewsUrl(String newsUrl) {
+		this.newsUrl = newsUrl;
 	}
 
 }

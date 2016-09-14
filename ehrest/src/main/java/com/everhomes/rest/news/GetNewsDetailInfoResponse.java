@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>childCount: 评论数量</li>
  * <li>viewCount: 查看数量</li>
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
+ * <li>newsUrl: 新闻链接-供分享</li>
  * </ul>
  */
 public class GetNewsDetailInfoResponse {
@@ -36,6 +37,7 @@ public class GetNewsDetailInfoResponse {
 	private Long childCount;
 	private Long viewCount;
 	private Byte likeFlag;
+	private String newsUrl;
 
 	public String getNewsToken() {
 		return newsToken;
@@ -136,6 +138,14 @@ public class GetNewsDetailInfoResponse {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getNewsUrl() {
+		return newsUrl;
+	}
+
+	public void setNewsUrl(String newsUrl) {
+		this.newsUrl = newsUrl;
 	}
 
 }

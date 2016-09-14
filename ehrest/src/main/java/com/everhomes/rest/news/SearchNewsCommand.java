@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
+ * <li>categoryId: 新闻类型ID</li>
  * <li>keyword: 搜索关键字</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
@@ -21,6 +22,7 @@ public class SearchNewsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
+	private Integer categoryId;
 	private String keyword;
 	private Long pageAnchor;
 	private Integer pageSize;
@@ -68,6 +70,14 @@ public class SearchNewsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Integer getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
 	}
 
 }
