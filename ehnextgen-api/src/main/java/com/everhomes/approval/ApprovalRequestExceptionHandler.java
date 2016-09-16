@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
@@ -22,6 +23,7 @@ import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.util.DateHelper;
@@ -38,6 +40,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 
 	@Autowired
 	private PunchProvider punchProvider;
+	
+	@Autowired
+	private AttachmentProvider attachmentProvider;
 	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
@@ -70,6 +75,8 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {
 			approvalRequest.setId(punchExceptionRequest.getRequestId());
+			//因为异常申请，再次申请时是同一张单据，所以需要删除之前申请的附件
+			attachmentProvider.deleteAttachmentByOwnerId(EhApprovalAttachments.class, approvalRequest.getId());
 		}
 		
 		return approvalRequest;

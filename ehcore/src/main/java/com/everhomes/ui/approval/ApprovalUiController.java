@@ -15,6 +15,8 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalFlowOfRequestBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneCommand;
@@ -111,6 +113,18 @@ public class ApprovalUiController extends ControllerBase {
 	@RequestMapping("cancelApprovalRequestByScene")
 	@RestReturn(String.class)
 	public RestResponse cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd) {
+		approvalService.cancelApprovalRequestByScene(cmd);
 		return new RestResponse();
+	}
+	
+	/**
+	 * 
+	 * <p>8.列出审批类别（客户端）</p>
+	 * <b>URL: /approval/listApprovalCategoryByScene</b>
+	 */
+	@RequestMapping("listApprovalCategoryByScene")
+	@RestReturn(ListApprovalCategoryBySceneResponse.class)
+	public RestResponse listApprovalCategoryByScene(ListApprovalCategoryBySceneCommand cmd){
+		return new RestResponse(approvalService.listApprovalCategoryByScene(cmd));
 	}
 }

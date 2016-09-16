@@ -9,6 +9,11 @@ package com.everhomes.rest.approval;
 public class CreateApprovalRequestBySceneResponse {
 	private BriefApprovalRequestDTO approvalRequest;
 
+	public CreateApprovalRequestBySceneResponse(BriefApprovalRequestDTO approvalRequest) {
+		super();
+		this.approvalRequest = approvalRequest;
+	}
+
 	public BriefApprovalRequestDTO getApprovalRequest() {
 		return approvalRequest;
 	}

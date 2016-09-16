@@ -170,4 +170,6 @@ public interface PunchService {
 
 	boolean isSameDay(Date date1, Date date2);
 
+	Time getEndTime(Time startTime, Time workTime);
+
 }

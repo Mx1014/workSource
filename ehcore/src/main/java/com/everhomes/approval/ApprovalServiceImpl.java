@@ -40,7 +40,6 @@ import com.everhomes.rest.approval.ApprovalLogOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalRequestCondition;
-import com.everhomes.rest.approval.ApprovalRequestDTO;
 import com.everhomes.rest.approval.ApprovalRuleDTO;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTargetType;
@@ -51,6 +50,7 @@ import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.BriefApprovalFlowDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.BriefApprovalRuleDTO;
+import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
@@ -69,6 +69,8 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
@@ -112,14 +114,10 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.punch.PunchRule;
-import com.everhomes.techpark.punch.PunchRuleOwnerMap;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -1204,9 +1202,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
 		
-		dbProvider.execute(s->{
+		ApprovalRequest result = dbProvider.execute(s->{
 			//1. 申请表增加一条记录
-			//前置处理器，处理一些特定审批类型的数据检查等操作，并返回内容
+			//前置处理器，处理一些特定审批类型的数据检查等操作
 			ApprovalRequest approvalRequest = handler.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 			if (approvalRequest.getId() == null) {
 				approvalRequestProvider.createApprovalRequest(approvalRequest);
@@ -1225,12 +1223,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 			//4. 后置处理器，处理时间，回调考勤接口更新打卡相关接口
 			handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
 
-			return true;
+			return approvalRequest;
 		});
 		
-		
-		
-		return null;
+		return new CreateApprovalRequestBySceneResponse(handler.processBriefApprovalRequest(result));
 	}
 
 	private void createApprovalOpRequest(Long userId, Long requestId, String processMessage) {
@@ -1284,6 +1280,18 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
+	public ListApprovalCategoryBySceneResponse listApprovalCategoryByScene(ListApprovalCategoryBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		checkApprovalType(cmd.getApprovalType());
+		
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), cmd.getApprovalType());
+		
+		return new ListApprovalCategoryBySceneResponse(categoryList.stream().map(c->ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
+	}
+	
+	@Override
 	public void approveApprovalRequest(ApproveApprovalRequestCommand cmd) {
 		final Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -1296,6 +1304,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	@Override
 	public void rejectApprovalRequest(RejectApprovalRequestCommand cmd) {
+	}
+
+	@Override
+	public void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd) {
 	}
 
 	@Override
@@ -1332,23 +1344,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	
 
-	
-	private void processCreateApprovalRequest(ApprovalRequestDTO approvalRequestDTO) {
-		ApprovalRequest approvalRequest = ConvertHelper.convert(approvalRequestDTO, ApprovalRequest.class);
-		approvalRequest.setApprovalStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
-		approvalRequest.setStatus(CommonStatus.ACTIVE.getCode());
-		approvalRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		approvalRequest.setCreatorUid(UserContext.current().getUser().getId());
-		approvalRequest.setUpdateTime(approvalRequest.getCreateTime());
-		approvalRequest.setOperatorUid(approvalRequest.getCreatorUid());
-		approvalRequestProvider.createApprovalRequest(approvalRequest);
-	}
-
-	private void processAttachment(ApprovalRequestDTO approvalRequestDTO) {
-	}
-
-	private void processTimeRange(ApprovalRequestDTO approvalRequestDTO) {
-	}
 
 	private ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType){
 		if (approvalType != null) {
@@ -1375,6 +1370,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public List<AttachmentDescriptor> listAttachmentByRequestId(Long requestId) {
 		return getAttachments(requestId);
 	}
+
+
 
 
 	

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.rest.approval.ApprovalRequestDTO;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
+import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
@@ -22,6 +23,8 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
@@ -129,5 +132,9 @@ public interface ApprovalService {
 	ListApprovalRequestResponse listApprovalRequest(ListApprovalRequestCommand cmd);
 
 	ApprovalFlow getApprovalFlowByUser(String ownerType, Long ownerId, Long userId, Byte approvalType);
+
+	ListApprovalCategoryBySceneResponse listApprovalCategoryByScene(ListApprovalCategoryBySceneCommand cmd);
+
+	void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd);
 
 }

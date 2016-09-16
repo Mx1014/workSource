@@ -24,5 +24,7 @@ public interface AttachmentProvider {
 	 * <p>按多个ownerId查询</p>
 	 */
 	List<Attachment> listAttachmentByOwnerIds(Class<?> pojoClass, List<Long> ownerIds);
+
+	void deleteAttachmentByOwnerId(Class<?> pojoClass, Long ownerId);
 	
 }

@@ -1461,8 +1461,9 @@ public class PunchServiceImpl implements PunchService {
 		return false;
 	}
 	
-	private Time getEndTime(Time startTime, Time workTime){
-		return new Time(convertTimeToGMTMillisecond(startTime) + convertTimeToGMTMillisecond(workTime) + MILLISECONDGMT);
+	@Override
+	public Time getEndTime(Time startTime, Time workTime){
+		return new Time(convertTimeToGMTMillisecond(startTime) + convertTimeToGMTMillisecond(workTime) - MILLISECONDGMT);
 	}
 	
 	@Override
