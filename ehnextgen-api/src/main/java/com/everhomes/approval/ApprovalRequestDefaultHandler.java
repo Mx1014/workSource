@@ -95,6 +95,11 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		approvalRequest.setNextLevel((byte) 1);
 		return approvalRequest;
 	}
+
+	@Override
+	public void processCancelApprovalRequest(ApprovalRequest approvalRequest) {
+		
+	}
 	
 	
 }

@@ -266,6 +266,10 @@ public interface PunchProvider {
 
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
 			Byte exceptionRequestType);
+
+	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
+
+	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
  
  
  

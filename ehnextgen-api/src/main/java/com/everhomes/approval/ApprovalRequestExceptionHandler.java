@@ -125,4 +125,15 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		//异常申请的重新申请是同一张单据，所以需要检查一下是否之前申请过，如果申请过则更新之前的
 		return punchProvider.findPunchExceptionRequest(userId, ownerId, punchDate, exceptionRequestType);
 	}
+
+	@Override
+	public void processCancelApprovalRequest(ApprovalRequest approvalRequest) {
+		PunchExceptionRequest punchExceptionRequest = punchProvider.findPunchExceptionRequestByRequestId(approvalRequest.getOwnerId(), approvalRequest.getCreatorUid(), approvalRequest.getId());
+		if (punchExceptionRequest != null) {
+			//为保证以前的接口正常，这里直接删除记录而不是更新状态
+			punchProvider.deletePunchExceptionRequest(punchExceptionRequest);
+		}
+	}
+	
+	
 }

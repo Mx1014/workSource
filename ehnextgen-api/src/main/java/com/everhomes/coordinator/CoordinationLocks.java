@@ -28,6 +28,7 @@ public enum CoordinationLocks {
 	UPDATE_APPROVAL_CATEGORY("update_approval_category"),
 	UPDATE_APPROVAL_RULE("update_approval_rule"),
 	UPDATE_APPROVAL_FLOW("update_approval_flow"),
+	UPDATE_APPROVAL_REQUEST("update_approval_request"),
     STAT_SETTLEMENT("stat.settlement");
     
 

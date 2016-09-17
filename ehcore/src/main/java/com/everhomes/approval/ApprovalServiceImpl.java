@@ -1290,6 +1290,35 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		return new ListApprovalCategoryBySceneResponse(categoryList.stream().map(c->ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
 	}
+
+	@Override
+	public void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd) {
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		Long requestId = WebTokenGenerator.getInstance().fromWebToken(cmd.getRequestToken(), Long.class);
+		
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_REQUEST.getCode()+requestId).enter(()->{
+			dbProvider.execute(s->{
+				ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
+				approvalRequest.setApprovalStatus(CommonStatus.INACTIVE.getCode());
+				updateApprovalRequest(userId, approvalRequest);
+				ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+				handler.processCancelApprovalRequest(approvalRequest);
+				return true;
+			});
+			return null;
+		});
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	@Override
 	public void approveApprovalRequest(ApproveApprovalRequestCommand cmd) {
@@ -1306,8 +1335,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public void rejectApprovalRequest(RejectApprovalRequestCommand cmd) {
 	}
 
-	@Override
-	public void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd) {
+	private void updateApprovalRequest(Long userId, ApprovalRequest approvalRequest) {
+		approvalRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalRequest.setOperatorUid(userId);
+		approvalRequestProvider.updateApprovalRequest(approvalRequest);
 	}
 
 	@Override

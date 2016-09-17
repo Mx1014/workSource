@@ -33,9 +33,11 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -2267,7 +2269,8 @@ long id = sequenceProvider.getNextSequence(key);
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
-				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(new Date(punchDate)));
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(new Date(punchDate)))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 				
 		if (exceptionRequestType.byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
 			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
@@ -2284,6 +2287,31 @@ long id = sequenceProvider.getNextSequence(key);
 		}
 		
 		return null;
+	}
+
+	@Override
+	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long requestId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(creatorUid))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_ID.eq(requestId))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchExceptionRequest.class);
+		}
+		
+		return null;
+	}
+
+	@Override
+	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchExceptionRequestsDao dao = new EhPunchExceptionRequestsDao(context.configuration());
+		dao.delete(punchExceptionRequest);
 	}
 	
 	
