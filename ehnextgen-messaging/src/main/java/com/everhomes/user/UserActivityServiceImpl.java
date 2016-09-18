@@ -61,6 +61,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -163,8 +168,11 @@ import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.repeat.RangeDTO;
+import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.BizOrderHolder;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
@@ -172,6 +180,10 @@ import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FieldDTO;
+import com.everhomes.rest.user.FieldTemplateDTO;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
@@ -183,6 +195,8 @@ import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
 import com.everhomes.rest.user.OrderCountDTO;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -1181,5 +1195,60 @@ public class UserActivityServiceImpl implements UserActivityService {
                     UserServiceErrorCode.ERROR_INVALID_PARAMS, "userId or itemName or itemValue is null");
 		}
 		userActivityProvider.updateProfileIfNotExist(userId, itemName, itemValue);
+	}
+
+	@Override
+	public RequestTemplateDTO getCustomRequestTemplate(
+			GetCustomRequestTemplateCommand cmd) {
+		RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(cmd.getTemplateType());
+		if(template != null) {
+			RequestTemplateDTO dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+			List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+			dto.setDtos(fields);
+			
+			return dto;
+		}
+		
+		return null;
+	}
+	
+	private List<FieldDTO> analyzefields(String fieldsJson) {
+		Gson gson = new Gson();
+		FieldTemplateDTO fields = gson.fromJson(fieldsJson, new TypeToken<FieldTemplateDTO>() {}.getType());
+		List<FieldDTO> dto = fields.getFields();
+		return dto;
+	}
+
+	@Override
+	public List<RequestTemplateDTO> getCustomRequestTemplateByNamespace() {
+		List<RequestTemplateDTO> dtos = new ArrayList<RequestTemplateDTO>();
+		List<RequestTemplatesNamespaceMapping> mappings = this.userActivityProvider.getRequestTemplatesNamespaceMappings(UserContext.getCurrentNamespaceId());
+		if(mappings != null && mappings.size() > 0) {
+			dtos = mappings.stream().map(mapping -> {
+				RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(mapping.getTemplateId());
+				RequestTemplateDTO dto = null;
+				if(template != null) {
+					dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+					List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+					dto.setDtos(fields);
+				}
+				return dto;
+			}).filter(r->r!=null).collect(Collectors.toList());
+		
+		}
+		
+		return dtos;
+	}
+
+	@Override
+	public void addCustomRequest(AddRequestCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<RequestFieldDTO> getCustomRequestInfo(GetRequestInfoCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

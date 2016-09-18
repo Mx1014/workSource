@@ -326,10 +326,27 @@ public class UserActivityController extends ControllerBase {
     @RequestMapping("getCustomRequestTemplate")
     @RestReturn(value = RequestTemplateDTO.class)
     public RestResponse getCustomRequestTemplate(@Valid GetCustomRequestTemplateCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	RequestTemplateDTO dto = this.userActivityService.getCustomRequestTemplate(cmd);
+    	 
+    	RestResponse response = new RestResponse(dto);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+	 * <b>URL: /user/getCustomRequestTemplateByNamespace</b>
+	 * <p> 获取模板（根据namespace）</p>
+	 */
+    @RequestMapping("getCustomRequestTemplateByNamespace")
+    @RestReturn(value = RequestTemplateDTO.class, collection = true)
+    public RestResponse getCustomRequestTemplateByNamespace() {
+    	List<RequestTemplateDTO> dtos = this.userActivityService.getCustomRequestTemplateByNamespace();
+    	
+    	RestResponse response = new RestResponse(dtos);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     
@@ -340,10 +357,12 @@ public class UserActivityController extends ControllerBase {
     @RequestMapping("addCustomRequest")
     @RestReturn(value = String.class)
     public RestResponse addCustomRequest(@Valid AddRequestCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	this.userActivityService.addCustomRequest(cmd);
+    	
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**
@@ -353,9 +372,10 @@ public class UserActivityController extends ControllerBase {
     @RequestMapping("getCustomRequestInfo")
     @RestReturn(value = RequestFieldDTO.class, collection = true)
     public RestResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	List<RequestFieldDTO> dto = this.userActivityService.getCustomRequestInfo(cmd);
+    	RestResponse response = new RestResponse(dto);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 }

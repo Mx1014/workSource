@@ -53,7 +53,8 @@ import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
+import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
+import com.everhomes.server.schema.tables.records.EhRequestTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
 import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -635,6 +636,44 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserProfiles.class, userProfile.getId());
 		
+	}
+
+	@Override
+	public RequestTemplates getCustomRequestTemplate(String templateType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.TEMPLATE_TYPE.eq(templateType));
+		 
+		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplates.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
+	@Override
+	public RequestTemplates getCustomRequestTemplate(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<RequestTemplatesNamespaceMapping> getRequestTemplatesNamespaceMappings(
+			Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesNamespaceMappingRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING.NAMESPACE_ID.eq(namespaceId));
+		 
+		List<RequestTemplatesNamespaceMapping> result = new ArrayList<RequestTemplatesNamespaceMapping>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplatesNamespaceMapping.class));
+			return null;
+		});
+		
+		return result;
 	}
 
 

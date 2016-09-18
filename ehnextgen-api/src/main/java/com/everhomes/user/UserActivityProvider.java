@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.UserFavoriteDTO;
 
 public interface UserActivityProvider {
@@ -82,4 +83,8 @@ public interface UserActivityProvider {
     int deletePostedTopic(Long ownerId, Long postId);
     
     void updateViewedActivityProfileIfNotExist(Long uid, String key, Long lastViewedTime, List<Long> ids);
+    
+    RequestTemplates getCustomRequestTemplate(String templateType);
+    RequestTemplates getCustomRequestTemplate(Long id);
+    List<RequestTemplatesNamespaceMapping> getRequestTemplatesNamespaceMappings(Integer namespaceId);
 }

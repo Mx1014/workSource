@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId: 拥有者ID</li>
  *  <li>contactType: 推送类型</li>
  *  <li>categoryId: 服务联盟大类id</li>
- *  <li>nextPageAnchor: 下一页锚点</li>
+ *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 每页的数量</li>
  * </ul>
  */
@@ -25,7 +25,7 @@ public class ListNotifyTargetsCommand {
 	
 	private Byte contactType;
 	
-	private Long nextPageAnchor;
+	private Long pageAnchor;
     
 	private Integer pageSize;
 
@@ -61,12 +61,12 @@ public class ListNotifyTargetsCommand {
 		this.contactType = contactType;
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getPageSize() {
