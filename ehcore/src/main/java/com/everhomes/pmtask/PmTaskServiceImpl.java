@@ -194,19 +194,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User current = UserContext.current().getUser();
 		
 		Byte status = cmd.getStatus();
-		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
-				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-			
-			if(null == cmd.getOrganizationId()){
-				LOGGER.error("OrganizationId cannot be null.");
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-	    				"OrganizationId cannot be null.");
-			}
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
-	    	if(!privileges.contains(PrivilegeConstants.VIEWTASKLIST)){
-	    		returnNoPrivileged(privileges, current);
-			}
-		}
+//		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+//				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+//			
+//			if(null == cmd.getOrganizationId()){
+//				LOGGER.error("OrganizationId cannot be null.");
+//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//	    				"OrganizationId cannot be null.");
+//			}
+//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+//	    	if(!privileges.contains(PrivilegeConstants.VIEWTASKLIST)){
+//	    		returnNoPrivileged(privileges, current);
+//			}
+//		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
 		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
