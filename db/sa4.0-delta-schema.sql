@@ -71,7 +71,7 @@ CREATE TABLE `eh_service_alliance_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 保存大类下设置的推送邮箱和推送消息的管理员信息
+-- 保存服务联盟大类下设置的推送邮箱和推送消息的管理员信息
 DROP TABLE IF EXISTS `eh_service_alliance_notify_targets`;
 CREATE TABLE `eh_service_alliance_notify_targets` (
   `id` BIGINT NOT NULL,
@@ -87,3 +87,5 @@ CREATE TABLE `eh_service_alliance_notify_targets` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `logo_url` VARCHAR(1024) COMMENT 'the logo url of the category';
