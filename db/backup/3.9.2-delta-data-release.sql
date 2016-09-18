@@ -447,7 +447,7 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
     VALUES(99,6,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (64, 6, '3.9.0', '', '${homeurl}/web/download/apk/iOS-zz-3-9-0.html', '0');
 
-SET @menu_scope_id = (SELECT MAX FROM `eh_web_menu_scopes`);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 -- 屏蔽爱特家物业报修2.0菜单：
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 24000,'', 'EhNamespaces', 999988 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 25000,'', 'EhNamespaces', 999988 , 0);
