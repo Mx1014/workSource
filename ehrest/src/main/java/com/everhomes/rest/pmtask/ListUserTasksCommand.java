@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 0: 未处理  1: 已处理 {@link com.everhomes.rest.pmtask.PmTaskProcessStatus}</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
+ * <li>organizationId: 机构id</li>
  * </ul>
  */
 public class ListUserTasksCommand {
@@ -17,6 +18,8 @@ public class ListUserTasksCommand {
 	private Byte status;
     private Long pageAnchor;
 	private Integer pageSize;
+	private Long organizationId;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -51,5 +54,11 @@ public class ListUserTasksCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

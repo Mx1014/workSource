@@ -95,6 +95,7 @@ import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskPrivilege;
+import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
@@ -190,9 +191,25 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		User current = UserContext.current().getUser();
+		
+		Byte status = cmd.getStatus();
+		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+			
+			if(null == cmd.getOrganizationId()){
+				LOGGER.error("OrganizationId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"OrganizationId cannot be null.");
+			}
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+	    	if(!privileges.contains(PrivilegeConstants.VIEWTASKLIST)){
+	    		returnNoPrivileged(privileges, current);
+			}
+		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
-		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId(), cmd.getStatus()
+		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
 				, cmd.getPageAnchor(), cmd.getPageSize());
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -266,11 +283,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<String> result = new ArrayList<String>();
 		for(Long p:privileges){
-			if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
+			if(p.longValue() == PrivilegeConstants.VIEWTASKLIST)
+				result.add(PmTaskPrivilege.VIEWTASKLIST.getCode());
+			else if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
 				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
-			if(p.longValue() == PrivilegeConstants.COMPLETETASK)
+			else if(p.longValue() == PrivilegeConstants.COMPLETETASK)
 				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
-			if(p.longValue() == PrivilegeConstants.CLOSETASK)
+			else if(p.longValue() == PrivilegeConstants.CLOSETASK)
 				result.add(PmTaskPrivilege.CLOSETASK.getCode());
 		}
 		dto.setPrivileges(result);
@@ -396,7 +415,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode() ){
-			LOGGER.error("Task cannot be completed.");
+			LOGGER.error("Task cannot be completed. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be completed.");
 		}
@@ -412,7 +431,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode()){
-			LOGGER.error("Task cannot be closed.");
+			LOGGER.error("Task cannot be closed. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be closed.");
 		}
@@ -428,7 +447,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
 		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-			LOGGER.error("Task cannot be canceled.");
+			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be canceled.");
 		}
@@ -465,12 +484,19 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetUser not found");
 		}
 		
+		
     	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
     	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
     		returnNoPrivileged(privileges, user);
 		}
 		
 		PmTask task = checkPmTask(cmd.getId());
+		
+		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode() ){
+			LOGGER.error("Task cannot be assigned. cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be assigned.");
+		}
 		
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		if(!task.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
