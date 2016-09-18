@@ -29,7 +29,9 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.AttachmentType;
+import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
@@ -39,14 +41,20 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
+import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
+import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
+import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
@@ -374,6 +382,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 //			}
 			category.setParentId(parent.getId());
 			category.setPath(parent.getName() + "/" + cmd.getName());
+			category.setLogoUrl(cmd.getLogoUrl());
 			yellowPageProvider.createCategory(category);
 		} else {
 			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
@@ -384,6 +393,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 //				category.setPath(parent.getName() + "/" + cmd.getName());
 //			}
 			category.setPath(parent.getName() + "/" + cmd.getName());
+			category.setLogoUrl(cmd.getLogoUrl());
 			yellowPageProvider.updateCategory(category);
 			
 			//yellow page中引用该类型的记录的serviceType字段也要更新
@@ -801,5 +811,43 @@ public class YellowPageServiceImpl implements YellowPageService {
 			 }
 		 }
 	 }
+
+	@Override
+	public void addTarget(AddNotifyTargetCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteNotifyTarget(DeleteNotifyTargetCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setNotifyTargetStatus(SetNotifyTargetStatusCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ListNotifyTargetsResponse listNotifyTargets(
+			ListNotifyTargetsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void verifyNotifyTarget(VerifyNotifyTargetCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public SearchRequestInfoResponse searchRequestInfo(
+			SearchRequestInfoCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

@@ -277,10 +277,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("addNotifyTarget")
     @RestReturn(value = String.class)
     public RestResponse addTarget(@Valid AddNotifyTargetCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	
+    	this.yellowPageService.addTarget(cmd);
+    	 
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**
@@ -290,10 +293,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("deleteNotifyTarget")
     @RestReturn(value = String.class)
     public RestResponse deleteNotifyTarget(@Valid DeleteNotifyTargetCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	
+    	this.yellowPageService.deleteNotifyTarget(cmd);
+		 
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**
@@ -303,10 +309,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("setNotifyTargetStatus")
     @RestReturn(value = String.class)
     public RestResponse setNotifyTargetStatus(@Valid SetNotifyTargetStatusCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+
+    	this.yellowPageService.setNotifyTargetStatus(cmd);
+    	
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**
@@ -316,10 +325,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("listNotifyTargets")
     @RestReturn(value = ListNotifyTargetsResponse.class)
     public RestResponse listNotifyTargets(@Valid ListNotifyTargetsCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+
+    	ListNotifyTargetsResponse resp = this.yellowPageService.listNotifyTargets(cmd);
+    	
+    	RestResponse response = new RestResponse(resp);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**
@@ -329,10 +341,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("verifyNotifyTarget")
     @RestReturn(value = String.class)
     public RestResponse verifyNotifyTarget(@Valid VerifyNotifyTargetCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+
+    	this.yellowPageService.verifyNotifyTarget(cmd);
+
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**
@@ -342,9 +357,12 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("searchRequestInfo")
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
-    	 RestResponse response = new RestResponse();
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	
+    	SearchRequestInfoResponse resp = this.yellowPageService.searchRequestInfo(cmd);
+    	 
+    	RestResponse response = new RestResponse(resp);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 }
