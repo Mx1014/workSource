@@ -67,12 +67,13 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 					"reason cannot be empty");
 		}
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
-		if (ExceptionRequestType.fromCode(approvalExceptionContent.getExceptionRequestType()) == null) {
+		if (approvalExceptionContent.getPunchDate() == null || ExceptionRequestType.fromCode(approvalExceptionContent.getExceptionRequestType()) == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"not exist exception request type");
+					"invalid parameters, content json="+approvalExceptionContent);
 		}
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
+		approvalRequest.setRemark(approvalExceptionContent.getPunchDate().toString());
 		
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {

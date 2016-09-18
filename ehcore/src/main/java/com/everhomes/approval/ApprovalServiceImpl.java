@@ -1431,6 +1431,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return null;
 	}
 
+	//目前可能只适用于异常申请和请假申请
 	@Override
 	public ListApprovalRequestResponse listApprovalRequest(ListApprovalRequestCommand cmd) {
 		if (cmd.getQueryType() == null) {
@@ -1446,7 +1447,14 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		//查询当前用户具有的哪些审批流程及审批级别
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByTarget(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalTargetType.USER.getCode(), userId);
+		List<User> userList = null;
+		if (StringUtils.isNotBlank(cmd.getNickName())) {
+			userList = getMatchedUser(cmd.getNickName());
+		}
 		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<ApprovalRequest> resultList = approvalRequestProvider.listApprovalRequestForWeb(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), 
+				cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(), cmd.getQueryType(), approvalFlowLevelList, userList, cmd.getPageAnchor(), pageSize+1);
 		
 		
 		return null;
@@ -1465,6 +1473,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	
 
+
+	private List<User> getMatchedUser(String nickName) {
+		return userProvider.listMatchedUser(nickName);
+	}
 
 	private ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType){
 		if (approvalType != null) {

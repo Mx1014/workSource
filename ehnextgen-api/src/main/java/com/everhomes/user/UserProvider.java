@@ -87,4 +87,5 @@ public interface UserProvider {
 	 * @return
 	 */
     List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize);
+	List<User> listMatchedUser(String nickName);
 }

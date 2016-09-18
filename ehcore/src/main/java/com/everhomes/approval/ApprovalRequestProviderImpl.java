@@ -22,6 +22,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
+import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -93,6 +94,13 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		}
 		
 		return new ArrayList<ApprovalRequest>();
+	}
+
+	@Override
+	public List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
+			List<ApprovalFlowLevel> approvalFlowLevelList, List<User> userList, Long pageAnchor, int pageSize) {
+		return null;
 	}
 
 	private EhApprovalRequestsDao getReadWriteDao() {
