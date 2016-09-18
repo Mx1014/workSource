@@ -28,6 +28,8 @@ import com.everhomes.rest.activity.ActivityRejectCommand;
 import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -38,6 +40,7 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -266,4 +269,27 @@ public class ActivityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 查询直播信息
+     */
+    @RequestMapping("getActivityVideoInfo")
+    @RestReturn(value=ActivityVideoDTO.class)
+    public RestResponse getActivityVideoInfo(@Valid GetActivityVideoInfoCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 更新直播信息
+     */
+    @RequestMapping("setActivityVideoInfo")
+    @RestReturn(value=ActivityVideoDTO.class)
+    public RestResponse setActivityVideoInfo(@Valid SetActivityVideoInfoCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
