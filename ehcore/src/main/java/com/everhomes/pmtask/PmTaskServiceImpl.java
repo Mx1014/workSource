@@ -764,6 +764,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 			}
 		}
+		
+		if(null == roleId)
+			return result;
+		
 		List<RoleAssignment> roleAssgnments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
 		for(RoleAssignment ra: roleAssgnments){
 			if(EntityType.USER.getCode().equals(ra.getTargetType()) &&
