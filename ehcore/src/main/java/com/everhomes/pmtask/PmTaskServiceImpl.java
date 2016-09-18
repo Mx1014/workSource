@@ -706,7 +706,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     		categoryName = parent.getName();
     	}
     	
-    	List<Long> ids = getOrganizationMembers(null == cmd.getOrganizationId()? 1000750L: cmd.getOrganizationId());
+    	List<Long> ids = getOrganizationMembers(cmd.getOrganizationId());
     	int size = ids.size();
     	if(LOGGER.isDebugEnabled())
     		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
