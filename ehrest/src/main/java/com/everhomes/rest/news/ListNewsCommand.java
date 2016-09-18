@@ -21,7 +21,7 @@ public class ListNewsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
-	private Integer categoryId;
+	private Long categoryId;
 	private Long pageAnchor;
 	private Integer pageSize;
 	
@@ -63,12 +63,12 @@ public class ListNewsCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Integer getCategoryId() {
+	public Long getCategoryId() {
 		return categoryId;
 	}
 
-	public void setCategoryId(Integer categoryId) {
+	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
-
+ 
 }

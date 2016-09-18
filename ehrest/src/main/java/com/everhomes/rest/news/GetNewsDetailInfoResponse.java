@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>viewCount: 查看数量</li>
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * <li>newsUrl: 新闻链接-供分享</li>
+ * <li>coverUri: 封面</li>
  * </ul>
  */
 public class GetNewsDetailInfoResponse {
@@ -38,6 +39,7 @@ public class GetNewsDetailInfoResponse {
 	private Long viewCount;
 	private Byte likeFlag;
 	private String newsUrl;
+	private String coverUri;
 
 	public String getNewsToken() {
 		return newsToken;
@@ -146,6 +148,14 @@ public class GetNewsDetailInfoResponse {
 
 	public void setNewsUrl(String newsUrl) {
 		this.newsUrl = newsUrl;
+	}
+
+	public String getCoverUri() {
+		return coverUri;
+	}
+
+	public void setCoverUri(String coverUri) {
+		this.coverUri = coverUri;
 	}
 
 }
