@@ -11,16 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
@@ -30,14 +28,20 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
+import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
+import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
 import com.everhomes.user.UserContext;
@@ -260,6 +264,84 @@ public class YellowPageController  extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateServiceAllianceEnterprise(@Valid UpdateServiceAllianceEnterpriseCommand cmd) {
     	 this.yellowPageService.updateServiceAllianceEnterprise(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /yellowPage/addNotifyTarget</b>
+	 * <p> 增加推送接收管理员</p>
+	 */
+    @RequestMapping("addNotifyTarget")
+    @RestReturn(value = String.class)
+    public RestResponse addTarget(@Valid AddNotifyTargetCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /yellowPage/deleteNotifyTarget</b>
+	 * <p> 删除推送接收管理员</p>
+	 */
+    @RequestMapping("deleteNotifyTarget")
+    @RestReturn(value = String.class)
+    public RestResponse deleteNotifyTarget(@Valid DeleteNotifyTargetCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /yellowPage/setNotifyTargetStatus</b>
+	 * <p> 设置接收管理员推送开启状态</p>
+	 */
+    @RequestMapping("setNotifyTargetStatus")
+    @RestReturn(value = String.class)
+    public RestResponse setNotifyTargetStatus(@Valid SetNotifyTargetStatusCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /yellowPage/listNotifyTargets</b>
+	 * <p> 获取推送接收管理员列表</p>
+	 */
+    @RequestMapping("listNotifyTargets")
+    @RestReturn(value = ListNotifyTargetsResponse.class)
+    public RestResponse listNotifyTargets(@Valid ListNotifyTargetsCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /yellowPage/verifyNotifyTarget</b>
+	 * <p> 检验手机号是否已存在且是否注册</p>
+	 */
+    @RequestMapping("verifyNotifyTarget")
+    @RestReturn(value = String.class)
+    public RestResponse verifyNotifyTarget(@Valid VerifyNotifyTargetCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /yellowPage/searchRequestInfo</b>
+	 * <p> 搜索申请信息</p>
+	 */
+    @RequestMapping("searchRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
     	 RestResponse response = new RestResponse();
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");

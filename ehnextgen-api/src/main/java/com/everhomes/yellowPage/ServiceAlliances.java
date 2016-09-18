@@ -38,12 +38,12 @@ public class ServiceAlliances extends EhServiceAlliances {
     	NewServiceAllianceCustomField.EMAIL.setStringValue(this, email);
     }
     
-    public Long getTemplateId() {
-        return NewServiceAllianceCustomField.TEMPLATEID.getIntegralValue(this);
+    public String getTemplateType() {
+        return NewServiceAllianceCustomField.TEMPLATETYPE.getStringValue(this);
     }
     
-    public void setTemplateId(Long templateId) {
-    	NewServiceAllianceCustomField.TEMPLATEID.setIntegralValue(this, templateId);
+    public void setTemplateType(String templateType) {
+    	NewServiceAllianceCustomField.TEMPLATETYPE.setStringValue(this, templateType);
     }
 
 	@Override

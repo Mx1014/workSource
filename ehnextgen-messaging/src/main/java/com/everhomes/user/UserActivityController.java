@@ -23,13 +23,17 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.local.AppVersionCommand;
 import com.everhomes.rest.local.GetAppVersion;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
+import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
 import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.ListContactRespose;
 import com.everhomes.rest.user.ListContactsCommand;
@@ -41,6 +45,7 @@ import com.everhomes.rest.user.ListSignupActivitiesCommand;
 import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -312,5 +317,45 @@ public class UserActivityController extends ControllerBase {
     public RestResponse listSignupActivities(@Valid ListSignupActivitiesCommand cmd) {
     	ListActivitiesReponse response = userActivityService.listSignupActivities(cmd);
         return new RestResponse(response);
+    }
+    
+    /**
+	 * <b>URL: /user/getCustomRequestTemplate</b>
+	 * <p> 获取模板（根据templateType）</p>
+	 */
+    @RequestMapping("getCustomRequestTemplate")
+    @RestReturn(value = RequestTemplateDTO.class)
+    public RestResponse getCustomRequestTemplate(@Valid GetCustomRequestTemplateCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    
+    /**
+	 * <b>URL: /user/addCustomRequest</b>
+	 * <p> 提交申请  </p>
+	 */
+    @RequestMapping("addCustomRequest")
+    @RestReturn(value = String.class)
+    public RestResponse addCustomRequest(@Valid AddRequestCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+	 * <b>URL: /user/getCustomRequestInfo</b>
+	 * <p> 获取申请信息  </p>
+	 */
+    @RequestMapping("getCustomRequestInfo")
+    @RestReturn(value = RequestFieldDTO.class, collection = true)
+    public RestResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd) {
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
     }
 }

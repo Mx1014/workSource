@@ -30,7 +30,7 @@ import com.everhomes.util.StringHelper;
  *  <li>discountDesc: 优惠信息</li>
  *  <li>type:类型  </li>
  *  <li>email: 邮箱地址</li>
- *  <li>templateId: 模板id</li>
+ *  <li>templateType : 模板类型</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -76,7 +76,7 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	private Long type;
 	
-	private Long templateId;
+	private String templateType;
 	
 	private String email;
 	
@@ -240,12 +240,12 @@ public class UpdateServiceAllianceEnterpriseCommand {
 		this.type = type;
 	}
 
-	public Long getTemplateId() {
-		return templateId;
+	public String getTemplateType() {
+		return templateType;
 	}
 
-	public void setTemplateId(Long templateId) {
-		this.templateId = templateId;
+	public void setTemplateType(String templateType) {
+		this.templateType = templateType;
 	}
 
 	public String getEmail() {
