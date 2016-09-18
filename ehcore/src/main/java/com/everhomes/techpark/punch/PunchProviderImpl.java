@@ -2313,6 +2313,22 @@ long id = sequenceProvider.getNextSequence(key);
 		EhPunchExceptionRequestsDao dao = new EhPunchExceptionRequestsDao(context.configuration());
 		dao.delete(punchExceptionRequest);
 	}
+
+	@Override
+	public PunchExceptionApproval findPunchExceptionApproval(Long userId, Long ownerId, Date date) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_EXCEPTION_APPROVALS)
+				.where(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId))
+				.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(date))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchExceptionApproval.class);
+		}
+		return null;
+	}
 	
 	
 }

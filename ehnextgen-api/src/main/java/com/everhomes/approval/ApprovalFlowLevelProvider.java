@@ -21,6 +21,11 @@ public interface ApprovalFlowLevelProvider {
 
 	List<ApprovalFlowLevel> listApprovalFlowLevelByFlowId(Long flowId);
 
+	ApprovalFlowLevel findApprovalFlowLevel(Byte targetType, Long targetId, Long flowId, Byte level);
+
+	List<ApprovalFlowLevel> listApprovalFlowLevelByTarget(Integer namespaceId, String ownerType, Long ownerId, byte targetType, Long targetId);
+
+
 //	void createApprovalFlowLevelList(List<ApprovalFlowLevel> approvalFlowLevelList);
 
 }

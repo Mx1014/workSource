@@ -120,7 +120,7 @@ public class ApprovalUiController extends ControllerBase {
 	/**
 	 * 
 	 * <p>8.列出审批类别（客户端）</p>
-	 * <b>URL: /approval/listApprovalCategoryByScene</b>
+	 * <b>URL: /ui/approval/listApprovalCategoryByScene</b>
 	 */
 	@RequestMapping("listApprovalCategoryByScene")
 	@RestReturn(ListApprovalCategoryBySceneResponse.class)

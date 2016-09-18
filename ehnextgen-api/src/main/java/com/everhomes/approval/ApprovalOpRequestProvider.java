@@ -15,4 +15,6 @@ public interface ApprovalOpRequestProvider {
 
 	List<ApprovalOpRequest> listApprovalOpRequestByRequestId(Long requestId);
 
+	void deleteApprovalOpRequestByRequestId(Long requestId);
+
 }

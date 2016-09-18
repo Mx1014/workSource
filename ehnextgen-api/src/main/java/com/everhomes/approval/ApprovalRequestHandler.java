@@ -17,5 +17,7 @@ public interface ApprovalRequestHandler {
 	void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest, CreateApprovalRequestBySceneCommand cmd);
 
 	void processCancelApprovalRequest(ApprovalRequest approvalRequest);
+
+	void processFinalApprove(ApprovalRequest approvalRequest);
 	
 }

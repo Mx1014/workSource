@@ -2,7 +2,6 @@ package com.everhomes.approval;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +21,13 @@ import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
+import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -134,6 +136,44 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			punchProvider.deletePunchExceptionRequest(punchExceptionRequest);
 		}
 	}
-	
-	
+
+	@Override
+	public void processFinalApprove(ApprovalRequest approvalRequest) {
+		// 更新或插入一条记录到eh_punch_exception_approvals中
+		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		PunchExceptionApproval punchExceptionApproval = punchProvider.findPunchExceptionApproval(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId(), new Date(approvalExceptionContent.getPunchDate()));
+		if (punchExceptionApproval != null) {
+			if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
+				punchExceptionApproval.setApprovalStatus(PunchStatus.NORMAL.getCode());
+			}else if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.MORNING.getCode()) {
+				punchExceptionApproval.setMorningApprovalStatus(PunchStatus.NORMAL.getCode());
+			}else if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.AFTERNOON.getCode()) {
+				punchExceptionApproval.setAfternoonApprovalStatus(PunchStatus.NORMAL.getCode());
+			}
+			punchExceptionApproval.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchExceptionApproval.setOperatorUid(UserContext.current().getUser().getId());
+			punchProvider.updatePunchExceptionApproval(punchExceptionApproval);
+		}else {
+			punchExceptionApproval = new PunchExceptionApproval();
+			punchExceptionApproval.setUserId(approvalRequest.getCreatorUid());
+			punchExceptionApproval.setEnterpriseId(approvalRequest.getOwnerId());
+			punchExceptionApproval.setPunchDate(new Date(approvalExceptionContent.getPunchDate()));
+			punchExceptionApproval.setCreatorUid(UserContext.current().getUser().getId());
+			punchExceptionApproval.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchExceptionApproval.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchExceptionApproval.setOperatorUid(UserContext.current().getUser().getId());
+			punchExceptionApproval.setViewFlag(ViewFlags.NOTVIEW.getCode());
+			if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
+				punchExceptionApproval.setApprovalStatus(PunchStatus.NORMAL.getCode());
+				punchExceptionApproval.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
+			}else if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.MORNING.getCode()) {
+				punchExceptionApproval.setMorningApprovalStatus(PunchStatus.NORMAL.getCode());
+				punchExceptionApproval.setPunchTimesPerDay(PunchTimesPerDay.FORTH.getCode());
+			}else if (approvalExceptionContent.getExceptionRequestType().byteValue() == ExceptionRequestType.AFTERNOON.getCode()) {
+				punchExceptionApproval.setAfternoonApprovalStatus(PunchStatus.NORMAL.getCode());
+				punchExceptionApproval.setPunchTimesPerDay(PunchTimesPerDay.FORTH.getCode());
+			}
+			punchProvider.createPunchExceptionApproval(punchExceptionApproval);
+		}
+	}
 }

@@ -119,6 +119,40 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 		return new ArrayList<ApprovalFlowLevel>();
 	}
 
+	@Override
+	public ApprovalFlowLevel findApprovalFlowLevel(Byte targetType, Long targetId, Long flowId, Byte level) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS)
+				.where(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.eq(flowId))
+				.and(Tables.EH_APPROVAL_FLOW_LEVELS.LEVEL.eq(level))
+				.and(Tables.EH_APPROVAL_FLOW_LEVELS.TARGET_TYPE.eq(targetType))
+				.and(Tables.EH_APPROVAL_FLOW_LEVELS.TARGET_ID.eq(targetId))
+				.limit(1)
+				.fetchOne();
+				
+		if (record != null) {
+			return ConvertHelper.convert(record, ApprovalFlowLevel.class);
+		}
+		return null;
+	}
+
+	@Override
+	public List<ApprovalFlowLevel> listApprovalFlowLevelByTarget(Integer namespaceId, String ownerType, Long ownerId, byte targetType, Long targetId) {
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS)
+			.leftOuterJoin(Tables.EH_APPROVAL_FLOWS)
+			.on(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.eq(Tables.EH_APPROVAL_FLOWS.ID))
+			.and(Tables.EH_APPROVAL_FLOWS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_APPROVAL_FLOWS.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_APPROVAL_FLOWS.OWNER_ID.eq(ownerId))
+			.where(Tables.EH_APPROVAL_FLOW_LEVELS.TARGET_TYPE.eq(targetType))
+			.and(Tables.EH_APPROVAL_FLOW_LEVELS.TARGET_ID.eq(targetId))
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalFlowLevel.class));
+		}
+		return new ArrayList<ApprovalFlowLevel>();
+	}
+
 	private EhApprovalFlowLevelsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

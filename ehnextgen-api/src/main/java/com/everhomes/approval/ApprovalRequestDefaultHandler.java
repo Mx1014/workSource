@@ -100,6 +100,10 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	public void processCancelApprovalRequest(ApprovalRequest approvalRequest) {
 		
 	}
+
+	@Override
+	public void processFinalApprove(ApprovalRequest approvalRequest) {
+	}
 	
 	
 }

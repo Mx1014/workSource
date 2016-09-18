@@ -1222,6 +1222,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 			
 			//4. 后置处理器，处理时间，回调考勤接口更新打卡相关接口
 			handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
+			
+			//5. 发消息给第一级审批者
 
 			return approvalRequest;
 		});
@@ -1310,29 +1312,112 @@ public class ApprovalServiceImpl implements ApprovalService {
 			return null;
 		});
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	@Override
 	public void approveApprovalRequest(ApproveApprovalRequestCommand cmd) {
 		final Long userId = getUserId();
+		if (ListUtils.isEmpty(cmd.getRequestIdList())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"request id cannot be null");
+		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		
+
 		dbProvider.execute(s->{
-			
+			cmd.getRequestIdList().forEach(r->{
+				coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_REQUEST.getCode()+r).enter(()->{
+					ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), r);
+					ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+					checkCurrentUserExistInLevel(userId, approvalRequest.getFlowId(), approvalRequest.getNextLevel());
+					List<ApprovalFlowLevel> nextLevelUser = approvalFlowLevelProvider.listApprovalFlowLevel(approvalRequest.getFlowId(),(byte) (approvalRequest.getNextLevel()+1));
+					if (nextLevelUser == null) {
+						//如果不存在下一级别的审批人，说明此单审批结束
+						//1. 修改审批状态为同意
+						approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+						approvalRequest.setNextLevel(null);
+						approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+						updateApprovalRequest(userId, approvalRequest);
+						//2. 发消息给申请单创建者
+						sendMessageToCreator(approvalRequest);
+						//3. 最终同意回调业务方法
+						handler.processFinalApprove(approvalRequest);
+					}else {
+						//如果存在下一级别的审批人，说明此单审批未结束
+						//1. 修改审批状态为同意
+						approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+						approvalRequest.setNextLevel((byte) (approvalRequest.getNextLevel()+1));
+						updateApprovalRequest(userId, approvalRequest);
+						//2. 发消息下一级别审批者
+						sendMessageToNextLevel(nextLevelUser, approvalRequest);
+					}
+					//添加日志
+					ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();
+					approvalOpRequest.setRequestId(approvalRequest.getId());
+					approvalOpRequest.setOperatorUid(userId);
+					approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					approvalOpRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+					approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest);
+					return null;
+				});
+			});
 			return true;
 		});
 	}
 
+	private void sendMessageToNextLevel(List<ApprovalFlowLevel> nextLevelUser, ApprovalRequest approvalRequest) {
+	}
+
+	private void sendMessageToCreator(ApprovalRequest approvalRequest) {
+	}
+
+	private void checkCurrentUserExistInLevel(Long userId, Long flowId, Byte level) {
+		ApprovalFlowLevel approvalFlowLevel = approvalFlowLevelProvider.findApprovalFlowLevel(ApprovalTargetType.USER.getCode(), userId, flowId, level);
+		if (approvalFlowLevel == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"you have no privilege");
+		}
+	}
+
 	@Override
 	public void rejectApprovalRequest(RejectApprovalRequestCommand cmd) {
+		final Long userId = getUserId();
+		if (StringUtils.isEmpty(cmd.getReason())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"reason cannot be null");
+		}
+		if (ListUtils.isEmpty(cmd.getRequestIdList())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"request id cannot be null");
+		}
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		dbProvider.execute(s->{
+			cmd.getRequestIdList().forEach(r->{
+				coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_REQUEST.getCode()+r).enter(()->{
+					ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), r);
+					checkCurrentUserExistInLevel(userId, approvalRequest.getFlowId(), approvalRequest.getNextLevel());
+				
+					//直接把审批状态改为已拒绝
+					//1. 修改审批状态为同意
+					approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+					approvalRequest.setNextLevel(null);
+					approvalRequest.setApprovalStatus(ApprovalStatus.REJECTION.getCode());
+					updateApprovalRequest(userId, approvalRequest);
+					//2. 发消息给申请单创建者
+					sendMessageToCreator(approvalRequest);
+					
+					//3. 添加日志
+					ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();
+					approvalOpRequest.setRequestId(approvalRequest.getId());
+					approvalOpRequest.setOperatorUid(userId);
+					approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					approvalOpRequest.setProcessMessage(cmd.getReason());
+					approvalOpRequest.setApprovalStatus(ApprovalStatus.REJECTION.getCode());
+					approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest);
+					return null;
+				});
+			});
+			return true;
+		});
 	}
 
 	private void updateApprovalRequest(Long userId, ApprovalRequest approvalRequest) {
@@ -1358,6 +1443,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (cmd.getCategoryId() != null) {
 			checkCategoryExist(cmd.getCategoryId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		}
+		
+		//查询当前用户具有的哪些审批流程及审批级别
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByTarget(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalTargetType.USER.getCode(), userId);
+		
+		
 		
 		return null;
 	}

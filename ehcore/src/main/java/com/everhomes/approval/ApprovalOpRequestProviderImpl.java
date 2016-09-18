@@ -72,6 +72,11 @@ public class ApprovalOpRequestProviderImpl implements ApprovalOpRequestProvider 
 		return new ArrayList<ApprovalOpRequest>();
 	}
 
+	@Override
+	public void deleteApprovalOpRequestByRequestId(Long requestId) {
+		getReadWriteContext().delete(Tables.EH_APPROVAL_OP_REQUESTS).where(Tables.EH_APPROVAL_OP_REQUESTS.REQUEST_ID.eq(requestId)).execute();
+	}
+
 	private EhApprovalOpRequestsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

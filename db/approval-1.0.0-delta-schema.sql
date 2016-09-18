@@ -1,4 +1,5 @@
 -- 审批流程表
+-- DROP TABLE IF EXISTS `eh_approval_flows`;
 CREATE TABLE `eh_approval_flows` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INT NOT NULL DEFAULT '0',
@@ -14,6 +15,7 @@ CREATE TABLE `eh_approval_flows` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 审批流程对应每级的人/角色表
+-- DROP TABLE IF EXISTS  `eh_approval_flow_levels`;
 CREATE TABLE `eh_approval_flow_levels` (
 	`id` BIGINT NOT NULL,
 	`flow_id` BIGINT NOT NULL COMMENT 'id of flow',
@@ -24,6 +26,7 @@ CREATE TABLE `eh_approval_flow_levels` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 审批规则表
+-- DROP TABLE IF EXISTS  `eh_approval_rules`;
 CREATE TABLE `eh_approval_rules` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INT NOT NULL DEFAULT '0',
@@ -39,6 +42,7 @@ CREATE TABLE `eh_approval_rules` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 审批规则与流程关联表
+-- DROP TABLE IF EXISTS  `eh_approval_rule_flow_map`;
 CREATE TABLE `eh_approval_rule_flow_map` (
 	`id` BIGINT NOT NULL,
 	`rule_id` BIGINT NOT NULL COMMENT 'id of rule',
@@ -49,6 +53,7 @@ CREATE TABLE `eh_approval_rule_flow_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 审批具体类别表
+-- DROP TABLE IF EXISTS  `eh_approval_categories`;
 CREATE TABLE `eh_approval_categories` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INT NOT NULL DEFAULT '0',
@@ -63,6 +68,7 @@ CREATE TABLE `eh_approval_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 申请记录表
+-- DROP TABLE IF EXISTS  `eh_approval_requests`;
 CREATE TABLE `eh_approval_requests` (
 	`id` BIGINT NOT NULL,
 	`namespace_id` INT NOT NULL DEFAULT '0',
@@ -79,6 +85,7 @@ CREATE TABLE `eh_approval_requests` (
 	`next_level` TINYINT COMMENT 'next level of flow',
 	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
 	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+	`remark` VARCHAR(256) COMMENT 'put some condition here',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME,
 	`update_time` DATETIME,
@@ -87,6 +94,7 @@ CREATE TABLE `eh_approval_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 审批附件表
+-- DROP TABLE IF EXISTS  `eh_approval_attachments`;
 CREATE TABLE `eh_approval_attachments` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g application_id',
@@ -98,6 +106,7 @@ CREATE TABLE `eh_approval_attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 审批时间表（请假时间表）
+-- DROP TABLE IF EXISTS  `eh_approval_time_ranges`;
 CREATE TABLE `eh_approval_time_ranges` (
 	`id` BIGINT NOT NULL,
 	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g application_id',
@@ -111,6 +120,7 @@ CREATE TABLE `eh_approval_time_ranges` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 申请处理日志表
+-- DROP TABLE IF EXISTS  `eh_approval_op_requests`;
 CREATE TABLE `eh_approval_op_requests` (
 	`id` BIGINT NOT NULL,
 	`request_id` BIGINT NOT NULL COMMENT 'id of request',

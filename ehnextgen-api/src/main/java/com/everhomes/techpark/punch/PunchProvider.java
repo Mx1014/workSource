@@ -270,6 +270,8 @@ public interface PunchProvider {
 	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
 
 	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
+
+	public PunchExceptionApproval findPunchExceptionApproval(Long creatorUid, Long ownerId, Date date);
  
  
  
