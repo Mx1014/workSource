@@ -43,6 +43,10 @@ public enum OwnerType {
         if(code.equalsIgnoreCase(PM.getCode())) {
         	return PM;
         }
+        
+        if(code.equalsIgnoreCase(DEPARTMENT.getCode())) {
+        	return DEPARTMENT;
+        }
 
         return null;
     }
