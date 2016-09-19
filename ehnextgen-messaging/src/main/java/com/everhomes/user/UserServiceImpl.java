@@ -68,9 +68,11 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.PusherService;
 import com.everhomes.messaging.UserMessageRoutingHandler;
@@ -126,6 +128,8 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
@@ -136,6 +140,8 @@ import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
@@ -145,6 +151,8 @@ import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImperInfo;
+import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserLoginDTO;
@@ -166,6 +174,7 @@ import com.everhomes.rest.user.admin.SendUserTestMailCommand;
 import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -291,6 +300,12 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private PropertyMgrService propertyMgrService;
+    
+    @Autowired
+    private MessagingKickoffService kickoffService;
+    
+    @Autowired
+    private UserImpersonationProvider userImpersonationProvider;
     
 
 	private static final String DEVICE_KEY = "device_login";
@@ -772,6 +787,11 @@ public class UserServiceImpl implements UserService {
 
 			return login;
 		}
+		
+		if(kickoffService.isKickoff(UserContext.current().getNamespaceId(), loginToken)) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+                    UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others"); 		    
+		}
 
 		LOGGER.error("Invalid token or token has expired, userKey=" + userKey + ", loginToken=" + loginToken + ", userLogin=" + login);
 		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN, 
@@ -837,9 +857,159 @@ public class UserServiceImpl implements UserService {
 		accessorLogin.putMapValueObject(maxId.toString(), newLogin);
 		accessor.putMapValueObject(hkeyIndex, Integer.valueOf(maxId.toString()));
 	}
+	
+	private boolean foundUserLogin(UserLogin login, User user, String deviceIdentifier, LogonRef ref) {
+	    if(login.getDeviceIdentifier() == null 
+	            || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())
+	            || (login.getImpersonationId() != null && login.getImpersonationId() > 0)) {
+	        //not user login
+	        return false;
+	    }
+	    
+	    if(ref.getFoundLogin() != null) {
+	        //found user login again
+	        return true;
+	    }
+	    
+	    if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
+	        if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+	            if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("User is kickoff(normal) for logined in another place, userId=" + user.getId()
+                                + ", newNamespaceId=" + ref.getNamespaceId() + ", newDeviceIdentifier="
+                                + deviceIdentifier + ", oldUserLogin=" + login);
+	                }
+	            //kickoff this login
+	            login.setStatus(UserLoginStatus.LOGGED_OFF);
+	            ref.setOldDeviceId(login.getDeviceIdentifier());
+	            ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId()));
+	            }
+	        login.setDeviceIdentifier(deviceIdentifier);
+	        }
+	    
+	    //must found twice
+	    ref.setFoundLogin(login);
+	    return false;
+	}
+	
+	private boolean foundImpersonationLogin(UserLogin login, User user, String deviceIdentifier, LogonRef ref) {
+	    if(login.getDeviceIdentifier() == null 
+	            || login.getDeviceIdentifier().equals(DeviceIdentifierType.INNER_LOGIN.name())
+	            || login.getImpersonationId() == null
+	            || login.getImpersonationId().equals(0)) {
+	        //not impersonation login
+	        return false;
+	    }
+	    
+	    if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
+	        if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
+	               if(LOGGER.isInfoEnabled()) {
+	                    LOGGER.info("User is kickoff(impersonation) for logined in another place, userId=" + user.getId()
+	                                + ", newNamespaceId=" + ref.getNamespaceId() + ", newDeviceIdentifier="
+	                                + deviceIdentifier + ", oldUserLogin=" + login);
+	                    }
+	               //kickoff this login
+	               login.setStatus(UserLoginStatus.LOGGED_OFF);
+	               ref.setOldDeviceId(login.getDeviceIdentifier());
+	               ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), ref.getImpId()));
+	        }
+	        login.setDeviceIdentifier(deviceIdentifier);
+	    }
+	    
+	    ref.setFoundLogin(login);
+	    return true;
+	}
+	
+	private boolean foundLoginByLoginType(User user, String deviceIdentifier, LoginType loginType, LogonRef ref) {
+	    Integer namespaceId = ref.getNamespaceId();
+	    String userKey = NameMapper.getCacheKey("user", user.getId(), null);
+	    String hkeyIndex = "0";
+	    Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+	    Object o = accessor.getMapValueObject(hkeyIndex);
+	    Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
+	    UserLogin foundLogin = null;
+	    int nextLoginId = 1;
+	    if(maxLoginId != null) {
+	            for(int i = 1; i <= maxLoginId.intValue(); i++) {
+	                String hkeyLogin = String.valueOf(i);
+	                Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+	                UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
+	                if(login == null) {
+	                    continue;
+	                }
+	                
+	                //found web login
+	                if(loginType == LoginType.WEB) {
+	                    if(login.getDeviceIdentifier() == null) {
+	                        ref.setFoundLogin(login);
+	                    }
+	                }
+	              //found inner login
+	                if(loginType == LoginType.INNER) {
+	                    if(deviceIdentifier.equals(login.getDeviceIdentifier())) {
+	                        ref.setFoundLogin(login);
+	                        break;
+	                    }
+                    }
+	                
+	                //found user login
+	                if(loginType == LoginType.USER) {
+	                    if(foundUserLogin(login, user, deviceIdentifier, ref)) {
+	                        //found twice, clear all for this user
+                            if(LOGGER.isInfoEnabled()) {
+                                LOGGER.info("User is kickoff state3 remove old all login tokens, userId=" + user.getId() 
+                                        + ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier
+                                        + ", oldUserLogin=" + login);
+                                }
+                            
+                            //found twice, delete all logins
+                            accessor.getTemplate().delete(accessor.getBucketName());
+                            accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+                            ref.setOldDeviceId("");
+                            ref.setNextLoginId(1);
+                            ref.setFoundLogin(null);
+	                        break;
+	                    }
+	                }
+	                
+	                //found impersonation
+	                if(loginType == LoginType.IMPERSONATION) {
+	                    if(foundImpersonationLogin(login, user, deviceIdentifier, ref)) {
+	                        break;
+	                    }
+	                }
+	             
+	                //check
+	                if(foundLogin == null && login.getLoginId() >= nextLoginId){
+	                    nextLoginId = login.getLoginId() + 1;
+	                    }
+	                
+	            }
+	       }
+	    
+	    if(ref.getFoundLogin() != null) {
+	        ref.setNextLoginId(ref.getFoundLogin().getLoginId());
+	        return true;
+	    } else {
+	        ref.setNextLoginId(nextLoginId);
+	    }
+	    return false;
+	}
 
-	private UserLogin createLogin(int namespaceId, User user, String deviceIdentifier, String pusherIdentify) {
+	private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify) {
 		Boolean isNew = false;
+		User user = null;
+		Long impId = null;
+		UserImpersonation userImp = userImpersonationProvider.getUserImpersonationByOwnerId(inUser.getId());
+		if(userImp == null) {
+		    user = inUser;
+		} else {
+		    user = userProvider.findUserById(userImp.getTargetId());
+		    if(user == null) {
+		        LOGGER.warn("get impersonation userId error. userId=" + userImp.getTargetId() + ", impId=" + userImp.getId());
+		        user = inUser;
+		    }
+		    impId = inUser.getId();
+		}
 
 		String userKey = NameMapper.getCacheKey("user", user.getId(), null);
 
@@ -847,104 +1017,56 @@ public class UserServiceImpl implements UserService {
 		String hkeyIndex = "0";
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object o = accessor.getMapValueObject(hkeyIndex);
-		Integer maxLoginId = null == o ? null : Integer.valueOf(o + "");
-		UserLogin foundLogin = null;
-		int nextLoginId = 1;
-		int foundIndex = 0xFFFFFF;
-		String oldDeviceId = "";
-
-		if(maxLoginId != null) {
-			for(int i = 1; i <= maxLoginId.intValue(); i++) {
-				String hkeyLogin = String.valueOf(i);
-				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
-				UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
-				if(login != null) {
-					if(login.getNamespaceId() == namespaceId) {
-						if(login.getDeviceIdentifier() == null && deviceIdentifier == null) {
-							// toggle status so that we can have a new loginIntanceNumber, this
-							// will cause the previous one to be kicked out
-							login.setStatus(UserLoginStatus.LOGGED_OFF);
-							foundLogin = login;
-							if(LOGGER.isInfoEnabled()) {
-								LOGGER.info("User is kickoff for logined in another place, userId=" + user.getId() 
-										+ ", newNamespaceId=" + namespaceId + ", newDeviceIdentifier=" + deviceIdentifier + ", oldUserLogin=" + login);
-							}
-							break;
-						} else if(login.getDeviceIdentifier() != null && deviceIdentifier != null) {
-							if(login.getDeviceIdentifier().equals(deviceIdentifier) && deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
-								foundLogin = login;
-								break;
-							} else {
-							    if(foundLogin == null) {
-							        if(!deviceIdentifier.equals(login.getDeviceIdentifier())) {
-							            if(login.getStatus() == UserLoginStatus.LOGGED_IN) {
-							                //kickoff this login
-							                oldDeviceId = login.getDeviceIdentifier();
-							                login.setStatus(UserLoginStatus.LOGGED_OFF);          
-							            }
-	                              
-			                        login.setDeviceIdentifier(deviceIdentifier);
-							        }
-							       
-                            foundLogin = login;
-                            foundIndex = i+2;
-							    } else {
-							        //found twice, delete all logins
-							        accessor.getTemplate().delete(accessor.getBucketName());
-							        foundLogin = null;
-							        nextLoginId = 1;
-							        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
-							        oldDeviceId = "";
-							        break;   
-							    }
-							}
-						}
-					}
-
-					if(foundLogin == null && login.getLoginId() >= nextLoginId)
-						nextLoginId = login.getLoginId() + 1;
-					
-					if(i > foundIndex && foundLogin != null) {
-					    //already found
-					    break;
-					}
-				}
-			}
+		LogonRef ref = new LogonRef();
+		ref.setNamespaceId(namespaceId);
+		ref.setOldDeviceId("");
+		ref.setImpId(impId);
+		if(deviceIdentifier == null || deviceIdentifier.isEmpty()) {
+		    foundLoginByLoginType(user, null, LoginType.WEB, ref);
+		} else if(deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name())) {
+		    foundLoginByLoginType(user, deviceIdentifier, LoginType.INNER, ref);
+		} else if(impId != null) {
+		    foundLoginByLoginType(user, deviceIdentifier, LoginType.IMPERSONATION, ref);
+		} else {
+		    foundLoginByLoginType(user, deviceIdentifier, LoginType.USER, ref);
 		}
 
+		UserLogin foundLogin = ref.getFoundLogin();
 		if(foundLogin == null) {
-			foundLogin = new UserLogin(namespaceId, user.getId(), nextLoginId, deviceIdentifier, pusherIdentify);
-			accessor.putMapValueObject(hkeyIndex, nextLoginId);
+			foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify);
+			accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
 			isNew = true;
 		}
 
+		foundLogin.setImpersonationId(impId);
 		foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
 		foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 		foundLogin.setPusherIdentify(pusherIdentify);
-		String hkeyLogin = String.valueOf(nextLoginId);
+		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
-		if(isNew) {
-			//Kickoff other login in this devices
+		if(isNew && deviceIdentifier != null && (!deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name()))) {
+			//Kickoff other login in this devices which is not inner login
 			kickoffLoginByDevice(foundLogin);
 		}
 		
-		if(!oldDeviceId.isEmpty()) {
-	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
-	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
-	            locale = user.getLocale(); 
-	        }
-	        
-	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
-		    String msg = this.localeStringService.getLocalizedString(
-	                MessagingLocalStringCode.SCOPE,
-	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
-	                locale,
-	                "kickoff other devices");
-		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
-		}
+//		if(!ref.getOldDeviceId().isEmpty()) {
+//		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+//	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+//	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
+//	            locale = user.getLocale(); 
+//	        }
+//	        
+//	       //TODO INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '5', 'zh_CN', '其它登录设备已经被踢出');
+//		    String msg = this.localeStringService.getLocalizedString(
+//	                MessagingLocalStringCode.SCOPE,
+//	                String.valueOf(MessagingLocalStringCode.KICK_OFF_ALERT),
+//	                locale,
+//	                "kickoff other devices");
+//		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
+//		}
 
 		return foundLogin;
 	}
@@ -1017,7 +1139,7 @@ public class UserServiceImpl implements UserService {
 		String hkeyLogin = String.valueOf(loginToken.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		UserLogin login = accessor.getMapValueObject(hkeyLogin);
-		if(login != null) {
+		if(login != null && login.getStatus() == UserLoginStatus.LOGGED_IN) {
 		    //Save loginBorderId here
 			login.setLoginBorderId(borderId);
 			login.setBorderSessionId(borderSessionId);
@@ -1025,12 +1147,12 @@ public class UserServiceImpl implements UserService {
 			accessor.putMapValueObject(hkeyLogin, login);
 			
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
+			return login;
 		} else {
 			LOGGER.warn("Unable to find UserLogin in big map, borderId=" + borderId 
 					+ ", loginToken=" + StringHelper.toJsonString(loginToken) + ", borderSessionId=" + borderSessionId);
+			return null;
 		}
-
-		return login;
 	}
 
 	public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
@@ -2849,7 +2971,11 @@ public class UserServiceImpl implements UserService {
         msg.setContent("test push " + Double.valueOf(Math.random()));
         msg.setMetaAppId(AppConstants.APPID_MESSAGING);
         msg.setCreateTime(System.currentTimeMillis());
-        msg.setNamespaceId(cmd.getNamespaceId());
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = 0;
+        }
+        msg.setNamespaceId(namespaceId);
         
         Map<String, String> meta = new HashMap<String, String>();
         meta.put("bodyType", "TEXT");
@@ -2876,6 +3002,62 @@ public class UserServiceImpl implements UserService {
         
         resp.setBorders(strs);
         
+        return resp;
+    }
+    
+    @Override
+    public UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd) {
+        User owner = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getOwnerPhone());
+        User target = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getTargetPhone());
+        if(owner == null || target == null) {
+            return null;
+        }
+        UserImpersonation obj = new UserImpersonation();
+        obj.setDescription(cmd.getDescription());
+        obj.setNamespaceId(cmd.getNamespaceId());
+        obj.setOwnerId(owner.getId());
+        obj.setTargetId(target.getId());
+        obj.setOwnerType(EntityType.USER.getCode());
+        obj.setTargetType(EntityType.USER.getCode());
+        obj.setStatus(UserStatus.ACTIVE.getCode());
+        this.userImpersonationProvider.createUserImpersonation(obj);
+        
+        return ConvertHelper.convert(obj, UserImpersonationDTO.class);
+    }
+    
+    @Override
+    public void deleteUserImpersonation(DeleteUserImpersonationCommand cmd) {
+        UserImpersonation obj = new UserImpersonation();
+        obj.setId(cmd.getUserImpersonationId());
+        this.userImpersonationProvider.deleteUserImpersonation(obj);
+    }
+    
+    @Override
+    public SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd) {
+        SearchUserImpersonationResponse resp = new SearchUserImpersonationResponse();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getAnchor());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getPhone(), cmd.getImperOnly(), locator, count);
+        for(UserImperInfo info : impers) {
+            if(info.getOwnerId() != null && info.getTargetId() != null) {
+                UserInfo u1 = this.getUserInfo(info.getOwnerId());
+                UserInfo u2 = this.getUserInfo(info.getTargetId());
+                if(u1 != null && u2 != null) {
+                    if(u1.getId().equals(info.getId())) {
+                        //ownerId match
+                        info.setPhone(u1.getPhones().get(0));
+                        info.setTargetPhone(u2.getPhones().get(0));
+                    } else {
+                        //target match
+                        info.setPhone(u2.getPhones().get(0));
+                        info.setTargetPhone(u1.getPhones().get(0));
+                    }
+                }
+            }
+        }
+        resp.setImpersonations(impers);
+        resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
 }

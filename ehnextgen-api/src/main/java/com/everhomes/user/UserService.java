@@ -9,20 +9,26 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
@@ -30,6 +36,7 @@ import com.everhomes.rest.user.SignupCommand;
 import com.everhomes.rest.user.SynThridUserCommand;
 import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserLoginResponse;
@@ -132,4 +139,8 @@ public interface UserService {
     String pushMessageTest(SendMessageTestCommand cmd);
     BorderListResponse listBorders();
 
+    UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
+    SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
+    void deleteUserImpersonation(DeleteUserImpersonationCommand cmd);
+    
 }

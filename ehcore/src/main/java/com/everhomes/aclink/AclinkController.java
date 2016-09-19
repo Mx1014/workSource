@@ -33,6 +33,9 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkLogCreateCommand;
+import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
@@ -502,7 +505,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /admin/createDoorVistor</b>
+     * <b>URL: /aclink/createDoorVistor</b>
      * <p>给令令访客授权</p>
      * @return OK 成功
      */
@@ -519,4 +522,17 @@ public class AclinkController extends ControllerBase {
         return response;        
     }
     
+    /**
+     * <b>URL: /aclink/createAclinkLog</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("createAclinkLog")
+    @RestReturn(value=AclinkLogListResponse.class)
+    public RestResponse createAclinkLog(@Valid AclinkLogCreateCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createAclinkLog(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -2,33 +2,79 @@
 package com.everhomes.community;
 
 
+<<<<<<< HEAD
+=======
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.RoleAssignment;
+>>>>>>> 3.9.2
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configuration.Configurations;
+import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.forum.Forum;
+import com.everhomes.forum.ForumProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
+<<<<<<< HEAD
 import com.everhomes.organization.*;
+=======
+import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOwners;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.point.UserLevel;
+>>>>>>> 3.9.2
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+<<<<<<< HEAD
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -38,20 +84,117 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
+=======
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.BuildingServiceErrorCode;
+import com.everhomes.rest.community.BuildingStatus;
+import com.everhomes.rest.community.CommunityGeoPointDTO;
+import com.everhomes.rest.community.CommunityNotificationTemplateCode;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.GetBuildingCommand;
+import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.community.GetCommunityByUuidCommand;
+import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.community.ListCommunitesByStatusCommand;
+import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
+import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
+import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
+import com.everhomes.rest.community.admin.CommunityManagerDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityUserDto;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
+import com.everhomes.rest.community.admin.CreateCommunityCommand;
+import com.everhomes.rest.community.admin.CreateCommunityResponse;
+import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.ImportCommunityCommand;
+import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
+import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
+import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
+import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
+import com.everhomes.rest.community.admin.SmsTemplate;
+import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UserCommunityDTO;
+import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
+import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
+import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupJoinPolicy;
+import com.everhomes.rest.group.GroupMemberDTO;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.group.GroupPostFlag;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationCommunityRequestType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.PrivateFlag;
+>>>>>>> 3.9.2
 import com.everhomes.rest.region.RegionServiceErrorCode;
+import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+<<<<<<< HEAD
 import com.everhomes.user.*;
+=======
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+>>>>>>> 3.9.2
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.VersionRange;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.version.VersionProvider;
+import com.everhomes.version.VersionRealm;
+import com.everhomes.version.VersionUpgradeRule;
 import com.mysql.jdbc.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
@@ -115,6 +258,30 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Autowired
 	private NamespaceResourceProvider namespaceResourceProvider;
+	
+	@Autowired
+	private NamespacesProvider namespacesProvider;
+	
+	@Autowired
+	private VersionProvider versionProvider;
+	
+	@Autowired
+    private LocaleTemplateProvider localeTemplateProvider;
+	
+	@Autowired
+	private ConfigurationsProvider configurationsProvider;
+	
+	@Autowired
+	private CategoryProvider categoryProvider;
+	
+	@Autowired
+	private ForumProvider forumProvider;
+	
+	@Autowired
+	private AclProvider aclProvider;
+	
+	@Autowired
+	private UserWithoutConfAccountSearcher userSearcher;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1222,11 +1389,12 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
 		
-		
+		// 有重复的用户，需要过滤 by lqs 20160831
+		List<Long> userIdList = new ArrayList<Long>();
 		for (GroupMember member : groupMembers) {
 			User user = userProvider.findUserById(member.getMemberId());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getMemberId(), IdentifierType.MOBILE.getCode());
-			if(null != user){
+			if(null != user && !userIdList.contains(user.getId())){
 				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 				dto.setUserId(user.getId());
 				dto.setUserName(user.getNickName());
@@ -1238,6 +1406,7 @@ public class CommunityServiceImpl implements CommunityService {
 				if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.ACTIVE)
 					dto.setIsAuth(1);
 				
+				userIdList.add(user.getId());
 				dtos.add(dto);
 			}
 		}
@@ -1729,6 +1898,7 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	private CommunityDTO createCommunity(final Long userId, final Integer namespaceId, final CreateCommunityCommand cmd){
 		List<CommunityDTO> communities = new ArrayList<>();
+		List<Community> cs = new ArrayList<>();
 		List<CommunityGeoPointDTO> points = new ArrayList<>();
 		dbProvider.execute(s->{
 			Long provinceId = createRegion(userId, namespaceId, getPath(cmd.getProvinceName()), 0L);  //创建省
@@ -1739,6 +1909,7 @@ public class CommunityServiceImpl implements CommunityService {
 			cmd.setCityId(cityId);
 			cmd.setAreaId(areaId);
 			Community community = createCommunity(userId, cmd);
+			cs.add(community);
 			
 			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
 			
@@ -1750,6 +1921,7 @@ public class CommunityServiceImpl implements CommunityService {
 			communities.add(cd);
 			return true;
 		});
+		communitySearcher.feedDoc(cs.get(0));
 		return communities.get(0);
 	} 
 	
@@ -1913,4 +2085,358 @@ public class CommunityServiceImpl implements CommunityService {
 				.collect(Collectors.toList()))
 				);
 	}
+
+
+	@Override
+	public void communityImportBaseConfig(CommunityImportBaseConfigCommand cmd) {
+		if (StringUtils.isEmptyOrWhitespaceOnly(cmd.getNamespaceName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getCommunityType()) 
+				|| NamespaceCommunityType.fromCode(cmd.getCommunityType())==null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: "+cmd);
+		}
+		dbProvider.execute(s->{
+			Integer namespaceId = createNamespace(cmd.getNamespaceName());
+			createNamespaceDetail(namespaceId, cmd.getCommunityType());
+			createVersion(namespaceId, cmd.getAndroidRealm(), cmd.getIosRealm(), cmd.getVersionDescription(), cmd.getVersionRange(), cmd.getTargetVersion(), cmd.getForceUpgrade());
+			createSmsTemplate(namespaceId, cmd.getSmsTemplates());
+			createAppAgreementsUrl(namespaceId, cmd.getAppAgreementsUrl());
+			createHomeUrl(namespaceId, cmd.getHomeUrl());
+			createPostTypes(namespaceId, cmd.getPostTypes());
+			return true;
+		});
+	}
+
+
+	private Integer createNamespace(String namespaceName) {
+		Namespace namespace = new Namespace();
+		namespace.setName(namespaceName);
+		namespacesProvider.createNamespace(namespace);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create namespace success: namespaceId="+namespace.getId()+", namespaceName="+namespaceName);
+		}
+		return namespace.getId();
+	}
+	
+	private void createNamespaceDetail(Integer namespaceId, String communityType) {
+		NamespaceDetail namespaceDetail = new NamespaceDetail();
+		namespaceDetail.setNamespaceId(namespaceId);
+		namespaceDetail.setResourceType(communityType);
+		namespacesProvider.createNamespaceDetail(namespaceDetail);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create namespace detail success: namespaceId="+namespaceId+", communityType="+communityType);
+		}
+	}
+
+	private void createVersion(Integer namespaceId, String androidRealm, String iosRealm, String versionDescription,
+			String versionRange, String targetVersion, Byte forceUpgrade) {
+		createVersion(namespaceId, androidRealm, versionDescription, versionRange, targetVersion, forceUpgrade);
+		createVersion(namespaceId, iosRealm, versionDescription, versionRange, targetVersion, forceUpgrade);
+	}
+	
+	private void createVersion(Integer namespaceId, String realm, String description, String versionRange, String targetVersion, Byte forceUpgrade){
+		if(StringUtils.isEmptyOrWhitespaceOnly(realm)){
+			return ;
+		}
+		VersionRealm versionRealm = new VersionRealm();
+		versionRealm.setRealm(realm);
+		versionRealm.setDescription(description);
+		//persist中无namespaceId，大师说不用管，add by tt， 20160817
+		versionProvider.createVersionRealm(versionRealm);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create version realm success: namespaceId="+namespaceId+", realm="+realm);
+		}
+		
+		if(StringUtils.isEmptyOrWhitespaceOnly(versionRange) || StringUtils.isEmptyOrWhitespaceOnly(targetVersion)){
+			return;
+		}
+		VersionUpgradeRule rule = new VersionUpgradeRule();
+        rule.setRealmId(versionRealm.getId());
+        rule.setForceUpgrade(forceUpgrade);
+        rule.setTargetVersion(targetVersion);
+        rule.setOrder(0);
+        VersionRange range = new VersionRange(versionRange);
+        rule.setMatchingLowerBound(range.getLowerBound());
+        rule.setMatchingUpperBound(range.getUpperBound());
+        versionProvider.createVersionUpgradeRule(rule);
+        if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create version upgrade rule success: namespaceId="+namespaceId+", targetVersion="+targetVersion+", versionRange="+versionRange);
+		}
+	}
+
+	private void createSmsTemplate(Integer namespaceId, List<SmsTemplate> smsTemplates) {
+		if(smsTemplates == null || smsTemplates.isEmpty()){
+			return;
+		}
+		smsTemplates.forEach(s->{
+			if(!StringUtils.isEmptyOrWhitespaceOnly(s.getTitle())){
+				LocaleTemplate localeTemplate = new LocaleTemplate();
+				localeTemplate.setCode(s.getCode());
+				localeTemplate.setDescription(s.getTitle());
+				localeTemplate.setLocale("zh_CN");
+				localeTemplate.setNamespaceId(namespaceId);
+				localeTemplate.setScope("sms.default.yzx");
+				localeTemplate.setText(s.getTemplateId());
+				if (LOGGER.isInfoEnabled()) {
+					LOGGER.info("create sms template success: namespaceId="+namespaceId+", title="+s.getTitle()+", templateId="+s.getTemplateId()+", code="+s.getCode());
+				}
+				localeTemplateProvider.createLocaleTemplate(localeTemplate);
+			}
+		});
+	}
+
+
+	private void createAppAgreementsUrl(Integer namespaceId, String appAgreementsUrl) {
+		if (StringUtils.isEmptyOrWhitespaceOnly(appAgreementsUrl)) {
+			return ;
+		}
+		Configurations configurations = new Configurations();
+		configurations.setName("app.agreements.url");
+		configurations.setValue(appAgreementsUrl);
+		configurations.setNamespaceId(namespaceId);
+		configurationsProvider.createConfiguration(configurations);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create app.agreements.url success: namespaceId="+namespaceId+", app.agreements.url="+appAgreementsUrl);
+		}
+	}
+
+
+	private void createHomeUrl(Integer namespaceId, String homeUrl) {
+		if (StringUtils.isEmptyOrWhitespaceOnly(homeUrl)) {
+			return ;
+		}
+		Configurations configurations = new Configurations();
+		configurations.setName("home.url");
+		configurations.setValue(homeUrl);
+		configurations.setNamespaceId(namespaceId);
+		configurationsProvider.createConfiguration(configurations);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create home.url success: namespaceId="+namespaceId+", home.url="+homeUrl);
+		}
+	}
+
+
+	private void createPostTypes(Integer namespaceId, List<String> postTypes) {
+		if (postTypes == null || postTypes.isEmpty()) {
+			return;
+		}
+		postTypes.forEach(p->{
+			if(!StringUtils.isEmptyOrWhitespaceOnly(p)){
+				Category category = new Category();
+				category.setParentId(1L);
+				category.setLinkId(0L);
+				category.setName(p);
+				category.setPath("帖子/"+p);
+				category.setDefaultOrder(0);
+				category.setStatus((byte)0);
+				category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				category.setNamespaceId(namespaceId);
+				categoryProvider.createCategory(category);
+				if (LOGGER.isInfoEnabled()) {
+					LOGGER.info("create post type success: namespaceId="+namespaceId+", post type="+p);
+				}
+			}
+		});
+	}
+
+
+	@Override
+	public void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd) {
+		if (StringUtils.isEmptyOrWhitespaceOnly(cmd.getOrganizationName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getAdminNickname()) 
+				|| cmd.getNamespaceId() == null || cmd.getCommunityId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getAdminPhone())
+				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getGroupName())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: "+cmd);
+		}
+		dbProvider.execute(s->{
+			Organization organization = createOrganization(cmd.getNamespaceId(), cmd.getOrganizationName());
+			createOrganizationCommunityRequest(organization.getId(), cmd.getCommunityId());
+			Group group = createGroup(cmd.getNamespaceId(), organization, cmd.getGroupName(), cmd.getGroupDisplayName());
+			createForum(cmd.getNamespaceId(), group);
+			createOrganizationCommunities(cmd.getNamespaceId(), organization.getId());
+			User user = createUser(cmd.getNamespaceId(), cmd.getAdminNickname(), cmd.getAdminPhone());
+			createOrganizationMember(cmd.getNamespaceId(), organization.getId(), user.getId(), user.getNickName(), cmd.getAdminPhone());
+			createAclRoleAssignment(organization.getId(), user.getId());
+			return true;
+		});
+	}
+
+
+	private Organization createOrganization(Integer namespaceId, String organizationName) {
+		Organization organization = new Organization();
+		organization.setParentId(0L);
+		organization.setOrganizationType(OrganizationType.PM.getCode());
+		organization.setName(organizationName);
+		organization.setAddressId(0L);
+		organization.setLevel(1);
+		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+		organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+		organization.setDirectlyEnterpriseId(0L);
+		organization.setNamespaceId(namespaceId);
+		organization.setShowFlag((byte) 1);
+		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationProvider.createOrganization(organization);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create organization success: namespaceId="+namespaceId+", organizationId="+organization.getId()+", organizationName"+organizationName);
+		}
+		return organization;
+	}
+
+
+	private void createOrganizationCommunityRequest(Long organizationId, Long communityId) {
+		OrganizationCommunityRequest request = new OrganizationCommunityRequest();
+		request.setCommunityId(communityId);
+		request.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+		request.setMemberId(organizationId);
+		request.setMemberStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		organizationProvider.createOrganizationCommunityRequest(request);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create organization community request success: organizationId="+organizationId+", communityId="+communityId);
+		}
+	}
+
+
+	private Group createGroup(Integer namespaceId, Organization organization, String groupName,
+			String groupDisplayName) {
+		Group group = new Group();
+		group.setNamespaceId(namespaceId);
+		group.setName(groupName);
+		group.setDisplayName(groupDisplayName);
+		group.setCreatorUid(UserContext.current().getUser().getId());
+		group.setPrivateFlag(PrivateFlag.PRIVATE.getCode());
+		group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
+		group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+		group.setStatus(GroupAdminStatus.ACTIVE.getCode());
+		group.setMemberCount(0L);
+		group.setShareCount(0L);
+		group.setPostFlag(GroupPostFlag.ALL.getCode());
+		group.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+		group.setVisibleRegionId(organization.getId());
+		groupProvider.createGroup(group);
+		
+		//更新组织中的groupId
+		organization.setGroupId(group.getId());
+		organizationProvider.updateOrganization(organization);
+		
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create group success: namespaceId="+namespaceId+", groupName="+groupName);
+		}
+		
+		return group;
+	}
+
+
+	private void createForum(Integer namespaceId, Group group) {
+		Forum forum = new Forum();
+		forum.setNamespaceId(namespaceId);
+		forum.setAppId(AppConstants.APPID_FORUM);
+		forum.setOwnerType(EntityType.GROUP.getCode());
+		forum.setOwnerId(group.getId());
+		forum.setName(EntityType.GROUP.getCode() + "-" + group.getId());
+		forum.setPostCount(0L);
+		forum.setModifySeq(0L);
+		forum.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		forumProvider.createForum(forum);
+		
+		//更新group中圈论坛id
+		group.setIntegralTag4(forum.getId());
+		groupProvider.updateGroup(group);
+		
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create forum success: namespaceId="+namespaceId+", groupId="+group.getId());
+		}
+	}
+
+
+	private void createOrganizationCommunities(Integer namespaceId, Long organizationId) {
+		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+		if(communities == null || communities.isEmpty()){
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("create organization communities error: namespaceId="+namespaceId+", organizationId="+organizationId+", no community!");
+			}
+			return ;
+		}
+		communities.forEach(c->{
+			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+			organizationCommunity.setCommunityId(c.getId());
+			organizationCommunity.setOrganizationId(organizationId);
+			organizationProvider.createOrganizationCommunity(organizationCommunity);
+		});
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create organization communities success: namespaceId="+namespaceId+", organizationId="+organizationId+", communities count="+communities.size());
+		}
+	}
+
+
+	private User createUser(Integer namespaceId, String adminNickname, String adminPhone) {
+		User user = new User();
+		user.setNickName(adminNickname);
+		user.setStatus(UserStatus.ACTIVE.getCode());
+		user.setPoints(0);
+		user.setLevel(UserLevel.L1.getCode());
+		user.setGender(UserGender.UNDISCLOSURED.getCode());
+		user.setLocale("zh_CN");
+		user.setNamespaceId(namespaceId);
+		String salt = EncryptionUtils.createRandomSalt();
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "123456",salt)));
+		user.setSalt(salt);
+		userProvider.createUser(user);
+		
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create user success: namespaceId="+namespaceId+", adminNickname="+adminNickname+", adminPhone="+adminPhone);
+		}
+		
+		UserIdentifier userIdentifier = new UserIdentifier();
+		userIdentifier.setOwnerUid(user.getId());
+		userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+		userIdentifier.setIdentifierToken(adminPhone);
+		userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+		userIdentifier.setNamespaceId(namespaceId);
+		userProvider.createIdentifier(userIdentifier);
+		
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create user identifier success: namespaceId="+namespaceId+", userId="+user.getId());
+		}
+		
+		return user;
+	}
+
+
+	private void createOrganizationMember(Integer namespaceId, Long organizationId, Long userId,
+			String nickName, String phone) {
+		OrganizationMember organizationMember = new OrganizationMember();
+		organizationMember.setOrganizationId(organizationId);
+		organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+		organizationMember.setTargetId(userId);
+		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+		organizationMember.setContactName(nickName);
+		organizationMember.setContactType(IdentifierType.MOBILE.getCode());
+		organizationMember.setContactToken(phone);
+		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		organizationMember.setGender(UserGender.UNDISCLOSURED.getCode());
+		organizationMember.setNamespaceId(namespaceId);
+		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationMember.setCreatorUid(UserContext.current().getUser().getId());
+		organizationProvider.createOrganizationMember(organizationMember);
+		userSearcher.feedDoc(organizationMember);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create organization member success: namespaceId="+namespaceId+", organizationId="+organizationId+", userId="+userId+", phone="+phone);
+		}
+	}
+
+
+	private void createAclRoleAssignment(Long organizationId, Long userId) {
+		RoleAssignment roleAssignment = new RoleAssignment();
+		roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+		roleAssignment.setOwnerId(organizationId);
+		roleAssignment.setTargetType(EntityType.USER.getCode());
+		roleAssignment.setTargetId(userId);
+		roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+		roleAssignment.setRoleId(1001L);
+		aclProvider.createRoleAssignment(roleAssignment);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("create acl role assignment success: organizationId="+organizationId+", userId="+userId);
+		}
+	}
+	
+	
 }

@@ -1,0 +1,41 @@
+package com.everhomes.rest.user;
+
+public class SearchUserImpersonationCommand {
+    private String phone;
+    private Byte imperOnly;
+    private Long anchor;
+    
+    private Integer pageSize;
+
+    public Byte getImperOnly() {
+        return imperOnly;
+    }
+
+    public void setImperOnly(Byte imperOnly) {
+        this.imperOnly = imperOnly;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Long getAnchor() {
+        return anchor;
+    }
+
+    public void setAnchor(Long anchor) {
+        this.anchor = anchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+}

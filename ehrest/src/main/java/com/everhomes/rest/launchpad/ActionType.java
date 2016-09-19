@@ -6,6 +6,7 @@ package com.everhomes.rest.launchpad;
  * <li>NONE(0): 无</li>
  * <li>BIZ(1): 更多按钮</li>
  * <li>NAVIGATION(2): 跳下一层</li>
+ * <li>THIRDPART_URL(14): 第三方url</li>
  * <li>OPEN_DOOR(21): 门禁</li>
  * <li>PUNCH(23): 打卡</li>
  * <li>MEETINGROOM(24): 会议室预定</li>
@@ -30,6 +31,7 @@ package com.everhomes.rest.launchpad;
  * <li>NEWS(48): 新闻</li>
  * <li>RENTAL(49): 预订2.0</li>
  * <li>OFFICIAL_ACTIVITY(50): 官方活动</li>
+ * <li>PM_TASK(51): 物业报修</li>
  * </ul>
  */
 public enum ActionType {
@@ -41,7 +43,7 @@ public enum ActionType {
       ELECSCREEN((byte)26) ,VIDEO_MEETING((byte)27),ENTER_PARK((byte)28),EXCHANGE_HALL((byte)29),PARKING_RECHARGE((byte)30),TOPIC_BY_FORUM((byte)31),
       MAKERZONE((byte)32),SERVICEALLIANCE((byte)33),PARKENTERPRISE((byte)34), USER_GROUPS((byte)35), LIST_GROUPS((byte)36), SERVICE_ORDER((byte)37),
       ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
-      WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50);
+      WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51);
     private byte code;
     
     private ActionType(byte code) {

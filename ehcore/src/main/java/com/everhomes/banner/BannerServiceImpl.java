@@ -1,12 +1,11 @@
 // @formatter:off
 package com.everhomes.banner;
 
+import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
+import static com.everhomes.rest.banner.BannerStatus.CLOSE;
+
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,28 +17,42 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.auditlog.AuditLog;
+import com.everhomes.auditlog.AuditLogOperator;
+import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
-import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.banner.BannerClickDTO;
 import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerOrder;
+import com.everhomes.rest.banner.BannerOwnerType;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerServiceErrorCode;
+import com.everhomes.rest.banner.BannerStatus;
+import com.everhomes.rest.banner.CreateBannerByOwnerCommand;
 import com.everhomes.rest.banner.CreateBannerClickCommand;
+import com.everhomes.rest.banner.DeleteBannerByOwnerCommand;
 import com.everhomes.rest.banner.GetBannerByIdCommand;
 import com.everhomes.rest.banner.GetBannersByOrgCommand;
 import com.everhomes.rest.banner.GetBannersCommand;
+import com.everhomes.rest.banner.ListBannersByOwnerCommand;
+import com.everhomes.rest.banner.ListBannersByOwnerCommandResponse;
+import com.everhomes.rest.banner.ReorderBannerByOwnerCommand;
+import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
 import com.everhomes.rest.banner.admin.CreateBannerAdminCommand;
 import com.everhomes.rest.banner.admin.DeleteBannerAdminCommand;
 import com.everhomes.rest.banner.admin.ListBannersAdminCommand;
@@ -56,9 +69,9 @@ import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
@@ -95,6 +108,12 @@ public class BannerServiceImpl implements BannerService {
     
     @Autowired
     private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private AuditLogProvider auditLogProvider;
+    
+    @Autowired
+    private DbProvider dbProvider;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -600,7 +619,7 @@ public class BannerServiceImpl implements BannerService {
         }
     }
     
-    @Override
+	@Override
     public void updateBanner(UpdateBannerAdminCommand cmd){
         if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -627,7 +646,6 @@ public class BannerServiceImpl implements BannerService {
             banner.setOrder(cmd.getOrder());
         if(cmd.getPosterPath() != null)
             banner.setPosterPath(cmd.getPosterPath());
-        
         if(cmd.getScopeCode() != null)
             banner.setScopeCode(cmd.getScopeCode());
         if(cmd.getScopeId() != null)
@@ -637,7 +655,8 @@ public class BannerServiceImpl implements BannerService {
         
         bannerProvider.updateBanner(banner);
     }
-    @Override
+	
+	@Override
     public void deleteBannerById(DeleteBannerAdminCommand cmd){
         if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -651,7 +670,7 @@ public class BannerServiceImpl implements BannerService {
         
         bannerProvider.deleteBanner(banner);
     }
-    
+	
     @Override
     public String createOrUpdateBannerClick(CreateBannerClickCommand cmd){
         if(cmd.getBannerId() == null){
@@ -697,7 +716,7 @@ public class BannerServiceImpl implements BannerService {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         long pageOffset = cmd.getPageOffset() == null ? 1L : cmd.getPageOffset();
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
-        List<BannerDTO> result = bannerProvider.listBanners(cmd.getKeyword(),offset,pageSize).stream().map((Banner r) ->{
+        List<BannerDTO> result = bannerProvider.listBanners(cmd.getKeyword(), offset,pageSize).stream().map((Banner r) ->{
             BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
             dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
             return dto;
@@ -715,7 +734,6 @@ public class BannerServiceImpl implements BannerService {
         BannerClick bannerClick = this.bannerProvider.findBannerClickByToken(token);
         BannerClickDTO dto = ConvertHelper.convert(bannerClick, BannerClickDTO.class);
         return dto;
-        
     }
     
     @Override
@@ -738,4 +756,350 @@ public class BannerServiceImpl implements BannerService {
         return dto;
         
     }
+
+	@Override
+	public ListBannersByOwnerCommandResponse listBannersByOwner(ListBannersByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() 
+				: this.configurationProvider.getIntValue("pagination.page.size", AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+				pageSize + 1, ApplyPolicy.CUSTOMIZED);
+        if(result == null || result.isEmpty()) {
+        	result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+        			pageSize + 1, ApplyPolicy.DEFAULT);
+        }
+        
+        for(BannerDTO dto : result) {
+        	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
+        }
+        
+		bannerDTOSort(result);
+		
+		ListBannersByOwnerCommandResponse resp = new ListBannersByOwnerCommandResponse();
+		resp.setBanners(result);
+		if(result.size() > pageSize) {
+			resp.setNextPageAnchor(result.get(result.size() - 1).getId());
+			result.remove(result.size() - 1);
+		}
+		return resp;
+	}
+
+	private void bannerDTOSort(List<BannerDTO> result) {
+		Collections.sort(result, (b1, b2) -> {
+			if (b1 == null || b2 == null) {
+				return 0;
+			}
+			if (b1.getStatus() == ACTIVE.getCode() && b2.getStatus() == ACTIVE.getCode()) {
+				return b1.getOrder().compareTo(b2.getOrder());
+			}
+			if (b1.getStatus() == CLOSE.getCode() && b2.getStatus() == CLOSE.getCode()) {
+				return b2.getUpdateTime().compareTo(b1.getUpdateTime());
+			}
+			return b1.getStatus().compareTo(b2.getStatus());
+		});
+	}
+
+	@Override
+	public void reorderBannerByOwner(ReorderBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<BannerOrder> bannerOrders = cmd.getBanners();
+        if(bannerOrders == null){
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid banners parameter.");
+        }
+        if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        
+    	List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                cmd.getScope(), null, null, null, ApplyPolicy.CUSTOMIZED);
+        if(customizedBanners == null || customizedBanners.isEmpty()) {// 如果没有自定义的banner，则复制默认banner并重排序
+         	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
+         	dbProvider.execute(status -> {
+         		bannerOrders.forEach(bo -> {
+         			Banner banner = null;
+         			for(BannerDTO dto : defaultBanners) {
+         				if(Objects.equals(dto.getId(), bo.getId())) {
+         					banner = ConvertHelper.convert(dto, Banner.class);
+         					break;
+         				}
+         			}
+         			// Banner banner = bannerProvider.findBannerById(bo.getId());
+                    if(banner != null && bo.getDefaultOrder() != null) {
+                    	banner.setOrder(bo.getDefaultOrder());
+                    	banner.setId(null);
+                    	banner.setScopeCode(cmd.getScope().getScopeCode());
+                    	banner.setScopeId(cmd.getScope().getScopeId());
+                    	banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+                     	bannerProvider.createBanner(banner);
+                    }
+                });
+         		return status;
+         	});
+        } else {// 有自定义的banner，直接重排序
+        	dbProvider.execute(status -> {
+	        	bannerOrders.forEach(bo -> {
+	     			 Banner banner = bannerProvider.findBannerById(bo.getId());
+	                 if(banner != null && bo.getDefaultOrder() != null) {
+	                 	banner.setOrder(bo.getDefaultOrder());
+	                 	bannerProvider.updateBanner(banner);
+	                 }
+	            });
+	        	return status;
+         	});
+        }
+	}
+	
+	/**
+	 * 复制默认的banner为用户可见范围下customized的banner
+	 * 
+	 * @param scope 复制过后新的banner的可见范围
+	 */
+	private void copyDefaultToCustomized(BannerScope scope) {
+        List<BannerDTO> customizedBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                scope, null, null, null, ApplyPolicy.CUSTOMIZED);
+        if(customizedBanners == null || customizedBanners.isEmpty()) {
+        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
+        	for(BannerDTO dto : defaultBanners) {
+        		Banner b = ConvertHelper.convert(dto, Banner.class);
+        		b.setScopeCode(scope.getScopeCode());
+        		b.setScopeId(scope.getScopeId());
+        		b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+        		b.setId(null);
+        		bannerProvider.createBanner(b);
+        	}
+        }
+	}
+	
+	@Override
+	public void deleteBannerByOwner(DeleteBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(cmd.getId() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+        }
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null) {
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 如果当前要删除的banner为默认的banner，则需要复制并设置删除状态
+        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
+        	dbProvider.execute(status -> {
+        		for(BannerDTO dto : defaultBanners) {
+     				Banner b = ConvertHelper.convert(dto, Banner.class);
+     				if(Objects.equals(b.getId(), cmd.getId())) {
+     					b.setStatus(BannerStatus.DELETE.getCode());
+     					createDeleteOperLog(b.getId());
+     				}
+     				b.setId(null);
+     				b.setScopeCode(cmd.getScope().getScopeCode());
+     				b.setScopeId(cmd.getScope().getScopeId());
+                	b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+     				bannerProvider.createBanner(b);
+     			}
+        		return status;
+        	});
+        } else {// 直接设置为删除状态
+        	banner.setStatus(BannerStatus.DELETE.getCode());
+            bannerProvider.updateBanner(banner);
+            createDeleteOperLog(banner.getId());
+        }
+	}
+	
+	private void createDeleteOperLog(Long bannerId) {
+		try {
+			User user = UserContext.current().getUser();
+			AuditLog log = new AuditLog();
+			log.setAppId(0L);
+			log.setOperatorUid(user.getId());
+			log.setOperationType(AuditLogOperator.DELETE.name());
+			log.setResourceType(Tables.EH_BANNERS.getName());
+			log.setResourceId(bannerId);
+			log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			auditLogProvider.createAuditLog(log);
+		} catch (Exception e) {
+			LOGGER.error("Create delete banner operator log error, bannerId = " + bannerId);
+			e.printStackTrace();
+		}
+	}
+	
+
+    @Override
+	public void createBannerByOwner(CreateBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		checkBannerActivationCount(cmd.getScope(), cmd.getSceneTypes());
+		
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        if(cmd.getBannerLocation() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerLocation parameter.");
+        }
+        if(cmd.getBannerGroup() == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup parameter.");
+        }
+        if(cmd.getSceneTypes() == null || cmd.getSceneTypes().isEmpty()) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scentTypes parameter.");
+        }
+        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        
+        dbProvider.execute(status -> {
+        	 copyDefaultToCustomized(cmd.getScope());
+             
+             for(String sceneStr : cmd.getSceneTypes()) {
+                 SceneType sceneType = SceneType.fromCode(sceneStr);
+                 if(sceneType == null) {
+                     LOGGER.error("Invalid scene type, userId={}, sceneType={}, cmd={}", userId, sceneStr, cmd);
+                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                             ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid sceneTypes parameter.");
+                 }
+                 Banner banner = new Banner();
+                 banner.setActionType(cmd.getActionType());
+                 banner.setActionData(cmd.getActionData());
+                 banner.setCreatorUid(userId);
+                 banner.setBannerLocation(cmd.getBannerLocation());
+                 banner.setBannerGroup(cmd.getBannerGroup());
+                 banner.setName(cmd.getName());
+                 banner.setNamespaceId(user.getNamespaceId());
+                 banner.setStatus(cmd.getStatus());
+                 banner.setPosterPath(cmd.getPosterPath());
+                 banner.setScopeCode(cmd.getScope().getScopeCode());
+                 banner.setScopeId(cmd.getScope().getScopeId());
+                 banner.setOrder(cmd.getDefaultOrder());
+                 banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+                 banner.setSceneType(sceneType.getCode());
+                 
+                 bannerProvider.createBanner(banner);
+             }
+        	return status;
+        });
+	}
+
+    /**
+     * 分不同的场景检查当前作用范围下banner的激活数量是否超限
+     * @param scope 当前作用范围
+     * @param sceneTypes 需要检查的场景列表
+     */
+	private void checkBannerActivationCount(BannerScope scope, List<String> sceneTypes) {
+		if(sceneTypes != null && !sceneTypes.isEmpty()) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			int maxBannerCount = this.configurationProvider.getIntValue("banner.max.active.count", AppConstants.DEFAULT_MAX_BANNER_CAN_ACTIVE);
+			Map<String, Integer> sceneTypeCountMap = bannerProvider.selectCountGroupBySceneType(namespaceId, scope, BannerStatus.ACTIVE);
+			
+			sceneTypes.forEach(scene -> {
+				Integer activeCount = sceneTypeCountMap.get(scene);
+				if(activeCount != null && activeCount >= maxBannerCount) {
+					throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+							BannerServiceErrorCode.ERROR_BANNER_MAX_ACTIVE, "Banner with maximum number %s of activations", maxBannerCount);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void updateBannerByOwner(UpdateBannerByOwnerCommand cmd) {
+		checkUserNotInOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+        }
+		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
+         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
+        }
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null){
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+        if(cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
+        	// 检查最大banner的激活数量是否超限
+			checkBannerActivationCount(cmd.getScope(), Collections.singletonList(banner.getSceneType()));
+		}
+        // 目前只考虑banner的应用类型为default和customized这两种情况 
+        if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.DEFAULT) {// 要更新的banner为默认的，复制并更新
+        	List<BannerDTO> defaultBanners = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    null, null, null, null, ApplyPolicy.DEFAULT);
+        	dbProvider.execute(status -> {
+        		for(BannerDTO dto : defaultBanners) {
+     				Banner b = ConvertHelper.convert(dto, Banner.class);
+     				if(Objects.equals(b.getId(), cmd.getId())) {
+     					setUpdateDataToBanner(cmd, b);
+     				}
+     				b.setId(null);
+     				b.setScopeCode(cmd.getScope().getScopeCode());
+     				b.setScopeId(cmd.getScope().getScopeId());
+                	b.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
+     				bannerProvider.createBanner(b);
+     			}
+        		return status;
+        	});
+        } else {// 直接更新
+        	setUpdateDataToBanner(cmd, banner);
+            bannerProvider.updateBanner(banner);
+        }
+	}
+
+	private void setUpdateDataToBanner(UpdateBannerByOwnerCommand cmd, Banner banner) {
+		if(cmd.getActionType() != null)
+            banner.setActionType(cmd.getActionType());
+        if(cmd.getActionData() != null)
+            banner.setActionData(cmd.getActionData());
+        if(cmd.getDefaultOrder() != null)
+            banner.setOrder(cmd.getDefaultOrder());
+        if(cmd.getPosterPath() != null)
+            banner.setPosterPath(cmd.getPosterPath());
+        if(cmd.getScope().getScopeId() != null)
+            banner.setScopeId(cmd.getScope().getScopeId());
+        if(cmd.getStatus() != null)
+            banner.setStatus(cmd.getStatus());
+        if(cmd.getScope().getScopeCode() != null)
+        	banner.setScopeCode(cmd.getScope().getScopeCode());
+        if(cmd.getName() != null)
+        	banner.setName(cmd.getName());
+	}
+
+	private void checkUserNotInOrg(String ownerType, Long ownerId) {
+		if(ownerType == null || ownerId == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType or ownerId parameter.");
+		}
+		BannerOwnerType bot = BannerOwnerType.fromCode(ownerType);
+		if(bot == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
+		}
+		User user = UserContext.current().getUser();
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
+		if(member == null){
+			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is not in the organization.");
+		}
+	}
 }

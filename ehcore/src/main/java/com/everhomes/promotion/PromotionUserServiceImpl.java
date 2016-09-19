@@ -173,7 +173,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         cmd.setGroupTypes(groupTypes);
         cmd.setPageSize(100);
         
-        ListOrganizationMemberCommandResponse resp = organizationService.ListParentOrganizationPersonnels(cmd);
+        ListOrganizationMemberCommandResponse resp = organizationService.listParentOrganizationPersonnels(cmd);
         while((resp != null) && (resp.getMembers() != null) && (resp.getMembers().size() > 0)) {
             List<OrganizationMemberDTO>  dtos = resp.getMembers();
             for(OrganizationMemberDTO dto : dtos) {
@@ -188,7 +188,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             }
             
             cmd.setPageAnchor(resp.getNextPageAnchor());
-            resp = organizationService.ListParentOrganizationPersonnels(cmd);
+            resp = organizationService.listParentOrganizationPersonnels(cmd);
             
         }   
     }

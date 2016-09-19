@@ -8,6 +8,8 @@
 *.classpath
 *.settings
 *.project
+*.iml
+
 ehcore/atomikos
 ehrest/target
 .gitignore

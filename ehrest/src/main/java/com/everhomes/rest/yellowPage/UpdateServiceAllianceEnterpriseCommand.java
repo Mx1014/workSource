@@ -28,6 +28,7 @@ import com.everhomes.util.StringHelper;
  *  <li>serviceUrl: 服务链接</li>
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
+ *  <li>type:类型  </li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -62,14 +63,16 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	private Long     categoryId;
 	
-	@ItemType(YellowPageAattchmentDTO.class)
-	private List<YellowPageAattchmentDTO> attachments;
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> attachments;
 	
 	private Long discount;
 	
 	private String serviceUrl;
 	
 	private String discountDesc;
+	
+	private Long type;
 	
 	public Long getId() {
 		return id;
@@ -191,11 +194,11 @@ public class UpdateServiceAllianceEnterpriseCommand {
 		this.categoryId = categoryId;
 	}
 
-	public List<YellowPageAattchmentDTO> getAttachments() {
+	public List<ServiceAllianceAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<YellowPageAattchmentDTO> attachments) {
+	public void setAttachments(List<ServiceAllianceAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 
@@ -221,6 +224,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setDiscountDesc(String discountDesc) {
 		this.discountDesc = discountDesc;
+	}
+
+	public Long getType() {
+		return type;
+	}
+
+	public void setType(Long type) {
+		this.type = type;
 	}
 
 	@Override

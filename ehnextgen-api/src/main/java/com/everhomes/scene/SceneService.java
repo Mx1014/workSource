@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.scene.ListSceneTypesCommand;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
+import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 
 @Component
 public interface SceneService {
@@ -39,4 +40,11 @@ public interface SceneService {
      * @return
      */
     List<SceneTypeInfoDTO> listSceneTypes(ListSceneTypesCommand cmd);
+
+    /**
+     * 根据归属者查询场景列表
+     * @param cmd
+     * @return
+     */
+	List<SceneTypeInfoDTO> listSceneTypeByOwner(ListScentTypeByOwnerCommand cmd);
  }

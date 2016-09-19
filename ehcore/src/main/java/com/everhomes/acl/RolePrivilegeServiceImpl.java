@@ -1,5 +1,7 @@
 package com.everhomes.acl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +38,35 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,25 +102,38 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
+
+
+
+
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationRoleMap;
 import com.everhomes.organization.OrganizationRoleMapProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuType;
+import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
@@ -97,24 +141,36 @@ import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
 import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
+import com.everhomes.rest.organization.CreateOrganizationCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -139,13 +195,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Autowired
 	private OrganizationService organizationService;
 	
+	@Autowired
+	private UserProvider userProvider;
+	
 	
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
 		User user = UserContext.current().getUser();
 		
 		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
@@ -168,19 +227,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		//根据机构获取全部要屏蔽的菜单
 		List<WebMenuScope> orgWebMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getOrganizationId()));
-		
-		//根据域获取全部要屏蔽的菜单
-		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
-		
+
 		//去掉机构要屏蔽的菜单
 		if(null != orgWebMenuScopes && orgWebMenuScopes.size() > 0){
 			menus = this.handleMenus(menus, orgWebMenuScopes);
+		}else{
+			//根据域获取全部要屏蔽的菜单
+			List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+			//去掉域要屏蔽的菜单
+			if(null != webMenuScopes && webMenuScopes.size() > 0)
+				menus = this.handleMenus(menus, webMenuScopes);
 		}
-		
-		//去掉域要屏蔽的菜单
-		if(null != webMenuScopes && webMenuScopes.size() > 0)
-			menus = this.handleMenus(menus, webMenuScopes);
-		
+
 		if(null == menus){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
@@ -194,8 +252,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		return res;
 	}
-	
-	
 
 	@Override
 	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
@@ -207,15 +263,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		//根据机构获取全部要屏蔽的菜单权限
 		List<WebMenuScope> orgWebMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getOrganizationId()));
 		
+
+		if(null != orgWebMenuScopes && orgWebMenuScopes.size() > 0){
+			return this.getListWebMenuPrivilege(webMenuPrivileges, orgWebMenuScopes);
+		}
+
 		//屏蔽域下面的菜单权限
 		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
-		
-		if(null != webMenuScopes){
-			webMenuScopes.addAll(orgWebMenuScopes);
-		}else{
-			webMenuScopes = orgWebMenuScopes;
-		}
-		
 		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
 	
@@ -485,6 +539,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			roles.add(RoleConstants.PM_SUPER_ADMIN);
 		}
 		
+		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
+		command.setOrganizationId(cmd.getOrganizationId());
+		command.setRoleIds(roles);
+		
+		ListOrganizationMemberCommandResponse res =  organizationService.listOrganizationPersonnelsByRoleIds(command);
+		
+		if(1 == res.getMembers().size()){
+			LOGGER.error("Keep at least one administrator, organizationId = {}", cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONNOT_DELETE_ADMIN,
+					"Keep at least one administrator.");
+		}
+		
 		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId());
 		
 		/**
@@ -513,9 +579,92 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		cmd.setRoleIds(roles);
 		
-		return organizationService.listOrganizationPersonnelsByRoleIds(cmd);
+		return organizationService.listOrganizationPersonnelsByRoleIds(ConvertHelper.convert(cmd, ListOrganizationPersonnelByRoleIdsCommand.class));
 	}
 	
+	@Override
+	public void deleteAclRoleAssignment(DeleteAclRoleAssignmentCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
+			LOGGER.error("delete acl role assignment error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"delete acl role assignment error.");
+		}
+		
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		if(null != roleAssignments && 0 < roleAssignments.size()){
+			for (RoleAssignment assignment : roleAssignments) {
+				if(assignment.getRoleId().equals(cmd.getRoleId())){
+					aclProvider.deleteRoleAssignment(assignment.getId());
+				}
+			}
+		}
+	}
+
+	@Override
+	public void addAclRoleAssignment(AddAclRoleAssignmentCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleId()){
+			LOGGER.error("invalid parameter error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"invalid parameter error.");
+		}
+		
+		RoleAssignment roleAssignment = new RoleAssignment();
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		if(null != roleAssignments && 0 < roleAssignments.size()){
+			for (RoleAssignment assignment : roleAssignments) {
+				if(assignment.getRoleId().equals(cmd.getRoleId())){
+					LOGGER.error("role personnel already exist, cmd = {}", cmd);
+					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ASSIGNMENT_EXISTS,
+							"role personnel already exist.");
+				}
+			}
+		}
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			roleAssignment.setRoleId(cmd.getRoleId());
+			roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			roleAssignment.setOwnerId(cmd.getOrganizationId());
+			roleAssignment.setTargetType(cmd.getTargetType());
+			roleAssignment.setTargetId(cmd.getTargetId());
+			roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+			aclProvider.createRoleAssignment(roleAssignment);
+			return null;
+		});
+	}
+	
+	
+	@Override
+	public void batchAddTargetRoles(BatchAddTargetRoleCommand cmd) {
+		if(null == EntityType.fromCode(cmd.getTargetType()) || null == cmd.getRoleIds() || 0 == cmd.getRoleIds().size()){
+			LOGGER.error("set target role error, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"set target role error.");
+		}
+		
+		RoleAssignment roleAssignment = new RoleAssignment();
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+		
+		List<Long> roleIds = cmd.getRoleIds();
+		dbProvider.execute((TransactionStatus status) -> {
+
+			for (RoleAssignment assignment : roleAssignments) {
+				aclProvider.deleteRoleAssignment(assignment.getId());
+			}
+			for (Long roleId : roleIds) {
+				roleAssignment.setRoleId(roleId);
+				roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+				roleAssignment.setOwnerId(cmd.getOrganizationId());
+				roleAssignment.setTargetType(cmd.getTargetType());
+				roleAssignment.setTargetId(cmd.getTargetId());
+				roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+				aclProvider.createRoleAssignment(roleAssignment);				
+			}
+			
+			return null;
+		});
+	}
 	
 	
 	 /**
@@ -632,6 +781,210 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	}
     	
     	return true;
+    }
+    
+    @Override
+    public void exportRoleAssignmentPersonnelXls(
+    		ExcelRoleExcelRoleAssignmentPersonnelCommand cmd,
+    		HttpServletResponse response) {
+    	
+    	Long organizationId = cmd.getOrganizationId();
+    	
+    	Long roleId = cmd.getRoleId();
+    	List<Long> roleIds = new ArrayList<Long>();
+    	ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
+    	command.setKeywords(cmd.getKeywords());
+    	command.setOrganizationId(organizationId);
+    	roleIds.add(roleId);
+    	command.setRoleIds(roleIds);
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(command);
+    	List<OrganizationMemberDTO> members = res.getMembers();
+    	ByteArrayOutputStream out = null;
+    	XSSFWorkbook wb = organizationService.createXSSFWorkbook(members);
+    	try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+		    DownloadUtil.download(out, response);
+		} catch (Exception e) {
+			LOGGER.error("export error, e = {}", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("close error", e);
+			}
+		}
+    }
+    
+    @Override
+    public ImportDataResponse importRoleAssignmentPersonnelXls(
+    		ExcelRoleExcelRoleAssignmentPersonnelCommand cmd,
+    		MultipartFile[] files) {
+    	ImportDataResponse result = new ImportDataResponse();
+    	if(null == files || 0 == files.length){
+    		LOGGER.error("file is empty, cmd = {}" + cmd);
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+    				"file is empty.");
+    	}
+    	
+    	Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+    	
+    	if(null == organization){
+    		LOGGER.error("organization non-existent, organization = {}" + cmd.getOrganizationId());
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+    				"file is empty.");
+    	}
+    	
+    	//解析excel
+		try {
+			List excelList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+			
+			List<OrganizationMemberDTO> memberDTOs = this.convertMemberDTO(excelList);
+			
+			Long totalCount = 0l;
+			
+			Long failCount = 0l;
+			
+			List<String> logs = new ArrayList<String>();
+			
+			totalCount = (long)memberDTOs.size();
+			
+			for (OrganizationMemberDTO organizationMemberDTO : memberDTOs) {
+				try {
+					this.createMemberAndRoleAssignment(organizationMemberDTO, organization.getId(), cmd.getRoleId());
+				} catch (Exception e) {
+					logs.add(StringHelper.toJsonString(organizationMemberDTO) + "exception:" + e.getMessage());
+				}
+			}
+			
+			failCount = (long)logs.size();
+			
+			result.setFailCount(failCount);
+			result.setTotalCount(totalCount);
+			result.setLogs(logs);
+		} catch (IOException e) {
+			LOGGER.error("import data error , cmd = {}" + cmd);
+		}
+    	
+    	return result;
+    }
+    
+    private void createMemberAndRoleAssignment(OrganizationMemberDTO memberDTO, Long organizationId, Long roleId){
+    	
+    	OrganizationMember member = ConvertHelper.convert(memberDTO, OrganizationMember.class);
+    	
+    	User user = UserContext.current().getUser();
+    	
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	
+    	if(StringUtils.isEmpty(memberDTO.getContactToken())
+    			|| StringUtils.isEmpty(memberDTO.getContactName())
+    			|| StringUtils.isEmpty(memberDTO.getGroupName())
+    			|| StringUtils.isEmpty(memberDTO.getEmployeeNo())){
+    		LOGGER.error("invalid parameter error , member = {}" + member);
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+    				"invalid parameter error.");
+    	}
+    	
+    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, memberDTO.getContactToken());
+    	if(null == userIdentifier){
+    		LOGGER.error("Mobile phone not registered , contactToken = {}" + memberDTO.getContactToken());
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+    				"Mobile phone not registered.");
+    	}
+    	
+    	member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+    	member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+    	member.setContactType(IdentifierType.MOBILE.getCode());
+    	member.setCreatorUid(user.getId());
+    	member.setNamespaceId(namespaceId);
+    	member.setGroupId(0l);
+    	member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+    	member.setTargetId(userIdentifier.getOwnerUid());
+    	
+    	dbProvider.execute((TransactionStatus status) -> {
+    		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(memberDTO.getContactToken(), organizationId);
+        	
+        	if(null == organizationMember){
+        		member.setOrganizationId(organizationId);
+        		organizationProvider.createOrganizationMember(member);
+        	}
+        	
+        	Organization department = organizationProvider.findOrganizationByParentAndName(organizationId, memberDTO.getGroupName());
+        	
+        	if(null == department){
+        		CreateOrganizationCommand command = new CreateOrganizationCommand();
+        		command.setGroupType(OrganizationGroupType.DEPARTMENT.getCode());
+        		command.setName(memberDTO.getGroupName());
+        		command.setParentId(organizationId);
+        		OrganizationDTO departmentDTO = organizationService.createChildrenOrganization(command);
+        		member.setOrganizationId(departmentDTO.getId());
+        		member.setGroupPath(departmentDTO.getPath());
+        	}else{
+            	organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(memberDTO.getContactToken(), department.getId());
+            	if(null == organizationMember){
+//            		LOGGER.error("phone number already exists. organizationId = {}, contactToken = {}", department.getId(), memberDTO.getContactToken());
+//    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+//    						"phone number already exists.");
+            		member.setOrganizationId(department.getId());
+            		member.setGroupPath(department.getPath());
+                	organizationProvider.createOrganizationMember(member);
+            	}
+
+        	}
+        	RoleAssignment roleAssignment = new RoleAssignment();
+    		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId());
+    		
+    		if(null != roleAssignments && 0 < roleAssignments.size()){
+    			for (RoleAssignment assignment : roleAssignments) {
+    				if(assignment.getRoleId().equals(roleId)){
+    	        		LOGGER.debug("role assignment already exists. roleId = {}, userId = {}, contactToken = {}", roleId, member.getTargetId(), member.getContactToken());
+    					return null;
+    				}
+    			}
+    		}
+    		
+    		roleAssignment.setRoleId(roleId);
+    		roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+    		roleAssignment.setOwnerId(organizationId);
+    		roleAssignment.setTargetType(EntityType.USER.getCode());
+    		roleAssignment.setTargetId(member.getTargetId());
+    		roleAssignment.setCreatorUid(user.getId());
+    		aclProvider.createRoleAssignment(roleAssignment);
+    		
+    		return null;
+    	});
+    }
+    
+    private List<OrganizationMemberDTO> convertMemberDTO(List excelList){
+    	List<OrganizationMemberDTO> result = new ArrayList<OrganizationMemberDTO>();
+		boolean firstRow = true;
+		for (Object o : excelList) {
+			if(firstRow){
+				firstRow = false;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			OrganizationMemberDTO dto = new OrganizationMemberDTO();
+			
+			if(!StringUtils.isEmpty(r.getA())){
+				dto.setEmployeeNo(Long.valueOf(r.getA()));
+			}
+			dto.setGroupName(r.getB());
+			dto.setContactName(r.getC());
+			Byte gender = 0;
+			if(!StringUtils.isEmpty(r.getD()) && r.getD().equals("男")){
+				gender = 1;
+			}else if(!StringUtils.isEmpty(r.getD()) && r.getD().equals("女")){
+				gender = 2;
+			}
+			dto.setGender(gender);
+			dto.setContactToken(r.getE());
+			
+			result.add(dto);
+		}
+		return result;
     }
     
     private List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
@@ -788,26 +1141,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
 			}
 		}
-		
+
+		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
+
 		if(null != webMenuScopes){
 			for (WebMenuScope webMenuScope : webMenuScopes) {
-				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
-					dtosMap.remove(webMenuScope.getMenuId());
+				WebMenu menu = menuMap.get(webMenuScope.getMenuId());
+				if(null == menu){
+					continue;
+				}
+
+				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT ||
+						WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
+					dto.setModuleId(menu.getId());
+					dto.setModuleName(menu.getName());
+					dto.setDtos(dtosMap.get(webMenuScope.getMenuId()));
+					dtos.add(dto);
 				}
 			}
 		}
-		
-		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
-		
-		for (Long menuId : dtosMap.keySet()) {
-			ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
-			WebMenu menu = menuMap.get(menuId);
-			dto.setModuleId(menu.getId());
-			dto.setModuleName(menu.getName());
-			dto.setDtos(dtosMap.get(menuId));
-			dtos.add(dto);
-		}
-		
+
 		return dtos;
 	}
 	
@@ -822,22 +1176,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	for (WebMenu webMenu : menus) {
     		menuMap.put(webMenu.getId(), webMenu);
 		}
-    	
+
+		menus = new ArrayList<WebMenu>();
+
     	for (WebMenuScope webMenuScope : webMenuScopes) {
     		WebMenu webMenu = menuMap.get(webMenuScope.getMenuId());
-			if(null != webMenu && WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
-				menuMap.remove(webMenuScope.getMenuId());
-			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+
+			if(null == webMenu){
+				continue;
+			}
+
+			if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 				//override menu
 				webMenu.setName(webMenuScope.getMenuName());
+				menus.add(webMenu);
 			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
-				
+				menus.add(webMenu);
 			}
-		}
-    	
-    	menus = new ArrayList<WebMenu>();
-    	for (Long  key : menuMap.keySet()) {
-    		menus.add(menuMap.get(key));
 		}
     	return menus;
 	}

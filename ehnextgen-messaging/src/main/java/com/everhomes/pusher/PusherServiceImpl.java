@@ -145,7 +145,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 ByteArrayInputStream bis = new ByteArrayInputStream(cert.getData());
                 //.withCert("/home/janson/projects/pys/apns/apns_develop.p12", "123456")
                 ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5).asQueued();
-                if(certName.indexOf("develop") >= 0) {
+                if(partner.indexOf("develop") >= 0) {
                     builder = builder.withSandboxDestination();
                 } else {
                     builder = builder.withProductionDestination();
@@ -276,27 +276,29 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         //use queue to notify
         
             int now =  (int)(new Date().getTime()/1000);
+
+            try {
+                    EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                                now + 60 * 60 /* Expire in one hour */,
+                                identify /* Device Token */,
+                                payload);
+                    ApnsService tempService = getApnsService(partner);
+                    if(tempService != null) {
+                            tempService.push(notification);   
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    }
+                     } else {
+                         LOGGER.warn("Pushing apnsServer not found");
+                     }
+            } catch (NetworkIOException e) {
+                LOGGER.warn("apns error and stop it", e);
+                stopApnsServiceByName(partner);
+            } catch(Exception ex) {
+                LOGGER.warn("apns error deviceId not correct", ex);
+            }
             
-            EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
-                        now + 60 * 60 /* Expire in one hour */,
-                        identify /* Device Token */,
-                        payload);
-            ApnsService tempService = getApnsService(partner);
-            if(tempService != null) {
-                try {
-                    tempService.push(notification);   
-                    
-                    if(LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
-                            + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
-                            }
-                } catch (NetworkIOException e) {
-                    LOGGER.warn("apns error and stop it", e);
-                    stopApnsServiceByName(partner);
-                }
-//            }
-            
-        }
     }
     
     private String getPlatform(UserLogin destLogin) {
@@ -310,12 +312,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
 
         Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
+        String platform = null;
         if(d == null) {
-            LOGGER.error("Pushing message, dest device not found, destLogin=" + destLogin);
-            return null;
+            LOGGER.warn("Pushing message, dest device not found, using auto detect, destLogin=" + destLogin);
+            //auto detect by destLogin.getDeviceIdentifier()
+            if(destLogin.getDeviceIdentifier().indexOf(":") >= 0) {
+                platform = "android";
+            } else if(destLogin.getDeviceIdentifier().length() >= 60) {
+                platform = "iOS";
+            }
+            
+            return platform;
         }
         
-        String platform = d.getPlatform();
+        platform = d.getPlatform();
         if(platform == null || !(platform.equals("iOS") || platform.equals("android"))) {
             //platform != iOS && platform != "android", auto detect by deviceId
             if(d.getDeviceId() != null) {
@@ -423,23 +433,23 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Override
     public void pushServiceTest(PushMessageCommand cmd) {
-//        ApnsService service =
-//                APNS.newService()
-//                .withCert("/tmp/apns_appstore.p12", "zuolin")
-//                .withAppleDestination(true)
-//                .build();
+        ApnsService service =
+                APNS.newService()
+                .withCert("/tmp/apns_appstore.p12", "zuolin")
+                .withAppleDestination(false)
+                .build();
         
 //        ApnsService service = getApnsService("namespace:1000000");
-//        
-//        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
-//        String token = cmd.getDeviceId();
-//        service.push(token, payload);
-//        
-//        Map<String, Date> inactiveDevices = service.getInactiveDevices();
-//        for (String deviceToken : inactiveDevices.keySet()) {
-//            Date inactiveAsOf = inactiveDevices.get(deviceToken);
-//            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
-//        }
+        
+        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
+        String token = cmd.getDeviceId();
+        service.push(token, payload);
+        
+        Map<String, Date> inactiveDevices = service.getInactiveDevices();
+        for (String deviceToken : inactiveDevices.keySet()) {
+            Date inactiveAsOf = inactiveDevices.get(deviceToken);
+            LOGGER.info("date=" + inactiveAsOf + " deviceToken=" + deviceToken);
+        }
         
         //http://www.concretepage.com/java/jdk-8/java-8-completablefuture-example
 //        List<Integer> list = Arrays.asList(10,20,30,40);
@@ -452,12 +462,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 //        list.stream().map(s->CompletableFuture.supplyAsync(()->s+s))
 //                .map(f->f.whenComplete((result,error)->System.out.println(result+" Error:"+error))).count();
         
-        Map<String, Long> deviceMap = new HashMap<String, Long>();
-        deviceMap.put("7e978fbb0d127671e30b4704414c7bdf272b06d066fccde8a2f309bcfa110393", 0l);
-        deviceMap.put("frompython_195870_xiaoxiao2", 0l);
-        deviceMap = requestDevices(deviceMap);
-        
-        LOGGER.info("all device is: " + deviceMap);
+//        Map<String, Long> deviceMap = new HashMap<String, Long>();
+//        deviceMap.put("7e978fbb0d127671e30b4704414c7bdf272b06d066fccde8a2f309bcfa110393", 0l);
+//        deviceMap.put("frompython_195870_xiaoxiao2", 0l);
+//        deviceMap = requestDevices(deviceMap);
+//        
+//        LOGGER.info("all device is: " + deviceMap);
     }
     
 //    private static int getNumber(int a){

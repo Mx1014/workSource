@@ -237,7 +237,7 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 	private LogonCommandResponse login(UserIdentifier identifier, String password, HttpServletRequest req, HttpServletResponse resp){
 		UserLogin login = this.userService.logon(identifier.getNamespaceId(), identifier.getIdentifierToken(), 
 				password, "", "");
-		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
 		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, JSON.toJSONString(login)));

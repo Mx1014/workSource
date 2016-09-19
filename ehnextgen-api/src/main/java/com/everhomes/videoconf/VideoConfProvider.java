@@ -54,6 +54,8 @@ public interface VideoConfProvider {
 //	void updateEnterpriseVideoconfAccount(ConfAccountHistories account);
 //	ConfAccountHistories findEnterpriseAccountByAccountId(Long accountId);
 	ConfAccounts findAccountByUserId(Long userId);
+	List<ConfAccounts> findAccountsByUserId(Long userId);
+	ConfAccounts findAccountByUserIdAndEnterpriseId(Long userId, Long enterpriseId);
 	List<Long> findUsersByEnterpriseId(Long enterpriseId);
 //	
 	void createConfOrderAccountMap(ConfOrderAccountMap map);
@@ -108,6 +110,7 @@ public interface VideoConfProvider {
 	void updateEnterpriseAccounts();
 	int countAccountsByEnterprise(Long enterpriseId, Byte accountType);
 	int countEnterpriseAccounts(Long enterpriseId);
+	boolean allTrialEnterpriseAccounts(Long enterpriseId);
 	List<ConfAccounts> listOccupiedConfAccounts(Timestamp assignedTime);
 	Long listConfTimeByAccount(Long accountId);
 	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize);

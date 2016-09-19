@@ -31,4 +31,5 @@ public interface RegionProvider {
 	List<Region> listRegionByName(Long parentRegionId, RegionScope scope,RegionAdminStatus status, Tuple<String, SortOrder> orderBy,String keyword);
 	Region findRegionByPath(String path);
 	Region findRegionByPath(Integer namespaceId, String path);
+	List<Region> listRegionByParentId(Integer namespaceId, Long parentId, RegionScope scope, RegionAdminStatus status);
 }

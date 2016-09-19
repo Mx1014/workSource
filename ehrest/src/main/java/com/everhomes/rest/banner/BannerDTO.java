@@ -16,13 +16,16 @@ import com.everhomes.util.StringHelper;
  * <li>name: 名称</li>
  * <li>vendorTag: 左邻系统或第三方服务标签标识</li>
  * <li>posterPath: 图片路径</li>
+ * <li>posterUrl:  图片链接</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
  * <li>endTime: banner结束时间</li>
  * <li>order: 顺序</li>
  * <li>creatorUid: banner创建者</li>
+ * <li>sceneType: 场景类型</li>
  * <li>createTime: 创建时间</li>
+ * <li>updateTime: 最后一次更新的时间</li>
  * <li>deleteTime: 删除时间</li>
  * </ul>
  */
@@ -37,6 +40,7 @@ public class BannerDTO {
     private String   name;
     private String   vendorTag;
     private String   posterPath;
+    private String   posterUrl;
     private Byte    actionType;
     private String  actionData;
     private Timestamp startTime;
@@ -44,7 +48,9 @@ public class BannerDTO {
     private Byte     status;
     private Integer  order;
     private Long     creatorUid;
+    private String    sceneType;
     private Timestamp createTime;
+    private Timestamp updateTime;
     private Timestamp deleteTime;
     
     public Long getId() {
@@ -68,7 +74,19 @@ public class BannerDTO {
     public String getScopeType() {
         return scopeType;
     }
-    public void setScopeType(String scopeType) {
+	public String getPosterUrl() {
+		return posterUrl;
+	}
+	public void setPosterUrl(String posterUrl) {
+		this.posterUrl = posterUrl;
+	}
+	public String getSceneType() {
+		return sceneType;
+	}
+	public void setSceneType(String sceneType) {
+		this.sceneType = sceneType;
+	}
+	public void setScopeType(String scopeType) {
         this.scopeType = scopeType;
     }
     public Long getScopeId() {
@@ -77,7 +95,6 @@ public class BannerDTO {
     public void setScopeId(Long scopeId) {
         this.scopeId = scopeId;
     }
-    
     public String getBannerLocation() {
         return bannerLocation;
     }
@@ -96,7 +113,14 @@ public class BannerDTO {
     public void setName(String name) {
         this.name = name;
     }
-    public String getVendorTag() {
+    
+    public Timestamp getUpdateTime() {
+		return updateTime;
+	}
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+	public String getVendorTag() {
         return vendorTag;
     }
     public void setVendorTag(String vendorTag) {
@@ -167,5 +191,4 @@ public class BannerDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 }

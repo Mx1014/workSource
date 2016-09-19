@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -320,9 +321,9 @@ public class ForumServiceImpl implements ForumService {
          */
         if(null != cmd.getEmbeddedAppId() && AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId()){
         	if(VisibleRegionType.COMMUNITY == VisibleRegionType.fromCode(cmd.getVisibleRegionType())) {
-				this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.COMMUNITY.getCode(), communityId);
+				this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.COMMUNITY.getCode(), communityId, post.getSubject());
             }else if(VisibleRegionType.REGION == VisibleRegionType.fromCode(cmd.getVisibleRegionType())){
-            	this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), cmd.getVisibleRegionId());
+            	this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), cmd.getVisibleRegionId(), post.getSubject());
             }
         	
         }
@@ -370,17 +371,18 @@ public class ForumServiceImpl implements ForumService {
 		return null;
 	}
     
-    private void sendTaskMsgToMembers(String taskType, String ownerType, Long ownerId){
+    private void sendTaskMsgToMembers(String taskType, String ownerType, Long ownerId, String subject){
     	
     	User user = UserContext.current().getUser();
     	Integer namespaceId = UserContext.getCurrentNamespaceId();
     	
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
     	
-    	Map<String,Object> map = new HashMap<String, Object>();
+    	Map<String,Object> map = new LinkedHashMap<String, Object>();
     	
     	map.put("createUName", user.getNickName());
     	map.put("createUToken", userIdentifier.getIdentifierToken());
+    	map.put("subject", subject);
     	
     	String msg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_NEW, user.getLocale(), map, "");
     	
@@ -1146,6 +1148,17 @@ public class ForumServiceImpl implements ForumService {
          	forumIds.add(community.getDefaultForumId());
          }
          
+         Condition privateCond = null;
+         if(PostPrivacy.PRIVATE == PostPrivacy.fromCode(cmd.getPrivateFlag())){
+        	 Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(operator.getId());
+             
+             // 只有公开的帖子才能查到
+        	 privateCond = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+        	 privateCond = creatorCondition.or(privateCond);
+         }
+         
+        
+         
          Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
          
          Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
@@ -1172,6 +1185,10 @@ public class ForumServiceImpl implements ForumService {
          int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
          CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
          locator.setAnchor(cmd.getPageAnchor());
+         
+         if(null != privateCond){
+        	 condition = condition.and(privateCond);
+         }
          
          List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
     	 if(LOGGER.isInfoEnabled()) {
@@ -1300,7 +1317,7 @@ public class ForumServiceImpl implements ForumService {
         
         if(null != cmd.getEmbeddedAppId()){
         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
-        		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+        		categorys = CategoryConstants.GA_PRIVACY_CATEGORIES;
         	}
         	
         }
@@ -2427,7 +2444,7 @@ public class ForumServiceImpl implements ForumService {
         PostPrivacy privateFlag = PostPrivacy.fromCode(cmd.getPrivateFlag());
         if(privateFlag == null) {
             // 政府机构发的维修之类的帖，默认不公开
-            if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(post.getContentCategory())) {
+            if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(post.getCategoryId())) {
                 privateFlag =  PostPrivacy.PRIVATE;
             } else {
                 privateFlag =  PostPrivacy.PUBLIC;
@@ -2681,7 +2698,7 @@ public class ForumServiceImpl implements ForumService {
         	contentCategoryIds.add(contentCategoryId);
         }else{
         	// 為0或者null的情況下，默認查詢全部的任務貼
-        	contentCategoryIds =  CategoryConstants.GA_RELATED_CATEGORIES;
+        	contentCategoryIds =  CategoryConstants.GA_PRIVACY_CATEGORIES;
         }
         
         Condition cond = null;

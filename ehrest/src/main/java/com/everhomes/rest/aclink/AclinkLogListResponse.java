@@ -1,0 +1,24 @@
+package com.everhomes.rest.aclink;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+public class AclinkLogListResponse {
+    @ItemType(AclinkLogDTO.class)
+    List<AclinkLogDTO> dtos;
+
+    public List<AclinkLogDTO> getDtos() {
+        return dtos;
+    }
+
+    public void setDtos(List<AclinkLogDTO> dtos) {
+        this.dtos = dtos;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

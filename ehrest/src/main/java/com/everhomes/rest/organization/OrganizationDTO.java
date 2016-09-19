@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>公司已经和机构合并(201604)，故在概念上它们是一个；公司分为物业公司、政府相关的公司（工作站、公安等），以及普通公司；
  * <li>namespaceId：域空间id</li>
+ * <li>namespaceName：域空间名称</li>
  * <li>id：主键id</li>
  * <li>parentId：父机构id。没有填0</li>
  * <li>parentName：父机构名称</li>
@@ -37,11 +38,15 @@ import com.everhomes.util.StringHelper;
  * <li>showFlag：控制是否在导航菜单中，{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
  * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>roles：机构/部门/群组拥有的角色</li>
+ *  <li>enterpriseContactor: 企业联系人</li>
+ *  <li>mobile: 手机号</li>
+ * <li>doorplateAddress：门牌地址</li>
  * <li>
  * </ul>
  */
 public class OrganizationDTO {
 	private Integer namespaceId;
+	private String namespaceName;
 	private Long    id;
     private Long    parentId;
     private String parentName;
@@ -80,6 +85,26 @@ public class OrganizationDTO {
 	@ItemType(RoleDTO.class)
 	private List<RoleDTO> roles;
 	
+	private String enterpriseContactor;
+	
+	private String mobile;
+	
+	public String getEnterpriseContactor() {
+		return enterpriseContactor;
+	}
+
+	public void setEnterpriseContactor(String enterpriseContactor) {
+		this.enterpriseContactor = enterpriseContactor;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
 	public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -88,7 +113,15 @@ public class OrganizationDTO {
         this.namespaceId = namespaceId;
     }
 
-    public Long getCommunityId() {
+    public String getNamespaceName() {
+		return namespaceName;
+	}
+
+	public void setNamespaceName(String namespaceName) {
+		this.namespaceName = namespaceName;
+	}
+
+	public Long getCommunityId() {
 		return communityId;
 	}
 
@@ -307,7 +340,7 @@ public class OrganizationDTO {
         this.feedbackForumId = feedbackForumId;
     }
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

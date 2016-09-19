@@ -17,18 +17,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.acl.Privilege;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.link.RichLinkDTO;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.EncriptInfoDTO;
+import com.everhomes.rest.user.FetchMessageCommandResponse;
+import com.everhomes.rest.user.FetchRecentToPastMessageAdminCommand;
 import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.ListVerfyCodeResponse;
 import com.everhomes.rest.user.ListVestResponse;
 import com.everhomes.rest.user.PaginationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.EncryptPlainTextCommand;
@@ -43,11 +52,13 @@ import com.everhomes.rest.user.admin.SendUserTestMailCommand;
 import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserAdminService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -65,8 +76,12 @@ public class UserAdminController extends ControllerBase {
 
     @Autowired
     private UserAdminService userAdminService;
+    
     @Autowired
-	private UserService userService;
+	 private UserService userService;
+    
+    @Autowired
+    private MessagingService messageServce;
 
     @RequestMapping("listVerifyCode")
     @RestReturn(ListVerfyCodeResponse.class)
@@ -383,4 +398,89 @@ public class UserAdminController extends ControllerBase {
         return response;
     }
 	
+    /**
+     * 
+     * 生成测试用户密码
+     * @return
+     */
+    @RequestMapping("createUserImpersonation")
+    @RestReturn(UserImpersonationDTO.class)
+    public RestResponse createUserImpersonation(@Valid CreateUserImpersonationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        RestResponse response = new RestResponse(userService.createUserImpersonation(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        if(response.getResponseObject() == null) {
+            response.setErrorDescription("User not found");
+        } else {
+            response.setErrorDescription("OK");
+        }
+        
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 生成测试用户密码
+     * @return
+     */
+    @RequestMapping("deleteUserImpersonation")
+    @RestReturn(UserImpersonationDTO.class)
+    public RestResponse createUserImpersonation(@Valid DeleteUserImpersonationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        userService.deleteUserImpersonation(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        if(response.getResponseObject() == null) {
+            response.setErrorDescription("User not found");
+        } else {
+            response.setErrorDescription("OK");
+        }
+        
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 生成测试用户密码
+     * @return
+     */
+    @RequestMapping("listUserImpersonation")
+    @RestReturn(SearchUserImpersonationResponse.class)
+    public RestResponse createUserImpersonation(@Valid SearchUserImpersonationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        RestResponse response = new RestResponse(userService.listUserImpersons(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    @RequestMapping("loginMessages")
+    @RestReturn(FetchMessageCommandResponse.class)
+    public RestResponse loginMessages(@Valid FetchRecentToPastMessageAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        List<UserLogin> logins = userService.listUserLogins(cmd.getUserId());
+        for(UserLogin login: logins) {
+            if(login.getLoginId() == cmd.getLoginId().intValue()) {
+                FetchMessageCommandResponse cmdResponse = this.messageServce.fetchRecentToPastMessagesAny(cmd);
+                response.setResponseObject(cmdResponse);
+            }
+        }
+        
+        return response;
+    }
 }

@@ -36,13 +36,18 @@ public interface PrivilegeConstants {
     public static final long TaskAcceptAndRefuse = 306L;
     public static final long TaskProcessingAndGrab = 307L; 
     
+    // privileges defined by pm Task2.0 module
+    public static final long VIEWTASKLIST = 904L;
+    public static final long ASSIGNTASK = 331L;
+    public static final long COMPLETETASK = 332L; 
+    public static final long CLOSETASK = 333L;
     
     // privileges defined by Notice module
     public static final long NoticeManagementPost = 200L;
     
     // privileges defined by Role module
-    public static final long RolePrivilegeList = 602L;
-    public static final long RolePrivilegeUpdate = 603L;
+    public static final long RolePrivilegeList = 606L;
+    public static final long RolePrivilegeUpdate = 607L;
     
     // privileges defined by Admin module
     public static final long OrgAdminList = 604L;

@@ -17,7 +17,7 @@ public enum PunchTimesPerDay {
         return this.code;
     }
     
-    public static PunchTimesPerDay fromCode(Byte code) {
+    public static PunchTimesPerDay fromCode(byte code) {
         for(PunchTimesPerDay t : PunchTimesPerDay.values()) {
             if (t.code == code) {
                 return t;

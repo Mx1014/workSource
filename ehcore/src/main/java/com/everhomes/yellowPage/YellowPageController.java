@@ -30,6 +30,8 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
@@ -56,7 +58,7 @@ public class YellowPageController  extends ControllerBase {
     private YellowPageService yellowPageService;
 
 	@Autowired
-	private CategoryProvider categoryProvider;
+	private YellowPageProvider yellowPageProvider;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -159,17 +161,15 @@ public class YellowPageController  extends ControllerBase {
 	 * <p> 列出服务联盟类型 </p>
 	 */
 	@RequestMapping("listServiceAllianceCategories")
-	@RestReturn(value = CategoryDTO.class, collection = true)
-	public RestResponse listServiceAllianceCategories() {
+	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
+	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
-		@SuppressWarnings("unchecked")
-		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, 
-				CategoryConstants.CATEGORY_ID_YELLOW_PAGE, CategoryAdminStatus.ACTIVE, orderBy);
+		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId, 
+				cmd.getParentId(), CategoryAdminStatus.ACTIVE);
 
-		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
-			return ConvertHelper.convert(r, CategoryDTO.class);
+		List<ServiceAllianceCategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+			return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
 		}).collect(Collectors.toList());
 
 		return new RestResponse(dtoResultList);
@@ -183,11 +183,13 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("getServiceAllianceEnterpriseDetail")
     @RestReturn(value=ServiceAllianceDTO.class)
     public RestResponse getServiceAllianceEnterpriseDetail(@Valid GetServiceAllianceEnterpriseDetailCommand cmd) {
+    	
     	ServiceAllianceDTO res = this.yellowPageService.getServiceAllianceEnterpriseDetail(cmd);
-    	 RestResponse response = new RestResponse(res);
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
+    	 
+    	RestResponse response = new RestResponse(res);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 
     /**
