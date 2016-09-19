@@ -462,7 +462,7 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
 		} else {
-			return homeUrl + contentUrl + "?newsToken=" + newsToken;
+			return homeUrl + contentUrl  + newsToken;
 		}
 	}
 
