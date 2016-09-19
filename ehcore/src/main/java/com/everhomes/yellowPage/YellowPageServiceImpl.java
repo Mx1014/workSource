@@ -12,11 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
-import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -26,11 +24,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.rentalv2.AttachmentType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
@@ -824,6 +818,22 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void addTarget(AddNotifyTargetCommand cmd) {
 		
+		ServiceAllianceNotifyTargets isExist = this.yellowPageProvider.findNotifyTarget(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getCategoryId(), cmd.getContactType() , cmd.getContactToken());
+		if(isExist != null) {
+			if(ContactType.EMAIL.equals(ContactType.fromCode(cmd.getContactType()))) {
+				throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+						YellowPageServiceErrorCode.ERROR_NOTIFY_EMAIL_EXIST,
+	 				"邮箱已存在，请重新输入");
+			} 
+			
+			if(ContactType.MOBILE.equals(ContactType.fromCode(cmd.getContactType()))) {
+				throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+						YellowPageServiceErrorCode.ERROR_NOTIFY_MOBILE_EXIST,
+	 				"该手机号已添加");
+			} 
+				
+		}
 		ServiceAllianceNotifyTargets target = ConvertHelper.convert(cmd, ServiceAllianceNotifyTargets.class);
 		target.setNamespaceId(UserContext.getCurrentNamespaceId());
 		
@@ -894,7 +904,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				cmd.getOwnerId(), cmd.getCategoryId(), ContactType.MOBILE.getCode() , cmd.getContactToken());
 		if(target != null) {
 			throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
-					YellowPageServiceErrorCode.ERROR_NOTIFY_TARGET_EXIST,
+					YellowPageServiceErrorCode.ERROR_NOTIFY_MOBILE_EXIST,
  				"该手机号已添加");
 		}
 		

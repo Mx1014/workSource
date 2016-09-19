@@ -40,6 +40,7 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAtt
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceNotifyTargetsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceAllianceRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAlliancesDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPageAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPagesDao;
@@ -49,6 +50,7 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
@@ -596,7 +598,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         }
         
         if(categoryId != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CATEGORY_ID.eq(categoryId));
         }
     		
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CONTACT_TYPE.eq(contactType));
@@ -630,5 +632,26 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if(result.size()==0)
 			return null;
 		return result.get(0);
+	}
+
+
+	@Override
+	public void createServiceAllianceRequests(ServiceAllianceRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
+        dao.insert(request);
+		
+	}
+
+
+	@Override
+	public ServiceAllianceRequests findServiceAllianceRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ServiceAllianceRequests.class);
 	}
 }

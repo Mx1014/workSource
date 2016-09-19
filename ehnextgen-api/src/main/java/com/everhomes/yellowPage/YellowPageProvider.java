@@ -68,5 +68,8 @@ public interface YellowPageProvider {
 	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long categoryId, Byte contactType, String contactToken);
 	List<ServiceAllianceNotifyTargets> listNotifyTargets(String ownerType, Long ownerId, Byte contactType, 
 			Long categoryId, CrossShardListingLocator locator, int pageSize);
+	
+	void createServiceAllianceRequests(ServiceAllianceRequests request);
+	ServiceAllianceRequests findServiceAllianceRequests(Long id);
 
 }

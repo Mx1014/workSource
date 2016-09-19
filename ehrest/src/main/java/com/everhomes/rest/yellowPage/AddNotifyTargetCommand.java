@@ -20,13 +20,13 @@ public class AddNotifyTargetCommand {
 	private String   ownerType;
 	@NotNull
 	private Long     ownerId;
-	
+	@NotNull
 	private String name;
-	
+	@NotNull
 	private String contactToken;
-	
+	@NotNull
 	private Byte contactType;
-	
+	@NotNull
 	private Long categoryId;
 
 	public String getOwnerType() {

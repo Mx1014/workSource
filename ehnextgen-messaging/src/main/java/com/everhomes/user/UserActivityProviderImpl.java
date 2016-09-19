@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -33,7 +34,9 @@ import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
+import com.everhomes.server.schema.tables.daos.EhRequestTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
 import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
@@ -45,6 +48,8 @@ import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
 import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
 import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhRequestTemplates;
 import com.everhomes.server.schema.tables.pojos.EhUserContacts;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -656,8 +661,13 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
 	@Override
 	public RequestTemplates getCustomRequestTemplate(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhRequestTemplates.class, id));
+		EhRequestTemplatesDao dao = new EhRequestTemplatesDao(context.configuration());
+		EhRequestTemplates result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, RequestTemplates.class);
 	}
 
 	@Override

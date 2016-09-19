@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -127,6 +128,7 @@ import com.everhomes.activity.CheckInStatus;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -142,6 +144,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Attachment;
+import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -1242,13 +1245,27 @@ public class UserActivityServiceImpl implements UserActivityService {
 
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
-		// TODO Auto-generated method stub
-		
+
+		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		handler.addCustomRequest(cmd.getRequestJson());
 	}
 
 	@Override
 	public List<RequestFieldDTO> getCustomRequestInfo(GetRequestInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		
+		List<RequestFieldDTO> dto = handler.getCustomRequestInfo(cmd.getId());
+		return dto;
 	}
+	
+	private CustomRequestHandler getCustomRequestHandler(String templateType) {
+		CustomRequestHandler handler = null;
+        
+        if(!StringUtils.isEmpty(templateType)) {
+            String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + templateType);
+        }
+        
+        return handler;
+    }
 }
