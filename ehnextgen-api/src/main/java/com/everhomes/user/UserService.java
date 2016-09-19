@@ -13,12 +13,12 @@ import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-<<<<<<< HEAD
+
 import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
 import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-=======
+
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
->>>>>>> master
+
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
