@@ -1141,28 +1141,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
 			}
 		}
-		
+
+		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
+
 		if(null != webMenuScopes){
 			for (WebMenuScope webMenuScope : webMenuScopes) {
+				WebMenu menu = menuMap.get(webMenuScope.getMenuId());
+				if(null == menu){
+					continue;
+				}
+
 				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT ||
 						WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
-				}else{
-					dtosMap.remove(webMenuScope.getMenuId());
+					ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
+					dto.setModuleId(menu.getId());
+					dto.setModuleName(menu.getName());
+					dto.setDtos(dtosMap.get(webMenuScope.getMenuId()));
+					dtos.add(dto);
 				}
 			}
 		}
-		
-		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
-		
-		for (Long menuId : dtosMap.keySet()) {
-			ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
-			WebMenu menu = menuMap.get(menuId);
-			dto.setModuleId(menu.getId());
-			dto.setModuleName(menu.getName());
-			dto.setDtos(dtosMap.get(menuId));
-			dtos.add(dto);
-		}
-		
+
 		return dtos;
 	}
 	
@@ -1177,24 +1176,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	for (WebMenu webMenu : menus) {
     		menuMap.put(webMenu.getId(), webMenu);
 		}
-    	
+
+		menus = new ArrayList<WebMenu>();
+
     	for (WebMenuScope webMenuScope : webMenuScopes) {
     		WebMenu webMenu = menuMap.get(webMenuScope.getMenuId());
-			if(null != webMenu && WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
-				menuMap.remove(webMenuScope.getMenuId());
-			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+
+			if(null == webMenu){
+				continue;
+			}
+
+			if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 				//override menu
 				webMenu.setName(webMenuScope.getMenuName());
+				menus.add(webMenu);
 			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
-				
-			}else{
-				menuMap.remove(webMenuScope.getMenuId());
+				menus.add(webMenu);
 			}
-		}
-    	
-    	menus = new ArrayList<WebMenu>();
-    	for (Long  key : menuMap.keySet()) {
-    		menus.add(menuMap.get(key));
 		}
     	return menus;
 	}
