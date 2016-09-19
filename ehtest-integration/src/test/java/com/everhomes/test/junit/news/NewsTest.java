@@ -128,6 +128,7 @@ public class NewsTest extends BaseLoginAuthTestCase {
 		String uri = LIST_NEWS_URI;
 		logon();
 		ImportNews(DEFAULT_CATEGORY_ID);
+		ImportNews(DEFAULT_CATEGORY_ID+1120);
 		ListNewsCommand cmd = new ListNewsCommand();
 		cmd.setOwnerId(1L);
 		cmd.setOwnerType(NewsOwnerType.ORGANIZATION.getCode());
