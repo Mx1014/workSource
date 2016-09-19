@@ -281,12 +281,20 @@ public class NewsServiceImpl implements NewsService {
 		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
 	}
 
+	@Override
+	public ListNewsResponse listNewsForWeb(ListNewsCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = UserContext.current().getNamespaceId();
+		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+	}
 	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long categoryId,Long pageAnchor, Integer pageSize) {
 		return listNews(userId, namespaceId,categoryId, pageAnchor, pageSize, false);
 	}
 
 	private ListNewsResponse listNews(Long userId, Integer namespaceId,Long categoryId, Long pageAnchor, Integer pageSize,
 			boolean isScene) {
+		if(null == categoryId)
+			categoryId = 0L;
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
 		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
 		Long from = pageAnchor * pageSize;
@@ -347,10 +355,10 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		return searchNews(userId, namespaceId, cmd.getKeyword(), pageAnchor, pageSize);
+		return searchNews(userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
 	}
 
-	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, String keyword, Long pageAnchor,
+	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
 			Integer pageSize) {
 		Long from = pageAnchor * pageSize;
 
@@ -366,6 +374,7 @@ public class NewsServiceImpl implements NewsService {
 		sort.add(JSONObject.parseObject("{\"topIndex\":{\"order\":\"desc\"}}"));
 		sort.add(JSONObject.parseObject("{\"createTime\":{\"order\":\"desc\"}}"));
 
+		
 		// 设置查询关键字
 		JSONObject query = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("query");
 		query.put("query_string",
@@ -376,7 +385,10 @@ public class NewsServiceImpl implements NewsService {
 				.getJSONObject("bool").getJSONArray("must");
 		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
 		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
-
+		//设置过滤条件
+		if(null != categoryId){
+			must.add(JSONObject.parse("{ \"term\": { \"categoryId\": "+categoryId+"}} "));
+		}
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 
@@ -405,13 +417,14 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setChildCount(o.getLong("childCount"));
 			newsDTO.setTopFlag(o.getByte("topFlag"));
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
+			newsDTO.setCategoryId(o.getLong("categoryId"));
 			return newsDTO;
 		}).collect(Collectors.toList());
 
 		SearchNewsResponse response = new SearchNewsResponse();
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setNewsList(list);
-
+		
 		return response;
 	}
 
@@ -445,7 +458,7 @@ public class NewsServiceImpl implements NewsService {
 		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
 		String contentUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_PAGE_URL, "");
 		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
-			LOGGER.error("Invalid home url or content url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
+			LOGGER.error("Invalid home url or news page url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
 		} else {
@@ -950,4 +963,5 @@ public class NewsServiceImpl implements NewsService {
 	private void syncNewsWhenDelete(Long id) {
 		searchProvider.deleteById(SearchUtils.NEWS, id.toString());
 	}
+
 }

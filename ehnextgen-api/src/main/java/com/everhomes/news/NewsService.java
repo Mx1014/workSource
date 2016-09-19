@@ -65,5 +65,7 @@ public interface NewsService {
 	void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd);
 
 	void syncNews(SyncNewsCommand cmd);
+
+	ListNewsResponse listNewsForWeb(ListNewsCommand cmd);
 	
 }
