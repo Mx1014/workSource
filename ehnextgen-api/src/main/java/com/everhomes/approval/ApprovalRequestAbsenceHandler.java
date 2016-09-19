@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.AbsenceBasicDescription;
+import com.everhomes.rest.approval.AbsenceRequestDTO;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
@@ -415,4 +417,34 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			return approvalTimeRange;
 		}).collect(Collectors.toList());
 	}
+
+
+	@Override
+	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		List<AbsenceRequestDTO> resultList = approvalRequestList.stream().map(a->{
+			AbsenceRequestDTO absenceRequest = new AbsenceRequestDTO();
+			absenceRequest.setRequestId(a.getId());
+			absenceRequest.setReason(a.getReason());
+			absenceRequest.setNickName(approvalService.getUserName(a.getCreatorUid()));
+			absenceRequest.setCategoryName(approvalCategoryProvider.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
+			List<ApprovalTimeRange> approvalTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(a.getId());
+			List<TimeRange> timeRangeList = new ArrayList<>();
+			String timeTotal = "";
+			for (ApprovalTimeRange approvalTimeRange : approvalTimeRangeList) {
+				TimeRange timeRange = new TimeRange();
+				timeRange.setType(approvalTimeRange.getType());
+				timeRange.setFromTime(approvalTimeRange.getFromTime().getTime());
+				timeRange.setEndTime(approvalTimeRange.getEndTime().getTime());
+				timeRange.setActualResult(approvalTimeRange.getActualResult());
+				timeRangeList.add(timeRange);
+				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+			}
+			absenceRequest.setTimeRangeList(timeRangeList);
+			absenceRequest.setTimeTotal(timeTotal);
+			return absenceRequest;
+		}).collect(Collectors.toList());
+		
+		return JSON.toJSONString(resultList);
+	}
+	
 }

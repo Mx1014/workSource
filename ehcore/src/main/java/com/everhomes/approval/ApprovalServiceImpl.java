@@ -3,6 +3,7 @@ package com.everhomes.approval;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,12 +24,14 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
@@ -39,6 +42,7 @@ import com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalOwnerType;
+import com.everhomes.rest.approval.ApprovalQueryType;
 import com.everhomes.rest.approval.ApprovalRequestCondition;
 import com.everhomes.rest.approval.ApprovalRuleDTO;
 import com.everhomes.rest.approval.ApprovalStatus;
@@ -46,6 +50,7 @@ import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.ApprovalUser;
+import com.everhomes.rest.approval.ApprovalUserDTO;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.BriefApprovalFlowDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -114,6 +119,8 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
@@ -125,6 +132,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
@@ -416,18 +424,22 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalTargetType approvalTargetType = ApprovalTargetType.fromCode(targetType);
 		switch (approvalTargetType) {
 		case USER:
-			User user = userProvider.findUserById(targetId);
-			if (user != null) {
-				return user.getNickName();
-			}
-			break;
+			return getUserName(targetId);
 		default:
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"error target type: targetType="+targetType+", targetId="+targetId);
 		}
-		return "";
 	}
 
+	@Override
+	public String getUserName(Long userId){
+		User user = userProvider.findUserById(userId);
+		if (user != null) {
+			return user.getNickName();
+		}
+		return "";
+	}
+	
 	private boolean checkCurrentLevelExist(Long flowId, Byte level) {
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(flowId, level);
 		if (ListUtils.isNotEmpty(approvalFlowLevelList)) {
@@ -991,10 +1003,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			ApprovalOpRequest approvalOpRequest = approvalOpRequestList.get(i);
 			ApprovalLogOfRequestDTO approvalLog = new ApprovalLogOfRequestDTO();
 			approvalLog.setCreateTime(approvalOpRequest.getCreateTime());
-			User user = userProvider.findUserById(approvalOpRequest.getOperatorUid());
-			if (user != null) {
-				approvalLog.setNickName(user.getNickName());
-			}
+			approvalLog.setNickName(getUserName(approvalOpRequest.getOperatorUid()));
 			
 			approvalLog.setRemark(approvalOpRequest.getProcessMessage());
 			approvalLog.setApprovalStatus(approvalOpRequest.getApprovalStatus());
@@ -1224,6 +1233,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 			handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
 			
 			//5. 发消息给第一级审批者
+			List<ApprovalFlowLevel> nextLevelUser = approvalFlowLevelProvider.listApprovalFlowLevel(approvalRequest.getFlowId(),(byte) 1);
+			sendMessageToNextLevel(nextLevelUser, approvalRequest);
 
 			return approvalRequest;
 		});
@@ -1426,17 +1437,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalRequestProvider.updateApprovalRequest(approvalRequest);
 	}
 
-	@Override
-	public ListApprovalUserResponse listApprovalUser(ListApprovalUserCommand cmd) {
-		return null;
-	}
-
 	//目前可能只适用于异常申请和请假申请
 	@Override
 	public ListApprovalRequestResponse listApprovalRequest(ListApprovalRequestCommand cmd) {
-		if (cmd.getQueryType() == null) {
+		if (ApprovalQueryType.fromCode(cmd.getQueryType()) == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"query type cannot be empty");
+					"query type error, query type="+cmd.getQueryType());
 		}
 		final Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -1447,14 +1453,67 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		//查询当前用户具有的哪些审批流程及审批级别
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByTarget(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalTargetType.USER.getCode(), userId);
+		if (ListUtils.isEmpty(approvalFlowLevelList)) {
+			return new ListApprovalRequestResponse();
+		}
+		
 		List<User> userList = null;
 		if (StringUtils.isNotBlank(cmd.getNickName())) {
 			userList = getMatchedUser(cmd.getNickName());
+			if (ListUtils.isEmpty(userList)) {
+				return new ListApprovalRequestResponse();
+			}
 		}
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<ApprovalRequest> resultList = approvalRequestProvider.listApprovalRequestForWeb(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), 
 				cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(), cmd.getQueryType(), approvalFlowLevelList, userList, cmd.getPageAnchor(), pageSize+1);
+		
+		Long nextPageAnchor = null;
+		if (ListUtils.isNotEmpty(resultList) && resultList.size() > pageSize) {
+			resultList.remove(resultList.size()-1);
+			nextPageAnchor = resultList.get(resultList.size()-1).getId();
+		}
+		
+		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
+		String listJson = handler.processListApprovalRequest(resultList);
+		
+		return new ListApprovalRequestResponse(nextPageAnchor, listJson);
+	}
+
+	@Override
+	public ListApprovalUserResponse listApprovalUser(ListApprovalUserCommand cmd) {
+		final Long userId = getUserId();
+		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if (cmd.getFlowId() == null || cmd.getLevel() == null ) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameters, cmd="+cmd);
+		}
+		ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel());
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		
+		Organization orgCommoand = new Organization();
+		if (cmd.getDepartmentId() == null) {
+			orgCommoand.setId(cmd.getOwnerId());
+		}else {
+			orgCommoand.setId(cmd.getDepartmentId());
+		}
+		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		
+		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeyword(),orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(), locator, 10000);
+		processPinyin(organizationMembers);
+		organizationMembers.sort((o1, o2)->{
+			return o1.getFullInitial().compareTo(o2.getFullInitial());
+		});
+		
+		List<ApprovalUserDTO> resultList = new ArrayList<>();
+		
+		
+		
+		
 		
 		
 		return null;
@@ -1473,6 +1532,13 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	
 
+
+	private void processPinyin(List<OrganizationMember> organizationMembers) {
+		organizationMembers.forEach(o->{
+			String pinyin = PinYinHelper.getPinYin(o.getContactName());
+			o.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+		});
+	}
 
 	private List<User> getMatchedUser(String nickName) {
 		return userProvider.listMatchedUser(nickName);

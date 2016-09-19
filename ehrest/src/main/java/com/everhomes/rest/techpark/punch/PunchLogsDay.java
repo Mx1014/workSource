@@ -26,6 +26,9 @@ import com.everhomes.util.StringHelper;
  * <li>requestFlag: 全天异常申请flag:1-有申请 0-无申请 空-无申请</li>
  * <li>morningRequestFlag: 上午异常申请flag:1-有申请 0-无申请 空-无申请</li>
  * <li>afternoonRequestFlag: 下午异常申请flag:1-有申请 0-无申请 空-无申请</li>
+ * <li>requestToken: 全天异常申请的申请标识</li>
+ * <li>morningRequestToken: 上午异常申请的申请标识</li>
+ * <li>afternoonRequestToken: 下午异常申请的申请标识</li>
  * <li>arriveTime:早上到达时间</li>
  * <li>leaveTime:下午离开时间</li>
  * <li>noonLeaveTime:早上离开时间-四次打卡</li>
@@ -60,6 +63,10 @@ public class PunchLogsDay{
 	private Byte requestFlag;
 	private Byte morningRequestFlag;
 	private Byte afternoonRequestFlag;
+	//added by wh  2016-9-18 增加申请ID, update by tt, 160919, 改成requestToken
+	private String requestToken;
+	private String morningRequestToken;
+	private String afternoonRequestToken;
 	//added by wh 为了审批增加4个时间戳
     private Long arriveTime;
     private Long leaveTime; 
@@ -68,6 +75,42 @@ public class PunchLogsDay{
 
 	public Byte getMorningPunchStatus() {
 		return morningPunchStatus;
+	}
+
+
+
+	public String getRequestToken() {
+		return requestToken;
+	}
+
+
+
+	public void setRequestToken(String requestToken) {
+		this.requestToken = requestToken;
+	}
+
+
+
+	public String getMorningRequestToken() {
+		return morningRequestToken;
+	}
+
+
+
+	public void setMorningRequestToken(String morningRequestToken) {
+		this.morningRequestToken = morningRequestToken;
+	}
+
+
+
+	public String getAfternoonRequestToken() {
+		return afternoonRequestToken;
+	}
+
+
+
+	public void setAfternoonRequestToken(String afternoonRequestToken) {
+		this.afternoonRequestToken = afternoonRequestToken;
 	}
 
 

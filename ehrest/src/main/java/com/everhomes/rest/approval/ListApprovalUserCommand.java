@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>level: 级别</li>
  * <li>departmentId: 部门ID</li>
  * <li>keyword: 姓名关键字</li>
+ * <li>pageSize: 每页大小</li>
+ * <li>pageAnchor: 锚点</li>
  * </ul>
  */
 public class ListApprovalUserCommand {

@@ -3,12 +3,16 @@ package com.everhomes.approval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.Row;
+import org.jooq.Row2;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +21,16 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalQueryType;
 import com.everhomes.rest.approval.ApprovalRequestCondition;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ListUtils;
 
 @Component
 public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
@@ -100,7 +107,50 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	public List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<User> userList, Long pageAnchor, int pageSize) {
-		return null;
+		
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType));
+				
+		if (categoryId != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
+		}
+		
+		if (fromDate != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.ge(fromDate));
+		}
+		
+		if (endDate != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
+		}
+		
+		if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
+		}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.REJECTION.getCode()));
+		}
+		
+		if (ListUtils.isNotEmpty(userList)) {
+			List<Long> userIds = userList.stream().map(u->u.getId()).collect(Collectors.toList());
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.in(userIds));
+		}
+		
+		List<Row2<Long, Byte>> flowLevelList = approvalFlowLevelList.stream().map(a->DSL.row(a.getFlowId(), a.getLevel())).collect(Collectors.toList());
+		step = step.and(DSL.row(Tables.EH_APPROVAL_REQUESTS.FLOW_ID, Tables.EH_APPROVAL_REQUESTS.NEXT_LEVEL).in(flowLevelList));
+		
+		if (pageAnchor != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.ID.lt(pageAnchor));
+		}
+		
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).limit(pageSize).fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
+		}
+		
+		return new ArrayList<ApprovalRequest>();
 	}
 
 	private EhApprovalRequestsDao getReadWriteDao() {

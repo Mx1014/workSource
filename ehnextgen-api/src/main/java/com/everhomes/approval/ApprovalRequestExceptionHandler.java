@@ -2,6 +2,8 @@ package com.everhomes.approval;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
+import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -46,6 +49,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	@Autowired
 	private AttachmentProvider attachmentProvider;
 	
+	@Autowired
+	private ApprovalService approvalService;
+	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
@@ -73,7 +79,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
-		approvalRequest.setRemark(approvalExceptionContent.getPunchDate().toString());
+		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate());
 		
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {
@@ -177,4 +183,24 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			punchProvider.createPunchExceptionApproval(punchExceptionApproval);
 		}
 	}
+
+	@Override
+	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		List<ExceptionRequestDTO> resultList = approvalRequestList.stream().map(a->{
+			ExceptionRequestDTO exceptionRequest = new ExceptionRequestDTO();
+			ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
+			exceptionRequest.setRequestId(a.getId());
+			exceptionRequest.setPunchDate(new Timestamp(approvalExceptionContent.getPunchDate()));
+			exceptionRequest.setExceptionRequestType(approvalExceptionContent.getExceptionRequestType());
+			exceptionRequest.setNickName(approvalService.getUserName(a.getCreatorUid()));
+			exceptionRequest.setReason(a.getReason());
+			exceptionRequest.setPunchStatusName(approvalExceptionContent.getPunchStatusName());
+			return exceptionRequest;
+		}).collect(Collectors.toList());
+		
+		
+		return JSON.toJSONString(resultList);
+	}
+	
+	
 }

@@ -1,5 +1,7 @@
 package com.everhomes.approval;
 
+import java.util.List;
+
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -19,5 +21,7 @@ public interface ApprovalRequestHandler {
 	void processCancelApprovalRequest(ApprovalRequest approvalRequest);
 
 	void processFinalApprove(ApprovalRequest approvalRequest);
+
+	String processListApprovalRequest(List<ApprovalRequest> approvalRequestList);
 	
 }

@@ -135,6 +135,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -584,12 +585,18 @@ public class PunchServiceImpl implements PunchService {
 		if (exceptionRequests.size() > 0) {
 			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
 				//是否有请求的flag
-				if(exceptionRequest.getApprovalStatus() != null )
+				if(exceptionRequest.getApprovalStatus() != null ){
 					pdl.setRequestFlag(NormalFlag.YES.getCode());
-				if(exceptionRequest.getMorningApprovalStatus() != null )
+					pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+				}
+				if(exceptionRequest.getMorningApprovalStatus() != null ){
 					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
-				if(exceptionRequest.getAfternoonApprovalStatus() != null )
+					pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+				}
+				if(exceptionRequest.getAfternoonApprovalStatus() != null ){
 					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
+					pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+				}
 				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
 				
 				punchExceptionDTO.setRequestType(exceptionRequest

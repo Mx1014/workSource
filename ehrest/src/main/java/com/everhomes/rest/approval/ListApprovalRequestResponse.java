@@ -14,6 +14,16 @@ public class ListApprovalRequestResponse {
 	private Long nextPageAnchor;
 	private String listJson;
 
+	public ListApprovalRequestResponse() {
+		super();
+	}
+
+	public ListApprovalRequestResponse(Long nextPageAnchor, String listJson) {
+		super();
+		this.nextPageAnchor = nextPageAnchor;
+		this.listJson = listJson;
+	}
+
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

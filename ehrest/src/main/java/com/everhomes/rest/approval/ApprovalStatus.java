@@ -22,7 +22,7 @@ public enum ApprovalStatus {
 		return this.code;
 	}
 	
-	public ApprovalStatus fromCode(Byte code){
+	public static ApprovalStatus fromCode(Byte code){
 		if (code != null) {
 			for (ApprovalStatus approvalStatus : ApprovalStatus.values()) {
 				if (approvalStatus.getCode() == code.byteValue()) {

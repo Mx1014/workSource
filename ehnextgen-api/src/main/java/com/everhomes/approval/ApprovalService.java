@@ -3,17 +3,16 @@ package com.everhomes.approval;
 
 import java.util.List;
 
-import com.everhomes.rest.approval.ApprovalRequestDTO;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
-import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
@@ -57,10 +56,10 @@ import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
@@ -136,5 +135,7 @@ public interface ApprovalService {
 	ListApprovalCategoryBySceneResponse listApprovalCategoryByScene(ListApprovalCategoryBySceneCommand cmd);
 
 	void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd);
+
+	String getUserName(Long userId);
 
 }

@@ -104,6 +104,11 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	@Override
 	public void processFinalApprove(ApprovalRequest approvalRequest) {
 	}
+
+	@Override
+	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		return null;
+	}
 	
 	
 }
