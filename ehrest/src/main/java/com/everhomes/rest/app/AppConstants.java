@@ -46,4 +46,6 @@ public interface AppConstants {
     public static final int PAGINATION_MAX_SIZE = 2000;
     public static final String DEFAULT_ETAG_TIMEOUT_KEY = "etag.timeout";
     public static final int DEFAULT_ETAG_TIMEOUT_SECONDS = 5;
+    
+    public static final int DEFAULT_MAX_BANNER_CAN_ACTIVE = 8;// 默认用户可以激活的banne的数量
 }

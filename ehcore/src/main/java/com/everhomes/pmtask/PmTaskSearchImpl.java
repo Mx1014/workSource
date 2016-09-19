@@ -39,6 +39,7 @@ import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
@@ -142,10 +143,18 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	
         	if(tasks.size() > 0){
         		tasks = tasks.stream().map(r -> {
-        			User user = userProvider.findUserById(r.getCreatorUid());
-        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-        			r.setNickName(user.getNickName());
-        			r.setMobile(userIdentifier.getIdentifierToken());
+        			
+        			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(r.getId(), PmTaskStatus.UNPROCESSED.getCode());
+    				PmTaskLog log = logs.get(0);
+        			if(0L == log.getOperatorUid()){
+        				r.setNickName(log.getOperatorName());
+            			r.setMobile(log.getOperatorPhone());
+        			}else{
+        				User user = userProvider.findUserById(log.getOperatorUid());
+            			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+            			r.setNickName(user.getNickName());
+            			r.setMobile(userIdentifier.getIdentifierToken());
+        			}
         			return r;
         		}).collect(Collectors.toList());
 
@@ -218,8 +227,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         }
         
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        
-        builder.setSize(pageSize);
+        if(null != pageSize)
+        	builder.setSize(pageSize);
         builder.setQuery(qb).setPostFilter(fb);
         // builder.addSort("createTime", SortOrder.ASC);
         builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));

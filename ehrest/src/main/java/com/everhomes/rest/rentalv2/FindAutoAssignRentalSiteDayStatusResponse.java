@@ -34,6 +34,7 @@ import com.everhomes.util.StringHelper;
  * <li>sitePics：{@link com.everhomes.rest.rentalv2.RentalSitePicDTO}详情图片多张 </li> 
  * <li>attachments：{@link com.everhomes.rest.rentalv2.AttachmentDTO}附件列表 </li> 
  * <li>siteItems：{@link com.everhomes.rest.rentalv2.SiteItemDTO} 商品列表</li> 
+ * <li>dayTimes：Long数组,按小时预订的时候把纵坐标轴的所有时间戳填入</li> 
  * </ul>
  */
 public class FindAutoAssignRentalSiteDayStatusResponse {
@@ -69,7 +70,8 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private List<AttachmentConfigDTO> attachments;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
-	
+	@ItemType(Long.class)
+	private List<Long> dayTimes;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -348,6 +350,16 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 
 	public void setSiteCounts(Double siteCounts) {
 		this.siteCounts = siteCounts;
+	}
+
+
+	public List<Long> getDayTimes() {
+		return dayTimes;
+	}
+
+
+	public void setDayTimes(List<Long> dayTimes) {
+		this.dayTimes = dayTimes;
 	}
  
 

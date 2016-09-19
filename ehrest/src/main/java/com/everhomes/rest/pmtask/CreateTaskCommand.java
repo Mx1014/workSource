@@ -23,6 +23,7 @@ public class CreateTaskCommand {
 	private String content;
 	private String nickName;
 	private String mobile;
+	private Long organizationId;
 	
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
@@ -78,6 +79,12 @@ public class CreateTaskCommand {
 	}
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 	
 }

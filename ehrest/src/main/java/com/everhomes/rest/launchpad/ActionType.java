@@ -6,6 +6,7 @@ package com.everhomes.rest.launchpad;
  * <li>NONE(0): 无</li>
  * <li>BIZ(1): 更多按钮</li>
  * <li>NAVIGATION(2): 跳下一层</li>
+ * <li>THIRDPART_URL(14): 第三方url</li>
  * <li>OPEN_DOOR(21): 门禁</li>
  * <li>PUNCH(23): 打卡</li>
  * <li>MEETINGROOM(24): 会议室预定</li>

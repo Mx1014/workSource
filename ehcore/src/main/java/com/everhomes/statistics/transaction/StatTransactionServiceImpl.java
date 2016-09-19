@@ -304,6 +304,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					Condition resCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
 					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(resCond, sStartDate, sEndDate);
 					result.setResourceName(statService.getServiceName());
+					result.setResourceType(statService.getServiceType());
 					result.setServiceType(serviceType);
 					results.add(result);
 				}
@@ -507,10 +508,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        row2.createCell(2).setCellValue("支付宝退款");
 	        row2.createCell(3).setCellValue("微信实收");
 	        row2.createCell(4).setCellValue("微信退款");
-	        row2.createCell(5).setCellValue("一卡通实收");
-	        row2.createCell(6).setCellValue("一卡通退款");
-	        row2.createCell(7).setCellValue("实收总计");
-	        row2.createCell(8).setCellValue("退款总计");
+//	        row2.createCell(5).setCellValue("一卡通实收");
+//	        row2.createCell(6).setCellValue("一卡通退款");
+	        row2.createCell(5).setCellValue("实收总计");
+	        row2.createCell(6).setCellValue("退款总计");
 	        
 	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultsDTOs) {
 	        	
@@ -521,10 +522,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            row.createCell(2).setCellValue(statServiceSettlementResult.getAlipayRefundAmount());
 	            row.createCell(3).setCellValue(statServiceSettlementResult.getWechatPaidAmount());
 	            row.createCell(4).setCellValue(statServiceSettlementResult.getWechatRefundAmount());
-	            row.createCell(5).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
-	            row.createCell(6).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
-	            row.createCell(7).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
-	            row.createCell(8).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
+//	            row.createCell(5).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
+//	            row.createCell(6).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
+	            row.createCell(5).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
+	            row.createCell(6).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
 			}
 	        
 	        
@@ -543,10 +544,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        row4.createCell(4).setCellValue("支付宝退款");
 	        row4.createCell(5).setCellValue("微信实收");
 	        row4.createCell(6).setCellValue("微信退款");
-	        row4.createCell(7).setCellValue("一卡通实收");
-	        row4.createCell(8).setCellValue("一卡通退款");
-	        row4.createCell(9).setCellValue("实收总计");
-	        row4.createCell(10).setCellValue("退款总计");
+//	        row4.createCell(7).setCellValue("一卡通实收");
+//	        row4.createCell(8).setCellValue("一卡通退款");
+	        row4.createCell(7).setCellValue("实收总计");
+	        row4.createCell(8).setCellValue("退款总计");
 	        
 	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultDetailDTOs) {
 	        	
@@ -559,10 +560,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            row.createCell(4).setCellValue(statServiceSettlementResult.getAlipayRefundAmount());
 	            row.createCell(5).setCellValue(statServiceSettlementResult.getWechatPaidAmount());
 	            row.createCell(6).setCellValue(statServiceSettlementResult.getWechatRefundAmount());
-	            row.createCell(7).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
-	            row.createCell(8).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
-	            row.createCell(9).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
-	            row.createCell(10).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
+//	            row.createCell(7).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
+//	            row.createCell(8).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
+	            row.createCell(7).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
+	            row.createCell(8).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
 			}
 	        
 	        out = new ByteArrayOutputStream();
@@ -671,7 +672,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            List<StatWareDTO> wareDTOs = statShopTransactionDTO.getWares();
 	            String wareInfo = "";
 	            for (StatWareDTO statWareDTO : wareDTOs) {
-	            	wareInfo = statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
+	            	wareInfo += statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
 				}
 	            row.createCell(7).setCellValue(wareInfo);
 			}
@@ -743,8 +744,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != wares){
 					for (Ware ware : wares) {
 						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
-						wareDTO.setNumber(ware.getNumber());
-						statWareDTOs.add(wareDTO);
+						if(null != wareDTO){
+							wareDTO.setNumber(ware.getNumber());
+							statWareDTOs.add(wareDTO);
+						}
 					}
 				}
 			}

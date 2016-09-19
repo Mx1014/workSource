@@ -63,10 +63,16 @@ import com.everhomes.rest.aclink.AclinkDeviceVer;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkFirmwareType;
+import com.everhomes.rest.aclink.AclinkLogCreateCommand;
+import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkLogItem;
+import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkMessageMeta;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkNotificationTemplateCode;
+import com.everhomes.rest.aclink.AclinkQueryLogCommand;
+import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
@@ -235,6 +241,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private AddressProvider addressProvider;
+    
+    @Autowired
+    private AclinkLogProvider aclinkLogProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -2353,6 +2362,87 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             resp.getMessages().add(m);
         }
         
+        return resp;
+    }
+    
+    @Override
+    public AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmds) {
+        AclinkLogListResponse resp = new AclinkLogListResponse();
+        resp.setDtos(new ArrayList<AclinkLogDTO>());
+        for(int i = 0; i < cmds.getItems().size(); i++) {
+            AclinkLogItem cmd = cmds.getItems().get(i);
+            AclinkLog aclinkLog = ConvertHelper.convert(cmd, AclinkLog.class);
+            DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
+            if(cmd.getUserId() == null) {
+                cmd.setUserId(doorAuth.getUserId());
+            }
+            UserInfo user = userService.getUserInfo(cmd.getUserId());
+            DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            
+            aclinkLog.setDoorName(door.getName());
+            aclinkLog.setUserName(user.getNickName());
+            aclinkLog.setHardwareId(door.getHardwareId());
+            aclinkLog.setOwnerId(door.getOwnerId());
+            aclinkLog.setOwnerType(door.getOwnerType());
+            aclinkLog.setDoorType(door.getDoorType());
+            if(user.getPhones() != null && user.getPhones().size() > 0) {
+                aclinkLog.setUserIdentifier(user.getPhones().get(0));    
+            }
+            
+            try {
+                aclinkLogProvider.createAclinkLog(aclinkLog);
+                AclinkLogDTO dto = ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
+                if(dto != null) {
+                    resp.getDtos().add(dto);
+                }
+            } catch(Exception ex) {
+                LOGGER.error("aclinklog error", ex);
+            }
+        }
+        
+        return resp;
+        
+    }
+    
+    @Override
+    public AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd) {
+        AclinkQueryLogResponse resp = new AclinkQueryLogResponse();
+        resp.setDtos(new ArrayList<AclinkLogDTO>());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogs(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                if(cmd.getOwnerType() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                }
+                if(cmd.getOwnerId() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
+                }
+                if(cmd.getEventType() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.eq(cmd.getEventType()));
+                }
+                if(cmd.getKeyword() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
+                            .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
+                }
+                if(cmd.getDoorId() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.eq(cmd.getDoorId()));
+                }
+                
+                return query;
+            }
+            
+        });
+        
+        for(AclinkLog obj : objs) {
+            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
+            resp.getDtos().add(dto);
+        }
         return resp;
     }
 }

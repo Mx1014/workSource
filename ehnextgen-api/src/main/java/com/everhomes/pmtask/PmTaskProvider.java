@@ -10,7 +10,7 @@ public interface PmTaskProvider {
 	
 	PmTask findTaskById(Long id);
 	
-	List<PmTaskLog> listPmTaskLogs(Long taskId);
+	List<PmTaskLog> listPmTaskLogs(Long taskId, Byte status);
 	
 	List<PmTaskAttachment> listPmTaskAttachments(Long ownerId, String contentType);
 	
