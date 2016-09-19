@@ -1,8 +1,14 @@
 /target
+/.idea
+/atomikos
+/logs
+/statistics
 *.gitignore
 *.classpath
 *.settings
 *.project
+*.iml
+
 ehcore/atomikos
 ehrest/target
 .gitignore

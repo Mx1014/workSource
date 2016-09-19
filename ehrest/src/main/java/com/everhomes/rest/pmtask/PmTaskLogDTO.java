@@ -33,6 +33,8 @@ public class PmTaskLogDTO {
 	private String targetType;
 	private Long targetId;
 	private Long operatorUid;
+	private String operatorName;
+	private String operatorPhone;
 	private Timestamp operatorTime;
 	private String text;
 	
@@ -123,5 +125,17 @@ public class PmTaskLogDTO {
 	}
 	public void setText(String text) {
 		this.text = text;
+	}
+	public String getOperatorName() {
+		return operatorName;
+	}
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+	public String getOperatorPhone() {
+		return operatorPhone;
+	}
+	public void setOperatorPhone(String operatorPhone) {
+		this.operatorPhone = operatorPhone;
 	}
 }

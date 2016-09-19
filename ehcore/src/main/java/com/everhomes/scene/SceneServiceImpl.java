@@ -12,10 +12,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.scene.ListSceneTypesCommand;
-import com.everhomes.rest.scene.SceneTypeInfoDTO;import com.everhomes.util.ConvertHelper;
+import com.everhomes.rest.scene.SceneTypeInfoDTO;
+import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 
 @Component
@@ -24,6 +33,9 @@ public class SceneServiceImpl implements SceneService {
         
     @Autowired
     private SceneProvider sceneProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public SceneTypeInfo getSceneTypeById(Long id) {
@@ -70,4 +82,39 @@ public class SceneServiceImpl implements SceneService {
         
         return result;
     }
+    
+    @Override
+	public List<SceneTypeInfoDTO> listSceneTypeByOwner(ListScentTypeByOwnerCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if(cmd.getCommunityId() == null) {
+			LOGGER.error("Community id may not be null, userId={}, namespaceId={}, cmd={}", userId, namespaceId, cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Community id may not be null");
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null) {
+			LOGGER.error("The community id is invalid, userId={}, namespaceId={}, cmd={}", userId, namespaceId, cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "The community id is invalid");
+		}
+		CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+		List<SceneTypeInfo> sceneTypeList = new ArrayList<>();
+		if(communityType == CommunityType.COMMERCIAL) {
+			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PARK_TOURIST.getCode()));
+			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
+		} else if(communityType == CommunityType.RESIDENTIAL) {
+			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.DEFAULT.getCode()));
+			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
+		}
+		
+		List<SceneTypeInfoDTO> dtos = new ArrayList<>();
+		sceneTypeList.forEach(info -> {
+			SceneTypeInfoDTO dto = new SceneTypeInfoDTO();
+			dto.setName(info.getName());
+			dto.setDisplayName(info.getDisplayName());
+			dtos.add(dto);
+		});
+		return dtos;
+	}
  }

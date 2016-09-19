@@ -178,6 +178,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public YellowPageListResponse getYellowPageList(
 			GetYellowPageListCommand cmd) { 
 		YellowPageListResponse response = new YellowPageListResponse();
+		response.setYellowPages(new ArrayList<YellowPageDTO>());
 		if(cmd.getType() != null && cmd.getType().byteValue() > 10) {
 			GetServiceAllianceEnterpriseListCommand command = ConvertHelper.convert(cmd, GetServiceAllianceEnterpriseListCommand.class);
 			command.setPageSize(AppConstants.PAGINATION_MAX_SIZE);
@@ -308,6 +309,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		YellowPageDTO response = null;
 		if(cmd.getType() != null && cmd.getType().byteValue() > 10) {
 			GetServiceAllianceCommand command = ConvertHelper.convert(cmd, GetServiceAllianceCommand.class);
+			command.setType(cmd.getType().longValue());
 			ServiceAllianceDTO sa = getServiceAlliance(command);
 					
 			response = ConvertHelper.convert(sa,YellowPageDTO.class);

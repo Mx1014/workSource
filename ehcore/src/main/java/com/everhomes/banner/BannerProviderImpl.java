@@ -1,21 +1,23 @@
 // @formatter:off
 package com.everhomes.banner;
 
+import static com.everhomes.server.schema.Tables.EH_BANNERS;
+
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectSeekStep3;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -24,7 +26,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
+import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBannerClicksDao;
@@ -50,17 +55,19 @@ public class BannerProviderImpl implements BannerProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createBanner(Banner banner) {
+    public long createBanner(Banner banner) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         
         InsertQuery<EhBannersRecord> query = context.insertQuery(Tables.EH_BANNERS);
         banner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        banner.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         query.setRecord(ConvertHelper.convert(banner, EhBannersRecord.class));
         query.setReturning(Tables.EH_BANNERS.ID);
         query.execute();
+        Long id = query.getReturnedRecord().getId();
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBanners.class, null);
-        
+        return id;
     }
 //    @Caching(evict = { @CacheEvict(value="Banner", key="#banner.id"),
 //            @CacheEvict(value="BannerList", key="#banner.id") } )
@@ -69,6 +76,7 @@ public class BannerProviderImpl implements BannerProvider {
         assert(banner != null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBannersDao dao = new EhBannersDao(context.configuration());
+        banner.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(banner);
         
     }
@@ -303,6 +311,66 @@ public class BannerProviderImpl implements BannerProvider {
 
         return result[0];
     }
-
-
+    
+	@Override
+	public List<Banner> findBannerByNamespeaceId(Integer namespaceId) {
+		List<Banner> banners = new ArrayList<>();
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), namespaceId, (context, reducingContext) -> {
+          context.select().from(Tables.EH_BANNER_CLICKS)
+            .where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+            .fetch().map((r) ->{
+            	banners.add(ConvertHelper.convert(r, Banner.class));
+            	return null;
+            });
+           return true;
+        });
+		return banners;
+	}
+	
+	@Override
+	public List<BannerDTO> listBannersByOwner(Integer namespaceId, BannerScope scope, String sceneType, Long pageAnchor, Integer pageSize, ApplyPolicy applyPolicy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = EH_BANNERS.NAMESPACE_ID.eq(namespaceId).and(EH_BANNERS.STATUS.ne(BannerStatus.DELETE.getCode()));
+		if(scope != null && scope.getScopeId() != null && scope.getScopeCode() != null) {
+			condition = condition.and(EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
+		}
+		if (sceneType != null){
+		    condition = condition.and(EH_BANNERS.SCENE_TYPE.eq(sceneType));
+        }
+		if(pageAnchor != null) {
+			condition = condition.and(EH_BANNERS.CREATE_TIME.ge(new Timestamp(pageAnchor)));
+		}
+		if(applyPolicy != null) {
+			condition = condition.and(EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()));
+		}
+		
+		SelectSeekStep3<EhBannersRecord, Byte, Integer, Timestamp> orderBy = context.selectFrom(EH_BANNERS).where(condition)
+			.orderBy(EH_BANNERS.STATUS.asc(), EH_BANNERS.ORDER.desc(), EH_BANNERS.CREATE_TIME.desc());
+		
+		List<BannerDTO> dtoList;
+		if(pageSize != null) {
+			dtoList = orderBy.limit(pageSize).fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+		} else {
+			dtoList = orderBy.fetch().map(r -> ConvertHelper.convert(r, BannerDTO.class));
+		}
+		return dtoList;
+	}
+	
+	@Override
+	public Map<String, Integer> selectCountGroupBySceneType(Integer namespaceId, BannerScope scope, BannerStatus status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = EH_BANNERS.NAMESPACE_ID.eq(namespaceId);
+		if(scope != null && scope.getScopeId() != null && scope.getScopeCode() != null) {
+			condition = condition.and(EH_BANNERS.SCOPE_CODE.eq(scope.getScopeCode()).and(EH_BANNERS.SCOPE_ID.eq(scope.getScopeId())));
+		}
+		if(status != null) {
+			condition = condition.and(EH_BANNERS.STATUS.eq(status.getCode()));
+		}
+		return context.select(EH_BANNERS.SCENE_TYPE, DSL.count())
+				.from(EH_BANNERS).where(condition)
+				.groupBy(EH_BANNERS.SCENE_TYPE).fetchMap(EH_BANNERS.SCENE_TYPE, DSL.count());
+	}
+	
 }

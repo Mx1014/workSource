@@ -152,9 +152,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public void createRentalSiteRule(RentalCell rsr) {
-		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2Cells.class));
-		rsr.setId(id);
+//		long id = sequenceProvider.getNextSequence(NameMapper
+//				.getSequenceDomainFromTablePojo(EhRentalv2Cells.class));
+//		rsr.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2CellsRecord record = ConvertHelper.convert(rsr,
 				EhRentalv2CellsRecord.class);
@@ -1719,6 +1719,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public RentalCell getRentalCellById(Long cellId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
+		EhRentalv2Cells order = dao.findById(cellId);
+		return ConvertHelper.convert(order, RentalCell.class);
+	}
+	
+	@Override
 	public void createRentalResourceType(RentalResourceType rentalResourceType) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2ResourceTypes.class));
 		rentalResourceType.setId(id); 
@@ -1829,6 +1838,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (null != result && result.size() > 0)
 			return result;
 		return null;
+	}
+
+	@Override
+	public void batchCreateRentalCells(List<EhRentalv2Cells> list) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2Cells.class,
+				 null);
 	}
  
 	

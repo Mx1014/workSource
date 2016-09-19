@@ -36,6 +36,14 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
+
+
+
+
+
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -68,8 +76,17 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
+
+
+
+
+
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
+import com.everhomes.business.BusinessService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -86,6 +103,11 @@ import com.everhomes.payment.PaymentCardProvider;
 import com.everhomes.payment.PaymentCardRechargeOrder;
 import com.everhomes.payment.PaymentCardTransaction;
 import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.business.BusinessDTO;
+import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.business.ListBusinessByKeywordCommand;
+import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardTransactionStatus;
@@ -101,6 +123,8 @@ import com.everhomes.rest.statistics.transaction.SettlementResourceType;
 import com.everhomes.rest.statistics.transaction.SettlementServiceType;
 import com.everhomes.rest.statistics.transaction.SettlementStatOrderStatus;
 import com.everhomes.rest.statistics.transaction.SettlementStatTransactionPaidStatus;
+import com.everhomes.rest.statistics.transaction.StatPaidOrderStatus;
+import com.everhomes.rest.statistics.transaction.StatRefundOrderStatus;
 import com.everhomes.rest.statistics.transaction.StatServiceSettlementResultDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLock;
 import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
@@ -158,6 +182,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+	private BusinessService businessService;
 	
 	@PostConstruct
 	public void setup(){
@@ -278,6 +304,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					Condition resCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_TYPE.eq(statService.getServiceType()));
 					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(resCond, sStartDate, sEndDate);
 					result.setResourceName(statService.getServiceName());
+					result.setResourceType(statService.getServiceType());
 					result.setServiceType(serviceType);
 					results.add(result);
 				}
@@ -481,10 +508,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        row2.createCell(2).setCellValue("支付宝退款");
 	        row2.createCell(3).setCellValue("微信实收");
 	        row2.createCell(4).setCellValue("微信退款");
-	        row2.createCell(5).setCellValue("一卡通实收");
-	        row2.createCell(6).setCellValue("一卡通退款");
-	        row2.createCell(7).setCellValue("实收总计");
-	        row2.createCell(8).setCellValue("退款总计");
+//	        row2.createCell(5).setCellValue("一卡通实收");
+//	        row2.createCell(6).setCellValue("一卡通退款");
+	        row2.createCell(5).setCellValue("实收总计");
+	        row2.createCell(6).setCellValue("退款总计");
 	        
 	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultsDTOs) {
 	        	
@@ -495,10 +522,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            row.createCell(2).setCellValue(statServiceSettlementResult.getAlipayRefundAmount());
 	            row.createCell(3).setCellValue(statServiceSettlementResult.getWechatPaidAmount());
 	            row.createCell(4).setCellValue(statServiceSettlementResult.getWechatRefundAmount());
-	            row.createCell(5).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
-	            row.createCell(6).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
-	            row.createCell(7).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
-	            row.createCell(8).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
+//	            row.createCell(5).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
+//	            row.createCell(6).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
+	            row.createCell(5).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
+	            row.createCell(6).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
 			}
 	        
 	        
@@ -517,10 +544,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	        row4.createCell(4).setCellValue("支付宝退款");
 	        row4.createCell(5).setCellValue("微信实收");
 	        row4.createCell(6).setCellValue("微信退款");
-	        row4.createCell(7).setCellValue("一卡通实收");
-	        row4.createCell(8).setCellValue("一卡通退款");
-	        row4.createCell(9).setCellValue("实收总计");
-	        row4.createCell(10).setCellValue("退款总计");
+//	        row4.createCell(7).setCellValue("一卡通实收");
+//	        row4.createCell(8).setCellValue("一卡通退款");
+	        row4.createCell(7).setCellValue("实收总计");
+	        row4.createCell(8).setCellValue("退款总计");
 	        
 	        for (StatServiceSettlementResultDTO statServiceSettlementResult : statServiceSettlementResultDetailDTOs) {
 	        	
@@ -533,10 +560,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 	            row.createCell(4).setCellValue(statServiceSettlementResult.getAlipayRefundAmount());
 	            row.createCell(5).setCellValue(statServiceSettlementResult.getWechatPaidAmount());
 	            row.createCell(6).setCellValue(statServiceSettlementResult.getWechatRefundAmount());
-	            row.createCell(7).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
-	            row.createCell(8).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
-	            row.createCell(9).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
-	            row.createCell(10).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
+//	            row.createCell(7).setCellValue(statServiceSettlementResult.getPaymentCardPaidAmount());
+//	            row.createCell(8).setCellValue(statServiceSettlementResult.getPaymentCardRefundAmount());
+	            row.createCell(7).setCellValue(statServiceSettlementResult.getTotalPaidAmount());
+	            row.createCell(8).setCellValue(statServiceSettlementResult.getTotalRefundAmount());
 			}
 	        
 	        out = new ByteArrayOutputStream();
@@ -576,16 +603,119 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<StatShopTransactionDTO> dtos = null;
 		if(SettlementOrderType.TRANSACTION == SettlementOrderType.fromCode(cmd.getOrderType())){
-			List<StatTransaction> statTransactions = statTransactionProvider.listStatTransactions(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			List<StatTransaction> statTransactions = statTransactionProvider.listStatTransactions(locator, pageSize, sStartDate, sEndDate, cmd.getResourceId(), cmd.getResourceType(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
 			dtos = convertTransactionDTOByPaid(statTransactions);
 		}else{
-			List<StatRefund> statRefunds = statTransactionProvider.listStatRefunds(locator, pageSize, sStartDate, sEndDate, cmd.getWareId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
+			List<StatRefund> statRefunds = statTransactionProvider.listStatRefunds(locator, pageSize, sStartDate, sEndDate, cmd.getResourceId(), cmd.getResourceType(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getServiceType());
 			dtos = convertTransactionDTOByRefund(statRefunds);
 		}
 		response.setNextPageAnchor(locator.getAnchor());
 		response.setDtos(dtos);
 		
 		return response;
+	}
+	
+	@Override
+	public void exportStatShopTransactions(ListStatTransactionCommand cmd,
+			HttpServletResponse response) {
+		//导出100条
+		cmd.setPageSize(100);
+		ListStatShopTransactionsResponse res = this.listStatShopTransactions(cmd);
+		List<StatShopTransactionDTO> dtos = res.getDtos();
+		this.exportStatShopTransactionsFile(dtos, response);
+	}
+	
+	private void exportStatShopTransactionsFile(List<StatShopTransactionDTO> dtos, HttpServletResponse response){
+		XSSFWorkbook wb = new XSSFWorkbook();
+		ByteArrayOutputStream out = null;
+		try {
+			String sheetName = "流水数据";
+			XSSFSheet sheet = wb.createSheet(sheetName);
+			
+			// 创建单元格样式
+			XSSFCellStyle style = wb.createCellStyle();// 样式对象
+			
+			//设置标题字体格式  
+	        Font font = wb.createFont();
+	        font.setFontHeightInPoints((short)20);  
+	        font.setFontName("Courier New");
+	        
+	        style.setFont(font);
+	        
+	        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+	        titleStyle.setFont(font);
+	        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER); 
+	        
+	        int rowNum = 0;
+	        XSSFRow row1 = sheet.createRow(rowNum ++);
+	        row1.setRowStyle(style);
+	        row1.createCell(0).setCellValue("订单编号");
+	        row1.createCell(1).setCellValue("支付时间");
+	        row1.createCell(2).setCellValue("订单状态");
+	        row1.createCell(3).setCellValue("支付金额");
+	        row1.createCell(4).setCellValue("支付通道");
+	        row1.createCell(5).setCellValue("联系人");
+	        row1.createCell(6).setCellValue("联系电话");
+	        row1.createCell(7).setCellValue("购买商品");
+	        
+	        for (StatShopTransactionDTO statShopTransactionDTO : dtos) {
+	        	
+	        	XSSFRow row = sheet.createRow(rowNum ++);
+	        	row.setRowStyle(style);
+	        	row.createCell(0).setCellValue(statShopTransactionDTO.getOrderNo());
+	        	row.createCell(1).setCellValue(DateUtil.dateToStr(new Date(statShopTransactionDTO.getPaidTime()), DateUtil.DATE_TIME_LINE));
+	            row.createCell(2).setCellValue(statShopTransactionDTO.getStatusName());
+	            row.createCell(3).setCellValue(statShopTransactionDTO.getPaidAmount());
+	            row.createCell(4).setCellValue(statShopTransactionDTO.getPaidChannelName());
+	            row.createCell(5).setCellValue(statShopTransactionDTO.getUserName());
+	            row.createCell(6).setCellValue(statShopTransactionDTO.getUserPhone());
+	            List<StatWareDTO> wareDTOs = statShopTransactionDTO.getWares();
+	            String wareInfo = "";
+	            for (StatWareDTO statWareDTO : wareDTOs) {
+	            	wareInfo += statWareDTO.getWareName() + "X" + statWareDTO.getNumber() + " ";
+				}
+	            row.createCell(7).setCellValue(wareInfo);
+			}
+	        out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtil.download(out, response);
+		} catch (Exception e) {
+			LOGGER.error("export excel error", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("export excel error", e);
+			}
+		}
+		
+	}
+	
+	@Override
+	public List<BusinessDTO> listZuoLinBusinesses() {
+		ListBusinessByKeywordCommand cmd = new ListBusinessByKeywordCommand();
+		cmd.setPageOffset(1);
+		cmd.setPageSize(1000);
+		ListBusinessByKeywordCommandResponse res = businessService.listBusinessByKeyword(cmd);
+		List<BusinessDTO> businessDTOs = res.getList();
+		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
+		
+		if(null != businessDTOs){
+			for (BusinessDTO businessDTO : businessDTOs) {
+				if(BusinessTargetType.fromCode(businessDTO.getTargetType()) == BusinessTargetType.ZUOLIN){
+					dtos.add(businessDTO);
+				}
+			}
+		}
+		//固定添加一个临时店铺 值为-1
+		BusinessDTO businessDTO = new BusinessDTO();
+		businessDTO.setTargetType(BusinessTargetType.ZUOLIN.getCode());
+		businessDTO.setTargetId("-1");
+		businessDTO.setName("临时店铺");
+		businessDTO.setDisplayName("临时店铺");
+		dtos.add(businessDTO);
+		return dtos;
 	}
 	
 	private List<StatShopTransactionDTO> convertTransactionDTOByPaid(List<StatTransaction> statTransactions){
@@ -599,6 +729,11 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != userIdentifier){
 					dto.setUserPhone(userIdentifier.getIdentifierToken());
 				}
+				
+				User user = userProvider.findUserById(statTransaction.getPayerUid());
+				if(null != user){
+					dto.setUserName(user.getNickName());
+				}
 			}
 			
 			String wareJson = statTransaction.getWareJson();
@@ -609,8 +744,10 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null != wares){
 					for (Ware ware : wares) {
 						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
-						wareDTO.setNumber(ware.getNumber());
-						statWareDTOs.add(wareDTO);
+						if(null != wareDTO){
+							wareDTO.setNumber(ware.getNumber());
+							statWareDTOs.add(wareDTO);
+						}
 					}
 				}
 			}
@@ -620,12 +757,58 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			
 			if(null != order){
 				dto.setStatus(order.getStatus());
+				dto.setStatusName(this.getPaidStatusName(order.getStatus()));
 			}
-			
+			dto.setPaidChannelName(this.getPaidChannelName(dto.getPaidChannel()));
 			dtos.add(dto);
 		}
 		
 		return dtos;
+	}
+	
+	private String getPaidStatusName(Byte status){
+		if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.WAITING_PAID){
+			return "待支付";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.WAITING_DELIVER){
+			return "待发货";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.DELIVERED){
+			return "已发货";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.FINISH){
+			return "已完成";
+		}else if(StatPaidOrderStatus.fromCode(status) == StatPaidOrderStatus.CLOSE){
+			return "已关闭";
+		}
+		return "未知";
+	}
+	
+	private String getRefundStatusName(Byte status){
+		if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.UN_APPLY){
+			return "未申请";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.WAITING){
+			return "待处理";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.REJECT){
+			return "已拒绝";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.REFUNDING){
+			return "退款中";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.SUCCESS){
+			return "成功";
+		}else if(StatRefundOrderStatus.fromCode(status) == StatRefundOrderStatus.CLOSE){
+			return "已关闭";
+		}
+		return "未知";
+	}
+	
+	private String getPaidChannelName(Byte paidChannel){
+		if(PaidChannel.fromCode(paidChannel) == PaidChannel.ALIPAY){
+			return "支付宝";
+		}else if(PaidChannel.fromCode(paidChannel) == PaidChannel.WECHAT){
+			return "微信";
+		}else if(PaidChannel.fromCode(paidChannel) == PaidChannel.PAYMENT){
+			return "一卡通";
+		}else if(PaidChannel.fromCode(paidChannel) == PaidChannel.OHTER){
+			return "其他";
+		}
+		return "未知";
 	}
 	
 	private List<StatShopTransactionDTO> convertTransactionDTOByRefund(List<StatRefund> statRefunds){
@@ -657,6 +840,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			StatOrder order = statTransactionProvider.findStatOrderByOrderNoAndResourceType(statRefund.getOrderNo(), SettlementResourceType.SHOP.getCode());
 			if(null != order){
 				dto.setStatus(order.getStatus());
+				dto.setStatusName(this.getRefundStatusName(order.getStatus()));
 			}
 			dtos.add(dto);
 		}
@@ -1800,6 +1984,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					"Failed to get data.");
 		}
 	}
+	
 	
 	public static void main(String[] args) {
 		String json = "{\"version\" : \"1\",\"response\" : {\"nextAnchor\" : \"1\",list:[{\"orderNo\" : \"1\"}]}}";

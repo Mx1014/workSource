@@ -2,8 +2,10 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.user.UserImperInfo;
 
 public interface UserImpersonationProvider {
 
@@ -22,6 +24,10 @@ public interface UserImpersonationProvider {
 
     UserImpersonation getUserImpersonationByTargetId(Long userId);
 
-    List<UserImpersonation> searchUserImpersonations(Long userId, ListingLocator locator, int count);
+    List<UserImpersonation> findOwnerUserImpersonations(Long userId, ListingLocator locator, int count);
+
+    List<UserImpersonation> findTargetUserImpersonations(Long userId, ListingLocator locator, int count);
+
+    List<UserImperInfo> searchUserByPhone(String keyword, Byte impOnly, CrossShardListingLocator locator, int pageSize);
 
 }

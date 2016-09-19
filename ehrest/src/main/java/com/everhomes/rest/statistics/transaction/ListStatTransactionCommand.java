@@ -6,7 +6,8 @@ package com.everhomes.rest.statistics.transaction;
  *<li>endDate:结束时间 到選擇日期當天凌晨+1天結束</li>
  *<li>communityId:小區ID</li>
  *<li>namespaceId:域id</li>
- *<li>wareId:商品</li>
+ *<li>resourceType:类型</li>
+ *<li>resourceId:店铺id</li>
  *<li>orderType:退款订单: refund 和支付订 transaction</li>
  *<li>pageSize:页数</li>
  *<li>pageAnchor:喵点</li>
@@ -22,7 +23,9 @@ public class ListStatTransactionCommand {
 	
 	private Integer namespaceId;
 	
-	private String wareId;
+	private String resourceId;
+	
+	private String resourceType;
 	
 	private String orderType;
 	
@@ -64,12 +67,21 @@ public class ListStatTransactionCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public String getWareId() {
-		return wareId;
+
+	public String getResourceId() {
+		return resourceId;
 	}
 
-	public void setWareId(String wareId) {
-		this.wareId = wareId;
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 	}
 
 	public String getOrderType() {

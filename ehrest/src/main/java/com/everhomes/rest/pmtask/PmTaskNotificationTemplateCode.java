@@ -14,4 +14,8 @@ public interface PmTaskNotificationTemplateCode {
     
     int CLOSED_TASK_LOG = 4;
     
+    int NOTIFY_TO_CREATOR = 5;
+    
+    int NOTIFY_TO_ASSIGNER = 6;
+    
 }

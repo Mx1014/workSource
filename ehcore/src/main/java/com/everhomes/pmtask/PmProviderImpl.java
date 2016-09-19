@@ -146,7 +146,7 @@ public class PmProviderImpl implements PmTaskProvider{
         condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
         
         if(null != pageAnchor && pageAnchor != 0)
-        	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+        	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         
         if(null != status && status.equals(PmTaskProcessStatus.UNPROCESSED.getCode())){
         	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
@@ -177,7 +177,7 @@ public class PmProviderImpl implements PmTaskProvider{
     	}
         
         
-        query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.asc());
+        query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
         if(null != pageSize)
         	query.limit(pageSize);
         
@@ -187,13 +187,16 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public List<PmTaskLog> listPmTaskLogs(Long taskId){
+	public List<PmTaskLog> listPmTaskLogs(Long taskId, Byte status){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskLogs.class));
         
         SelectQuery<EhPmTaskLogsRecord> query = context.selectQuery(Tables.EH_PM_TASK_LOGS);
         if(null != taskId)
         	query.addConditions(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(taskId));
-        query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
+        if(null != status)
+        	query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.eq(status));
+        else
+        	query.addConditions(Tables.EH_PM_TASK_LOGS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
         query.addOrderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
         List<PmTaskLog> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskLog.class))
         		.collect(Collectors.toList());

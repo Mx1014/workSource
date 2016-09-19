@@ -89,8 +89,8 @@ public interface StatTransactionProvider {
 	
 	List<StatService> listStatServiceGroupByServiceTypes();
 	
-	List<StatTransaction> listStatTransactions(CrossShardListingLocator locator, Integer pageSize, String startDate, String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType);
+	List<StatTransaction> listStatTransactions(CrossShardListingLocator locator, Integer pageSize, String startDate, String endDate, String resourceId, String resourceType, Integer namespaceId, Long communityId, String serviceType);
 	
 	
-	List<StatRefund> listStatRefunds(CrossShardListingLocator locator, Integer pageSize, String startDate,String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType);
+	List<StatRefund> listStatRefunds(CrossShardListingLocator locator, Integer pageSize, String startDate,String endDate, String resourceId, String resourceType, Integer namespaceId, Long communityId, String serviceType);
 }

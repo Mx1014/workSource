@@ -542,7 +542,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 	
 	@Override
 	public List<StatTransaction> listStatTransactions(CrossShardListingLocator locator, Integer pageSize, String startDate,
-			String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType) {
+			String endDate, String resourceId, String resourceType, Integer namespaceId, Long communityId, String serviceType) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		List<StatTransaction> results = new ArrayList<StatTransaction>();
 		Condition condition = Tables.EH_STAT_TRANSACTIONS.PAID_DATE.ge(startDate);
@@ -560,8 +560,12 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		if(null != serviceType){
 			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.SERVICE_TYPE.eq(serviceType));
 		}
-		if(!StringUtils.isEmpty(wareId)){
-			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.WARE_JSON.like("%" + wareId + "%"));
+		if(!StringUtils.isEmpty(resourceType)){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.RESOURCE_TYPE.eq(resourceType));
+		}
+		
+		if(!StringUtils.isEmpty(resourceId)){
+			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.RESOURCE_ID.eq(resourceId));
 		}
 		SelectQuery<EhStatTransactionsRecord> query = context.selectQuery(Tables.EH_STAT_TRANSACTIONS);
 		query.addConditions(condition);
@@ -583,7 +587,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 	
 	@Override
 	public List<StatRefund> listStatRefunds(CrossShardListingLocator locator, Integer pageSize, String startDate,
-			String endDate, String wareId, Integer namespaceId, Long communityId, String serviceType) {
+			String endDate, String resourceId, String resourceType, Integer namespaceId, Long communityId, String serviceType) {
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		List<StatRefund> results = new ArrayList<StatRefund>();
@@ -591,7 +595,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		condition = condition.and(Tables.EH_STAT_REFUNDS.REFUND_DATE.le(endDate));
 		
 		if(null != namespaceId){
-			condition = condition.and(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId));
+			condition = condition.and(Tables.EH_STAT_REFUNDS.NAMESPACE_ID.eq(namespaceId));
 		}
 		
 		if(null != locator.getAnchor()){
@@ -601,8 +605,13 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		if(null != serviceType){
 			condition = condition.and(Tables.EH_STAT_REFUNDS.SERVICE_TYPE.eq(serviceType));
 		}
-		if(!StringUtils.isEmpty(wareId)){
-			condition = condition.and(Tables.EH_STAT_REFUNDS.WARE_JSON.like("%" + wareId + "%"));
+		
+		if(!StringUtils.isEmpty(resourceType)){
+			condition = condition.and(Tables.EH_STAT_REFUNDS.RESOURCE_TYPE.eq(resourceType));
+		}
+		
+		if(!StringUtils.isEmpty(resourceId)){
+			condition = condition.and(Tables.EH_STAT_REFUNDS.RESOURCE_ID.eq(resourceId));
 		}
 		SelectQuery<EhStatRefundsRecord> query = context.selectQuery(Tables.EH_STAT_REFUNDS);
 		query.addConditions(condition);
