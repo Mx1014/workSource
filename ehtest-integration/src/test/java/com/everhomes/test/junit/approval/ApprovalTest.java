@@ -1,5 +1,6 @@
 package com.everhomes.test.junit.approval;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
+import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
@@ -38,6 +40,8 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestRestResponse;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryRestResponse;
@@ -92,12 +96,17 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleRestResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
+import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.news.NewsContentType;
 import com.everhomes.rest.ui.approval.ApprovalCreateApprovalRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalGetApprovalBasicInfoOfRequestBySceneRestResponse;
+import com.everhomes.rest.ui.approval.ApprovalListApprovalCategoryBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalFlowOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalLogAndFlowOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalLogOfRequestBySceneRestResponse;
 import com.everhomes.rest.ui.approval.ApprovalListApprovalRequestBySceneRestResponse;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.UserListUserRelatedScenesRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhApprovalCategories;
 import com.everhomes.server.schema.tables.pojos.EhApprovalFlows;
@@ -169,7 +178,10 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	private static final String LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL = "/ui/approval/listApprovalFlowOfRequestByScene";
 	//30. 创建申请（客户端）
 	private static final String CREATE_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/createApprovalRequestByScene";
-
+	//31. 取消申请（客户端）
+	private static final String CANCEL_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/cancelApprovalRequestByScene";
+	//32. 列出审批类别（客户端）
+	private static final String LIST_APPROVAL_CATEGORY_BY_SCENE_URL = "/ui/approval/listApprovalCategoryByScene";
 
 	//1. 增加审批类别，如请假的公出、事假等
 	//@Test
@@ -643,7 +655,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//15. 审批规则列表
-	@Test
+	//@Test
 	public void testListApprovalRule() {
 		String url = LIST_APPROVAL_RULE_URL;
 		logon();
@@ -717,7 +729,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		
 
 	}
 
@@ -981,31 +993,34 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 
 	//30. 创建申请（客户端）
-	//@Test
+	@Test
 	public void testCreateApprovalRequestByScene() {
 		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
+		initListData();
+		//创建请假申请
 		CreateApprovalRequestBySceneCommand cmd = new CreateApprovalRequestBySceneCommand();
-		cmd.setSceneToken("");
-		cmd.setApprovalType((byte)1);
+		cmd.setSceneToken(getSceneToken());
+		cmd.setApprovalType(ApprovalType.ABSENCE.getCode());
 		cmd.setCategoryId(1L);
-		cmd.setReason("");
+		cmd.setReason("我是请假原因");
 		List<TimeRange> timeRangeList = new ArrayList<>();
 		TimeRange timeRange = new TimeRange();
 		timeRange.setType((byte)1);
-		timeRange.setFromTime(DateHelper.currentGMTTime().getTime());
-		timeRange.setEndTime(DateHelper.currentGMTTime().getTime());
-		timeRange.setActualResult("");
+		timeRange.setFromTime(Date.valueOf("2016-09-18").getTime());
+		timeRange.setEndTime(Date.valueOf("2016-09-22").getTime());
 		timeRangeList.add(timeRange);
 		cmd.setTimeRangeList(timeRangeList);
 		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
 		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
-		attachmentDescriptor.setContentType("");
-		attachmentDescriptor.setContentUri("");
-		attachmentDescriptor.setContentUrl("");
+		attachmentDescriptor.setContentType(NewsCommentContentType.IMAGE.getCode());
+		attachmentDescriptor.setContentUri("http://content-1.zuolin.com:80/image/aW1hZ2UvTVRvMlpUTmhNVGRqTVRrNE0yUXpNR0k0WWpJM1pEUmhPVEUxWmpKbFpqaG1OQQ?token=K08C4RsCo8wl-S31M4wo3qLhkYBhpF-aHW_fjc7OyRj-Z_1EKEsaBTRVOtWeH8tXje_LMI7geEo_B_IYnzhwyiOMG_n3k_V9yKwJCnjtj-W-4LZsOnC4krMFe1l3OD8u");
 		attachmentDescriptorList.add(attachmentDescriptor);
+		AttachmentDescriptor attachmentDescriptor2 = new AttachmentDescriptor();
+		attachmentDescriptor2.setContentType(NewsCommentContentType.IMAGE.getCode());
+		attachmentDescriptor2.setContentUri("http://content-1.zuolin.com:80/image/aW1hZ2UvTVRvMlpUTmhNVGRqTVRrNE0yUXpNR0k0WWpJM1pEUmhPVEUxWmpKbFpqaG1OQQ?token=K08C4RsCo8wl-S31M4wo3qLhkYBhpF-aHW_fjc7OyRj-Z_1EKEsaBTRVOtWeH8tXje_LMI7geEo_B_IYnzhwyiOMG_n3k_V9yKwJCnjtj-W-4LZsOnC4krMFe1l3OD8u");
+		attachmentDescriptorList.add(attachmentDescriptor2);
 		cmd.setAttachmentList(attachmentDescriptorList);
-		cmd.setContentJson("");
 
 		ApprovalCreateApprovalRequestBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalCreateApprovalRequestBySceneRestResponse.class);
 		assertNotNull(response);
@@ -1017,7 +1032,41 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 	}
 
-	
+	//31. 取消申请（客户端）
+	//@Test
+	public void testCancelApprovalRequestByScene() {
+		String url = CANCEL_APPROVAL_REQUEST_BY_SCENE_URL;
+		logon();
+		CancelApprovalRequestBySceneCommand cmd = new CancelApprovalRequestBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setRequestToken("");
+
+		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+
+
+	}
+
+	//32. 列出审批类别（客户端）
+	//@Test
+	public void testListApprovalCategoryByScene() {
+		String url = LIST_APPROVAL_CATEGORY_BY_SCENE_URL;
+		logon();
+		ListApprovalCategoryBySceneCommand cmd = new ListApprovalCategoryBySceneCommand();
+		cmd.setSceneToken("");
+		cmd.setApprovalType((byte)1);
+
+		ApprovalListApprovalCategoryBySceneRestResponse response = httpClientService.restPost(url, cmd, ApprovalListApprovalCategoryBySceneRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+		ListApprovalCategoryBySceneResponse myResponse = response.getResponse();
+		assertNotNull(myResponse);
+
+
+	}
 	
 	
 	
@@ -1047,15 +1096,29 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 	}
 
+	private String getSceneToken() {
+		String uri = "/ui/user/listUserRelatedScenes";
+		UserListUserRelatedScenesRestResponse response = httpClientService.restPost(uri, null,
+				UserListUserRelatedScenesRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+		List<SceneDTO> list = response.getResponse();
+		assertTrue("list size should be greater than 0", list != null && list.size() > 0);
+
+		return list.get(0).getSceneToken();
+	}
+	
 	@After
 	public void tearDown() {
 		logoff();
 	}
 
 	private void logon() {
-		String userIdentifier = "root";
+		String userIdentifier = "tt";
 		String plainTexPassword = "123456";
-		logon(null, userIdentifier, plainTexPassword);
+		Integer namespaceId = 999995;
+		logon(namespaceId, userIdentifier, plainTexPassword);
 	}
 
 }

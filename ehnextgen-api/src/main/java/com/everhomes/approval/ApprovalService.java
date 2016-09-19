@@ -136,6 +136,6 @@ public interface ApprovalService {
 
 	void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd);
 
-	String getUserName(Long userId);
+	String getUserName(Long userId, Long organizationId);
 
 }

@@ -33,6 +33,7 @@ import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
@@ -119,6 +120,8 @@ import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
@@ -184,6 +187,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	
 	@Autowired
 	private PunchService punchService;
+	
+	@Autowired
+	private OrganizationService organizationService;
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -391,7 +397,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			return true;
 		});
 		
-		processTargetName(cmd.getApprovalUserList());
+		processTargetName(cmd.getApprovalUserList(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		return new CreateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalUserList()));
 	}
@@ -411,20 +417,20 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 	}
 
-	private void processTargetName(List<ApprovalUser> approvalPersonList) {
+	private void processTargetName(List<ApprovalUser> approvalPersonList, String ownerType, Long ownerId) {
 		if (ListUtils.isEmpty(approvalPersonList)) {
 			return;
 		}
 		approvalPersonList.forEach(a->{
-			a.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));
+			a.setTargetName(getTargetName(a.getTargetType(), a.getTargetId(), ownerType, ownerId));
 		});
 	}
 	
-	private String getTargetName(Byte targetType, Long targetId){
+	private String getTargetName(Byte targetType, Long targetId, String ownerType, Long ownerId){
 		ApprovalTargetType approvalTargetType = ApprovalTargetType.fromCode(targetType);
 		switch (approvalTargetType) {
 		case USER:
-			return getUserName(targetId);
+			return getUserName(targetId, ownerId);  //目前只有组织，所以此处直接传ownerId作为组织id
 		default:
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"error target type: targetType="+targetType+", targetId="+targetId);
@@ -432,12 +438,21 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public String getUserName(Long userId){
+	public String getUserName(Long userId, Long organizationId){
+		OrganizationMember organizationMember = getOrganizationMember(userId, organizationId);
+		if (organizationMember != null) {
+			return organizationMember.getContactName();
+		}
+		
 		User user = userProvider.findUserById(userId);
 		if (user != null) {
 			return user.getNickName();
 		}
 		return "";
+	}
+	
+	private OrganizationMember getOrganizationMember(Long userId, Long organizationId) {
+		return organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
 	}
 	
 	private boolean checkCurrentLevelExist(Long flowId, Byte level) {
@@ -491,7 +506,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			return true;
 		});
 
-		processTargetName(cmd.getApprovalUserList());
+		processTargetName(cmd.getApprovalUserList(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		return new UpdateApprovalFlowLevelResponse(cmd.getFlowId(), new ApprovalFlowLevelDTO(cmd.getLevel(), cmd.getApprovalUserList()));
 	}
@@ -512,12 +527,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		
 		//处理每个审批流程中每级设置的人
-		List<ApprovalFlowDTO> list = processApprovalFlowLevelList(approvalFlowList);
+		List<ApprovalFlowDTO> list = processApprovalFlowLevelList(approvalFlowList, cmd.getOwnerType(), cmd.getOwnerId());
 		
 		return new ListApprovalFlowResponse(nextPageAnchor, list);
 	}
 
-	private List<ApprovalFlowDTO> processApprovalFlowLevelList(final List<ApprovalFlow> approvalFlowList) {
+	private List<ApprovalFlowDTO> processApprovalFlowLevelList(final List<ApprovalFlow> approvalFlowList, String ownerType, Long ownerId) {
+		if (ListUtils.isEmpty(approvalFlowList)) {
+			return new ArrayList<ApprovalFlowDTO>();
+		}
 		final List<ApprovalFlowDTO> resultList = new ArrayList<>();
 		final List<Long> flowIdList = new ArrayList<>();
 		final Map<Long, ApprovalFlowDTO> flowMap = new HashMap<>();
@@ -541,7 +559,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 					ApprovalUser approvalPerson = new ApprovalUser();
 					approvalPerson.setTargetType(a.getTargetType());
 					approvalPerson.setTargetId(a.getId());
-					approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId()));
+					approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId(), ownerType, ownerId));
 					return approvalPerson;
 				}).collect(Collectors.toList());
 				levelList.add(new ApprovalFlowLevelDTO(k2, approvalPersonList));
@@ -965,7 +983,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		
 		//如果没有后续流程了，则不用再取流程
 		if (approvalRequest.getNextLevel() == null) {
-			List<ApprovalFlowOfRequestDTO> flowList = listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel());
+			List<ApprovalFlowOfRequestDTO> flowList = listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel(), approvalRequest.getOwnerType(), approvalRequest.getOwnerId());
 			//流程只取当前进行到的level后面的
 			boolean flag = false;
 			if (approvalRequest.getCurrentLevel().byteValue() == (byte)0) {
@@ -1003,7 +1021,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			ApprovalOpRequest approvalOpRequest = approvalOpRequestList.get(i);
 			ApprovalLogOfRequestDTO approvalLog = new ApprovalLogOfRequestDTO();
 			approvalLog.setCreateTime(approvalOpRequest.getCreateTime());
-			approvalLog.setNickName(getUserName(approvalOpRequest.getOperatorUid()));
+			approvalLog.setNickName(getUserName(approvalOpRequest.getOperatorUid(), approvalRequest.getOwnerId()));
 			
 			approvalLog.setRemark(approvalOpRequest.getProcessMessage());
 			approvalLog.setApprovalStatus(approvalOpRequest.getApprovalStatus());
@@ -1051,10 +1069,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		ApprovalRequest approvalRequest = checkApprovalRequestExist(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRequestId());
 		
-		return new ListApprovalFlowOfRequestResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel()));
+		return new ListApprovalFlowOfRequestResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel(), cmd.getOwnerType(), cmd.getOwnerId()));
 	}
 
-	private List<ApprovalFlowOfRequestDTO> listApprovalFlowUser(Long flowId, Byte currentLevel) {
+	private List<ApprovalFlowOfRequestDTO> listApprovalFlowUser(Long flowId, Byte currentLevel, String ownerType, Long ownerId) {
 		List<ApprovalFlowOfRequestDTO> resultList = new ArrayList<>();
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByFlowId(flowId);
 		
@@ -1063,15 +1081,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		map.forEach((key, value)->{
 			ApprovalFlowOfRequestDTO approvalFlowOfRequestDTO = new ApprovalFlowOfRequestDTO();
 			approvalFlowOfRequestDTO.setCurrentFlag(currentLevel.byteValue()==key.byteValue()?TrueOrFalseFlag.TRUE.getCode():TrueOrFalseFlag.FALSE.getCode());
-			approvalFlowOfRequestDTO.setNickNameList(getNickNameList(value));
+			approvalFlowOfRequestDTO.setNickNameList(getNickNameList(value, ownerType, ownerId));
 			resultList.add(approvalFlowOfRequestDTO);
 		});
 		
 		return resultList;
 	}	
 
-	private List<String> getNickNameList(List<ApprovalFlowLevel> approvalFlowLevelList) {
-		return approvalFlowLevelList.stream().map(a->getTargetName(a.getTargetType(), a.getTargetId())).collect(Collectors.toList());
+	private List<String> getNickNameList(List<ApprovalFlowLevel> approvalFlowLevelList, String ownerType, Long ownerId) {
+		return approvalFlowLevelList.stream().map(a->getTargetName(a.getTargetType(), a.getTargetId(), ownerType, ownerId)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -1119,7 +1137,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		checkPrivilege(userId, ownerInfo);
 		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
 		
-		return new ListApprovalFlowOfRequestBySceneResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel()));
+		return new ListApprovalFlowOfRequestBySceneResponse(listApprovalFlowUser(approvalRequest.getFlowId(), approvalRequest.getCurrentLevel(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId()));
 	}	
 	
 	private ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString){
@@ -1489,8 +1507,19 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"invalid parameters, cmd="+cmd);
 		}
-		ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(cmd.getFlowId(), cmd.getLevel());
+		List<ApprovalUserDTO> checkedUser = approvalFlowLevelList.stream().map(a->{
+			String nickName = getTargetName(a.getTargetType(), a.getTargetId(), cmd.getOwnerType(), cmd.getOwnerId());
+			if (!nickName.startsWith(cmd.getKeyword())) {
+				return null;
+			}
+			ApprovalUserDTO approvalUserDTO = new ApprovalUserDTO();
+			approvalUserDTO.setCheckedFlag(TrueOrFalseFlag.TRUE.getCode());
+			approvalUserDTO.setDepartmentName(getDepartmentNames(a.getTargetId(), cmd.getOwnerId()));
+			approvalUserDTO.setNickName(nickName);
+			return approvalUserDTO;
+		}).filter(au->au != null).collect(Collectors.toList());
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
@@ -1508,20 +1537,68 @@ public class ApprovalServiceImpl implements ApprovalService {
 		organizationMembers.sort((o1, o2)->{
 			return o1.getFullInitial().compareTo(o2.getFullInitial());
 		});
-		
+
 		List<ApprovalUserDTO> resultList = new ArrayList<>();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long nextPageAnchor = null;
+		int i = 0;
+		if (cmd.getPageAnchor() == null || cmd.getPageAnchor().longValue() == 0L) {
+			resultList.addAll(checkedUser);
+		}else {
+			i = cmd.getPageAnchor().intValue() + 1;
+		}
 		
+		for (; ; i++) {
+			OrganizationMember organizationMember = organizationMembers.get(i);
+			//如果用户已在已选择列表中，则不出现
+			if (checkUserInCheckedUser(organizationMember, approvalFlowLevelList)) {
+				continue;
+			}
+			ApprovalUserDTO approvalUserDTO = new ApprovalUserDTO();
+			approvalUserDTO.setCheckedFlag(TrueOrFalseFlag.FALSE.getCode());
+			approvalUserDTO.setDepartmentName(getDepartmentNames(organizationMember.getTargetId(), cmd.getOwnerId()));
+			approvalUserDTO.setNickName(getTargetName(ApprovalTargetType.USER.getCode(), organizationMember.getTargetId(), cmd.getOwnerType(), cmd.getOwnerId()));
+			resultList.add(approvalUserDTO);
+			
+			//如果取满pageSize条，或取完了则返回
+			if (resultList.size() == pageSize || i == organizationMembers.size()-1) {
+				break;
+			}
+		}
 		
+		//如果取完了，则无下页，否则下页从大于i的地方开始
+		if (i == organizationMembers.size()-1) {
+			nextPageAnchor = null;
+		}else {
+			nextPageAnchor = Long.valueOf(i);
+		}
 		
-		
-		
-		
-		return null;
+		return new ListApprovalUserResponse(nextPageAnchor, resultList);
 	}
 
+	private boolean checkUserInCheckedUser(OrganizationMember organizationMember,
+			List<ApprovalFlowLevel> approvalFlowLevelList) {
+		for (ApprovalFlowLevel approvalFlowLevel : approvalFlowLevelList) {
+			if (organizationMember.getTargetId().longValue() == approvalFlowLevel.getTargetId().longValue()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
+	private String getDepartmentNames(Long userId, Long organizationId){
+		OrganizationMember organizationMember = getOrganizationMember(userId, organizationId);
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if (organization == null || organizationMember == null) {
+			return "";
+		}
+		List<OrganizationDTO> organizationList = organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, organizationMember.getContactToken(), organization.getPath());
+		StringBuilder sb = new StringBuilder();
+		organizationList.forEach(o->sb.append(o.getName()).append(","));
+		return sb.substring(0,sb.length()-2);
+	}
 	
-
+	
 	
 	
 	

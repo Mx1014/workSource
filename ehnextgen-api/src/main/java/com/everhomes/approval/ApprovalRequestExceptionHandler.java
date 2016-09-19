@@ -192,7 +192,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			exceptionRequest.setRequestId(a.getId());
 			exceptionRequest.setPunchDate(new Timestamp(approvalExceptionContent.getPunchDate()));
 			exceptionRequest.setExceptionRequestType(approvalExceptionContent.getExceptionRequestType());
-			exceptionRequest.setNickName(approvalService.getUserName(a.getCreatorUid()));
+			exceptionRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
 			exceptionRequest.setReason(a.getReason());
 			exceptionRequest.setPunchStatusName(approvalExceptionContent.getPunchStatusName());
 			return exceptionRequest;

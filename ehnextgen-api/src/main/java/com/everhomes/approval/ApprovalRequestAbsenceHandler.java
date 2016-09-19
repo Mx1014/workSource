@@ -425,7 +425,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			AbsenceRequestDTO absenceRequest = new AbsenceRequestDTO();
 			absenceRequest.setRequestId(a.getId());
 			absenceRequest.setReason(a.getReason());
-			absenceRequest.setNickName(approvalService.getUserName(a.getCreatorUid()));
+			absenceRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
 			absenceRequest.setCategoryName(approvalCategoryProvider.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 			List<ApprovalTimeRange> approvalTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(a.getId());
 			List<TimeRange> timeRangeList = new ArrayList<>();

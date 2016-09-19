@@ -17,6 +17,12 @@ public class ListApprovalUserResponse {
 	@ItemType(ApprovalUserDTO.class)
 	private List<ApprovalUserDTO> approvalUserList;
 
+	public ListApprovalUserResponse(Long nextPageAnchor, List<ApprovalUserDTO> approvalUserList) {
+		super();
+		this.nextPageAnchor = nextPageAnchor;
+		this.approvalUserList = approvalUserList;
+	}
+
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

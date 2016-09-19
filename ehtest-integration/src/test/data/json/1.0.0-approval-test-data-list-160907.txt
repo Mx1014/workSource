@@ -245,5 +245,63 @@
 			"flow_id": 2,
 			"status": 2
 		}
+	],
+	"eh_punch_rules":
+	[
+		{
+			"id": 1,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "测试规则",
+			"time_rule_id": 3,
+			"location_rule_id": 3,
+			"wifi_rule_id": null,
+			"workday_rule_id": 3,
+			"creator_uid": 227296,
+			"create_time": "2016-08-30 11:22:52",
+			"operator_uid": 227296,
+			"operate_time": "2016-08-31 14:35:17"
+		},
+		{
+			"id": 2,
+			"owner_type": "organization",
+			"owner_id": 2,
+			"name": "测试规则2",
+			"time_rule_id": 3,
+			"location_rule_id": 3,
+			"wifi_rule_id": null,
+			"workday_rule_id": 3,
+			"creator_uid": 227296,
+			"create_time": "2016-08-30 11:22:52",
+			"operator_uid": 227296,
+			"operate_time": "2016-08-31 14:35:17"
+		}
+	],
+	"eh_punch_rule_owner_map":
+	[
+		{
+			"id": 1,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"target_type": "organization",
+			"target_id": 1,
+			"punch_rule_id": 1,
+			"review_rule_id": 11,
+			"description": null,
+			"creator_uid": 195506,
+			"create_time": "2015-12-09 15:56:45"
+		},
+		{
+			"id": 2,
+			"owner_type": "organization",
+			"owner_id": 2,
+			"target_type": "organization",
+			"target_id": 2,
+			"punch_rule_id": 2,
+			"review_rule_id": 12,
+			"description": null,
+			"creator_uid": 195506,
+			"create_time": "2015-12-09 15:56:45"
+		}
 	]
 }
