@@ -141,7 +141,7 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
-		News news = ConvertHelper.convert(cmd, News.class);
+		News news = ConvertHelper.convert(cmd, News.class); 
 		news.setNamespaceId(namespaceId);
 		news.setOwnerType(cmd.getOwnerType().toLowerCase());
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
@@ -247,6 +247,7 @@ public class NewsServiceImpl implements NewsService {
 					command.setPublishTime(covertStringToLongTime(publishTime));
 					command.setSourceDesc(sourceDesc);
 					command.setSourceUrl(sourceUrl);
+					command.setCategoryId(cmd.getCategoryId());
 					checkNewsParameter(userId, command);
 					newsList.add(processNewsCommand(userId, namespaceId, command));
 				}
@@ -277,19 +278,19 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
-		return listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize());
+		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
 	}
 
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize) {
-		return listNews(userId, namespaceId, pageAnchor, pageSize, false);
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long categoryId,Long pageAnchor, Integer pageSize) {
+		return listNews(userId, namespaceId,categoryId, pageAnchor, pageSize, false);
 	}
 
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize,
+	private ListNewsResponse listNews(Long userId, Integer namespaceId,Long categoryId, Long pageAnchor, Integer pageSize,
 			boolean isScene) {
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
 		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
 		Long from = pageAnchor * pageSize;
-		List<BriefNewsDTO> list = newsProvider.listNews(namespaceId, from, pageSize + 1).stream()
+		List<BriefNewsDTO> list = newsProvider.listNews(categoryId,namespaceId, from, pageSize + 1).stream()
 				.map(news -> convertNewsToBriefNewsDTO(userId, news, isScene)).collect(Collectors.toList());
 
 		if (list.size() > pageSize) {
@@ -312,6 +313,8 @@ public class NewsServiceImpl implements NewsService {
 		if (!isScene) {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());
 		}
+		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		
 		return newsDTO;
 	}
 
@@ -432,8 +435,22 @@ public class NewsServiceImpl implements NewsService {
 		newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		newsDTO.setContent(null);
 		newsDTO.setContentUrl(getContentUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		newsDTO.setCoverUri(news.getCoverUri());
+		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
 		return newsDTO;
+	}
+
+	private String getNewsUrl(Integer namespaceId, String newsToken) {
+		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+		String contentUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_PAGE_URL, "");
+		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
+			LOGGER.error("Invalid home url or content url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
+		} else {
+			return homeUrl + contentUrl + "?newsToken=" + newsToken;
+		}
 	}
 
 	private String getContentUrl(Integer namespaceId, String newsToken) {
@@ -762,7 +779,7 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		return ConvertHelper.convert(listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize(), true),
+		return ConvertHelper.convert(listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
 				ListNewsBySceneResponse.class);
 	}
 

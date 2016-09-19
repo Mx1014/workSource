@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 参数
  * <li>sceneToken: 场景标识</li>
+ * <li>categoryId: 新闻类型ID</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -17,6 +18,8 @@ import com.everhomes.util.StringHelper;
 public class ListNewsBySceneCommand {
 	@NotNull
 	private String sceneToken;
+
+    private Long categoryId;
 	private Long pageAnchor;
 	private Integer pageSize;
 
@@ -47,6 +50,14 @@ public class ListNewsBySceneCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 }
