@@ -23,4 +23,7 @@ public interface PropertyServiceErrorCode {
     int ERROR_OWNER_CAR_EXIST = 16001;// 车辆已存在
     int ERROR_OWNER_CAR_NOT_EXIST = 16002;// 车辆不存在
     int ERROR_OWNER_CAR_PLATE_NUMBER_REPEAT = 16003;// 车牌号码重复
+    int ERROR_OWNER_CAR_USER_EXIST = 16004;// 用户已经在车辆的使用者列表中
+
+    int ERROR_OWNER_ADDRESS_EXIST = 17001;// 用户已经在楼栋门牌中
 }

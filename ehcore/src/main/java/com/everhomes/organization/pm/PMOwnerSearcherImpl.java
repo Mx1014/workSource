@@ -1,6 +1,5 @@
 package com.everhomes.organization.pm;
 
-import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
@@ -41,9 +40,6 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
-	
-	@Autowired
-	private AddressProvider addressProvider;
 
 	@Override
 	public void deleteById(Long id) {

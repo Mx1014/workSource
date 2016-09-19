@@ -29,6 +29,10 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pm'
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pm', '16001', 'zh_CN', '车辆已存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pm', '16002', 'zh_CN', '车辆不存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pm', '16003', 'zh_CN', '车牌号码重复');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pm', '16004', 'zh_CN', '用户已经在车辆的使用者列表中');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pm', '17001', 'zh_CN', '用户已经在楼栋门牌中');
+
+
 
 
 

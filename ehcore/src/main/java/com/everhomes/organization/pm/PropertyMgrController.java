@@ -639,7 +639,6 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/searchOrganizationOwners</b>
 	 * <p>搜索业主列表</p>
 	 */
-	//checked
 	@RequestMapping("searchOrganizationOwners")
 	@RestReturn(value=ListOrganizationOwnersResponse.class)
 	public RestResponse searchOrganizationOwners(@Valid SearchOrganizationOwnersCommand cmd) {

@@ -21,6 +21,9 @@ import java.util.Date;
  *     <li>registeredResidence:户籍</li>
  *     <li>avatar:头像的URI地址</li>
  *     <li>avatarUrl:头像URL链接</li>
+ *     <li>livingStatus:在户状态</li>
+ *     <li>authType:认证类型</li>
+ *     <li>primaryFlag:首要联系人状态</li>
  * </ul>
  */
 public class OrganizationOwnerDTO {
