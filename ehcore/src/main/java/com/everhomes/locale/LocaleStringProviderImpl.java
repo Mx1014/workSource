@@ -1,24 +1,5 @@
 package com.everhomes.locale;
 
-<<<<<<< HEAD
-=======
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
-
->>>>>>> 3.9.2
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
@@ -31,12 +12,20 @@ import com.everhomes.server.schema.tables.EhLocaleTemplates;
 import com.everhomes.server.schema.tables.daos.EhLocaleTemplatesDao;
 import com.everhomes.server.schema.tables.records.EhLocaleStringsRecord;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class LocaleStringProviderImpl implements LocaleStringProvider {
@@ -80,7 +69,6 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
         return ConvertHelper.convert(record, LocaleString.class);
     }
 
-<<<<<<< HEAD
     @Cacheable(value="LocaleStringFind", key="{#scope, #text, #locale}")
     @Override
     public LocaleString findByText(String scope, String text, String locale) {
@@ -93,7 +81,7 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
 
         return ConvertHelper.convert(record, LocaleString.class);
     }
-=======
+
 	@Override
 	public List<LocaleTemplateDTO> listLocaleTemplate(int from, int pageSize, Integer namespaceId, String scope,
 			Integer code, String keyword) {
@@ -147,5 +135,4 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
 		
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLocaleTemplates.class, template.getId());
 	}
->>>>>>> 3.9.2
 }
