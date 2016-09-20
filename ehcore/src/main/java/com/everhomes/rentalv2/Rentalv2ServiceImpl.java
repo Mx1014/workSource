@@ -3236,9 +3236,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									- rsb.getRentalCount());
 						}
 					}
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
-						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
-					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
@@ -3261,6 +3258,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								- rs.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
+					}
+					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
+						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 					dayDto.getSiteRules().add(dto);
 	
@@ -3374,9 +3374,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									- rsb.getRentalCount());
 						}
 					}
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
-						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
-					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
@@ -3399,6 +3396,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								- rs.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
+					}
+
+					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
+						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 					if(siteNumberMap.get(dto.getSiteNumber())==null)
 						siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
@@ -3540,9 +3541,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								- rsb.getRentalCount());
 					}
 				}
-				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
-					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
-				}
+				
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 					if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 							.getBeginTime().getTime()
@@ -3565,6 +3564,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							- rs.getRentalEndTime()))) ){
 						dto.setStatus(SiteRuleStatus.LATE.getCode());
 					}
+				}
+				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
+					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 				if(siteNumberMap.get(dto.getSiteNumber())==null)
 					siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
