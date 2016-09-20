@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>fieldName:字段名</li>
+ *  <li>fieldDisplayName:字段展示名</li>
  *  <li>fieldType:字段类型 参考{@link com.everhomes.rest.user.FieldType}</li>
  *  <li>fieldContentType:字段内容类型 参考{@link com.everhomes.rest.user.FieldContentType}</li>
  *  <li>fieldDesc:字段描述</li>
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
 public class FieldDTO {
 
 	private String fieldName;
+	
+	private String fieldDisplayName;
 	
 	private String fieldType;
 	
@@ -29,6 +32,14 @@ public class FieldDTO {
 
 	public void setFieldName(String fieldName) {
 		this.fieldName = fieldName;
+	}
+
+	public String getFieldDisplayName() {
+		return fieldDisplayName;
+	}
+
+	public void setFieldDisplayName(String fieldDisplayName) {
+		this.fieldDisplayName = fieldDisplayName;
 	}
 
 	public String getFieldType() {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.FieldType;
 import com.everhomes.rest.user.IdentifierType;
@@ -44,6 +46,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 
 @Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM)
@@ -70,11 +73,18 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	private OrganizationProvider organizationProvider;
 			
 	@Override
-	public void addCustomRequest(String json) {
-		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest json:" + json);
+	public void addCustomRequest(AddRequestCommand cmd) {
+		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest cmd:" + cmd);
 		
-		ServiceAllianceRequests request = GsonUtil.fromJson(json, ServiceAllianceRequests.class);
+		ServiceAllianceRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ServiceAllianceRequests.class);
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+		request.setOwnerType(cmd.getOwnerType());
+		request.setOwnerId(cmd.getOwnerId());
+		request.setType(cmd.getType());
+		request.setCategoryId(cmd.getCategoryId());
+		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
+		request.setServiceAllianceId(cmd.getServiceAllianceId());
 	  
 		User user = UserContext.current().getUser();
 		request.setCreatorUid(user.getId());
@@ -86,6 +96,20 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createServiceAllianceRequests(request);
 		
+		if(cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
+			List<RequestAttachments> attachments = cmd.getAttachments().stream().map(attachment -> {
+				RequestAttachments att = ConvertHelper.convert(attachment, RequestAttachments.class);
+				att.setOwnerType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
+				att.setOwnerId(request.getId());
+				att.setCreatorUid(user.getId());
+				
+				userActivityProvider.createRequestAttachments(att);
+				return att;
+			}).collect(Collectors.toList());
+			request.setAttachments(attachments);
+		}
+		
+		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		//推送消息
@@ -252,7 +276,17 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		dto.setFieldName("提交时间");
 		list.add(dto);
 		
-		
+		List<RequestAttachments> attachments =  userActivityProvider.listRequestAttachments(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM, fields.getId());
+		if(attachments != null && attachments.size() > 0) {
+			for(RequestAttachments attachment : attachments) {
+				dto.setFieldContentType(attachment.getContentType());
+				dto.setFieldType(FieldType.BLOB.getCode());
+				dto.setFieldName(attachment.getTargetFieldName());
+				dto.setFieldValue(attachment.getContentUri());
+				list.add(dto);
+			}
+			                        
+		}
 		
 		return list;
 	}

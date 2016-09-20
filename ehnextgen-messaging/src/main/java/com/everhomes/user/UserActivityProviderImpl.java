@@ -3,6 +3,7 @@ package com.everhomes.user;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,8 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
+import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhRequestAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhRequestTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
@@ -49,6 +52,9 @@ import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
 import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.server.schema.tables.pojos.EhRequestAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRequestTemplates;
 import com.everhomes.server.schema.tables.pojos.EhUserContacts;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
@@ -58,6 +64,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhRequestAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
 import com.everhomes.server.schema.tables.records.EhRequestTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
@@ -707,6 +714,54 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 		if(result.size()==0)
 			return null;
 		return result;
+	}
+
+	@Override
+	public List<RequestAttachments> listRequestAttachments(String ownerType,
+			Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestAttachmentsRecord> query = context.selectQuery(Tables.EH_REQUEST_ATTACHMENTS);
+		query.addConditions(Tables.EH_REQUEST_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_REQUEST_ATTACHMENTS.OWNER_ID.eq(ownerId));
+		
+		Map<String, RequestAttachments> map = new HashMap<String, RequestAttachments>();
+		List<RequestAttachments> result = new ArrayList<RequestAttachments>();
+		query.fetch().map((r) -> {
+			if(map.get(r.getTargetFieldName()) != null) {
+				RequestAttachments attachment = map.get(r.getTargetFieldName());
+				attachment.setContentUri(attachment.getContentUri() + "," + r.getContentUri());
+				map.put(r.getTargetFieldName(), attachment);
+			} else {
+				map.put(r.getTargetFieldName(), ConvertHelper.convert(r, RequestAttachments.class));
+			}
+			return null;
+		});
+		
+		Iterator it = map.entrySet().iterator();
+		while(it.hasNext()){
+			java.util.Map.Entry entry = (java.util.Map.Entry)it.next();
+			RequestAttachments attachment = (RequestAttachments) entry.getValue();
+			result.add(attachment);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public void createRequestAttachments(RequestAttachments attachment) {
+
+		assert(attachment.getOwnerId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhRequestAttachments.class, attachment.getOwnerId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRequestAttachments.class));
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        EhRequestAttachmentsDao dao = new EhRequestAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhRequestAttachments.class, null);
+		
 	}
 
 

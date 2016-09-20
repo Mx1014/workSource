@@ -1258,7 +1258,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 	public void addCustomRequest(AddRequestCommand cmd) {
 
 		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
-		handler.addCustomRequest(cmd.getRequestJson());
+		handler.addCustomRequest(cmd);
 	}
 
 	@Override
