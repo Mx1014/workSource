@@ -9,12 +9,22 @@ import com.everhomes.util.StringHelper;
  * <li>checkedFlag: 是否选中，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>departmentName: 部门名称</li>
  * <li>nickName: 姓名</li>
+ * <li>userId: 用户id</li>
  * </ul>
  */
 public class ApprovalUserDTO {
 	private Byte checkedFlag;
 	private String departmentName;
 	private String nickName;
+	private Long userId;
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
 	public Byte getCheckedFlag() {
 		return checkedFlag;
