@@ -1226,7 +1226,6 @@ CREATE TABLE `eh_conf_orders` (
   `vendor_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'vendor type 0: none, 1: Alipay, 2: Wechat',
   `email` VARCHAR(128),
   `expired_date` DATETIME,
-
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -14,6 +14,9 @@ public class RecordHelper {
 		try {
 			T t = clazz.newInstance();
 			Field[] fields = clazz.getDeclaredFields();
+			if (fields == null || fields.length == 0 || (fields.length == 1 && fields[0].getName().equals("serialVersionUID"))) {
+				fields = clazz.getSuperclass().getDeclaredFields();
+			}
 			for (Field field : fields) {
 				if (field.getModifiers() == 2) {
 					String name = field.getName();
