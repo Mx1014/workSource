@@ -88,4 +88,5 @@ public interface UserActivityProvider {
     RequestTemplates getCustomRequestTemplate(Long id);
     List<RequestTemplatesNamespaceMapping> getRequestTemplatesNamespaceMappings(Integer namespaceId);
     List<RequestTemplates> listCustomRequestTemplates();
+    List<RequestAttachments> listRequestAttachments(String ownerType, Long ownerId);
 }

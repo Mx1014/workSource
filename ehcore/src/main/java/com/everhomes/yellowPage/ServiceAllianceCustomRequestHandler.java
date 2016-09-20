@@ -10,9 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -29,6 +33,7 @@ import com.everhomes.rest.user.FieldType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.CustomRequestHandler;
@@ -39,6 +44,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.mysql.jdbc.StringUtils;
 
 @Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM)
 public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler {
@@ -82,7 +88,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
-		//发邮件 和 推送消息
+		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
 		String locale = "zh_CN";
@@ -91,6 +97,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		notifyMap.put("categoryName", category.getName());
 		notifyMap.put("creatorName", request.getCreatorName());
 		notifyMap.put("creatorMobile", request.getCreatorMobile());
+		notifyMap.put("note", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         
 		if(org != null) {
@@ -107,8 +114,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
 			}
 			
+			sendEmail(serviceOrg.getEmail(), category.getName(), notifyTextForOrg);
+			
 		}
-		
 		
 		//发消息给服务联盟机构管理员
 		code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ADMIN;
@@ -124,8 +132,23 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			}
 		}
 		
-		//给大类下的推送人员推消息和邮件
+		//发邮件给服务联盟机构管理员
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(), 
+				request.getType(), locator, Integer.MAX_VALUE);
+		if(emails != null && emails.size() > 0) {
+			for(ServiceAllianceNotifyTargets email : emails) {
+				sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin);
+			}
+		}
+	}
+	
+	private String getNote(ServiceAllianceRequests request) {
 		
+		String note = "姓名" + request.getName() + "\n" + "手机号" + request.getMobile() + "\n" + "企业名称" + request.getOrganizationName()
+				 + "\n" + "企业城市" + request.getCityName() + "\n" + "企业行业" + request.getIndustry() + "\n"
+				 + "项目描述" + request.getProjectDesc() + "\n" + "融资阶段" + request.getFinancingStage() + "\n" + "融资金额"
+				 + request.getFinancingAmount() + "\n" + "出让股份" + request.getTransferShares() + "\n";
+		return note;
 	}
 
 	@Override
@@ -139,6 +162,22 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		
 		return fieldList;
+	}
+	
+	private void sendEmail(String emailAddress, String categoryName, String content) {
+		if(!StringUtils.isNullOrEmpty(emailAddress)) {
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+	        
+	        String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
+			String locale = "zh_CN";
+			int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_SUBJECT;
+			Map<String, Object> notifyMap = new HashMap<String, Object>();
+			notifyMap.put("categoryName", categoryName);
+			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+			
+	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, content);
+		}
 	}
 	
 	private void sendMessageToUser(Long userId, String content) {
@@ -212,6 +251,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		dto.setFieldName("提交时间");
 		list.add(dto);
+		
+		
 		
 		return list;
 	}
