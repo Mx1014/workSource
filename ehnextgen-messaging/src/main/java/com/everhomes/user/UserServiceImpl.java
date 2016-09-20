@@ -3150,6 +3150,7 @@ public class UserServiceImpl implements UserService {
 	    
 	    //先按域空间查，ownerid和ownertype暂时不用
 	    ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
+	    response.setSearchTypes(new ArrayList<SearchTypeDTO>());
 	    List<SearchTypes> searchTypes = userActivityProvider.listByNamespaceId(namespaceId);
 	    if(searchTypes != null && searchTypes.size() > 0) {
 	    	response.getSearchTypes().addAll(searchTypes.stream().map(r -> {
