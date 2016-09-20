@@ -508,7 +508,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListApprovalFlowResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-		assertEquals(2L, myResponse.getNextPageAnchor().longValue());
+		assertEquals(3L, myResponse.getNextPageAnchor().longValue());
 		assertNotNull(myResponse.getApprovalFlowList());
 		assertEquals(2, myResponse.getApprovalFlowList().size());
 		
