@@ -284,7 +284,7 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public ListNewsResponse listNewsForWeb(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = UserContext.current().getNamespaceId();
+		final Integer namespaceId = UserContext.getCurrentNamespaceId();
 		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
 	}
 	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long categoryId,Long pageAnchor, Integer pageSize) {
