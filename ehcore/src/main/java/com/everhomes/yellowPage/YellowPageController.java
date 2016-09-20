@@ -44,6 +44,7 @@ import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -63,6 +64,9 @@ public class YellowPageController  extends ControllerBase {
 
 	@Autowired
 	private YellowPageProvider yellowPageProvider;
+	
+	@Autowired
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -358,7 +362,7 @@ public class YellowPageController  extends ControllerBase {
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
     	
-    	SearchRequestInfoResponse resp = this.yellowPageService.searchRequestInfo(cmd);
+    	SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
     	 
     	RestResponse response = new RestResponse(resp);
     	response.setErrorCode(ErrorCodes.SUCCESS);

@@ -45,6 +45,7 @@ import com.everhomes.server.schema.tables.daos.EhServiceAlliancesDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPageAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPagesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
@@ -55,19 +56,24 @@ import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceNotifyTargetsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPagesRecord;
+import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.videoconf.ConfAccounts;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -653,5 +659,41 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), ServiceAllianceRequests.class);
+	}
+
+
+	@Override
+	public List<ServiceAllianceRequests> listServiceAllianceRequests(
+			CrossShardListingLocator locator, int pageSize) {
+		List<ServiceAllianceRequests> requests = new ArrayList<ServiceAllianceRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCE_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, ServiceAllianceRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
 	}
 }

@@ -26,7 +26,7 @@ public class RequestInfoDTO {
 	
 	private String serviceOrganization;
 	
-	private Timestamp createTime;
+	private String createTime;
 
 
 	public Long getId() {
@@ -69,11 +69,11 @@ public class RequestInfoDTO {
 		this.creatorMobile = creatorMobile;
 	}
 
-	public Timestamp getCreateTime() {
+	public String getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Timestamp createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
 	

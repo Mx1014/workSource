@@ -71,5 +71,6 @@ public interface YellowPageProvider {
 	
 	void createServiceAllianceRequests(ServiceAllianceRequests request);
 	ServiceAllianceRequests findServiceAllianceRequests(Long id);
+	List<ServiceAllianceRequests> listServiceAllianceRequests(CrossShardListingLocator locator, int pageSize);
 
 }

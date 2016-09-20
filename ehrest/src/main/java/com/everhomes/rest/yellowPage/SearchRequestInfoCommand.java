@@ -11,8 +11,9 @@ import com.everhomes.util.StringHelper;
  *  <li>categoryId: 服务联盟大类id</li>
  *  <li>startDay: 开始时间</li>
  *  <li>endDay：结束时间</li>
- *  <li>creatorName：用户姓名</li>
- *  <li>creatorOrganization：机构名称</li>
+ *  <li>keyword：关键字（创建请求的用户姓名和机构名称）</li>
+ *  <li>pageAnchor: 锚点</li>
+ *  <li>pageSize: 页面大小</li>
  * </ul>
  */
 public class SearchRequestInfoCommand {
@@ -28,10 +29,12 @@ public class SearchRequestInfoCommand {
 	
 	private Long endDay;
 	
-	private String creatorName;
+	private String keyword;
 	
-	private String creatorOrganization;
-
+	private Long pageAnchor;
+	
+	private Integer pageSize;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -56,14 +59,6 @@ public class SearchRequestInfoCommand {
 		this.categoryId = categoryId;
 	}
 
-	public String getCreatorOrganization() {
-		return creatorOrganization;
-	}
-
-	public void setCreatorOrganization(String creatorOrganization) {
-		this.creatorOrganization = creatorOrganization;
-	}
-
 	public Long getStartDay() {
 		return startDay;
 	}
@@ -80,14 +75,30 @@ public class SearchRequestInfoCommand {
 		this.endDay = endDay;
 	}
 
-	public String getCreatorName() {
-		return creatorName;
+	public String getKeyword() {
+		return keyword;
 	}
 
-	public void setCreatorName(String creatorName) {
-		this.creatorName = creatorName;
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
-	
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

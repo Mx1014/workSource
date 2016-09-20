@@ -916,11 +916,4 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 	}
 
-	@Override
-	public SearchRequestInfoResponse searchRequestInfo(
-			SearchRequestInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

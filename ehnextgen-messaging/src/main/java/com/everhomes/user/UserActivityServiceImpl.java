@@ -1226,6 +1226,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 	public List<RequestTemplateDTO> getCustomRequestTemplateByNamespace() {
 		List<RequestTemplateDTO> dtos = new ArrayList<RequestTemplateDTO>();
 		List<RequestTemplatesNamespaceMapping> mappings = this.userActivityProvider.getRequestTemplatesNamespaceMappings(UserContext.getCurrentNamespaceId());
+		//配了mapping的从mapping里捞 ，没配的把所有模板都返回
 		if(mappings != null && mappings.size() > 0) {
 			dtos = mappings.stream().map(mapping -> {
 				RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(mapping.getTemplateId());
@@ -1238,6 +1239,16 @@ public class UserActivityServiceImpl implements UserActivityService {
 				return dto;
 			}).filter(r->r!=null).collect(Collectors.toList());
 		
+		} else {
+			List<RequestTemplates> templates = this.userActivityProvider.listCustomRequestTemplates();
+			if(templates != null && templates.size() > 0) {
+				dtos = templates.stream().map(template -> {
+					RequestTemplateDTO dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+					List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+					dto.setDtos(fields);
+					return dto;
+				}).filter(r->r!=null).collect(Collectors.toList());
+			}
 		}
 		
 		return dtos;

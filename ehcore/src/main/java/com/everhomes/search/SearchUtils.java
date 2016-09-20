@@ -37,6 +37,8 @@ public class SearchUtils {
     
     public static final String PMTASK = "pmtask";
     
+    public static final String SAREQUEST = "saRequest";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

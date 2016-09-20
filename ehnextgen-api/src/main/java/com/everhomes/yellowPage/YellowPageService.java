@@ -59,5 +59,5 @@ public interface YellowPageService {
 	void setNotifyTargetStatus(SetNotifyTargetStatusCommand cmd);
 	ListNotifyTargetsResponse listNotifyTargets(ListNotifyTargetsCommand cmd);
 	void verifyNotifyTarget(VerifyNotifyTargetCommand cmd);
-	SearchRequestInfoResponse searchRequestInfo(SearchRequestInfoCommand cmd);
+	
 }

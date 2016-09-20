@@ -648,6 +648,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
 		query.addConditions(Tables.EH_REQUEST_TEMPLATES.TEMPLATE_TYPE.eq(templateType));
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.STATUS.eq((byte) 1));
 		 
 		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
 		query.fetch().map((r) -> {
@@ -661,13 +662,19 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
 	@Override
 	public RequestTemplates getCustomRequestTemplate(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhRequestTemplates.class, id));
-		EhRequestTemplatesDao dao = new EhRequestTemplatesDao(context.configuration());
-		EhRequestTemplates result = dao.findById(id);
-        if (result == null) {
-            return null;
-        }
-        return ConvertHelper.convert(result, RequestTemplates.class);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.ID.eq(id));
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.STATUS.eq((byte) 1));
+		 
+		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplates.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
 	}
 
 	@Override
@@ -683,6 +690,22 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 			return null;
 		});
 		
+		return result;
+	}
+
+	@Override
+	public List<RequestTemplates> listCustomRequestTemplates() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.STATUS.eq((byte) 1));
+		 
+		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplates.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
 		return result;
 	}
 
