@@ -855,6 +855,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
         });
+        syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")
