@@ -18,6 +18,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TimeRange;
+import com.everhomes.rest.approval.TimeRangeType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalTimeRangesDao;
@@ -38,6 +39,9 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 	public void createApprovalTimeRange(ApprovalTimeRange approvalTimeRange) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalTimeRanges.class));
 		approvalTimeRange.setId(id);
+		if (approvalTimeRange.getType() == null) {
+			approvalTimeRange.setType(TimeRangeType.TIME.getCode());
+		}
 		getReadWriteDao().insert(approvalTimeRange);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalTimeRanges.class, null);
 	}
@@ -47,6 +51,9 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 		List<EhApprovalTimeRanges> list = approvalTimeRanges.stream().map(a->{
 			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalTimeRanges.class));
 			a.setId(id);
+			if (a.getType() == null) {
+				a.setType(TimeRangeType.TIME.getCode());
+			}
 			return ConvertHelper.convert(a, EhApprovalTimeRanges.class);
 		}).collect(Collectors.toList());
 		getReadWriteDao().insert(list);
