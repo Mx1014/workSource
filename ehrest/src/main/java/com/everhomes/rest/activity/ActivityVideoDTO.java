@@ -25,7 +25,7 @@ public class ActivityVideoDTO {
     private Byte videoState;
     private Long ownerId;
     private Byte ownerType;
-    private Long creatorId;
+    private Long creatorUid;
     
     private String videoUrl;
     private String channelId;
@@ -86,12 +86,12 @@ public class ActivityVideoDTO {
     public void setId(Long id) {
         this.id = id;
     }
-    
-    public Long getCreatorId() {
-        return creatorId;
+
+    public Long getCreatorUid() {
+        return creatorUid;
     }
-    public void setCreatorId(Long creatorId) {
-        this.creatorId = creatorId;
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
     public String getVideoUrl() {
         return videoUrl;
