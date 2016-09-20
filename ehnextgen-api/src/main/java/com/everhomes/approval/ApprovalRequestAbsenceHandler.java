@@ -6,7 +6,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,13 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.approval.AbsenceBasicDescription;
 import com.everhomes.rest.approval.AbsenceRequestDTO;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
@@ -29,6 +33,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.techpark.punch.PunchTimeRule;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -46,6 +51,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	private static final SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final SimpleDateFormat dateMinutesSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	@Autowired
 	private ApprovalCategoryProvider approvalCategoryProvider;
@@ -58,6 +64,10 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	
 	@Autowired
 	private PunchService punchService;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+	
 	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
@@ -446,6 +456,56 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}).collect(Collectors.toList());
 		
 		return JSON.toJSONString(resultList);
+	}
+
+
+	@Override
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("time", getAbsenceTime(approvalRequest));
+		if (approvalRequest.getApprovalStatus().byteValue() == ApprovalStatus.AGREEMENT.getCode()) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.ABSENCE_APPROVED;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.ABSENCE_REJECTED;
+			map.put("reason", approvalRequest.getReason());
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
+	
+	private String getAbsenceTime(ApprovalRequest approvalRequest){
+		List<ApprovalTimeRange> approvalTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(approvalRequest.getId());
+		StringBuilder sb = new StringBuilder();
+		if (ListUtils.isNotEmpty(approvalTimeRangeList)) {
+			approvalTimeRangeList.forEach(a->sb.append(dateMinutesSF.format(a.getFromTime())).append(" ~ ").append(dateMinutesSF.format(a.getEndTime())).append(", "));
+			if (sb.length()>1) {
+				return sb.substring(0, sb.length()-2);
+			}
+		}
+		return "";
+	}
+
+	@Override
+	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("creatorName", approvalService.getUserName(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId()));
+		map.put("time", getAbsenceTime(approvalRequest));
+		//当前级别为0表示用户刚提交
+		if (approvalRequest.getCurrentLevel().byteValue() == (byte)0) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.ABSENCE_COMMIT_REQUEST;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.ABSENCE_TO_NEXT_LEVEL;
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 	}
 	
 }

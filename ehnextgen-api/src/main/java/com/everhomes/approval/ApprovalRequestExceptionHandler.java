@@ -2,7 +2,10 @@ package com.everhomes.approval;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -12,11 +15,14 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
+import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
@@ -52,6 +58,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	
 	@Autowired
 	private ApprovalService approvalService;
+
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
@@ -203,6 +212,51 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		return JSON.toJSONString(resultList);
 	}
-	
+
+	@Override
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("punchDate", getPunchDate(approvalRequest));
+		if (approvalRequest.getApprovalStatus().byteValue() == ApprovalStatus.AGREEMENT.getCode()) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_APPROVED;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_REJECTED;
+			map.put("reason", approvalRequest.getReason());
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
+
+	private String getPunchDate(ApprovalRequest approvalRequest) {
+		SimpleDateFormat dateSF = new SimpleDateFormat("MM月dd日");
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		String result = dateSF.format(new java.util.Date(content.getPunchDate()));
+		if (result.startsWith("0")) {
+			return result.substring(1);
+		}
+		return result;
+	}
+
+	@Override
+	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("creatorName", approvalService.getUserName(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId()));
+		//当前级别为0表示用户刚提交
+		if (approvalRequest.getCurrentLevel().byteValue() == (byte)0) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_COMMIT_REQUEST;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_TO_NEXT_LEVEL;
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
 	
 }
