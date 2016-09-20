@@ -14,6 +14,8 @@ public class NewsInstanceConfig implements Serializable  {
     private Long itemGroup;
     
     private Long categoryId;
+    
+    private String timeWidgetStyle ;
 
 	@Override
     public String toString() {
@@ -34,6 +36,14 @@ public class NewsInstanceConfig implements Serializable  {
 
 	public void setItemGroup(Long itemGroup) {
 		this.itemGroup = itemGroup;
+	}
+
+	public String getTimeWidgetStyle() {
+		return timeWidgetStyle;
+	}
+
+	public void setTimeWidgetStyle(String timeWidgetStyle) {
+		this.timeWidgetStyle = timeWidgetStyle;
 	}
 
 }
