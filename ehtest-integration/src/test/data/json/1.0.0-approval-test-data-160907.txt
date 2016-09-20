@@ -51,10 +51,10 @@
       "target_type": "USER",
       "target_id": "11",
       "member_group": "manager",
-      "namespace_id": "0",
+      "namespace_id": "999995",
       "group_id": "0",
       "organization_id": "1",
-      "status": "2"
+      "status": "3"
     },
     {
       "gender": "0",
@@ -65,10 +65,10 @@
       "target_type": "USER",
       "target_id": "2",
       "member_group": "manager",
-      "namespace_id": "0",
+      "namespace_id": "999995",
       "group_id": "0",
-      "organization_id": "2",
-      "status": "2"
+      "organization_id": "1",
+      "status": "3"
     }
   ],
   "eh_locale_strings":

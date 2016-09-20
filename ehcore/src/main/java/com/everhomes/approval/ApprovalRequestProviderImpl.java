@@ -106,7 +106,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	@Override
 	public List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
-			List<ApprovalFlowLevel> approvalFlowLevelList, List<User> userList, Long pageAnchor, int pageSize) {
+			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userIds, Long pageAnchor, int pageSize) {
 		
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
 				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
@@ -132,8 +132,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.REJECTION.getCode()));
 		}
 		
-		if (ListUtils.isNotEmpty(userList)) {
-			List<Long> userIds = userList.stream().map(u->u.getId()).collect(Collectors.toList());
+		if (ListUtils.isNotEmpty(userIds)) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.in(userIds));
 		}
 		

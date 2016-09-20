@@ -1258,20 +1258,5 @@ public class UserProviderImpl implements UserProvider {
 		});
 		return identifiers;
 	}
-
-	@Override
-	public List<User> listMatchedUser(String nickName) {
-		List<User> resultList = new ArrayList<>();
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
-			resultList.addAll(context.select().from(Tables.EH_USERS)
-				.where(Tables.EH_USERS.NICK_NAME.like(nickName+"%"))
-				.fetch()
-				.map(r->ConvertHelper.convert(r, User.class)));
-			
-			return true;
-		});
-		
-		return resultList;
-	}
 	
 }

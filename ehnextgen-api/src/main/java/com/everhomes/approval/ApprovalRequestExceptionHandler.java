@@ -56,10 +56,11 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
 		ExceptionRequestBasicDescription description = new ExceptionRequestBasicDescription();
-		JSONObject contentJsonObject = JSONObject.parseObject(approvalRequest.getContentJson());
-		description.setPunchDate(Timestamp.valueOf(contentJsonObject.getString("punchDate")));
-		description.setPunchDetail(contentJsonObject.getString("punchDetail"));
-		description.setPunchStatusName(contentJsonObject.getString("punchStatusName"));
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		description.setPunchDate(new Timestamp(content.getPunchDate()));
+		description.setExceptionRequestType(content.getExceptionRequestType());
+		description.setPunchDetail(content.getPunchDetail());
+		description.setPunchStatusName(content.getPunchStatusName());
 		
 		approvalBasicInfo.setDescriptionJson(JSON.toJSONString(description));
 		return approvalBasicInfo;

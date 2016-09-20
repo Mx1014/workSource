@@ -1,5 +1,7 @@
 package com.everhomes.rest.approval;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -22,5 +24,8 @@ public class CreateApprovalRequestBySceneResponse {
 		this.approvalRequest = approvalRequest;
 	}
 	
-	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

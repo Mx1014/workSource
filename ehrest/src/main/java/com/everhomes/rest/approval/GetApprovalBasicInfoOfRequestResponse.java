@@ -6,23 +6,27 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值：
- * <li>approvalBasicInfo: 审批基本信息，参考{@link com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO}</li>
+ * <li>approvalBasicInfoOfRequest: 审批基本信息，参考{@link com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO}</li>
  * </ul>
  */
 public class GetApprovalBasicInfoOfRequestResponse {
 	private ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequest;
+
+	public GetApprovalBasicInfoOfRequestResponse() {
+		super();
+	}
 
 	public GetApprovalBasicInfoOfRequestResponse(ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequest) {
 		super();
 		this.approvalBasicInfoOfRequest = approvalBasicInfoOfRequest;
 	}
 
-	public ApprovalBasicInfoOfRequestDTO getApprovalBasicInfo() {
+	public ApprovalBasicInfoOfRequestDTO getApprovalBasicInfoOfRequest() {
 		return approvalBasicInfoOfRequest;
 	}
 
-	public void setApprovalBasicInfo(ApprovalBasicInfoOfRequestDTO approvalBasicInfo) {
-		this.approvalBasicInfoOfRequest = approvalBasicInfo;
+	public void setApprovalBasicInfoOfRequest(ApprovalBasicInfoOfRequestDTO approvalBasicInfoOfRequest) {
+		this.approvalBasicInfoOfRequest = approvalBasicInfoOfRequest;
 	}
 
 	@Override

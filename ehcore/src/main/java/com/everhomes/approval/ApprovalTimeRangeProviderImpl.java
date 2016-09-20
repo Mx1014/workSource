@@ -23,6 +23,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalTimeRangesDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RecordHelper;
 
 @Component
 public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider {
@@ -89,7 +90,7 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 	@Override
 	public List<ApprovalTimeRange> listApprovalTimeRangeByUserId(Long userId, Integer namespaceId, String ownerType,
 			Long ownerId) {
-		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_TIME_RANGES)
+		Result<Record> result = getReadOnlyContext().select(Tables.EH_APPROVAL_TIME_RANGES.fields()).from(Tables.EH_APPROVAL_TIME_RANGES)
 				.join(Tables.EH_APPROVAL_REQUESTS)
 				.on(Tables.EH_APPROVAL_TIME_RANGES.OWNER_ID.eq(Tables.EH_APPROVAL_REQUESTS.ID))
 				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
@@ -100,7 +101,7 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 				.fetch();
 				
 		if (result != null && result.isNotEmpty()) {
-			return result.map(r->ConvertHelper.convert(r, ApprovalTimeRange.class));
+			return result.map(r->RecordHelper.convert(r, ApprovalTimeRange.class));
 		}
 				
 		return new ArrayList<ApprovalTimeRange>();

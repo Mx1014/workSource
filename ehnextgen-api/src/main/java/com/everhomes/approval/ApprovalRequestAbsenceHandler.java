@@ -95,7 +95,6 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			}
 		}
 		briefApprovalRequestDTO.setDescription(timeTotal);
-		briefApprovalRequestDTO.setReason(JSONObject.parseObject(approvalRequest.getContentJson()).getString("reason"));
 		
 		return briefApprovalRequestDTO;
 	}
@@ -160,7 +159,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					|| !punchService.isWorkDay(new Date(timeRange.getEndTime()), punchRule)
 					|| !punchService.isWorkTime(new Time(timeRange.getFromTime()), punchRule)
 					|| !punchService.isWorkTime(new Time(timeRange.getEndTime()), punchRule)
-					|| !punchService.isRestTime(new Date(timeRange.getFromTime()), new Date(timeRange.getEndTime()), punchRule)) {
+					|| punchService.isRestTime(new Date(timeRange.getFromTime()), new Date(timeRange.getEndTime()), punchRule)) {
 				return true;
 			}
 		}
@@ -300,7 +299,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	private long calculateDeltaDay(Date fromTime, Date endTime) {
 		try {
-			return (dateSF.parse(dateSF.format(endTime)).getTime() - dateSF.parse(dateSF.format(fromTime)).getTime()) / (24*3600*100L);
+			return (dateSF.parse(dateSF.format(endTime)).getTime() - dateSF.parse(dateSF.format(fromTime)).getTime()) / (24*3600*1000L);
 		} catch (ParseException e) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"calculate delta day error");

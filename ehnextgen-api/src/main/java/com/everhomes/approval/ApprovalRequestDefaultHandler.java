@@ -52,6 +52,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		}
 		briefApprovalRequestDTO.setApprovalStatus(approvalRequest.getApprovalStatus());
 		briefApprovalRequestDTO.setCreateTime(approvalRequest.getCreateTime());
+		briefApprovalRequestDTO.setReason(approvalRequest.getReason());
 		if (approvalRequest.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
 			briefApprovalRequestDTO.setTimeRangeList(approvalService.listTimeRangeByRequestId(approvalRequest.getId()));
 		}

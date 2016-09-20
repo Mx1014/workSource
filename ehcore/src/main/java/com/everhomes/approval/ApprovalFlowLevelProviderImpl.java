@@ -21,6 +21,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalFlowLevelsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalFlowLevels;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RecordHelper;
 
 @Component
 public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider {
@@ -137,7 +138,7 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 
 	@Override
 	public List<ApprovalFlowLevel> listApprovalFlowLevelByTarget(Integer namespaceId, String ownerType, Long ownerId, byte targetType, Long targetId) {
-		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_FLOW_LEVELS)
+		Result<Record> result = getReadOnlyContext().select(Tables.EH_APPROVAL_FLOW_LEVELS.fields()).from(Tables.EH_APPROVAL_FLOW_LEVELS)
 			.leftOuterJoin(Tables.EH_APPROVAL_FLOWS)
 			.on(Tables.EH_APPROVAL_FLOW_LEVELS.FLOW_ID.eq(Tables.EH_APPROVAL_FLOWS.ID))
 			.and(Tables.EH_APPROVAL_FLOWS.NAMESPACE_ID.eq(namespaceId))
@@ -148,7 +149,7 @@ public class ApprovalFlowLevelProviderImpl implements ApprovalFlowLevelProvider 
 			.fetch();
 		
 		if (result != null && result.isNotEmpty()) {
-			return result.map(r->ConvertHelper.convert(r, ApprovalFlowLevel.class));
+			return result.map(r->RecordHelper.convert(r, ApprovalFlowLevel.class));
 		}
 		return new ArrayList<ApprovalFlowLevel>();
 	}
