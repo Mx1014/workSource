@@ -240,7 +240,7 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
 	VALUES(1004005, 1002756, 'PM', '怡景管理处', '', '/1002756/1004005', 1, 2, 'ENTERPRISE', 0, 1004375);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, create_time)
-	VALUES(2110153, 1004005, 'USER', 231350, 'manager', '刘兰', 0, '13728614307', 3, UTC_TIMESTAMP());	
+	VALUES(2110301, 1004005, 'USER', 231350, 'manager', '刘兰', 0, '13728614307', 3, UTC_TIMESTAMP());	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(11529, 'EhOrganizations', 1004005, 'EhUsers', 231350, 1001, 1, UTC_TIMESTAMP());
