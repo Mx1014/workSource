@@ -52,7 +52,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.user.GetVideoPermisionByUserIdCommand;
+import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
 import com.everhomes.rest.user.AppIdStatusCommand;
@@ -1070,12 +1070,12 @@ public class UserController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /user/getVideoPermisionByUserId</b>
+     * <b>URL: /user/getVideoPermision</b>
      * <p>获取用户是否有视频权限</p>
      */
-    @RequestMapping("getVideoPermisionByUserId")
+    @RequestMapping("getVideoPermision")
     @RestReturn(value = String.class)
-    public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermisionByUserIdCommand cmd) {
+    public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermisionInfoCommand cmd) {
         RestResponse resp = new RestResponse();
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");

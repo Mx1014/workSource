@@ -100,7 +100,9 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
+import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
@@ -2146,5 +2148,17 @@ public class ActivityServiceImpl implements ActivityService {
 	    cmd.setCommunityId(communityId);
 	}
 	
+	public void requestVideoPermission(RequestVideoPermisionCommand cmd) {
+	    
+	}
 	
+	public String GetVideoPermisionInfo(GetVideoPermisionInfoCommand cmd) {
+	    User user = UserContext.current().getUser();
+	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
+        if(profile == null || null == profile.getItemValue()) {
+            return null;
+        }
+        
+        return profile.getItemValue();
+	}
 }
