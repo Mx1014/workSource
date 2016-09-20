@@ -34,6 +34,7 @@ public class ListOrganizationOwnerStatisticByAgeTest extends BaseLoginAuthTestCa
 
         assertTrue("The male list size should be 3", response.getResponse().getMale().size() == 3);
         assertTrue("The female list size should be 1", response.getResponse().getFemale().size() == 1);
+        assertTrue("The female list size should be 1", response.getResponse().getTotal().size() == 4);
 
         assertEquals(response.getResponse().getMale().get(0).getFirst(), "0-10");
         assertEquals(response.getResponse().getMale().get(0).getSecond(), "2");
