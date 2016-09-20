@@ -38,7 +38,6 @@ import com.everhomes.util.DateHelper;
  */
 @Component
 public class CoreServerBootstrapBean implements ApplicationListener<ApplicationEvent> {
-    
     @Autowired
     private PlatformBootstrap platformBootstrap;
     

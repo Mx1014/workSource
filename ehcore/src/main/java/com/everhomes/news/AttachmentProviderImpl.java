@@ -127,6 +127,22 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 				.map(p -> ConvertHelper.convert(p, Attachment.class)).collect(Collectors.toList());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void deleteAttachmentByOwnerId(Class<?> pojoClass, Long ownerId) {
+		assert (ownerId != null);
+
+		DSLContext context = getReadWriteContext();
+
+		JooqMetaInfo meta = JooqDiscover.jooqMetaFromPojo(pojoClass);
+		assert (meta != null);
+
+		Record blankRecord = meta.getBlankRecordObject();
+		assert (blankRecord != null);
+		
+		context.delete(meta.getTableImpl()).where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).execute();
+	}
+	
 	@SuppressWarnings("rawtypes")
 	private DAOImpl getDao(Class<?> pojoClass, DSLContext context) {
 		try {

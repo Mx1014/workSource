@@ -39,12 +39,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.approval.ApprovalRule;
+import com.everhomes.approval.ApprovalRuleProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
@@ -82,6 +83,7 @@ import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchCountDTO;
@@ -133,6 +135,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -164,7 +167,8 @@ public class PunchServiceImpl implements PunchService {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
-	
+	@Autowired
+	private ApprovalRuleProvider approvalRuleProvider;
 
     
     @Autowired
@@ -518,6 +522,14 @@ public class PunchServiceImpl implements PunchService {
 			}
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
+		if(punchDayLog.getArriveTime()!=null)
+			pdl.setArriveTime(punchDayLog.getArriveTime().getTime());
+		if(punchDayLog.getLeaveTime()!=null)
+			pdl.setLeaveTime(punchDayLog.getLeaveTime().getTime());
+		if(punchDayLog.getAfternoonArriveTime()!=null)
+			pdl.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
+		if(punchDayLog.getNoonLeaveTime()!=null)
+			pdl.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
 		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
 				dateSF.format(logDay.getTime()));
 		if (null != exceptionApproval) {
@@ -572,9 +584,21 @@ public class PunchServiceImpl implements PunchService {
 						dateSF.format(logDay.getTime()));
 		if (exceptionRequests.size() > 0) {
 			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
-
+				//是否有请求的flag
+				if(exceptionRequest.getApprovalStatus() != null ){
+					pdl.setRequestFlag(NormalFlag.YES.getCode());
+					pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+				}
+				if(exceptionRequest.getMorningApprovalStatus() != null ){
+					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
+					pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+				}
+				if(exceptionRequest.getAfternoonApprovalStatus() != null ){
+					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
+					pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+				}
 				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
-
+				
 				punchExceptionDTO.setRequestType(exceptionRequest
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
@@ -1382,6 +1406,7 @@ public class PunchServiceImpl implements PunchService {
 		} 
 	}
 
+	@Override
 	public boolean isWorkDay(Date date1,PunchRule punchRule) {
 		if (date1 == null)
 			return false;
@@ -1430,7 +1455,52 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	 
+	private boolean isWorkTime(Time time, PunchTimeRule punchTimeRule) {
+		if (time == null || punchTimeRule == null) {
+			return false;
+		}
+		time = Time.valueOf(timeSF.format(time));
+		//时间在最早上班时间到最晚下班时间之间且不在午休时间范围内
+		if (!time.before(punchTimeRule.getStartEarlyTime()) && !time.after(getEndTime(punchTimeRule.getStartLateTime(), punchTimeRule.getWorkTime()))
+				&& !(time.after(punchTimeRule.getNoonLeaveTime()) && time.before(punchTimeRule.getAfternoonArriveTime()))) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public Time getEndTime(Time startTime, Time workTime){
+		return new Time(convertTimeToGMTMillisecond(startTime) + convertTimeToGMTMillisecond(workTime) - MILLISECONDGMT);
+	}
+	
+	@Override
+	public boolean isWorkTime(Time time, PunchRule punchRule) {
+		return isWorkTime(time, getPunchTimeRule(punchRule));
+	}
+	
+	private boolean isRestTime(Date fromTime, Date endTime, PunchTimeRule punchTimeRule){
+		return isSameDay(fromTime, endTime)
+				&& timeSF.format(fromTime).equals(timeSF.format(punchTimeRule.getNoonLeaveTime()))
+				&& timeSF.format(endTime).equals(timeSF.format(punchTimeRule.getAfternoonArriveTime()));
+	}
+	
+	@Override
+	public boolean isSameDay(Date date1, Date date2) {
+		return dateSF.format(date1).equals(dateSF.format(date2));
+	}
+	
+	@Override
+	public boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule) {
+		return isRestTime(fromTime, endTime, getPunchTimeRule(punchRule));
+	}
+	
+	@Override
+	public PunchTimeRule getPunchTimeRule(PunchRule punchRule) {
+		if (punchRule != null && punchRule.getTimeRuleId() != null) {
+			return punchProvider.findPunchTimeRuleById(punchRule.getTimeRuleId());
+		}
+		return null;
+	}
 
 	@Override
 	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd) {
@@ -1939,6 +2009,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setAfternoonApprovalStatus(ApprovalStatus.UNPUNCH.getCode());
 		punchProvider.viewDateFlags(userId, cmd.getEnterpirseId(),
 				dateSF.format(logDay.getTime()));
+		
 		return pdl;
 	}
 
@@ -3497,7 +3568,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 	/**找到用户的打卡总规则*/
-	private PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
+	@Override
+	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
 		if (null == map){
@@ -3513,6 +3585,25 @@ public class PunchServiceImpl implements PunchService {
 		return this.punchProvider.getPunchRuleById(map.getPunchRuleId());
 		
 	}
+	
+	//ownerType为组织，ownerId为组织id
+	@Override
+	public ApprovalRule getApprovalRule(String ownerType, Long ownerId,Long userId){
+		//如果有个人规则就返回个人规则
+		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
+		if (null == map){
+			//没有个人规则,向上递归找部门规则
+			if(!ownerType.equals(PunchOwnerType.ORGANIZATION.getCode()))
+				return null;
+			//加循环限制
+			int loopMax = 10;
+			OrganizationDTO deptDTO = findUserDepartment(userId, ownerId);
+			Organization dept =  ConvertHelper.convert(deptDTO, Organization.class);
+			map = getPunchRule(ownerId ,dept,loopMax);
+		}
+		return approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
+	}
+	
 //	/**找到用户的打卡时间规则*/
 //	private PunchTimeRule getTimeRule(String ownerType, Long ownerId ,Long  userId) {  
 //		PunchRule pr = this.getPunchRule(ownerType, ownerId, userId);

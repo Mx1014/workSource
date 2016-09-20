@@ -1,10 +1,13 @@
 package com.everhomes.techpark.punch;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.approval.ApprovalRule;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -152,4 +155,21 @@ public interface PunchService {
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 
 	void refreshMonthDayLogs(String month);
+
+	ApprovalRule getApprovalRule(String ownerType, Long ownerId, Long userId);
+
+	PunchRule getPunchRule(String ownerType, Long ownerId, Long userId);
+
+	boolean isWorkDay(Date date1, PunchRule punchRule);
+
+	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
+
+	boolean isWorkTime(Time time, PunchRule punchRule);
+
+	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule);
+
+	boolean isSameDay(Date date1, Date date2);
+
+	Time getEndTime(Time startTime, Time workTime);
+
 }
