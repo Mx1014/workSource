@@ -120,6 +120,9 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupNotificationTemplateCode;
+import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -1413,6 +1416,22 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void sendMessageToCreator(ApprovalRequest approvalRequest) {
+		
+		
+//		Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("groupName", group.getName());
+//        map.put("userName", operator);
+//        
+//        String scope = GroupNotificationTemplateCode.SCOPE;
+//        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
+//        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC){
+//        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_CLUB_ADMIN;
+//        }
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//       
+//        for(Long userId: adminList) {
+//            sendMessageToUser(userId, notifyTextForApplicant, null);
+//        }
 	}
 
 	private void checkCurrentUserExistInLevel(Long userId, Long flowId, Byte level) {
@@ -1541,6 +1560,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			approvalUserDTO.setCheckedFlag(TrueOrFalseFlag.TRUE.getCode());
 			approvalUserDTO.setDepartmentName(getDepartmentNames(a.getTargetId(), cmd.getOwnerId()));
 			approvalUserDTO.setNickName(nickName);
+			approvalUserDTO.setUserId(a.getTargetId());
 			return approvalUserDTO;
 		}).filter(au->au != null).collect(Collectors.toList());
 		
@@ -1582,6 +1602,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 				approvalUserDTO.setCheckedFlag(TrueOrFalseFlag.FALSE.getCode());
 				approvalUserDTO.setDepartmentName(getDepartmentNames(organizationMember.getTargetId(), cmd.getOwnerId()));
 				approvalUserDTO.setNickName(getTargetName(ApprovalTargetType.USER.getCode(), organizationMember.getTargetId(), cmd.getOwnerType(), cmd.getOwnerId()));
+				approvalUserDTO.setUserId(organizationMember.getTargetId());
 				resultList.add(approvalUserDTO);
 			}
 			
