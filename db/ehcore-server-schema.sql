@@ -3494,7 +3494,6 @@ CREATE TABLE `eh_organization_owners` (
   `id_card_number` VARCHAR(18) COMMENT 'id card number',
   `avatar` VARCHAR(128) COMMENT 'avatar',
   `status` TINYINT COMMENT 'delete: 0, normal: 1',
-  `address_id`  bigint(20) NULL COMMENT 'address id',
 
   PRIMARY KEY (`id`),
   KEY `fk_eh_organization` (`organization_id`),
