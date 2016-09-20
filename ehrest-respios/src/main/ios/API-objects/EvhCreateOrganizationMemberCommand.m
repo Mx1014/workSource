@@ -30,8 +30,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.targetType)
         [jsonObject setObject: self.targetType forKey: @"targetType"];
     if(self.targetId)
@@ -57,9 +57,9 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.targetType = [jsonObject objectForKey: @"targetType"];
         if(self.targetType && [self.targetType isEqual:[NSNull null]])

@@ -127,6 +127,22 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 				.map(p -> ConvertHelper.convert(p, Attachment.class)).collect(Collectors.toList());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void deleteAttachmentByOwnerId(Class<?> pojoClass, Long ownerId) {
+		assert (ownerId != null);
+
+		DSLContext context = getReadWriteContext();
+
+		JooqMetaInfo meta = JooqDiscover.jooqMetaFromPojo(pojoClass);
+		assert (meta != null);
+
+		Record blankRecord = meta.getBlankRecordObject();
+		assert (blankRecord != null);
+		
+		context.delete(meta.getTableImpl()).where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).execute();
+	}
+	
 	@SuppressWarnings("rawtypes")
 	private DAOImpl getDao(Class<?> pojoClass, DSLContext context) {
 		try {
@@ -172,6 +188,7 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 			Attachment attachment = new Attachment();
 			attachment.setId(r.getValue("id", Long.class));
 			attachment.setOwnerId(r.getValue("owner_id", Long.class));
+			attachment.setContentType(r.getValue("attachment_name", String.class));
 			attachment.setContentType(r.getValue("content_type", String.class));
 			attachment.setContentUri(r.getValue("content_uri", String.class));
 			attachment.setCreatorUid(r.getValue("creator_uid", Long.class));

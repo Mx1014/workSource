@@ -1330,7 +1330,7 @@ public class UserServiceImpl implements UserService {
 		UserInfo info = ConvertHelper.convert(user, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
 		populateUserAvatar(info, user.getAvatar());
-//		info.setAvatarUri(user.getAvatar());
+//		info.setAvatar(user.getAvatar());
 //		try{
 //			String url = contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
 //			info.setAvatarUrl(url);
@@ -1740,12 +1740,12 @@ public class UserServiceImpl implements UserService {
 		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
 		populateUserAvatar(info, queryUser.getAvatar());
-//		info.setAvatarUri(queryUser.getAvatar());
+//		info.setAvatar(queryUser.getAvatar());
 //		try{
 //			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
 //			info.setAvatarUrl(url);
 //		}catch(Exception e){
-//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatarUri());
+//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatar());
 //		}
 		if(queryUser.getCommunityId()!=null){
 			Community community = communityProvider.findCommunityById(queryUser.getCommunityId());
@@ -1826,7 +1826,7 @@ public class UserServiceImpl implements UserService {
 		}
         // 把用户头像的处理独立到一个方法中 by lqs 20151211
         populateUserAvatar(info, queryUser.getAvatar());
-//		info.setAvatarUri(queryUser.getAvatar());
+//		info.setAvatar(queryUser.getAvatar());
 //		try{
 //			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
 //			info.setAvatarUrl(url);

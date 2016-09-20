@@ -34,8 +34,8 @@
         [jsonObject setObject: self.targetId forKey: @"targetId"];
     if(self.roleId)
         [jsonObject setObject: self.roleId forKey: @"roleId"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -49,9 +49,9 @@
         if(self.roleId && [self.roleId isEqual:[NSNull null]])
             self.roleId = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         return self;
     }

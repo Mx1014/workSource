@@ -1,22 +1,11 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
-import java.sql.Timestamp;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
-import com.everhomes.organization.Organization;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.util.DateHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component(PropertyEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_PM)
 public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
@@ -54,14 +43,14 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 //			if(VisibleRegionType.fromCode(post.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
 //				organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
 //			}
-//			task.setOrganizationId(organizationId);
+//			task.setCommunityId(organizationId);
 //			task.setApplyEntityType(EntityType.TOPIC.getCode());
 //			task.setApplyEntityId(-1L);
 //			task.setTargetType(EntityType.USER.getCode());
 //			task.setTargetId(0L);
 //			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 //			//task.setTaskType(OrganizationTaskType.fromCode(post.getActionCategory()).getCode());
-//			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			task.setBehaviorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //			propertyMgrProvider.createPmTask(task );
 //			post.setEmbeddedId(task.getId());
 //		}

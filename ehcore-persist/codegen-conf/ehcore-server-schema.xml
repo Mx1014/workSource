@@ -98,6 +98,8 @@
 		eh_rentalv2_items_orders | eh_rentalv2_order_attachments | eh_rentalv2_order_payorder_map | eh_rentalv2_refund_orders | eh_rentalv2_resource_types | eh_rentalv2_resource_numbers |
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders |
         eh_journals | eh_journal_configs |
+		eh_community_services |
+        eh_organization_owner_cars | eh_organization_owner_address | eh_organization_owner_owner_car | eh_organization_owner_attachments | eh_organization_owner_car_attachments | eh_organization_owner_behaviors | eh_organization_owner_type |
 		eh_pm_tasks | eh_pm_task_logs | eh_pm_task_attachments | eh_pm_task_statistics |
 		eh_rich_texts |
 		eh_office_cubicle_spaces | eh_office_cubicle_attachments | eh_office_cubicle_categories | eh_office_cubicle_orders | eh_rich_texts | eh_user_impersonations |
@@ -105,7 +107,8 @@
         eh_search_types |
         eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments |
 		eh_community_services | eh_aclink_logs |
-		eh_namespaces | eh_configurations
+		eh_namespaces | eh_configurations |
+		eh_approval_flows | eh_approval_flow_levels | eh_approval_rules | eh_approval_rule_flow_map | eh_approval_categories | eh_approval_requests | eh_approval_attachments | eh_approval_time_ranges | eh_approval_op_requests
 
         </includes>
             <!-- All elements that are excluded from your schema

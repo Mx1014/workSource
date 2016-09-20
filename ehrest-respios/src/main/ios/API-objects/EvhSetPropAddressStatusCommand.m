@@ -30,10 +30,10 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
 }
@@ -41,13 +41,13 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.status = [jsonObject objectForKey: @"status"];
         if(self.status && [self.status isEqual:[NSNull null]])

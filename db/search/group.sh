@@ -29,7 +29,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/group" -d '
             "creatorUid":{"type":"long"},
             "categoryId":{"type":"long"},
 			"namespaceId":{"type":"long"},
-            "createTime":{"type":"date"}
+            "behaviorTime":{"type":"date"}
         }
     }
 }

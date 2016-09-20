@@ -2080,7 +2080,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         AclinkLinglingQrCodeRequest qrRequest = new AclinkLinglingQrCodeRequest();
-        qrRequest.setEffecNumber(2l);
+        qrRequest.setEffecNumber(this.configProvider.getLongValue(AclinkConstant.ACLINK_VISITOR_CNT, 6));
         qrRequest.setEndTime(24*60l);
         qrRequest.setStartTime(Long.toString(System.currentTimeMillis() - 5000));
         

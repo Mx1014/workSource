@@ -40,8 +40,8 @@
         [jsonObject setObject: self.messageText forKey: @"messageText"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.messageMeta)
@@ -79,9 +79,9 @@
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])

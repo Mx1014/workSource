@@ -44,8 +44,8 @@
         [jsonObject setObject: self.md5sum forKey: @"md5sum"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.downloadUrl)
         [jsonObject setObject: self.downloadUrl forKey: @"downloadUrl"];
     if(self.creatorId)
@@ -91,9 +91,9 @@
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.downloadUrl = [jsonObject objectForKey: @"downloadUrl"];
         if(self.downloadUrl && [self.downloadUrl isEqual:[NSNull null]])

@@ -77,8 +77,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"categories"];
     }
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.deleteTime)
         [jsonObject setObject: self.deleteTime forKey: @"deleteTime"];
     if(self.recommendStatus)
@@ -187,9 +187,9 @@
                 [self.categories addObject: item];
             }
         }
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.deleteTime = [jsonObject objectForKey: @"deleteTime"];
         if(self.deleteTime && [self.deleteTime isEqual:[NSNull null]])

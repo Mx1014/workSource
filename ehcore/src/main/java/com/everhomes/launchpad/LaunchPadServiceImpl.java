@@ -315,7 +315,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //            orgCmd.setItemLocation(cmd.getItemLocation());
 //            orgCmd.setNamespaceId(sceneToken.getNamespaceId());
 //            orgCmd.setSceneType(sceneToken.getScene());
-//            orgCmd.setOrganizationId(sceneToken.getEntityId());
+//            orgCmd.setCommunityId(sceneToken.getEntityId());
 //            cmdResponse = getLaunchPadItems(orgCmd, request);
 //            break;
 //        default:

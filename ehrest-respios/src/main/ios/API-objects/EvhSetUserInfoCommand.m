@@ -32,8 +32,8 @@
 {
     if(self.nickName)
         [jsonObject setObject: self.nickName forKey: @"nickName"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
     if(self.statusLine)
@@ -59,9 +59,9 @@
         if(self.nickName && [self.nickName isEqual:[NSNull null]])
             self.nickName = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])

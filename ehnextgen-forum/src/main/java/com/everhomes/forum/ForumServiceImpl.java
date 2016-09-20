@@ -1142,7 +1142,7 @@ public class ForumServiceImpl implements ForumService {
          List<Long> communityIdList = new ArrayList<Long>();
          if(null == communityId){
 //        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-//         	command.setOrganizationId(organization.getId());;
+//         	command.setCommunityId(organization.getId());;
 //         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
          	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
          	if(null != communities){
@@ -3813,7 +3813,7 @@ public class ForumServiceImpl implements ForumService {
 //            		}
 //            	}else{
 ////                	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-////                	command.setOrganizationId(org.getId());		
+////                	command.setCommunityId(org.getId());
 ////                	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
 ////                	for (CommunityDTO communityDTO : communityDTOs) {
 ////                		visibleRegionIds.add(communityDTO.getId());

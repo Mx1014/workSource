@@ -1,9 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.group;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -48,6 +48,7 @@ public class GroupMemberDTO {
     private Timestamp inviteTime;
     private Timestamp createTime;
     private Timestamp approveTime;
+    private Timestamp updateTime;
     private Byte phonePrivateFlag;
     private String cellPhone;
     private Byte muteNotificationFlag;
@@ -69,6 +70,14 @@ public class GroupMemberDTO {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     public void setUuid(String uuid) {

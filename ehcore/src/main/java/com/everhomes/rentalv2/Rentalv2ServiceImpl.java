@@ -489,7 +489,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	        addCmd.getAttachments().add(attachement);
 	        addCmd.setRentalType(RentalType.DAY.getCode());
 	        addCmd.setRentalEndTime(1000*60*60L);
-	        addCmd.setRentalStartTime(1000*60*60*24*30L); 			addCmd.setTimeStep(1.0);
+	        addCmd.setRentalStartTime(1000*60*60*24*30L);
+ 			addCmd.setTimeStep(1.0);
 //	        cmd.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
 	        addCmd.setBeginDate(new java.util.Date().getTime());
 	        //当前时间+100天
@@ -682,7 +683,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //	public Long addRentalSite(AddRentalSiteCommand cmd) {
 //		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
 //		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
-//		rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+//		rentalsite.setBehaviorTime(new Timestamp(DateHelper.currentGMTTime()
 //				.getTime()));
 //		rentalsite.setCreatorUid( UserContext.current().getUser().getId());
 //		Long siteId = rentalProvider.createRentalSite(rentalsite);

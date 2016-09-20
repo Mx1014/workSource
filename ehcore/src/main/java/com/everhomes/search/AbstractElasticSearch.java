@@ -1,9 +1,5 @@
 package com.everhomes.search;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.elasticsearch.action.WriteConsistencyLevel;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoRequest;
@@ -18,7 +14,6 @@ import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
-import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -31,7 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractElasticSearch {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElasticSearch.class);
@@ -120,7 +117,7 @@ public abstract class AbstractElasticSearch {
     }
 
     public void deleteById(String id) {
-        DeleteResponse response = getClient()
+        getClient()
                 .prepareDelete(getIndexName(), getIndexType(), id).execute()
                 .actionGet();
     }

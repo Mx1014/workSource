@@ -128,7 +128,7 @@ public class RecommendAction implements Runnable {
         // TODO if recommends exists before?
 //        if(recommends.size() > 0) {
 //            Recommendation commend = recommends.get(0);
-//            commend.setCreateTime(new Timestamp(System.currentTimeMillis()));
+//            commend.setBehaviorTime(new Timestamp(System.currentTimeMillis()));
 //            this.recommendationProvider.updateRecommendation(commend);
 //        }
         
