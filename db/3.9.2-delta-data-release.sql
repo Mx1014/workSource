@@ -127,3 +127,4 @@ delete from eh_web_menu_scopes where owner_id not in (999992, 999988) and menu_i
 
 delete from eh_web_menu_scopes where owner_id in (999988) and menu_id in (21000,22000,23000);
 
+delete from eh_web_menu_scopes where owner_id = 999991 and menu_id = 44000;
