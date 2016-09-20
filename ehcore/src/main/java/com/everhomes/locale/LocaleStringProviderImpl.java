@@ -1,5 +1,7 @@
 package com.everhomes.locale;
 
+<<<<<<< HEAD
+=======
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+>>>>>>> 3.9.2
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
@@ -28,6 +31,12 @@ import com.everhomes.server.schema.tables.EhLocaleTemplates;
 import com.everhomes.server.schema.tables.daos.EhLocaleTemplatesDao;
 import com.everhomes.server.schema.tables.records.EhLocaleStringsRecord;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Component
 public class LocaleStringProviderImpl implements LocaleStringProvider {
@@ -71,6 +80,20 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
         return ConvertHelper.convert(record, LocaleString.class);
     }
 
+<<<<<<< HEAD
+    @Cacheable(value="LocaleStringFind", key="{#scope, #text, #locale}")
+    @Override
+    public LocaleString findByText(String scope, String text, String locale) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhLocaleStringsRecord record = (EhLocaleStringsRecord)context.select().from(Tables.EH_LOCALE_STRINGS)
+                .where(Tables.EH_LOCALE_STRINGS.SCOPE.like(scope))
+                .and(Tables.EH_LOCALE_STRINGS.TEXT.eq(text))
+                .and(Tables.EH_LOCALE_STRINGS.LOCALE.like(locale))
+                .fetchOne();
+
+        return ConvertHelper.convert(record, LocaleString.class);
+    }
+=======
 	@Override
 	public List<LocaleTemplateDTO> listLocaleTemplate(int from, int pageSize, Integer namespaceId, String scope,
 			Integer code, String keyword) {
@@ -124,4 +147,5 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
 		
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLocaleTemplates.class, template.getId());
 	}
+>>>>>>> 3.9.2
 }

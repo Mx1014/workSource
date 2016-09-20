@@ -35,8 +35,8 @@
 {
     if(self.resourceTypeId)
         [jsonObject setObject: self.resourceTypeId forKey: @"resourceTypeId"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.siteName)
         [jsonObject setObject: self.siteName forKey: @"siteName"];
     if(self.spec)
@@ -86,9 +86,9 @@
         if(self.resourceTypeId && [self.resourceTypeId isEqual:[NSNull null]])
             self.resourceTypeId = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.siteName = [jsonObject objectForKey: @"siteName"];
         if(self.siteName && [self.siteName isEqual:[NSNull null]])

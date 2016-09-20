@@ -2,6 +2,8 @@
 package com.everhomes.community;
 
 
+<<<<<<< HEAD
+=======
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
+>>>>>>> 3.9.2
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
@@ -50,6 +53,9 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
+<<<<<<< HEAD
+import com.everhomes.organization.*;
+=======
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
@@ -61,12 +67,24 @@ import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.point.UserLevel;
+>>>>>>> 3.9.2
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+<<<<<<< HEAD
+import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupMemberDTO;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.organization.*;
+=======
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatus;
@@ -143,6 +161,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+>>>>>>> 3.9.2
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -156,12 +175,16 @@ import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+<<<<<<< HEAD
+import com.everhomes.user.*;
+=======
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+>>>>>>> 3.9.2
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -173,6 +196,22 @@ import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
 import com.mysql.jdbc.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -1383,7 +1422,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<OrganizationOwners> owners = organizationProvider.listOrganizationOwnerByCommunityId(cmd.getCommunityId(),locator, cmd.getPageSize(),(loc, query) -> {
+		List<OrganizationOwner> owners = organizationProvider.listOrganizationOwnerByCommunityId(cmd.getCommunityId(),locator, cmd.getPageSize(),(loc, query) -> {
 			if(org.springframework.util.StringUtils.isEmpty(cmd.getKeywords())){
 				Condition cond = Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME.like(cmd.getKeywords() + "%");
 				cond = cond.or(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(cmd.getKeywords()));
@@ -1393,18 +1432,18 @@ public class CommunityServiceImpl implements CommunityService {
         });
 		
 		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
-		for (OrganizationOwners organizationOwners : owners) {
+		for (OrganizationOwner organizationOwner : owners) {
 			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(organizationOwners.getNamespaceId(), organizationOwners.getContactToken());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(organizationOwner.getNamespaceId(), organizationOwner.getContactToken());
 			dto.setIsAuth(2);
 			if(null != userIdentifier){
 				dto.setUserId(userIdentifier.getOwnerUid());
 				dto.setIsAuth(1);
 			}
 			
-			dto.setUserName(organizationOwners.getContactName());
-			dto.setNikeName(organizationOwners.getContactName());
-			dto.setPhone(organizationOwners.getContactToken());
+			dto.setUserName(organizationOwner.getContactName());
+			dto.setNikeName(organizationOwner.getContactName());
+			dto.setPhone(organizationOwner.getContactToken());
 			dtos.add(dto);
 		}
 		res.setDtos(dtos);
@@ -1419,10 +1458,10 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 		if(null == userIdentifier){
-			List<OrganizationOwners> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(cmd.getContactToken(), namespaceId);
+			List<OrganizationOwner> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(cmd.getContactToken(), namespaceId);
 			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
-			for (OrganizationOwners organizationOwners : owners) {
-				Address address = addressProvider.findAddressById(organizationOwners.getAddressId());
+			for (OrganizationOwner organizationOwner : owners) {
+				Address address = addressProvider.findAddressById(organizationOwner.getAddressId());
 				addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 			}
 			return dto;
@@ -1641,15 +1680,15 @@ public class CommunityServiceImpl implements CommunityService {
 					}
 				}
 //				if(null != m){
-//					Organization org = organizationProvider.findOrganizationById(m.getOrganizationId());
+//					Organization org = organizationProvider.findOrganizationById(m.getCommunityId());
 //					if(null != org)
 //						dto.setEnterpriseName(org.getName());
 //					
-//					List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(m.getOrganizationId());
+//					List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(m.getCommunityId());
 //					if(null != addresses && addresses.size() > 0){
-//						Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
+//						Address address = addressProvider.findAddressById(addresses.get(0).getApartmentId());
 //						dto.setAddressName(address.getAddress());
-//						dto.setAddressId(address.getId());
+//						dto.setApartmentId(address.getId());
 //						dto.setBuildingName(address.getBuildingName());
 //					}
 //				}

@@ -1,32 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -39,71 +13,36 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
@@ -917,9 +856,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationOwners> listOrganizationOwnersByOrgIdAndAddressId(
+	public List<OrganizationOwner> listOrganizationOwnersByOrgIdAndAddressId(
 			Long organizationId, Long addressId) {
-		List<OrganizationOwners> list = new ArrayList<OrganizationOwners>();
+		List<OrganizationOwner> list = new ArrayList<OrganizationOwner>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
 				.where(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId)
@@ -927,7 +866,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						.fetch();
 		if(records != null && !records.isEmpty()){
 			for(Record r : records)
-				list.add(ConvertHelper.convert(r, OrganizationOwners.class));
+				list.add(ConvertHelper.convert(r, OrganizationOwner.class));
 		}
 		return list;
 	}
@@ -1632,7 +1571,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void createOrganizationDetail(OrganizationDetail organizationDetail) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationDetails.class));
-		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getOrganizationId()));
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getCommunityId()));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
 		organizationDetail.setId(id);
@@ -1641,7 +1580,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public void updateOrganizationDetail(OrganizationDetail organizationDetail) {
-		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getOrganizationId()));
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getCommunityId()));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
 		dao.update(organizationDetail);
@@ -1869,7 +1808,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		assert(attachment.getOrganizationId() != null);
 
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, attachment.getOrganizationId()));
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, attachment.getCommunityId()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAttachments.class));
         attachment.setId(id);
@@ -1886,7 +1825,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		assert(address.getOrganizationId() != null);
 
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getOrganizationId()));
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getCommunityId()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddresses.class));
         address.setId(id);
@@ -2039,7 +1978,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void deleteOrganizationAddress(OrganizationAddress address) {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getOrganizationId()));
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, address.getCommunityId()));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
@@ -2058,7 +1997,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void updateOrganizationAddress(OrganizationAddress oa) {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, oa.getOrganizationId()));
+		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, oa.getCommunityId()));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		oa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
@@ -2235,7 +2174,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public void createOrganizationOwner(OrganizationOwners owner) {
+	public void createOrganizationOwner(OrganizationOwner owner) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		InsertQuery<EhOrganizationOwnersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_OWNERS);
@@ -2248,14 +2187,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public OrganizationOwners getOrganizationOwnerByTokenOraddressId(String contactToken, Long addressId) {
+	public OrganizationOwner getOrganizationOwnerByTokenOraddressId(String contactToken, Long addressId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TYPE.eq(ContactType.MOBILE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
-		return ConvertHelper.convert(query.fetchAny(), OrganizationOwners.class);
+		return ConvertHelper.convert(query.fetchAny(), OrganizationOwner.class);
 	}
 	
 	@Override
@@ -2268,7 +2207,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public void updateOrganizationOwner(OrganizationOwners organizationOwner){
+	public void updateOrganizationOwner(OrganizationOwner organizationOwner){
 		assert(organizationOwner.getId() == null);
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2278,7 +2217,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<OrganizationOwners> listOrganizationOwnerByCommunityId(Long communityId, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback) {
+	public List<OrganizationOwner> listOrganizationOwnerByCommunityId(Long communityId, ListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
 		Integer count = null == pageSize ? 0 : pageSize + 1;
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2295,8 +2234,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(null != pageSize)
 			query.addLimit(count);
 		
-		List<OrganizationOwners> owners = query.fetch().map((r) -> {
-       	 	return ConvertHelper.convert(r, OrganizationOwners.class);
+		List<OrganizationOwner> owners = query.fetch().map((r) -> {
+       	 	return ConvertHelper.convert(r, OrganizationOwner.class);
 		});
 		
 		 if(null != pageSize){
@@ -2309,7 +2248,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<OrganizationOwners> findOrganizationOwnerByTokenOrNamespaceId(String contactToken, Integer namespaceId) {
+	public List<OrganizationOwner> findOrganizationOwnerByTokenOrNamespaceId(String contactToken, Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
@@ -2317,8 +2256,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TYPE.eq(ContactType.MOBILE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
 		
-		List<OrganizationOwners> owners = query.fetch().map((r) -> {
-       	 	return ConvertHelper.convert(r, OrganizationOwners.class);
+		List<OrganizationOwner> owners = query.fetch().map((r) -> {
+       	 	return ConvertHelper.convert(r, OrganizationOwner.class);
 		});
 		return owners;
 	}

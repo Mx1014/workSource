@@ -188,6 +188,7 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 			Attachment attachment = new Attachment();
 			attachment.setId(r.getValue("id", Long.class));
 			attachment.setOwnerId(r.getValue("owner_id", Long.class));
+			attachment.setContentType(r.getValue("attachment_name", String.class));
 			attachment.setContentType(r.getValue("content_type", String.class));
 			attachment.setContentUri(r.getValue("content_uri", String.class));
 			attachment.setCreatorUid(r.getValue("creator_uid", Long.class));

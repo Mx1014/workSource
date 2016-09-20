@@ -1,47 +1,24 @@
 package com.everhomes.family;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.family.*;
+import com.everhomes.search.CommunitySearcher;
+import com.everhomes.util.EtagHelper;
+import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.family.ApproveMemberCommand;
-import com.everhomes.rest.family.DeleteHistoryByIdCommand;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.family.FamilyMemberDTO;
-import com.everhomes.rest.family.FamilyMembershipRequestDTO;
-import com.everhomes.rest.family.FindFamilyByAddressIdCommand;
-import com.everhomes.rest.family.GetFamilyCommand;
-import com.everhomes.rest.family.GetOwningFamilyByIdCommand;
-import com.everhomes.rest.family.JoinFamilyCommand;
-import com.everhomes.rest.family.LeaveFamilyCommand;
-import com.everhomes.rest.family.ListFamilyByKeywordCommand;
-import com.everhomes.rest.family.ListFamilyRequestsCommand;
-import com.everhomes.rest.family.ListFamilyRequestsCommandResponse;
-import com.everhomes.rest.family.ListNearbyNeighborUserCommand;
-import com.everhomes.rest.family.ListNeighborUsersCommand;
-import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
-import com.everhomes.rest.family.ListOwningFamilyMembersCommand;
-import com.everhomes.rest.family.NeighborUserDTO;
-import com.everhomes.rest.family.RejectMemberCommand;
-import com.everhomes.rest.family.RevokeMemberCommand;
-import com.everhomes.rest.family.SetCurrentFamilyCommand;
-import com.everhomes.rest.family.UpdateFamilyInfoCommand;
-import com.everhomes.search.CommunitySearcher;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.Tuple;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <ul>家庭管理：
@@ -342,13 +319,11 @@ public class FamilyController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     @RequestMapping("listFamilyMembersByFamilyId")
     @RestReturn(value=FamilyMemberDTO.class, collection=true)
     public RestResponse listFamilyMembersByFamilyId(ListNeighborUsersCommand cmd) {
-        
         List<FamilyMemberDTO> result = this.familyService.listFamilyMembersByFamilyId(cmd.getId(), 1, 20);
-        
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

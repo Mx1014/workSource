@@ -38,8 +38,8 @@
         [jsonObject setObject: self.billId forKey: @"billId"];
     if(self.address)
         [jsonObject setObject: self.address forKey: @"address"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.lastPayTime)
         [jsonObject setObject: self.lastPayTime forKey: @"lastPayTime"];
     if(self.lastBillingTransactionId)
@@ -67,9 +67,9 @@
         if(self.address && [self.address isEqual:[NSNull null]])
             self.address = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.lastPayTime = [jsonObject objectForKey: @"lastPayTime"];
         if(self.lastPayTime && [self.lastPayTime isEqual:[NSNull null]])

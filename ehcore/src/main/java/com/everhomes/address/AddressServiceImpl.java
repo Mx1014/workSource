@@ -1,39 +1,9 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
-
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.community.Building;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityDataInfo;
-import com.everhomes.community.CommunityGeoPoint;
-import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -54,39 +24,11 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.AddressAdminStatus;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.AddressLivingStatus;
-import com.everhomes.rest.address.AddressServiceErrorCode;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.CommunitySummaryDTO;
-import com.everhomes.rest.address.CreateServiceAddressCommand;
-import com.everhomes.rest.address.DeleteServiceAddressCommand;
-import com.everhomes.rest.address.DisclaimAddressCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
-import com.everhomes.rest.address.ListAddressCommand;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListCommunityByKeywordCommand;
-import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.SearchCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.CommunityDoc;
@@ -104,23 +46,29 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroupHistory;
-import com.everhomes.user.UserGroupHistoryProvider;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserServiceAddress;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.FileHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
@@ -617,7 +565,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 //        userGroups = userGroups.stream().filter((userGroup)-> {
 //            Group group = this.groupProvider.findGroupById(userGroup.getGroupId());
 //            if(group != null){
-//                return group.getIntegralTag1().longValue() == cmd.getAddressId().longValue();
+//                return group.getIntegralTag1().longValue() == cmd.getApartmentId().longValue();
 //            }
 //            return false;
 //        }).collect(Collectors.toList());

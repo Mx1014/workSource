@@ -26,6 +26,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+<<<<<<< HEAD
+=======
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Font;
@@ -34,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+>>>>>>> 3.9.2
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +179,6 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
@@ -2965,7 +2967,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					orgVo.setOrgComms(new ArrayList<OrganizationCommunity>());
 				orgVo.getOrgComms().add(orgComm);
 				orgCommCount++;
-				//orgComm.setOrganizationId(org.getId());
+				//orgComm.setCommunityId(org.getId());
 				//this.organizationProvider.createOrganizationCommunity(orgComm);
 			}
 			//机构电话
@@ -2980,7 +2982,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					orgVo.setOrgContacts(new ArrayList<CommunityPmContact>());
 				orgVo.getOrgContacts().add(orgContact);
 				orgContactCount++;
-				//				orgContact.setOrganizationId(org.getId());
+				//				orgContact.setCommunityId(org.getId());
 				//				this.propertyMgrProvider.createPropContact(orgContact);
 			}
 			orgVos.add(orgVo);
@@ -3611,7 +3613,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			//二期实现机构管理楼栋
-//			this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getOrganizationId());
+//			this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getCommunityId());
 //			if(cmd.getIsAll() == 0) {
 //				List<Long> buildingIds = this.communityProvider.listBuildingIdByCommunityId(cmd.getCommunityId());
 //				cmd.setBuildingIds(buildingIds);
@@ -3619,7 +3621,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //			
 //			for(Long buildingId: cmd.getBuildingIds()) {
 //				OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
-//				pmBuilding.setOrganizationId(cmd.getOrganizationId());
+//				pmBuilding.setCommunityId(cmd.getCommunityId());
 //				pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
 //				pmBuilding.setScopeId(buildingId);
 //				this.organizationProvider.addPmBuilding(pmBuilding);
@@ -3936,7 +3938,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            member = new OrganizationMember();
 //
 //            member.setContactName(user.getNickName());
-//            member.setOrganizationId(organization.getId());
+//            member.setCommunityId(organization.getId());
 //            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 //            member.setTargetId(user.getId());
 //            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
@@ -6437,9 +6439,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     		
     		
 	    	if(null == userIdentifier){
-	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
+	    		OrganizationOwner owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
 	    		if(null == owner){
-	    			owner = ConvertHelper.convert(cmd, OrganizationOwners.class);
+	    			owner = ConvertHelper.convert(cmd, OrganizationOwner.class);
 	    			owner.setAddressId(address.getId());
 	    			if(null == owner.getContactType()){
 	    				owner.setContactType(ContactType.MOBILE.getCode());
@@ -6464,7 +6466,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 	    	if(null == userIdentifier){
-	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), cmd.getAddressId());
+	    		OrganizationOwner owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), cmd.getAddressId());
 		    	if(null != owner){
 		    		organizationProvider.deleteOrganizationOwnerById(owner.getId());
 		    	}

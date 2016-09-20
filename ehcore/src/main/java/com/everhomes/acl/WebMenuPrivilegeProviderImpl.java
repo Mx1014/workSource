@@ -1,32 +1,25 @@
 // @formatter:off
 package com.everhomes.acl;
 
-import java.util.List;
-
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
+import com.everhomes.rest.acl.WebMenuStatus;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord;
+import com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord;
+import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.WebMenu;
-import com.everhomes.acl.WebMenuPrivilege;
-import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DbProvider;
-import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
-import com.everhomes.rest.acl.WebMenuStatus;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhWebMenuScopes;
-import com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord;
-import com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord;
-import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
+import java.util.List;
 @Component
 public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	

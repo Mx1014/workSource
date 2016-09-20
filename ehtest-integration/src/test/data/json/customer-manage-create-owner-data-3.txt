@@ -1,0 +1,42 @@
+{
+    "eh_addresses": [
+        {
+          "id": 24206890946797812,
+          "uuid": "711e2770-65aa-11e5-ae8f-00163e0018d7",
+          "community_id": 111,
+          "city_id": 10002,
+          "city_name": "北京市",
+          "area_id": 10007,
+          "area_name": "朝阳区",
+          "address": "101-1-102",
+          "address_alias": "",
+          "building_name": "101-1",
+          "building_alias_name": "",
+          "apartment_name": "102",
+          "apartment_floor": "",
+          "status": 2,
+          "operator_uid": 0,
+          "creator_uid": 0,
+          "create_time": "2014-08-01 14:30:16",
+          "namespace_id": 0
+        },
+        {
+          "id": 24206890946797814,
+          "uuid": "711e2cc0-65aa-11e5-ae8f-00163e0018d7",
+          "community_id": 111,
+          "city_id": 10002,
+          "city_name": "北京市",
+          "area_id": 10007,
+          "area_name": "朝阳区",
+          "address": "101-1-202",
+          "address_alias": "",
+          "building_name": "101-1",
+          "building_alias_name": "",
+          "apartment_name": "202",
+          "apartment_floor": "",
+          "status": 2,
+          "operator_uid": 0,
+          "namespace_id": 0
+        }
+      ]
+}

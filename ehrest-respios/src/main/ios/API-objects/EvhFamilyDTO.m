@@ -36,8 +36,8 @@
         [jsonObject setObject: self.name forKey: @"name"];
     if(self.displayName)
         [jsonObject setObject: self.displayName forKey: @"displayName"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
     if(self.description_)
@@ -74,8 +74,8 @@
         [jsonObject setObject: self.memberAvatarUrl forKey: @"memberAvatarUrl"];
     if(self.cellPhone)
         [jsonObject setObject: self.cellPhone forKey: @"cellPhone"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.buildingName)
         [jsonObject setObject: self.buildingName forKey: @"buildingName"];
     if(self.apartmentName)
@@ -86,8 +86,8 @@
         [jsonObject setObject: self.proofResourceUri forKey: @"proofResourceUri"];
     if(self.proofResourceUrl)
         [jsonObject setObject: self.proofResourceUrl forKey: @"proofResourceUrl"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.communityType)
         [jsonObject setObject: self.communityType forKey: @"communityType"];
     if(self.defaultForumId)
@@ -111,9 +111,9 @@
         if(self.displayName && [self.displayName isEqual:[NSNull null]])
             self.displayName = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])
@@ -187,9 +187,9 @@
         if(self.cellPhone && [self.cellPhone isEqual:[NSNull null]])
             self.cellPhone = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.buildingName = [jsonObject objectForKey: @"buildingName"];
         if(self.buildingName && [self.buildingName isEqual:[NSNull null]])
@@ -211,9 +211,9 @@
         if(self.proofResourceUrl && [self.proofResourceUrl isEqual:[NSNull null]])
             self.proofResourceUrl = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.communityType = [jsonObject objectForKey: @"communityType"];
         if(self.communityType && [self.communityType isEqual:[NSNull null]])

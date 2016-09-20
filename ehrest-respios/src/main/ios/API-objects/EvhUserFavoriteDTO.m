@@ -38,8 +38,8 @@
         [jsonObject setObject: self.targetType forKey: @"targetType"];
     if(self.targetId)
         [jsonObject setObject: self.targetId forKey: @"targetId"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -61,9 +61,9 @@
         if(self.targetId && [self.targetId isEqual:[NSNull null]])
             self.targetId = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         return self;
     }

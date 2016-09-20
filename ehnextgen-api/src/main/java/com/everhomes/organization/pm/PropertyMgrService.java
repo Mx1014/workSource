@@ -1,103 +1,26 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.community.Community;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.family.FamilyMemberDTO;
-import com.everhomes.rest.forum.CancelLikeTopicCommand;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.LikeTopicCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.ListTopicCommand;
-import com.everhomes.rest.forum.ListTopicCommentCommand;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
-import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
-import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
-import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
-import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.CreatePropOwnerCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
-import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
-import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeletePropOwnerCommand;
-import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
-import com.everhomes.rest.organization.pm.InsertPmBillCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropBillCommand;
-import com.everhomes.rest.organization.pm.ListPropBillCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
-import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommand;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropPostCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
-import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
-import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
-import com.everhomes.rest.organization.pm.PmBillsDTO;
-import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
-import com.everhomes.rest.organization.pm.PropCommunityBillDateCommand;
-import com.everhomes.rest.organization.pm.PropCommunityBillIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
-import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
-import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
-import com.everhomes.rest.organization.pm.PropFamilyDTO;
-import com.everhomes.rest.organization.pm.QueryPropTopicByCategoryCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
-import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
-import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.Tuple;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 public interface PropertyMgrService {
 	//获取用户的物业权限
@@ -127,46 +50,43 @@ public interface PropertyMgrService {
 	Tuple<Integer, List<BuildingDTO>> listPropBuildingsByKeyword(ListBuildingByKeywordCommand cmd);
 	void setApartmentStatus(SetPropAddressStatusCommand cmd);
 	PropFamilyDTO findFamilyByAddressId(ListPropCommunityAddressCommand cmd);
-	List<FamilyMemberDTO> listFamilyMembersByFamilyId(ListPropFamilyMemberCommand cmd);
-	
-	
-	UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd);
-	void setPropCurrentCommunity(SetCurrentCommunityCommand cmd);
 
-	
+	UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd);
+
+
+    void setPropCurrentCommunity(SetCurrentCommunityCommand cmd);
 	void importPMAddressMapping(PropCommunityIdCommand cmd);
-	ListPropAddressMappingCommandResponse listAddressMappings(ListPropAddressMappingCommand cmd);
-	
+
+
+    ListPropAddressMappingCommandResponse listAddressMappings(ListPropAddressMappingCommand cmd);
 	ListPropBillCommandResponse listPropertyBill(ListPropBillCommand cmd);
-	ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd);
-	
+
+    ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd);
 	ListPropInvitedUserCommandResponse listInvitedUsers(ListPropInvitedUserCommand cmd);
 
-	
-	void importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd, MultipartFile[] files);
 	void importPropertyBills(@Valid PropCommunityIdCommand cmd, MultipartFile[] files);
-	void createPropBill(CommunityPmBill bill);
-	void sendPropertyBillById(PropCommunityBillIdCommand cmd);
-	void sendPropertyBillByMonth(PropCommunityBillDateCommand cmd);
-	void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd);
-	void sendMsgToPMGroup(PropCommunityIdMessageCommand cmd);
-		
-	
-	//物业帖子相关 
+
+
+    void createPropBill(CommunityPmBill bill);
+    void sendPropertyBillById(PropCommunityBillIdCommand cmd);
+    void sendPropertyBillByMonth(PropCommunityBillDateCommand cmd);
+    void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd);
+    void sendMsgToPMGroup(PropCommunityIdMessageCommand cmd);
+    //物业帖子相关
 	PostDTO createTopic(NewTopicCommand cmd);
 	ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd);
-	ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd);
-	PostDTO createComment(NewCommentCommand cmd);
-	void cancelLikeTopic(CancelLikeTopicCommand cmd);
-	void likeTopic(LikeTopicCommand cmd);
-	PostDTO getTopic(GetTopicCommand cmd);
-	ListPostCommandResponse listTopics(ListTopicCommand cmd);
 
-	ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd);
+
+    ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd);
+    PostDTO createComment(NewCommentCommand cmd);
+    void cancelLikeTopic(CancelLikeTopicCommand cmd);
+    void likeTopic(LikeTopicCommand cmd);
+    PostDTO getTopic(GetTopicCommand cmd);
+    ListPostCommandResponse listTopics(ListTopicCommand cmd);
+    ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd);
 	PropAptStatisticDTO getApartmentStatistics(PropCommunityIdCommand cmd);
 
     List<PropCommunityContactDTO> listPropertyCommunityContacts(ListPropCommunityContactCommand cmd);
-
 	ListPmBillsByConditionsCommandResponse listPmBillsByConditions(ListPmBillsByConditionsCommand cmd);
 
 	void importPmBills(Long orgId, MultipartFile[] files);
@@ -214,20 +134,248 @@ public interface PropertyMgrService {
 	PmBillForOrderNoDTO findPmBillByOrderNo(FindPmBillByOrderNoCommand cmd);
 
 	OrganizationOrderDTO createPmBillOrder(CreatePmBillOrderCommand cmd);
-	
+
 	void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd, User user);
 
 	CommonOrderDTO createPmBillOrderDemo(CreatePmBillOrderCommand cmd);
-	
+
 	void pushMessage(PropCommunityBuildAddessCommand cmd,User user);
-	
-	void createPMPropertyOwnerInfo(CreatePropOwnerCommand cmd);
-	
-	void deletePMPropertyOwnerInfo(DeletePropOwnerCommand cmd);
-	
+
 	void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd);
-	
+
 	void createPMPropertyOwnerAddress(CreatePropOwnerAddressCommand cmd);
-	
+
 	void processUserForOwner(UserIdentifier identifier);
+
+	/**
+	 * 对业主的不同的操作行为
+	 * @param cmd 包含迁入,迁出,删除等行为
+	 */
+	void updateOrganizationOwnerAddressStatus(UpdateOrganizationOwnerAddressStatusCommand cmd);
+
+    /**
+     * 查询业主的活动记录列表
+     * @param cmd
+     * @return behavior列表
+     */
+    List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd);
+
+    /**
+     * 修改业主信息
+     */
+	OrganizationOwnerDTO updateOrganizationOwner(CreateOrUpdateOrganizationOwnerCommand cmd);
+
+    /**
+     * 创建业主
+     */
+	OrganizationOwnerDTO createOrganizationOwner(CreateOrUpdateOrganizationOwnerCommand cmd);
+
+    /**
+     * 删除业主的的活动行为记录
+     * @param cmd
+     */
+    void deleteOrganizationOwnerBehavior(DeleteOrganizationOwnerBehaviorCommand cmd);
+
+    /**
+     * 删除业主对应的附件
+     * @param cmd
+     */
+    void deleteOrganizationOwnerAttachment(@Valid DeleteOrganizationOwnerAttachmentCommand cmd);
+
+    /**
+     * 删除车辆对应的附件
+     * @param cmd
+     */
+    void deleteOrganizationOwnerCarAttachment(DeleteOrganizationOwnerCarAttachmentCommand cmd);
+
+    /**
+     * 删除业主
+     * @param cmd
+     */
+	void deleteOrganizationOwner(DeleteOrganizationOwnerCommand cmd);
+
+    /**
+     * 导入业主excel文件
+     * @param cmd 导入哪个小区的业主
+     * @param file excel文件
+     */
+	void importOrganizationOwners(ImportOrganizationsOwnersCommand cmd, MultipartFile[] file);
+
+    /**
+     * 列出当前用户的使用车辆
+     * @param cmd
+     * @return
+     */
+    ListOrganizationOwnerCarResponse searchOrganizationOwnerCars(SearchOrganizationOwnerCarCommand cmd);
+
+    /**
+     * 列出车辆对应的附件列表
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerCarAttachmentDTO> listOrganizationOwnerCarAttachments(ListOrganizationOwnerCarAttachmentCommand cmd);
+
+    /**
+     * 根据门牌号查询业主
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerDTO> listOrganizationOwnersByAddress(ListOrganizationOwnersByAddressCommand cmd);
+
+    /**
+     * 获取单条业主信息
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerDTO getOrganizationOwner(GetOrganizationOwnerCommand cmd);
+
+    /**
+     * 列出车辆使用者
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerDTO> listOrganizationOwnersByCar(ListOrganizationOwnersByCarCommand cmd);
+
+    /**
+     * 根据业主,列出业主的使用车辆
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerCarDTO> listOrganizationOwnerCarsByOrgOwner(ListOrganizationOwnerCarByOrgOwnerCommand cmd);
+
+    /**
+     * 根据address的id查询organizationOwner的列表
+     * @param cmd	cmd
+     * @return
+     */
+    ListOrganizationOwnersResponse searchOrganizationOwners(SearchOrganizationOwnersCommand cmd);
+
+    /**
+     * 查询业主对应的楼栋门牌等信息
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerAddressDTO> listOrganizationOwnerAddresses(ListOrganizationOwnerAddressesCommand cmd);
+
+    /**
+     * 查询业主的附件列表
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerAttachmentDTO> listOrganizationOwnerAttachments(ListOrganizationOwnerAttachmentsCommand cmd);
+
+    /**
+     * 创建车辆
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerCarDTO createOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd);
+
+    /**
+     * 删除车辆
+     * @param cmd
+     */
+    void deleteOrganizationOwnerCar(DeleteOrganizationOwnerCarCommand cmd);
+
+    /**
+     * 标记业主为车辆的首要联系人
+     * @param cmd
+     */
+    void setOrganizationOwnerAsCarPrimary(SetOrganizationOwnerAsCarPrimaryCommand cmd);
+
+    /**
+     * 移除业主与车辆之间的关系
+     * @param cmd
+     */
+    void deleteRelationOfOrganizationOwnerAndCar(DeleteRelationOfOrganizationOwnerAndCarCommand cmd);
+
+    /**
+     * 导入车辆
+     * @param cmd
+     * @param file
+     */
+    void importOrganizationOwnerCars(ImportOrganizationOwnerCarsCommand cmd, MultipartFile[] file);
+
+    /**
+     * 导出车辆
+     * @param cmd
+     * @param response
+     */
+    void exportOrganizationOwnerCars(ExportOrganizationOwnerCarsCommand cmd, HttpServletResponse response);
+
+    /**
+     * 导出业主
+     * @param cmd
+     * @param response
+     */
+    void exportOrganizationOwners(ExportOrganizationsOwnersCommand cmd, HttpServletResponse response);
+
+    /**
+     * 根据性别统计业主信息
+     * @param cmd
+     * @return
+     */
+    List<ListOrganizationOwnerStatisticDTO> listOrganizationOwnerStatisticByGender(ListOrganizationOwnerStatisticCommand cmd);
+
+    /**
+     * 根据年龄统计业主信息
+     * @param cmd
+     * @return
+     */
+    ListOrganizationOwnerStatisticByAgeDTO listOrganizationOwnerStatisticByAge(ListOrganizationOwnerStatisticCommand cmd);
+
+    /**
+     * 更新车辆
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerCarDTO updateOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd);
+
+    /**
+     * 上传业主附件
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerAttachmentDTO uploadOrganizationOwnerAttachment(UploadOrganizationOwnerAttachmentCommand cmd);
+
+    /**
+     * 给业主新增楼栋门牌信息
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerAddressDTO addOrganizationOwnerAddress(AddOrganizationOwnerAddressCommand cmd);
+
+    /**
+     * 移除业主与地址的之间的关系
+     * @param cmd
+     */
+    void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd);
+
+    /**
+     * 获取业主类型列表
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerTypeDTO> listOrganizationOwnerTypes(ListOrganizationOwnerTypesCommand cmd);
+
+    /**
+     * 根据id获取车辆信息
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerCarDTO getOrganizationOwnerCar(GetOrganizationOwnerCarCommand cmd);
+
+    /**
+     * 上传车辆附件
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerCarAttachmentDTO uploadOrganizationOwnerCarAttachment(UploadOrganizationOwnerCarAttachmentCommand cmd);
+
+    /**
+     * 给车辆添加使用人
+     * @param cmd
+     * @return
+     */
+    OrganizationOwnerDTO addOrganizationOwnerCarUser(AddOrganizationOwnerCarUserCommand cmd);
 }

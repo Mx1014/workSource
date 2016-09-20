@@ -58,8 +58,8 @@
         [jsonObject setObject: self.operatorUid forKey: @"operatorUid"];
     if(self.processMessage)
         [jsonObject setObject: self.processMessage forKey: @"processMessage"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.processTime)
         [jsonObject setObject: self.processTime forKey: @"processTime"];
 }
@@ -123,9 +123,9 @@
         if(self.processMessage && [self.processMessage isEqual:[NSNull null]])
             self.processMessage = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.processTime = [jsonObject objectForKey: @"processTime"];
         if(self.processTime && [self.processTime isEqual:[NSNull null]])

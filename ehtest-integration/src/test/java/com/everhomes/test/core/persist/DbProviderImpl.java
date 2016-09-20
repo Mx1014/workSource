@@ -1,33 +1,9 @@
 package com.everhomes.test.core.persist;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Query;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
+import com.everhomes.test.core.util.GsonHelper;
+import com.google.gson.*;
+import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.jooq.types.ULong;
-import org.jooq.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -36,15 +12,14 @@ import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhNamespaceDetailsRecord;
-import com.everhomes.test.core.util.GsonHelper;
-import com.everhomes.util.StringHelper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mysql.fabric.xmlrpc.base.Array;
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Component
 public class DbProviderImpl implements DbProvider {
@@ -343,9 +318,13 @@ public class DbProviderImpl implements DbProvider {
             Entry<String, JsonElement> recordEntry = recordIterator.next();
             String columnName = recordEntry.getKey();
             colunNames.add(DSL.fieldByName(columnName));
-            String columnValue = processValue(recordEntry.getValue().getAsString());
-            colunValues.add(columnValue);
-        }
+			JsonElement value = recordEntry.getValue();
+			String columnValue = null;
+			if (!(value instanceof JsonNull)) {
+				columnValue = processValue(value.getAsString());
+			}
+			colunValues.add(columnValue);
+		}
         
         return dslContext.insertInto(table, colunNames).values(colunValues);
 	}
