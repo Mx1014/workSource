@@ -4498,31 +4498,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         Integer[] maleTotalNum = {0};
         Integer[] femaleTotalNum = {0};
+        Integer[] totalNum = {0};
 
         List<ListOrganizationOwnerStatisticDTO> maleDtoList = new ArrayList<>();
         List<ListOrganizationOwnerStatisticDTO> femaleDtoList = new ArrayList<>();
+        List<ListOrganizationOwnerStatisticDTO> totalDtoList = new ArrayList<>();
 
         RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper = (r) -> {
             ListOrganizationOwnerStatisticDTO dto = new ListOrganizationOwnerStatisticDTO();
             Byte gender = r.getValue("gender", Byte.class);
+            Integer count = r.getValue("count", Integer.class);
             if (Objects.equals(gender, UserGender.MALE.getCode())) {
                 maleDtoList.add(dto);
-                maleTotalNum[0] += r.getValue("count", Integer.class);
+                maleTotalNum[0] += count;
             } else if (Objects.equals(gender, UserGender.FEMALE.getCode())) {
                 femaleDtoList.add(dto);
-                femaleTotalNum[0] += r.getValue("count", Integer.class);
+                femaleTotalNum[0] += count;
             }
+            totalNum[0] += count;
             dto.setFirst(r.getValue("ageGroups", String.class));
             dto.setSecond(r.getValue("count", String.class));
+            totalDtoList.add(dto);
             return dto;
         };
 
         propertyMgrProvider.listOrganizationOwnerStatisticByAge(cmd.getCommunityId(), cmd.getLivingStatus(), cmd.getOrgOwnerTypeIds(), mapper);
 
-        maleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / maleTotalNum[0] * 100)) + "%"));
-        femaleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / femaleTotalNum[0] * 100)) + "%"));
+        maleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / maleTotalNum[0] * 100)) + ""));
+        femaleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / femaleTotalNum[0] * 100)) + ""));
+        totalDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
 
-        return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList);
+        return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalDtoList);
     }
 
     @Override
