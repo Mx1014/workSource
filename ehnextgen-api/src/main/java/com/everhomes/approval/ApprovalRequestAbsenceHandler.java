@@ -20,6 +20,7 @@ import com.everhomes.rest.approval.AbsenceBasicDescription;
 import com.everhomes.rest.approval.AbsenceRequestDTO;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
+import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
@@ -124,28 +125,28 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			CreateApprovalRequestBySceneCommand cmd) {
 		//请假理由不能为空
 		if (StringUtils.isBlank(cmd.getReason())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_EMPTY_REASON,
 					"reason cannot be empty");
 		}
 		//请假时间不能为空
 		if (ListUtils.isEmpty(cmd.getTimeRangeList()) || checkTimeEmpty(cmd.getTimeRangeList())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_EMPTY_TIME,
 					"time cannot be empty");
 		}
 		//开始时间不能大于等于结束时间
 		if (checkTimeFromGreaterThanEnd(cmd.getTimeRangeList())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_FROM_TIME_MUST_LT_END_TIME,
 					"from time cannot be greater than end time");
 		}
 		PunchRule punchRule = punchService.getPunchRule(ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), userId);
 		//请假时间不能在非工作时间
 		if (checkNotInWorkTime(cmd.getTimeRangeList(), punchRule)) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_NOT_WORK_TIME,
 					"absence time not in work time");
 		}
 		//请假时间不能包含已请假时间
 		if (checkContainRequestedTime(userId, ownerInfo, cmd.getTimeRangeList())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_TIME_CONTAINS_REQUESTED_TIME,
 					"absence time cannot contain requested time");
 		}
 		calculateActualResult(userId, punchRule, cmd.getTimeRangeList());
@@ -251,10 +252,11 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					a.setActualResult(convertMsToActualResult(finalAbsentTime, deltaWorkTime));
 				}
 			}
-			if (a.getActualResult().equals(new MyDate().toString())) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"no actual absent time");
-			}
+			//产品的文档上是可以存在请假时长为0的
+//			if (a.getActualResult().equals(new MyDate().toString())) {
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//						"no actual absent time");
+//			}
 			
 		});
 	}

@@ -47,6 +47,7 @@ import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalQueryType;
 import com.everhomes.rest.approval.ApprovalRequestCondition;
 import com.everhomes.rest.approval.ApprovalRuleDTO;
+import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTargetType;
 import com.everhomes.rest.approval.ApprovalType;
@@ -127,6 +128,7 @@ import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
@@ -208,7 +210,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
 		if (StringUtils.isBlank(cmd.getCategoryName()) || cmd.getApprovalType() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME,
 					"Invalid parameters: cmd="+cmd);
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -229,7 +231,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			String categoryName) {
 		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryByName(namespaceId, ownerType, ownerId, approvalType, categoryName);
 		if (category != null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EXIST_NAME,
 					"exist category name: categoryName="+categoryName);
 		}
 	}
@@ -309,11 +311,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public CreateApprovalFlowInfoResponse createApprovalFlowInfo(CreateApprovalFlowInfoCommand cmd) {
 		Long userId = getUserId();
 		if (StringUtils.isBlank(cmd.getName())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EMPTY_NAME,
 					"name cannot be empty");
 		}
 		if (cmd.getName().length() > 8) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_NAME_LENGTH_GREATER_EIGHT,
 					"length of name cannot be greater than 8 words, name="+cmd.getName());
 		}
 		
@@ -334,7 +336,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private void checkApprovalFlowNameDuplication(Integer namespaceId, String ownerType, Long ownerId, String name) {
 		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowByName(namespaceId, ownerType, ownerId, name);
 		if (approvalFlow != null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_NAME,
 					"exist name, name="+name);
 		}
 	}
@@ -613,11 +615,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public CreateApprovalRuleResponse createApprovalRule(CreateApprovalRuleCommand cmd) {
 		final Long userId = getUserId();
 		if (StringUtils.isBlank(cmd.getName()) || ListUtils.isEmpty(cmd.getRuleFlowMapList())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_RULE_EMPTY_NAME,
 					"Invalid parameters: cmd="+cmd);
 		}
 		if (cmd.getName().length() > 8) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_RULE_NAME_LENGTH_GREATER_EIGHT,
 					"length of name cannot be greater than 8: name="+cmd.getName());
 		}
 		
@@ -677,15 +679,20 @@ public class ApprovalServiceImpl implements ApprovalService {
 				return;
 			}
 		}
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-				"parameters must contain specific approval type, approvalType="+approvalType);
+		if (ApprovalType.ABSENCE.getCode() == approvalType.byteValue()) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_RULE_EMPTY_ABSENCE,
+					"parameters must contain specific approval type, approvalType="+approvalType);
+		}else if (ApprovalType.EXCEPTION.getCode() == approvalType.byteValue()) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_RULE_EMPTH_EXCEPTION,
+					"parameters must contain specific approval type, approvalType="+approvalType);
+		}
 	}
 
 	private void checkApprovalRuleNameDuplication(Long userId, Integer namespaceId, String ownerType, Long ownerId,
 			String ruleName) {
 		ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleByName(namespaceId, ownerType, ownerId, ruleName);
 		if (approvalRule != null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_RULE_EXIST_NAME,
 					"repeated rule name, ruleName="+ruleName);
 		}
 	}
@@ -783,7 +790,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (approvalRule == null || approvalRule.getNamespaceId().intValue() != namespaceId.intValue()
 				|| !ownerType.equals(approvalRule.getOwnerType()) || approvalRule.getOwnerId().longValue() != ownerId.longValue()
 				|| approvalRule.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_APPROVAL_RULE_WHEN_DELETE,
 					"not exist approval rule: ruleId="+id+", namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
 		}
 		return approvalRule;
@@ -1420,11 +1427,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public void rejectApprovalRequest(RejectApprovalRequestCommand cmd) {
 		final Long userId = getUserId();
 		if (StringUtils.isEmpty(cmd.getReason())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVE_OR_REJECT_EMPTY_REASON,
 					"reason cannot be null");
 		}
 		if (ListUtils.isEmpty(cmd.getRequestIdList())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVE_OR_REJECT_EMPTY_REQUEST,
 					"request id cannot be null");
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -1500,7 +1507,13 @@ public class ApprovalServiceImpl implements ApprovalService {
 		Long nextPageAnchor = null;
 		if (ListUtils.isNotEmpty(resultList) && resultList.size() > pageSize) {
 			resultList.remove(resultList.size()-1);
-			nextPageAnchor = resultList.get(resultList.size()-1).getId();
+			//未审批的按id排序，已审批的按最后更新时间排序，所以未审批的可以按锚点分页，已审批的只能按照正常的分页
+			if (cmd.getQueryType().byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
+				nextPageAnchor = resultList.get(resultList.size()-1).getId();
+			}else if (cmd.getQueryType().byteValue() == ApprovalQueryType.APPROVED.getCode()) {
+				nextPageAnchor = (cmd.getPageAnchor() == null?0:cmd.getPageAnchor())+1;
+				
+			}
 		}
 		
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());

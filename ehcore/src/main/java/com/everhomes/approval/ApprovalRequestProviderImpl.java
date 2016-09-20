@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -140,10 +141,22 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		step = step.and(DSL.row(Tables.EH_APPROVAL_REQUESTS.FLOW_ID, Tables.EH_APPROVAL_REQUESTS.NEXT_LEVEL).in(flowLevelList));
 		
 		if (pageAnchor != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.ID.lt(pageAnchor));
+			if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
+				step = step.and(Tables.EH_APPROVAL_REQUESTS.ID.lt(pageAnchor));
+			}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
+//				step = step.and(Tables.EH_APPROVAL_REQUESTS.UPDATE_TIME.lt(new Timestamp(pageAnchor)));
+			}
+			
 		}
 		
-		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).limit(pageSize).fetch();
+		//未审批的按id排序，已审批的按最后更新时间排序，所以未审批的可以按锚点分页，已审批的只能按照正常的分页
+		Result<Record> result = null;
+		if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
+			result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).limit(pageSize).fetch();
+		}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
+			pageAnchor = pageAnchor == null?0:pageAnchor;
+			result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.UPDATE_TIME.desc()).limit(Long.valueOf(pageAnchor*pageSize).intValue(), pageSize).fetch();
+		}
 		
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
