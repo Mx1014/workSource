@@ -3,7 +3,6 @@ package com.everhomes.approval;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.jni.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +26,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
@@ -35,6 +34,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
@@ -120,9 +120,10 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
-import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -131,7 +132,7 @@ import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.server.schema.Tables;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
@@ -209,6 +210,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	@Autowired
 	private ContentServerService contentServerService;
 
+    @Autowired
+    private MessagingService messagingService;
+    
 	@Override
 	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
@@ -1263,7 +1267,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
 			
 			//5. 发消息给第一级审批者
-			List<ApprovalFlowLevel> nextLevelUser = approvalFlowLevelProvider.listApprovalFlowLevel(approvalRequest.getFlowId(),(byte) 1);
+			List<ApprovalFlowLevel> nextLevelUser = approvalFlowLevelProvider.listApprovalFlowLevel(approvalRequest.getFlowId(), approvalRequest.getNextLevel());
 			sendMessageToNextLevel(nextLevelUser, approvalRequest);
 
 			return approvalRequest;
@@ -1413,27 +1417,34 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void sendMessageToNextLevel(List<ApprovalFlowLevel> nextLevelUser, ApprovalRequest approvalRequest) {
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+		String body = handler.processMessageToNextLevelBody(approvalRequest);
+		nextLevelUser.forEach(n->sendMessageToUser(n.getTargetId(), body, null));
 	}
 
 	private void sendMessageToCreator(ApprovalRequest approvalRequest) {
-		
-		
-//		Map<String, Object> map = new HashMap<String, Object>();
-//        map.put("groupName", group.getName());
-//        map.put("userName", operator);
-//        
-//        String scope = GroupNotificationTemplateCode.SCOPE;
-//        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
-//        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC){
-//        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_CLUB_ADMIN;
-//        }
-//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-//       
-//        for(Long userId: adminList) {
-//            sendMessageToUser(userId, notifyTextForApplicant, null);
-//        }
+		//分为四种情况，同意请假、驳回请假、同意异常、驳回异常
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+		String body = handler.processMessageToCreatorBody(approvalRequest);
+		sendMessageToUser(approvalRequest.getCreatorUid(), body, null);
 	}
 
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+	
 	private void checkCurrentUserExistInLevel(Long userId, Long flowId, Byte level) {
 		ApprovalFlowLevel approvalFlowLevel = approvalFlowLevelProvider.findApprovalFlowLevel(ApprovalTargetType.USER.getCode(), userId, flowId, level);
 		if (approvalFlowLevel == null) {
