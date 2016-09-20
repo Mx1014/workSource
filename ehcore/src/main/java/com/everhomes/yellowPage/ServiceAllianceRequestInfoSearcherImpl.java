@@ -1,0 +1,234 @@
+package com.everhomes.yellowPage;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
+import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+
+public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearch
+	implements ServiceAllianceRequestInfoSearcher {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceRequestInfoSearcherImpl.class);
+	
+	@Autowired
+	private YellowPageProvider yellowPageProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ConfigurationProvider configProvider;
+	
+	@Override
+	public void deleteById(Long id) {
+		deleteById(id.toString());
+		
+	}
+
+	@Override
+	public void syncFromDb() {
+		int pageSize = 200;      
+        this.deleteAll();
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+            List<ServiceAllianceRequests> requests = yellowPageProvider.listServiceAllianceRequests(locator, pageSize);
+            
+            if(requests.size() > 0) {
+                this.bulkUpdate(requests);
+            }
+            
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+        this.optimize(1);
+        this.refresh();
+        
+        LOGGER.info("sync for service alliance request ok");
+		
+	}
+
+	@Override
+	public String getIndexType() {
+		return SearchUtils.SAREQUEST;
+	}
+
+	@Override
+	public void bulkUpdate(List<ServiceAllianceRequests> requests) {
+		BulkRequestBuilder brb = getClient().prepareBulk();
+        for (ServiceAllianceRequests request : requests) {
+	            XContentBuilder source = createDoc(request);
+	            if(null != source) {
+	                LOGGER.info("service alliance request id:" + request.getId());
+	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
+	                        .id(request.getId().toString()).source(source));    
+	                }
+            
+        }
+        if (brb.numberOfActions() > 0) {
+            brb.execute().actionGet();
+        }
+		
+	}
+
+	@Override
+	public void feedDoc(ServiceAllianceRequests request) {
+		XContentBuilder source = createDoc(request);
+        feedDoc(request.getId().toString(), source);
+	}
+
+	@Override
+	public SearchRequestInfoResponse searchRequestInfo(
+			SearchRequestInfoCommand cmd) {
+
+		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        
+        QueryBuilder qb = null;
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("creatorName", 1.2f)
+                    .field("creatorOrganization", 1.0f);
+            
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("creatorName").addHighlightedField("creatorOrganization");
+            
+        }
+        
+        FilterBuilder fb = FilterBuilders.termFilter("type", cmd.getCategoryId());
+        
+        RangeFilterBuilder rf = new RangeFilterBuilder("createDate");
+        if(cmd.getStartDay() != null) {
+        	rf.gt(cmd.getStartDay());
+        	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+        
+        if(cmd.getEndDay() != null) {
+        	rf.lt(cmd.getEndDay());
+        	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        
+        SearchResponse rsp = builder.execute().actionGet();
+        SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+        List<RequestInfoDTO> dtos = getDTOs(rsp);
+        
+        if(dtos.size() > pageSize){
+        	response.setNextPageAnchor(anchor+1);
+        	dtos.remove(dtos.size() - 1);
+        }
+        
+        response.setDtos(dtos);
+        
+		return response;
+	}
+
+	private XContentBuilder createDoc(ServiceAllianceRequests request){
+		try {
+            XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("type", request.getCategoryId());
+            b.field("ownerType", request.getOwnerType());
+            b.field("ownerId", request.getCategoryId());
+            b.field("creatorName", request.getCreatorName());
+            b.field("creatorMobile", request.getCreatorMobile());
+            b.field("createDate", new Date(request.getCreateTime().getTime()));
+            
+			Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+          
+			if(org != null) {
+			    b.field("creatorOrganization", org.getName());
+            } else {
+                b.field("creatorOrganization", "");
+            }
+            
+			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+            if(sa != null) {
+            	b.field("serviceOrganization", sa.getName());
+            } else {
+                b.field("serviceOrganization", "");
+            }
+			
+            b.endObject();
+            return b;
+        } catch (IOException ex) {
+            LOGGER.error("Create ServiceAllianceRequests " + request.getId() + " error");
+            return null;
+        }
+    }
+	
+	private List<RequestInfoDTO> getDTOs(SearchResponse rsp) {
+        List<RequestInfoDTO> dtos = new ArrayList<RequestInfoDTO>();
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            try {
+            	RequestInfoDTO dto = new RequestInfoDTO();
+            	dto.setId(Long.parseLong(sd.getId()));
+            	Map<String, Object> source = sd.getSource();
+            	
+            	dto.setCreatorName(String.valueOf(source.get("creatorName")));
+            	dto.setCreatorMobile(String.valueOf(source.get("creatorMobile")));
+            	dto.setCreatorOrganization(String.valueOf(source.get("creatorOrganization")));
+            	dto.setServiceOrganization(String.valueOf(source.get("serviceOrganization")));
+            	dto.setCreateTime(String.valueOf(source.get("createDate")));
+            	
+            	dtos.add(dto);
+            }
+            catch(Exception ex) {
+                LOGGER.info("getTopicIds error " + ex.getMessage());
+            }
+        }
+        
+        return dtos;
+    }
+
+}
