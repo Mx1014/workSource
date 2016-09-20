@@ -1131,7 +1131,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						dto.setCounts(dto.getCounts() - rsb.getRentalCount());
 					}
 				}
-				if (dto.getCounts() == 0) {
+				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 
@@ -3236,7 +3236,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									- rsb.getRentalCount());
 						}
 					}
-					if (dto.getCounts() == 0) {
+					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
@@ -3374,7 +3374,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									- rsb.getRentalCount());
 						}
 					}
-					if (dto.getCounts() == 0) {
+					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
@@ -3540,7 +3540,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								- rsb.getRentalCount());
 					}
 				}
-				if (dto.getCounts() == 0) {
+				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
@@ -4435,8 +4435,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private RentalCell findRentalSiteRuleById(Long ruleId) {
 		for( RentalCell cell : cellList.get()){
-			if (cell.getId().equals(ruleId))
+			if (cell.getId().equals(ruleId)){
+				RentalCell dbCell = this.rentalProvider.getRentalCellById(cell.getId());
+				if(null != dbCell )
+					cell = dbCell;
 				return cell;
+			}
 		}
 		return null;
 	}
