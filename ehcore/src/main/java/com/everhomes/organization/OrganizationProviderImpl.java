@@ -1573,7 +1573,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(condition);
-		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.desc());
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.asc());
 		query.fetch().map(r -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
