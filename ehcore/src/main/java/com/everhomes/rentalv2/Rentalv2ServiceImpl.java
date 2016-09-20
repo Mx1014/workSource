@@ -4460,13 +4460,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"rental resource (site) cannot found ");
 		rs.setDiscountType(cmd.getDiscountType());
-		if(cmd.getDiscountType().equals(DiscountType.FULL_DAY_CUT_MONEY)){
+		if(cmd.getDiscountType().equals(DiscountType.FULL_DAY_CUT_MONEY.getCode())){
 			if( null == cmd.getCutPrice()  )
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					" cut price cannot found ");
 		}
-		if(cmd.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY)){
+		if(cmd.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
 			if( null == cmd.getCutPrice() || null == cmd.getFullPrice())
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_GENERAL_EXCEPTION,
