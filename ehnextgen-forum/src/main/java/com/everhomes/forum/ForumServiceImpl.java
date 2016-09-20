@@ -4930,7 +4930,7 @@ public class ForumServiceImpl implements ForumService {
 	private SearchContentsBySceneReponse analyzeSearchResponse(SearchResponse rsp, int pageSize, Long anchor, String searchContentType) {
     	SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
     	
-    	SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), SearchContentType.NEWS.getCode());
+    	SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
     	List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
     	SearchHit[] docs = rsp.getHits().getHits();
     	
