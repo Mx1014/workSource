@@ -41,6 +41,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
+import com.everhomes.approval.ApprovalService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -3509,6 +3510,12 @@ public class PunchServiceImpl implements PunchService {
 				if(null != dept)
 					dto.setTargetDept(dept.getName());
 				
+			}
+			if (other.getReviewRuleId() != null) {
+				ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleById(other.getReviewRuleId());
+				if (approvalRule != null) {
+					dto.setReviewRuleName(approvalRule.getName());
+				}
 			}
 			response.getPunchRuleMaps().add(dto);
 		});
