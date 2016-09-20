@@ -4480,7 +4480,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getValue("gender", String.class)),
                     UserContext.current().getUser().getLocale());
             dto.setFirst(genderLocale != null ? genderLocale.getText() : "");
-            dto.setSecond(r.getValue("count", String.class));
+            dto.setSecond(r.getValue("count", Integer.class));
             totalNum[0] += r.getValue("count", Integer.class);
             return dto;
         };
@@ -4502,7 +4502,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         List<ListOrganizationOwnerStatisticDTO> maleDtoList = new ArrayList<>();
         List<ListOrganizationOwnerStatisticDTO> femaleDtoList = new ArrayList<>();
-        List<ListOrganizationOwnerStatisticDTO> totalDtoList = new ArrayList<>();
+        Map<String, ListOrganizationOwnerStatisticDTO> totalDtoMap = new HashMap<>();
 
         RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper = (r) -> {
             ListOrganizationOwnerStatisticDTO dto = new ListOrganizationOwnerStatisticDTO();
@@ -4517,8 +4517,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             totalNum[0] += count;
             dto.setFirst(r.getValue("ageGroups", String.class));
-            dto.setSecond(r.getValue("count", String.class));
-            totalDtoList.add(dto);
+            dto.setSecond(count);
+            ListOrganizationOwnerStatisticDTO ageGroup = totalDtoMap.get(dto.getFirst());
+            if (ageGroup != null) {
+                ageGroup.setSecond(ageGroup.getSecond() + count);
+            } else {
+                totalDtoMap.put(dto.getFirst(), ConvertHelper.convert(dto, ListOrganizationOwnerStatisticDTO.class));
+            }
             return dto;
         };
 
@@ -4526,9 +4531,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         maleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / maleTotalNum[0] * 100)) + ""));
         femaleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / femaleTotalNum[0] * 100)) + ""));
-        totalDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
+        totalDtoMap.values().forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
 
-        return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalDtoList);
+        return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalDtoMap.values());
     }
 
     @Override
