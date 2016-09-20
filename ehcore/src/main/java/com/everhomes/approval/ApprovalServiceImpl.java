@@ -1212,6 +1212,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		condition.setOwnerInfo(ownerInfo);
 		condition.setApprovalType(cmd.getApprovalType());
 		condition.setCategoryId(cmd.getCategoryId());
+		condition.setCreatorUid(userId);
 		condition.setPageAnchor(cmd.getPageAnchor());
 		condition.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
 		
