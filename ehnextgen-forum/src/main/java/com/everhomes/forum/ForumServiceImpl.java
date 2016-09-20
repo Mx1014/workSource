@@ -612,6 +612,14 @@ public class ForumServiceImpl implements ForumService {
 	            
 	            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
 	            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+	            
+	            //attachment也要转成dto modified by xiongying 20160920
+	            List<AttachmentDTO> attachments = new ArrayList<AttachmentDTO>();
+        		for(Attachment attachment : post.getAttachments()) {
+        			attachments.add(ConvertHelper.convert(attachment, AttachmentDTO.class));
+        		}
+        		dto.setAttachments(attachments);
+        		
 	            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
 	            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
 	            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
@@ -3206,7 +3214,7 @@ public class ForumServiceImpl implements ForumService {
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
                 	//单独处理活动的分享链接 modified by xiongying 20160622
-                	if(post.getCategoryId() == 1010) {
+                	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
                 		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
                 		ActivityTokenDTO dto = new ActivityTokenDTO();
                 		dto.setPostId(post.getId());
@@ -4955,8 +4963,11 @@ public class ForumServiceImpl implements ForumService {
 			}
         	
         	PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
-        	if(postDto.getAttachments() != null && postDto.getAttachments().size() > 0) {
-        		dto.setPostUrl(postDto.getAttachments().get(0).getContentUrl());
+        	if(postDto != null && postDto.getAttachments() != null && postDto.getAttachments().size() > 0) {
+        		postDto.getAttachments();
+        		postDto.getAttachments().get(0);
+        		String postUrl = postDto.getAttachments().get(0).getContentUrl();
+        		dto.setPostUrl(postUrl);
         	}
         	
         	ForumFootnoteHandler handler = getForumFootnoteHandler(searchContentType);
@@ -4971,6 +4982,8 @@ public class ForumServiceImpl implements ForumService {
     		response.setNextPageAnchor(anchor+1);
     		dtos.remove(dtos.size() - 1);
     	}
+    	
+    	response.setDtos(dtos);
 
     	return response;
     }
