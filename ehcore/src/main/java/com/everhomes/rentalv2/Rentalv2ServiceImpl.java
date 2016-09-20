@@ -1287,7 +1287,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //						int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
 //						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 						//满了多少次,都只减一个
-						if(siteTotalMoney.compareTo(rs.getFullPrice())> 0)
+						if(siteTotalMoney.compareTo(rs.getFullPrice())>= 0)
 							siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice());
 					}
 					else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
@@ -1744,7 +1744,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 	}
-
+	
 	
 	@Override
 	public FindRentalBillsCommandResponse findRentalBills(
@@ -4460,13 +4460,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"rental resource (site) cannot found ");
 		rs.setDiscountType(cmd.getDiscountType());
-		if(cmd.getDiscountType().equals(DiscountType.FULL_DAY_CUT_MONEY)){
+		if(cmd.getDiscountType().equals(DiscountType.FULL_DAY_CUT_MONEY.getCode())){
 			if( null == cmd.getCutPrice()  )
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					" cut price cannot found ");
 		}
-		if(cmd.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY)){
+		if(cmd.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
 			if( null == cmd.getCutPrice() || null == cmd.getFullPrice())
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_GENERAL_EXCEPTION,
