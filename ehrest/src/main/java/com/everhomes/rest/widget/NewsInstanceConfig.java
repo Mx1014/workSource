@@ -11,7 +11,7 @@ public class NewsInstanceConfig implements Serializable  {
 	 */
 	private static final long serialVersionUID = -5152885247968357254L;
 
-    private Long itemGroup;
+    private String itemGroup;
     
     private Long categoryId;
     
@@ -30,11 +30,11 @@ public class NewsInstanceConfig implements Serializable  {
 		this.categoryId = categoryId;
 	}
 
-	public Long getItemGroup() {
+	public String getItemGroup() {
 		return itemGroup;
 	}
 
-	public void setItemGroup(Long itemGroup) {
+	public void setItemGroup(String itemGroup) {
 		this.itemGroup = itemGroup;
 	}
 
