@@ -120,6 +120,21 @@ CREATE TABLE `eh_approval_time_ranges` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 申请时间具体到每一天的实际时长
+-- DROP TABLE IF EXISTS  `eh_approval_day_actual_time`;
+CREATE TABLE `eh_approval_day_actual_time` (
+	`id` BIGINT NOT NULL,
+	`time_range_id` BIGINT NOT NULL,
+	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g request_id',
+	`user_id`  BIGINT NOT NULL,
+	`time_date` DATE NOT NULL COMMENT 'concrete date',
+	`actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours',
+	`creator_uid` BIGINT NOT NULL,
+	`create_time` DATETIME NOT NULL,
+	
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 申请处理日志表
 -- DROP TABLE IF EXISTS  `eh_approval_op_requests`;
 CREATE TABLE `eh_approval_op_requests` (

@@ -3478,7 +3478,7 @@ CREATE TABLE `eh_organization_owners` (
   `contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
   `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
   `contact_description` TEXT,
-  `address_id` BIGINT NOT NULL COMMENT 'address id',
+  `address_id`  BIGINT NULL COMMENT 'address id',
   `address` VARCHAR(128),
   `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
   `create_time` DATETIME,
@@ -6895,6 +6895,21 @@ CREATE TABLE `eh_approval_time_ranges` (
 	`actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours',
 	`creator_uid` BIGINT NOT NULL,
 	`create_time` DATETIME NOT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 申请时间具体到每一天的实际时长
+DROP TABLE IF EXISTS  `eh_approval_day_actual_time`;
+CREATE TABLE `eh_approval_day_actual_time` (
+	`id` BIGINT NOT NULL,
+	`time_range_id` BIGINT NOT NULL,
+	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g request_id',
+	`user_id`  BIGINT NOT NULL,
+	`time_date` DATE NOT NULL COMMENT 'concrete date',
+	`actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours',
+	`creator_uid` BIGINT NOT NULL,
+	`create_time` DATETIME NOT NULL,
+	
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
