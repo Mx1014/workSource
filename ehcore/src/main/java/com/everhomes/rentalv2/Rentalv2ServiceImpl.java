@@ -4425,8 +4425,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						changeRentalSiteRules = findRentalSiteRuleByDate(choseRSR.getRentalResourceId(),choseRSR.getResourceNumber(),null,null,
 								null, dateSF.format(new java.util.Date(start.getTimeInMillis())));
 					}
-					updateRSRs(changeRentalSiteRules, cmd);
-					start.add(Calendar.DAY_OF_MONTH, 1);
+					updateRSRs(changeRentalSiteRules, cmd); 
 				}
 			}
 			return null;
