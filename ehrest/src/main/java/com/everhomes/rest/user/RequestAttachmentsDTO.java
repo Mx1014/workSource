@@ -1,5 +1,7 @@
 package com.everhomes.rest.user;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *  <li>targetFieldName:字段展示名</li>
@@ -38,5 +40,10 @@ public class RequestAttachmentsDTO {
 	public void setContentUri(String contentUri) {
 		this.contentUri = contentUri;
 	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
 }
