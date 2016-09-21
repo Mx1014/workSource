@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.ApprovalQueryType;
 import com.everhomes.rest.approval.ApprovalRequestCondition;
 import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -162,6 +164,29 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		}
 		
 		return new ArrayList<ApprovalRequest>();
+	}
+
+	@Override
+	public boolean checkExcludeAbsenceRequest(Long userId, Long requestId, Date date) {
+		ApprovalRequest approvalRequest = findApprovalRequestById(requestId);
+		//针对同一天既有请假申请，又有忘打卡申请，已最后提交的申请为依据
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(approvalRequest.getNamespaceId()))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(approvalRequest.getOwnerType()))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(approvalRequest.getOwnerId()))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(ApprovalType.EXCEPTION.getCode()))
+				.and(Tables.EH_APPROVAL_REQUESTS.CREATE_TIME.gt(approvalRequest.getCreateTime()))
+				.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.eq(date.getTime()))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return true;
+		}
+		
+		return false;
 	}
 
 	private EhApprovalRequestsDao getReadWriteDao() {

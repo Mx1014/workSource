@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -39,9 +41,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.approval.ApprovalCategory;
+import com.everhomes.approval.ApprovalCategoryProvider;
+import com.everhomes.approval.ApprovalDayActualTime;
+import com.everhomes.approval.ApprovalDayActualTimeProvider;
+import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
-import com.everhomes.approval.ApprovalService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -53,12 +59,15 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.approval.ApprovalOwnerType;
+import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.techpark.punch.AbsenceTimeDTO;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -137,6 +146,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -170,6 +180,15 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	private ApprovalRuleProvider approvalRuleProvider;
+	
+	@Autowired
+	private ApprovalRequestProvider approvalRequestProvider;
+	
+	@Autowired
+	private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
+	
+	@Autowired
+	private ApprovalCategoryProvider approvalCategoryProvider;
 
     
     @Autowired
@@ -3670,6 +3689,8 @@ public class PunchServiceImpl implements PunchService {
 			results.remove(results.size() - 1);
 			nextPageAnchor = results.get(results.size() - 1).getId();
 		}
+		
+		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
 			if(statistic.getOverTimeSum().equals(0L)){
@@ -3681,12 +3702,98 @@ public class PunchServiceImpl implements PunchService {
 			}
 			
 			punchCountDTOList.add(dto);
+			absenceUserIdList.add(statistic.getUserId());
 		}
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setPunchCountList(punchCountDTOList);
+		
+		//把请假的天数加在这里，add by tt, 20160921
+		Map<Long, List<AbsenceTimeDTO>> userAbsenceTimeMap = getUserAbsenceTimes(cmd.getMonth(), cmd.getOwnerType(), cmd.getOwnerId(), absenceUserIdList);
+		punchCountDTOList.forEach(p->p.setAbsenceTimeList(userAbsenceTimeMap.get(p.getUserId())));
+		
 		return response;
 	}
 
+	private Map<Long, List<AbsenceTimeDTO>> getUserAbsenceTimes(String month, String ownerType, Long ownerId, List<Long> absenceUserIdList) {
+		Long userId = UserContext.current().getUser().getId();
+		Long organizationId = organizationService.getTopOrganizationId(ownerId);
+		try {
+			java.sql.Date fromDate = new java.sql.Date(monthSF.parse(month).getTime());
+			java.sql.Date toDate = new java.sql.Date(getNextMonth(month).getTime());
+			
+			List<ApprovalDayActualTime> approvalDayActualTimeList = approvalDayActualTimeProvider.listApprovalDayActualTimeByUserIds(fromDate, toDate, ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), absenceUserIdList);
+			//需要把 针对同一天既有请假申请，又有忘打卡申请，已最后提交的申请为依据 排除掉
+			Map<Long, Map<Long, List<ApprovalDayActualTime>>> map = approvalDayActualTimeList.stream().map(a->{
+				if (approvalRequestProvider.checkExcludeAbsenceRequest(userId, a.getOwnerId(), a.getTimeDate())) {
+					return null;
+				}
+				return a;
+			}).filter(a->a!=null).collect(Collectors.groupingBy(ApprovalDayActualTime::getUserId, Collectors.groupingBy(ApprovalDayActualTime::getCategoryId)));
+			
+			Map<Long, List<AbsenceTimeDTO>> resultMap = new HashMap<>();
+			List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode());
+			//key1 userId, key2 categoryId
+			map.forEach((key1, value1)->{
+				List<AbsenceTimeDTO> absenceTimeList = new ArrayList<>();
+				value1.forEach((key2, value2)->{
+					AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
+					absenceTimeDTO.setCategoryId(key2);
+					absenceTimeDTO.setCategoryName(getCategoryName(key2));
+					absenceTimeDTO.setActualResult("");
+					value2.forEach(v->{
+						absenceTimeDTO.setActualResult(calculateTimeTotal(absenceTimeDTO.getActualResult(), v.getActualResult()));
+					});
+					absenceTimeList.add(absenceTimeDTO);
+				});
+				resultMap.put(key1, absenceTimeList);
+			});
+			
+			return resultMap;
+		} catch (ParseException e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"parse month error");
+		}
+	}
+
+	private String calculateTimeTotal(String timeTotal, String actualResult) {
+		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点
+		if (StringUtils.isBlank(timeTotal)) {
+			return actualResult;
+		}
+		
+		String[] times = timeTotal.split(".");
+		String[] actuals = actualResult.split(".");
+		
+		int days = Integer.parseInt(times[0]) + Integer.parseInt(actuals[0]);
+		int hours = Integer.parseInt(times[1]) + Integer.parseInt(actuals[1]);
+		int minutes = Integer.parseInt(times[2]) + Integer.parseInt(actuals[2]);
+		
+		hours = hours + minutes / 60;
+		minutes = minutes % 60;
+		
+		return days + "." + hours + "." + minutes;
+	}
+	
+	private String getCategoryName(Long categoryId){
+		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(categoryId);
+		if (category != null) {
+			return category.getCategoryName();
+		}
+		return "";
+	}
+	
+	private Date getNextMonth(String month) {
+		try {
+			Date date = monthSF.parse(month);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.add(Calendar.MONTH, 1);
+			return calendar.getTime();
+		} catch (ParseException e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"parse month error");
+		}
+	}
 	/**
 	 * 打卡2.0 的考勤详情
 	 * */

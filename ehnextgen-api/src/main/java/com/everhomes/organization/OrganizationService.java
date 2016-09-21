@@ -385,4 +385,5 @@ public interface OrganizationService {
 	 * @return
 	 */
 	List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes,String userName);
+	Long getTopOrganizationId(Long organizationId);
 }

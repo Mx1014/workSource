@@ -60,6 +60,15 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalCategory.class));
 	}
 	
+	@Override
+	public List<ApprovalCategory> listApprovalCategoryForStatistics(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType) {
+		
+		
+		
+		return null;
+	}
+
 	private EhApprovalCategoriesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

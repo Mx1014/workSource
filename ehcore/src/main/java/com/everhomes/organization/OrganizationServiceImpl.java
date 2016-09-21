@@ -6505,6 +6505,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
+	public Long getTopOrganizationId(Long organizationId){
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if (organization != null) {
+			String path = organization.getPath();
+			String[] ogs = path.split("/");
+			return Long.valueOf(ogs[1]);
+		}
+		return null;
+	}
+	
+	@Override
 	public SearchOrganizationCommandResponse searchOrganization(
 			SearchOrganizationCommand cmd) {
 		SearchOrganizationCommandResponse resp = new SearchOrganizationCommandResponse();

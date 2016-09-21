@@ -2,6 +2,7 @@ package com.everhomes.approval;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,8 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ApprovalRequestHandler.APPROVAL_REQUEST_OBJECT_PREFIX + ApprovalTypeTemplateCode.EXCEPTION)
 public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandler {
 
+	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	
 	@Autowired
 	private PunchProvider punchProvider;
 	
@@ -88,6 +91,13 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"invalid parameters, content json="+approvalExceptionContent);
 		}
+		try {
+			approvalExceptionContent.setPunchDate(dateSF.parse(dateSF.format(new Date(approvalExceptionContent.getPunchDate()))).getTime());
+		} catch (ParseException e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"format punch date error");
+		}
+		
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
 		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate());

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.rest.approval.ApprovalRequestCondition;
@@ -21,5 +22,7 @@ public interface ApprovalRequestProvider {
 	List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userList, Long pageAnchor, int pageSize);
+
+	boolean checkExcludeAbsenceRequest(Long userId, Long ownerId, Date date);
 
 }

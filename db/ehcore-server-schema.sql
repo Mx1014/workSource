@@ -6842,6 +6842,8 @@ CREATE TABLE `eh_approval_categories` (
 	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME, 
+	`update_time` DATETIME,
+	`operator_uid` BIGINT, 
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6902,7 +6904,6 @@ CREATE TABLE `eh_approval_time_ranges` (
 DROP TABLE IF EXISTS  `eh_approval_day_actual_time`;
 CREATE TABLE `eh_approval_day_actual_time` (
 	`id` BIGINT NOT NULL,
-	`time_range_id` BIGINT NOT NULL,
 	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g request_id',
 	`user_id`  BIGINT NOT NULL,
 	`time_date` DATE NOT NULL COMMENT 'concrete date',
