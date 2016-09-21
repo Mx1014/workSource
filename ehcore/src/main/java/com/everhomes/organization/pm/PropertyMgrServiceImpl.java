@@ -4788,7 +4788,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             ownerCarList.addAll(ownerCars);
         });
 
-        return ownerCarList.stream().distinct().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
+        return ownerCarList.stream().map(this::convertOwnerCarToOwnerCarDTO).distinct().collect(Collectors.toList());
     }
 
     private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address) {

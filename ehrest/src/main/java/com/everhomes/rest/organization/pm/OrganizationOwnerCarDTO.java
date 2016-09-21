@@ -1,5 +1,9 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.util.StringHelper;
+
+import java.util.Objects;
+
 /**
  * <ul>
  *     <li>id: carId</li>
@@ -105,5 +109,24 @@ public class OrganizationOwnerCarDTO {
 
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null
+                && obj instanceof OrganizationOwnerCarDTO
+                && Objects.equals(this.getId(), ((OrganizationOwnerCarDTO) obj).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.getId() != null)
+            return this.getId().hashCode();
+        return super.hashCode();
     }
 }
