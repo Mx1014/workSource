@@ -404,7 +404,7 @@ DELETE from eh_organization_members where target_id = 229429;
 -- 东方建富2菜单 by sw 2016/09/21
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), ﻿10000, '', 'EhOrganizations', 1004005 , 2);
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 10000, '', 'EhOrganizations', 1004005 , 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 11000, '', 'EhOrganizations', 1004005 , 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
