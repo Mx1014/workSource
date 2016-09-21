@@ -150,8 +150,9 @@ public class EnterpriseController extends ControllerBase {
     @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse searchEnterprise(@Valid SearchEnterpriseCommand cmd) {
     	SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
-    	
-    	command.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+
+        //查出所有公司包括物业公司 by sfyan 20160921
+//    	command.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
         ListEnterprisesCommandResponse resp = organizationService.searchEnterprise(command);
         List<EnterpriseDTO> enterprises = resp.getDtos().stream().map((r) ->{
         	 EnterpriseDTO eDto = ConvertHelper.convert(r, EnterpriseDTO.class);
