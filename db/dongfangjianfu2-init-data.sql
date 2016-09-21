@@ -399,3 +399,4 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 删除东方建富线网重复用户 by sw 2016/09/21
 DELETE from eh_users where id = 229429 and namespace_id = 0;
 DELETE from eh_user_identifiers where owner_uid = 229429 and namespace_id = 0;
+DELETE from eh_organization_members where target_id = 229429;
