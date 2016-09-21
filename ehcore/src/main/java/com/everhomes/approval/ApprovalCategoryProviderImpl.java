@@ -75,7 +75,6 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 						.or(Tables.EH_APPROVAL_CATEGORIES.STATUS.eq(CommonStatus.INACTIVE.getCode())
 								.and(Tables.EH_APPROVAL_CATEGORIES.UPDATE_TIME.gt(new Timestamp(fromDate.getTime())))))
 				.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID.asc())
-				.limit(1)
 				.fetch();
 		
 		if (result != null && result.isNotEmpty()) {
