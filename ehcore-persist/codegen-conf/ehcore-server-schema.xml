@@ -107,7 +107,6 @@
         eh_search_types |
         eh_service_alliance_categories | eh_service_alliances | eh_service_alliance_attachments |
 		eh_community_services | eh_aclink_logs |
-		eh_namespaces | eh_configurations |
 		eh_approval_flows | eh_approval_flow_levels | eh_approval_rules | eh_approval_rule_flow_map | eh_approval_categories | eh_approval_requests | eh_approval_attachments | eh_approval_time_ranges | eh_approval_op_requests
 
         </includes>
