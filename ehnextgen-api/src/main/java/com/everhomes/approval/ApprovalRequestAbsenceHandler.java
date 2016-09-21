@@ -133,6 +133,10 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	@Override
 	public ApprovalRequest preProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo,
 			CreateApprovalRequestBySceneCommand cmd) {
+		if (cmd.getCategoryId() == null) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_EMPTY_REASON,
+					"category cannot be empty");
+		}
 		//请假理由不能为空
 		if (StringUtils.isBlank(cmd.getReason())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_EMPTY_REASON,
