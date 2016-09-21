@@ -105,8 +105,8 @@ import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
-/*
- * //物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
+/**
+ * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
  */
 @Component 
 public class PropertyMgrServiceImpl implements PropertyMgrService {
@@ -4226,13 +4226,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         List<OrganizationOwnerAttachment> attachmentList = propertyMgrProvider
                 .listOrganizationOwnerAttachments(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
 
-        List<OrganizationOwnerAttachmentDTO> dtoList = attachmentList.stream().map(r -> {
+        return attachmentList.stream().map(r -> {
             OrganizationOwnerAttachmentDTO dto = ConvertHelper.convert(r, OrganizationOwnerAttachmentDTO.class);
             dto.setContentUrl(parserUri(r.getContentUri(), EhOrganizationOwners.class.getSimpleName(), r.getOwnerId()));
             return dto;
         }).collect(Collectors.toList());
-
-        return dtoList;
     }
 
     @Override
@@ -4286,8 +4284,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (!Objects.equals(car.getStatus(), OrganizationOwnerCarStatus.DELETE.getCode())) {
             car.setStatus(OrganizationOwnerCarStatus.DELETE.getCode());
             dbProvider.execute(status -> {
-                propertyMgrProvider.updateOrganizationOwnerCar(car);
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
+                propertyMgrProvider.updateOrganizationOwnerCar(car);
                 propertyMgrProvider.deleteOrganizationOwnerOwnerCarByCarId(namespaceId, car.getId());
                 propertyMgrProvider.deleteOrganizationOwnerCarAttachmentByCarId(namespaceId, car.getId());
                 ownerCarSearcher.deleteById(car.getId());
@@ -4389,9 +4387,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if (community == null) {
-            LOGGER.error("Community is not exist.");
+            LOGGER.error("Community are not exist.");
             throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
-                    "Community is not exist.");
+                    "Community are not exist.");
         }
 
         List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarsByCommunity(
@@ -4408,7 +4406,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, ownerCarDTOs);
         } else {
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_NOT_EXIST,
-                    "Organization owner car is not exist.");
+                    "Organization owner car are not exist.");
         }
     }
 
