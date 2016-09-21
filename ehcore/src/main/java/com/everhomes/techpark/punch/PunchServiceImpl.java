@@ -3710,7 +3710,18 @@ public class PunchServiceImpl implements PunchService {
 		
 		//把请假的天数加在这里，add by tt, 20160921
 		Map<Long, List<AbsenceTimeDTO>> userAbsenceTimeMap = getUserAbsenceTimes(cmd.getMonth(), cmd.getOwnerType(), cmd.getOwnerId(), absenceUserIdList);
-		punchCountDTOList.forEach(p->p.setAbsenceTimeList(userAbsenceTimeMap.get(p.getUserId())));
+		punchCountDTOList.forEach(p->{
+			List<AbsenceTimeDTO> list = userAbsenceTimeMap.get(p.getUserId());
+			if (ListUtils.isEmpty(list)) {
+				try {
+					list = getDefaultAbsenceStatistics(organizationService.getTopOrganizationId(cmd.getOwnerId()), new java.sql.Date(monthSF.parse(cmd.getMonth()).getTime()));
+				} catch (Exception e) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+							"parse month error");
+				}
+			}
+			p.setAbsenceTimeList(list);
+		});
 		
 		return response;
 	}
@@ -3764,6 +3775,17 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 
+	private List<AbsenceTimeDTO> getDefaultAbsenceStatistics(Long organizationId, java.sql.Date fromDate){
+		List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), fromDate);
+		return approvalCategoryList.stream().map(a->{
+			AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
+			absenceTimeDTO.setCategoryId(a.getId());
+			absenceTimeDTO.setCategoryName(a.getCategoryName());
+			absenceTimeDTO.setActualResult("0.0.0");
+			return absenceTimeDTO;
+		}).collect(Collectors.toList());
+	}
+	
 	private String calculateTimeTotal(String timeTotal, String actualResult) {
 		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点
 		if (StringUtils.isBlank(timeTotal)) {
