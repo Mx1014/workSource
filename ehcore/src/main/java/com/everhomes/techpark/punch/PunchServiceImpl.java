@@ -3723,6 +3723,9 @@ public class PunchServiceImpl implements PunchService {
 			java.sql.Date toDate = new java.sql.Date(getNextMonth(month).getTime());
 			
 			List<ApprovalDayActualTime> approvalDayActualTimeList = approvalDayActualTimeProvider.listApprovalDayActualTimeByUserIds(fromDate, toDate, ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), absenceUserIdList);
+			if (ListUtils.isEmpty(approvalDayActualTimeList)) {
+				return new HashMap<Long, List<AbsenceTimeDTO>>();
+			}
 			//需要把 针对同一天既有请假申请，又有忘打卡申请，已最后提交的申请为依据 排除掉
 			Map<Long, Map<Long, List<ApprovalDayActualTime>>> map = approvalDayActualTimeList.stream().map(a->{
 				if (approvalRequestProvider.checkExcludeAbsenceRequest(userId, a.getOwnerId(), a.getTimeDate())) {
