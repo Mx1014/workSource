@@ -636,7 +636,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalRuleNameDuplication(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkApprovalRuleNameDuplication(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName(), null);
 		checkRuleFlowMap(cmd.getRuleFlowMapList());
 		
 		final ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
@@ -701,9 +701,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void checkApprovalRuleNameDuplication(Long userId, Integer namespaceId, String ownerType, Long ownerId,
-			String ruleName) {
+			String ruleName, Long id) {
 		ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleByName(namespaceId, ownerType, ownerId, ruleName);
-		if (approvalRule != null) {
+		if (approvalRule != null && (id == null || id.longValue() != approvalRule.getId().longValue())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_RULE_EXIST_NAME,
 					"repeated rule name, ruleName="+ruleName);
 		}
@@ -763,7 +763,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"length of name cannot be greater than 8: name="+cmd.getName());
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalRuleNameDuplication(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkApprovalRuleNameDuplication(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName(), cmd.getId());
 		checkRuleFlowMap(cmd.getRuleFlowMapList());
 
 		Tuple<ApprovalRule, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_FLOW.getCode()+cmd.getId()).enter(()->{
