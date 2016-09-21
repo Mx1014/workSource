@@ -150,9 +150,12 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
-				UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
-				if(contact != null)
-					sendMessageToUser(contact.getOwnerUid(), notifyTextForAdmin);
+				if(target.getStatus().byteValue() == 1) {
+					UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
+					if(contact != null)
+						sendMessageToUser(contact.getOwnerUid(), notifyTextForAdmin);
+				}
+				
 			}
 		}
 		
@@ -161,7 +164,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
-				sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin);
+				if(email.getStatus().byteValue() == 1) {
+					sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin);
+				}
 			}
 		}
 	}
