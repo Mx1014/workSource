@@ -396,4 +396,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (111302, 0, 0, 1, 240111044331053735, '/home', 'Bizs', 'VIDEO_MEETING', '视频会议', 'cs://1/image/aW1hZ2UvTVRvMU5qVmhOakUzTm1ZM01HSm1aakpqTURVeVltTXhZemhsT1dRek5HWTRPUQ', '1', '1', '27', '', '0', '3', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
-
+-- 删除东方建富线网重复用户
+DELETE from eh_users where id = 229429 and namespace_id = 0;
+DELETE from eh_user_identifiers where owner_uid = 229429 and namespace_id = 0;
