@@ -664,6 +664,20 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /pm/listOrganizationOwnerCarsByAddress</b>
+	 * <p>根据地址信息查询车辆列表</p>
+	 */
+	@RequestMapping("listOrganizationOwnerCarsByAddress")
+	@RestReturn(value=OrganizationOwnerCarDTO.class, collection = true)
+	public RestResponse listOrganizationOwnerCarsByAddress(@Valid ListOrganizationOwnerCarsByAddressCommand cmd) {
+		List<OrganizationOwnerCarDTO> dtoList = propertyMgrService.listOrganizationOwnerCarsByAddress(cmd);
+		RestResponse response = new RestResponse(dtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /pm/getOrganizationOwner</b>
 	 * <p>根据id获取业主信息</p>
 	 */

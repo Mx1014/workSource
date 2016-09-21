@@ -378,4 +378,11 @@ public interface PropertyMgrService {
      * @return
      */
     OrganizationOwnerDTO addOrganizationOwnerCarUser(AddOrganizationOwnerCarUserCommand cmd);
+
+    /**
+     * 查询一个楼栋门牌下的所有车辆信息
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerCarDTO> listOrganizationOwnerCarsByAddress(ListOrganizationOwnerCarsByAddressCommand cmd);
 }

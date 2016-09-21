@@ -4186,7 +4186,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validateOwnerId(cmd.getOwnerId());
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddress(namespaceId, cmd.getOwnerId());
+        List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(namespaceId, cmd.getOwnerId());
         List<Long> ids = ownerAddressList.stream().map(OrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
 
         List<OrganizationOwnerAddressDTO> dtoList = new ArrayList<>();
@@ -4255,7 +4255,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
         propertyMgrProvider.createOrganizationOwnerCar(newCar);
         ownerCarSearcher.feedDoc(newCar);
-        return ConvertHelper.convert(newCar, OrganizationOwnerCarDTO.class);
+        return convertOwnerCarToOwnerCarDTO(newCar);
     }
 
     private void checkOrganizationOwnerCarUnique(Long communityId, String plateNumber, Integer namespaceId) {
@@ -4766,6 +4766,31 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return dto;
     }
 
+    @Override
+    public List<OrganizationOwnerCarDTO> listOrganizationOwnerCarsByAddress(ListOrganizationOwnerCarsByAddressCommand cmd) {
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
+        validateAddressId(cmd.getAddressId());
+
+        Address address = addressProvider.findAddressById(cmd.getAddressId());
+        if (address == null) {
+            LOGGER.error("The address {} is not exist.", cmd.getAddressId());
+            throw errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST,
+                    "The address %s is not exist.", cmd.getAddressId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(
+                namespaceId, address.getId());
+
+        List<OrganizationOwnerCar> ownerCarList = new ArrayList<>();
+        ownerAddressList.forEach(r -> {
+            List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarByOwnerId(namespaceId, r.getOrganizationOwnerId());
+            ownerCarList.addAll(ownerCars);
+        });
+
+        return ownerCarList.stream().distinct().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
+    }
+
     private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address) {
         OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
         String locale = UserContext.current().getUser().getLocale();
@@ -4891,13 +4916,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validateOwnerId(cmd.getOwnerId());
 
         List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarByOwnerId(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
-        return ownerCars.stream().map(r -> {
-            OrganizationOwnerCarDTO dto = ConvertHelper.convert(r, OrganizationOwnerCarDTO.class);
-            LocaleString parkingTypeLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.PARKING_TYPE_SCOPE,
-                    String.valueOf(r.getParkingType()), UserContext.current().getUser().getLocale());
-            dto.setParkingType(parkingTypeLocale != null ? parkingTypeLocale.getText() : "");
-            return dto;
-        }).collect(Collectors.toList());
+        return ownerCars.stream().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
     }
 
     @Override
