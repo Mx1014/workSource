@@ -1,6 +1,6 @@
 package com.everhomes.rest.organization.pm;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 /**
  *  <ul>
