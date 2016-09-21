@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +27,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 
 @RestDoc(value = "WX Controller", site = "core")
@@ -98,6 +100,19 @@ public class WXController {
 		
 		response.sendRedirect(sourceUrl); 
 	}
+	
+    @RequestMapping("/onAuth/{appId}")  
+    public String onAuth(@PathVariable("appId")String appId, HttpServletRequest request, HttpServletResponse response){
+        LOGGER.info("Auth result from wx: appId={}, obj={}", appId, StringHelper.toJsonString(request.getParameterMap()));
+        return "0";
+    }
+    
+    @RequestMapping("/onMessage/{appId}")  
+    public String onMessage(@PathVariable("appId")String appId, HttpServletRequest request, HttpServletResponse response){
+        LOGGER.info("Message result from wx: appId={}, obj={}", appId, StringHelper.toJsonString(request.getParameterMap()));
+        return "0";
+    }
+	
 	private LoginToken getLoginToken(HttpServletRequest request) {
 		Map<String, String[]> paramMap = request.getParameterMap();
 		String loginTokenString = null;
