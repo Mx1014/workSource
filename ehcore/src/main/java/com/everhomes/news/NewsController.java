@@ -92,6 +92,22 @@ public class NewsController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /news/listNewsForWeb</b>
+	 * <p>
+	 * 给web的APP端查询新闻列表
+	 * </p>
+	 */
+	@RequestMapping("listNewsForWeb")
+	@RestReturn(ListNewsResponse.class)
+	public RestResponse listNewsForWeb(ListNewsCommand cmd) {
+		ListNewsResponse listNewsResponse = newsService.listNewsForWeb(cmd);
+
+		RestResponse response = new RestResponse(listNewsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /news/searchNews</b>

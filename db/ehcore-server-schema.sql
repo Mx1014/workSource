@@ -3478,7 +3478,7 @@ CREATE TABLE `eh_organization_owners` (
   `contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
   `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
   `contact_description` TEXT,
-  `address_id` BIGINT NOT NULL COMMENT 'address id',
+  `address_id`  BIGINT NULL COMMENT 'address id',
   `address` VARCHAR(128),
   `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
   `create_time` DATETIME,

@@ -68,6 +68,13 @@
       "description": "news content url",
       "id": "-999",
       "value": "/web/lib/html/news_text_review.html"
+    }, 
+    {
+      "namespace_id": "0",
+      "name": "news.url",
+      "description": "news page url",
+      "id": "-99",
+      "value": "/web/lib/html/news_text_review.html"
     }
   ]
 }

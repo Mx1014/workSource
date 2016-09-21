@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -83,10 +85,12 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<News> listNews(Integer namespaceId, Long from, Integer pageSize) {
-		return getReadOnlyContext().select().from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()))
-				.orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
+	public List<News> listNews(Long categoryId,Integer namespaceId, Long from, Integer pageSize) {
+		SelectConditionStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode())) ;
+		if(null != categoryId)
+			step.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
+		return step.orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
 				.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
 	}
 
