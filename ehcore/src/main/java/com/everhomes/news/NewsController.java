@@ -13,6 +13,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.news.AddNewsCommentCommand;
+import com.everhomes.rest.news.AddNewsCommentForWebCommand;
 import com.everhomes.rest.news.AddNewsCommentResponse;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.CreateNewsResponse;
@@ -30,6 +31,7 @@ import com.everhomes.rest.news.ListNewsResponse;
 import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.util.RequireAuthentication;
@@ -212,7 +214,22 @@ public class NewsController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /news/setNewsLikeFlagForWeb</b>
+	 * <p>
+	 * 点赞/取消点赞
+	 * </p>
+	 */
+	@RequestMapping("setNewsLikeFlagForWeb")
+	@RestReturn(String.class)
+	public RestResponse setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd) {
+		newsService.setNewsLikeFlagForWeb(cmd);
 
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * <b>URL: /news/addNewsComment</b>
 	 * <p>
@@ -223,6 +240,22 @@ public class NewsController extends ControllerBase {
 	@RestReturn(AddNewsCommentResponse.class)
 	public RestResponse addNewsComment(AddNewsCommentCommand cmd) {
 		AddNewsCommentResponse newsCommentDTO = newsService.addNewsComment(cmd);
+
+		RestResponse response = new RestResponse(newsCommentDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /news/addNewsCommentForWeb</b>
+	 * <p>
+	 * 添加一条评论 给WEB做的功能用
+	 * </p>
+	 */
+	@RequestMapping("addNewsCommentForWeb")
+	@RestReturn(AddNewsCommentResponse.class)
+	public RestResponse addNewsCommentForWeb(AddNewsCommentForWebCommand cmd) {
+		AddNewsCommentResponse newsCommentDTO = newsService.addNewsForWebComment(cmd);
 
 		RestResponse response = new RestResponse(newsCommentDTO);
 		response.setErrorCode(ErrorCodes.SUCCESS);

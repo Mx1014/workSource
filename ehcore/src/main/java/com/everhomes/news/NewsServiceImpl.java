@@ -35,6 +35,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.news.AddNewsCommentCommand;
+import com.everhomes.rest.news.AddNewsCommentForWebCommand;
 import com.everhomes.rest.news.AddNewsCommentResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.news.BriefNewsDTO;
@@ -64,6 +65,7 @@ import com.everhomes.rest.news.NewsTopFlag;
 import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.search.SearchContentType;
@@ -689,6 +691,11 @@ public class NewsServiceImpl implements NewsService {
 		return comment;
 	}
 
+	private Comment processComment(Long userId, Long newsId, AddNewsCommentForWebCommand cmd) {
+		AddNewsCommentCommand newCmd = ConvertHelper.convert(cmd, AddNewsCommentCommand.class);
+		return processComment(userId,newsId,newCmd);
+	}
+
 	private List<Attachment> processAttachments(Long userId, Long commentId, List<AttachmentDescriptor> attachments) {
 		if (attachments == null || attachments.size() == 0) {
 			return null;
@@ -1136,6 +1143,55 @@ public class NewsServiceImpl implements NewsService {
 		response.setDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;
+	}
+
+	@Override
+	public AddNewsCommentResponse addNewsForWebComment(AddNewsCommentForWebCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		// 检查参数
+		// 检查评论类型
+		checkCommentType(userId, cmd.getContentType());
+		// 检查附件类型
+		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
+		}
+
+		final List<Comment> comments = new ArrayList<>();
+		final List<Attachment> attachments = new ArrayList<>();
+
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
+			dbProvider.execute(s -> {
+				News news = findNewsById(userId, newsId);
+				// 创建评论
+				Comment comment = processComment(userId, newsId, cmd);
+				comments.add(comment);
+				commentProvider.createComment(EhNewsComment.class, comment);
+
+				// 创建附件
+				if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+					attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
+					attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+				}
+
+				news.setChildCount(news.getChildCount() + 1L);
+				newsProvider.updateNews(news);
+				return true;
+			});
+			return null;
+		});
+
+		AddNewsCommentResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentResponse.class);
+		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
+				.collect(Collectors.toList()));
+
+		return commentDTO;
+	}
+
+	@Override
+	public void setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
  
 }
