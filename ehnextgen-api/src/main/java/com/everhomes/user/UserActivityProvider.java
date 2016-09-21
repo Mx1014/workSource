@@ -82,4 +82,10 @@ public interface UserActivityProvider {
     int deletePostedTopic(Long ownerId, Long postId);
     
     void updateViewedActivityProfileIfNotExist(Long uid, String key, Long lastViewedTime, List<Long> ids);
+    
+    List<SearchTypes> listByNamespaceId(Integer namespaceId);
+	SearchTypes findByContentAndNamespaceId(Integer namespaceId, String contentType);
+	
+	void createSearchTypes(SearchTypes searchType);
+	void deleteSearchTypes(Long id);
 }

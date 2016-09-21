@@ -12,7 +12,7 @@ public enum AddressLivingStatus {
     INACTIVE((byte)0), ACTIVE((byte)1);
     
     private byte code;
-    private AddressLivingStatus(byte code) {
+    AddressLivingStatus(byte code) {
         this.code = code;
     }
     

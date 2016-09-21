@@ -67,6 +67,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.forum.ForumService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -83,6 +84,7 @@ import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.news.NewsService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -118,13 +120,19 @@ import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.SearchTypeDTO;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
@@ -306,6 +314,15 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private UserImpersonationProvider userImpersonationProvider;
+    
+    @Autowired
+    private NewsService newsService;
+    
+    @Autowired
+    private ForumService forumService;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
     
 
 	private static final String DEVICE_KEY = "device_login";
@@ -1313,7 +1330,7 @@ public class UserServiceImpl implements UserService {
 		UserInfo info = ConvertHelper.convert(user, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
 		populateUserAvatar(info, user.getAvatar());
-//		info.setAvatarUri(user.getAvatar());
+//		info.setAvatar(user.getAvatar());
 //		try{
 //			String url = contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
 //			info.setAvatarUrl(url);
@@ -1723,12 +1740,12 @@ public class UserServiceImpl implements UserService {
 		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
 		populateUserAvatar(info, queryUser.getAvatar());
-//		info.setAvatarUri(queryUser.getAvatar());
+//		info.setAvatar(queryUser.getAvatar());
 //		try{
 //			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
 //			info.setAvatarUrl(url);
 //		}catch(Exception e){
-//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatarUri());
+//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatar());
 //		}
 		if(queryUser.getCommunityId()!=null){
 			Community community = communityProvider.findCommunityById(queryUser.getCommunityId());
@@ -1809,7 +1826,7 @@ public class UserServiceImpl implements UserService {
 		}
         // 把用户头像的处理独立到一个方法中 by lqs 20151211
         populateUserAvatar(info, queryUser.getAvatar());
-//		info.setAvatarUri(queryUser.getAvatar());
+//		info.setAvatar(queryUser.getAvatar());
 //		try{
 //			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
 //			info.setAvatarUrl(url);
@@ -3060,4 +3077,87 @@ public class UserServiceImpl implements UserService {
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
+
+	@Override
+	public SearchContentsBySceneReponse searchContentsByScene(
+			SearchContentsBySceneCommand cmd) {
+		long startTime = System.currentTimeMillis();
+		User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId(); 
+//	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+		 
+	    if(StringUtils.isEmpty(cmd.getContentType())) {
+	    	cmd.setContentType(SearchContentType.ALL.getCode());
+	    }
+	    SearchContentType contentType = SearchContentType.fromCode(cmd.getContentType());
+	    
+	    SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+	    switch(contentType) {
+	    case ACTIVITY:
+	    case POLL:
+	    case TOPIC:
+	    	response = forumService.searchContents(cmd, contentType);
+	    	break;
+		
+	    case NEWS:
+	    	response = newsService.searchNewsByScene(cmd);
+	    	break;
+	    case ALL:
+	    	int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
+	    	cmd.setPageSize(pageSize);
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+	    	}
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
+	    	}
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+	    	}
+	    	
+	    	
+	    	response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+	    	break;
+		
+	    default:
+	    	LOGGER.error("Unsupported content type for search, contentType=" + cmd.getContentType());
+	    	break;
+	    }
+		    
+	    if(LOGGER.isDebugEnabled()) {
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("search contents by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
+	            userId, namespaceId, (endTime - startTime), cmd);
+	    }
+		return response;
+	}
+
+	@Override
+	public ListSearchTypesBySceneReponse listSearchTypesByScene(
+			ListSearchTypesBySceneCommand cmd) {
+		User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    
+	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+	    
+	    //先按域空间查，ownerid和ownertype暂时不用
+	    ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
+	    response.setSearchTypes(new ArrayList<SearchTypeDTO>());
+	    List<SearchTypes> searchTypes = userActivityProvider.listByNamespaceId(namespaceId);
+	    if(searchTypes != null && searchTypes.size() > 0) {
+	    	response.getSearchTypes().addAll(searchTypes.stream().map(r -> {
+	    		SearchTypeDTO dto = ConvertHelper.convert(r, SearchTypeDTO.class);
+	    		return dto;
+	    	}).collect(Collectors.toList()));
+	    }
+	    return response;
+	}
 }

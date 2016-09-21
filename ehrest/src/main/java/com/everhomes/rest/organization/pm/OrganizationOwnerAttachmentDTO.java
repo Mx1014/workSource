@@ -1,0 +1,71 @@
+package com.everhomes.rest.organization.pm;
+
+import java.security.Timestamp;
+
+/**
+ *  <ul>
+ *      <li>id: 附件id</li>
+ *      <li>attachmentName: 附件名称</li>
+ *      <li>ownerId: 业主id</li>
+ *      <li>createTime: 上传时间</li>
+ *      <li>contentUri: 附件URI</li>
+ *      <li>contentUrl: 附件URL</li>
+ *  </ul>
+ */
+public class OrganizationOwnerAttachmentDTO {
+
+    private Long        id;
+    private Long        ownerId;
+    private String      attachmentName;
+    private Timestamp   createTime;
+    private String      contentUri;
+    private String      contentUrl;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAttachmentName() {
+        return attachmentName;
+    }
+
+    public void setAttachmentName(String attachmentName) {
+        this.attachmentName = attachmentName;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getContentUri() {
+        return contentUri;
+    }
+
+    public void setContentUri(String contentUri) {
+        this.contentUri = contentUri;
+    }
+
+    public String getContentUrl() {
+        return contentUrl;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
+    }
+}

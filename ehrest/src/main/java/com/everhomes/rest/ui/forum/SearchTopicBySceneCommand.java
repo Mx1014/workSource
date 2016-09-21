@@ -23,6 +23,7 @@ public class SearchTopicBySceneCommand {
     private String queryString;
     private Long contentCategory;
     private Long actionCategory;
+    private String searchContentType;
     
     private Integer searchFlag;
     private Long pageAnchor;
@@ -104,7 +105,15 @@ public class SearchTopicBySceneCommand {
         this.pageAnchor = pageAnchor;
     }
 
-    @Override
+    public String getSearchContentType() {
+		return searchContentType;
+	}
+
+	public void setSearchContentType(String searchContentType) {
+		this.searchContentType = searchContentType;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

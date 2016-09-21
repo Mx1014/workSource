@@ -1,12 +1,14 @@
 package com.everhomes.organization.pm;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.PMOwnerSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -23,23 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OwnerAddressDTO;
-import com.everhomes.rest.organization.pm.OwnerDTO;
-import com.everhomes.rest.organization.pm.SearchPMOwnerCommand;
-import com.everhomes.rest.organization.pm.SearchPMOwnerResponse;
-import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
-import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.PMOwnerSearcher;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwnerSearcher {
@@ -51,9 +40,6 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
-	
-	@Autowired
-	private AddressProvider addressProvider;
 
 	@Override
 	public void deleteById(Long id) {
@@ -64,19 +50,16 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	public void bulkUpdate(List<CommunityPmOwner> owners) {
 		BulkRequestBuilder brb = getClient().prepareBulk();
         for (CommunityPmOwner owner : owners) {
-        	
             XContentBuilder source = createDoc(owner);
             if(null != source) {
                 LOGGER.info("id:" + owner.getId());
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
                         .id(owner.getId().toString()).source(source));    
-                }
-            
+            }
         }
         if (brb.numberOfActions() > 0) {
             brb.execute().actionGet();
         }
-
 	}
 
 	@Override
@@ -104,26 +87,29 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	}
 
 	@Override
-	public SearchPMOwnerResponse query(SearchPMOwnerCommand cmd) {
+	public ListOrganizationOwnersResponse query(SearchOrganizationOwnersCommand cmd) {
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-		QueryBuilder qb = null;
+		QueryBuilder qb;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("contactToken", 5.0f)
                     .field("contactName", 2.0f);
-            
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("contactToken").addHighlightedField("contactName");
+            builder.addHighlightedField("contactToken")
+					.addHighlightedField("contactName");
         }
 
-        
         FilterBuilder fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
-        
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        if (cmd.getOrgOwnerTypeId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("orgOwnerTypeId", cmd.getOrgOwnerTypeId()));
+        }
+
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -135,59 +121,28 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         
         SearchResponse rsp = builder.execute().actionGet();
 
+        ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
+        List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
         List<Long> ids = getIds(rsp);
-        
-        SearchPMOwnerResponse response = new SearchPMOwnerResponse();
-        if(ids.size() > pageSize) {
-        	response.setNextPageAnchor(anchor + 1);
-            ids.remove(ids.size() - 1);
-         } else {
-        	 response.setNextPageAnchor(null);
+        if (ids != null && ids.size() > 0) {
+            List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
+            ownerDTOList = pmOwners.stream().map(r -> {
+                OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
+                OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
+                dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
+                return dto;
+            }).collect(Collectors.toList());
+
+            if(ids.size() > pageSize) {
+                response.setNextPageAnchor(anchor + 1);
+                ids.remove(ids.size() - 1);
             }
-        
-        Map<String, OwnerDTO> map = new HashMap<String, OwnerDTO>();
-        List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
-        for(CommunityPmOwner pmOwner : pmOwners) {
-        	OwnerDTO dto = map.get(pmOwner.getContactToken());
-        	if(null == dto) {
-        		dto = new OwnerDTO();
-        		List<OwnerAddressDTO> ownerAddresses = new ArrayList<OwnerAddressDTO>();
-        		
-        		Address address = addressProvider.findAddressById(pmOwner.getAddressId());
-        		OwnerAddressDTO ownerAddress = new OwnerAddressDTO();
-        		ownerAddress.setId(pmOwner.getId());
-        		ownerAddress.setAddressId(address.getId());
-        		ownerAddress.setApartmentName(address.getApartmentName());
-        		ownerAddress.setBuildingName(address.getBuildingName());
-        		ownerAddresses.add(ownerAddress);
-        		
-        		dto.setOwnerAddresses(ownerAddresses);
-        		dto.setIdentifierToken(pmOwner.getContactToken());
-        		dto.setOwnerName(pmOwner.getContactName());
-        	} else {
-        		List<OwnerAddressDTO> ownerAddresses = dto.getOwnerAddresses();
-        		
-        		Address address = addressProvider.findAddressById(pmOwner.getAddressId());
-        		OwnerAddressDTO ownerAddress = new OwnerAddressDTO();
-        		ownerAddress.setId(pmOwner.getId());
-        		ownerAddress.setAddressId(address.getId());
-        		ownerAddress.setApartmentName(address.getApartmentName());
-        		ownerAddress.setBuildingName(address.getBuildingName());
-        		ownerAddresses.add(ownerAddress);
-        		
-        		dto.setOwnerAddresses(ownerAddresses);
-        	}
-        	
-        	map.put(pmOwner.getContactToken(), dto);
         }
-        
-        List<OwnerDTO> owners = map.values().stream().collect(Collectors.toList());
-        response.setOwners(owners);
-        
+        response.setOwners(ownerDTOList);
         return response;
 	}
 
-	@Override
+    @Override
 	public String getIndexType() {
 		return SearchUtils.PMOWNERINDEXTYPE;
 	}
@@ -198,7 +153,8 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
             b.field("contactToken", owner.getContactToken());
             b.field("contactName", owner.getContactName());
             b.field("communityId", owner.getCommunityId());
-        
+            b.field("orgOwnerTypeId", owner.getOrgOwnerTypeId());
+
             b.endObject();
             return b;
 		} catch (IOException ex) {
@@ -206,5 +162,4 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 			return null;
 		}
 	}
-
 }

@@ -153,7 +153,7 @@ public class GroupController extends ControllerBase {
         
 //        Timestamp etagTime = groupDto.getUpdateTime();
 //        if(etagTime == null) {
-//            etagTime = groupDto.getCreateTime();
+//            etagTime = groupDto.getBehaviorTime();
 //        } 
 //        if(etagTime != null) {
 //            int interval = configurationProvider.getIntValue(AppConstants.DEFAULT_ETAG_TIMEOUT_KEY, 

@@ -3,6 +3,7 @@
 /atomikos
 /logs
 /statistics
+
 *.gitignore
 *.classpath
 *.settings

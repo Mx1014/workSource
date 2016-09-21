@@ -36,8 +36,8 @@
         [jsonObject setObject: self.name forKey: @"name"];
     if(self.displayName)
         [jsonObject setObject: self.displayName forKey: @"displayName"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
     if(self.description_)
@@ -60,8 +60,8 @@
         [jsonObject setObject: self.memberAvatarUrl forKey: @"memberAvatarUrl"];
     if(self.cellPhone)
         [jsonObject setObject: self.cellPhone forKey: @"cellPhone"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -79,9 +79,9 @@
         if(self.displayName && [self.displayName isEqual:[NSNull null]])
             self.displayName = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])
@@ -127,9 +127,9 @@
         if(self.cellPhone && [self.cellPhone isEqual:[NSNull null]])
             self.cellPhone = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         return self;
     }

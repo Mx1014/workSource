@@ -38,8 +38,8 @@
         [jsonObject setObject: self.contactName forKey: @"contactName"];
     if(self.contactId)
         [jsonObject setObject: self.contactId forKey: @"contactId"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.ehUsername)
         [jsonObject setObject: self.ehUsername forKey: @"ehUsername"];
     if(self.contactAvatar)
@@ -67,9 +67,9 @@
         if(self.contactId && [self.contactId isEqual:[NSNull null]])
             self.contactId = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.ehUsername = [jsonObject objectForKey: @"ehUsername"];
         if(self.ehUsername && [self.ehUsername isEqual:[NSNull null]])

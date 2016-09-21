@@ -38,8 +38,8 @@
         [jsonObject setObject: self.name forKey: @"name"];
     if(self.displayName)
         [jsonObject setObject: self.displayName forKey: @"displayName"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.parentId)
         [jsonObject setObject: self.parentId forKey: @"parentId"];
 }
@@ -63,9 +63,9 @@
         if(self.displayName && [self.displayName isEqual:[NSNull null]])
             self.displayName = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.parentId = [jsonObject objectForKey: @"parentId"];
         if(self.parentId && [self.parentId isEqual:[NSNull null]])

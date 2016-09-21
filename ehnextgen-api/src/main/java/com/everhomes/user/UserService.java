@@ -13,10 +13,17 @@ import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
+
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
+
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
@@ -141,6 +148,13 @@ public interface UserService {
 
     UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
     SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
+
+    
+    SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+    ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
+
+
     void deleteUserImpersonation(DeleteUserImpersonationCommand cmd);
     
+
 }

@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.test.core.util.GsonHelper;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -69,6 +70,7 @@ public class HttpClientServiceImpl implements HttpClientService {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Date.class, new GsonJacksonDateAdapter());
         builder.registerTypeAdapter(Timestamp.class, new GsonJacksonTimestampAdapter());
+        builder.registerTypeAdapter(Date.class, new GsonHelper.DateAdapter()).setDateFormat("yyyy-MM-dd");
         gson = builder.create();
     }
 

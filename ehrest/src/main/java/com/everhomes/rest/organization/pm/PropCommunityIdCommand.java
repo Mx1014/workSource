@@ -1,9 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.organization.pm;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>

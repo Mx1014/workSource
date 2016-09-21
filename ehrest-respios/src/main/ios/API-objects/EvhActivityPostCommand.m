@@ -40,8 +40,8 @@
         [jsonObject setObject: self.location forKey: @"location"];
     if(self.contactPerson)
         [jsonObject setObject: self.contactPerson forKey: @"contactPerson"];
-    if(self.contactNumber)
-        [jsonObject setObject: self.contactNumber forKey: @"contactNumber"];
+    if(self.contactToken)
+        [jsonObject setObject: self.contactToken forKey: @"contactToken"];
     if(self.startTime)
         [jsonObject setObject: self.startTime forKey: @"startTime"];
     if(self.endTime)
@@ -99,9 +99,9 @@
         if(self.contactPerson && [self.contactPerson isEqual:[NSNull null]])
             self.contactPerson = nil;
 
-        self.contactNumber = [jsonObject objectForKey: @"contactNumber"];
-        if(self.contactNumber && [self.contactNumber isEqual:[NSNull null]])
-            self.contactNumber = nil;
+        self.contactToken = [jsonObject objectForKey: @"contactToken"];
+        if(self.contactToken && [self.contactToken isEqual:[NSNull null]])
+            self.contactToken = nil;
 
         self.startTime = [jsonObject objectForKey: @"startTime"];
         if(self.startTime && [self.startTime isEqual:[NSNull null]])

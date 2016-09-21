@@ -1856,7 +1856,7 @@ public class ActivityServiceImpl implements ActivityService {
 //            break;
 //        case ORGANIZATION:
 //            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-//            execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+//            execOrgCmd.setCommunityId(sceneTokenDto.getEntityId());
 //            resp = listOrgNearbyActivities(execOrgCmd);
 //            break;
 //        default:

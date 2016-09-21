@@ -48,8 +48,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"tokenList"];
     }
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.orgName)
         [jsonObject setObject: self.orgName forKey: @"orgName"];
     if(self.communityNames)
@@ -93,9 +93,9 @@
                 [self.tokenList addObject: itemJson];
             }
         }
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.orgName = [jsonObject objectForKey: @"orgName"];
         if(self.orgName && [self.orgName isEqual:[NSNull null]])

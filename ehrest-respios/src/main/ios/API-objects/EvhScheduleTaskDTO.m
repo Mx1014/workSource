@@ -38,8 +38,8 @@
         [jsonObject setObject: self.resourceType forKey: @"resourceType"];
     if(self.resourceId)
         [jsonObject setObject: self.resourceId forKey: @"resourceId"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.progress)
@@ -69,9 +69,9 @@
         if(self.resourceId && [self.resourceId isEqual:[NSNull null]])
             self.resourceId = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])

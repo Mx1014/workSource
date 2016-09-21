@@ -94,7 +94,7 @@ public class PropertyTest extends CoreServerTestCase {
     	System.out.println(mapping.getId());
     	
 //    	CommunityAddressMapping mapping2 = new CommunityAddressMapping();
-//    	mapping2.setAddressId(122356l);
+//    	mapping2.setApartmentId(122356l);
 //    	mapping2.setCommunityId(12l);
 //    	mapping2.setName("测试2");
 //    	mapping2.setLivingStatus((byte)3);

@@ -1,19 +1,6 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -23,71 +10,11 @@ import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
-import com.everhomes.rest.family.FamilyMemberDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
-import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
-import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
-import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
-import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeletePropOwnerCommand;
-import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
-import com.everhomes.rest.organization.pm.ImportPmBillsCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
-import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
-import com.everhomes.rest.organization.pm.OweFamilyDTO;
-import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
-import com.everhomes.rest.organization.pm.PmBillsDTO;
-import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
-import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
-import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
-import com.everhomes.rest.organization.pm.PropFamilyDTO;
-import com.everhomes.rest.organization.pm.SearchPMOwnerCommand;
-import com.everhomes.rest.organization.pm.SearchPMOwnerResponse;
-import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
-import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
-import com.everhomes.rest.organization.pm.CreatePropOwnerCommand;
-import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
@@ -95,6 +22,18 @@ import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/pm")
@@ -164,7 +103,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("applyPropertyMember")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse applyPropertyMember(@Valid applyPropertyMemberCommand cmd) {
 
 		propertyMgrService.applyPropertyMember(cmd);
@@ -180,7 +119,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("addPMGroupMemberByPhone")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse addPropertyMemberByPhone(@Valid CreatePropMemberCommand cmd) {
 
 		propertyMgrService.createPropMember(cmd);
@@ -271,7 +210,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("importPMAddressMapping")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse importPMAddressMapping(@Valid PropCommunityIdCommand cmd) {
 		propertyMgrService.importPMAddressMapping(cmd);
 		RestResponse response = new RestResponse();
@@ -296,21 +235,6 @@ public class PropertyMgrController extends ControllerBase {
 	}*/
 
 	/**
-	 * <b>URL: /pm/importPMPropertyOwnerInfo</b>
-	 * <p>上传业主信息</p>
-	 */
-	//checked
-	@RequestMapping(value="importPMPropertyOwnerInfo", method = RequestMethod.POST)
-	@RestReturn(value=String.class)
-	public RestResponse importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
-		propertyMgrService.importPMPropertyOwnerInfo(cmd,files);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /pm/ListPropOwnerCommandResponse</b>
 	 * <p>列出业主信息表</p>
 	 */
@@ -326,43 +250,13 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/updatePMPropertyOwnerInfo</b>
-	 * <p>修改业主信息表</p>
-	 * @return 修改的结果
-	 */
-	/*@RequestMapping("updatePMPropertyOwnerInfo")
-	@RestReturn(value=String.class)
-	public RestResponse updatePMPropertyOwnerInfo(@Valid UpdatePropOwnerCommand cmd) {
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}*/
-
-	/**
-	 * <b>URL: /pm/deletePMPropertyOwnerInfo</b>
-	 * <p>删除业主信息</p>
-	 * @return 删除的结果
-	 */
-	/*@RequestMapping("deletePMPropertyOwnerInfo")
-	@RestReturn(value=String.class)
-	public RestResponse deletePMPropertyOwnerInfo(@Valid DeletePropOwnerCommand cmd) {
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}*/
-
-	/**
 	 * <b>URL: /pm/setApartmentStatus</b>
 	 * <p>设置公寓状态：自住/出租/空闲/装修/待售/其它</p>
 	 * @return 设置的结果
 	 */
 	//checked
 	@RequestMapping("setApartmentStatus")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse setApartmentStatus(@Valid SetPropAddressStatusCommand cmd) {
 		propertyMgrService.setApartmentStatus(cmd);
 		RestResponse response = new RestResponse();
@@ -391,6 +285,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>把物业维修帖指派给处理人员（可批量指派）</p>
 	 * @return 分配的结果
 	 */
+
 	/*@RequestMapping("assignPMTopics")
 	@RestReturn(value=String.class)
 	public RestResponse assignPMTopics(@Valid AssginPmTopicCommand cmd) {
@@ -400,12 +295,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/setPMTopicStatus</b>
 	 * <p>设置物业维修帖状态：未处理、处理中、已处理、其它（可批量设置）</p>
 	 * @return 设置的结果
 	 */
+
 	/*@RequestMapping("setPMTopicStatus")
 	@RestReturn(value=String.class)
 	public RestResponse setPMTopicStatus(@Valid SetPmTopicStatusCommand cmd) {
@@ -415,7 +310,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/getPMTopicStatistics</b>
 	 * <p>根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它</p>
@@ -437,7 +331,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("sendMsgToPMGroup")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse sendMsgToPMGroup(@Valid PropCommunityIdMessageCommand cmd) {
 		propertyMgrService.sendMsgToPMGroup(cmd);
 		RestResponse response = new RestResponse();
@@ -451,6 +345,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * 发通知给整个小区业主（是左邻用户则发消息、不是左邻用户则发短信）
 	 * @return 发通知的结果
 	 */
+
 	/*@RequestMapping("sendNoticeToCommunity")
 	@RestReturn(value=String.class)
 	public RestResponse sendNoticeToCommunity(@Valid PropCommunityIdCommand cmd)  {
@@ -460,12 +355,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/sendNoticeToFloor</b>
 	 * 发通知给整层楼业主（是左邻用户则发消息、不是左邻用户则发短信）
-	 * @return 
+	 * @return
 	 */
+
 	/*@RequestMapping("sendNoticeToFloor")
 	@RestReturn(value=String.class)
 	public RestResponse sendNoticeToFloor(@Valid PropCommunityBuildCommand cmd) {
@@ -475,7 +370,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/sendNoticeToFamily</b>
 	 * 物业一键推送消息（是左邻用户则发消息、不是左邻用户则发短信）。
@@ -483,7 +377,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("sendNoticeToFamily")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
 		propertyMgrService.sendNoticeToFamily(cmd);
 		RestResponse response = new RestResponse();
@@ -497,8 +391,9 @@ public class PropertyMgrController extends ControllerBase {
 	 * 上传缴费账单excel文件
 	 * @param communityId 小区id
 	 * @param files 要上传文件
-	 * @return 
+	 * @return
 	 */
+
 	/*@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
 	public RestResponse importPropertyBills(@Valid PropCommunityIdCommand cmd,
@@ -510,11 +405,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/listPropertyBill</b>
 	 * 查询缴费账单详情
 	 */
+
 	/*@RequestMapping("listPropertyBill")
 	@RestReturn(value=ListPropBillCommandResponse.class)
 	public RestResponse listPropertyBill(
@@ -525,13 +420,13 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
-
 	/**
 	 * <b>URL: /pm/deletePropertyBillByMonth</b>
 	 * 删除指定月份的缴费账单
 	 * @return 删除的结果
 	 */
+
+
 	/*@RequestMapping("deletePropertyBillByMonth")
 	@RestReturn(value=String.class)
 	public RestResponse deletePropertyBillByMonth(@Valid PropCommunityBillDateCommand cmd) {
@@ -541,12 +436,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/deletePropertyBill</b>
 	 * 删除缴费账单（可批量删除）
 	 * @return 删除的结果
 	 */
+
 	/*@RequestMapping("deletePropertyBill")
 	@RestReturn(value=String.class)
 	public RestResponse deletePropertyBill(@Valid PropCommunityBillIdCommand cmd) {
@@ -556,12 +451,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/sendPropertyBillsByMonth</b>
 	 * 批量发指定月份的缴费账单
 	 * @return 发送物业缴费通知的结果
 	 */
+
 	/*@RequestMapping("sendPropertyBillsByMonth")
 	@RestReturn(value=String.class)
 	public RestResponse sendPropertyBillsByMonth(@Valid PropCommunityBillDateCommand cmd) {
@@ -571,12 +466,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/sendPropertyBillById</b>
 	 * 发指定的单个缴费账单
 	 * @return 发送物业缴费通知的结果
 	 */
+
 	/*@RequestMapping("sendPropertyBillById")
 	@RestReturn(value=String.class)
 	public RestResponse sendPropertyBillById(@Valid PropCommunityBillIdCommand cmd) {
@@ -586,11 +481,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/listInvitedUsers</b>
 	 * 查询邀请加入左邻的用户列表
 	 */
+
 	/*@RequestMapping("listInvitedUsers")
 	@RestReturn(value=ListPropInvitedUserCommandResponse.class)
 	public RestResponse listInvitedUsers(@Valid ListPropInvitedUserCommand cmd) {
@@ -600,11 +495,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/searchInvitedUsers</b>
 	 * 搜索邀请加入左邻的用户
 	 */
+
 	/*@RequestMapping("searchInvitedUsers")
 	@RestReturn(value=ListPropInvitedUserCommandResponse.class)
 	public RestResponse searchInvitedUsers(@Valid ListPropInvitedUserCommand cmd) {
@@ -614,14 +509,13 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/approvePropFamilyMember</b>
 	 * <p>批准家庭成员</p>
 	 */
 	//checked
 	@RequestMapping("approvePropFamilyMember")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse approvePropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
 		propertyMgrService.approvePropFamilyMember(cmd);
 		RestResponse response = new RestResponse();
@@ -637,7 +531,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("rejectPropFamilyMember")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse rejectPropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
 		propertyMgrService.rejectPropFamilyMember(cmd);
 		RestResponse response = new RestResponse();
@@ -652,7 +546,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	//checked
 	@RequestMapping("revokePropFamilyMember")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse revokePropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
 		propertyMgrService.revokePropFamilyMember(cmd);
 		RestResponse response = new RestResponse();
@@ -677,7 +571,6 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-
 	/**
 	 * <b>URL: /pm/findUserByIndentifier</b>
 	 * <p>根据用户token查询用户信息</p>
@@ -694,13 +587,14 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
+
 	/**
 	 * <b>URL: /pm/setPropCurrentCommunity</b>
 	 * <p>设置物业用户当前小区（切换物业）</p>
 	 */
 	//checked
 	@RequestMapping("setPropCurrentCommunity")
-	@RestReturn(String.class)
+	@RestReturn(java.lang.String.class)
 	public RestResponse setPropCurrentCommunity(@Valid SetCurrentCommunityCommand cmd) throws Exception {
 		propertyMgrService.setPropCurrentCommunity(cmd);
 		RestResponse response = new RestResponse();
@@ -742,16 +636,70 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/listFamilyMembersByFamilyId</b>
-	 * <p>查询家庭的成员列表</p>
+	 * <b>URL: /pm/searchOrganizationOwners</b>
+	 * <p>搜索业主列表</p>
 	 */
-	//checked
-	@RequestMapping("listFamilyMembersByFamilyId")
-	@RestReturn(value=FamilyMemberDTO.class, collection=true)
-	public RestResponse listFamilyMembersByFamilyId(@Valid ListPropFamilyMemberCommand cmd) {
-		List<FamilyMemberDTO> results = propertyMgrService.listFamilyMembersByFamilyId(cmd);
+	@RequestMapping("searchOrganizationOwners")
+	@RestReturn(value=ListOrganizationOwnersResponse.class)
+	public RestResponse searchOrganizationOwners(@Valid SearchOrganizationOwnersCommand cmd) {
+		ListOrganizationOwnersResponse results = propertyMgrService.searchOrganizationOwners(cmd);
 		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	/**
+	 * <b>URL: /pm/listOrganizationOwnersByAddress</b>
+	 * <p>根据地址信息查询业主列表</p>
+	 */
+	@RequestMapping("listOrganizationOwnersByAddress")
+	@RestReturn(value=OrganizationOwnerDTO.class, collection = true)
+	public RestResponse listOrganizationOwnersByAddress(@Valid ListOrganizationOwnersByAddressCommand cmd) {
+		List<OrganizationOwnerDTO> dtoList = propertyMgrService.listOrganizationOwnersByAddress(cmd);
+		RestResponse response = new RestResponse(dtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/getOrganizationOwner</b>
+	 * <p>根据id获取业主信息</p>
+	 */
+	@RequestMapping("getOrganizationOwner")
+	@RestReturn(value=OrganizationOwnerDTO.class)
+	public RestResponse getOrganizationOwner(@Valid GetOrganizationOwnerCommand cmd) {
+        OrganizationOwnerDTO dto = propertyMgrService.getOrganizationOwner(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/getOrganizationOwnerCar</b>
+	 * <p>根据id获取车辆信息</p>
+	 */
+	@RequestMapping("getOrganizationOwnerCar")
+	@RestReturn(value=OrganizationOwnerCarDTO.class)
+	public RestResponse getOrganizationOwnerCar(@Valid GetOrganizationOwnerCarCommand cmd) {
+        OrganizationOwnerCarDTO dto = propertyMgrService.getOrganizationOwnerCar(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/listOrganizationOwnersByCar</b>
+	 * <p>根据车辆获取业主信息</p>
+	 */
+	@RequestMapping("listOrganizationOwnersByCar")
+	@RestReturn(value=OrganizationOwnerDTO.class, collection = true)
+	public RestResponse listOrganizationOwnersByCar(@Valid ListOrganizationOwnersByCarCommand cmd) {
+        List<OrganizationOwnerDTO> dtos = propertyMgrService.listOrganizationOwnersByCar(cmd);
+		RestResponse response = new RestResponse(dtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -761,6 +709,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listPropBillDateStr</b>
 	 * <p>查询物业账单的时间列表</p>
 	 */
+
 	/*@RequestMapping("listPropBillDateStr")
 	@RestReturn(value=String.class, collection=true)
 	public RestResponse listPropBillDateStr(@Valid PropCommunityIdCommand cmd) {
@@ -771,12 +720,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/newPmTopic</b>
 	 * <p>物业人员发帖</p>
 	 * @return 发帖的内容
 	 */
+
 	/*@RequestMapping("newPmTopic")
 	@RestReturn(value=PostDTO.class)
 	public RestResponse newPmTopic(@Valid NewTopicCommand cmd) {
@@ -786,11 +735,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/queryPmTopicsByCategory</b>
 	 * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
 	 */
+
 	/*@RequestMapping("queryPmTopicsByCategory")
 	@RestReturn(value=ListPropPostCommandResponse.class)
 	public RestResponse queryPmTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
@@ -800,11 +749,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/listPmTopics</b>
 	 * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
 	 */
+
 	/*@RequestMapping("listPmTopics")
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse listPmTopics(ListTopicCommand cmd) {
@@ -815,11 +764,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/getPmTopic</b>
 	 * <p>获取指定论坛里的指定帖子内容</p>
 	 */
+
 	/*@RequestMapping("getPmTopic")
 	@RestReturn(value=PostDTO.class)
 	public RestResponse getPmTopic(GetTopicCommand cmd) {
@@ -830,12 +779,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/likePmTopic</b>
 	 * <p>对指定论坛里的指定帖子点赞</p>
 	 * @return 点赞的结果
 	 */
+
 	/*@RequestMapping("likePmTopic")
 	@RestReturn(value=String.class)
 	public RestResponse likePmTopic(LikeTopicCommand cmd) {
@@ -846,12 +795,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/cancelLikePmTopic</b>
 	 * <p>对指定论坛里的指定帖子取消赞</p>
 	 * @return 取消赞的结果
 	 */
+
 	/*@RequestMapping("cancelLikePmTopic")
 	@RestReturn(value=String.class)
 	public RestResponse cancelLikePmTopic(CancelLikeTopicCommand cmd) {
@@ -862,12 +811,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/deletePmTopic</b>
 	 * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
 	 * @return 删除结果
 	 */
+
 	/*@RequestMapping("deletePmTopic")
 	@RestReturn(value=String.class)
 	public RestResponse deletePmTopic(DeleteTopicCommand cmd) {
@@ -878,8 +827,8 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	//    /**
+
 	//     * <b>URL: /pm/forwardTopic</b>
 	//     * <p>转发帖子</p>
 	//     * @return 转发结果
@@ -887,14 +836,14 @@ public class PropertyMgrController extends ControllerBase {
 	//    @RequestMapping("forwardTopic")
 	//    @RestReturn(value=Long.class)
 	//    public RestResponse forwardTopic(@Valid ForwardTopicCommand cmd) {
-	//        
+	//
 	//        // ???
 	//        RestResponse response = new RestResponse();
 	//        response.setErrorCode(ErrorCodes.SUCCESS);
 	//        response.setErrorDescription("OK");
 	//        return response;
 	//    }
-	//    
+	//
 	//    /**
 	//     * <b>URL: /pm/makeTop</b>
 	//     * <p>置顶帖子</p>
@@ -903,14 +852,14 @@ public class PropertyMgrController extends ControllerBase {
 	//    @RequestMapping("makeTop")
 	//    @RestReturn(value=String.class)
 	//    public RestResponse makeTop(@Valid MakeTopCommand cmd) {
-	//        
+	//
 	//        // ???
 	//        RestResponse response = new RestResponse();
 	//        response.setErrorCode(ErrorCodes.SUCCESS);
 	//        response.setErrorDescription("OK");
 	//        return response;
 	//    }
-	//    
+	//
 	//    /**
 	//     * <b>URL: /pm/search</b>
 	//     * <p>按指定条件查询符合条件的帖子列表</p>
@@ -919,18 +868,18 @@ public class PropertyMgrController extends ControllerBase {
 	//    @RestReturn(value=ListPostCommandResponse.class)
 	//    public RestResponse search(SearchTopicCommand cmd) {
 	//        ListPostCommandResponse cmdResponse = postSearcher.query(cmd);
-	//        
+	//
 	//        RestResponse response = new RestResponse();
 	//        response.setResponseObject(cmdResponse);
 	//        response.setErrorCode(ErrorCodes.SUCCESS);
 	//        response.setErrorDescription("OK");
 	//        return response;
 	//    }
-
 	/**
 	 * <b>URL: /pm/listPmTopicComments</b>
 	 * <p>获取指定论坛里指定帖子下的评论列表</p>
 	 */
+
 	/*@RequestMapping("listPmTopicComments")
 	@RestReturn(value=PostDTO.class, collection=true)
 	public RestResponse listPmTopicComments(@Valid ListTopicCommentCommand cmd) {
@@ -941,11 +890,11 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/newPmComment</b>
 	 * <p>创建新评论</p>
 	 */
+
 	/*@RequestMapping("newPmComment")
 	@RestReturn(value=PostDTO.class)
 	public RestResponse newPmComment(@Valid NewCommentCommand cmd) {
@@ -956,12 +905,12 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}*/
-
 	/**
 	 * <b>URL: /pm/deletePmComment</b>
 	 * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
 	 * @return 删除结果
 	 */
+
 	/*@RequestMapping("deletePmComment")
 	@RestReturn(value=String.class)
 	public RestResponse deletePmComment(DeleteCommentCommand cmd) {
@@ -971,8 +920,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}*/ 
-
+	}*/
 	/**
 	 * <b>URL: /pm/listPropApartmentsByKeyword</b>
 	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
@@ -991,12 +939,12 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/importPmBills
 	 * <p>上传缴费账单excel文件
-	 * @param communityId 小区id
+	 * @param cmd
 	 * @param files 要上传文件
-	 * @return 
+	 * @return
 	 */
 	@RequestMapping(value="importPmBills", method = RequestMethod.POST)
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
 		propertyMgrService.importPmBills(cmd.getOrganizationId(), files);
@@ -1007,7 +955,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 
 	}
-	
+
 	/**
 	 * <b>URL: /pm/listPmBillsByConditions
 	 * <p>根据条件查询物业缴费单
@@ -1020,14 +968,14 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	} 
+	}
 
 	/**
 	 * <b>URL: /pm/deletePmBills
 	 * <p>删除物业缴费单
 	 */
 	@RequestMapping("deletePmBills")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse deletePmBills(@Valid DeletePmBillsCommand cmd) {
 
 		propertyMgrService.deletePmBills(cmd);
@@ -1043,7 +991,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>更新物业缴费单
 	 */
 	@RequestMapping("updatePmBills")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse updatePmBills(@Valid UpdatePmBillsCommand cmd) {
 
 		propertyMgrService.updatePmBills(cmd);
@@ -1059,7 +1007,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>新增物业缴费单
 	 */
 	@RequestMapping("insertPmBills")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse insertPmBills(@Valid InsertPmBillsCommand cmd) {
 
 		propertyMgrService.insertPmBills(cmd);
@@ -1075,7 +1023,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>删除物业缴费单
 	 */
 	@RequestMapping("deletePmBill")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse deletePmBill(@Valid DeletePmBillCommand cmd) {
 
 		propertyMgrService.deletePmBill(cmd);
@@ -1091,7 +1039,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>更新物业缴费单
 	 */
 	@RequestMapping("updatePmBill")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse updatePmBill(@Valid UpdatePmBillCommand cmd) {
 
 		propertyMgrService.updatePmBill(cmd);
@@ -1107,7 +1055,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>新增物业缴费单
 	 */
 	@RequestMapping("insertPmBill")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse insertPmBill(@Valid InsertPmBillCommand cmd) {
 
 		propertyMgrService.insertPmBill(cmd);
@@ -1117,7 +1065,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
 
 	/**
 	 * <b>URL: /pm/listOrgBillingTransactionsByConditions
@@ -1135,6 +1082,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
+
 	/**
 	 * <b>URL: /pm/listOweFamilysByConditions
 	 * <p>根据条件查询欠费家庭
@@ -1150,8 +1098,9 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
+	//web-family
 
-	//web-family	
+
 	/**
 	 * <b>URL: /pm/listBillTxByAddressId
 	 * <p>根据家庭Id查询家庭的缴费记录
@@ -1167,7 +1116,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
 	/**
 	 * <b>URL: /pm/findBillByAddressIdAndTime
 	 * <p>根据家庭Id和日期查询家庭的账单
@@ -1199,6 +1147,7 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	//app
+
 	/**
 	 * <b>URL: /pm/findFamilyBillAndPaysByFamilyIdAndTime
 	 * <p>根据家庭id和日期查询家庭某月份的账单和缴费记录
@@ -1213,7 +1162,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
 	/**
 	 * <b>URL: /pm/listFamilyBillsAndPaysByFamilyId
 	 * <p>根据家庭id和日期查询家庭的所有账单和缴费记录
@@ -1231,12 +1179,13 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	//线下支付
+
 	/**
 	 * <b>URL: /pm/payPmBillByAddressId
 	 * <p>缴费
 	 */
 	@RequestMapping("payPmBillByAddressId")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse payPmBillByAddressId(@Valid PayPmBillByAddressIdCommand cmd) {
 
 		propertyMgrService.payPmBillByAddressId(cmd);
@@ -1246,7 +1195,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 	/**
 	 * <b>URL: /pm/getPmPayStatistics
 	 * <p>物业缴费统计:年度收入，待收费,欠费户数
@@ -1267,7 +1215,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>给指定欠费家庭发缴费通知
 	 */
 	@RequestMapping("sendPmPayMessageByAddressId")
-	@RestReturn(String.class)
+	@RestReturn(java.lang.String.class)
 	public RestResponse sendPmPayMessageByAddressId (@Valid SendPmPayMessageByAddressIdCommand cmd){
 		this.propertyMgrService.sendPmPayMessageByAddressId(cmd);
 
@@ -1282,7 +1230,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>给所有欠费家庭发缴费通知
 	 */
 	@RequestMapping("sendPmPayMessageToAllOweFamilies")
-	@RestReturn(String.class)
+	@RestReturn(java.lang.String.class)
 	public RestResponse sendPmPayMessageToAllOweFamilies (@Valid SendPmPayMessageToAllOweFamiliesCommand cmd){
 		this.propertyMgrService.sendPmPayMessageToAllOweFamilies(cmd);
 
@@ -1291,6 +1239,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 	/**
 	 * <b>URL: /pm/getFamilyStatistic
 	 * <p>统计家庭的年总应付，年总实付，目前欠款
@@ -1304,14 +1253,14 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
 	//线上支付
+
 	/**
 	 * <b>URL: /pm/onlinePayPmBill
 	 * <p>物业费线上支付
 	 */
 	@RequestMapping("onlinePayPmBill")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse onlinePayPmBill(@Valid OnlinePayPmBillCommand cmd) {
 		propertyMgrService.onlinePayPmBill(cmd);
 		RestResponse response = new RestResponse();
@@ -1333,7 +1282,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 	/**
 	 * <b>URL: /pm/createPmBillOrder
 	 * <p>线上支付下订单
@@ -1347,20 +1295,20 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	@RequestMapping("getWebToken")
-    @RestReturn(value=String.class)
+    @RestReturn(value= java.lang.String.class)
     public RestResponse getWebToken(@Valid FindPmBillByOrderNoCommand cmd){
-		String str = cmd.getOrderNo();
-		String encodeStr = WebTokenGenerator.getInstance().toWebToken(str);
+		java.lang.String str = cmd.getOrderNo();
+		java.lang.String encodeStr = WebTokenGenerator.getInstance().toWebToken(str);
         RestResponse response = new RestResponse(encodeStr);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-	
+
 	@RequestMapping("sendNoticeToOrganizationMember")
-    @RestReturn(value=String.class)
+    @RestReturn(value= java.lang.String.class)
     public RestResponse sendNoticeToOrganizationMember(@Valid PropCommunityBuildAddessCommand cmd){
 		propertyMgrService.sendNoticeToOrganizationMember(cmd,UserContext.current().getUser());
         RestResponse response = new RestResponse();
@@ -1368,7 +1316,7 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-	
+
 	@RequestMapping("createPmBillOrderDemo")
 	@RestReturn(value=CommonOrderDTO.class)
 	public RestResponse createPmBillOrderDemo(@Valid CreatePmBillOrderCommand cmd) {
@@ -1378,11 +1326,27 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+    /**
+     * <b>URL: /pm/listFamilyMembersByFamilyId</b>
+     * <p>查询家庭的成员列表</p>
+     */
+    //checked
+    /*@RequestMapping("listFamilyMembersByFamilyId")
+    @RestReturn(value=FamilyMemberDTO.class, collection=true)
+    public RestResponse listFamilyMembersByFamilyId(@Valid ListPropFamilyMemberCommand cmd) {
+        List<FamilyMemberDTO> results = propertyMgrService.listFamilyMembersByFamilyId(cmd);
+        RestResponse response = new RestResponse(results);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
+
 	/**
 	 * <b>URL: /pm/searchPMOwnerInfo</b>
 	 * <p>列出业主信息表</p>
-	 */
+	 *//*
 	@RequestMapping("searchPMOwnerInfo")
 	@RestReturn(value=SearchPMOwnerResponse.class)
 	public RestResponse searchPMOwnerInfo(@Valid SearchPMOwnerCommand cmd) {
@@ -1391,18 +1355,72 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
-	
+	}*/
+
 	/**
-	 * <b>URL: /pm/createPMPropertyOwnerInfo</b>
+	 * <b>URL: /pm/createOrganizationOwner</b>
 	 * <p>增加新业主</p>
 	 */
-	@RequestMapping("createPMPropertyOwnerInfo")
-	@RestReturn(value=String.class)
-	public RestResponse createPMPropertyOwnerInfo(@Valid CreatePropOwnerCommand cmd) {
-		
-		propertyMgrService.createPMPropertyOwnerInfo(cmd);
+	@RequestMapping("createOrganizationOwner")
+	@RestReturn(value= OrganizationOwnerDTO.class)
+	public RestResponse createOrganizationOwner(@Valid CreateOrUpdateOrganizationOwnerCommand cmd) {
+        OrganizationOwnerDTO dto = propertyMgrService.createOrganizationOwner(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	/**
+	 * <b>URL: /pm/addOrganizationOwnerAddress</b>
+	 * <p>给业主增加楼栋门牌</p>
+	 */
+	@RequestMapping("addOrganizationOwnerAddress")
+	@RestReturn(value= OrganizationOwnerAddressDTO.class)
+	public RestResponse addOrganizationOwnerAddress(@Valid AddOrganizationOwnerAddressCommand cmd) {
+		OrganizationOwnerAddressDTO dto = propertyMgrService.addOrganizationOwnerAddress(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/addOrganizationOwnerCarUser</b>
+	 * <p>给业主增加楼栋门牌</p>
+	 */
+	@RequestMapping("addOrganizationOwnerCarUser")
+	@RestReturn(value= OrganizationOwnerDTO.class)
+	public RestResponse addOrganizationOwnerCarUser(@Valid AddOrganizationOwnerCarUserCommand cmd) {
+        OrganizationOwnerDTO dto = propertyMgrService.addOrganizationOwnerCarUser(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+     * <b>URL: /pm/updateOrganizationOwner</b>
+     * <p>修改业主信息</p>
+     */
+    @RequestMapping("updateOrganizationOwner")
+    @RestReturn(value= OrganizationOwnerDTO.class)
+    public RestResponse updateOrganizationOwner(@Valid CreateOrUpdateOrganizationOwnerCommand cmd) {
+        OrganizationOwnerDTO dto = propertyMgrService.updateOrganizationOwner(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+	/**
+	 * <b>URL: /pm/updateOrganizationOwnerAddressStatus</b>
+	 * <p>对业主执行的一些迁入, 迁出</p>
+	 */
+	@RequestMapping("updateOrganizationOwnerAddressStatus")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse updateOrganizationOwnerAddressStatus(@Valid UpdateOrganizationOwnerAddressStatusCommand cmd) {
+		propertyMgrService.updateOrganizationOwnerAddressStatus(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1410,27 +1428,361 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/deletePMPropertyOwnerInfo</b>
-	 * <p>删除业主</p>
+	 * <b>URL: /pm/deleteOrganizationOwnerAddress</b>
+	 * <p>移除业主与地址的之间的关系</p>
 	 */
-	@RequestMapping("deletePMPropertyOwnerInfo")
-	@RestReturn(value=String.class)
-	public RestResponse deletePMPropertyOwnerInfo(@Valid DeletePropOwnerCommand cmd) {
-
-		propertyMgrService.deletePMPropertyOwnerInfo(cmd);
-		
+	@RequestMapping("deleteOrganizationOwnerAddress")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse deleteOrganizationOwnerAddress(@Valid DeleteOrganizationOwnerAddressCommand cmd) {
+		propertyMgrService.deleteOrganizationOwnerAddress(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /pm/listOrganizationOwnerBehaviors</b>
+	 * <p>查询业主的活动记录</p>
+	 */
+	@RequestMapping("listOrganizationOwnerBehaviors")
+	@RestReturn(value=OrganizationOwnerBehaviorDTO.class, collection = true)
+	public RestResponse listOrganizationOwnerBehaviors(@Valid ListOrganizationOwnerBehaviorsCommand cmd) {
+	    List<OrganizationOwnerBehaviorDTO> dtos = propertyMgrService.listOrganizationOwnerBehaviors(cmd);
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/listOrganizationOwnerAddresses</b>
+	 * <p>查询业主的所关联的楼栋门牌</p>
+	 */
+	@RequestMapping("listOrganizationOwnerAddresses")
+	@RestReturn(value=OrganizationOwnerAddressDTO.class, collection = true)
+	public RestResponse listOrganizationOwnerAddresses(@Valid ListOrganizationOwnerAddressesCommand cmd) {
+        List<OrganizationOwnerAddressDTO> dtos = propertyMgrService.listOrganizationOwnerAddresses(cmd);
+        RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/listOrganizationOwnerAttachments</b>
+	 * <p>查询业主的所有附件列表</p>
+	 */
+	@RequestMapping("listOrganizationOwnerAttachments")
+	@RestReturn(value=OrganizationOwnerAttachmentDTO.class, collection = true)
+	public RestResponse listOrganizationOwnerAttachments(@Valid ListOrganizationOwnerAttachmentsCommand cmd) {
+        List<OrganizationOwnerAttachmentDTO> dtos = propertyMgrService.listOrganizationOwnerAttachments(cmd);
+        RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/listOrganizationOwnerTypes</b>
+	 * <p>查询业主类型列表</p>
+	 */
+	@RequestMapping("listOrganizationOwnerTypes")
+	@RestReturn(value=OrganizationOwnerTypeDTO.class, collection = true)
+	public RestResponse listOrganizationOwnerTypes(@Valid ListOrganizationOwnerTypesCommand cmd) {
+        List<OrganizationOwnerTypeDTO> dtos = propertyMgrService.listOrganizationOwnerTypes(cmd);
+        RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/uploadOrganizationOwnerAttachment</b>
+	 * <p>上传业主附件</p>
+	 */
+	@RequestMapping("uploadOrganizationOwnerAttachment")
+	@RestReturn(value=OrganizationOwnerAttachmentDTO.class)
+	public RestResponse uploadOrganizationOwnerAttachment(@Valid UploadOrganizationOwnerAttachmentCommand cmd) {
+		OrganizationOwnerAttachmentDTO dto = propertyMgrService.uploadOrganizationOwnerAttachment(cmd);
+        RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/uploadOrganizationOwnerCarAttachment</b>
+	 * <p>上传车辆附件</p>
+	 */
+	@RequestMapping("uploadOrganizationOwnerCarAttachment")
+	@RestReturn(value=OrganizationOwnerCarAttachmentDTO.class)
+	public RestResponse uploadOrganizationOwnerCarAttachment(@Valid UploadOrganizationOwnerCarAttachmentCommand cmd) {
+		OrganizationOwnerCarAttachmentDTO dto = propertyMgrService.uploadOrganizationOwnerCarAttachment(cmd);
+        RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/deleteOrganizationOwnerBehavior</b>
+	 * <p>删除业主的活动记录</p>
+	 */
+	@RequestMapping("deleteOrganizationOwnerBehavior")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse deleteOrganizationOwnerBehavior(@Valid DeleteOrganizationOwnerBehaviorCommand cmd) {
+	    propertyMgrService.deleteOrganizationOwnerBehavior(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/deleteOrganizationOwnerAttachment</b>
+	 * <p>删除附件</p>
+	 */
+	@RequestMapping("deleteOrganizationOwnerAttachment")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse deleteOrganizationOwnerAttachment(@Valid DeleteOrganizationOwnerAttachmentCommand cmd) {
+	    propertyMgrService.deleteOrganizationOwnerAttachment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/deleteOrganizationOwnerCarAttachment</b>
+	 * <p>删除车辆附件</p>
+	 */
+	@RequestMapping("deleteOrganizationOwnerCarAttachment")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse deleteOrganizationOwnerCarAttachment(@Valid DeleteOrganizationOwnerCarAttachmentCommand cmd) {
+	    propertyMgrService.deleteOrganizationOwnerCarAttachment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+    /**
+     * <b>URL:/pm/createOrganizationOwnerCar</b>
+     * <p>创建车辆记录</p>
+     */
+    @RequestMapping("createOrganizationOwnerCar")
+    @RestReturn(value = OrganizationOwnerCarDTO.class)
+    public RestResponse createOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd) {
+        OrganizationOwnerCarDTO dto = propertyMgrService.createOrganizationOwnerCar(cmd);
+        RestResponse resp = new RestResponse(dto);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/updateOrganizationOwnerCar</b>
+     * <p>修改车辆记录</p>
+     */
+    @RequestMapping("updateOrganizationOwnerCar")
+    @RestReturn(value = OrganizationOwnerCarDTO.class)
+    public RestResponse updateOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd) {
+        OrganizationOwnerCarDTO dto = propertyMgrService.updateOrganizationOwnerCar(cmd);
+        RestResponse resp = new RestResponse(dto);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/deleteOrganizationOwnerCar</b>
+     * <p>删除车辆</p>
+     */
+    @RequestMapping("deleteOrganizationOwnerCar")
+    @RestReturn(value = java.lang.String.class)
+    public RestResponse deleteOrganizationOwnerCar(DeleteOrganizationOwnerCarCommand cmd) {
+        propertyMgrService.deleteOrganizationOwnerCar(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/setOrganizationOwnerAsCarPrimary</b>
+     * <p>标记使用者为首要联系人</p>
+     */
+    @RequestMapping("setOrganizationOwnerAsCarPrimary")
+    @RestReturn(value = java.lang.String.class)
+    public RestResponse setOrganizationOwnerAsCarPrimary(SetOrganizationOwnerAsCarPrimaryCommand cmd) {
+        propertyMgrService.setOrganizationOwnerAsCarPrimary(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/deleteRelationOfOrganizationOwnerAndCar</b>
+     * <p>移除车辆与业主的关系</p>
+     */
+    @RequestMapping("deleteRelationOfOrganizationOwnerAndCar")
+    @RestReturn(value = java.lang.String.class)
+    public RestResponse deleteRelationOfOrganizationOwnerAndCar(DeleteRelationOfOrganizationOwnerAndCarCommand cmd) {
+        propertyMgrService.deleteRelationOfOrganizationOwnerAndCar(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/listOrganizationOwnerCarsByOrgOwner</b>
+     * <p>根据业主列出关联车辆</p>
+     */
+    @RequestMapping("listOrganizationOwnerCarsByOrgOwner")
+    @RestReturn(value = OrganizationOwnerCarDTO.class, collection = true)
+    public RestResponse listOrganizationOwnerCarsByOrgOwner(ListOrganizationOwnerCarByOrgOwnerCommand cmd) {
+        List<OrganizationOwnerCarDTO> dtos = propertyMgrService.listOrganizationOwnerCarsByOrgOwner(cmd);
+        RestResponse resp = new RestResponse(dtos);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/searchOrganizationOwnerCars</b>
+     * <p>车辆搜索</p>
+     */
+    @RequestMapping("searchOrganizationOwnerCars")
+    @RestReturn(ListOrganizationOwnerCarResponse.class)
+    public RestResponse searchOrganizationOwnerCars(SearchOrganizationOwnerCarCommand cmd) {
+        ListOrganizationOwnerCarResponse responseObject = propertyMgrService.searchOrganizationOwnerCars(cmd);
+        RestResponse resp = new RestResponse(responseObject);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL:/pm/listOrganizationOwnerCarAttachments</b>
+     * <p>列出车辆关联的附件列表</p>
+     */
+    @RequestMapping("listOrganizationOwnerCarAttachments")
+    @RestReturn(value = OrganizationOwnerCarAttachmentDTO.class, collection = true)
+    public RestResponse listOrganizationOwnerCarAttachments(ListOrganizationOwnerCarAttachmentCommand cmd) {
+        List<OrganizationOwnerCarAttachmentDTO> dtos = propertyMgrService.listOrganizationOwnerCarAttachments(cmd);
+        RestResponse resp = new RestResponse(dtos);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pm/importOrganizationOwnerCars</b>
+     * <p>导入车辆信息</p>
+     */
+    @RequestMapping(value="importOrganizationOwnerCars", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importOrganizationOwnerCars(@Valid ImportOrganizationOwnerCarsCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+        propertyMgrService.importOrganizationOwnerCars(cmd, files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pm/exportOrganizationOwnerCars</b>
+     * <p>导出车辆信息</p>
+     */
+    @RequestMapping(value="exportOrganizationOwnerCars")
+    @RestReturn(value= String.class)
+    public RestResponse exportOrganizationOwnerCars(@Valid ExportOrganizationOwnerCarsCommand cmd, HttpServletResponse response) {
+        propertyMgrService.exportOrganizationOwnerCars(cmd, response);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+	/**
+	 * <b>URL: /pm/importOrganizationOwners</b>
+	 * <p>导入业主信息</p>
+	 */
+	@RequestMapping(value="importOrganizationOwners", method = RequestMethod.POST)
+	@RestReturn(value=String.class)
+	public RestResponse importOrganizationOwners(ImportOrganizationsOwnersCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
+        propertyMgrService.importOrganizationOwners(cmd, files);
+        RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+     * <b>URL: /pm/exportOrganizationOwners</b>
+     * <p>导出业主信息</p>
+     */
+    @RequestMapping(value="exportOrganizationOwners")
+    @RestReturn(value= java.lang.String.class)
+    public RestResponse exportOrganizationOwners(@Valid ExportOrganizationsOwnersCommand cmd, HttpServletResponse response) {
+        propertyMgrService.exportOrganizationOwners(cmd, response);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+	/**
+	 * <b>URL: /pm/deleteOrganizationOwner</b>
+	 * <p>删除业主</p>
+	 */
+	@RequestMapping("deleteOrganizationOwner")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse deleteOrganizationOwner(@Valid DeleteOrganizationOwnerCommand cmd) {
+		propertyMgrService.deleteOrganizationOwner(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+    /**
+     * <b>URL: /pm/listOrganizationOwnerStatisticByGender</b>
+     * <p>根据性别来查询报表</p>
+     */
+    @RequestMapping("listOrganizationOwnerStatisticByGender")
+    @RestReturn(value = ListOrganizationOwnerStatisticDTO.class, collection = true)
+    public RestResponse listOrganizationOwnerStatisticByGender(ListOrganizationOwnerStatisticCommand cmd) {
+        List<ListOrganizationOwnerStatisticDTO> dtos = propertyMgrService.listOrganizationOwnerStatisticByGender(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pm/listOrganizationOwnerStatisticByAge</b>
+     * <p>根据年龄来查询报表</p>
+     */
+    @RequestMapping("listOrganizationOwnerStatisticByAge")
+    @RestReturn(value = ListOrganizationOwnerStatisticByAgeDTO.class)
+    public RestResponse listOrganizationOwnerStatisticByAge(ListOrganizationOwnerStatisticCommand cmd) {
+        ListOrganizationOwnerStatisticByAgeDTO dto = propertyMgrService.listOrganizationOwnerStatisticByAge(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	/**
 	 * <b>URL: /pm/deletePMPropertyOwnerAddress</b>
 	 * <p>删除业主地址</p>
 	 */
 	@RequestMapping("deletePMPropertyOwnerAddress")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse deletePMPropertyOwnerAddress(@Valid DeletePropOwnerAddressCommand cmd) {
 
 		propertyMgrService.deletePMPropertyOwnerAddress(cmd);
@@ -1446,7 +1798,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>增加业主地址</p>
 	 */
 	@RequestMapping("createPMPropertyOwnerAddress")
-	@RestReturn(value=String.class)
+	@RestReturn(value= java.lang.String.class)
 	public RestResponse createPMPropertyOwnerAddress(@Valid CreatePropOwnerAddressCommand cmd) {
 
 		propertyMgrService.createPMPropertyOwnerAddress(cmd);

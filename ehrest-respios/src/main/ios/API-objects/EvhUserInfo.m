@@ -62,8 +62,8 @@
         [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.communityName)
         [jsonObject setObject: self.communityName forKey: @"communityName"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.address)
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.regionId)
@@ -72,8 +72,8 @@
         [jsonObject setObject: self.regionName forKey: @"regionName"];
     if(self.regionPath)
         [jsonObject setObject: self.regionPath forKey: @"regionPath"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.namespaceUserToken)
@@ -170,9 +170,9 @@
         if(self.communityName && [self.communityName isEqual:[NSNull null]])
             self.communityName = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.address = [jsonObject objectForKey: @"address"];
         if(self.address && [self.address isEqual:[NSNull null]])
@@ -190,9 +190,9 @@
         if(self.regionPath && [self.regionPath isEqual:[NSNull null]])
             self.regionPath = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
