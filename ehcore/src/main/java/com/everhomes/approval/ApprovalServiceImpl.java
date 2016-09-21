@@ -229,6 +229,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 		category.setStatus(CommonStatus.ACTIVE.getCode());
 		category.setCreatorUid(userId);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		category.setUpdateTime(category.getCreateTime());
+		category.setOperatorUid(userId);
 		
 		approvalCategoryProvider.createApprovalCategory(category);
 		return new CreateApprovalCategoryResponse(ConvertHelper.convert(category, ApprovalCategoryDTO.class));
@@ -263,6 +265,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 		Tuple<ApprovalCategory, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode()+cmd.getId()).enter(()->{
 			ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 			category.setCategoryName(cmd.getCategoryName());
+			category.setUpdateTime(category.getCreateTime());
+			category.setOperatorUid(userId);
 			approvalCategoryProvider.updateApprovalCategory(category);
 			return category;
 		});
@@ -304,11 +308,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"id cannot be empty");
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		
 
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode()+cmd.getId()).enter(()->{
 			ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 			category.setStatus(CommonStatus.INACTIVE.getCode());
+			category.setUpdateTime(category.getCreateTime());
+			category.setOperatorUid(userId);
 			approvalCategoryProvider.updateApprovalCategory(category);
 			return null;
 		});

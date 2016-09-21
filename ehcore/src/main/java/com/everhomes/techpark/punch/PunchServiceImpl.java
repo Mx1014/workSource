@@ -144,6 +144,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import com.mysql.fabric.xmlrpc.base.Array;
@@ -3731,20 +3732,25 @@ public class PunchServiceImpl implements PunchService {
 			}).filter(a->a!=null).collect(Collectors.groupingBy(ApprovalDayActualTime::getUserId, Collectors.groupingBy(ApprovalDayActualTime::getCategoryId)));
 			
 			Map<Long, List<AbsenceTimeDTO>> resultMap = new HashMap<>();
-			List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode());
+			List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), fromDate);
 			//key1 userId, key2 categoryId
 			map.forEach((key1, value1)->{
-				List<AbsenceTimeDTO> absenceTimeList = new ArrayList<>();
-				value1.forEach((key2, value2)->{
+				List<AbsenceTimeDTO> absenceTimeList = approvalCategoryList.stream().map(a->{
+					List<ApprovalDayActualTime> value2 = value1.get(a.getId());
 					AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
-					absenceTimeDTO.setCategoryId(key2);
-					absenceTimeDTO.setCategoryName(getCategoryName(key2));
-					absenceTimeDTO.setActualResult("");
-					value2.forEach(v->{
-						absenceTimeDTO.setActualResult(calculateTimeTotal(absenceTimeDTO.getActualResult(), v.getActualResult()));
-					});
-					absenceTimeList.add(absenceTimeDTO);
-				});
+					absenceTimeDTO.setCategoryId(a.getId());
+					absenceTimeDTO.setCategoryName(a.getCategoryName());
+					if (ListUtils.isEmpty(value2)) {
+						absenceTimeDTO.setActualResult("0.0.0");
+					}else {
+						absenceTimeDTO.setActualResult("");
+						value2.forEach(v->{
+							absenceTimeDTO.setActualResult(calculateTimeTotal(absenceTimeDTO.getActualResult(), v.getActualResult()));
+						});
+					}
+					return absenceTimeDTO;
+				}).collect(Collectors.toList());
+				
 				resultMap.put(key1, absenceTimeList);
 			});
 			
