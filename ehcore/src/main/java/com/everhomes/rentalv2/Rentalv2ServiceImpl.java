@@ -4371,7 +4371,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				start.setTime(new Date(cmd.getBeginDate()));
 				end.setTime(new Date(cmd.getEndDate()));
 				
-				while (start.before(end)) {
+				for (;!start.after(end);start.add(Calendar.DAY_OF_MONTH, 1)) {
 					Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 					Integer monthDay = start.get(Calendar.DAY_OF_MONTH);
 					//按周循环的,如果不对就继续循环	
