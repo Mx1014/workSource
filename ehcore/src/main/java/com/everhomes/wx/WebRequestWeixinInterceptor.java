@@ -93,7 +93,7 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
                 String wxAuthCallbackUrl = configurationProvider.getValue(namespaceId, "wx.auth.callback.url", WX_AUTH_CALLBACK_URL);
                 String redirectUri =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
 
-                String appId = "wx58052b72c7579016";
+                String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
                 String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
                         + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
                         URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
