@@ -1,6 +1,14 @@
 -- effect for linging visitor
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.qr_visitor_cnt', '6', 'effect time for lingling effect');
 
+
+-- 微信link 保修短信接收人调整
+SET @organization_task_target_id = (SELECT MAX(id) FROM `eh_organization_task_targets`);
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',230275,'REPAIRS','push');
+INSERT INTO `eh_organization_task_targets` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`task_type`,`message_type`) VALUES((@organization_task_target_id := @organization_task_target_id + 1),'EhCommunities',240111044331053517,'EhUsers',230275,'REPAIRS','sms');
+-- 微信link 删除短信接收人
+DELETE FROM `eh_organization_task_targets` WHERE `target_type` = 'EhUsers' AND `target_id` = 1002757;
+
 -- 菜单调整 by sfyan 20160919
  SET @menu_scope_id = 1000;
  INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`, `owner_type`, `owner_id`, `apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1),`id`,'EhNamespaces',999993,2 FROM `eh_web_menus` WHERE `id` NOT IN (SELECT `menu_id` FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = 999993);
