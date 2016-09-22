@@ -2,15 +2,20 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
 import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
@@ -19,6 +24,8 @@ import com.everhomes.rest.user.ListSignupActivitiesCommand;
 import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -76,4 +83,9 @@ public interface UserActivityService {
 	UserProfileDTO findUserProfileBySpecialKey(Long userId,String itemName);
 
 	void updateProfileIfNotExist(Long userId, String itemName, Integer itemValue);
+	
+	RequestTemplateDTO getCustomRequestTemplate(@Valid GetCustomRequestTemplateCommand cmd);
+	List<RequestTemplateDTO> getCustomRequestTemplateByNamespace();
+	void addCustomRequest(@Valid AddRequestCommand cmd);
+	List<RequestFieldDTO> getCustomRequestInfo(@Valid GetRequestInfoCommand cmd);
 }

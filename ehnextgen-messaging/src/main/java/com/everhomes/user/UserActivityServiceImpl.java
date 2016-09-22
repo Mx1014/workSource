@@ -61,6 +61,12 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -122,6 +128,7 @@ import com.everhomes.activity.CheckInStatus;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -137,6 +144,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Attachment;
+import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -163,8 +171,11 @@ import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.repeat.RangeDTO;
+import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.BizOrderHolder;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
@@ -172,6 +183,10 @@ import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FieldDTO;
+import com.everhomes.rest.user.FieldTemplateDTO;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
@@ -183,6 +198,8 @@ import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
 import com.everhomes.rest.user.OrderCountDTO;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -1182,4 +1199,84 @@ public class UserActivityServiceImpl implements UserActivityService {
 		}
 		userActivityProvider.updateProfileIfNotExist(userId, itemName, itemValue);
 	}
+
+	@Override
+	public RequestTemplateDTO getCustomRequestTemplate(
+			GetCustomRequestTemplateCommand cmd) {
+		RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(cmd.getTemplateType());
+		if(template != null) {
+			RequestTemplateDTO dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+			List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+			dto.setDtos(fields);
+			
+			return dto;
+		}
+		
+		return null;
+	}
+	
+	private List<FieldDTO> analyzefields(String fieldsJson) {
+		Gson gson = new Gson();
+		FieldTemplateDTO fields = gson.fromJson(fieldsJson, new TypeToken<FieldTemplateDTO>() {}.getType());
+		List<FieldDTO> dto = fields.getFields();
+		return dto;
+	}
+
+	@Override
+	public List<RequestTemplateDTO> getCustomRequestTemplateByNamespace() {
+		List<RequestTemplateDTO> dtos = new ArrayList<RequestTemplateDTO>();
+		List<RequestTemplatesNamespaceMapping> mappings = this.userActivityProvider.getRequestTemplatesNamespaceMappings(UserContext.getCurrentNamespaceId());
+		//配了mapping的从mapping里捞 ，没配的把所有模板都返回
+		if(mappings != null && mappings.size() > 0) {
+			dtos = mappings.stream().map(mapping -> {
+				RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(mapping.getTemplateId());
+				RequestTemplateDTO dto = null;
+				if(template != null) {
+					dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+					List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+					dto.setDtos(fields);
+				}
+				return dto;
+			}).filter(r->r!=null).collect(Collectors.toList());
+		
+		} else {
+			List<RequestTemplates> templates = this.userActivityProvider.listCustomRequestTemplates();
+			if(templates != null && templates.size() > 0) {
+				dtos = templates.stream().map(template -> {
+					RequestTemplateDTO dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+					List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+					dto.setDtos(fields);
+					return dto;
+				}).filter(r->r!=null).collect(Collectors.toList());
+			}
+		}
+		
+		return dtos;
+	}
+
+	@Override
+	public void addCustomRequest(AddRequestCommand cmd) {
+
+		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		handler.addCustomRequest(cmd);
+	}
+
+	@Override
+	public List<RequestFieldDTO> getCustomRequestInfo(GetRequestInfoCommand cmd) {
+		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		
+		List<RequestFieldDTO> dto = handler.getCustomRequestInfo(cmd.getId());
+		return dto;
+	}
+	
+	private CustomRequestHandler getCustomRequestHandler(String templateType) {
+		CustomRequestHandler handler = null;
+        
+        if(!StringUtils.isEmpty(templateType)) {
+            String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + templateType);
+        }
+        
+        return handler;
+    }
 }
