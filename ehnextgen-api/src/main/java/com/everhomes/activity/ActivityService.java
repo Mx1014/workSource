@@ -17,7 +17,9 @@ import com.everhomes.rest.activity.ActivityRejectCommand;
 import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -27,6 +29,7 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
@@ -93,5 +96,9 @@ public interface ActivityService {
     UserVideoPermissionDTO GetVideoPermisionInfo(GetVideoPermisionInfoCommand cmd);
 
     void requestVideoPermission(RequestVideoPermisionCommand cmd);
+
+    ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd);
+
+    ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd);
 
 }

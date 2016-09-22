@@ -66,7 +66,9 @@ import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -76,6 +78,7 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -203,6 +206,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private ActivityVideoProvider activityVideoProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -2179,4 +2185,16 @@ public class ActivityServiceImpl implements ActivityService {
         
         return dto;
 	}
+	
+	@Override
+	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {
+	    ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+	    return ConvertHelper.convert(video, ActivityVideoDTO.class);
+	}
+	
+   @Override
+    public ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd) {
+        ActivityVideo video = new ActivityVideo();
+        return ConvertHelper.convert(video, ActivityVideoDTO.class);
+    }
 }

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -108,6 +109,26 @@ public class ActivityVideoProviderImpl implements ActivityVideoProvider {
         }
 
         return objs;
+    }
+    
+    @Override
+    public ActivityVideo getActivityVideoByActivityId(Long activityId) {
+        ListingLocator locator = new ListingLocator();
+        List<ActivityVideo> videos = this.queryActivityVideos(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                return query;
+            }
+            
+        });
+        
+        if(videos != null && videos.size() > 0) {
+            return videos.get(0);
+        }
+        
+        return null;
     }
 
     private void prepareObj(ActivityVideo obj) {

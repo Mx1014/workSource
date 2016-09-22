@@ -275,7 +275,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("getActivityVideoInfo")
     @RestReturn(value=ActivityVideoDTO.class)
     public RestResponse getActivityVideoInfo(@Valid GetActivityVideoInfoCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(activityService.getActivityVideo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -287,7 +287,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("setActivityVideoInfo")
     @RestReturn(value=ActivityVideoDTO.class)
     public RestResponse setActivityVideoInfo(@Valid SetActivityVideoInfoCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(activityService.setActivityVideo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

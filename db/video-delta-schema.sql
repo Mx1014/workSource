@@ -4,7 +4,8 @@
 DROP TABLE IF EXISTS `eh_activity_video`;
 CREATE TABLE `eh_activity_video` (
   `id` BIGINT NOT NULL,
-  `video_state` TINYINT NOT NULL DEFAULT 0 COMMENT '0:UN_READY, 1:DEBUG, 2:LIVE, 3:RECORDING, 4:INVALID',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `video_state` TINYINT NOT NULL DEFAULT 0 COMMENT '0:UN_READY, 1:DEBUG, 2:LIVE, 3:RECORDING, 4:EXCEPTION, 5:INVALID',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'activity',
   `owner_id` BIGINT NOT NULL DEFAULT 0 ,
   `creator_uid` BIGINT NOT NULL DEFAULT 0 ,
@@ -34,6 +35,7 @@ ALTER TABLE `eh_activities` ADD COLUMN `video_url` VARCHAR(128) COMMENT 'url of 
 DROP TABLE IF EXISTS `eh_yzb_devices`;
 CREATE TABLE `eh_yzb_devices` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `device_id` VARCHAR(64) NOT NULL COMMENT 'device_id of yzb',
   `room_id` VARCHAR(64) NOT NULL COMMENT 'room_id of this devices',
   `relative_id` BIGINT NOT NULL COMMENT 'activity_id',

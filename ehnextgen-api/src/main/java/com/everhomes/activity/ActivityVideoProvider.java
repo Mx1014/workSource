@@ -18,4 +18,6 @@ public interface ActivityVideoProvider {
     List<ActivityVideo> queryActivityVideos(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback);
 
+    ActivityVideo getActivityVideoByActivityId(Long activityId);
+
 }
