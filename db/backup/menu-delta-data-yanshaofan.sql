@@ -1319,4 +1319,13 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),730,59400,'门禁
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),560,56230,'会议官网',1,1,'查看会议官网',641);
 
+-- 新增车辆管理菜单   by xq.tian  20160920
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (37000,'车辆管理',30000,null,null,0,2,'/30000/37000','park',370);
 
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (420,0,'车辆管理','车辆管理',null);
+
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),420,37000,'车辆管理',1,1,'车辆管理  全部权限',370);

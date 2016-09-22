@@ -163,12 +163,12 @@ public interface PropertyMgrService {
     /**
      * 修改业主信息
      */
-	OrganizationOwnerDTO updateOrganizationOwner(CreateOrUpdateOrganizationOwnerCommand cmd);
+	OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd);
 
     /**
      * 创建业主
      */
-	OrganizationOwnerDTO createOrganizationOwner(CreateOrUpdateOrganizationOwnerCommand cmd);
+	OrganizationOwnerDTO createOrganizationOwner(CreateOrganizationOwnerCommand cmd);
 
     /**
      * 删除业主的的活动行为记录
@@ -269,7 +269,7 @@ public interface PropertyMgrService {
      * @param cmd
      * @return
      */
-    OrganizationOwnerCarDTO createOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd);
+    OrganizationOwnerCarDTO createOrganizationOwnerCar(CreateOrganizationOwnerCarCommand cmd);
 
     /**
      * 删除车辆
@@ -329,7 +329,7 @@ public interface PropertyMgrService {
      * @param cmd
      * @return
      */
-    OrganizationOwnerCarDTO updateOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd);
+    OrganizationOwnerCarDTO updateOrganizationOwnerCar(UpdateOrganizationOwnerCarCommand cmd);
 
     /**
      * 上传业主附件
@@ -378,4 +378,21 @@ public interface PropertyMgrService {
      * @return
      */
     OrganizationOwnerDTO addOrganizationOwnerCarUser(AddOrganizationOwnerCarUserCommand cmd);
+
+    /**
+     * 查询一个楼栋门牌下的所有车辆信息
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerCarDTO> listOrganizationOwnerCarsByAddress(ListOrganizationOwnerCarsByAddressCommand cmd);
+
+    /**
+     * 同步业主索引
+     */
+    void syncOwnerIndex();
+
+    /**
+     * 同步车辆索引
+     */
+    void syncOwnerCarIndex();
 }

@@ -10,14 +10,14 @@ package com.everhomes.rest.organization.pm;
 public class ListOrganizationOwnerStatisticDTO {
 
     private String first;
-    private String second;
+    private Integer second;
     private String third;
 
-    public String getSecond() {
+    public Integer getSecond() {
         return second;
     }
 
-    public void setSecond(String second) {
+    public void setSecond(Integer second) {
         this.second = second;
     }
 

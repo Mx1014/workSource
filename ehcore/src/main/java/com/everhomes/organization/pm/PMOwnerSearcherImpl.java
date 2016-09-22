@@ -65,25 +65,19 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	@Override
 	public void feedDoc(CommunityPmOwner owner) {
 		XContentBuilder source = createDoc(owner);
-        
         feedDoc(owner.getId().toString(), source);
 	}
 
 	@Override
 	public void syncFromDb() {
         this.deleteAll();
-        
         List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwners(null, null);
-        
         if(owners.size() > 0) {
             this.bulkUpdate(owners);
         }
-        
         this.optimize(1);
         this.refresh();
-        
         LOGGER.info("sync for organization owner ok");
-
 	}
 
 	@Override
@@ -115,10 +109,11 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         }
         
         qb = QueryBuilders.filteredQuery(qb, fb);
-        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
-        builder.setQuery(qb);
-        
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH)
+                .setFrom(anchor.intValue() * pageSize)
+                .setSize(pageSize + 1)
+                .setQuery(qb);
+
         SearchResponse rsp = builder.execute().actionGet();
 
         ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();

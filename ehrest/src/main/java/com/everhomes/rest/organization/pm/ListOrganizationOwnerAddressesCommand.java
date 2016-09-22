@@ -9,10 +9,9 @@ import javax.validation.constraints.NotNull;
  *  </ul>
  */
 public class ListOrganizationOwnerAddressesCommand {
-    @NotNull
-    private Long organizationId;
-    @NotNull
-    private Long ownerId;
+
+    @NotNull private Long ownerId;
+    @NotNull private Long organizationId;
 
     public Long getOrganizationId() {
         return organizationId;
