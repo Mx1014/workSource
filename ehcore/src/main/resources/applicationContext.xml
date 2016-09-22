@@ -18,6 +18,10 @@
             <bean class="com.everhomes.wx.WebRequestWeixinInterceptor" />
         </mvc:interceptor>
         <mvc:interceptor>
+            <mvc:mapping path="/**/wxindex.html" />
+            <bean class="com.everhomes.wx.WebRequestWeixinInterceptor" />
+        </mvc:interceptor>
+        <mvc:interceptor>
             <mvc:mapping path="/**" />
             <bean class="com.everhomes.controller.WebRequestInterceptor" />
         </mvc:interceptor>
