@@ -87,4 +87,13 @@ public interface UserProvider {
 	 * @return
 	 */
     List<AclinkUser> searchDoorUsers(ListAclinkUserCommand cmd, CrossShardListingLocator locator, int pageSize);
+    
+    /**
+     * 有些用户来源于第三方（比如华为、微信等），这些用户没有密码等，是使用namespace_id、namespace_user_token、namespace_user_type来区分
+     * @param namespaceId 域空间
+     * @param userType 域空间下用户类型
+     * @param userToken 第三方系统的用户标识
+     * @return
+     */
+    List<User> findThirdparkUserByTokenAndType(Integer namespaceId, String userType, String userToken);
 }
