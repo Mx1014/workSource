@@ -12,10 +12,9 @@ import javax.validation.constraints.NotNull;
  * </ul>
  */
 public class DeleteOrganizationOwnerCommand {
-    @NotNull
-    private Long id;
-    @NotNull
-    private Long organizationId;
+
+    @NotNull private Long id;
+    @NotNull private Long organizationId;
 
     public DeleteOrganizationOwnerCommand() {
     }

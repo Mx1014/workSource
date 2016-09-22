@@ -79,11 +79,10 @@ public class OrganizationOwnerCarSearcherImpl extends AbstractElasticSearch impl
 	@Override
 	public void syncFromDb() {
         this.deleteAll();
-        /*List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwners(null, null);
-
-        if(owners.size() > 0) {
-            this.bulkUpdate(owners);
-        }*/
+        List<OrganizationOwnerCar> cars = propertyMgrProvider.listOrganizationOwnerCarsByIds(null);
+        if(cars.size() > 0) {
+            this.bulkUpdate(cars);
+        }
         this.optimize(1);
         this.refresh();
         LOGGER.info("Sync for organization owner car index OK");

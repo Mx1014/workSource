@@ -28,6 +28,17 @@ public class ExportOrganizationOwnerTest extends BaseLoginAuthTestCase {
         RestResponseBase resp = httpClientService.restPost(api, cmd, RestResponseBase.class);
     }
 
+    @Test
+    public void syncIndex() throws IOException {
+        logon();
+        String api = "/pm/syncOwnerCarIndex";
+        ImportOrganizationsOwnersCommand cmd = new ImportOrganizationsOwnersCommand();
+        cmd.setOrganizationId(1000001L);
+        cmd.setCommunityId(24206890946790405L);
+
+        RestResponseBase resp = httpClientService.restPost(api, cmd, RestResponseBase.class);
+    }
+
     private void logon() {
         Integer namespaceId = 0;
         String userIdentifier = "12900000001";

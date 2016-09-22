@@ -1,6 +1,6 @@
 package com.everhomes.test.junit.organization.pm;
 
-import com.everhomes.rest.organization.pm.CreateOrUpdateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
@@ -21,7 +21,7 @@ public class UpdateOrganizationOwnerTest extends BaseLoginAuthTestCase {
     public void testUpdateOrganizationOwner() {
         logon();
         String api = "/pm/updateOrganizationOwner";
-        CreateOrUpdateOrganizationOwnerCommand cmd = new CreateOrUpdateOrganizationOwnerCommand();
+        UpdateOrganizationOwnerCommand cmd = new UpdateOrganizationOwnerCommand();
         cmd.setOrganizationId(1000001L);
         cmd.setId(1L);
         String idCardNumber = "654225199222222220";

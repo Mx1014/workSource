@@ -38,19 +38,19 @@ public class ListOrganizationOwnerStatisticByAgeTest extends BaseLoginAuthTestCa
 
         assertEquals(response.getResponse().getMale().get(0).getFirst(), "0-10");
         assertEquals(response.getResponse().getMale().get(0).getSecond(), "2");
-        assertEquals(response.getResponse().getMale().get(0).getThird(), "50%");
+        assertEquals(response.getResponse().getMale().get(0).getThird(), "50");
 
         assertEquals(response.getResponse().getMale().get(1).getFirst(), "21-30");
         assertEquals(response.getResponse().getMale().get(1).getSecond(), "1");
-        assertEquals(response.getResponse().getMale().get(1).getThird(), "25%");
+        assertEquals(response.getResponse().getMale().get(1).getThird(), "25");
 
         assertEquals(response.getResponse().getMale().get(2).getFirst(), "31-40");
         assertEquals(response.getResponse().getMale().get(2).getSecond(), "1");
-        assertEquals(response.getResponse().getMale().get(2).getThird(), "25%");
+        assertEquals(response.getResponse().getMale().get(2).getThird(), "25");
 
         assertEquals(response.getResponse().getFemale().get(0).getFirst(), "31-40");
         assertEquals(response.getResponse().getFemale().get(0).getSecond(), "2");
-        assertEquals(response.getResponse().getFemale().get(0).getThird(), "100%");
+        assertEquals(response.getResponse().getFemale().get(0).getThird(), "100");
     }
 
     private void logon() {
