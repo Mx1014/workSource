@@ -887,6 +887,21 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhApprovalOpRequests.class, Tables.EH_APPROVAL_OP_REQUESTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_APPROVAL_OP_REQUESTS.ID.max()).from(Tables.EH_APPROVAL_OP_REQUESTS).fetchOne().value1();
         });
+        syncTableSequence(null, EhRequestTemplates.class, Tables.EH_REQUEST_TEMPLATES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REQUEST_TEMPLATES.ID.max()).from(Tables.EH_REQUEST_TEMPLATES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRequestTemplatesNamespaceMapping.class, Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING.ID.max()).from(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRequestAttachments.class, Tables.EH_REQUEST_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REQUEST_ATTACHMENTS.ID.max()).from(Tables.EH_REQUEST_ATTACHMENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceRequests.class, Tables.EH_SERVICE_ALLIANCE_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceNotifyTargets.class, Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

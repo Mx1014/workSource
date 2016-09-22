@@ -220,9 +220,13 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME,
 					"Invalid parameters: cmd="+cmd);
 		}
+		if (cmd.getCategoryName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
+					"length of name cannot be greater than 8 words, name="+cmd.getCategoryName());
+		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkApprovalType(cmd.getApprovalType());
-		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryName());
+		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryName(), null);
 		
 		ApprovalCategory category = ConvertHelper.convert(cmd, ApprovalCategory.class);
 		category.setApprovalType(cmd.getApprovalType());
@@ -237,9 +241,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void checkApprovalCategoryNameDuplication(Integer namespaceId, String ownerType, Long ownerId, Byte approvalType,
-			String categoryName) {
+			String categoryName, Long id) {
 		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryByName(namespaceId, ownerType, ownerId, approvalType, categoryName);
-		if (category != null) {
+		if (category != null && (id == null || id.longValue() != category.getId().longValue())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EXIST_NAME,
 					"exist category name: categoryName="+categoryName);
 		}
@@ -259,8 +263,13 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id and categoryName cannot be empty");
 		}
+		if (cmd.getCategoryName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
+					"length of name cannot be greater than 8 words, name="+cmd.getCategoryName());
+		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkApprovalType(cmd.getApprovalType());
+		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryName(), cmd.getId());
 		
 		Tuple<ApprovalCategory, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode()+cmd.getId()).enter(()->{
 			ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
@@ -332,7 +341,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalFlowNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkApprovalFlowNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName(), null);
 		
 		ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class);
 		approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
@@ -345,9 +354,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return new CreateApprovalFlowInfoResponse(ConvertHelper.convert(approvalFlow, BriefApprovalFlowDTO.class));
 	}
 
-	private void checkApprovalFlowNameDuplication(Integer namespaceId, String ownerType, Long ownerId, String name) {
+	private void checkApprovalFlowNameDuplication(Integer namespaceId, String ownerType, Long ownerId, String name, Long id) {
 		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowByName(namespaceId, ownerType, ownerId, name);
-		if (approvalFlow != null) {
+		if (approvalFlow != null && (id == null || id.longValue() != approvalFlow.getId().longValue())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_NAME,
 					"exist name, name="+name);
 		}
@@ -365,7 +374,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 					"length of name cannot be greater than 8 words, name="+cmd.getName());
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalFlowNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		checkApprovalFlowNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName(), cmd.getId());
 		
 		Tuple<ApprovalFlow, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_FLOW.getCode()+cmd.getId()).enter(()->{
 			ApprovalFlow approvalFlow = checkApprovalFlowExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -608,7 +617,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private void checkApprovalRuleFlowMapExist(Long flowId) {
 		ApprovalRuleFlowMap approvalRuleFlowMap= approvalRuleFlowMapProvider.findOneApprovalRuleFlowMapByFlowId(flowId);
 		if (approvalRuleFlowMap != null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_APPROVAL_RULE_WHEN_DELETE,
 					"This flow has related to some rules, so you cannot delete it: flowId="+flowId);
 		}
 	}
@@ -802,7 +811,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (approvalRule == null || approvalRule.getNamespaceId().intValue() != namespaceId.intValue()
 				|| !ownerType.equals(approvalRule.getOwnerType()) || approvalRule.getOwnerId().longValue() != ownerId.longValue()
 				|| approvalRule.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_APPROVAL_RULE_WHEN_DELETE,
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"not exist approval rule: ruleId="+id+", namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
 		}
 		return approvalRule;
@@ -1678,7 +1687,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (sb.length() == 0) {
 			return "";
 		}
-		return sb.substring(0,sb.length()-2);
+		return sb.substring(0,sb.length()-1);
 	}
 	
 	

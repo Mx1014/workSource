@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.UserFavoriteDTO;
 
 public interface UserActivityProvider {
@@ -88,4 +89,10 @@ public interface UserActivityProvider {
 	
 	void createSearchTypes(SearchTypes searchType);
 	void deleteSearchTypes(Long id);
+    RequestTemplates getCustomRequestTemplate(String templateType);
+    RequestTemplates getCustomRequestTemplate(Long id);
+    List<RequestTemplatesNamespaceMapping> getRequestTemplatesNamespaceMappings(Integer namespaceId);
+    List<RequestTemplates> listCustomRequestTemplates();
+    List<RequestAttachments> listRequestAttachments(String ownerType, Long ownerId);
+    void createRequestAttachments(RequestAttachments attachment);
 }

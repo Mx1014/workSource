@@ -29,6 +29,8 @@ import com.everhomes.util.StringHelper;
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
  *  <li>type:类型  </li>
+ *  <li>email: 邮箱地址</li>
+ *  <li>templateType : 模板类型</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -73,6 +75,10 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String discountDesc;
 	
 	private Long type;
+	
+	private String templateType;
+	
+	private String email;
 	
 	public Long getId() {
 		return id;
@@ -232,6 +238,22 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setType(Long type) {
 		this.type = type;
+	}
+
+	public String getTemplateType() {
+		return templateType;
+	}
+
+	public void setTemplateType(String templateType) {
+		this.templateType = templateType;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

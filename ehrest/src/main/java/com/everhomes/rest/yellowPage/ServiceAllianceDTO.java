@@ -32,6 +32,10 @@ import com.everhomes.util.StringHelper;
  *  <li>serviceUrl: 服务链接</li>
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
+ *  <li>templateType : 模板类型</li>
+ *  <li>templateName: 模板名称</li>
+ *  <li>buttonTitle: 按钮名称</li>
+ *  <li>email: 邮箱地址</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -83,6 +87,15 @@ public class ServiceAllianceDTO {
 	
 	private Byte     status;
 	private Integer  defaultOrder;
+	
+	private String templateType;
+	
+	private String templateName;
+	
+	private String buttonTitle;
+	
+	private String email;
+	
 	public Long getId() {
 		return id;
 	}
@@ -230,6 +243,30 @@ public class ServiceAllianceDTO {
 		this.defaultOrder = defaultOrder;
 	}
 	
+	public String getTemplateType() {
+		return templateType;
+	}
+	public void setTemplateType(String templateType) {
+		this.templateType = templateType;
+	}
+	public String getButtonTitle() {
+		return buttonTitle;
+	}
+	public void setButtonTitle(String buttonTitle) {
+		this.buttonTitle = buttonTitle;
+	}
+	public String getTemplateName() {
+		return templateName;
+	}
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
