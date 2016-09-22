@@ -1267,7 +1267,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			}
 			
 			//3. 处理日志
-			createApprovalOpRequest(userId, approvalRequest.getId(), cmd.getReason());
+			createApprovalOpRequest(userId, approvalRequest, cmd.getReason());
 			
 			//4. 后置处理器，处理时间，回调考勤接口更新打卡相关接口
 			handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
@@ -1282,13 +1282,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return new CreateApprovalRequestBySceneResponse(handler.processBriefApprovalRequest(result));
 	}
 
-	private void createApprovalOpRequest(Long userId, Long requestId, String processMessage) {
+	private void createApprovalOpRequest(Long userId, ApprovalRequest approvalRequest, String processMessage) {
 		ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();
-		approvalOpRequest.setRequestId(requestId);
+		approvalOpRequest.setRequestId(approvalRequest.getId());
 		approvalOpRequest.setProcessMessage(processMessage);
 		approvalOpRequest.setOperatorUid(userId);
 		approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		approvalOpRequest.setApprovalStatus(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+		approvalOpRequest.setFlowId(approvalRequest.getFlowId());
+		approvalOpRequest.setLevel(approvalRequest.getCurrentLevel());
 		approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest);
 	}
 
@@ -1414,6 +1416,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 					approvalOpRequest.setOperatorUid(userId);
 					approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					approvalOpRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+					approvalOpRequest.setFlowId(approvalRequest.getFlowId());
+					approvalOpRequest.setLevel(approvalRequest.getCurrentLevel());
 					approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest);
 					return null;
 				});
