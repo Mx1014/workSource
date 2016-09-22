@@ -546,7 +546,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
 		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
 		smsProvider.addToTupleList(variables, "categoryName", categoryName);
-		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PUSH_MSG_CODE, user.getLocale(), variables);
+		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
 
 		//elasticsearch更新
 		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
@@ -761,7 +761,7 @@ public class PmTaskServiceImpl implements PmTaskService {
         		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
         		smsProvider.addToTupleList(variables, "categoryName", categoryName);
         		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
-        				SmsTemplateCode.PM_TASK_PUSH_MSG_CODE, user.getLocale(), variables);
+        				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
         	}
         	
     	}
