@@ -67,6 +67,7 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.ActivityVideoRoomType;
 import com.everhomes.rest.activity.GeoLocation;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
@@ -79,6 +80,8 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.VideoManufacturerType;
+import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -2188,13 +2191,23 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {
-	    ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+	    //TODO request other to get vid
+	    User user = UserContext.current().getUser();
+	    ActivityVideo video = new ActivityVideo();
+	    video.setRoomId(cmd.getRoomId());
+	    video.setCreatorUid(user.getId());
+	    video.setManufacturerType(VideoManufacturerType.YZB.toString());
+	    video.setRoomType(ActivityVideoRoomType.YZB.toString());
+	    video.setStartTime(System.currentTimeMillis());
+	    video.setIntegralTag1(0l);
+	    video.setVideoState(VideoState.LIVE.getCode());
+	    activityVideoProvider.createActivityVideo(video);
 	    return ConvertHelper.convert(video, ActivityVideoDTO.class);
 	}
 	
    @Override
     public ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd) {
-        ActivityVideo video = new ActivityVideo();
-        return ConvertHelper.convert(video, ActivityVideoDTO.class);
+       ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+       return ConvertHelper.convert(video, ActivityVideoDTO.class);
     }
 }
