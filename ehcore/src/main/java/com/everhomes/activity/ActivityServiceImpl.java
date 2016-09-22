@@ -212,6 +212,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private ActivityVideoProvider activityVideoProvider;
+    
+    @Autowired
+    private YzbDeviceProvider yzbDeviceProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
