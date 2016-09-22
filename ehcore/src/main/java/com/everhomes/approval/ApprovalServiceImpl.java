@@ -220,6 +220,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME,
 					"Invalid parameters: cmd="+cmd);
 		}
+		if (cmd.getCategoryName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
+					"length of name cannot be greater than 8 words, name="+cmd.getCategoryName());
+		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkApprovalType(cmd.getApprovalType());
 		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryName(), null);
@@ -258,6 +262,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id and categoryName cannot be empty");
+		}
+		if (cmd.getCategoryName().length() > 8) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
+					"length of name cannot be greater than 8 words, name="+cmd.getCategoryName());
 		}
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkApprovalType(cmd.getApprovalType());
