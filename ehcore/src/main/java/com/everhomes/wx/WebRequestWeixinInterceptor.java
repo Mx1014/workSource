@@ -159,18 +159,19 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
         
         // 使用临时code从微信中换取accessToken
         String accessTokenUri = String.format(WX_ACCESS_TOKEN_URL, appId, secret, code);
-        String accessTokenJson = httpGet(accessTokenUri);
+        String accessTokenUriWithoutSecret = accessTokenUri.replaceAll(secret, "****");
+        String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
         WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
         if (accessToken.getErrcode() != null) {
             LOGGER.error("Failed to get access token from webchat, appId={}, accessToken={}, accessTokenUri={}", 
-                appId, accessTokenJson, accessTokenUri);
+                appId, accessTokenJson, accessTokenUriWithoutSecret);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Failed to get access token from webchat");
         }
         
         // 获取用户信息
         String userInfoUri = String.format(WX_USER_INFO_URL, accessToken.getAccess_token(), accessToken.getOpenid());
-        String userInfoJson = httpGet(userInfoUri);
+        String userInfoJson = httpGet(userInfoUri, userInfoUri);
         WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
         if (userInfo.getErrcode()!=null) {
             LOGGER.error("Failed to get user information from webchat, appId={}, userInfo={}, userinfoUri={}", appId, userInfoJson, userInfoUri);
@@ -192,7 +193,7 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
         userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
     }
     
-    private String httpGet(String url) {
+    private String httpGet(String url, String safeUrl) {
         CloseableHttpClient httpclient = null;
         
         CloseableHttpResponse response = null;
@@ -204,18 +205,18 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
 
             int status = response.getStatusLine().getStatusCode();
             if(status != 200){
-                LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
+                LOGGER.error("Failed to get the http result, url={}, status={}", safeUrl, response.getStatusLine());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                         "Failed to get the http result");
             } else {
                 HttpEntity resEntity = response.getEntity();
                 result = EntityUtils.toString(resEntity);
                 if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Get http result, url={}, result={}", url, result);
+                    LOGGER.debug("Get http result, url={}, result={}", safeUrl, result);
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to get the http result, url={}", url, e);
+            LOGGER.error("Failed to get the http result, url={}", safeUrl, e);
         } finally {
             if(response != null) {
                 try {

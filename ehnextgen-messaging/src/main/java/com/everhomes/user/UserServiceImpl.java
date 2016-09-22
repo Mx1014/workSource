@@ -3122,24 +3122,17 @@ public class UserServiceImpl implements UserService {
     }
     
     public UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response) {
-        User user = null;
-//        user = this.userProvider.findUserByAccountName(userIdentifierToken);
-//        if(user == null) {
-//            UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
-//            if(userIdentifier == null) {
-//                LOGGER.warn("Unable to find identifier record of " + userIdentifierToken);
-//                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-//            } else {
-//                user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
-//                if(user == null) {
-//                    LOGGER.error("Unable to find owner user of identifier record: " + userIdentifierToken);
-//                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
-//                }
-//            }
-//        }
+        List<User> userList = this.userProvider.findThirdparkUserByTokenAndType(namespaceId, userType, userToken);
+        if(userList == null || userList.size() == 0) {
+            LOGGER.error("Unable to find the thridpark user, namespaceId={}, userType={}, userToken={}", namespaceId, userType, userToken);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
 
-        if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
+        User user = userList.get(0);
+        if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, 
+                "User account has not been activated yet");
+        }
 
         UserLogin login = createLogin(namespaceId, user, null, null);
         login.setStatus(UserLoginStatus.LOGGED_IN);
