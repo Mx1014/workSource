@@ -609,7 +609,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private void checkApprovalRuleFlowMapExist(Long flowId) {
 		ApprovalRuleFlowMap approvalRuleFlowMap= approvalRuleFlowMapProvider.findOneApprovalRuleFlowMapByFlowId(flowId);
 		if (approvalRuleFlowMap != null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_APPROVAL_RULE_WHEN_DELETE,
 					"This flow has related to some rules, so you cannot delete it: flowId="+flowId);
 		}
 	}
@@ -803,7 +803,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (approvalRule == null || approvalRule.getNamespaceId().intValue() != namespaceId.intValue()
 				|| !ownerType.equals(approvalRule.getOwnerType()) || approvalRule.getOwnerId().longValue() != ownerId.longValue()
 				|| approvalRule.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_APPROVAL_RULE_WHEN_DELETE,
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"not exist approval rule: ruleId="+id+", namespaceId="+namespaceId+", ownerType="+ownerType+", ownerId="+ownerId);
 		}
 		return approvalRule;
