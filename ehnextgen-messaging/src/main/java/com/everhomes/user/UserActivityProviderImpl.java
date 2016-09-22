@@ -700,7 +700,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 			return null;
 
 		
-		return result;
+		return result.get(0);
 	}
 
 	@Override
