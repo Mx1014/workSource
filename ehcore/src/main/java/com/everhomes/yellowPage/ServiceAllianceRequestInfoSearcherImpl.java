@@ -178,9 +178,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	private XContentBuilder createDoc(ServiceAllianceRequests request){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("type", request.getCategoryId());
+            b.field("type", request.getType());
             b.field("ownerType", request.getOwnerType());
-            b.field("ownerId", request.getCategoryId());
+            b.field("ownerId", request.getOwnerId());
             b.field("creatorName", request.getCreatorName());
             b.field("creatorMobile", request.getCreatorMobile());
             b.field("createDate", new Date(request.getCreateTime().getTime()));
