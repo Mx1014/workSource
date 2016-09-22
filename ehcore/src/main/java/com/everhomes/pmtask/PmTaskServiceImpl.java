@@ -1109,7 +1109,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 			
 			for(PmTaskStatistics p: list){
-				Long id = p.getId();
+				Long id = p.getOwnerId();
 				PmTaskStatistics pts = null;
 				if(tempMap.containsKey(id)){
 					pts = tempMap.get(id);
