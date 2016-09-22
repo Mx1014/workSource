@@ -67,24 +67,17 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
         }
         
         LoginToken loginToken = userService.getLoginToken(request);
+        HttpSession session = request.getSession();
         if(!userService.isValid(loginToken)) {
             if(isWxAuthCallbackRequest(request)) {
-                HttpSession session = request.getSession();
                 Object ns = session.getAttribute(KEY_NAMESPACE);
                 Integer namespaceId = parseNamespace(ns);
                 
                 // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
                 processUserInfo(namespaceId, request, response);
-                
-                // 登录成功则跳转到原来访问的链接
-                String sourceUrl = (String) session.getAttribute(KEY_SOURCE_URL);
-
-                response.sendRedirect(sourceUrl);
-                return false; 
             } else {
                 // 没有登录，则请求微信授权
                 String sourceUrl = request.getParameter(KEY_SOURCE_URL);
-                HttpSession session = request.getSession();
                 session.setAttribute(KEY_SOURCE_URL, sourceUrl);
                 String sessionId = session.getId();
                 String ns = request.getParameter(KEY_NAMESPACE);
@@ -105,13 +98,14 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
                 response.sendRedirect(authorizeUri);
                 return false;
             }
-        }
+        } 
         
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Pre handle weixin request, loginToken={}", loginToken);
-        }
+        // 登录成功则跳转到原来访问的链接
+        String sourceUrl = (String) session.getAttribute(KEY_SOURCE_URL);
+        response.sendRedirect(sourceUrl);
+        LOGGER.info("Pre handle weixin request, loginToken={}, sourceUrl={}", loginToken, sourceUrl);
         
-        return true;
+        return false;
     }
 
     @Override
