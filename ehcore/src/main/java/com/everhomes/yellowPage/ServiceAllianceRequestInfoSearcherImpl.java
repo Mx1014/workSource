@@ -141,12 +141,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         
         RangeFilterBuilder rf = new RangeFilterBuilder("createDate");
         if(cmd.getStartDay() != null) {
-        	rf.gt(cmd.getStartDay());
+        	rf.gte(cmd.getStartDay());
         	fb = FilterBuilders.andFilter(fb, rf); 
         }
         
         if(cmd.getEndDay() != null) {
-        	rf.lt(cmd.getEndDay());
+        	rf.lte(cmd.getEndDay());
         	fb = FilterBuilders.andFilter(fb, rf); 
         }
         
