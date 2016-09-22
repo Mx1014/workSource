@@ -2,6 +2,18 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `name`, `content_type`, `st
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('news.url', '/park-news/index.html/#/news/share/', 'news page url', 0, NULL);
 
 
+-- merge from sa4.0 by xiongying
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) 
+    VALUES( 'serviceAlliance.request.notification', 1, 'zh_CN', '提交申请通知给管理员', '您收到一条“${categoryName}”的申请 \n 预订人：“${creatorName}” \n 手机号：“${creatorMobile}” \n 公司名称：“${creatorOrganization}” \n 备注：“${note}” \n 您可以登录管理后台查看详情');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) 
+    VALUES( 'serviceAlliance.request.notification', 2, 'zh_CN', '提交申请通知给机构', '您收到一条“${categoryName}”的申请 \n 预订人：“${creatorName}” \n 手机号：“${creatorMobile}” \n 公司名称：“${creatorOrganization} \n 备注：“${note}”');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) 
+    VALUES( 'serviceAlliance.request.notification', 3, 'zh_CN', '邮件主题', '您收到一条“${categoryName}”的申请');
+    
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`) 
+    VALUES ('1', 'ServiceAlliance', 'BP融资模板', '提交BP', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"林龙","requiredFlag":"0"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"13163366563","requiredFlag":"0"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"左邻","requiredFlag":"0"},{"fieldName":"cityName","fieldDisplayName":"企业城市","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所在城市","requiredFlag":"0"},{"fieldName":"industry","fieldDisplayName":"企业行业","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所属行业","requiredFlag":"0"},{"fieldName":"financingStage","fieldDisplayName":"融资阶段","fieldType":"string","fieldContentType":"text","fieldDesc":"融资阶段","requiredFlag":"0"},{"fieldName":"financingAmount","fieldDisplayName":"融资金额","fieldType":"decimal","fieldContentType":"text","fieldDesc":"融资金额（万元）","requiredFlag":"0"},{"fieldName":"transferShares","fieldDisplayName":"出让股份","fieldType":"number","fieldContentType":"text","fieldDesc":"出让股份 %","requiredFlag":"0"},{"fieldName":"projectDesc","fieldDisplayName":"项目描述","fieldType":"string","fieldContentType":"text","fieldDesc":"项目描述","requiredFlag":"0"},{"fieldName":"attachments","fieldDisplayName":"附件图片","fieldType":"blob","fieldContentType":"image","fieldDesc":"","requiredFlag":"0"},{"fieldName":"attachments","fieldDisplayName":"商业计划书","fieldType":"blob","fieldContentType":"file","fieldDesc":"","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP());
+
+
 -- 插入审批类型对应的汉字文本，add by tt, 20160901
 SET @max_id = (SELECT max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@max_id:=@max_id+1, 'approval.type', '1', 'zh_CN', '请假');
@@ -43,3 +55,4 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.notification', 22, 'zh_CN', '异常申请到下一级别', '${creatorName}提交了异常申请，${approver}已同意，请及时到后台进行处理。', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.notification', 23, 'zh_CN', '异常申请通过', '您对${punchDate}提交的异常申请已通过审批。', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.notification', 24, 'zh_CN', '异常申请驳回', '您对${punchDate}提交的异常申请被${approver}驳回，理由是：${reason}。', 0);
+
