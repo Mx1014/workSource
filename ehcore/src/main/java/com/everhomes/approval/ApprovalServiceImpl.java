@@ -1522,6 +1522,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			checkCategoryExist(cmd.getCategoryId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		}
 		
+		//根据用户关键字查询匹配的用户id
 		List<Long> userIdList = null;
 		if (StringUtils.isNotBlank(cmd.getNickName())) {
 			userIdList = getMatchedUser(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getNickName());
@@ -1530,20 +1531,20 @@ public class ApprovalServiceImpl implements ApprovalService {
 			}
 		}
 		
+		//查询当前用户具有的哪些审批流程及审批级别
+		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByTarget(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalTargetType.USER.getCode(), userId);
+		if (ListUtils.isEmpty(approvalFlowLevelList)) {
+			return new ListApprovalRequestResponse();
+		}
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		Long nextPageAnchor = null;
 		List<ApprovalRequest> resultList = null;
 		//查询待审批的，根据当前用户拥有的流程及级别来查申请表中nextLevel与之相同的记录
 		if (cmd.getQueryType().byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
-			//查询当前用户具有的哪些审批流程及审批级别
-			List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByTarget(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), ApprovalTargetType.USER.getCode(), userId);
-			if (ListUtils.isEmpty(approvalFlowLevelList)) {
-				return new ListApprovalRequestResponse();
-			}
-			
 			resultList = approvalRequestProvider.listApprovalRequestWaitingForApproving(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), 
-					cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(), cmd.getQueryType(), approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize+1);
+					cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(), approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize+1);
 			
 			if (ListUtils.isNotEmpty(resultList) && resultList.size() > pageSize) {
 				resultList.remove(resultList.size()-1);
@@ -1551,11 +1552,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 				nextPageAnchor = resultList.get(resultList.size()-1).getId();
 			}
 		}else if (cmd.getQueryType().byteValue() == ApprovalQueryType.APPROVED.getCode()) {
-			//查询已审批的，已审批的需要把我所在的流程中其他人审批的也查出来
+			//查询已审批的，已审批的需要把我所在的流程中其他人审批的也查出来，只能从日志表中查询了
+			resultList = approvalRequestProvider.listApprovalRequestApproved(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(), 
+					cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(), approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize+1);
 			
-			
-			//已审批的按最后更新时间排序，所以已审批的只能按照正常的分页
-			nextPageAnchor = (cmd.getPageAnchor() == null?0:cmd.getPageAnchor())+1;
+			if (ListUtils.isNotEmpty(resultList) && resultList.size() > pageSize) {
+				resultList.remove(resultList.size()-1);
+				//已审批的按最后更新时间排序，所以已审批的只能按照正常的分页
+				nextPageAnchor = (cmd.getPageAnchor() == null?0:cmd.getPageAnchor())+1;
+			}
 		}
 		
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
