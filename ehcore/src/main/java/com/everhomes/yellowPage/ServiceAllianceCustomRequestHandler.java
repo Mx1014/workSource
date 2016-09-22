@@ -232,8 +232,6 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceRequests fields) {
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
 		RequestFieldDTO dto = new RequestFieldDTO();
-		
-		
 		dto.setFieldType(FieldType.STRING.getCode());
 		dto.setFieldContentType(FieldContentType.TEXT.getCode());
 		
@@ -241,29 +239,56 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		dto.setFieldName("姓名");
 		list.add(dto);
 		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
 		dto.setFieldValue(fields.getMobile());
 		dto.setFieldName("手机号");
 		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
 		
 		dto.setFieldValue(fields.getOrganizationName());
 		dto.setFieldName("企业名称");
 		list.add(dto);
 		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
 		dto.setFieldValue(fields.getCityName());
 		dto.setFieldName("企业城市");
 		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
 		
 		dto.setFieldValue(fields.getIndustry());
 		dto.setFieldName("企业行业");
 		list.add(dto);
 		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
 		dto.setFieldValue(fields.getProjectDesc());
 		dto.setFieldName("项目描述");
 		list.add(dto);
 		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
 		dto.setFieldValue(fields.getFinancingStage());
 		dto.setFieldName("融资阶段");
 		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
 		
 		dto.setFieldType(FieldType.DECIMAL.getCode());
 		if(fields.getFinancingAmount() != null) {
@@ -272,12 +297,18 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		dto.setFieldName("融资金额");
 		list.add(dto);
 		
+		dto = new RequestFieldDTO();
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+
 		dto.setFieldType(FieldType.NUMBER.getCode());
 		if(fields.getTransferShares() != null) {
 			dto.setFieldValue(fields.getTransferShares().toString());
 		}
 		dto.setFieldName("出让股份");
 		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
 		
 		dto.setFieldType(FieldType.DATETIME.getCode());
 		if(fields.getCreateTime() != null) {
@@ -289,6 +320,10 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		List<RequestAttachments> attachments =  userActivityProvider.listRequestAttachments(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM, fields.getId());
 		if(attachments != null && attachments.size() > 0) {
 			for(RequestAttachments attachment : attachments) {
+				dto = new RequestFieldDTO();
+				dto.setFieldType(FieldType.STRING.getCode());
+				dto.setFieldContentType(FieldContentType.TEXT.getCode());
+				
 				dto.setFieldContentType(attachment.getContentType());
 				dto.setFieldType(FieldType.BLOB.getCode());
 				dto.setFieldName(attachment.getTargetFieldName());
