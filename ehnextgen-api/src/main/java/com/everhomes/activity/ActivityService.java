@@ -27,7 +27,10 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.util.Tuple;
 
 public interface ActivityService {
@@ -86,5 +89,9 @@ public interface ActivityService {
 
 	ListActivitiesReponse listOfficialActivitiesByScene(
 			ListNearbyActivitiesBySceneCommand command);
+
+    UserVideoPermissionDTO GetVideoPermisionInfo(GetVideoPermisionInfoCommand cmd);
+
+    void requestVideoPermission(RequestVideoPermisionCommand cmd);
 
 }

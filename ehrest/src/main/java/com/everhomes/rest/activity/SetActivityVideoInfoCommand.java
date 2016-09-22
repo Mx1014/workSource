@@ -11,20 +11,27 @@ import com.everhomes.util.StringHelper;
  */
 public class SetActivityVideoInfoCommand {
     private Long activityId;
-    private Long channelId;
+    private String roomId;
+    private String vid;
     private Byte isContinue;
 
+    public String getChannelId() {
+        return channelId;
+    }
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
+    public String getVid() {
+        return vid;
+    }
+    public void setVid(String vid) {
+        this.vid = vid;
+    }
     public Long getActivityId() {
         return activityId;
     }
     public void setActivityId(Long activityId) {
         this.activityId = activityId;
-    }
-    public Long getChannelId() {
-        return channelId;
-    }
-    public void setChannelId(Long channelId) {
-        this.channelId = channelId;
     }
     public Byte getIsContinue() {
         return isContinue;

@@ -10,8 +10,8 @@ CREATE TABLE `eh_activity_video` (
   `creator_uid` BIGINT NOT NULL DEFAULT 0 ,
   `start_time` BIGINT NOT NULL DEFAULT 0,
   `end_time` BIGINT NOT NULL DEFAULT 0,
-  `channel_type` VARCHAR(64),
-  `channel_id` VARCHAR(64),
+  `room_type` VARCHAR(64),
+  `room_id` VARCHAR(64),
   `manufacturer_type` VARCHAR(64) COMMENT 'YZB',
   `extra` TEXT,
   `integral_tag1` BIGINT,
@@ -24,6 +24,23 @@ CREATE TABLE `eh_activity_video` (
   `string_tag3` VARCHAR(128),
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_activities` ADD COLUMN `video_url` VARCHAR(128) COMMENT 'url of video support' AFTER `official_flag`;
+
+DROP TABLE IF EXISTS `eh_yzb_devices`;
+CREATE TABLE `eh_yzb_devices` (
+  `id` BIGINT NOT NULL,
+  `device_id` VARCHAR(64) NOT NULL COMMENT 'device_id of yzb',
+  `room_id` VARCHAR(64) NOT NULL COMMENT 'room_id of this devices',
+  `relative_id` BIGINT NOT NULL COMMENT 'activity_id',
+  `relative_type` VARCHAR(64) NOT NULL DEFAULT "activity",
+  `last_vid` VARCHAR(64) COMMENT 'the last vid',
+  `state` TINYINT NOT NULL DEFAULT 0 COMMENT 'the current state of this devices',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'INVALID, VALID',
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)

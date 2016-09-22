@@ -105,6 +105,7 @@ import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteDTO;
@@ -2148,17 +2149,34 @@ public class ActivityServiceImpl implements ActivityService {
 	    cmd.setCommunityId(communityId);
 	}
 	
+	@Override
 	public void requestVideoPermission(RequestVideoPermisionCommand cmd) {
-	    
+        User user = UserContext.current().getUser();
+        UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
+        if(null != profile) {
+            profile.setItemValue(cmd.getVideoToken());
+            userActivityProvider.updateUserProfile(profile);
+        } else {
+            UserProfile p2 = new UserProfile();
+            p2.setItemName(UserProfileContstant.YZB_VIDEO_PERMISION);
+            p2.setItemKind((byte)0);
+            p2.setItemValue(cmd.getVideoToken());
+            p2.setOwnerId(user.getId());
+            userActivityProvider.addUserProfile(p2);
+        }
 	}
 	
-	public String GetVideoPermisionInfo(GetVideoPermisionInfoCommand cmd) {
+	@Override
+	public UserVideoPermissionDTO GetVideoPermisionInfo(GetVideoPermisionInfoCommand cmd) {
+	    UserVideoPermissionDTO dto = new UserVideoPermissionDTO();
 	    User user = UserContext.current().getUser();
 	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
         if(profile == null || null == profile.getItemValue()) {
             return null;
         }
         
-        return profile.getItemValue();
+        dto.setVideoToken(profile.getItemValue());
+        
+        return dto;
 	}
 }

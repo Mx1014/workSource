@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.activity.ActivityService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -257,6 +258,9 @@ public class UserController extends ControllerBase {
 	
 	@Autowired
 	private SceneService sceneService;
+	
+	@Autowired
+    private ActivityService activityService;
 
 	public UserController() {
 	}
@@ -1076,7 +1080,7 @@ public class UserController extends ControllerBase {
     @RequestMapping("getVideoPermision")
     @RestReturn(value = String.class)
     public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermisionInfoCommand cmd) {
-        RestResponse resp = new RestResponse();
+        RestResponse resp = new RestResponse(activityService.GetVideoPermisionInfo(cmd));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
