@@ -30,6 +30,7 @@ import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -75,6 +76,8 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -2144,6 +2147,29 @@ public class ActivityServiceImpl implements ActivityService {
 	    cmd.setOrganizationId(organizationId);
 	    // 补充小区/园区ID，方便后面构建查询条件：既要查本园区的官方活动，又要查对应的管理公司发给所有园区的官方活动 by lqs 20160730
 	    cmd.setCommunityId(communityId);
+	}
+
+	@Override
+	public ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(
+			ListOfficialActivityByNamespaceCommand cmd) {
+		if (cmd.getNamespaceId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameters, cmd="+cmd);
+		}
+		ListPostCommandResponse postResponse = forumService.listOfficialActivityByNamespace(cmd);
+		List<PostDTO> posts = postResponse.getPosts();
+		final List<ActivityDTO> activities = new ArrayList<>();
+		if (posts != null && posts.size() > 0) {
+			posts.forEach(p->{
+				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
+				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
+				activity.setFavoriteFlag(p.getFavoriteFlag());
+				activities.add(activity);
+			});
+		}
+		
+		ListOfficialActivityByNamespaceResponse reponse = new ListOfficialActivityByNamespaceResponse(postResponse.getNextPageAnchor(), activities);
+		return reponse;
 	}
 	
 	

@@ -3,6 +3,7 @@ package com.everhomes.forum;
 
 import java.util.List;
 
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
 import com.everhomes.rest.forum.AssignedScopeDTO;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -109,5 +110,6 @@ public interface ForumService {
     ListPostCommandResponse listNoticeTopic(VisibleRegionType visibleRegionType, List<Long> visibleRegionIds, String publishStatus, Integer pageSize, Long pageAnchor);
     ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd);
     
-    SearchContentsBySceneReponse searchContents(SearchContentsBySceneCommand cmd, SearchContentType contentType); 
+    SearchContentsBySceneReponse searchContents(SearchContentsBySceneCommand cmd, SearchContentType contentType);
+	ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd); 
 }

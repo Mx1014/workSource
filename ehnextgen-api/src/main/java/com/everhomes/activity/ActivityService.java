@@ -26,6 +26,8 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.util.Tuple;
@@ -86,5 +88,7 @@ public interface ActivityService {
 
 	ListActivitiesReponse listOfficialActivitiesByScene(
 			ListNearbyActivitiesBySceneCommand command);
+
+	ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
 
 }
