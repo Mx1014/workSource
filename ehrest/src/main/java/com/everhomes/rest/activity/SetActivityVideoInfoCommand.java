@@ -15,11 +15,11 @@ public class SetActivityVideoInfoCommand {
     private String vid;
     private Byte isContinue;
 
-    public String getChannelId() {
-        return channelId;
+    public String getRoomId() {
+        return roomId;
     }
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
     public String getVid() {
         return vid;

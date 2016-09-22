@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>videoState: UN_READY, DEBUG, LIVE, RECORDING, INVALID </li>
  * <li>startTime: 视频开始时间 </li>
  * <li>endTime: 视频结束时间 </li>
- * <li>channelId: 视频流 ID，或房间号 ID </li>
+ * <li>roomId: 视频流 ID，或房间号 ID </li>
  * <li>manufacturerType: 厂家，暂时不用，默认 YZB（易直播） </li>
  * <li>
  * </ul>
@@ -28,8 +28,8 @@ public class ActivityVideoDTO {
     private Long creatorUid;
     
     private String videoUrl;
-    private String channelId;
-    private String channelType;
+    private String roomId;
+    private String roomType;
     private String manufacturerType;
     private Long startTime;
     private Long endTime;
@@ -52,17 +52,18 @@ public class ActivityVideoDTO {
     public void setOwnerType(Byte ownerType) {
         this.ownerType = ownerType;
     }
-    public String getChannelId() {
-        return channelId;
+
+    public String getRoomId() {
+        return roomId;
     }
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
-    public String getChannelType() {
-        return channelType;
+    public String getRoomType() {
+        return roomType;
     }
-    public void setChannelType(String channelType) {
-        this.channelType = channelType;
+    public void setRoomType(String roomType) {
+        this.roomType = roomType;
     }
     public String getManufacturerType() {
         return manufacturerType;
