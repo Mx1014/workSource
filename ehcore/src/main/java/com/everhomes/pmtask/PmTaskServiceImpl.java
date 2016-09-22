@@ -1109,7 +1109,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 			
 			for(PmTaskStatistics p: list){
-				Long id = p.getOwnerId();
+				Long id = p.getCategoryId();
 				PmTaskStatistics pts = null;
 				if(tempMap.containsKey(id)){
 					pts = tempMap.get(id);
@@ -1118,6 +1118,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
 					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
 					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+					pts.setStar1(pts.getStar1() + p.getStar1());
+					pts.setStar2(pts.getStar2() + p.getStar2());
+					pts.setStar3(pts.getStar3() + p.getStar3());
+					pts.setStar4(pts.getStar4() + p.getStar4());
+					pts.setStar5(pts.getStar5() + p.getStar5());
 					continue;
 				}
 				tempMap.put(id, p);

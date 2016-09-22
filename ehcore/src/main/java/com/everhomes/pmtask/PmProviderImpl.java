@@ -231,7 +231,7 @@ public class PmProviderImpl implements PmTaskProvider{
                 	Condition condition = Tables.EH_PM_TASKS.OWNER_ID.equal(ownerId);
                 	if(null != categoryId){
                     	query.join(Tables.EH_CATEGORIES).on(Tables.EH_CATEGORIES.ID.eq(Tables.EH_PM_TASKS.CATEGORY_ID));
-                    	condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId));
+                    	condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId).or(Tables.EH_CATEGORIES.ID.eq(categoryId)));
                 	}
                 	condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
                 	if(null != status)
