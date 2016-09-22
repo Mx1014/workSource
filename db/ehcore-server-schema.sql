@@ -6921,6 +6921,8 @@ CREATE TABLE `eh_approval_op_requests` (
 	`request_id` BIGINT NOT NULL COMMENT 'id of request',
 	`requestor_comment` TEXT COMMENT 'comment of reqeust',
 	`process_message` TEXT COMMENT 'process message',
+	`flow_id` BIGINT COMMENT 'id of flow',
+	`level` TINYINT COMMENT 'which level approved',
 	`operator_uid` BIGINT,
 	`create_time` DATETIME,
 	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',

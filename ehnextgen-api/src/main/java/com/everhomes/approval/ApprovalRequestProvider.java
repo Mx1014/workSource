@@ -19,7 +19,7 @@ public interface ApprovalRequestProvider {
 
 	List<ApprovalRequest> listApprovalRequestByCondition(ApprovalRequestCondition condition);
 
-	List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
+	List<ApprovalRequest> listApprovalRequestWaitingForApproving(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userList, Long pageAnchor, int pageSize);
 

@@ -105,7 +105,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	}
 
 	@Override
-	public List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
+	public List<ApprovalRequest> listApprovalRequestWaitingForApproving(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userIds, Long pageAnchor, int pageSize) {
 		
@@ -128,11 +128,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
 		}
 		
-		if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
-		}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.REJECTION.getCode()));
-		}
+		step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
 		
 		if (ListUtils.isNotEmpty(userIds)) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.in(userIds));
@@ -142,22 +138,10 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		step = step.and(DSL.row(Tables.EH_APPROVAL_REQUESTS.FLOW_ID, Tables.EH_APPROVAL_REQUESTS.NEXT_LEVEL).in(flowLevelList));
 		
 		if (pageAnchor != null) {
-			if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
-				step = step.and(Tables.EH_APPROVAL_REQUESTS.ID.lt(pageAnchor));
-			}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
-//				step = step.and(Tables.EH_APPROVAL_REQUESTS.UPDATE_TIME.lt(new Timestamp(pageAnchor)));
-			}
-			
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.ID.lt(pageAnchor));
 		}
 		
-		//未审批的按id排序，已审批的按最后更新时间排序，所以未审批的可以按锚点分页，已审批的只能按照正常的分页
-		Result<Record> result = null;
-		if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
-			result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).limit(pageSize).fetch();
-		}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
-			pageAnchor = pageAnchor == null?0:pageAnchor;
-			result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.UPDATE_TIME.desc()).limit(Long.valueOf(pageAnchor*pageSize).intValue(), pageSize).fetch();
-		}
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).limit(pageSize).fetch();
 		
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
