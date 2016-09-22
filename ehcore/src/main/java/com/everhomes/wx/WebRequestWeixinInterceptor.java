@@ -45,7 +45,9 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
     
     private final static String KEY_SOURCE_URL = "src_url";
     
-    private final static String WX_AUTH_CALLBACK_URL = "/wx/authCallback";
+    private final static String WX_AUTH_REQ_URL = "/wxauth/authReq";
+    
+    private final static String WX_AUTH_CALLBACK_URL = "/wxauth/authCallback";
     
     private final static String WX_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
 
@@ -66,7 +68,7 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
         
         LoginToken loginToken = userService.getLoginToken(request);
         if(!userService.isValid(loginToken)) {
-            if(isWxAuthRequest(request)) {
+            if(isWxAuthCallbackRequest(request)) {
                 HttpSession session = request.getSession();
                 Object ns = session.getAttribute(KEY_NAMESPACE);
                 Integer namespaceId = parseNamespace(ns);
@@ -81,8 +83,9 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
                 return false; 
             } else {
                 // 没有登录，则请求微信授权
+                String sourceUrl = request.getParameter(KEY_SOURCE_URL);
                 HttpSession session = request.getSession();
-                session.setAttribute(KEY_SOURCE_URL, requestUrl);
+                session.setAttribute(KEY_SOURCE_URL, sourceUrl);
                 String sessionId = session.getId();
                 String ns = request.getParameter(KEY_NAMESPACE);
                 Integer namespaceId = parseNamespace(ns);
@@ -96,7 +99,7 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
                         URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
                 
                 if(LOGGER.isDebugEnabled()) {
-                    LOGGER.info("Pre handle weixin request, requestUrl={}, authorizeUri={}", requestUrl, authorizeUri);
+                    LOGGER.info("Pre handle weixin request, requestUrl={}, sourceUrl={}, authorizeUrl={}", requestUrl, sourceUrl, authorizeUri);
                 }
                 
                 response.sendRedirect(authorizeUri);
@@ -139,7 +142,7 @@ public class WebRequestWeixinInterceptor implements HandlerInterceptor {
      * @param request
      * @return
      */
-    private boolean isWxAuthRequest(HttpServletRequest request) {
+    private boolean isWxAuthCallbackRequest(HttpServletRequest request) {
         String sourceUrl = request.getRequestURL().toString();
         if(sourceUrl != null && sourceUrl.contains(WX_AUTH_CALLBACK_URL)) {
             return true;
