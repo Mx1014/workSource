@@ -41,6 +41,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contentserver.ResourceType;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -55,6 +56,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
@@ -67,6 +71,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -126,6 +131,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -262,6 +268,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private SmsProvider smsProvider;
+    
+    @Autowired
+    private NamespacesProvider namespacesProvider;
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
@@ -4998,4 +5007,51 @@ public class ForumServiceImpl implements ForumService {
         
         return handler;
     }
+
+	@Override
+	public ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
+		long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Integer namespaceId = cmd.getNamespaceId();
+        List<Long> forumIds = new ArrayList<Long>();
+        List<Long> communityIdList = new ArrayList<Long>();
+        // 获取所管理的所有小区对应的社区论坛
+        if(namespaceId != null) {
+            List<NamespaceResource> namespaceResources = namespacesProvider.listNamespaceResources(namespaceId, NamespaceResourceType.COMMUNITY.getCode());
+            List<Community> communities = communityProvider.findCommunitiesByIds(namespaceResources.stream().map(n->n.getResourceId()).collect(Collectors.toList()));            
+            if(communities != null){
+                for (Community community : communities) {
+                    communityIdList.add(community.getId());
+                    forumIds.add(community.getDefaultForumId());
+                }
+            }
+        }
+        
+        // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
+        if(forumIds.size() == 0) {
+            LOGGER.error("Forum not found for offical activities, cmd={}", cmd);
+            return null;
+        }
+        
+        Condition forumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds);
+        
+        Condition condition = forumCondition;
+        condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY));
+        condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
+        CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null);
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }   
+        return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+	}
+    
 }

@@ -17,6 +17,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
@@ -119,4 +120,16 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public List<NamespaceResource> listNamespaceResources(Integer namespaceId, String resourceType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select().from(Tables.EH_NAMESPACE_RESOURCES)
+		.where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(resourceType))
+		.fetch()
+		.map(r->ConvertHelper.convert(r, NamespaceResource.class));
+	}
+	
+	
 }

@@ -2,6 +2,7 @@ package com.everhomes.rest.techpark.punch;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -42,6 +43,7 @@ public class PunchCountDTO {
     private Double overTimeSum;
 	private java.lang.Byte     punchTimesPerDay;
 	private String userEnterpriseGroup;
+	@ItemType(AbsenceTimeDTO.class)
 	private List<AbsenceTimeDTO> absenceTimeList;
 	
 	
