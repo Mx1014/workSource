@@ -54,6 +54,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.promotion.OpPromotionRegionPushingCommand;
 import com.everhomes.rest.promotion.OpPromotionScopeType;
@@ -93,7 +94,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -102,6 +106,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -206,6 +211,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private LocaleStringProvider localeStringProvider;
     
     private String queueName = "property-mgr-push";
+
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 	
     @PostConstruct
     public void setup() {
@@ -238,9 +245,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private void checkCurrentUserNotInOrg(Long orgId) {
         Long userId = UserContext.current().getUser().getId();
 		if (orgId == null) {
-			LOGGER.error("Invalid parameter organizationId, organizationId: null");
+			LOGGER.error("Invalid parameter organizationId [ {} ]", orgId);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter organizationId, organizationId: null");
+					"Invalid parameter organizationId [ %s ]", orgId);
 		}
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
 		if(member == null){
@@ -3792,65 +3799,56 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
     @Override
-    public OrganizationOwnerDTO updateOrganizationOwner(CreateOrUpdateOrganizationOwnerCommand cmd) {
+    public OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd) {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        validate(cmd);
 
-        validateId(cmd.getId());
-
-        CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
-        if (owner == null) {
-            LOGGER.error("Organization owner are not exist, id = {}", cmd.getId());
-            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
-                    "Organization owner are not exist, id = %s", cmd.getId());
-        }
-        boolean needUpdateDoc = false;
-        if (cmd.getContactName() != null) {
-            owner.setContactName(cmd.getContactName());
-            needUpdateDoc = true;
-        }
-        if (cmd.getAvatar() != null)
-            owner.setAvatar(cmd.getAvatar());
-        if (cmd.getBirthday() != null)
-            owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
-        if (cmd.getOrgOwnerTypeId() != null)
-            owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
-        if (cmd.getMaritalStatus() != null)
-            owner.setMaritalStatus(cmd.getMaritalStatus());
-        if (cmd.getJob() != null)
-            owner.setJob(cmd.getJob());
-        if (cmd.getCompany() != null)
-            owner.setCompany(cmd.getCompany());
-        if (cmd.getIdCardNumber() != null)
-            owner.setIdCardNumber(cmd.getIdCardNumber());
-        if (cmd.getRegisteredResidence() != null)
-            owner.setRegisteredResidence(cmd.getRegisteredResidence());
-        UserGender gender = UserGender.fromCode(cmd.getGender());
-        if (gender != null) {
-            owner.setGender(gender.getCode());
-        }
-        propertyMgrProvider.updatePropOwner(owner);
-        if (needUpdateDoc) {
-            pmOwnerSearcher.feedDoc(owner);
-        }
-        return ConvertHelper.convert(owner, OrganizationOwnerDTO.class);
+        Tuple<CommunityPmOwner, Boolean> tuple =
+                coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
+            CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
+            if (owner == null) {
+                LOGGER.error("Organization owner are not exist, id = {}", cmd.getId());
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
+                        "Organization owner are not exist, id = %s", cmd.getId());
+            }
+            boolean needUpdateDoc = false;
+            if (cmd.getContactName() != null) {
+                owner.setContactName(cmd.getContactName());
+                needUpdateDoc = true;
+            }
+            if (cmd.getAvatar() != null)
+                owner.setAvatar(cmd.getAvatar());
+            if (cmd.getBirthday() != null)
+                owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+            if (cmd.getOrgOwnerTypeId() != null)
+                owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
+            if (cmd.getMaritalStatus() != null)
+                owner.setMaritalStatus(cmd.getMaritalStatus());
+            if (cmd.getJob() != null)
+                owner.setJob(cmd.getJob());
+            if (cmd.getCompany() != null)
+                owner.setCompany(cmd.getCompany());
+            if (cmd.getIdCardNumber() != null)
+                owner.setIdCardNumber(cmd.getIdCardNumber());
+            if (cmd.getRegisteredResidence() != null)
+                owner.setRegisteredResidence(cmd.getRegisteredResidence());
+            UserGender gender = UserGender.fromCode(cmd.getGender());
+            if (gender != null) {
+                owner.setGender(gender.getCode());
+            }
+            if (needUpdateDoc) {
+                pmOwnerSearcher.feedDoc(owner);
+            }
+            return owner;
+        });
+        return convertOwnerToDTO(tuple.first());
     }
 
 	@Override
-	public OrganizationOwnerDTO createOrganizationOwner(CreateOrUpdateOrganizationOwnerCommand cmd) {
+	public OrganizationOwnerDTO createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        if (cmd.getAddresses() == null || cmd.getAddresses().size() == 0) {
-            invalidParameterException("addresses", cmd.getAddresses());
-        }
-        if (cmd.getContactName() == null) {
-            invalidParameterException("contactName", cmd.getContactName());
-        }
-        if (cmd.getContactToken() == null) {
-            invalidParameterException("contactToken", cmd.getContactToken());
-        }
-        if (cmd.getOrgOwnerTypeId() == null) {
-            invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
-        }
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(cmd.getOrgOwnerTypeId());
         if (ownerType == null) {
             invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
@@ -3881,7 +3879,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         this.dbProvider.execute(status -> {
             long ownerId = propertyMgrProvider.createPropOwner(owner);
             for(OrganizationOwnerAddressCommand addressCmd : cmd.getAddresses()) {
-                validateAddressId(addressCmd.getAddressId());
                 Address address = addressProvider.findAddressById(addressCmd.getAddressId());
                 if(address != null) {
                     OrganizationOwnerAddress ownerAddress = new OrganizationOwnerAddress();
@@ -3918,7 +3915,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         behavior.setAddressId(addressId);
         behavior.setOwnerId(ownerId);
         behavior.setBehaviorType(behaviorType.getCode());
-        behavior.setNamespaceId(UserContext.getCurrentNamespaceId());
+        behavior.setNamespaceId(currentNamespaceId());
         behavior.setBehaviorTime(new Timestamp(date));
         behavior.setStatus(OrganizationOwnerBehaviorStatus.NORMAL.getCode());
         propertyMgrProvider.createOrganizationOwnerBehavior(behavior);
@@ -3946,7 +3943,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void createPMPropertyOwnerAddress(CreatePropOwnerAddressCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = currentNamespaceId();
 
 		CommunityPmOwner owner = new CommunityPmOwner();
 		owner.setCommunityId(cmd.getCommunityId());
@@ -4028,12 +4025,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
     public void updateOrganizationOwnerAddressStatus(UpdateOrganizationOwnerAddressStatusCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateOwnerId(cmd.getOwnerId());
-        validateAddressId(cmd.getAddressId());
-
-        if (cmd.getBehaviorType() == null || OrganizationOwnerBehaviorType.fromCode(cmd.getBehaviorType()) == null) {
+        if (OrganizationOwnerBehaviorType.fromCode(cmd.getBehaviorType()) == null) {
             invalidParameterException("behaviorType", cmd.getBehaviorType());
         }
         Address address = addressProvider.findAddressById(cmd.getAddressId());
@@ -4043,7 +4038,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The address %s is not exist.", cmd.getAddressId());
         }
         OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
-                UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), address.getId());
+                currentNamespaceId(), cmd.getOwnerId(), address.getId());
         if (ownerAddress == null) {
             LOGGER.error("The organization owner address is not exist.");
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_ADDRESS,
@@ -4063,9 +4058,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateOwnerId(cmd.getOwnerId());
 
         User user = UserContext.current().getUser();
         List<OrganizationOwnerBehavior> behaviorList = propertyMgrProvider.listOrganizationOwnerBehaviors(user.getNamespaceId(), cmd.getOwnerId());
@@ -4090,13 +4084,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerBehavior(DeleteOrganizationOwnerBehaviorCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateId(cmd.getId());
-        validateOwnerId(cmd.getOwnerId());
-
         OrganizationOwnerBehavior behavior = propertyMgrProvider.findOrganizationOwnerBehaviorById(
-                UserContext.getCurrentNamespaceId(), cmd.getId());
+                currentNamespaceId(), cmd.getId());
         if (behavior == null) {
             LOGGER.error("Organization owner behavior is not exist, id = {}", cmd.getId());
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4109,13 +4101,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerAttachment(DeleteOrganizationOwnerAttachmentCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateId(cmd.getId());
-        validateOwnerId(cmd.getOwnerId());
-
         OrganizationOwnerAttachment attachment = propertyMgrProvider.findOrganizationOwnerAttachment(
-                UserContext.getCurrentNamespaceId(), cmd.getId());
+                currentNamespaceId(), cmd.getId());
         if (attachment == null) {
             LOGGER.error("Organization owner attachment is not exist. id = {}", cmd.getId());
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4127,13 +4117,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerCarAttachment(DeleteOrganizationOwnerCarAttachmentCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateCarId(cmd.getCarId());
-        validateId(cmd.getId());
-
         OrganizationOwnerCarAttachment attachment = propertyMgrProvider.findOrganizationOwnerCarAttachment(
-                UserContext.getCurrentNamespaceId(), cmd.getId());
+                currentNamespaceId(), cmd.getId());
         if (attachment == null) {
             LOGGER.error("Organization owner car attachment is not exist. id = {}", cmd.getId());
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4145,9 +4133,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
 	public void deleteOrganizationOwner(DeleteOrganizationOwnerCommand cmd) {
+        validate(cmd);
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-		validateId(cmd.getId());
 
 		CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getId());
 		if (pmOwner == null) {
@@ -4159,7 +4146,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             if (!Objects.equals(pmOwner.getStatus(), OrganizationOwnerStatus.DELETE.getCode())) {
                 pmOwner.setStatus(OrganizationOwnerStatus.DELETE.getCode());
                 propertyMgrProvider.updatePropOwner(pmOwner);
-                Integer namespaceId = UserContext.getCurrentNamespaceId();
+                Integer namespaceId = currentNamespaceId();
                 propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, pmOwner.getId());
                 propertyMgrProvider.deleteOrganizationOwnerAttachmentByOwnerId(namespaceId, pmOwner.getId());
                 propertyMgrProvider.deleteOrganizationOwnerOwnerCarByOwnerId(namespaceId, pmOwner.getId());
@@ -4181,11 +4168,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerAddressDTO> listOrganizationOwnerAddresses(ListOrganizationOwnerAddressesCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateOwnerId(cmd.getOwnerId());
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = currentNamespaceId();
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(namespaceId, cmd.getOwnerId());
         List<Long> ids = ownerAddressList.stream().map(OrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
 
@@ -4219,12 +4205,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerAttachmentDTO> listOrganizationOwnerAttachments(ListOrganizationOwnerAttachmentsCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateOwnerId(cmd.getOwnerId());
-
         List<OrganizationOwnerAttachment> attachmentList = propertyMgrProvider
-                .listOrganizationOwnerAttachments(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
+                .listOrganizationOwnerAttachments(currentNamespaceId(), cmd.getOwnerId());
 
         return attachmentList.stream().map(r -> {
             OrganizationOwnerAttachmentDTO dto = ConvertHelper.convert(r, OrganizationOwnerAttachmentDTO.class);
@@ -4234,15 +4219,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
     @Override
-    public OrganizationOwnerCarDTO createOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd) {
+    public OrganizationOwnerCarDTO createOrganizationOwnerCar(CreateOrganizationOwnerCarCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateCommunityId(cmd.getCommunityId());
-
-        if (cmd.getPlateNumber() == null) {
-            invalidParameterException("plateNumber", cmd.getPlateNumber());
-        }
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = currentNamespaceId();
         checkOrganizationOwnerCarUnique(cmd.getCommunityId(), cmd.getPlateNumber(), namespaceId);
 
         OrganizationOwnerCar newCar = ConvertHelper.convert(cmd, OrganizationOwnerCar.class);
@@ -4271,11 +4252,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerCar(DeleteOrganizationOwnerCarCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateId(cmd.getId());
-
-        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(UserContext.getCurrentNamespaceId(), cmd.getId());
+        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(currentNamespaceId(), cmd.getId());
         if (car == null) {
             LOGGER.error("The organization owner car are not exist, id = {}", cmd.getId());
             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_EXIST,
@@ -4284,7 +4264,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (!Objects.equals(car.getStatus(), OrganizationOwnerCarStatus.DELETE.getCode())) {
             car.setStatus(OrganizationOwnerCarStatus.DELETE.getCode());
             dbProvider.execute(status -> {
-                Integer namespaceId = UserContext.getCurrentNamespaceId();
+                Integer namespaceId = currentNamespaceId();
                 propertyMgrProvider.updateOrganizationOwnerCar(car);
                 propertyMgrProvider.deleteOrganizationOwnerOwnerCarByCarId(namespaceId, car.getId());
                 propertyMgrProvider.deleteOrganizationOwnerCarAttachmentByCarId(namespaceId, car.getId());
@@ -4297,12 +4277,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void setOrganizationOwnerAsCarPrimary(SetOrganizationOwnerAsCarPrimaryCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateCarId(cmd.getCarId());
-        validateOwnerId(cmd.getOwnerId());
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = currentNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
@@ -4328,12 +4306,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteRelationOfOrganizationOwnerAndCar(DeleteRelationOfOrganizationOwnerAndCarCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateCarId(cmd.getCarId());
-        validateOwnerId(cmd.getOwnerId());
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = currentNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
@@ -4381,9 +4357,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void exportOrganizationOwnerCars(ExportOrganizationOwnerCarsCommand cmd, HttpServletResponse response) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateCommunityId(cmd.getCommunityId());
 
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if (community == null) {
@@ -4393,7 +4368,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
 
         List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarsByCommunity(
-                UserContext.getCurrentNamespaceId(), cmd.getCommunityId());
+                currentNamespaceId(), cmd.getCommunityId());
 
         if (ownerCars != null && ownerCars.size() > 0) {
             List<OrganizationOwnerCarDTO> ownerCarDTOs = ownerCars.stream().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
@@ -4420,9 +4395,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void exportOrganizationOwners(ExportOrganizationsOwnersCommand cmd, HttpServletResponse response) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateCommunityId(cmd.getCommunityId());
 
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if (community == null) {
@@ -4432,7 +4406,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
 
         List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwnersByCommunity(
-                UserContext.getCurrentNamespaceId(), cmd.getCommunityId());
+                currentNamespaceId(), cmd.getCommunityId());
 
         if (ownerList != null && ownerList.size() > 0) {
             List<OrganizationOwnerDTO> ownerDTOs = ownerList.stream().map(this::convertOwnerToDTO).collect(Collectors.toList());
@@ -4449,6 +4423,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
                     "Organization owner are not exist.");
         }
+    }
+
+    private Integer currentNamespaceId() {
+        return UserContext.getCurrentNamespaceId();
     }
 
     private OrganizationOwnerDTO convertOwnerToDTO(CommunityPmOwner owner) {
@@ -4468,9 +4446,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<ListOrganizationOwnerStatisticDTO> listOrganizationOwnerStatisticByGender(ListOrganizationOwnerStatisticCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateCommunityId(cmd.getCommunityId());
 
         Integer[] totalNum = {0};
         RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper = (r) -> {
@@ -4490,9 +4467,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public ListOrganizationOwnerStatisticByAgeDTO listOrganizationOwnerStatisticByAge(ListOrganizationOwnerStatisticCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateCommunityId(cmd.getCommunityId());
 
         Integer[] maleTotalNum = {0};
         Integer[] femaleTotalNum = {0};
@@ -4535,12 +4511,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
     @Override
-    public OrganizationOwnerCarDTO updateOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd) {
+    public OrganizationOwnerCarDTO updateOrganizationOwnerCar(UpdateOrganizationOwnerCarCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateId(cmd.getId());
-
-        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(UserContext.getCurrentNamespaceId(), cmd.getId());
+        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(currentNamespaceId(), cmd.getId());
         if (car == null) {
             LOGGER.error("Organization owner car are not exist, id = {}", cmd.getId());
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_NOT_EXIST,
@@ -4578,18 +4553,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerAttachmentDTO uploadOrganizationOwnerAttachment(UploadOrganizationOwnerAttachmentCommand cmd) {
+        validate(cmd);
     	checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateOwnerId(cmd.getOwnerId());
-
-        if (cmd.getContentUri() == null) {
-            invalidParameterException("contentUri", cmd.getContentUri());
-        }
-        if (cmd.getAttachmentName() == null) {
-            invalidParameterException("attachmentName", cmd.getAttachmentName());
-        }
 		OrganizationOwnerAttachment attachment = new OrganizationOwnerAttachment();
-		attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
+		attachment.setNamespaceId(currentNamespaceId());
 		attachment.setOwnerId(cmd.getOwnerId());
 		attachment.setContentUri(cmd.getContentUri());
 		attachment.setAttachmentName(cmd.getAttachmentName());
@@ -4602,14 +4570,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerAddressDTO addOrganizationOwnerAddress(AddOrganizationOwnerAddressCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateOwnerId(cmd.getOwnerId());
-        validateAddressId(cmd.getAddressId());
-
-        if (cmd.getLivingStatus() == null) {
-            invalidParameterException("livingStatus", cmd.getLivingStatus());
-        }
         Address address = addressProvider.findAddressById(cmd.getAddressId());
         if (address == null) {
             LOGGER.error("The address is not exist, addressId = {}.", cmd.getAddressId());
@@ -4617,7 +4580,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The address is not exist, addressId = %s.", cmd.getAddressId());
         }
         OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
-                UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getAddressId());
+                currentNamespaceId(), cmd.getOwnerId(), cmd.getAddressId());
         if (ownerAddress != null) {
             LOGGER.error("The organization owner {} already in address {}.", cmd.getOwnerId(), cmd.getAddressId());
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_EXIST,
@@ -4632,17 +4595,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ownerAddress.setAddressId(addressId);
 		ownerAddress.setLivingStatus(livingStatus);
 		ownerAddress.setOrganizationOwnerId(ownerId);
-		ownerAddress.setNamespaceId(UserContext.getCurrentNamespaceId());
+		ownerAddress.setNamespaceId(currentNamespaceId());
 		ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
 		propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
 	}
 
 	@Override
     public void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd) {
+        validate(cmd);
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateOwnerId(cmd.getOwnerId());
-        validateAddressId(cmd.getAddressId());
 
         Address address = addressProvider.findAddressById(cmd.getAddressId());
         if (address == null) {
@@ -4651,7 +4612,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The address is not exist, addressId = %s.", cmd.getAddressId());
         }
         OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
-                UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), address.getId());
+                currentNamespaceId(), cmd.getOwnerId(), address.getId());
         if (ownerAddress == null) {
             LOGGER.error("The ownerAddress is not exist.");
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_ADDRESS,
@@ -4676,6 +4637,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerTypeDTO> listOrganizationOwnerTypes(ListOrganizationOwnerTypesCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         List<OrganizationOwnerType> typeList = propertyMgrProvider.listOrganizationOwnerType();
         return typeList.stream().map(type -> ConvertHelper.convert(type, OrganizationOwnerTypeDTO.class)).collect(Collectors.toList());
@@ -4683,11 +4645,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerCarDTO getOrganizationOwnerCar(GetOrganizationOwnerCarCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateId(cmd.getId());
-
-        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(UserContext.getCurrentNamespaceId(), cmd.getId());
+        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(currentNamespaceId(), cmd.getId());
         if (car == null) {
             LOGGER.error("The organization owner car are not exist, id = {}.", cmd.getId());
             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_EXIST,
@@ -4703,18 +4664,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerCarAttachmentDTO uploadOrganizationOwnerCarAttachment(UploadOrganizationOwnerCarAttachmentCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateCarId(cmd.getCarId());
-
-        if (cmd.getContentUri() == null) {
-            invalidParameterException("contentUri", cmd.getContentUri());
-        }
-        if (cmd.getAttachmentName() == null) {
-            invalidParameterException("attachmentName", cmd.getAttachmentName());
-        }
         OrganizationOwnerCarAttachment attachment = new OrganizationOwnerCarAttachment();
-        attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
+        attachment.setNamespaceId(currentNamespaceId());
         attachment.setOwnerId(cmd.getCarId());
         attachment.setContentUri(cmd.getContentUri());
         attachment.setAttachmentName(cmd.getAttachmentName());
@@ -4727,10 +4681,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerDTO addOrganizationOwnerCarUser(AddOrganizationOwnerCarUserCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateCarId(cmd.getCarId());
-        validateOwnerId(cmd.getOwnerId());
 
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOwnerId());
         if (pmOwner == null) {
@@ -4738,7 +4690,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
                     "OrganizationOwner are not exist, ownerId = %s.", cmd.getOwnerId());
         }
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = currentNamespaceId();
         OrganizationOwnerOwnerCar ownerOwnerCar = propertyMgrProvider.findOrganizationOwnerOwnerCarByOwnerIdAndCarId(
                 namespaceId, cmd.getOwnerId(), cmd.getCarId());
         if (ownerOwnerCar != null) {
@@ -4768,9 +4720,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerCarDTO> listOrganizationOwnerCarsByAddress(ListOrganizationOwnerCarsByAddressCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateAddressId(cmd.getAddressId());
 
         Address address = addressProvider.findAddressById(cmd.getAddressId());
         if (address == null) {
@@ -4778,17 +4729,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST,
                     "The address %s is not exist.", cmd.getAddressId());
         }
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = currentNamespaceId();
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(
                 namespaceId, address.getId());
 
-        List<OrganizationOwnerCar> ownerCarList = new ArrayList<>();
-        ownerAddressList.forEach(r -> {
-            List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarByOwnerId(namespaceId, r.getOrganizationOwnerId());
-            ownerCarList.addAll(ownerCars);
-        });
+        return ownerAddressList
+                .stream().flatMap(r -> propertyMgrProvider.listOrganizationOwnerCarByOwnerId(namespaceId, r.getOrganizationOwnerId())
+                        .stream().map(this::convertOwnerCarToOwnerCarDTO)).distinct().collect(Collectors.toList());
+    }
 
-        return ownerCarList.stream().map(this::convertOwnerCarToOwnerCarDTO).distinct().collect(Collectors.toList());
+    @Override
+    public void syncOwnerIndex() {
+        pmOwnerSearcher.syncFromDb();
+    }
+
+    @Override
+    public void syncOwnerCarIndex() {
+        ownerCarSearcher.syncFromDb();
     }
 
     private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address) {
@@ -4813,30 +4770,31 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerCarAttachmentDTO> listOrganizationOwnerCarAttachments(ListOrganizationOwnerCarAttachmentCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateCarId(cmd.getCarId());
-
         List<OrganizationOwnerCarAttachment> carAttachmentList = propertyMgrProvider.listOrganizationOwnerCarAttachment(
-                UserContext.getCurrentNamespaceId(), cmd.getCarId());
-        return carAttachmentList.stream().map(attachment -> {
-            OrganizationOwnerCarAttachmentDTO dto = ConvertHelper.convert(attachment, OrganizationOwnerCarAttachmentDTO.class);
-            dto.setContentUrl(parserUri(attachment.getContentUri(), EhOrganizationOwnerCars.class.getSimpleName(), cmd.getCarId()));
-            return dto;
-        }).collect(Collectors.toList());
+                currentNamespaceId(), cmd.getCarId());
+        if (carAttachmentList != null) {
+            return carAttachmentList.stream().map(attachment -> {
+                OrganizationOwnerCarAttachmentDTO dto = ConvertHelper.convert(attachment, OrganizationOwnerCarAttachmentDTO.class);
+                dto.setContentUrl(parserUri(attachment.getContentUri(), EhOrganizationOwnerCars.class.getSimpleName(), cmd.getCarId()));
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @Override
     public List<OrganizationOwnerDTO> listOrganizationOwnersByAddress(ListOrganizationOwnersByAddressCommand cmd) {
-		checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateAddressId(cmd.getAddressId());
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         Address address = addressProvider.findAddressById(cmd.getAddressId());
 		if (address == null) {
-            LOGGER.error("The address is not exist, addressId = {}.", cmd.getAddressId());
+            LOGGER.error("The address {} is not exist.", cmd.getAddressId());
             throw errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST,
-                    "The address is not exist, addressId = %s.", cmd.getAddressId());
+                    "The address %s not exist.", cmd.getAddressId());
 		}
 		User user = UserContext.current().getUser();
 		RecordMapper<Record, OrganizationOwnerDTO> mapper = (r) -> {
@@ -4861,6 +4819,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerDTO getOrganizationOwner(GetOrganizationOwnerCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getId());
@@ -4885,9 +4844,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerDTO> listOrganizationOwnersByCar(ListOrganizationOwnersByCarCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
-        validateCarId(cmd.getCarId());
 
         RecordMapper<Record, OrganizationOwnerDTO> mapper = (r) -> {
             OrganizationOwnerDTO dto = new OrganizationOwnerDTO();
@@ -4901,7 +4859,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             dto.setPrimaryFlag(primaryFlagLocale != null ? primaryFlagLocale.getText() : "");
             return dto;
         };
-        return propertyMgrProvider.listOrganizationOwnersByCar(UserContext.getCurrentNamespaceId(), cmd.getCarId(), mapper);
+        return propertyMgrProvider.listOrganizationOwnersByCar(currentNamespaceId(), cmd.getCarId(), mapper);
     }
 
     private String getOrganizationOwnerTypeDisplayName(Long ownerTypeId) {
@@ -4911,12 +4869,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerCarDTO> listOrganizationOwnerCarsByOrgOwner(ListOrganizationOwnerCarByOrgOwnerCommand cmd) {
+        validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        validateOwnerId(cmd.getOwnerId());
-
-        List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarByOwnerId(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
-        return ownerCars.stream().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
+        List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarByOwnerId(currentNamespaceId(), cmd.getOwnerId());
+        if (ownerCars != null) {
+            return ownerCars.stream().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -4981,12 +4941,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			int row = resultList.size();
             for (int rowIndex = 2; rowIndex < row ; rowIndex++) {
                 RowResult result = (RowResult)resultList.get(rowIndex);
-                if (result.getA() == null || RowResult.trimString(result.getA()).isEmpty()
-                        || result.getB() == null || RowResult.trimString(result.getB()).isEmpty()
-                        || result.getC() == null || RowResult.trimString(result.getC()).isEmpty()
-                        || result.getD() == null || RowResult.trimString(result.getD()).isEmpty()
-                        || result.getE() == null || RowResult.trimString(result.getE()).isEmpty()
-                        || result.getF() == null || RowResult.trimString(result.getF()).isEmpty()) {
+                if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getF()).anyMatch(StringUtils::isEmpty)) {
                     continue;
                 }
                 // 检查手机号的唯一性
@@ -5011,7 +4966,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setCompany(result.getL());
                 owner.setIdCardNumber(result.getM());
                 owner.setRegisteredResidence(result.getN());
-                owner.setNamespaceId(UserContext.getCurrentNamespaceId());
+                owner.setNamespaceId(currentNamespaceId());
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
                 owner.setCommunityId(communityId);
@@ -5083,9 +5038,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 	}
 
+    // 每个联系电话在一个小区内是唯一的
 	private void checkContactTokenUnique(Long communityId, String contactToken) {
-		// 每个联系电话在一个小区内是唯一的
-		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(UserContext.getCurrentNamespaceId(),
+		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(currentNamespaceId(),
                 communityId, contactToken);
 		if (pmOwners != null && pmOwners.size() > 0) {
             LOGGER.error("OrganizationOwner are already exist, contactToken = {}.", contactToken);
@@ -5147,39 +5102,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return type.getId();
 	}
 
-    private void validateAddressId(Long addressId) {
-        if (addressId == null) {
-            invalidParameterException("addressId", addressId);
-        }
-    }
-
-    private void validateCarId(Long carId) {
-        if (carId == null) {
-            invalidParameterException("carId", carId);
-        }
-    }
-
-    private void validateCommunityId(Long communityId) {
-        if (communityId == null) {
-            invalidParameterException("communityId", communityId);
-        }
-    }
-
-    private void validateId(Long id) {
-        if (id == null) {
-            invalidParameterException("id", id);
-        }
-    }
-
-    private void validateOwnerId(Long ownerId) {
-        if (ownerId == null) {
-            invalidParameterException("ownerId", ownerId);
-        }
-    }
-
     private void invalidParameterException(String name, Object param) {
-        LOGGER.error("Invalid parameter {} '{}'.", name, param);
+        LOGGER.error("Invalid parameter {} [ {} ].", name, param);
         throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                "Invalid parameter %s '%s'.", name, param);
+                "Invalid parameter %s [ %s ].", name, param);
+    }
+
+    // 参数校验方法
+    // 可以校验带bean validation 注解的对象
+    // 校验失败, 抛出异常, 异常信息附带参数值信息
+    private void validate(Object o){
+        Set<ConstraintViolation<Object>> result = validator.validate(o);
+        if (!result.isEmpty()) {
+            result.stream().map(r -> r.getPropertyPath().toString() + " [ "+r.getInvalidValue() + " ]")
+                    .reduce((i, a) -> i + ", " + a).ifPresent(r -> {
+                LOGGER.error("Invalid parameter {}", r);
+                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
+            });
+        }
     }
 }

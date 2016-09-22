@@ -1,6 +1,6 @@
 package com.everhomes.test.junit.organization.pm;
 
-import com.everhomes.rest.organization.pm.CreateOrUpdateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarCommand;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarRestResponse;
 import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
 import com.everhomes.server.schema.Tables;
@@ -22,7 +22,7 @@ public class CreateOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
     public void testCreateOrganizationOwnerCar() {
         logon();
         String api = "/pm/createOrganizationOwnerCar";
-        CreateOrUpdateOrganizationOwnerCarCommand cmd = new CreateOrUpdateOrganizationOwnerCarCommand();
+        CreateOrganizationOwnerCarCommand cmd = new CreateOrganizationOwnerCarCommand();
 
         Long communityId = 111L;
         String plateNumber = "粤B77777";

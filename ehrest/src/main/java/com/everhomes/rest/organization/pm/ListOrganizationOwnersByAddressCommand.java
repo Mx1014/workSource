@@ -3,6 +3,8 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>addressId: 地址id</li>
@@ -11,8 +13,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListOrganizationOwnersByAddressCommand {
 
-    private Long addressId;
-    private Long organizationId;
+    @NotNull private Long addressId;
+    @NotNull private Long organizationId;
 
     public Long getAddressId() {
         return addressId;

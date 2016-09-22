@@ -1,5 +1,7 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -9,10 +11,9 @@ import javax.validation.constraints.NotNull;
  * </ul>
  */
 public class ExportOrganizationOwnerCarsCommand {
-    @NotNull
-    private Long organizationId;
-    @NotNull
-    private Long communityId;
+
+    @NotNull private Long communityId;
+    @NotNull private Long organizationId;
 
     public Long getCommunityId() {
         return communityId;
@@ -27,7 +28,11 @@ public class ExportOrganizationOwnerCarsCommand {
     }
 
     public void setCommunityId(Long communityId) {
-
         this.communityId = communityId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

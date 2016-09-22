@@ -12,13 +12,9 @@ import javax.validation.constraints.NotNull;
  */
 public class UpdateOrganizationOwnerAddressStatusCommand {
 
-    @NotNull
-    private Long ownerId;
-    @NotNull
-    private Long organizationId;
-    @NotNull
-    private Long addressId;
-    @NotNull
+    @NotNull private Long ownerId;
+    @NotNull private Long organizationId;
+    @NotNull private Long addressId;
     private String behaviorType;
 
     public Long getOwnerId() {

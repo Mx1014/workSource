@@ -919,6 +919,10 @@ public class FamilyServiceImpl implements FamilyService {
         
     }
 
+    //
+    // 认证organization owner
+    // add by xq.tian   20160922
+    //
     public boolean approveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
         if (addressId != null) {
             User memberUser = userProvider.findUserById(memberUid);
@@ -933,9 +937,9 @@ public class FamilyServiceImpl implements FamilyService {
                         if (ownerAddress != null && ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
                             ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
                             propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
-                            return true;
                         }
                     }
+                    return true;
                 }
             }
         }

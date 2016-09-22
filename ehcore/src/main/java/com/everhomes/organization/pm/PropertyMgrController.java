@@ -719,6 +719,34 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
+    /**
+     * <b>URL: /pm/syncOwnerIndex</b>
+     * <p>同步业主索引</p>
+     */
+    @RequestMapping("syncOwnerIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncOwnerIndex() {
+        propertyMgrService.syncOwnerIndex();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pm/syncOwnerCarIndex</b>
+     * <p>同步车辆索引</p>
+     */
+    @RequestMapping("syncOwnerCarIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncOwnerCarIndex() {
+        propertyMgrService.syncOwnerCarIndex();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	/**
 	 * <b>URL: /pm/listPropBillDateStr</b>
 	 * <p>查询物业账单的时间列表</p>
@@ -1377,7 +1405,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("createOrganizationOwner")
 	@RestReturn(value= OrganizationOwnerDTO.class)
-	public RestResponse createOrganizationOwner(@Valid CreateOrUpdateOrganizationOwnerCommand cmd) {
+	public RestResponse createOrganizationOwner(@Valid CreateOrganizationOwnerCommand cmd) {
         OrganizationOwnerDTO dto = propertyMgrService.createOrganizationOwner(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1419,7 +1447,7 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("updateOrganizationOwner")
     @RestReturn(value= OrganizationOwnerDTO.class)
-    public RestResponse updateOrganizationOwner(@Valid CreateOrUpdateOrganizationOwnerCommand cmd) {
+    public RestResponse updateOrganizationOwner(@Valid UpdateOrganizationOwnerCommand cmd) {
         OrganizationOwnerDTO dto = propertyMgrService.updateOrganizationOwner(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1587,7 +1615,7 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("createOrganizationOwnerCar")
     @RestReturn(value = OrganizationOwnerCarDTO.class)
-    public RestResponse createOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd) {
+    public RestResponse createOrganizationOwnerCar(CreateOrganizationOwnerCarCommand cmd) {
         OrganizationOwnerCarDTO dto = propertyMgrService.createOrganizationOwnerCar(cmd);
         RestResponse resp = new RestResponse(dto);
         resp.setErrorCode(ErrorCodes.SUCCESS);
@@ -1601,7 +1629,7 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("updateOrganizationOwnerCar")
     @RestReturn(value = OrganizationOwnerCarDTO.class)
-    public RestResponse updateOrganizationOwnerCar(CreateOrUpdateOrganizationOwnerCarCommand cmd) {
+    public RestResponse updateOrganizationOwnerCar(UpdateOrganizationOwnerCarCommand cmd) {
         OrganizationOwnerCarDTO dto = propertyMgrService.updateOrganizationOwnerCar(cmd);
         RestResponse resp = new RestResponse(dto);
         resp.setErrorCode(ErrorCodes.SUCCESS);
