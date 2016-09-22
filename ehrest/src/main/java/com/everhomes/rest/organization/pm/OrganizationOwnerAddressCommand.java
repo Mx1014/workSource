@@ -2,6 +2,8 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>addressId: 地址信息</li>
@@ -11,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class OrganizationOwnerAddressCommand {
 
-    private Long addressId;
+    @NotNull private Long addressId;
     private Byte livingStatus;
     private Long checkInDate;
 
