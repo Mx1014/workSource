@@ -879,6 +879,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 				cmd.getContactType(), cmd.getCategoryId(), locator, pageSize+1);
 		
 		if(targets != null && targets.size() > 0) {
+			
+			Long nextPageAnchor = null;
+			if(targets.size() > pageSize) {
+	        	targets.remove(targets.size() - 1);
+	            nextPageAnchor = targets.get(targets.size() - 1).getId();
+	        }
+			
 			List<NotifyTargetDTO> dtos = targets.stream().map((target) -> {
 				NotifyTargetDTO dto = ConvertHelper.convert(target, NotifyTargetDTO.class);
 				return dto;
@@ -886,12 +893,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 			
 			response.setDtos(dtos);
 			
-			Long nextPageAnchor = null;
-	        if(targets.size() > pageSize) {
-	        	targets.remove(targets.size() - 1);
-	            nextPageAnchor = targets.get(targets.size() - 1).getId();
-	        }
-	        
 	        response.setNextPageAnchor(nextPageAnchor);
 		}
 		return response;
