@@ -22,9 +22,9 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 	VALUES ('205', 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个任务，请尽快处理', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('197', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '<{operatorName}><{operatorPhone}>已将一个<{categoryName}>单派发给你，请尽快处理', '999992');
+	VALUES ('197', 'sms.default.yzx', '7', 'zh_CN', '任务操作模版', '29479', '999992');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('198', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '<{creatorName}><{creatorPhone}>已发起一个任务，请尽快处理', '999992');
+	VALUES ('198', 'sms.default.yzx', '7', 'zh_CN', '任务操作模版', '29478', '999992');
 
 
 -- 物业报修2.0
