@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
  *  </ul>
  */
 public class ListOrganizationOwnerTypesCommand {
-    @NotNull
-    private Long organizationId;
+
+    @NotNull private Long organizationId;
 
     public Long getOrganizationId() {
         return organizationId;

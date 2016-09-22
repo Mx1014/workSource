@@ -1384,7 +1384,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
     @Override
-    public List<OrganizationOwnerAddress> listOrganizationOwnerAddress(Integer namespaceId, Long ownerId) {
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByOwnerId(Integer namespaceId, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select()
                 .from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
@@ -1890,6 +1890,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addGroupBy(Tables.EH_ORGANIZATION_OWNERS.GENDER);
         query.addGroupBy(ageGroups);
         return query.fetch(mapper);
+    }
+
+    @Override
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressId(Integer namespaceId, Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+                .fetchInto(OrganizationOwnerAddress.class);
     }
 
     @Override

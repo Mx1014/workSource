@@ -1,16 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -18,75 +8,22 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.forum.CancelLikeTopicCommand;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.LikeTopicCommand;
-import com.everhomes.rest.forum.ListOrgMixTopicCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.ListTopicCommand;
-import com.everhomes.rest.forum.ListTopicCommentCommand;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
-import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
-import com.everhomes.rest.organization.AssginOrgTopicCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeResponse;
-import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
-import com.everhomes.rest.organization.CreateOrganizationContactCommand;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
-import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.GetOrgDetailCommand;
-import com.everhomes.rest.organization.GetUserResourcePrivilege;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.ListUserTaskCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationMemberCommand;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.organization.RejectOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
-import com.everhomes.rest.organization.SendOrganizationMessageCommand;
-import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
-import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
-import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
-import com.everhomes.rest.organization.UserExitOrganizationCommand;
-import com.everhomes.rest.organization.UserJoinOrganizationCommand;
-import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.user.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/org")
@@ -855,7 +792,7 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/syncIndex</b>
+     * <b>URL: /org/syncOwnerIndex</b>
      * <p>搜索索引同步 TODO: 求敢哥优化</p>
      * @return {String.class}
      */

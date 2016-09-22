@@ -1,5 +1,7 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -11,14 +13,11 @@ import javax.validation.constraints.NotNull;
  *  </ul>
  */
 public class UploadOrganizationOwnerCarAttachmentCommand {
-    @NotNull
-    private Long organizationId;
-    @NotNull
-    private Long carId;
-    @NotNull
-    private String contentUri;
-    @NotNull
-    private String attachmentName;
+
+    @NotNull private Long carId;
+    @NotNull private Long organizationId;
+    @NotNull private String contentUri;
+    @NotNull private String attachmentName;
 
     public String getContentUri() {
         return contentUri;
@@ -50,5 +49,10 @@ public class UploadOrganizationOwnerCarAttachmentCommand {
 
     public void setCarId(Long carId) {
         this.carId = carId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

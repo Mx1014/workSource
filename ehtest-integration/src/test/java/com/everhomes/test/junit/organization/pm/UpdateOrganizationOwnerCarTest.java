@@ -1,6 +1,6 @@
 package com.everhomes.test.junit.organization.pm;
 
-import com.everhomes.rest.organization.pm.CreateOrUpdateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarCommand;
 import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnerCarsRecord;
@@ -21,7 +21,7 @@ public class UpdateOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
     public void testUpdateOrganizationOwnerCar() {
         logon();
         String api = "/pm/updateOrganizationOwnerCar";
-        CreateOrUpdateOrganizationOwnerCarCommand cmd = new CreateOrUpdateOrganizationOwnerCarCommand();
+        UpdateOrganizationOwnerCarCommand cmd = new UpdateOrganizationOwnerCarCommand();
         cmd.setOrganizationId(1000001L);
         cmd.setId(1L);
         String color = "黑色";
