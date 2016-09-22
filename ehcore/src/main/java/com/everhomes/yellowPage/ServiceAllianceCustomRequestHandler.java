@@ -37,6 +37,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.CustomRequestHandler;
 import com.everhomes.user.RequestAttachments;
@@ -71,6 +72,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 			
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -95,6 +99,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		  
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createServiceAllianceRequests(request);
+		saRequestInfoSearcher.feedDoc(request);
 		
 		if(cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
 			List<RequestAttachments> attachments = cmd.getAttachments().stream().map(attachment -> {

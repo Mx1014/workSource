@@ -369,4 +369,20 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+    
+    /**
+   	 * <b>URL: /yellowPage/synchRequestInfo</b>
+   	 * <p> 搜索申请信息</p>
+   	 */
+       @RequestMapping("synchRequestInfo")
+       @RestReturn(value = String.class)
+       public RestResponse synchRequestInfo() {
+       	
+       	this.saRequestInfoSearcher.syncFromDb();
+       	 
+       	RestResponse response = new RestResponse();
+       	response.setErrorCode(ErrorCodes.SUCCESS);
+       	response.setErrorDescription("OK");
+       	return response;
+       }
 }
