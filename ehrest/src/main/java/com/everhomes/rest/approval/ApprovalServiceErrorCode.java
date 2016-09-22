@@ -29,5 +29,7 @@ public interface ApprovalServiceErrorCode {
 	int APPROVE_OR_REJECT_EMPTY_REASON = 10019;  //请输入驳回理由
 	int APPROVE_OR_REJECT_EMPTY_REQUEST = 10020;  //请选择需要审批的申请单
 	
+	int CATEGORY_NAME_LENGTH_GREATER_EIGHT = 10021;  //类型名称不能超过8字
+	
 	
 }
