@@ -29,6 +29,22 @@ public class ServiceAlliances extends EhServiceAlliances {
 	public void setAttachments(List<ServiceAllianceAttachment> attachments) {
 		this.attachments = attachments;
 	}
+	
+	public String getEmail() {
+        return NewServiceAllianceCustomField.EMAIL.getStringValue(this);
+    }
+    
+    public void setEmail(String email) {
+    	NewServiceAllianceCustomField.EMAIL.setStringValue(this, email);
+    }
+    
+    public String getTemplateType() {
+        return NewServiceAllianceCustomField.TEMPLATETYPE.getStringValue(this);
+    }
+    
+    public void setTemplateType(String templateType) {
+    	NewServiceAllianceCustomField.TEMPLATETYPE.setStringValue(this, templateType);
+    }
 
 	@Override
     public String toString() {
