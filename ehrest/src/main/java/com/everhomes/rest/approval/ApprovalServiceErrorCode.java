@@ -3,6 +3,7 @@ package com.everhomes.rest.approval;
 public interface ApprovalServiceErrorCode {
 	String SCOPE = "approval";
 	
+	int ABSENCE_EMPTY_CATEGORY = 10000;  //请选择请假类型
 	int ABSENCE_EMPTY_REASON = 10001;  //请输入请假理由
 	int ABSENCE_EMPTY_TIME = 10002;  //请选择请假时间
 	int ABSENCE_FROM_TIME_MUST_LT_END_TIME = 10003;  //请假开始时间必须小于请假结束时间
