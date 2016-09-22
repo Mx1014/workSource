@@ -1498,6 +1498,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 					approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					approvalOpRequest.setProcessMessage(cmd.getReason());
 					approvalOpRequest.setApprovalStatus(ApprovalStatus.REJECTION.getCode());
+					approvalOpRequest.setFlowId(approvalRequest.getFlowId());
+					approvalOpRequest.setLevel(approvalRequest.getCurrentLevel());
 					approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest);
 					return null;
 				});
