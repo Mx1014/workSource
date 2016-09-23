@@ -30,6 +30,7 @@ public class ActivityVideoDTO {
     private String videoUrl;
     private String roomId;
     private String roomType;
+    private String rmtp;
     private String manufacturerType;
     private Long startTime;
     private Long endTime;
@@ -102,6 +103,13 @@ public class ActivityVideoDTO {
     }
     public Long getStartTime() {
         return startTime;
+    }
+
+    public String getRmtp() {
+        return rmtp;
+    }
+    public void setRmtp(String rmtp) {
+        this.rmtp = rmtp;
     }
     @Override
     public String toString() {

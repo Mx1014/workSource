@@ -5,6 +5,6 @@ package com.everhomes.rest.ui.user;
  * @author janson
  *
  */
-public class GetVideoPermisionInfoCommand {
+public class GetVideoPermissionInfoCommand {
 
 }

@@ -53,9 +53,9 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
+import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.AppIdStatusCommand;
 import com.everhomes.rest.user.AppIdStatusResponse;
@@ -1067,20 +1067,20 @@ public class UserController extends ControllerBase {
      */
     @RequestMapping("requestVideoPermission")
     @RestReturn(value = UserVideoPermissionDTO.class)
-    public RestResponse requestVideoPermission(@Valid RequestVideoPermisionCommand cmd) {
-        RestResponse resp = new RestResponse();
+    public RestResponse requestVideoPermission(@Valid RequestVideoPermissionCommand cmd) {
+        RestResponse resp = new RestResponse(activityService.requestVideoPermission(cmd));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
     }
     
     /**
-     * <b>URL: /user/getVideoPermision</b>
+     * <b>URL: /user/getVideoPermission</b>
      * <p>获取用户是否有视频权限</p>
      */
-    @RequestMapping("getVideoPermision")
+    @RequestMapping("getVideoPermission")
     @RestReturn(value = UserVideoPermissionDTO.class)
-    public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermisionInfoCommand cmd) {
+    public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermissionInfoCommand cmd) {
         RestResponse resp = new RestResponse(activityService.GetVideoPermisionInfo(cmd));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");

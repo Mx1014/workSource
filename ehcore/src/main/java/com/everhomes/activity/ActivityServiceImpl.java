@@ -106,9 +106,9 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
-import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
+import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
@@ -2170,7 +2170,7 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 	
 	@Override
-	public void requestVideoPermission(RequestVideoPermisionCommand cmd) {
+	public UserVideoPermissionDTO requestVideoPermission(RequestVideoPermissionCommand cmd) {
         User user = UserContext.current().getUser();
         UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
         if(null != profile) {
@@ -2184,18 +2184,20 @@ public class ActivityServiceImpl implements ActivityService {
             p2.setOwnerId(user.getId());
             userActivityProvider.addUserProfile(p2);
         }
+        
+        return GetVideoPermisionInfo(new GetVideoPermissionInfoCommand());
 	}
 	
 	@Override
-	public UserVideoPermissionDTO GetVideoPermisionInfo(GetVideoPermisionInfoCommand cmd) {
+	public UserVideoPermissionDTO GetVideoPermisionInfo(GetVideoPermissionInfoCommand cmd) {
 	    UserVideoPermissionDTO dto = new UserVideoPermissionDTO();
 	    User user = UserContext.current().getUser();
 	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
         if(profile == null || null == profile.getItemValue()) {
-            return null;
+            return dto;
         }
         
-        RequestVideoPermisionCommand req = (RequestVideoPermisionCommand)StringHelper.fromJsonString(profile.getItemValue(), RequestVideoPermisionCommand.class);
+        RequestVideoPermissionCommand req = (RequestVideoPermissionCommand)StringHelper.fromJsonString(profile.getItemValue(), RequestVideoPermissionCommand.class);
         
         dto.setVideoToken(req.getVideoToken());
         dto.setSessionId(req.getSessionId());
@@ -2206,6 +2208,7 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {
 	    ActivityVideo video = new ActivityVideo();
+	    String rmtp = "";
 	    if(cmd.getRoomId() == null) {
 	        //app sdk
 	        video.setIntegralTag1(0l);
@@ -2227,6 +2230,7 @@ public class ActivityServiceImpl implements ActivityService {
 	            device.setStatus((byte)1);//valid
                device.setRelativeId(cmd.getActivityId());
                device.setRelativeType("activity");
+               device.setRoomId(cmd.getRoomId());
 	            yzbDeviceProvider.createYzbDevice(device);
 	            
 	            yzbVideoService.setContinue(cmd.getRoomId(), 0);
@@ -2242,6 +2246,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	            
 	            device.setRelativeId(cmd.getActivityId());
+	        }
+	        
 	            YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
 	            if(liveResp == null) {
 	                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -2250,10 +2256,10 @@ public class ActivityServiceImpl implements ActivityService {
 	            String url = liveResp.getRetinfo().getDstexkey();
 	            String vid = url.substring(0, url.lastIndexOf("/"));
 	            video.setVideoSid(vid);
+	            rmtp = url;
 	            yzbVideoService.setContinue(cmd.getRoomId(), 1);
 	            
 	            yzbDeviceProvider.updateYzbDevice(device);
-	        }
 	    }
 	    
 	    if(video.getVideoSid() == null) {
@@ -2268,9 +2274,12 @@ public class ActivityServiceImpl implements ActivityService {
 	    video.setStartTime(System.currentTimeMillis());
 	    video.setIntegralTag1(0l);
 	    video.setVideoState(VideoState.LIVE.getCode());
+	    video.setOwnerType("activity");
+	    video.setOwnerId(cmd.getActivityId());
 	    activityVideoProvider.createActivityVideo(video);
 	    ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
 	    dto.setVideoUrl("yzb://" + video.getVideoSid());
+	    dto.setRmtp(rmtp);
 	    
 	    return dto;
 	}

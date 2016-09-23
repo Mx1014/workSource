@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class RequestVideoPermisionCommand {
+public class RequestVideoPermissionCommand {
     private String manufacturerType;
     private String phone;
     private String videoToken; 
