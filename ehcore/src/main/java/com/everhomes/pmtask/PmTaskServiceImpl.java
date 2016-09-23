@@ -194,23 +194,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User current = UserContext.current().getUser();
 		
 		Byte status = cmd.getStatus();
-//		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
-//				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-//			
-//			if(null == cmd.getOrganizationId()){
-//				LOGGER.error("OrganizationId cannot be null.");
-//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//	    				"OrganizationId cannot be null.");
-//			}
-//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
-//	    	if(!privileges.contains(PrivilegeConstants.VIEWTASKLIST)){
-//	    		returnNoPrivileged(privileges, current);
-//			}
-//		}
+		List<PmTask> list = new ArrayList<>();
+		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+			
+			if(null == cmd.getOrganizationId()){
+				LOGGER.error("OrganizationId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"OrganizationId cannot be null.");
+			}
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else{
+				returnNoPrivileged(privileges, current);
+			}
+	    	
+		}else{
+			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+					, cmd.getPageAnchor(), cmd.getPageSize());
+		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
-		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
-				, cmd.getPageAnchor(), cmd.getPageSize());
+		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
@@ -283,8 +293,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<String> result = new ArrayList<String>();
 		for(Long p:privileges){
-			if(p.longValue() == PrivilegeConstants.VIEWTASKLIST)
-				result.add(PmTaskPrivilege.VIEWTASKLIST.getCode());
+			if(p.longValue() == PrivilegeConstants.LISTALLTASK)
+				result.add(PmTaskPrivilege.LISTALLTASK.getCode());
+			else if(p.longValue() == PrivilegeConstants.LISTUSERTASK)
+				result.add(PmTaskPrivilege.LISTUSERTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
 				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.COMPLETETASK)

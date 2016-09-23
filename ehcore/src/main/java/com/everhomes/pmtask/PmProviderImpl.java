@@ -164,6 +164,12 @@ public class PmProviderImpl implements PmTaskProvider{
     				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.OTHER.getCode())));
     		query.groupBy(Tables.EH_PM_TASKS.ID);
 
+    	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){
+        	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+        	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
+        					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
+        	query.groupBy(Tables.EH_PM_TASKS.ID);
+        	
     	}else{
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
