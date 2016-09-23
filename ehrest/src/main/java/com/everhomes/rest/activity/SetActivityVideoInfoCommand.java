@@ -10,11 +10,18 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class SetActivityVideoInfoCommand {
+    private Integer namespaceId;
     private Long activityId;
     private String roomId;
     private String vid;
     private Byte isContinue;
 
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
     public String getRoomId() {
         return roomId;
     }

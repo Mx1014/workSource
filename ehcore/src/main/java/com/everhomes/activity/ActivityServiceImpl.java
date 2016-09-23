@@ -2213,9 +2213,43 @@ public class ActivityServiceImpl implements ActivityService {
             //default, use device
 	        video.setRoomId(cmd.getRoomId());
 	        video.setIntegralTag1(1l);
+	        
+	        YzbDevice device = yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());
+	        if(device == null) {
+	            //create new device
+	            device = new YzbDevice();
+	            device.setDeviceId(cmd.getRoomId());
+	            if(cmd.getNamespaceId() == null) {
+	                device.setNamespaceId(UserContext.current().getNamespaceId());    
+	            }
+	            device.setState(YzbDeviceState.LIVING.getCode());//LIVING
+	            device.setStatus((byte)1);//valid
+               device.setRelativeId(cmd.getActivityId());
+               device.setRelativeType("activity");
+	            yzbDeviceProvider.createYzbDevice(device);
+	            
+	            yzbVideoService.setContinue(cmd.getRoomId(), 0);
+	        } else {
+	            if(!cmd.getActivityId().equals(device.getRelativeId())
+	                    && device.getState().equals(YzbDeviceState.LIVING.getCode())) {
+	                LOGGER.warn("new living but device is already living, cmd=" + cmd + " device=" + device.getRelativeId());
+	            }
+	            
+	            if(device.getRelativeId() == null || !cmd.getActivityId().equals(device.getRelativeId())) {
+	                //new live stream
+	                yzbVideoService.setContinue(cmd.getRoomId(), 0);
+	            }
+	            
+	            device.setRelativeId(cmd.getActivityId());
+	            YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
+	            if(liveResp == null) {
+	                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
+	            }
+	            
+	            yzbVideoService.setContinue(cmd.getRoomId(), 1);
+	        }
 	    }
-	    
-	    yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());
 	    
 	    User user = UserContext.current().getUser();
 	    video.setCreatorUid(user.getId());
@@ -2225,7 +2259,10 @@ public class ActivityServiceImpl implements ActivityService {
 	    video.setIntegralTag1(0l);
 	    video.setVideoState(VideoState.LIVE.getCode());
 	    activityVideoProvider.createActivityVideo(video);
-	    return ConvertHelper.convert(video, ActivityVideoDTO.class);
+	    ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+	    dto.setVideoUrl("");
+	    
+	    return dto;
 	}
 	
    @Override
