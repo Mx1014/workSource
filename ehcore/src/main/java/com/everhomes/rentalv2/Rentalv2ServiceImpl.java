@@ -195,6 +195,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
@@ -1060,9 +1061,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.add(Calendar.DAY_OF_MONTH, 7); 
 		try {
-			List<RentalCell> cells = this.rentalProvider.findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), dateSF.format(beginCalendar.getTime()), 
+			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), dateSF.format(beginCalendar.getTime()), 
 					dateSF.format(endCalendar.getTime()));
-			if(null == cells)
+			if(null == cells || cells.size() == 0)
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
 			else {
 				BigDecimal sum = new BigDecimal(0);
@@ -1080,6 +1081,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				
 		return rSiteDTO;
 	}
+	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
+		List<RentalCell>  result = new ArrayList<RentalCell>(); 
+		for(RentalCell cell : cellList.get()){
+			//如果预定时间在开始时间之前,跳过
+			if (null != beginTime && 
+					cell.getResourceRentalDate().before((new Date(dateSF.parse(beginTime).getTime())))) {
+				 continue;
+			}
+			//如果预定时间在结束时间之后,跳过
+			if (null != endTime &&
+					cell.getResourceRentalDate().after((new Date(dateSF.parse(endTime).getTime())))) {
+				 continue;
+			}  
+			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
+			RentalCell dbCell = this.rentalProvider.getRentalCellById(cell.getId());
+			if(null != dbCell )
+				cell = dbCell;
+			result.add(cell);
+			
+		}
+		return result;
+		 
+	}
+
 	public SiteItemDTO convertItem2DTO(RentalItem item ){
 		SiteItemDTO siteItemDTO = ConvertHelper.convert(item, SiteItemDTO.class); 
 		if(item.getItemType().equals(RentalItemType.SALE.getCode())){
