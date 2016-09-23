@@ -15,7 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -33,7 +36,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserGender;
@@ -80,6 +85,9 @@ public class WXAuthController {// extends ControllerBase
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private LocaleStringService localeStringService;
     
     @Value("${server.contextPath:}")
     private String contextPath;
@@ -129,7 +137,7 @@ public class WXAuthController {// extends ControllerBase
 	}
 	/**
 	 * <b>URL: /wx/authCallback</b>
-	 * <p>微信授权后回调API，逻辑由拦截器完成。定义此接口目的是为了打印日志。</p>
+	 * <p>微信授权后回调，回调包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
 	 */
 	@RequestMapping("authCallback")
 	@RestReturn(String.class)
@@ -144,6 +152,9 @@ public class WXAuthController {// extends ControllerBase
         String namespaceInReq = params.get(KEY_NAMESPACE);
         Integer namespaceId = parseNamespace(namespaceInReq);
         
+        // 当配置了code_url时，说明从微信回调得到的code不是本服务器使用的，需要把code信息转给code_url对应的API；
+        // 这是由于微信回调只支持配置一个域名，且是严格校验的（即子域名也是严格匹配的），为了能够使得支持多个域名的回调，
+        // 需要在此配置一个中转，即在此接收到后再转给其它域名。
         String codeUrl = params.get(KEY_CODE_URL);
         if(codeUrl != null) {
             codeUrl = URLDecoder.decode(codeUrl, "UTF8");
@@ -215,16 +226,16 @@ public class WXAuthController {// extends ControllerBase
 	private void sendAuthRequestToWeixin(Integer namespaceId, String sessionId, Map<String, String> params, 
 	        HttpServletResponse response) throws Exception {
         String wxAuthCallbackUrl = configurationProvider.getValue(namespaceId, "wx.auth.callback.url", WX_AUTH_CALLBACK_URL);
-        String redirectUri =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
-        redirectUri = appendParamToUrl(redirectUri, params);
+        String callbackUrl =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
+        callbackUrl = appendParamToUrl(callbackUrl, params);
 
         String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
         String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
                 + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
-                URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
+                URLEncoder.encode(callbackUrl, "UTF-8"), sessionId); 
         
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Process weixin auth request, send auth to weixin, redirectUri={}, authorizeUrl={}", redirectUri, authorizeUri);
+            LOGGER.info("Process weixin auth request(send auth to weixin), authorizeUrl={}, callbackUrl={}", authorizeUri, callbackUrl);
         }
         
         response.sendRedirect(authorizeUri);
@@ -236,16 +247,22 @@ public class WXAuthController {// extends ControllerBase
 	 * @param redirectUrl
 	 */
 	private void redirectByWx(HttpServletResponse response, String redirectUrl) {
-	    //response.sendRedirect(redirectUrl);
+	    if(LOGGER.isDebugEnabled()) {
+	        LOGGER.debug("Process weixin auth request(redirect), redirectUrl={}", redirectUrl);
+	    }
+	    
 	    response.setContentType("text/html; charset=utf8");  
 	    PrintWriter out = null;
 	    try {
+	        User user = new User();
+	        String title = localeStringService.getLocalizedString(OAuth2ServiceErrorCode.SCOPE, 
+	            String.valueOf(OAuth2ServiceErrorCode.ERROR_REDIRECTING), user.getLocale(), "Redirecting...");
 	        out = response.getWriter();
 	        out.println("<!DOCTYPE html>"); 
 	        out.println("<html lang=\"en\">"); 
 	        out.println("<head>"); 
 	        out.println("<meta charset=\"UTF-8\">"); 
-	        out.println("<title>跳转中...</title>"); 
+	        out.println("<title>" + title + "</title>"); 
 	        out.println("</head>"); 
 	        out.println("<body>"); 
 	        out.println("<script>"); 
@@ -277,14 +294,6 @@ public class WXAuthController {// extends ControllerBase
         }
         
         return namespaceId;
-    }
-    
-    private String parseStr(Object strObj) {
-        if(strObj == null) {
-            return null;
-        } else {
-            return strObj.toString();
-        }
     }
     
     private void processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
@@ -337,8 +346,8 @@ public class WXAuthController {// extends ControllerBase
         String result = null;
         try {
             httpclient = HttpClients.createDefault();
-            HttpGet httpPost = new HttpGet(url);
-            response = httpclient.execute(httpPost);
+            HttpGet httpGet = new HttpGet(url);
+            response = httpclient.execute(httpGet);
 
             int status = response.getStatusLine().getStatusCode();
             if(status != 200){
@@ -347,9 +356,10 @@ public class WXAuthController {// extends ControllerBase
                         "Failed to get the http result");
             } else {
                 HttpEntity resEntity = response.getEntity();
-                result = EntityUtils.toString(resEntity);
+                String charset = getContentCharSet(resEntity);
+                result = EntityUtils.toString(resEntity, charset);
                 if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Get http result, url={}, result={}", safeUrl, result);
+                    LOGGER.debug("Get http result, charset={}, url={}, result={}", charset, safeUrl, result);
                 }
             }
         } catch (Exception e) {
@@ -374,4 +384,26 @@ public class WXAuthController {// extends ControllerBase
         
         return result;
     }
+    
+    public static String getContentCharSet(final HttpEntity entity) throws ParseException {
+        if (entity == null) {   
+            throw new IllegalArgumentException("HTTP entity may not be null");   
+        }   
+        String charset = null;   
+        if (entity.getContentType() != null) {    
+            HeaderElement values[] = entity.getContentType().getElements();   
+            if (values.length > 0) {   
+                NameValuePair param = values[0].getParameterByName("charset" );   
+                if (param != null) {   
+                    charset = param.getValue();   
+                }   
+            }   
+        }   
+         
+        if(charset == null || charset.length() == 0){  
+            charset = "UTF-8";  
+        }
+        
+        return charset;   
+    }  
 }
