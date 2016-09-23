@@ -15,6 +15,7 @@ public class RequestVideoPermisionCommand {
     private String manufacturerType;
     private String phone;
     private String videoToken; 
+    private String sessionId;
     
     public String getManufacturerType() {
         return manufacturerType;
@@ -33,6 +34,13 @@ public class RequestVideoPermisionCommand {
     }
     public void setVideoToken(String videoToken) {
         this.videoToken = videoToken;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
     public String toString() {
         return StringHelper.toJsonString(this);

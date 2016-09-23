@@ -56,6 +56,7 @@ import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.GetVideoPermisionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermisionCommand;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.AppIdStatusCommand;
 import com.everhomes.rest.user.AppIdStatusResponse;
 import com.everhomes.rest.user.AppServiceAccessCommand;
@@ -1065,7 +1066,7 @@ public class UserController extends ControllerBase {
      * <p>请求手机号权限</p>
      */
     @RequestMapping("requestVideoPermission")
-    @RestReturn(value = String.class)
+    @RestReturn(value = UserVideoPermissionDTO.class)
     public RestResponse requestVideoPermission(@Valid RequestVideoPermisionCommand cmd) {
         RestResponse resp = new RestResponse();
         resp.setErrorCode(ErrorCodes.SUCCESS);
@@ -1078,7 +1079,7 @@ public class UserController extends ControllerBase {
      * <p>获取用户是否有视频权限</p>
      */
     @RequestMapping("getVideoPermision")
-    @RestReturn(value = String.class)
+    @RestReturn(value = UserVideoPermissionDTO.class)
     public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermisionInfoCommand cmd) {
         RestResponse resp = new RestResponse(activityService.GetVideoPermisionInfo(cmd));
         resp.setErrorCode(ErrorCodes.SUCCESS);

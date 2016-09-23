@@ -99,10 +99,6 @@ public class NewTopicCommand {
     
     private Byte mediaDisplayFlag;
     
-    //added by Janson
-    private Byte isVideoSupport;
-    private String videoUrl;
-    
     public Byte getMediaDisplayFlag() {
 		return mediaDisplayFlag;
 	}
@@ -283,22 +279,6 @@ public class NewTopicCommand {
 	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
-
-	public Byte getIsVideoSupport() {
-        return isVideoSupport;
-    }
-
-    public void setIsVideoSupport(Byte isVideoSupport) {
-        this.isVideoSupport = isVideoSupport;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
-    }
 
     @Override
     public String toString() {

@@ -270,7 +270,8 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
-     * 查询直播信息
+     * <b>URL: /activity/getActivityVideoInfo</b>
+     * <p>获取直播信息详情</p>
      */
     @RequestMapping("getActivityVideoInfo")
     @RestReturn(value=ActivityVideoDTO.class)
@@ -282,7 +283,8 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
-     * 更新直播信息
+     * <b>URL: /activity/setActivityVideoInfo</b>
+     * <p>更新直播信息</p>
      */
     @RequestMapping("setActivityVideoInfo")
     @RestReturn(value=ActivityVideoDTO.class)

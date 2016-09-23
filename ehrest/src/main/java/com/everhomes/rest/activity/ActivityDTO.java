@@ -69,6 +69,7 @@ public class ActivityDTO {
     private Byte favoriteFlag;
     
     // Add by jannson
+    private Byte isVideoSupport;
     private Long videoId;
     private String manufacturerType;
     private String videoUrl;    //yzb://[vid]
@@ -350,6 +351,14 @@ public class ActivityDTO {
 
     public void setVideoState(Byte videoState) {
         this.videoState = videoState;
+    }
+
+    public Byte getIsVideoSupport() {
+        return isVideoSupport;
+    }
+
+    public void setIsVideoSupport(Byte isVideoSupport) {
+        this.isVideoSupport = isVideoSupport;
     }
 
     public String toString() {
