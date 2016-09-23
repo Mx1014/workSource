@@ -3822,8 +3822,8 @@ public class PunchServiceImpl implements PunchService {
 			return actualResult;
 		}
 		
-		String[] times = timeTotal.split(".");
-		String[] actuals = actualResult.split(".");
+		String[] times = timeTotal.split("\\.");
+		String[] actuals = actualResult.split("\\.");
 		
 		int days = Integer.parseInt(times[0]) + Integer.parseInt(actuals[0]);
 		int hours = Integer.parseInt(times[1]) + Integer.parseInt(actuals[1]);
