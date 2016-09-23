@@ -588,4 +588,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 	VALUES((@menu_scope_id := @menu_scope_id + 1),41300,'', 'EhNamespaces', 999992,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 999992,2);
+	
+delete from eh_launch_pad_items where namespace_id = 999992 and action_type != 30 and item_label = '停车充值';
+delete from eh_web_menu_privileges where id in(3,4,5,6,7,8,9,73,74,75,77) and menu_id in (21000,22000, 23000);
+
 
