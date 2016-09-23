@@ -224,7 +224,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	}
 
 	@Override
-	public String processMessageToCreatorBody(ApprovalRequest approvalRequest) {
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
 		String scope = null;
 		int code = 0;
 		Map<String, Object> map = new HashMap<>();
@@ -235,7 +235,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}else {
 			scope = ApprovalNotificationTemplateCode.SCOPE;
 			code = ApprovalNotificationTemplateCode.EXCEPTION_REJECTED;
-			map.put("reason", approvalRequest.getReason());
+			map.put("reason", StringUtils.isBlank(reason)?approvalRequest.getReason():reason);
 			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");

@@ -112,7 +112,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	}
 
 	@Override
-	public String processMessageToCreatorBody(ApprovalRequest approvalRequest) {
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
 		return null;
 	}
 
