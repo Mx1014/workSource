@@ -27,7 +27,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -61,7 +60,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO")
@@ -71,12 +69,12 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 	
-	private static final String RECHARGE = "CardRecharge";
-	private static final String GET_CARD = "GetCarCardInfo";
-	private static final String GET_TYPES = "GetCarTypeList";
-	private static final String GET_CARd_RULE = "GetCardRule";
-	private static final String GET_TEMP_FEE = "GetParkingPaymentInfo";
-	private static final String PAY_TEMP_FEE = "PayParkingFee";
+	private static final String RECHARGE = "/api/pay/CardRecharge";
+	private static final String GET_CARD = "/api/pay/GetCarCardInfo";
+	private static final String GET_TYPES = "/api/pay/GetCarTypeList";
+	private static final String GET_CARd_RULE = "/api/pay/GetCardRule";
+	private static final String GET_TEMP_FEE = "/api/pay/GetParkingPaymentInfo";
+	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	private static final String RULE_TYPE = "1"; //只显示ruleType = 1时的充值项
 	
 	private CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -361,18 +359,20 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     }
 	
 	public String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://220.160.111.114:9099/api/pay/" + type);
+		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.chuneng.url", "") + type);
 		StringBuilder result = new StringBuilder();
 		
-        String key = "F7A0B971B199FD2A1017CEC5";
+        String key = configProvider.getValue("parking.chuneng.key", "");
         String iv = sdf2.format(new Date());
-        String user = "ktapi";
-        String pwd = "0306A9";
+        String user = configProvider.getValue("parking.chuneng.user", "");
+        String pwd = configProvider.getValue("parking.chuneng.pwd", "");
         String data = null;
 		try {
 			data = EncryptUtil.getEncString(param, key, iv);
 		} catch (Exception e) {
 			LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Parking encrypt param error.");
 		}
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("data", data));
@@ -396,14 +396,15 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 				}
 			}
 		} catch (IOException e) {
-			LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
-
+			LOGGER.error("Parking request error, param={}, key={}, iv={}", param, key, iv, e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Parking request error.");
 		}finally {
             try {
             	instream.close();
 				response.close();
 			} catch (IOException e) {
-				LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
+				LOGGER.error("Parking close instream, response error, param={}, key={}, iv={}", param, key, iv, e);
 			}
         }
 		String json = result.toString();
@@ -488,7 +489,19 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     }
 	public static void main(String[] args) {
 		KetuoParkingVendorHandler k = new KetuoParkingVendorHandler();
-		k.getTempFee("AJQ001");
+		k.getTempFee("浙A185VK");
+//		JSONObject param = new JSONObject();
+//		
+//		param.put("orderNo", "0001201609231559054139");
+//		param.put("amount", 84500);
+//	    param.put("discount", 0);
+//	    param.put("payType", 4);
+//		String json = k.post(param, PAY_TEMP_FEE);
+//        
+//        if(LOGGER.isDebugEnabled())
+//			LOGGER.debug("Result={}", json);
+//        
+//		KetuoJsonEntity<?> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<?>>(){});
 	}
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
