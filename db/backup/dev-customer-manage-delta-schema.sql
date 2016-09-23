@@ -9,7 +9,7 @@ ALTER TABLE `eh_organization_owners` ADD COLUMN `marital_status` VARCHAR(10);
 ALTER TABLE `eh_organization_owners` ADD COLUMN `job` VARCHAR(10) COMMENT 'job';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `company` VARCHAR(100) COMMENT 'company';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `id_card_number` VARCHAR(18) COMMENT 'id card number';
-ALTER TABLE `eh_organization_owners` ADD COLUMN `avatar` VARCHAR(128) COMMENT 'avatar';
+ALTER TABLE `eh_organization_owners` ADD COLUMN `avatar` VARCHAR(1024) COMMENT 'avatar';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `status` TINYINT COMMENT 'delete: 0, normal: 1';
 ALTER TABLE `eh_organization_owners`  MODIFY COLUMN `address_id`  bigint(20) NULL COMMENT 'address id';
 
@@ -27,7 +27,7 @@ CREATE TABLE `eh_organization_owner_cars` (
   `plate_number` VARCHAR(20),
   `contacts` VARCHAR(20),
   `contact_number` VARCHAR(20),
-  `content_uri` VARCHAR(20),
+  `content_uri` VARCHAR(1024),
   `color` VARCHAR(20),
   `status` TINYINT COMMENT 'delete: 0, normal: 1',
   `create_time` DATETIME,
@@ -73,7 +73,7 @@ CREATE TABLE `eh_organization_owner_attachments` (
   `owner_id` BIGINT COMMENT 'organization owner id',
   `attachment_name` VARCHAR(100) COMMENT 'attachment name',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
-  `content_uri` VARCHAR(256) COMMENT 'attachment object link info on storage',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -89,7 +89,7 @@ CREATE TABLE `eh_organization_owner_car_attachments` (
   `owner_id` BIGINT COMMENT 'car id',
   `attachment_name` VARCHAR(100) COMMENT 'attachment name',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
-  `content_uri` VARCHAR(256) COMMENT 'attachment object link info on storage',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
