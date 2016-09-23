@@ -14,10 +14,6 @@
 >           
     <mvc:interceptors>
         <mvc:interceptor>
-            <mvc:mapping path="/**/wx/**" />
-            <bean class="com.everhomes.wx.WebRequestWeixinInterceptor" />
-        </mvc:interceptor>
-        <mvc:interceptor>
             <mvc:mapping path="/**" />
             <bean class="com.everhomes.controller.WebRequestInterceptor" />
         </mvc:interceptor>
