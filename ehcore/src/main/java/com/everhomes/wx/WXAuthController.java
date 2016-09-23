@@ -294,7 +294,7 @@ public class WXAuthController {// extends ControllerBase
         
         // 使用临时code从微信中换取accessToken
         String accessTokenUri = String.format(WX_ACCESS_TOKEN_URL, appId, secret, code);
-        String accessTokenUriWithoutSecret = accessTokenUri.replaceAll(secret, "****");
+        String accessTokenUriWithoutSecret = accessTokenUri.replaceAll("secret=" + secret, "secret=****");
         String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
         WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
         if (accessToken.getErrcode() != null) {
