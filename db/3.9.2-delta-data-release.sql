@@ -579,13 +579,13 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	VALUES ('10023', '999992', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车充值', 'cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1');
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),41000,'', 'EhNamespaces', 1000000,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41000,'', 'EhNamespaces', 999992,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 1000000,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999992,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),41200,'', 'EhNamespaces', 1000000,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41200,'', 'EhNamespaces', 999992,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),41300,'', 'EhNamespaces', 1000000,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41300,'', 'EhNamespaces', 999992,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 1000000,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 999992,2);
 
