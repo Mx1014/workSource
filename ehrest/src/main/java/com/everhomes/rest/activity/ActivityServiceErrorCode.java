@@ -14,4 +14,5 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_CHECKIN_UN_CONFIRMED=10008;
     static final int ERROR_CHECKIN_ALREADY=10009;
     static final int ERROR_VIDEO_SERVER_ERROR=10010;
+    static final int ERROR_VIDEO_PARAM_ERROR=10011;
 }

@@ -2209,6 +2209,7 @@ public class ActivityServiceImpl implements ActivityService {
 	    if(cmd.getRoomId() == null) {
 	        //app sdk
 	        video.setIntegralTag1(0l);
+	        video.setVideoSid(cmd.getVid());
 	    } else {
             //default, use device
 	        video.setRoomId(cmd.getRoomId());
@@ -2246,9 +2247,18 @@ public class ActivityServiceImpl implements ActivityService {
 	                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
 	            }
-	            
+	            String url = liveResp.getRetinfo().getDstexkey();
+	            String vid = url.substring(0, url.lastIndexOf("/"));
+	            video.setVideoSid(vid);
 	            yzbVideoService.setContinue(cmd.getRoomId(), 1);
+	            
+	            yzbDeviceProvider.updateYzbDevice(device);
 	        }
+	    }
+	    
+	    if(video.getVideoSid() == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_VIDEO_PARAM_ERROR, "video client params error");
 	    }
 	    
 	    User user = UserContext.current().getUser();
@@ -2260,7 +2270,7 @@ public class ActivityServiceImpl implements ActivityService {
 	    video.setVideoState(VideoState.LIVE.getCode());
 	    activityVideoProvider.createActivityVideo(video);
 	    ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
-	    dto.setVideoUrl("");
+	    dto.setVideoUrl("yzb://" + video.getVideoSid());
 	    
 	    return dto;
 	}
