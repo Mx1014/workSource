@@ -13,6 +13,7 @@ CREATE TABLE `eh_activity_video` (
   `end_time` BIGINT NOT NULL DEFAULT 0,
   `room_type` VARCHAR(64),
   `room_id` VARCHAR(64),
+  `video_sid` VARCHAR(64),
   `manufacturer_type` VARCHAR(64) COMMENT 'YZB',
   `extra` TEXT,
   `integral_tag1` BIGINT,

@@ -1,5 +1,6 @@
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.db.AccessSpec;
@@ -9,6 +10,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import com.everhomes.server.schema.tables.pojos.EhYzbDevices;
 import com.everhomes.server.schema.tables.records.EhYzbDevicesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class YzbDeviceProviderImpl implements YzbDeviceProvider {
@@ -101,7 +104,29 @@ public class YzbDeviceProviderImpl implements YzbDeviceProvider {
 
         return objs;
     }
+    
+    @Override
+    public YzbDevice findYzbDeviceById(String deviceId) {
+        ListingLocator locator = new ListingLocator();
+        List<YzbDevice> devices = queryYzbDevices(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                return query;
+            }
+            
+        });
+        
+        if(devices != null && devices.size() > 0) {
+            return devices.get(0);
+        }
+        
+        return null;
+    }
 
     private void prepareObj(YzbDevice obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
 }

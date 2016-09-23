@@ -215,6 +215,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private YzbDeviceProvider yzbDeviceProvider;
+    
+    @Autowired
+    private YzbVideoService yzbVideoService;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -262,6 +265,11 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setStartTimeMs(startTimeMs);
         activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        //added by janson
+        activity.setIsVideoSupport(cmd.getIsVideoSupport());
+        activity.setVideoUrl(cmd.getVideoUrl());
+        
         activityProvider.createActity(activity);
         
         ActivityRoster roster = new ActivityRoster();
@@ -2166,13 +2174,13 @@ public class ActivityServiceImpl implements ActivityService {
         User user = UserContext.current().getUser();
         UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
         if(null != profile) {
-            profile.setItemValue(cmd.getVideoToken());
+            profile.setItemValue(cmd.toString());
             userActivityProvider.updateUserProfile(profile);
         } else {
             UserProfile p2 = new UserProfile();
             p2.setItemName(UserProfileContstant.YZB_VIDEO_PERMISION);
             p2.setItemKind((byte)0);
-            p2.setItemValue(cmd.getVideoToken());
+            p2.setItemValue(cmd.toString());
             p2.setOwnerId(user.getId());
             userActivityProvider.addUserProfile(p2);
         }
@@ -2187,17 +2195,29 @@ public class ActivityServiceImpl implements ActivityService {
             return null;
         }
         
-        dto.setVideoToken(profile.getItemValue());
+        RequestVideoPermisionCommand req = (RequestVideoPermisionCommand)StringHelper.fromJsonString(profile.getItemValue(), RequestVideoPermisionCommand.class);
+        
+        dto.setVideoToken(req.getVideoToken());
+        dto.setSessionId(req.getSessionId());
         
         return dto;
 	}
 	
 	@Override
 	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {
-	    //TODO request other to get vid
-	    User user = UserContext.current().getUser();
 	    ActivityVideo video = new ActivityVideo();
-	    video.setRoomId(cmd.getRoomId());
+	    if(cmd.getRoomId() == null) {
+	        //app sdk
+	        video.setIntegralTag1(0l);
+	    } else {
+            //default, use device
+	        video.setRoomId(cmd.getRoomId());
+	        video.setIntegralTag1(1l);
+	    }
+	    
+	    yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());
+	    
+	    User user = UserContext.current().getUser();
 	    video.setCreatorUid(user.getId());
 	    video.setManufacturerType(VideoManufacturerType.YZB.toString());
 	    video.setRoomType(ActivityVideoRoomType.YZB.toString());

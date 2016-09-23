@@ -17,4 +17,6 @@ public interface YzbDeviceProvider {
 
     List<YzbDevice> queryYzbDevices(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+    YzbDevice findYzbDeviceById(String deviceId);
+
 }
