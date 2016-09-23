@@ -214,7 +214,7 @@ public class WXAuthController {// extends ControllerBase
                 baseUrl = baseUrl + "&";
             }
             Entry<String, String> entry = iterator.next();
-            baseUrl = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF8");
+            baseUrl += entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF8");
             isFirst = false;
         }
         
