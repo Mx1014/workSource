@@ -24,6 +24,7 @@ import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -80,6 +81,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -3856,20 +3858,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
 
         User currentUser = UserContext.current().getUser();
-        CommunityPmOwner owner = new CommunityPmOwner();
-        owner.setCommunityId(cmd.getCommunityId());
-        owner.setContactName(cmd.getContactName());
-        owner.setContactToken(cmd.getContactToken());
-        owner.setAvatar(cmd.getAvatar());
+        CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
         owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
-        owner.setCompany(cmd.getCompany());
         owner.setOrgOwnerTypeId(ownerType.getId());
-        owner.setRegisteredResidence(cmd.getRegisteredResidence());
-        owner.setMaritalStatus(cmd.getMaritalStatus());
-        owner.setJob(cmd.getJob());
-        owner.setOrganizationId(cmd.getOrganizationId());
         owner.setNamespaceId(currentUser.getNamespaceId());
-        owner.setIdCardNumber(cmd.getIdCardNumber());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         UserGender gender = UserGender.fromCode(cmd.getGender());
         if (gender != null) {
@@ -3890,16 +3882,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     if (addressCmd.getCheckInDate() != null) {
                         createOrganizationOwnerBehavior(ownerId, address.getId(), addressCmd.getCheckInDate(), OrganizationOwnerBehaviorType.IMMIGRATION);
                     }
-                    // 如果小区里有该手机号的用户自动审核
-                    UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(currentUser.getNamespaceId(), cmd.getContactToken());
-                    if(userIdentifier != null) {
-                        User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-						if(user != null && Objects.equals(user.getCommunityId(), cmd.getCommunityId())) {
-							ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-						}
-					}
-					propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-					// getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
+                    // 如果小区里有该手机号的用户, 则自动审核当前客户
+                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
+                    propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
+                    // getIntoFamily(address, cmd.getContactToken(), currentUser.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -3908,6 +3894,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         });
         pmOwnerSearcher.feedDoc(owner);
         return ConvertHelper.convert(owner, OrganizationOwnerDTO.class);
+    }
+
+    // 如果小区里有该手机号的用户, 则自动审核当前客户
+    private void autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(currentNamespaceId(), contactToken);
+        if(userIdentifier != null) {
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if(user != null) {
+                List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
+                    Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+                    query.addConditions(c);
+                    return query;
+                });
+                if (groups != null && groups.size() > 0) {
+                    GroupMember member = groupProvider.findGroupMemberByMemberInfo(groups.get(0).getId(), EntityType.USER.getCode(), user.getId());
+                    if (member != null) {
+                        ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                        // 审核当前用户
+                        // ApproveMemberCommand cmd = new ApproveMemberCommand();
+                        // cmd.setId(groups.get(0).getId());
+                        // cmd.setMemberUid(member.getId());
+                        // familySerivce.adminApproveMember(cmd);
+                    }
+                }
+            }
+        }
     }
 
     private void createOrganizationOwnerBehavior(long ownerId, Long addressId, Long date, OrganizationOwnerBehaviorType behaviorType) {

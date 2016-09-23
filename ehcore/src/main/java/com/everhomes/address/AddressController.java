@@ -1,53 +1,29 @@
 package com.everhomes.address;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.CommunitySummaryDTO;
-import com.everhomes.rest.address.CreateServiceAddressCommand;
-import com.everhomes.rest.address.DeleteServiceAddressCommand;
-import com.everhomes.rest.address.DisclaimAddressCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListCommunityByKeywordCommand;
-import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.SearchCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/address")
@@ -172,7 +148,8 @@ public class AddressController extends ControllerBase {
      */
     @RequestMapping("claimAddressV2")
     @RestReturn(value=FamilyDTO.class)
-    public RestResponse claimAddressV2(@Valid ClaimAddressCommand cmd) {
+    public RestResponse
+    claimAddressV2(@Valid ClaimAddressCommand cmd) {
         FamilyDTO info = this.addressService.claimAddressV2(cmd);
         RestResponse response = new RestResponse(info);
         
