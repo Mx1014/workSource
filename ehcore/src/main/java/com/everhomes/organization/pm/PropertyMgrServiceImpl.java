@@ -3922,6 +3922,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
     }
 
+    // 自动审核group member
+    @Override
+    public void autoApprovalGroupMember(Long userId, Long communityId, Long groupId) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+        if(userIdentifier != null) {
+            CommunityPmOwner pmOwner = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(currentNamespaceId(),
+                    communityId, userIdentifier.getIdentifierToken());
+            if (pmOwner != null) {
+                ApproveMemberCommand approveCmd = new ApproveMemberCommand();
+                approveCmd.setMemberUid(UserContext.current().getUser().getId());
+                approveCmd.setId(groupId);
+                familySerivce.adminApproveMember(approveCmd);
+            }
+        }
+    }
+
     private void createOrganizationOwnerBehavior(long ownerId, Long addressId, Long date, OrganizationOwnerBehaviorType behaviorType) {
         OrganizationOwnerBehavior behavior = new OrganizationOwnerBehavior();
         behavior.setAddressId(addressId);
@@ -4758,6 +4774,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Override
     public void syncOwnerCarIndex() {
         ownerCarSearcher.syncFromDb();
+    }
+
+    @Override
+    public void updateOrganizationOwnerAddressAuthType(Long userId, Long communityId, Long addressId, OrganizationOwnerAddressAuthType authType) {
+        if (Stream.of(userId, communityId, addressId, authType).allMatch(Objects::nonNull)) {
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+            if(userIdentifier != null) {
+                CommunityPmOwner pmOwner = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(currentNamespaceId(),
+                        communityId, userIdentifier.getIdentifierToken());
+                if (pmOwner != null) {
+                    OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+                            currentNamespaceId(), pmOwner.getId(), addressId);
+                    if (ownerAddress != null && ownerAddress.getAuthType() != authType.getCode()) {
+                        ownerAddress.setAuthType(authType.getCode());
+                        propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                    }
+                }
+            }
+        }
     }
 
     private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address) {
