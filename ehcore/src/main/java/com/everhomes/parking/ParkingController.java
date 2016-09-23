@@ -22,6 +22,7 @@ import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
+import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
@@ -35,12 +36,13 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
 import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
+import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 
@@ -85,15 +87,29 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /parking/getParkingTempFee</b>
+     * <p>查询停车临时费用</p>
+     */
+    @RequestMapping("getParkingTempFee")
+    @RestReturn(value=ParkingTempFeeDTO.class)
+    public RestResponse getParkingTempFee(GetParkingTempFeeCommand cmd) {
+        
+    	ParkingTempFeeDTO dto = parkingService.getParkingTempFee(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /parking/listParkingRechargeRates</b>
      * <p>查询指定园区/小区、停车场对应的充值费率列表</p>
      */
     @RequestMapping("listParkingRechargeRates")
     @RestReturn(value=ParkingRechargeRateDTO.class, collection=true)
     public RestResponse listParkingRechargeRates(ListParkingRechargeRatesCommand cmd) {
-        List<ParkingRechargeRateDTO> rateList = null;
         
-        rateList = parkingService.listParkingRechargeRates(cmd);
+        List<ParkingRechargeRateDTO> rateList = parkingService.listParkingRechargeRates(cmd);
         RestResponse response = new RestResponse(rateList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -194,6 +210,22 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /parking/createParkingTempOrder</b>
+     * <p>创建临时订单</p>
+     */
+    @RequestMapping("createParkingTempOrder")
+    @RestReturn(value=CommonOrderDTO.class)
+    public RestResponse createParkingTempOrder(CreateParkingRechargeOrderCommand cmd) {
+        CommonOrderDTO dto = null;
+        
+        dto = parkingService.createParkingTempOrder(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /parking/listParkingCardRequests</b>
      * <p>查询指定园区/小区、停车场、车牌对应的月卡申请列表</p>
      */
@@ -241,15 +273,13 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /parking/setParkingCardReserveDays</b>
-     * <p>设置充值卡保留多少天（在发卡后到领卡之间的天数）</p>
+     * <b>URL: /parking/setParkingLotConfig</b>
      */
-    @RequestMapping("setParkingCardReserveDays")
+    @RequestMapping("setParkingLotConfig")
     @RestReturn(value=String.class)
-    public RestResponse setParkingCardReserveDays(SetParkingCardReserveDaysCommand cmd) {
-        // set parking card reserve days, according to the card_reserve_days of eh_parking_lots
+    public RestResponse setParkingLotConfig(SetParkingLotConfigCommand cmd) {
         
-    	parkingService.setParkingCardReserveDays(cmd);
+    	parkingService.setParkingLotConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

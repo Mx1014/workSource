@@ -2,7 +2,7 @@ package com.bosigao.cxf.rest;
 
 import com.everhomes.util.StringHelper;
 
-public class CardInfo {
+public class BosigaoCardInfo {
 	private String userName;
 	private String mobile;
 	private String carNumber;

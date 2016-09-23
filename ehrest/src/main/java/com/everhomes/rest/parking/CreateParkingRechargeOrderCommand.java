@@ -38,17 +38,13 @@ public class CreateParkingRechargeOrderCommand {
 	@NotNull
     private Long payerEnterpriseId;
     private String vendorName;
-    @NotNull
+    
+    private String orderToken;
     private String cardNumber;
-    @NotNull
     private String rateToken;
-    @NotNull
     private String rateName;
-    @NotNull
     private Integer monthCount;
-    @NotNull
     private BigDecimal price;
-    @NotNull
 	private Long expiredTime; 
     
 	public Long getExpiredTime() {
@@ -170,4 +166,12 @@ public class CreateParkingRechargeOrderCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getOrderToken() {
+		return orderToken;
+	}
+
+	public void setOrderToken(String orderToken) {
+		this.orderToken = orderToken;
+	}
 }

@@ -41,6 +41,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -50,6 +51,7 @@ import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
+import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -66,22 +68,28 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingRechargeType;
+import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
 import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
+import com.everhomes.rest.parking.SetParkingLotConfigCommand;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -90,7 +98,7 @@ import com.everhomes.util.RuntimeErrorException;
 public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
-    SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     @Autowired
     private ParkingProvider parkingProvider;
@@ -112,6 +120,7 @@ public class ParkingServiceImpl implements ParkingService {
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
+    	
     	checkPlateNumber(cmd.getPlateNumber());
         Long parkingLotId = cmd.getParkingLotId();
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
@@ -139,14 +148,15 @@ public class ParkingServiceImpl implements ParkingService {
     
     @Override
     public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
+    	
     	Long parkingLotId = cmd.getParkingLotId();
-    	List<ParkingRechargeRateDTO> parkingRechargeRateList = null;
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
         
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
         
-        parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId,cmd.getPlateNumber(),cmd.getCardNo());
+        List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(),
+        		parkingLotId, cmd.getPlateNumber(), cmd.getCardNo());
         
         return parkingRechargeRateList;
     }
@@ -165,16 +175,18 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     public List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd){
-    	List<ParkingLotDTO> parkingLotList = null;
+    	
     	if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
-    		LOGGER.error("ownerId or ownertype cannot be null.");
+    		LOGGER.error("OwnerId or ownertype cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"ownerId or ownertype cannot be null.");
+					"OwnerId or ownertype cannot be null.");
     	}
     	
     	List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
-    	parkingLotList = list.stream().map(r -> ConvertHelper.convert(r, ParkingLotDTO.class))
+    	
+    	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> ConvertHelper.convert(r, ParkingLotDTO.class))
     		.collect(Collectors.toList());
+    	
     	return parkingLotList;
     }
     
@@ -187,7 +199,54 @@ public class ParkingServiceImpl implements ParkingService {
     	String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
-		return handler.getRequestParkingCard(cmd);
+    	List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
+        		cmd.getPlateNumber());
+        User user = UserContext.current().getUser();
+		if(cardList.size()>0){
+			LOGGER.error("PlateNumber card is existed, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
+					"PlateNumber card is existed");
+		}
+
+        if(cardList.size() == 0){
+        	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+        			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
+        			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
+        	if(list.size()>0){
+        		LOGGER.error("PlateNumber is already applied.");
+    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
+    					"plateNumber is already applied.");
+        	}
+        }
+		
+		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
+		
+		ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
+		parkingCardRequest.setOwnerId(cmd.getOwnerId());
+		parkingCardRequest.setOwnerType(cmd.getOwnerType());
+		parkingCardRequest.setParkingLotId(cmd.getParkingLotId());
+		parkingCardRequest.setRequestorEnterpriseId(cmd.getRequestorEnterpriseId());
+		parkingCardRequest.setPlateNumber(cmd.getPlateNumber());
+		parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
+		parkingCardRequest.setPlateOwnerName(cmd.getPlateOwnerName());
+		parkingCardRequest.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
+		parkingCardRequest.setRequestorUid(user.getId());
+		//设置一些初始状态
+		parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
+		parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+		parkingCardRequest.setCreatorUid(user.getId());
+		parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		
+		parkingProvider.requestParkingCard(parkingCardRequest);
+		
+		parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
+		
+		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
+		parkingCardRequestDTO.setRanking(count);
+		
+		return parkingCardRequestDTO;
+    	
 	}
     
 	@Override
@@ -199,8 +258,8 @@ public class ParkingServiceImpl implements ParkingService {
     	cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
     	User user = UserContext.current().getUser();
     	
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(),cmd.getOwnerType(), 
-    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null, cmd.getPageAnchor(),
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null, cmd.getPageAnchor(),
     			cmd.getPageSize());
     					
     	if(list.size() > 0){
@@ -219,15 +278,76 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
+		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
+	}
+	
+	@Override
+	public CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd) {
+		return createParkingTempOrder(cmd, ParkingRechargeType.TEMPORARY.getCode());
+
+	}
+	
+	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
-		return handler.createParkingRechargeOrder(cmd, parkingLot);
+    	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
-
+		User user = UserContext.current().getUser();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		parkingRechargeOrder.setRechargeType(rechargeType);
+		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
+		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
+		parkingRechargeOrder.setParkingLotId(parkingLot.getId());
+		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
+		parkingRechargeOrder.setPlateOwnerName(cmd.getPlateOwnerName());
+		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
+		
+		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
+		parkingRechargeOrder.setPayerUid(user.getId());
+		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
+		parkingRechargeOrder.setCreatorUid(user.getId());
+		Long now = System.currentTimeMillis();
+		parkingRechargeOrder.setCreateTime(new Timestamp(now));
+		
+		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
+		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
+		//查询rate
+		if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+			parkingRechargeOrder.setRateToken(cmd.getRateToken());
+			handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+		}
+		parkingRechargeOrder.setOrderToken(cmd.getOrderToken());
+		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
+		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		
+		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
+//		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
+//		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
+		
+		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(parkingRechargeOrder.getRateName());
+		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		orderCmd.setSubject("停车充值订单");
+		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+    	
+		return dto;
 	}
 	
 	@Override
@@ -240,9 +360,8 @@ public class ParkingServiceImpl implements ParkingService {
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
 		User user = UserContext.current().getUser();
 
-		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders
-    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),
-    					cmd.getPageAnchor(), cmd.getPageSize(),user.getId());
+		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), cmd.getPlateNumber(), user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -280,6 +399,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(cmd.getStartDate() != null)
@@ -287,12 +407,10 @@ public class ParkingServiceImpl implements ParkingService {
 		if(cmd.getEndDate() != null)
 			new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		//User user = UserContext.current().getUser();
+
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				pageSize,startDate,endDate,cmd.getRechargeStatus()/*,user.getId()*/
-				);
+				cmd.getPayerPhone(), startDate, endDate, cmd.getPageAnchor(), pageSize);
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -335,12 +453,24 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 	
 	@Override
-	public void setParkingCardReserveDays(SetParkingCardReserveDaysCommand cmd){
+	public void setParkingLotConfig(SetParkingLotConfigCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
+		if(null == cmd.getReserveDay()){
+        	LOGGER.error("ReserveDay cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ReserveDay cannot be null.");
+        }
+		if(null == cmd.getRequestNum()){
+        	LOGGER.error("ReserveDay cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"RequestNum cannot be null.");
+        }
+		
 		//设置厂商月卡 保留时间 各个厂商 可能不一样
-        parkingLot.setCardReserveDays(cmd.getCount());
-        parkingProvider.setParkingCardReserveDays(parkingLot);
+        parkingLot.setCardReserveDays(cmd.getReserveDay());
+        parkingLot.setMaxRequestNum(cmd.getRequestNum());
+        parkingProvider.setParkingLotConfig(parkingLot);
 	}
 	
 	@Override
@@ -381,8 +511,8 @@ public class ParkingServiceImpl implements ParkingService {
         }
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null,null, 
-    			null, null, null,ParkingCardRequestStatus.QUEUEING.getCode(),
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, null, 
+    			null, null, null, ParkingCardRequestStatus.QUEUEING.getCode(),
     			null, null, cmd.getCount())
     			.stream().map(r -> {
     				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
@@ -416,7 +546,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 	
 	private void sendMessageToUser(Long userId, String content) {
-//		User user = UserContext.current().getUser();
+
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
@@ -548,21 +678,17 @@ public class ParkingServiceImpl implements ParkingService {
 		return String.valueOf(code);
 	}
 	@Override
-	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
-			HttpServletResponse response){
+	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd, HttpServletResponse response){
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(cmd.getStartDate() != null)
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			new Timestamp(cmd.getEndDate());
-		//User user = UserContext.current().getUser();
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				null,startDate,endDate,cmd.getRechargeStatus()/*,user.getId()*/
-				);
+				cmd.getPayerPhone(), startDate, endDate, cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
 		
 		Font font = wb.createFont();   
@@ -648,5 +774,22 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		order.setIsDelete(IsOrderDelete.DELETED.getCode());
 		parkingProvider.updateParkingRechargeOrder(order);
+	}
+	
+	private Long createOrderNo(Long time) {
+		String bill = String.valueOf(time) + (int) (Math.random()*1000);
+		return Long.valueOf(bill);
+	}
+
+	@Override
+	public ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd) {
+		checkPlateNumber(cmd.getPlateNumber());
+    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		
+    	String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+    	ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
+		return dto;
 	}
 }
