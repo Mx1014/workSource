@@ -431,7 +431,7 @@ public class PunchServiceImpl implements PunchService {
 					morningStatus = exceptionApproval.getMorningApprovalStatus();
 				Byte afternoonStatus = pdl.getAfternoonPunchStatus();
 				if(null!=exceptionApproval.getAfternoonApprovalStatus())
-					morningStatus = exceptionApproval.getAfternoonApprovalStatus();
+					afternoonStatus = exceptionApproval.getAfternoonApprovalStatus();
 				if (calculateExceptionCode(afternoonStatus).equals(ExceptionStatus.NORMAL.getCode())
 						&&calculateExceptionCode(morningStatus).equals(ExceptionStatus.NORMAL.getCode())) {
 				 
