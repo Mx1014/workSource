@@ -143,10 +143,17 @@ public class WXAuthController {// extends ControllerBase
 	@RequestMapping("authCallback")
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
-	public void wxRedirect(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void authCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
-	    Object ns = session.getAttribute(KEY_NAMESPACE);
-        Integer namespaceId = parseNamespace(ns);
+        
+        String namespaceInReq = request.getParameter(KEY_NAMESPACE);
+        Integer namespaceId = null;
+        if(namespaceInReq != null && namespaceInReq.trim().length() > 0) {
+            namespaceId = parseNamespace(namespaceInReq);
+        } else {
+            Object ns = session.getAttribute(KEY_NAMESPACE);
+            namespaceId = parseNamespace(ns);
+        }
         String sourceUrl = parseStr(session.getAttribute(KEY_SOURCE_URL));
         String sourceUrlInReq = request.getParameter(KEY_SOURCE_URL);
         if(sourceUrlInReq != null && sourceUrlInReq.trim().length() > 0) {
@@ -216,6 +223,9 @@ public class WXAuthController {// extends ControllerBase
 	private void sendAuthRequestToWeixin(Integer namespaceId, String sessionId, HttpServletResponse response) throws Exception {
         String wxAuthCallbackUrl = configurationProvider.getValue(namespaceId, "wx.auth.callback.url", WX_AUTH_CALLBACK_URL);
         String redirectUri =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(KEY_NAMESPACE, String.valueOf(namespaceId));
+        redirectUri = appendParamToUrl(redirectUri, params);
 
         String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
         String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
@@ -298,8 +308,8 @@ public class WXAuthController {// extends ControllerBase
         String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
         WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
         if (accessToken.getErrcode() != null) {
-            LOGGER.error("Failed to get access token from webchat, appId={}, accessToken={}, accessTokenUri={}", 
-                appId, accessTokenJson, accessTokenUriWithoutSecret);
+            LOGGER.error("Failed to get access token from webchat, namespaceId={}, appId={}, accessToken={}, accessTokenUri={}", 
+                namespaceId, appId, accessTokenJson, accessTokenUriWithoutSecret);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Failed to get access token from webchat");
         }
@@ -309,7 +319,8 @@ public class WXAuthController {// extends ControllerBase
         String userInfoJson = httpGet(userInfoUri, userInfoUri);
         WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
         if (userInfo.getErrcode()!=null) {
-            LOGGER.error("Failed to get user information from webchat, appId={}, userInfo={}, userinfoUri={}", appId, userInfoJson, userInfoUri);
+            LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}", 
+                namespaceId, appId, userInfoJson, userInfoUri);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Failed to get user information from webchat");
         }
