@@ -44,6 +44,8 @@ import com.everhomes.util.StringHelper;
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
  * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
+ * <li>isVideoSupport: 为空则不开启，为 1 则开启直播 </li>
+ * <li>videoUrl: TODO 需要么？</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -96,6 +98,10 @@ public class NewTopicCommand {
     private Byte officialFlag;
     
     private Byte mediaDisplayFlag;
+    
+    //added by Janson
+    private Byte isVideoSupport;
+    private String videoUrl;
     
     public Byte getMediaDisplayFlag() {
 		return mediaDisplayFlag;
@@ -278,7 +284,23 @@ public class NewTopicCommand {
 		this.endTime = endTime;
 	}
 
-	@Override
+	public Byte getIsVideoSupport() {
+        return isVideoSupport;
+    }
+
+    public void setIsVideoSupport(Byte isVideoSupport) {
+        this.isVideoSupport = isVideoSupport;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

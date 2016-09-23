@@ -31,6 +31,7 @@ CREATE TABLE `eh_activity_video` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_activities` ADD COLUMN `video_url` VARCHAR(128) COMMENT 'url of video support' AFTER `official_flag`;
+ALTER TABLE `eh_activities` ADD COLUMN `video_support` TINYINT NOT NULL DEFAULT 0 COMMENT 'is video support' AFTER `video_url`;
 
 DROP TABLE IF EXISTS `eh_yzb_devices`;
 CREATE TABLE `eh_yzb_devices` (
