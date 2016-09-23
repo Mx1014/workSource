@@ -215,6 +215,7 @@ public class WXAuthController {// extends ControllerBase
             }
             Entry<String, String> entry = iterator.next();
             baseUrl = entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF8");
+            isFirst = false;
         }
         
         return baseUrl + hashUrl;
@@ -233,7 +234,7 @@ public class WXAuthController {// extends ControllerBase
                 URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
         
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Process weixin auth request, send auth to weixin, authorizeUrl={}", authorizeUri);
+            LOGGER.info("Process weixin auth request, send auth to weixin, redirectUri={}, authorizeUrl={}", redirectUri, authorizeUri);
         }
         
         response.sendRedirect(authorizeUri);
