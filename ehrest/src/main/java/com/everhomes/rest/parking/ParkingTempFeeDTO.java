@@ -11,6 +11,7 @@ public class ParkingTempFeeDTO {
 	private Integer parkingTime;
 	private BigDecimal price;
 	private Integer delayTime;
+	private String orderNo;
 	public String getPlateNumber() {
 		return plateNumber;
 	}
@@ -52,4 +53,10 @@ public class ParkingTempFeeDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
 }

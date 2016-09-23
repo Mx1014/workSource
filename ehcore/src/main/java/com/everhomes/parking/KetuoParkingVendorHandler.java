@@ -329,7 +329,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}", json);
         
-		KetuoJsonEntity<?> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<?>>(){});
+		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
 		
 		return entity.isSuccess();
     }
@@ -347,7 +347,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}", json);
         
-		KetuoJsonEntity<?> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<?>>(){});
+		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
 		
 		return entity.isSuccess();
     }
@@ -514,6 +514,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
 		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
+		dto.setOrderNo(tempFee.getOrderNo());
 		return dto;
 	}
 

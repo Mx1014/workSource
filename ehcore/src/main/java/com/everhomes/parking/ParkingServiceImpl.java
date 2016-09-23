@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -320,8 +321,10 @@ public class ParkingServiceImpl implements ParkingService {
 		if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
 			parkingRechargeOrder.setRateToken(cmd.getRateToken());
 			handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+		}else{
+			parkingRechargeOrder.setPrice(cmd.getPrice());
+			parkingRechargeOrder.setOrderToken(cmd.getOrderToken());
 		}
-		parkingRechargeOrder.setOrderToken(cmd.getOrderToken());
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
 		
@@ -333,7 +336,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
-		orderCmd.setBody(parkingRechargeOrder.getRateName());
+		orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
 		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		orderCmd.setSubject("停车充值订单");
