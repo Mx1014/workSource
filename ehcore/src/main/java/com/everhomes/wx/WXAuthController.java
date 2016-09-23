@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -93,47 +94,37 @@ public class WXAuthController {// extends ControllerBase
 	public void authReq(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
         String sessionId = session.getId();
-        
-        // 记录源始URL
-        String sourceUrl = request.getParameter(KEY_SOURCE_URL);
-        if(sourceUrl != null && sourceUrl.trim().length() > 0) {
-            sourceUrl = sourceUrl.trim();
-            session.setAttribute(KEY_SOURCE_URL, sourceUrl);
-        }
+
+        String requestUrl = request.getRequestURL().toString();
+        Map<String, String> params = getRequestParams(request);
         
         // 记录域空间
-        String ns = request.getParameter(KEY_NAMESPACE);
+        String ns = params.get(KEY_NAMESPACE);
         Integer namespaceId = parseNamespace(ns);
-        session.setAttribute(KEY_NAMESPACE, namespaceId);
 
         // 记录需要接收code的URL
-        String codeUrl = request.getParameter(KEY_CODE_URL);
-        if(codeUrl != null && codeUrl.trim().length() > 0) {
-            codeUrl = codeUrl.trim();
-            session.setAttribute(KEY_CODE_URL, codeUrl);
-        }
-        String requestUrl = request.getRequestURL().toString();
+        String codeUrl = params.get(KEY_CODE_URL);
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Process weixin auth request, ns={}, requestUrl={}, sourceUrl={}, codeUrl={}", 
-                ns, requestUrl, sourceUrl, codeUrl);
+            LOGGER.info("Process weixin auth request, requestUrl={}, params={}", requestUrl, params);
         }
         
         // 如果配置了接收code的URL，代表接收到的code不属于本服务器域名的处理范畴，也就是不会在本服务器登录，
         // 此时需要向微信获取到code，并把code转给另外一台服务器
         if(codeUrl != null && codeUrl.trim().length() > 0) {
-            sendAuthRequestToWeixin(namespaceId, sessionId, response);
+            sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
             return;
         }
         
         LoginToken loginToken = userService.getLoginToken(request);
         // 没有登录，则请求微信授权
         if(!userService.isValid(loginToken)) {
-            sendAuthRequestToWeixin(namespaceId, sessionId, response);
+            sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
             return;
         }
         
         // 登录成功则跳转到原来访问的链接
-        LOGGER.info("Process weixin auth request, loginToken={}, sourceUrl={}", loginToken, sourceUrl);
+        LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
+        String sourceUrl = params.get(KEY_SOURCE_URL);
         redirectByWx(response, sourceUrl);
 	}
 	/**
@@ -144,32 +135,19 @@ public class WXAuthController {// extends ControllerBase
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
 	public void authCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        HttpSession session = request.getSession();
+        String requestUrl = request.getRequestURL().toString();
+        Map<String, String> params = getRequestParams(request);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback), requestUrl={}, params={}", requestUrl, params);
+        }
         
-        String namespaceInReq = request.getParameter(KEY_NAMESPACE);
-        Integer namespaceId = null;
-        if(namespaceInReq != null && namespaceInReq.trim().length() > 0) {
-            namespaceId = parseNamespace(namespaceInReq);
-        } else {
-            Object ns = session.getAttribute(KEY_NAMESPACE);
-            namespaceId = parseNamespace(ns);
-        }
-        String sourceUrl = parseStr(session.getAttribute(KEY_SOURCE_URL));
-        String sourceUrlInReq = request.getParameter(KEY_SOURCE_URL);
-        if(sourceUrlInReq != null && sourceUrlInReq.trim().length() > 0) {
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.info("Process weixin auth request(callback), use source url in params, sourceUrlInReq={}, sourceUrlInSession={}", 
-                    sourceUrlInReq, sourceUrl);
-            }
-            sourceUrl = sourceUrlInReq;
-        }
-        String codeUrl = parseStr(session.getAttribute(KEY_CODE_URL));
+        String namespaceInReq = params.get(KEY_NAMESPACE);
+        Integer namespaceId = parseNamespace(namespaceInReq);
+        
+        String codeUrl = params.get(KEY_CODE_URL);
         if(codeUrl != null) {
             codeUrl = URLDecoder.decode(codeUrl, "UTF8");
-            Map<String, String> params = new HashMap<String, String>();
-            params.put(KEY_CODE, request.getParameter(KEY_CODE));
-            params.put(KEY_STATE, request.getParameter(KEY_STATE));
-            params.put(KEY_SOURCE_URL, request.getParameter(KEY_SOURCE_URL));
+            params.remove(KEY_CODE_URL);
             codeUrl = appendParamToUrl(codeUrl, params);
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.info("Process weixin auth request(callback), redirect code to other domain, codeUrl={}", codeUrl);
@@ -179,9 +157,22 @@ public class WXAuthController {// extends ControllerBase
         } else {
             // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
             processUserInfo(namespaceId, request, response);
-            
+
+            String sourceUrl = params.get(KEY_SOURCE_URL);
             redirectByWx(response, sourceUrl);
         }
+	}
+	
+	private Map<String, String> getRequestParams(HttpServletRequest request) {
+	    Map<String, String> params = new HashMap<String, String>();
+	    Enumeration<String> em = request.getParameterNames();
+	    while (em.hasMoreElements()) {
+	       String name = em.nextElement();
+	       String value = request.getParameter(name);
+	       params.put(name, value);
+	   }
+	    
+	    return params;
 	}
 	
 	private String appendParamToUrl(String url, Map<String, String> params) throws Exception {
@@ -221,11 +212,10 @@ public class WXAuthController {// extends ControllerBase
         return baseUrl + hashUrl;
 	}
 	
-	private void sendAuthRequestToWeixin(Integer namespaceId, String sessionId, HttpServletResponse response) throws Exception {
+	private void sendAuthRequestToWeixin(Integer namespaceId, String sessionId, Map<String, String> params, 
+	        HttpServletResponse response) throws Exception {
         String wxAuthCallbackUrl = configurationProvider.getValue(namespaceId, "wx.auth.callback.url", WX_AUTH_CALLBACK_URL);
         String redirectUri =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(KEY_NAMESPACE, String.valueOf(namespaceId));
         redirectUri = appendParamToUrl(redirectUri, params);
 
         String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
