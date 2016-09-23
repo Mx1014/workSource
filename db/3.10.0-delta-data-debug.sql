@@ -119,7 +119,7 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.notification', 24, 'zh_CN', '异常申请驳回', '您对${punchDate}提交的异常申请被${approver}驳回，理由是：${reason}。', 0);
 
 
--- 服务联盟配三种形式的入口供测试
+-- 服务联盟配三种形式的入口供测试 add by xiongying 20160923
 update eh_launch_pad_items set action_data = '{"type":11,"parentId":11,"displayType": "grid"}' where id in(803, 10304) and namespace_id = 1000000;
 update eh_launch_pad_items set item_label = '服务联盟grid' where id in(803, 10304) and namespace_id = 1000000;
 
