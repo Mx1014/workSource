@@ -2,7 +2,13 @@ package com.everhomes.wx;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,8 +57,14 @@ public class WXAuthController {// extends ControllerBase
 	private static final Logger LOGGER = LoggerFactory.getLogger(WXAuthController.class);
     
     private final static String KEY_NAMESPACE = "ns";
+    private final static String KEY_CODE = "code";
+    private final static String KEY_STATE = "state";
     
+    /** 用于记录登录后要跳转的源链接 */
     private final static String KEY_SOURCE_URL = "src_url";
+    
+    /** 用于记录拿到code之后要跳转的链接（由于微信只允许配置一个回调域名，需要通过些配置来把code送到其它域名） */
+    private final static String KEY_CODE_URL = "code_url";
     
     private final static String WX_AUTH_REQ_URL = "/wxauth/authReq";
     
@@ -79,39 +91,48 @@ public class WXAuthController {// extends ControllerBase
 	//@RestReturn(String.class)
 	//@RequireAuthentication(false)
 	public void authReq(HttpServletRequest request, HttpServletResponse response) throws Exception {
-	    String requestUrl = request.getRequestURL().toString();
+        HttpSession session = request.getSession();
+        String sessionId = session.getId();
+        
+        // 记录源始URL
+        String sourceUrl = request.getParameter(KEY_SOURCE_URL);
+        if(sourceUrl != null && sourceUrl.trim().length() > 0) {
+            sourceUrl = sourceUrl.trim();
+            session.setAttribute(KEY_SOURCE_URL, sourceUrl);
+        }
+        
+        // 记录域空间
+        String ns = request.getParameter(KEY_NAMESPACE);
+        Integer namespaceId = parseNamespace(ns);
+        session.setAttribute(KEY_NAMESPACE, namespaceId);
+
+        // 记录需要接收code的URL
+        String codeUrl = request.getParameter(KEY_CODE_URL);
+        if(codeUrl != null && codeUrl.trim().length() > 0) {
+            codeUrl = codeUrl.trim();
+            session.setAttribute(KEY_CODE_URL, codeUrl);
+        }
+        String requestUrl = request.getRequestURL().toString();
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Process weixin auth request, requestUrl={}", requestUrl);
+            LOGGER.info("Process weixin auth request, ns={}, requestUrl={}, sourceUrl={}, codeUrl={}", 
+                ns, requestUrl, sourceUrl, codeUrl);
+        }
+        
+        // 如果配置了接收code的URL，代表接收到的code不属于本服务器域名的处理范畴，也就是不会在本服务器登录，
+        // 此时需要向微信获取到code，并把code转给另外一台服务器
+        if(codeUrl != null && codeUrl.trim().length() > 0) {
+            sendAuthRequestToWeixin(namespaceId, sessionId, response);
+            return;
         }
         
         LoginToken loginToken = userService.getLoginToken(request);
-        HttpSession session = request.getSession();
+        // 没有登录，则请求微信授权
         if(!userService.isValid(loginToken)) {
-         // 没有登录，则请求微信授权
-            String sourceUrl = request.getParameter(KEY_SOURCE_URL);
-            session.setAttribute(KEY_SOURCE_URL, sourceUrl);
-            String sessionId = session.getId();
-            String ns = request.getParameter(KEY_NAMESPACE);
-            Integer namespaceId = parseNamespace(ns);
-            session.setAttribute(KEY_NAMESPACE, namespaceId);
-            String wxAuthCallbackUrl = configurationProvider.getValue(namespaceId, "wx.auth.callback.url", WX_AUTH_CALLBACK_URL);
-            String redirectUri =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
-
-            String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
-            String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
-                    + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
-                    URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
-            
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.info("Process weixin auth request, requestUrl={}, sourceUrl={}, authorizeUrl={}", requestUrl, sourceUrl, authorizeUri);
-            }
-            
-            response.sendRedirect(authorizeUri);
-        } 
+            sendAuthRequestToWeixin(namespaceId, sessionId, response);
+            return;
+        }
         
         // 登录成功则跳转到原来访问的链接
-        String sourceUrl = (String) session.getAttribute(KEY_SOURCE_URL);
-        sourceUrl = "http://baidu.com";
         LOGGER.info("Process weixin auth request, loginToken={}, sourceUrl={}", loginToken, sourceUrl);
         redirectByWx(response, sourceUrl);
 	}
@@ -122,16 +143,101 @@ public class WXAuthController {// extends ControllerBase
 	@RequestMapping("authCallback")
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
-	public void wxRedirect(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void authCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
-	    Object ns = session.getAttribute(KEY_NAMESPACE);
-        Integer namespaceId = parseNamespace(ns);
         
-        // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
-        processUserInfo(namespaceId, request, response);
+        String namespaceInReq = request.getParameter(KEY_NAMESPACE);
+        Integer namespaceId = null;
+        if(namespaceInReq != null && namespaceInReq.trim().length() > 0) {
+            namespaceId = parseNamespace(namespaceInReq);
+        } else {
+            Object ns = session.getAttribute(KEY_NAMESPACE);
+            namespaceId = parseNamespace(ns);
+        }
+        String sourceUrl = parseStr(session.getAttribute(KEY_SOURCE_URL));
+        String sourceUrlInReq = request.getParameter(KEY_SOURCE_URL);
+        if(sourceUrlInReq != null && sourceUrlInReq.trim().length() > 0) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.info("Process weixin auth request(callback), use source url in params, sourceUrlInReq={}, sourceUrlInSession={}", 
+                    sourceUrlInReq, sourceUrl);
+            }
+            sourceUrl = sourceUrlInReq;
+        }
+        String codeUrl = parseStr(session.getAttribute(KEY_CODE_URL));
+        if(codeUrl != null) {
+            codeUrl = URLDecoder.decode(codeUrl, "UTF8");
+            Map<String, String> params = new HashMap<String, String>();
+            params.put(KEY_CODE, request.getParameter(KEY_CODE));
+            params.put(KEY_STATE, request.getParameter(KEY_STATE));
+            params.put(KEY_SOURCE_URL, request.getParameter(KEY_SOURCE_URL));
+            codeUrl = appendParamToUrl(codeUrl, params);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.info("Process weixin auth request(callback), redirect code to other domain, codeUrl={}", codeUrl);
+            }
+            
+            redirectByWx(response, codeUrl);
+        } else {
+            // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
+            processUserInfo(namespaceId, request, response);
+            
+            redirectByWx(response, sourceUrl);
+        }
+	}
+	
+	private String appendParamToUrl(String url, Map<String, String> params) throws Exception {
+	    String baseUrl = null;
+	    String hashUrl = "";
+	    
+	    // 若有#段，则先分离该段
+	    int pos = url.indexOf('#');
+	    if(pos != -1) {
+	        baseUrl = url.substring(0, pos);
+	        hashUrl = url.substring(pos);
+	    } else {
+	        baseUrl = url;
+	    }
+	    
+	    // 若有问号，代表着有参数
+	    pos = baseUrl.indexOf('?');
+        if(pos == -1) {
+            baseUrl = baseUrl + "?";
+        } else {
+            if(baseUrl.length() - 1 > pos) {
+                baseUrl = baseUrl + "&";
+            }
+        }
         
-        String sourceUrl = (String) session.getAttribute(KEY_SOURCE_URL);
-        redirectByWx(response, sourceUrl);
+        boolean isFirst = true;
+        Iterator<Entry<String, String>> iterator = params.entrySet().iterator();
+        while(iterator.hasNext()) {
+            if(!isFirst) {
+                baseUrl = baseUrl + "&";
+            }
+            Entry<String, String> entry = iterator.next();
+            baseUrl += entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF8");
+            isFirst = false;
+        }
+        
+        return baseUrl + hashUrl;
+	}
+	
+	private void sendAuthRequestToWeixin(Integer namespaceId, String sessionId, HttpServletResponse response) throws Exception {
+        String wxAuthCallbackUrl = configurationProvider.getValue(namespaceId, "wx.auth.callback.url", WX_AUTH_CALLBACK_URL);
+        String redirectUri =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(KEY_NAMESPACE, String.valueOf(namespaceId));
+        redirectUri = appendParamToUrl(redirectUri, params);
+
+        String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+        String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
+                + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
+                URLEncoder.encode(redirectUri, "UTF-8"), sessionId); 
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request, send auth to weixin, redirectUri={}, authorizeUrl={}", redirectUri, authorizeUri);
+        }
+        
+        response.sendRedirect(authorizeUri);
 	}
 	
 	/**
@@ -183,6 +289,14 @@ public class WXAuthController {// extends ControllerBase
         return namespaceId;
     }
     
+    private String parseStr(Object strObj) {
+        if(strObj == null) {
+            return null;
+        } else {
+            return strObj.toString();
+        }
+    }
+    
     private void processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
         String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
         String secret = configurationProvider.getValue(namespaceId, "wx.offical.account.secret", "");
@@ -191,12 +305,12 @@ public class WXAuthController {// extends ControllerBase
         
         // 使用临时code从微信中换取accessToken
         String accessTokenUri = String.format(WX_ACCESS_TOKEN_URL, appId, secret, code);
-        String accessTokenUriWithoutSecret = accessTokenUri.replaceAll(secret, "****");
+        String accessTokenUriWithoutSecret = accessTokenUri.replaceAll("secret=" + secret, "secret=****");
         String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
         WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
         if (accessToken.getErrcode() != null) {
-            LOGGER.error("Failed to get access token from webchat, appId={}, accessToken={}, accessTokenUri={}", 
-                appId, accessTokenJson, accessTokenUriWithoutSecret);
+            LOGGER.error("Failed to get access token from webchat, namespaceId={}, appId={}, accessToken={}, accessTokenUri={}", 
+                namespaceId, appId, accessTokenJson, accessTokenUriWithoutSecret);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Failed to get access token from webchat");
         }
@@ -206,7 +320,8 @@ public class WXAuthController {// extends ControllerBase
         String userInfoJson = httpGet(userInfoUri, userInfoUri);
         WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
         if (userInfo.getErrcode()!=null) {
-            LOGGER.error("Failed to get user information from webchat, appId={}, userInfo={}, userinfoUri={}", appId, userInfoJson, userInfoUri);
+            LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}", 
+                namespaceId, appId, userInfoJson, userInfoUri);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Failed to get user information from webchat");
         }
