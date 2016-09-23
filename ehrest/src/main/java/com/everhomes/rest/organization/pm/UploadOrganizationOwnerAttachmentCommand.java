@@ -1,24 +1,23 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
  *  <ul>
- *      <li>organizationId: 公司id</li>
  *      <li>ownerId: 业主id</li>
+ *      <li>organizationId: 公司id</li>
  *      <li>contentUri: 附件URI</li>
  *      <li>attachmentName: 附件名称</li>
  *  </ul>
  */
 public class UploadOrganizationOwnerAttachmentCommand {
-    @NotNull
-    private Long organizationId;
-    @NotNull
-    private Long ownerId;
-    @NotNull
-    private String contentUri;
-    @NotNull
-    private String attachmentName;
+
+    @NotNull private Long ownerId;
+    @NotNull private Long organizationId;
+    @NotNull private String contentUri;
+    @NotNull private String attachmentName;
 
     public String getContentUri() {
         return contentUri;
@@ -50,5 +49,10 @@ public class UploadOrganizationOwnerAttachmentCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

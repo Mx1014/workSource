@@ -1,6 +1,6 @@
 package com.everhomes.test.junit.organization.pm;
 
-import com.everhomes.rest.organization.pm.CreateOrUpdateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerRestResponse;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressCommand;
 import com.everhomes.server.schema.Tables;
@@ -28,7 +28,7 @@ public class CreateOrganizationOwnerTest extends BaseLoginAuthTestCase {
     public void testCreateOrganizationOwner() {
         logon();
         String api = "/pm/createOrganizationOwner";
-        CreateOrUpdateOrganizationOwnerCommand cmd = new CreateOrUpdateOrganizationOwnerCommand();
+        CreateOrganizationOwnerCommand cmd = new CreateOrganizationOwnerCommand();
 
         String contactToken = "13245678911";
         String contactName = "zuolin";

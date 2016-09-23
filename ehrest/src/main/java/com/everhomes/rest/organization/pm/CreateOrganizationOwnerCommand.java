@@ -3,11 +3,12 @@ package com.everhomes.rest.organization.pm;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
  * <ul>
- * <li>id: 业主id</li>
  * <li>communityId: 小区id</li>
  * <li>organizationId: 公司id</li>
  * <li>contactName: 联系人名称</li>
@@ -24,13 +25,17 @@ import java.util.List;
  * <li>addresses: 地址列表</li>
  * </ul>
  */
-public class CreateOrUpdateOrganizationOwnerCommand {
+public class CreateOrganizationOwnerCommand {
 
-    private Long id;
+    @NotNull
     private Long organizationId;
+    @NotNull
     private Long communityId;
+    @NotNull
     private String contactName;
+    @NotNull
     private String contactToken;
+    @NotNull
     private Long orgOwnerTypeId;
     private Byte gender;
     private Long birthday;
@@ -40,8 +45,9 @@ public class CreateOrUpdateOrganizationOwnerCommand {
     private String idCardNumber;
     private String registeredResidence;
     private String avatar;
+    @NotNull
     @ItemType(OrganizationOwnerAddressCommand.class)
-    private List<OrganizationOwnerAddressCommand> addresses;
+    @Valid private List<OrganizationOwnerAddressCommand> addresses;
 
     public Long getCommunityId() {
         return communityId;
@@ -105,14 +111,6 @@ public class CreateOrUpdateOrganizationOwnerCommand {
 
     public void setMaritalStatus(String maritalStatus) {
         this.maritalStatus = maritalStatus;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getJob() {

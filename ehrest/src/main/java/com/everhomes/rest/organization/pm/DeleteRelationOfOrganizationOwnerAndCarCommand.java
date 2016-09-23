@@ -1,16 +1,19 @@
 package com.everhomes.rest.organization.pm;
 
+import javax.validation.constraints.NotNull;
+
 /**
  *  <ul>
- *      <li>ownerId: 业主id</li>
  *      <li>carId: 车辆id</li>
+ *      <li>ownerId: 业主id</li>
  *      <li>organizationId: 公司id</li>
  *  </ul>
  */
 public class DeleteRelationOfOrganizationOwnerAndCarCommand {
-    private Long ownerId;
-    private Long carId;
-    private Long organizationId;
+
+    @NotNull private Long carId;
+    @NotNull private Long ownerId;
+    @NotNull private Long organizationId;
 
     public Long getOwnerId() {
         return ownerId;

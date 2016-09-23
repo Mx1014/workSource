@@ -426,8 +426,14 @@ public class PunchServiceImpl implements PunchService {
 			if (null != exceptionApproval) {
 				pdl.setMorningApprovalStatus(exceptionApproval.getMorningApprovalStatus());
 				pdl.setAfternoonApprovalStatus(exceptionApproval.getAfternoonApprovalStatus());
-				if (calculateExceptionCode(pdl.getAfternoonApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())
-						&&calculateExceptionCode(pdl.getMorningApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())) {
+				Byte morningStatus = pdl.getMorningPunchStatus();
+				if(null!=pdl.getMorningApprovalStatus())
+					morningStatus = pdl.getMorningApprovalStatus();
+				Byte afternoonStatus = pdl.getAfternoonPunchStatus();
+				if(null!=pdl.getAfternoonApprovalStatus())
+					morningStatus = pdl.getAfternoonApprovalStatus();
+				if (calculateExceptionCode(afternoonStatus).equals(ExceptionStatus.NORMAL.getCode())
+						&&calculateExceptionCode(morningStatus).equals(ExceptionStatus.NORMAL.getCode())) {
 				 
 					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 				}
@@ -551,17 +557,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
 		if(punchDayLog.getNoonLeaveTime()!=null)
 			pdl.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
-		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
-				dateSF.format(logDay.getTime()));
-		if (null != exceptionApproval) {
-			pdl.setMorningApprovalStatus(exceptionApproval.getMorningApprovalStatus());
-			pdl.setAfternoonApprovalStatus(exceptionApproval.getAfternoonApprovalStatus());
-			if (calculateExceptionCode(pdl.getAfternoonApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())
-					&&calculateExceptionCode(pdl.getMorningApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())) {
-			 
-				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-			}
-		}
+		
 
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		pdl.setMorningPunchStatus(punchDayLog.getMorningStatus());
@@ -577,6 +573,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.getPunchLogs().add(dto); 
 		}
 		pdl.setPunchStatus(punchDayLog.getStatus());
+		//通过打卡记录计算状态
 		// 如果是非工作日和当天，则异常为normal
 		if (!isWorkDay(logDay.getTime(),pr)
 				|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
@@ -589,17 +586,29 @@ public class PunchServiceImpl implements PunchService {
 					.getCode() : ExceptionStatus.EXCEPTION.getCode());
 			}
 			else if(pdl.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())){
-				pdl.setExceptionStatus(punchDayLog.getMorningStatus().equals(
+				//上午为加班或者普通 且 下午为加班或者普通 则
+				pdl.setExceptionStatus((punchDayLog.getMorningStatus().equals(
 						PunchStatus.NORMAL.getCode())||punchDayLog.getMorningStatus().equals(
-								PunchStatus.OVERTIME.getCode())||punchDayLog.getAfternoonStatus().equals(
+								PunchStatus.OVERTIME.getCode()))&&(punchDayLog.getAfternoonStatus().equals(
 										PunchStatus.NORMAL.getCode())||punchDayLog.getAfternoonStatus().equals(
-												PunchStatus.OVERTIME.getCode()) ? ExceptionStatus.NORMAL
+												PunchStatus.OVERTIME.getCode())) ? ExceptionStatus.NORMAL
 						.getCode() : ExceptionStatus.EXCEPTION.getCode());
 				 
 				
 			}
 		}
-
+		//通过审批计算状态
+		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
+				dateSF.format(logDay.getTime()));
+		if (null != exceptionApproval) {
+			pdl.setMorningApprovalStatus(exceptionApproval.getMorningApprovalStatus());
+			pdl.setAfternoonApprovalStatus(exceptionApproval.getAfternoonApprovalStatus());
+			if (calculateExceptionCode(pdl.getAfternoonApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())
+					&&calculateExceptionCode(pdl.getMorningApprovalStatus()).equals(ExceptionStatus.NORMAL.getCode())) {
+			 
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			}
+		}
 		List<PunchExceptionRequest> exceptionRequests = punchProvider
 				.listExceptionRequestsByDate(userId, companyId,
 						dateSF.format(logDay.getTime()));

@@ -346,7 +346,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			if (punchService.isWorkDay(date, punchRule)) {
 				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 				actualTime.setUserId(userId);
-				actualTime.setTimeDate(new java.sql.Date(fromTime.getTime()));
+				actualTime.setTimeDate(new java.sql.Date(date.getTime()));
 				actualTime.setActualResult(new MyDate(1, 0, 0).toString());
 				approvalDayActualTimeList.add(actualTime);
 			}
@@ -366,7 +366,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			//如果结束时间在最晚上班时间到最早下班时间之间，则计算小时分钟
 			ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 			actualTime.setUserId(userId);
-			actualTime.setTimeDate(new java.sql.Date(fromTime.getTime()));
+			actualTime.setTimeDate(new java.sql.Date(endTime.getTime()));
 			try {
 				actualTime.setActualResult(calculateOneDayTime(datetimeSF.parse(dateSF.format(endTime)+" "+timeSF.format(punchTimeRule.getStartLateTime())).getTime(), endTime.getTime(), punchTimeRule));
 			} catch (ParseException e) {

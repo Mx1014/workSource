@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 
+
+
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.category.CategoryProvider;
@@ -60,7 +62,9 @@ import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.RequestTemplates;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -95,6 +99,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private UserActivityProvider userActivityProvider;
     
 
 	private void populateYellowPage(YellowPage yellowPage) { 
@@ -510,6 +517,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 //		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+		if(!StringUtils.isEmpty(response.getTemplateType())) {
+			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+			response.setTemplateName(template.getName());
+			response.setButtonTitle(template.getButtonTitle());
+		}
 //		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
@@ -579,6 +591,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 				sa.setServiceType(category.getName());
 			}
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+			if(!StringUtils.isEmpty(dto.getTemplateType())) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
+				dto.setTemplateName(template.getName());
+				dto.setButtonTitle(template.getButtonTitle());
+			}
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
 

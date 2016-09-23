@@ -2,15 +2,16 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.util.StringHelper;
 
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>id: carId</li>
+ *     <li>organizationId: 公司id</li>
+ *     <li>communityId: 小区id</li>
  *     <li>brand: 品牌</li>
  *     <li>plateNumber: 车牌号</li>
  *     <li>parkingSpace: 停车位</li>
- *     <li>parkingType: 停车类型</li>
+ *     <li>parkingType: 停车类型 {@link com.everhomes.rest.organization.pm.OrganizationOwnerCarParkingType}</li>
  *     <li>contacts: 联系人</li>
  *     <li>contactNumber: 联系人电话</li>
  *     <li>color: 颜色</li>
@@ -18,29 +19,37 @@ import java.util.Objects;
  *     <li>contentUrl: 图片的URL</li>
  * </ul>
  */
-public class OrganizationOwnerCarDTO {
+public class CreateOrganizationOwnerCarCommand {
 
-    private Long   id;
+    @NotNull private Long communityId;
+    @NotNull private String plateNumber;
+    @NotNull private Long organizationId;
     private String brand;
-    private String plateNumber;
     private String parkingSpace;
-    private String parkingType;
+    private Byte   parkingType;
     private String contacts;
     private String contactNumber;
     private String color;
     private String contentUri;
-    private String contentUrl;
 
-    public Long getId() {
-        return id;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getBrand() {
         return brand;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setBrand(String brand) {
@@ -63,11 +72,11 @@ public class OrganizationOwnerCarDTO {
         this.parkingSpace = parkingSpace;
     }
 
-    public String getParkingType() {
+    public Byte getParkingType() {
         return parkingType;
     }
 
-    public void setParkingType(String parkingType) {
+    public void setParkingType(Byte parkingType) {
         this.parkingType = parkingType;
     }
 
@@ -103,30 +112,8 @@ public class OrganizationOwnerCarDTO {
         this.contentUri = contentUri;
     }
 
-    public String getContentUrl() {
-        return contentUrl;
-    }
-
-    public void setContentUrl(String contentUrl) {
-        this.contentUrl = contentUrl;
-    }
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj != null
-                && obj instanceof OrganizationOwnerCarDTO
-                && Objects.equals(this.getId(), ((OrganizationOwnerCarDTO) obj).getId());
-    }
-
-    @Override
-    public int hashCode() {
-        if (this.getId() != null)
-            return this.getId().hashCode();
-        return super.hashCode();
     }
 }

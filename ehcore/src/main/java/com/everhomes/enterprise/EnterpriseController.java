@@ -88,7 +88,7 @@ public class EnterpriseController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /enterprise/syncIndex</b>
+     * <b>URL: /enterprise/syncOwnerIndex</b>
      * <p>搜索索引同步 TODO: 求敢哥优化</p>
      * @return {String.class}
      */

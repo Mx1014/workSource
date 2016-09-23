@@ -145,7 +145,7 @@ public interface PropertyMgrProvider {
 	 * @param ownerId
 	 * @return
 	 */
-	List<OrganizationOwnerAddress> listOrganizationOwnerAddress(Integer namespaceId, Long ownerId);
+	List<OrganizationOwnerAddress> listOrganizationOwnerAddressByOwnerId(Integer namespaceId, Long ownerId);
 
 	/**
 	 * 创建业主的附件记录
@@ -447,4 +447,12 @@ public interface PropertyMgrProvider {
      */
     List<ListOrganizationOwnerStatisticDTO> listOrganizationOwnerStatisticByAge(
             Long communityId, Byte livingStatus, List<Long> orgOwnerTypeIds, RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper);
+
+    /**
+     * 查询楼栋门牌下的住户列表
+     * @param namespaceId
+     * @param addressId
+     * @return
+     */
+    List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressId(Integer namespaceId, Long addressId);
 }

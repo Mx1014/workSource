@@ -29,8 +29,10 @@ public enum CoordinationLocks {
 	UPDATE_APPROVAL_RULE("update_approval_rule"),
 	UPDATE_APPROVAL_FLOW("update_approval_flow"),
 	UPDATE_APPROVAL_REQUEST("update_approval_request"),
-    STAT_SETTLEMENT("stat.settlement");
-    
+    STAT_SETTLEMENT("stat.settlement"),
+
+    UPDATE_ORGANIZATION_OWNER("organization.owner.update");
+
 
     private String code;
     private CoordinationLocks(String code) {

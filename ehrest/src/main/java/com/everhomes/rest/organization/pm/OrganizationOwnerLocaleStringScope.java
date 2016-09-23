@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.organization.pm;
 
 /**
@@ -8,24 +9,22 @@ public interface OrganizationOwnerLocaleStringScope {
 
     /*----------  业主行为类型  --------*/
 
-    String BEHAVIOR_SCOPE = "orgOwnerBehavior";
-
+    String BEHAVIOR_SCOPE = "pm.address.behavior";
 
     /*----------  认证状态  --------*/
 
-    String AUTH_TYPE_SCOPE = "orgOwnerAddressAuthType";
-
+    String AUTH_TYPE_SCOPE = "pm.address.authType";
 
     /*----------  在户状态  --------*/
 
-    String LIVING_STATUS_SCOPE = "orgOwnerAddressLivingStatus";
+    String LIVING_STATUS_SCOPE = "pm.address.livingStatus";
 
     /*----------  车辆停车类型  --------*/
 
-    String PARKING_TYPE_SCOPE = "parkingType";
+    String PARKING_TYPE_SCOPE = "pm.car.parkingType";
 
     /*----------  车辆用户的首要联系人标志  --------*/
 
-    String PRIMARY_FLAG_SCOPE = "ownerCarPrimaryFlag";
+    String PRIMARY_FLAG_SCOPE = "pm.car.primaryFlag";
 
 }

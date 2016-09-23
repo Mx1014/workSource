@@ -3,6 +3,8 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>carId: 车辆id</li>
@@ -11,8 +13,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListOrganizationOwnersByCarCommand {
 
-    private Long carId;
-    private Long organizationId;
+    @NotNull private Long carId;
+    @NotNull private Long organizationId;
 
     public Long getOrganizationId() {
         return organizationId;

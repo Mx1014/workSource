@@ -1,3 +1,4 @@
+
 package com.everhomes.rest.organization.pm;
 
 import com.everhomes.util.StringHelper;
@@ -6,17 +7,21 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *  <li>communityId: 物业小区id</li>
- *  <li>organizationId: 公司id</li>
+ * <li>addressId: 地址id</li>
+ * <li>organizationId: 公司id</li>
  * </ul>
  */
-public class ExportOrganizationOwnerCarsCommand {
+public class ListOrganizationOwnerCarsByAddressCommand {
 
-    @NotNull private Long communityId;
+    @NotNull private Long addressId;
     @NotNull private Long organizationId;
 
-    public Long getCommunityId() {
-        return communityId;
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public Long getOrganizationId() {
@@ -25,10 +30,6 @@ public class ExportOrganizationOwnerCarsCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
     }
 
     @Override
