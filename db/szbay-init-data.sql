@@ -61,12 +61,10 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(101,61,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 1, 'zh_CN', '验证码-深圳湾', '28964');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 4, 'zh_CN', '派单-深圳湾', '28965');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 6, 'zh_CN', '任务2-深圳湾', '28967');    
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 6, 'zh_CN', '门禁授权-深圳湾', '28968');    
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 7, 'zh_CN', '看楼申请-深圳湾', '28969');    
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 7, 'zh_CN', '新报修-深圳湾', '28970');    
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 1, 'zh_CN', '验证码-深圳湾', '29699');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 4, 'zh_CN', '派单-深圳湾', '29700');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 6, 'zh_CN', '任务2-深圳湾', '29707');    
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 7, 'zh_CN', '新报修-深圳湾', '29706');    
 
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
