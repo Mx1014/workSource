@@ -92,6 +92,44 @@ public class WXAuthController {// extends ControllerBase
     @Value("${server.contextPath:}")
     private String contextPath;
     
+    /**
+     * <b>URL: /wxauth/test</b>
+     * <p>请求微信授权。</p>
+     */
+    @RequestMapping("test")
+    //@RestReturn(String.class)
+    //@RequireAuthentication(false)
+    public void test(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.setContentType("text/html; charset=utf8");  
+        PrintWriter out = null;
+        String redirectUrl = "https://biz-beta.zuolin.com/zl-ec/rest/service/front/wechatRedirect?mallId=4000000&code=021Mmhkn0Yq9ze1smCkn0yNnkn0Mmhk7&ns=999987&srcUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%3";
+        try {
+            out = response.getWriter();
+            out.println("<!DOCTYPE html>"); 
+            out.println("<html lang=\"en\">"); 
+            out.println("<head>"); 
+            out.println("<meta charset=\"UTF-8\">"); 
+            out.println("<title>跳转中...</title>"); 
+            out.println("</head>"); 
+            out.println("<body>"); 
+            out.println("<script>"); 
+            out.println("location.href=\"" + redirectUrl + "\";"); 
+            out.println("</script>"); 
+            out.println("</body>"); 
+            out.println("</html>"); 
+        } catch(Exception e) {
+            LOGGER.error("Failed to print ouput by response, redirectUrl={}", redirectUrl, e);
+        } finally {
+            if(out != null) {
+                try {
+                    out.close();
+                } catch(Exception e) {
+                    LOGGER.error("Failed to close response writer, redirectUrl={}", redirectUrl, e);
+                }
+            }
+        }
+    }
+    
 	/**
 	 * <b>URL: /wxauth/authReq</b>
 	 * <p>请求微信授权。</p>
@@ -166,11 +204,14 @@ public class WXAuthController {// extends ControllerBase
             
             redirectByWx(response, codeUrl);
         } else {
-            // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
-            processUserInfo(namespaceId, request, response);
-
+            LoginToken loginToken = userService.getLoginToken(request);
+            if(!userService.isValid(loginToken)) {
+                // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
+                processUserInfo(namespaceId, request, response);
+            }
             String sourceUrl = params.get(KEY_SOURCE_URL);
             redirectByWx(response, sourceUrl);
+            
         }
 	}
 	
