@@ -88,7 +88,12 @@ INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `p
 
 --eh_news_categories 差一条id=2的数据    
 
-eh_banners: 10788
+
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10798', '999987', '0', '/home', 'Default', '0', '0', '深圳湾', 'szbay', 'cs://1/image/aW1hZ2UvTVRveE1qWXhPVEJpTURSalpEVmtNR1V6T0dWbE5Ua3lPRE5tTm1JMlkyVXpaUQ', 0, '', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'park_tourist', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10799', '999987', '0', '/home', 'Default', '0', '0', '深圳湾', 'szbay', 'cs://1/image/aW1hZ2UvTVRveE1qWXhPVEJpTURSalpEVmtNR1V6T0dWbE5Ua3lPRE5tTm1JMlkyVXpaUQ', 0, '', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+
 --广场
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) 
     VALUES ('380', '999987', 'ServiceMarketLayout', '{\"versionCode\":\"2016081701\",\"versionName\":\"3.3.0\",\"layoutName\":\"ServiceMarketLayout\",\"displayName\":\"服务市场\",\"groups\":[{\"groupName\":\"\",\"widget\":\"Banners\",\"instanceConfig\":{\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"商家服务\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"Bizs\"},\"style\":\"Default\",\"defaultOrder\":5,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"\",\"widget\":\"Bulletins\",\"instanceConfig\":{\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":1,\"separatorHeight\":21},{\"groupName\":\"\",\"widget\":\"News\",\"instanceConfig\":{\"timeWidgetStyle\":\"datetime\",\"categoryId\":0,\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":1,\"separatorHeight\":21}]}', '2016081701', '0', '2', '2016-06-01 10:41:25', 'park_tourist', '0', '0', '0');
