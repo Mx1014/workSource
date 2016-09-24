@@ -221,7 +221,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			notifyMap.put("categoryName", categoryName);
 			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 			
-	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, content);
+	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content);
 		}
 	}
 	
