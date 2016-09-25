@@ -2,6 +2,11 @@ package com.everhomes.rest.wx;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * 
+ * url:调用JS接口页面的完整URL
+ *
+ */
 public class GetSignatureCommand {
 	
 	private String url;
