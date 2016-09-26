@@ -1080,7 +1080,8 @@ public class UserController extends ControllerBase {
      */
     @RequestMapping("getVideoPermission")
     @RestReturn(value = UserVideoPermissionDTO.class)
-    public RestResponse getVideoPermisionByUserId(@Valid GetVideoPermissionInfoCommand cmd) {
+    public RestResponse getVideoPermisionByUserId() {
+        GetVideoPermissionInfoCommand cmd = new GetVideoPermissionInfoCommand(); 
         RestResponse resp = new RestResponse(activityService.GetVideoPermisionInfo(cmd));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
