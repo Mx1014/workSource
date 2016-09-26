@@ -5004,7 +5004,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setContactName(RowResult.trimString(result.getA()));
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
                 owner.setContactToken(RowResult.trimString(result.getC()));
-                Address address = parseAddress(result.getD(), result.getE());
+                Address address = parseAddress(currentNamespaceId(), communityId, result.getD(), result.getE());
                 owner.setAddress(address.getAddress());
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
@@ -5128,11 +5128,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return Byte.valueOf(localeString.getCode());
 	}
 
-	private Address parseAddress(String building, String apartment) {
-		String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
-		Address address = addressProvider.findAddressByAddress(addressText);
-		if (address == null) {
-			LOGGER.error("The address {} is not exist.", addressText);
+	private Address parseAddress(Integer namespaceId, Long communityId, String building, String apartment) {
+        Address address = addressProvider.findApartmentAddress(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+                StringUtils.trimAllWhitespace(apartment));
+        if (address == null) {
+            String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
+            LOGGER.error("The address {} is not exist.", addressText);
 			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
 					"The address %s is not exist.", addressText);
 		}

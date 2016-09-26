@@ -36,6 +36,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 修改业主管理菜单为客户资料管理   by xq.tian 20160920
 UPDATE `eh_web_menus` SET `name`='客户资料管理' WHERE (`id`='36000');
 UPDATE `eh_acl_privileges` SET `name`='客户资料管理',`description`='客户资料管理' WHERE (`id`='411');
+UPDATE `eh_web_menu_privileges` SET `name`='客户资料管理', `discription`='客户资料管理 全部权限' WHERE (`id`='142');
+
 
 -- 新增车辆管理菜单   by xq.tian  20160920
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
@@ -47,6 +49,11 @@ VALUES (420,0,'车辆管理','车辆管理',null);
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),420,37000,'车辆管理',1,1,'车辆管理  全部权限',370);
+
+set @eh_web_menu_scopes_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@eh_web_menu_scopes_id:=@eh_web_menu_scopes_id + 1), '37000', NULL, 'EhNamespaces', '999992', '2');
+
 
 -- 添加菜单与权限的关联关系
 set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
