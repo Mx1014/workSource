@@ -2374,6 +2374,10 @@ public class ActivityServiceImpl implements ActivityService {
     }
    
    private void fixupVideoInfo(ActivityDTO dto) {
+       if(dto.getIsVideoSupport() != null) {
+           return;
+       }
+       
        dto.setIsVideoSupport((byte)0);
        if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
            ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
