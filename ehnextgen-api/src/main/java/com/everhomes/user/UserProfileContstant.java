@@ -25,4 +25,9 @@ public interface UserProfileContstant {
      * 查看过的新的活动
      */
     public static final String VIEWED_ACTIVITY_NEW = "viewedActivityNew";
+    
+    /**
+     * 
+     */
+    public static final String YZB_VIDEO_PERMISION = "yzb_video_permision";
 }

@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * 
@@ -64,6 +67,13 @@ public class ActivityDTO {
     private String mediaUrl;
     
     private Byte favoriteFlag;
+    
+    // Add by jannson
+    private Byte isVideoSupport;
+    private Long videoId;
+    private String manufacturerType;
+    private String videoUrl;    //yzb://[vid]
+    private Byte videoState;
     
     public ActivityDTO() {
     }
@@ -310,8 +320,48 @@ public class ActivityDTO {
 	public void setFavoriteFlag(Byte favoriteFlag) {
 		this.favoriteFlag = favoriteFlag;
 	}
+	
+	public Long getVideoId() {
+        return videoId;
+    }
 
-	public String toString() {
+    public void setVideoId(Long videoId) {
+        this.videoId = videoId;
+    }
+
+    public String getManufacturerType() {
+        return manufacturerType;
+    }
+
+    public void setManufacturerType(String manufacturerType) {
+        this.manufacturerType = manufacturerType;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public Byte getVideoState() {
+        return videoState;
+    }
+
+    public void setVideoState(Byte videoState) {
+        this.videoState = videoState;
+    }
+
+    public Byte getIsVideoSupport() {
+        return isVideoSupport;
+    }
+
+    public void setIsVideoSupport(Byte isVideoSupport) {
+        this.isVideoSupport = isVideoSupport;
+    }
+
+    public String toString() {
         return StringHelper.toJsonString(this);
     }
 }

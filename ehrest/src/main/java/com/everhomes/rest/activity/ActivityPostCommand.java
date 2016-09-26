@@ -58,6 +58,10 @@ public class ActivityPostCommand{
     
     private Byte officialFlag;
     
+    //added by Janson
+    private Byte isVideoSupport;
+    private String videoUrl;
+    
     public Byte getOfficialFlag() {
 		return officialFlag;
 	}
@@ -237,7 +241,23 @@ public class ActivityPostCommand{
 		this.mediaUrl = mediaUrl;
 	}
 
-	@Override
+	public Byte getIsVideoSupport() {
+        return isVideoSupport;
+    }
+
+    public void setIsVideoSupport(Byte isVideoSupport) {
+        this.isVideoSupport = isVideoSupport;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
