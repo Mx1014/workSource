@@ -368,11 +368,11 @@ public class YellowPageController  extends ControllerBase {
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
     	
     	SearchRequestInfoResponse resp = new SearchRequestInfoResponse();
-    	if(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM.equals(cmd.getRequestType())) {
+    	if(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
     		resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
     	}
     	
-    	if(CustomRequestConstants.SETTLE_REQUEST_CUSTOM.equals(cmd.getRequestType())) {
+    	if(CustomRequestConstants.SETTLE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
     		resp = this.settleRequestInfoSearcher.searchRequestInfo(cmd);
     	}
     	 
