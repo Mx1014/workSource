@@ -104,6 +104,11 @@ public class YzbDeviceProviderImpl implements YzbDeviceProvider {
 
         return objs;
     }
+
+    private void prepareObj(YzbDevice obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+    }
     
     @Override
     public YzbDevice findYzbDeviceById(String deviceId) {
@@ -113,6 +118,29 @@ public class YzbDeviceProviderImpl implements YzbDeviceProvider {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_YZB_DEVICES.DEVICE_ID.eq(deviceId));
+                return query;
+            }
+            
+        });
+        
+        if(devices != null && devices.size() > 0) {
+            return devices.get(0);
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public YzbDevice findYzbDeviceByActivityId(Long activityId) {
+        ListingLocator locator = new ListingLocator();
+        List<YzbDevice> devices = queryYzbDevices(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_YZB_DEVICES.RELATIVE_ID.eq(activityId));
+                query.addConditions(Tables.EH_YZB_DEVICES.RELATIVE_TYPE.eq("activity"));
                 return query;
             }
             
@@ -125,8 +153,4 @@ public class YzbDeviceProviderImpl implements YzbDeviceProvider {
         return null;
     }
 
-    private void prepareObj(YzbDevice obj) {
-        Long l2 = DateHelper.currentGMTTime().getTime();
-        obj.setCreateTime(new Timestamp(l2));
-    }
 }
