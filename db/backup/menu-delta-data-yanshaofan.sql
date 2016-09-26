@@ -1325,7 +1325,7 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),560,56230,'会议
 -- 删除之前的考勤管理菜单数据
 DELETE FROM `eh_web_menus` WHERE `path` LIKE '%56100/%';
 
-DELETE FROM `eh_acl_privileges` WHERE `id` IN (790,791,792,793,794,795,796,798,799,820,821,822,823);
+DELETE FROM `eh_acl_privileges` WHERE `id` IN (790,791,792,793,794,795,796,797,798,799,820,821,822,823);
 
 DELETE FROM `eh_web_menu_privileges` WHERE `menu_id` IN (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56100/%');
 
