@@ -100,7 +100,7 @@ INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `p
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '知识产权', '创业服务/知识产权', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', 'cs://1/image/aW1hZ2UvTVRvNVpXRm1aVFk1TVRFNE5EVXlZbUkzTkRKbE1HRmtZV1E1T1dVeU9HVmxOZw');
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
-    VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '人才招聘', '创业服务/人才招聘', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', '');
+    VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '人才招聘', '创业服务/人才招聘', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', 'cs://1/image/aW1hZ2UvTVRwalpUaGlORGt3TnprNU5qQXdPVGd3TURReVpHVmxOVFJqTWpVMllqSTNNdw');
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '其他', '创业服务/其他', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', 'cs://1/image/aW1hZ2UvTVRveE5UWm1aVFJqTkdaak9EVXdOak0yT1RkbFl6ZGlaV001TlRZME5USXdPQQ');
 
