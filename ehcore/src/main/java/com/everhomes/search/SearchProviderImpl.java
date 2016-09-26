@@ -387,4 +387,25 @@ public class SearchProviderImpl implements SearchProvider {
 
 		return list;
 	}
+
+	/**
+	 * 按json字符串查询
+	 * @param type
+	 * @param json
+	 * @param fields
+	 * @return JSONArray 返回JSONArray格式数据，返回hits中的数组
+	 */
+	@Override
+	public JSONArray queryTopHits(String type, String json, String fields) {
+		JSONObject result = JSONObject.parseObject(queryRaw(type, json, fields));
+		JSONArray list = new JSONArray();
+		JSONObject topHits = result.getJSONObject("hits");
+		if (topHits == null)
+			return list;
+		JSONArray hits = topHits.getJSONArray("hits");
+		if (hits == null)
+			return list;
+		
+		return hits;
+	}
 }

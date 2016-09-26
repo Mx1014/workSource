@@ -62,8 +62,8 @@
         [jsonObject setObject: self.inviterAvatarUrl forKey: @"inviterAvatarUrl"];
     if(self.inviteTime)
         [jsonObject setObject: self.inviteTime forKey: @"inviteTime"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.approveTime)
         [jsonObject setObject: self.approveTime forKey: @"approveTime"];
     if(self.phonePrivateFlag)
@@ -72,8 +72,8 @@
         [jsonObject setObject: self.cellPhone forKey: @"cellPhone"];
     if(self.muteNotificationFlag)
         [jsonObject setObject: self.muteNotificationFlag forKey: @"muteNotificationFlag"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.buildingName)
         [jsonObject setObject: self.buildingName forKey: @"buildingName"];
     if(self.apartmentName)
@@ -147,9 +147,9 @@
         if(self.inviteTime && [self.inviteTime isEqual:[NSNull null]])
             self.inviteTime = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.approveTime = [jsonObject objectForKey: @"approveTime"];
         if(self.approveTime && [self.approveTime isEqual:[NSNull null]])
@@ -167,9 +167,9 @@
         if(self.muteNotificationFlag && [self.muteNotificationFlag isEqual:[NSNull null]])
             self.muteNotificationFlag = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.buildingName = [jsonObject objectForKey: @"buildingName"];
         if(self.buildingName && [self.buildingName isEqual:[NSNull null]])

@@ -16,7 +16,6 @@ import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
@@ -78,7 +77,7 @@ public interface OrganizationProvider {
 	List<CommunityPmOwner> listOrgOwnerByOrgIdAndAddressId(Long organizationId, Long addressId);
 	CommunityPmBill findOranizationBillById(Long id);
 	List<OrganizationBillingTransactionDTO> listOrgBillTxByOrgId(Long orgId, int resultCode, Timestamp startTime, Timestamp endTime, String address, long offset, int i);
-	List<OrganizationOwners> listOrganizationOwnersByOrgIdAndAddressId(Long organizationId, Long addressId);
+	List<OrganizationOwner> listOrganizationOwnersByOrgIdAndAddressId(Long organizationId, Long addressId);
 	CommunityAddressMapping findOrganizationAddressMappingByOrgIdAndAddress(Long organizationId, String address);
 	void deleteOrganizationBillById(Long id);
 	void updateOrganizationBill(CommunityPmBill communBill);
@@ -185,17 +184,17 @@ public interface OrganizationProvider {
 	
 	List<OrganizationMember> listOrganizationMembersTargetIdExist();
 	
-	void createOrganizationOwner(OrganizationOwners owner);
+	void createOrganizationOwner(OrganizationOwner owner);
 	
-	OrganizationOwners getOrganizationOwnerByTokenOraddressId(String contactToken, Long addressId);
+	OrganizationOwner getOrganizationOwnerByTokenOraddressId(String contactToken, Long addressId);
 	
 	void deleteOrganizationOwnerById(Long id);
 	
-	void updateOrganizationOwner(OrganizationOwners organizationOwner);
+	void updateOrganizationOwner(OrganizationOwner organizationOwner);
 	
-	List<OrganizationOwners> listOrganizationOwnerByCommunityId(Long communityId, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback);
+	List<OrganizationOwner> listOrganizationOwnerByCommunityId(Long communityId, ListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	
-	List<OrganizationOwners> findOrganizationOwnerByTokenOrNamespaceId(String contactToken, Integer namespaceId);
+	List<OrganizationOwner> findOrganizationOwnerByTokenOrNamespaceId(String contactToken, Integer namespaceId);
 	
 	Organization findOrganizationByGroupId(Long groupId);
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);

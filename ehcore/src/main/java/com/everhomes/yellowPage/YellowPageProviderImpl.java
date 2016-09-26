@@ -23,6 +23,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.jooq.JooqHelper;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -35,30 +36,44 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactEntriesDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhServiceAllianceNotifyTargetsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceAllianceRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAlliancesDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPageAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPagesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhConfReservations;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceNotifyTargetsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPagesRecord;
+import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.videoconf.ConfAccounts;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -515,5 +530,170 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
         
         return result;
+	}
+
+
+	@Override
+	public void createNotifyTarget(ServiceAllianceNotifyTargets target) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceNotifyTargets.class));
+		target.setId(id);
+		target.setStatus((byte) 1);
+        target.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhServiceAllianceNotifyTargetsDao dao = new EhServiceAllianceNotifyTargetsDao(context.configuration());
+        dao.insert(target);
+		
+	}
+
+
+	@Override
+	public void updateNotifyTarget(ServiceAllianceNotifyTargets target) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceNotifyTargetsDao dao = new EhServiceAllianceNotifyTargetsDao(context.configuration());
+        dao.update(target);
+		
+	}
+
+
+	@Override
+	public void deleteNotifyTarget(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceAllianceNotifyTargets.class));
+		EhServiceAllianceNotifyTargetsDao dao = new EhServiceAllianceNotifyTargetsDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+
+	@Override
+	public ServiceAllianceNotifyTargets findNotifyTarget(String ownerType,
+			Long ownerId, Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceNotifyTargetsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.ID.eq(id));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
+		 
+		List<ServiceAllianceNotifyTargets> result = new ArrayList<ServiceAllianceNotifyTargets>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ServiceAllianceNotifyTargets.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
+
+	@Override
+	public List<ServiceAllianceNotifyTargets> listNotifyTargets(
+			String ownerType, Long ownerId, Byte contactType, Long categoryId,
+			CrossShardListingLocator locator, int pageSize) {
+		List<ServiceAllianceNotifyTargets> targets = new ArrayList<ServiceAllianceNotifyTargets>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhServiceAllianceNotifyTargetsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS);
+ 
+        if (!StringUtils.isEmpty(ownerType) )
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
+        
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
+        
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.ID.gt(locator.getAnchor()));
+            
+        }
+        
+        if(categoryId != null) {
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CATEGORY_ID.eq(categoryId));
+        }
+    		
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CONTACT_TYPE.eq(contactType));
+        query.addLimit(pageSize);
+       
+        query.fetch().map((r) -> {
+        	targets.add(ConvertHelper.convert(r, ServiceAllianceNotifyTargets.class));
+            return null;
+        });
+        
+        return targets;
+	}
+
+
+	@Override
+	public ServiceAllianceNotifyTargets findNotifyTarget(String ownerType,
+			Long ownerId, Long categoryId, Byte contactType, String contactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceNotifyTargetsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CATEGORY_ID.eq(categoryId));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CONTACT_TYPE.eq(contactType));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.OWNER_ID.eq(ownerId));
+		 
+		List<ServiceAllianceNotifyTargets> result = new ArrayList<ServiceAllianceNotifyTargets>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ServiceAllianceNotifyTargets.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
+
+	@Override
+	public void createServiceAllianceRequests(ServiceAllianceRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
+        dao.insert(request);
+		
+	}
+
+
+	@Override
+	public ServiceAllianceRequests findServiceAllianceRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ServiceAllianceRequests.class);
+	}
+
+
+	@Override
+	public List<ServiceAllianceRequests> listServiceAllianceRequests(
+			CrossShardListingLocator locator, int pageSize) {
+		List<ServiceAllianceRequests> requests = new ArrayList<ServiceAllianceRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCE_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, ServiceAllianceRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
 	}
 }

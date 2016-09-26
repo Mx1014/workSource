@@ -28,6 +28,8 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
@@ -100,5 +102,7 @@ public interface ActivityService {
     ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd);
 
     ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd);
+
+	ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
 
 }

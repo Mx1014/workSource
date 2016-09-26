@@ -95,6 +95,7 @@ import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskPrivilege;
+import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
@@ -190,10 +191,36 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		User current = UserContext.current().getUser();
+		
+		Byte status = cmd.getStatus();
+		List<PmTask> list = new ArrayList<>();
+		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+			
+			if(null == cmd.getOrganizationId()){
+				LOGGER.error("OrganizationId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"OrganizationId cannot be null.");
+			}
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else{
+				returnNoPrivileged(privileges, current);
+			}
+	    	
+		}else{
+			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+					, cmd.getPageAnchor(), cmd.getPageSize());
+		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
-		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId(), cmd.getStatus()
-				, cmd.getPageAnchor(), cmd.getPageSize());
+		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
@@ -266,11 +293,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<String> result = new ArrayList<String>();
 		for(Long p:privileges){
-			if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
+			if(p.longValue() == PrivilegeConstants.LISTALLTASK)
+				result.add(PmTaskPrivilege.LISTALLTASK.getCode());
+			else if(p.longValue() == PrivilegeConstants.LISTUSERTASK)
+				result.add(PmTaskPrivilege.LISTUSERTASK.getCode());
+			else if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
 				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
-			if(p.longValue() == PrivilegeConstants.COMPLETETASK)
+			else if(p.longValue() == PrivilegeConstants.COMPLETETASK)
 				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
-			if(p.longValue() == PrivilegeConstants.CLOSETASK)
+			else if(p.longValue() == PrivilegeConstants.CLOSETASK)
 				result.add(PmTaskPrivilege.CLOSETASK.getCode());
 		}
 		dto.setPrivileges(result);
@@ -298,13 +329,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
-	    	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
+	    	if(!privileges.contains(PrivilegeConstants.COMPLETETASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
 		}
 			
 		if(status.equals(PmTaskStatus.OTHER.getCode())){
 			task.setClosedTime(now);
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+	    	if(!privileges.contains(PrivilegeConstants.CLOSETASK)){
+	    		returnNoPrivileged(privileges, user);
+			}
 		}
 		pmTaskProvider.updateTask(task);
 		
@@ -392,7 +427,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode() ){
-			LOGGER.error("Task cannot be completed.");
+			LOGGER.error("Task cannot be completed. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be completed.");
 		}
@@ -408,7 +443,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode()){
-			LOGGER.error("Task cannot be closed.");
+			LOGGER.error("Task cannot be closed. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be closed.");
 		}
@@ -424,7 +459,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
 		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-			LOGGER.error("Task cannot be canceled.");
+			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Task cannot be canceled.");
 		}
@@ -461,12 +496,19 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetUser not found");
 		}
 		
+		
     	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
     	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
     		returnNoPrivileged(privileges, user);
 		}
 		
 		PmTask task = checkPmTask(cmd.getId());
+		
+		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode() ){
+			LOGGER.error("Task cannot be assigned. cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be assigned.");
+		}
 		
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		if(!task.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
@@ -702,24 +744,38 @@ public class PmTaskServiceImpl implements PmTaskService {
     		categoryName = parent.getName();
     	}
     	
-    	List<Long> ids = getOrganizationMembers(null == cmd.getOrganizationId()? 1000750L: cmd.getOrganizationId());
+    	List<Long> ids = getOrganizationMembers(cmd.getOrganizationId());
     	int size = ids.size();
     	if(LOGGER.isDebugEnabled())
     		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
     	if(size > 0){
     		List<String> phones = new ArrayList<String>();
-        	String[] s = null;
+        	
+        	//消息推送
+        	String scope = PmTaskNotificationTemplateCode.SCOPE;
+    	    String locale = PmTaskNotificationTemplateCode.LOCALE;
         	for(Long id: ids) {
             	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(id, IdentifierType.MOBILE.getCode());
             	phones.add(sender.getIdentifierToken());
-            	s = new String[phones.size()];
-            	phones.toArray(s);
+            	//消息推送
+            	Map<String, Object> map = new HashMap<String, Object>();
+        	    map.put("creatorName", nickName);
+        	    map.put("creatorPhone", mobile);
+        		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
+        		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        		sendMessageToUser(id, text);
         	}
-    		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", nickName);
-    		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
-    		smsProvider.addToTupleList(variables, "categoryName", categoryName);
-    		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
-    				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
+        	int num = phones.size();
+        	if(num > 0) {
+        		String[] s = new String[num];
+            	phones.toArray(s);
+        		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", nickName);
+        		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
+        		smsProvider.addToTupleList(variables, "categoryName", categoryName);
+        		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
+        				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
+        	}
+        	
     	}
     	
 		return ConvertHelper.convert(task, PmTaskDTO.class);
@@ -746,6 +802,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 			}
 		}
+		
+		if(null == roleId)
+			return result;
+		
 		List<RoleAssignment> roleAssgnments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
 		for(RoleAssignment ra: roleAssgnments){
 			if(EntityType.USER.getCode().equals(ra.getTargetType()) &&
@@ -1061,7 +1121,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 			
 			for(PmTaskStatistics p: list){
-				Long id = p.getId();
+				Long id = p.getCategoryId();
 				PmTaskStatistics pts = null;
 				if(tempMap.containsKey(id)){
 					pts = tempMap.get(id);
@@ -1070,6 +1130,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
 					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
 					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+					pts.setStar1(pts.getStar1() + p.getStar1());
+					pts.setStar2(pts.getStar2() + p.getStar2());
+					pts.setStar3(pts.getStar3() + p.getStar3());
+					pts.setStar4(pts.getStar4() + p.getStar4());
+					pts.setStar5(pts.getStar5() + p.getStar5());
 					continue;
 				}
 				tempMap.put(id, p);

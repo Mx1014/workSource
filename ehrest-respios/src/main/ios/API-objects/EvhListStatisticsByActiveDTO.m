@@ -40,8 +40,8 @@
         [jsonObject setObject: self.ystToLastWeekRatio forKey: @"ystToLastWeekRatio"];
     if(self.ystToLastMonthRatio)
         [jsonObject setObject: self.ystToLastMonthRatio forKey: @"ystToLastMonthRatio"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.activeCount)
         [jsonObject setObject: self.activeCount forKey: @"activeCount"];
     if(self.dayActiveToSearchRatio)
@@ -71,9 +71,9 @@
         if(self.ystToLastMonthRatio && [self.ystToLastMonthRatio isEqual:[NSNull null]])
             self.ystToLastMonthRatio = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.activeCount = [jsonObject objectForKey: @"activeCount"];
         if(self.activeCount && [self.activeCount isEqual:[NSNull null]])

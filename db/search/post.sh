@@ -34,7 +34,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/topic" -d '
                 "geohash_prefix": true,
                 "geohash_precision": "50m"
             },
-			"createTime":{"type":"date"}
+			"behaviorTime":{"type":"date"}
 		}
 	}
 }

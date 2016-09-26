@@ -50,12 +50,12 @@
         [jsonObject setObject: self.latitude forKey: @"latitude"];
     if(self.geohash)
         [jsonObject setObject: self.geohash forKey: @"geohash"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhEnterpriseAttachmentDTO* item in self.attachments) {
@@ -106,17 +106,17 @@
         if(self.geohash && [self.geohash isEqual:[NSNull null]])
             self.geohash = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])
             self.avatarUrl = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];

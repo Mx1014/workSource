@@ -154,10 +154,7 @@ public class PmProviderImpl implements PmTaskProvider{
         			.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId))));
         	query.groupBy(Tables.EH_PM_TASKS.ID);
-//    		query.addJoin(Tables.EH_PM_TASK_LOGS, Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
-//    		query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.UNPROCESSED.getCode())
-//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
-//    						.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId))));
+        	
     	}else if(null != status && status.equals(PmTaskProcessStatus.PROCESSED.getCode())){
     		
     		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
@@ -166,11 +163,13 @@ public class PmProviderImpl implements PmTaskProvider{
     				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
     				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.OTHER.getCode())));
     		query.groupBy(Tables.EH_PM_TASKS.ID);
-//    		query.addJoin(Tables.EH_PM_TASK_LOGS, Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
-//    		query.addConditions((Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
-//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
-//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.OTHER.getCode())))
-//    				.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId)));
+
+    	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){
+        	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+        	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
+        					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
+        	query.groupBy(Tables.EH_PM_TASKS.ID);
+        	
     	}else{
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
@@ -238,7 +237,7 @@ public class PmProviderImpl implements PmTaskProvider{
                 	Condition condition = Tables.EH_PM_TASKS.OWNER_ID.equal(ownerId);
                 	if(null != categoryId){
                     	query.join(Tables.EH_CATEGORIES).on(Tables.EH_CATEGORIES.ID.eq(Tables.EH_PM_TASKS.CATEGORY_ID));
-                    	condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId));
+                    	condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId).or(Tables.EH_CATEGORIES.ID.eq(categoryId)));
                 	}
                 	condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
                 	if(null != status)

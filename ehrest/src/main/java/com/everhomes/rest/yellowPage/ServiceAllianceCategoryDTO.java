@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>deleteUid: 删除者uid</li>
  * <li>deleteTime: 删除时间</li>
  * <li>namespaceId: 域空间id</li>
+ * <li>logoUrl: 类型logo的url地址</li>
  * </ul>
  */
 public class ServiceAllianceCategoryDTO {
@@ -47,6 +48,8 @@ public class ServiceAllianceCategoryDTO {
     private Timestamp deleteTime;
 	
 	private Integer namespaceId;
+	
+	private String logoUrl;
 
 	public Long getId() {
 		return id;
@@ -144,6 +147,14 @@ public class ServiceAllianceCategoryDTO {
 		this.namespaceId = namespaceId;
 	}
 	
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

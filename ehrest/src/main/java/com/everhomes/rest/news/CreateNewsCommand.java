@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
+ * <li>categoryId: 新闻类型ID</li>
  * <li>title: 标题</li>
  * <li>contentAbstract: 摘要</li>
  * <li>coverUri: 封面</li>
@@ -28,6 +29,7 @@ public class CreateNewsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
+	private Long categoryId;
 	@NotNull
 	private String title;
 	private String contentAbstract;
@@ -122,6 +124,14 @@ public class CreateNewsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 }

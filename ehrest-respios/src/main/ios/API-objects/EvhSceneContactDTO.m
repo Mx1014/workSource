@@ -46,8 +46,8 @@
         [jsonObject setObject: self.contactAvatar forKey: @"contactAvatar"];
     if(self.userId)
         [jsonObject setObject: self.userId forKey: @"userId"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.departmentName)
         [jsonObject setObject: self.departmentName forKey: @"departmentName"];
     if(self.statusLine)
@@ -99,9 +99,9 @@
         if(self.userId && [self.userId isEqual:[NSNull null]])
             self.userId = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.departmentName = [jsonObject objectForKey: @"departmentName"];
         if(self.departmentName && [self.departmentName isEqual:[NSNull null]])

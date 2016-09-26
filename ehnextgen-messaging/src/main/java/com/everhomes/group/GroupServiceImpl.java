@@ -2295,8 +2295,8 @@ public class GroupServiceImpl implements GroupService {
             if(category != null)
                 groupDto.setCategoryName(category.getName());
         }
-        //groupDto.setCreateTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), 
-        //    group.getCreateTime().getTime()));
+        //groupDto.setBehaviorTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"),
+        //    group.getBehaviorTime().getTime()));
         //groupDto.setCreatorUid(group.getCreatorUid());
         //groupDto.setJoinPolicy(group.getJoinPolicy());
         //groupDto.setDescription(group.getDescription());

@@ -48,8 +48,8 @@
         [jsonObject setObject: self.iconUrl forKey: @"iconUrl"];
     if(self.description_)
         [jsonObject setObject: self.description_ forKey: @"description"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.deleteTime)
         [jsonObject setObject: self.deleteTime forKey: @"deleteTime"];
 }
@@ -93,9 +93,9 @@
         if(self.description_ && [self.description_ isEqual:[NSNull null]])
             self.description_ = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.deleteTime = [jsonObject objectForKey: @"deleteTime"];
         if(self.deleteTime && [self.deleteTime isEqual:[NSNull null]])

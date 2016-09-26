@@ -1,21 +1,5 @@
 package com.everhomes.locale;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
@@ -28,6 +12,20 @@ import com.everhomes.server.schema.tables.EhLocaleTemplates;
 import com.everhomes.server.schema.tables.daos.EhLocaleTemplatesDao;
 import com.everhomes.server.schema.tables.records.EhLocaleStringsRecord;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class LocaleStringProviderImpl implements LocaleStringProvider {
@@ -68,6 +66,19 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
 //            LOGGER.debug("Query locale string, bindValues=" + query.getBindValues());
 //        }
             
+        return ConvertHelper.convert(record, LocaleString.class);
+    }
+
+    @Cacheable(value="LocaleStringFind", key="{#scope, #text, #locale}")
+    @Override
+    public LocaleString findByText(String scope, String text, String locale) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhLocaleStringsRecord record = (EhLocaleStringsRecord)context.select().from(Tables.EH_LOCALE_STRINGS)
+                .where(Tables.EH_LOCALE_STRINGS.SCOPE.like(scope))
+                .and(Tables.EH_LOCALE_STRINGS.TEXT.eq(text))
+                .and(Tables.EH_LOCALE_STRINGS.LOCALE.like(locale))
+                .fetchOne();
+
         return ConvertHelper.convert(record, LocaleString.class);
     }
 

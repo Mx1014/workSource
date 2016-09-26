@@ -1,23 +1,26 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationTask;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,49 +28,12 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationTask;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
-import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationContactsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillItems;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationContacts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillItemsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationContactsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.Tuple;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 
 @Component
@@ -191,7 +157,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	//@Cacheable(value = "CommunityPmMemberList", key="#communityId")
 	@Override
-	public List<CommunityPmMember> listCommunityPmMembers(Long organizationId, String contactToken,Integer pageOffset,Integer pageSize) {  
+	public List<CommunityPmMember> listCommunityPmMembers(Long organizationId, String contactToken,Integer pageOffset,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
@@ -497,9 +463,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public void createPropOwner(CommunityPmOwner communityPmOwner) {
+	public long createPropOwner(CommunityPmOwner communityPmOwner) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		
+
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwners.class));
 		communityPmOwner.setId(id);
 		communityPmOwner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -509,9 +475,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		dao.insert(communityPmOwner);
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwners.class, null);
+		return id;
 	}
 
-	@CacheEvict(value = "CommunityPmOwner", key="communityPmOwner.#id")
+	@CacheEvict(value = "CommunityPmOwner", key="#communityPmOwner.id")
 	@Override
 	public void updatePropOwner(CommunityPmOwner communityPmOwner){
 		assert(communityPmOwner.getId() == null);
@@ -548,7 +515,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	@Cacheable(value="CommunityPmOwner", key="#id")
 	@Override
 	public CommunityPmOwner findPropOwnerById(long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), CommunityPmOwner.class);
 	}
@@ -1347,7 +1314,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
-		if(ids != null & ids.size() > 0)
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+		if(ids != null && ids.size() > 0)
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.in(ids));
 		
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
@@ -1360,11 +1328,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Override
 	public List<CommunityPmOwner> listCommunityPmOwnersByToken(
-			Long communityId, String contactToken) {
+            Integer namespaceId, Long communityId, String contactToken) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
@@ -1391,4 +1360,563 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		});
 		return result;
 	}
+
+    @Override
+    public long createOrganizationOwnerBehavior(OrganizationOwnerBehavior behavior) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerBehaviors.class));
+		behavior.setId(id);
+		behavior.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		behavior.setUpdateTime(behavior.getCreateTime());
+		behavior.setUpdateUid(UserContext.current().getUser().getId());
+		EhOrganizationOwnerBehaviorsDao dao = new EhOrganizationOwnerBehaviorsDao(context.configuration());
+		dao.insert(behavior);
+		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerBehaviorsDao.class, id);
+		return id;
+    }
+
+	@Override
+	public OrganizationOwnerType findOrganizationOwnerTypeById(Long orgOwnerTypeId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_TYPE)
+                .where(Tables.EH_ORGANIZATION_OWNER_TYPE.ID.eq(orgOwnerTypeId))
+                .fetchOneInto(OrganizationOwnerType.class);
+	}
+
+    @Override
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByOwnerId(Integer namespaceId, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select()
+                .from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(ownerId))
+                .fetchInto(OrganizationOwnerAddress.class);
+    }
+
+    @Override
+    public long createOrganizationOwnerAttachment(OrganizationOwnerAttachment attachment) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerAttachments.class));
+		attachment.setId(id);
+		attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		attachment.setCreatorUid(UserContext.current().getUser().getId());
+		EhOrganizationOwnerAttachmentsDao dao = new EhOrganizationOwnerAttachmentsDao(context.configuration());
+		dao.insert(attachment);
+		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerAttachments.class, id);
+		return id;
+    }
+
+    @Override
+    public List<OrganizationOwnerAttachment> listOrganizationOwnerAttachments(Integer namespaceId, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.OWNER_ID.eq(ownerId))
+                .fetchInto(OrganizationOwnerAttachment.class);
+    }
+
+    @Override
+    public OrganizationOwnerAttachment findOrganizationOwnerAttachment(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.ID.eq(id))
+                .fetchOneInto(OrganizationOwnerAttachment.class);
+    }
+
+    @Override
+    public void deleteOrganizationOwnerAttachment(OrganizationOwnerAttachment attachment) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationOwnerAttachmentsDao dao = new EhOrganizationOwnerAttachmentsDao(context.configuration());
+        dao.deleteById(attachment.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerAttachments.class, attachment.getId());
+    }
+
+    @Override
+    public OrganizationOwnerBehavior findOrganizationOwnerBehaviorById(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+                .where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ID.eq(id))
+                .fetchOneInto(OrganizationOwnerBehavior.class);
+    }
+
+    @Override
+    public void deleteOrganizationOwnerBehavior(OrganizationOwnerBehavior behavior) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationOwnerBehaviorsDao dao = new EhOrganizationOwnerBehaviorsDao(context.configuration());
+        behavior.setStatus(OrganizationOwnerBehaviorStatus.DELETE.getCode());// 设置为删除状态
+        dao.update(behavior);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerBehaviors.class, behavior.getId());
+    }
+
+    @Override
+    public List<OrganizationOwnerBehavior> listOrganizationOwnerBehaviors(Integer namespaceId, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+                .where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.STATUS.eq(OrganizationOwnerBehaviorStatus.NORMAL.getCode()))
+                .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(ownerId))
+                .fetchInto(OrganizationOwnerBehavior.class);
+    }
+
+    @Override
+    public long createOrganizationOwnerAddress(OrganizationOwnerAddress ownerAddress) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerAddress.class));
+        ownerAddress.setId(id);
+        EhOrganizationOwnerAddressDao dao = new EhOrganizationOwnerAddressDao(context.configuration());
+        dao.insert(ownerAddress);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerAddress.class, id);
+        return id;
+    }
+
+    @Override
+    public OrganizationOwnerAddress findOrganizationOwnerAddressByOwnerAndAddress(Integer namespaceId, Long ownerId, Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(ownerId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+                .fetchOneInto(OrganizationOwnerAddress.class);
+    }
+
+    @Override
+    public void updateOrganizationOwnerAddress(OrganizationOwnerAddress ownerAddress) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationOwnerAddressDao dao = new EhOrganizationOwnerAddressDao(context.configuration());
+        dao.update(ownerAddress);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerAddress.class, ownerAddress.getId());
+    }
+
+    @Override
+    public void deleteOrganizationOwnerAddress(OrganizationOwnerAddress ownerAddress) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationOwnerAddressDao dao = new EhOrganizationOwnerAddressDao(context.configuration());
+		dao.delete(ownerAddress);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerAddress.class, ownerAddress.getId());
+    }
+
+	@Override
+	public int deleteOrganizationOwnerAddressByOwnerId(Integer namespaceId, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		int rows = context.delete(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+						.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+						.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(ownerId))
+						.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerAddress.class, null);
+		return rows;
+	}
+
+    @Override
+    public List<OrganizationOwnerDTO> listOrganizationOwnersByAddressId(Integer namespaceId,
+																		Long addressId,
+																		RecordMapper<Record, OrganizationOwnerDTO> mapper) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationOwnerDTO> dtoList = context.select(
+				Tables.EH_ORGANIZATION_OWNER_ADDRESS.LIVING_STATUS,
+				Tables.EH_ORGANIZATION_OWNER_ADDRESS.AUTH_TYPE,
+				Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID,
+				Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME,
+				Tables.EH_ORGANIZATION_OWNERS.ID.as("ownerId")
+		)
+				.from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+				.join(Tables.EH_ORGANIZATION_OWNERS)
+				.on(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(Tables.EH_ORGANIZATION_OWNERS.ID))
+				.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+				.fetch().map(mapper);
+		return dtoList;
+    }
+
+	@Override
+	public OrganizationOwnerType findOrganizationOwnerTypeByDisplayName(String orgOwnerTypeName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_ORGANIZATION_OWNER_TYPE)
+				.where(Tables.EH_ORGANIZATION_OWNER_TYPE.DISPLAY_NAME.eq(orgOwnerTypeName))
+				.fetchOneInto(OrganizationOwnerType.class);
+	}
+
+    @Override
+    public List<CommunityPmOwner> listCommunityPmOwnersByCommunity(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+                .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
+                .fetchInto(CommunityPmOwner.class);
+    }
+
+    @Override
+    public long createOrganizationOwnerCar(OrganizationOwnerCar car) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerCars.class));
+        car.setId(id);
+        car.setUpdateUid(UserContext.current().getUser().getId());
+        car.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        car.setUpdateTime(car.getCreateTime());
+        EhOrganizationOwnerCarsDao dao = new EhOrganizationOwnerCarsDao(context.configuration());
+        dao.insert(car);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerCars.class, id);
+        return id;
+    }
+
+    @Override
+    public List<OrganizationOwnerCar> findOrganizationOwnerCarByCommunityIdAndPlateNumber(Integer namespaceId, Long communityId, String plateNumber) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationOwnerCarsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNER_CARS);
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (communityId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.COMMUNITY_ID.eq(communityId));
+        }
+        if (plateNumber != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.PLATE_NUMBER.eq(plateNumber));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_OWNER_CARS.CREATE_TIME);
+        query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.STATUS.eq(OrganizationOwnerCarStatus.NORMAL.getCode()));
+        return query.fetchInto(OrganizationOwnerCar.class);
+    }
+
+    @Override
+    public List<OrganizationOwnerCar> listOrganizationOwnerCarsByIds(List<Long> ids) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationOwnerCarsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNER_CARS);
+        if(ids != null && ids.size() > 0) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.ID.in(ids));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_OWNER_CARS.ID.desc());
+        return query.fetchInto(OrganizationOwnerCar.class);
+    }
+
+    @Override
+    public List<OrganizationOwnerType> listOrganizationOwnerType() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_TYPE).fetchInto(OrganizationOwnerType.class);
+    }
+
+    @Override
+    public OrganizationOwnerCar findOrganizationOwnerCar(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_CARS)
+                .where(Tables.EH_ORGANIZATION_OWNER_CARS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CARS.ID.eq(id))
+                .fetchOneInto(OrganizationOwnerCar.class);
+    }
+
+    @Override
+    public void updateOrganizationOwnerCar(OrganizationOwnerCar car) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationOwnerCarsDao dao = new EhOrganizationOwnerCarsDao(context.configuration());
+        dao.update(car);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerCars.class, car.getId());
+    }
+
+    @Override
+    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, Long pageAnchor, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (communityId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        }
+        if (orgOwnerTypeId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.eq(orgOwnerTypeId));
+        }
+        if (pageAnchor != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.ge(pageAnchor));
+        }
+        query.addLimit(pageSize);
+        return query.fetchInto(CommunityPmOwner.class);
+    }
+
+    @Override
+    public long createOrganizationOwnerCarAttachment(OrganizationOwnerCarAttachment attachment) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerCarAttachments.class));
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        attachment.setCreatorUid(UserContext.current().getUser().getId());
+        EhOrganizationOwnerCarAttachmentsDao dao = new EhOrganizationOwnerCarAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerCarAttachments.class, id);
+        return id;
+    }
+
+    @Override
+    public List<OrganizationOwnerCarAttachment> listOrganizationOwnerCarAttachment(Integer namespaceId, Long carId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.OWNER_ID.eq(carId))
+                .fetchInto(OrganizationOwnerCarAttachment.class);
+    }
+
+    @Override
+    public OrganizationOwnerCarAttachment findOrganizationOwnerCarAttachment(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.ID.eq(id))
+                .fetchOneInto(OrganizationOwnerCarAttachment.class);
+    }
+
+    @Override
+    public void deleteOrganizationOwnerCarAttachment(OrganizationOwnerCarAttachment attachment) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationOwnerCarAttachmentsDao dao = new EhOrganizationOwnerCarAttachmentsDao(context.configuration());
+        dao.delete(attachment);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwnerCarAttachments.class, attachment.getId());
+    }
+
+    @Override
+    public long createOrganizationOwnerOwnerCar(OrganizationOwnerOwnerCar ownerOwnerCar) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationOwnerOwnerCar.class));
+        ownerOwnerCar.setId(id);
+        EhOrganizationOwnerOwnerCarDao dao = new EhOrganizationOwnerOwnerCarDao(context.configuration());
+        dao.insert(ownerOwnerCar);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerOwnerCar.class, id);
+        return id;
+    }
+
+    @Override
+    public <R> List<R> listOrganizationOwnersByCar(Integer namespaceId, Long carId, RecordMapper<Record, R> mapper) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(
+                Tables.EH_ORGANIZATION_OWNERS.ID.as("ownerId"),
+                Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ID.as("ownerOwnerCarId"),
+                Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN,
+                Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID,
+                Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.PRIMARY_FLAG
+        )
+                .from(Tables.EH_ORGANIZATION_OWNERS)
+                .join(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .on(Tables.EH_ORGANIZATION_OWNERS.ID.eq(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID))
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
+                .orderBy(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.asc())
+                .fetch(mapper);
+    }
+
+    @Override
+    public int deleteOrganizationOwnerOwnerCarByOwnerId(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.delete(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public int deleteOrganizationOwnerOwnerCarByCarId(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.delete(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public int deleteOrganizationOwnerCarAttachmentByCarId(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.delete(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.OWNER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void deleteOrganizationOwnerOwnerCarByOwnerIdAndCarId(Integer namespaceId, Long ownerId, Long carId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID.eq(ownerId))
+                .execute();
+    }
+
+    @Override
+    public OrganizationOwnerOwnerCar findOrganizationOwnerOwnerCarByOwnerIdAndCarId(Integer namespaceId, Long ownerId, Long carId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID.eq(ownerId))
+                .fetchOneInto(OrganizationOwnerOwnerCar.class);
+    }
+
+    @Override
+    public void updateOrganizationOwnerOwnerCar(OrganizationOwnerOwnerCar ownerOwnerCar) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationOwnerOwnerCarDao dao = new EhOrganizationOwnerOwnerCarDao(context.configuration());
+        dao.update(ownerOwnerCar);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhOrganizationOwnerOwnerCar.class, ownerOwnerCar.getId());
+    }
+
+    @Override
+    public OrganizationOwnerOwnerCar findOrganizationOwnerOwnerCarById(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ID.eq(id))
+                .fetchOneInto(OrganizationOwnerOwnerCar.class);
+    }
+
+    @Override
+    public OrganizationOwnerOwnerCar findOrganizationOwnerCarPrimaryUser(Integer namespaceId, Long carId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.PRIMARY_FLAG.eq(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode()))
+                .fetchOneInto(OrganizationOwnerOwnerCar.class);
+    }
+
+    @Override
+    public List<OrganizationOwnerCar> listOrganizationOwnerCarByOwnerId(Integer namespaceId, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_ORGANIZATION_OWNER_CARS.fields())
+                .from(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
+                .join(Tables.EH_ORGANIZATION_OWNER_CARS)
+                .on(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(Tables.EH_ORGANIZATION_OWNER_CARS.ID))
+                .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID.eq(ownerId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CARS.STATUS.eq(OrganizationOwnerCarStatus.NORMAL.getCode()))
+                .fetchInto(OrganizationOwnerCar.class);
+    }
+
+    @Override
+    public List<OrganizationOwnerCar> listOrganizationOwnerCarsByCommunity(Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select()
+                .from(Tables.EH_ORGANIZATION_OWNER_CARS)
+                .where(Tables.EH_ORGANIZATION_OWNER_CARS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CARS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNER_CARS.STATUS.eq(OrganizationOwnerCarStatus.NORMAL.getCode()))
+                .fetchInto(OrganizationOwnerCar.class);
+    }
+
+    @Override
+    public List<ListOrganizationOwnerStatisticDTO> listOrganizationOwnerStatisticByGender(
+            Long communityId, Byte livingStatus, List<Long> orgOwnerTypeIds, RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        SelectQuery<Record1<Long>> subQuery = context.select(
+                Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID
+        )
+                .from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .getQuery();
+
+        if (livingStatus != null) {
+            subQuery.addConditions(Tables.EH_ORGANIZATION_OWNER_ADDRESS.LIVING_STATUS.eq(livingStatus));
+        }
+        subQuery.addGroupBy(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID);
+
+        SelectQuery<Record2<Byte, Integer>> query = context.select(
+                Tables.EH_ORGANIZATION_OWNERS.GENDER,
+                DSL.count().as("count")
+        )
+                .from(subQuery)
+                .join(Tables.EH_ORGANIZATION_OWNERS)
+                .on(subQuery.field(DSL.fieldByName(Long.class, "organization_owner_id")).eq(Tables.EH_ORGANIZATION_OWNERS.ID))
+                .getQuery();
+
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+        if (communityId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        }
+        if (orgOwnerTypeIds != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.in(orgOwnerTypeIds));
+        }
+        query.addGroupBy(Tables.EH_ORGANIZATION_OWNERS.GENDER);
+        return query.fetch(mapper);
+    }
+
+    @Override
+    public List<ListOrganizationOwnerStatisticDTO> listOrganizationOwnerStatisticByAge(Long communityId, Byte livingStatus, List<Long> orgOwnerTypeIds, RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        SelectQuery<Record1<Long>> subQuery = context.select(
+                Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID
+        )
+                .from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .getQuery();
+
+        Field<Integer> age = DSL.year(DSL.currentDate()).sub(DSL.year(Tables.EH_ORGANIZATION_OWNERS.BIRTHDAY));
+        Field<String> ageGroups = DSL.decode()
+                .when(age.between(0, 10), "0-10")
+                .when(age.between(11, 20), "11-20")
+                .when(age.between(21, 30), "21-30")
+                .when(age.between(31, 40), "31-40")
+                .when(age.between(41, 50), "41-50")
+                .when(age.between(51, 60), "51-60")
+                .when(age.between(61, 70), "61-70")
+                .when(age.between(71, 80), "71-80")
+                .when(age.between(81, 90), "81-90")
+                .when(age.between(91, 100), "91-100")
+                .otherwise("101+").as("ageGroups");
+
+        if (livingStatus != null) {
+            subQuery.addConditions(Tables.EH_ORGANIZATION_OWNER_ADDRESS.LIVING_STATUS.eq(livingStatus));
+        }
+        subQuery.addGroupBy(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID);
+
+        SelectQuery<Record3<Byte, String, Integer>> query = context.select(
+                Tables.EH_ORGANIZATION_OWNERS.GENDER,
+                ageGroups,
+                DSL.count()
+        )
+                .from(subQuery)
+                .join(Tables.EH_ORGANIZATION_OWNERS)
+                .on(subQuery.field(DSL.fieldByName(Long.class, "organization_owner_id")).eq(Tables.EH_ORGANIZATION_OWNERS.ID))
+                .getQuery();
+
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+        if (communityId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        }
+        if (orgOwnerTypeIds != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.in(orgOwnerTypeIds));
+        }
+        query.addGroupBy(Tables.EH_ORGANIZATION_OWNERS.GENDER);
+        query.addGroupBy(ageGroups);
+        return query.fetch(mapper);
+    }
+
+    @Override
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressId(Integer namespaceId, Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+                .fetchInto(OrganizationOwnerAddress.class);
+    }
+
+    @Override
+    public CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+                .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
+                .fetchOneInto(CommunityPmOwner.class);
+    }
+
+    @Override
+    public int deleteOrganizationOwnerAttachmentByOwnerId(Integer namespaceId, Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.delete(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.OWNER_ID.eq(id))
+                .execute();
+    }
 }

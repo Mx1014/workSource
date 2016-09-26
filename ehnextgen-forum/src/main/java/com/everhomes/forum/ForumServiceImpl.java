@@ -13,7 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
+import org.elasticsearch.common.text.Text;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.highlight.HighlightField;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -38,6 +42,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contentserver.ResourceType;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -52,6 +57,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
@@ -64,6 +72,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -123,6 +132,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -136,6 +146,7 @@ import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
@@ -143,11 +154,15 @@ import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
 import com.everhomes.rest.ui.forum.MediaDisplayFlag;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.PostFilterType;
+import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
@@ -162,6 +177,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.SearchTypes;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -253,6 +269,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private SmsProvider smsProvider;
+    
+    @Autowired
+    private NamespacesProvider namespacesProvider;
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
@@ -603,6 +622,14 @@ public class ForumServiceImpl implements ForumService {
 	            
 	            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
 	            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+	            
+	            //attachment也要转成dto modified by xiongying 20160920
+	            List<AttachmentDTO> attachments = new ArrayList<AttachmentDTO>();
+        		for(Attachment attachment : post.getAttachments()) {
+        			attachments.add(ConvertHelper.convert(attachment, AttachmentDTO.class));
+        		}
+        		dto.setAttachments(attachments);
+        		
 	            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
 	            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
 	            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
@@ -1133,7 +1160,7 @@ public class ForumServiceImpl implements ForumService {
          List<Long> communityIdList = new ArrayList<Long>();
          if(null == communityId){
 //        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-//         	command.setOrganizationId(organization.getId());;
+//         	command.setCommunityId(organization.getId());;
 //         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
          	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
          	if(null != communities){
@@ -3197,7 +3224,7 @@ public class ForumServiceImpl implements ForumService {
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
                 	//单独处理活动的分享链接 modified by xiongying 20160622
-                	if(post.getCategoryId() == 1010) {
+                	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
                 		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
                 		ActivityTokenDTO dto = new ActivityTokenDTO();
                 		dto.setPostId(post.getId());
@@ -3804,7 +3831,7 @@ public class ForumServiceImpl implements ForumService {
 //            		}
 //            	}else{
 ////                	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-////                	command.setOrganizationId(org.getId());		
+////                	command.setCommunityId(org.getId());
 ////                	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
 ////                	for (CommunityDTO communityDTO : communityDTOs) {
 ////                		visibleRegionIds.add(communityDTO.getId());
@@ -4896,4 +4923,154 @@ public class ForumServiceImpl implements ForumService {
         
         return forumId.equals(makerzoneForumId);
     }
+
+	@Override
+	public SearchContentsBySceneReponse searchContents(
+			SearchContentsBySceneCommand cmd, SearchContentType contentType) {
+
+		SearchTopicBySceneCommand command = new SearchTopicBySceneCommand();
+		command.setPageAnchor(cmd.getPageAnchor());
+		command.setPageSize(cmd.getPageSize());
+		command.setQueryString(cmd.getKeyword());
+		command.setSceneToken(cmd.getSceneToken());
+		command.setSearchContentType(cmd.getContentType());
+		//是否全局搜索未设定
+		SearchResponse rsp = postSearcher.searchByScene(command);
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+		SearchContentsBySceneReponse resp = analyzeSearchResponse(rsp, pageSize, anchor, cmd.getContentType());
+		return resp;
+	}
+	
+	private String highlightText(Text[] texts) {
+		StringBuilder sb = new StringBuilder();
+		for(Text text: texts) {
+			if(sb.length() != 0) {
+				sb.append("..." + text);
+			} else {
+				sb.append(text);
+			}
+		}
+		
+		String str = sb.toString();
+		
+		return str;
+	}
+	
+	private SearchContentsBySceneReponse analyzeSearchResponse(SearchResponse rsp, int pageSize, Long anchor, String searchContentType) {
+    	SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+    	
+    	SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
+    	List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+    	SearchHit[] docs = rsp.getHits().getHits();
+    	
+        for (SearchHit sd : docs) {
+        	ContentBriefDTO dto = new ContentBriefDTO();
+        	dto.setId(Long.parseLong(sd.getId()));
+        	dto.setSearchTypeId(searchType.getId());
+			dto.setSearchTypeName(searchType.getName());
+        	Map<String, Object> source = sd.getSource();
+        	Map<String, HighlightField> highlight = sd.getHighlightFields();
+        	
+        	if(StringUtils.isEmpty(String.valueOf(highlight.get("subject"))) || "null".equals(String.valueOf(highlight.get("subject")))){
+        		dto.setSubject(String.valueOf(source.get("subject")));
+			} else {
+				String subject = highlightText(highlight.get("subject").getFragments());
+				dto.setSubject(subject);
+				
+			}
+        	
+        	if(StringUtils.isEmpty(String.valueOf(highlight.get("content"))) || "null".equals(String.valueOf(highlight.get("content")))){
+        		dto.setContent(String.valueOf(source.get("content")));
+			} else {
+				String content = highlightText(highlight.get("content").getFragments());
+				dto.setContent(content);
+			}
+        	
+        	PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
+        	if(postDto != null && postDto.getAttachments() != null && postDto.getAttachments().size() > 0) {
+        		postDto.getAttachments();
+        		postDto.getAttachments().get(0);
+        		String postUrl = postDto.getAttachments().get(0).getContentUrl();
+        		dto.setPostUrl(postUrl);
+        	}
+        	
+        	ForumFootnoteHandler handler = getForumFootnoteHandler(searchContentType);
+            if(handler != null) {
+                handler.renderContentFootnote(dto, postDto);
+            }
+        	
+        	dtos.add(dto);
+        }
+        
+    	if(dtos.size() > pageSize) {
+    		response.setNextPageAnchor(anchor+1);
+    		dtos.remove(dtos.size() - 1);
+    	}
+    	
+    	response.setDtos(dtos);
+
+    	return response;
+    }
+    
+    private ForumFootnoteHandler getForumFootnoteHandler(String searchContentType) {
+    	ForumFootnoteHandler handler = null;
+        
+        if(StringUtils.isEmpty(searchContentType)) {
+            String handlerPrefix = ForumFootnoteHandler.FORUM_FOOTNOTE_RESOLVER_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + searchContentType);
+        }
+        
+        return handler;
+    }
+
+	@Override
+	public ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
+		long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Integer namespaceId = cmd.getNamespaceId();
+        List<Long> forumIds = new ArrayList<Long>();
+        List<Long> communityIdList = new ArrayList<Long>();
+        // 获取所管理的所有小区对应的社区论坛
+        if(namespaceId != null) {
+            List<NamespaceResource> namespaceResources = namespacesProvider.listNamespaceResources(namespaceId, NamespaceResourceType.COMMUNITY.getCode());
+            List<Community> communities = communityProvider.findCommunitiesByIds(namespaceResources.stream().map(n->n.getResourceId()).collect(Collectors.toList()));            
+            if(communities != null){
+                for (Community community : communities) {
+                    communityIdList.add(community.getId());
+                    forumIds.add(community.getDefaultForumId());
+                }
+            }
+        }
+        
+        // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
+        if(forumIds.size() == 0) {
+            LOGGER.error("Forum not found for offical activities, cmd={}", cmd);
+            return null;
+        }
+        
+        Condition forumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds);
+        
+        Condition condition = forumCondition;
+        condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY));
+        condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
+        CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null);
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }   
+        return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+	}
+    
 }

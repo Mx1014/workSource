@@ -1,29 +1,7 @@
 // @formatter:off
 package com.everhomes.family;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.lucene.spatial.DistanceUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-
 import ch.hsr.geohash.GeoHash;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -41,17 +19,16 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.point.PointType;
+import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.organization.pm.OrganizationOwnerAddress;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
@@ -59,47 +36,16 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.family.ApproveMemberCommand;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.family.FamilyMemberDTO;
-import com.everhomes.rest.family.FamilyMemberFullDTO;
-import com.everhomes.rest.family.FamilyMembershipRequestDTO;
-import com.everhomes.rest.family.FamilyNotificationTemplateCode;
-import com.everhomes.rest.family.FamilyServiceErrorCode;
-import com.everhomes.rest.family.FindFamilyByAddressIdCommand;
-import com.everhomes.rest.family.GetFamilyCommand;
-import com.everhomes.rest.family.GetOwningFamilyByIdCommand;
-import com.everhomes.rest.family.JoinFamilyCommand;
-import com.everhomes.rest.family.LeaveFamilyCommand;
-import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
-import com.everhomes.rest.family.ListFamilyRequestsCommand;
-import com.everhomes.rest.family.ListFamilyRequestsCommandResponse;
-import com.everhomes.rest.family.ListNearbyNeighborUserCommand;
-import com.everhomes.rest.family.ListNeighborUsersCommand;
-import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
-import com.everhomes.rest.family.ListOwningFamilyMembersCommand;
-import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
-import com.everhomes.rest.family.NeighborUserDTO;
-import com.everhomes.rest.family.NeighborUserDetailDTO;
-import com.everhomes.rest.family.NeighborhoodRelation;
-import com.everhomes.rest.family.ParamType;
-import com.everhomes.rest.family.RejectMemberCommand;
-import com.everhomes.rest.family.RevokeMemberCommand;
-import com.everhomes.rest.family.SetCurrentFamilyCommand;
-import com.everhomes.rest.family.UpdateFamilyInfoCommand;
+import com.everhomes.rest.family.*;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.point.AddUserPointCommand;
+import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -109,23 +55,23 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserGroupHistory;
-import com.everhomes.user.UserGroupHistoryProvider;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLocation;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.PinYinHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import org.apache.lucene.spatial.DistanceUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.jooq.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Family inherits from Group for family member management. GroupDiscriminator.FAMILY
@@ -190,6 +136,9 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private UserGroupHistoryProvider userGroupHistoryProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -899,11 +848,11 @@ public class FamilyServiceImpl implements FamilyService {
         long startTime = System.currentTimeMillis();
         cmd.setOperatorRole(cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole());
         if(cmd.getOperatorRole() != Role.SystemAdmin){
-            GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
+            GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId,
                     EntityType.USER.getCode(), userId);
             if(currMember == null || currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
                 LOGGER.error("User permission denied, userId=" + userId);
-                throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_STATUS_INVALID, 
+                throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_STATUS_INVALID,
                         "User permission denied.");
             }
         }
@@ -944,7 +893,9 @@ public class FamilyServiceImpl implements FamilyService {
         });
        
         if(tuple.second()){
-            
+            // 认证organizationOwner
+            approveOrganizationOwner(cmd.getAddressId(), user.getNamespaceId(), memberUid);
+
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
             else if(cmd.getOperatorRole().byteValue() == Role.SystemAdmin)
@@ -967,7 +918,34 @@ public class FamilyServiceImpl implements FamilyService {
         
         
     }
-    
+
+    //
+    // 认证organization owner
+    // add by xq.tian   20160922
+    //
+    private boolean approveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
+        if (addressId != null) {
+            User memberUser = userProvider.findUserById(memberUid);
+            UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
+            if (memberUser != null && userIdentifier != null) {
+                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
+                        memberUser.getCommunityId(), userIdentifier.getIdentifierToken());
+                if (pmOwners != null && pmOwners.size() > 0) {
+                    for (CommunityPmOwner owner : pmOwners) {
+                        OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+                                namespaceId, owner.getId(), addressId);
+                        if (ownerAddress != null && ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
+                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                            propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void sendFamilyNotificationForApproveMember(Address address, Group group, GroupMember member,long operatorId) {
         // send notification to the applicant
         try {
@@ -1686,7 +1664,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
         
 //        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
-//        //familyDTO.setAddressId(cmd.getAddressId());
+//        //familyDTO.setApartmentId(cmd.getApartmentId());
 //        if(family.getCreatorUid() == user.getId())
 //            familyDTO.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
 //        
@@ -1701,7 +1679,7 @@ public class FamilyServiceImpl implements FamilyService {
 //            Address address = this.addressProvider.findAddressById(addressId);
 //            if(address != null){
 //                familyDTO.setAddress(address.getAddress());
-//                familyDTO.setAddressId(address.getId());
+//                familyDTO.setApartmentId(address.getId());
 //                familyDTO.setApartmentName(address.getApartmentName());
 //                familyDTO.setBuildingName(address.getBuildingName());
 //                familyDTO.setAddressStatus(address.getStatus());

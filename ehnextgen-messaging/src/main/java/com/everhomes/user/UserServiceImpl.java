@@ -18,7 +18,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
@@ -55,6 +57,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -67,6 +70,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.forum.ForumService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -83,6 +87,7 @@ import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.news.NewsService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -118,13 +123,19 @@ import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.SearchTypeDTO;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
@@ -306,6 +317,15 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private UserImpersonationProvider userImpersonationProvider;
+    
+    @Autowired
+    private NewsService newsService;
+    
+    @Autowired
+    private ForumService forumService;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
     
 
 	private static final String DEVICE_KEY = "device_login";
@@ -1313,7 +1333,7 @@ public class UserServiceImpl implements UserService {
 		UserInfo info = ConvertHelper.convert(user, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
 		populateUserAvatar(info, user.getAvatar());
-//		info.setAvatarUri(user.getAvatar());
+//		info.setAvatar(user.getAvatar());
 //		try{
 //			String url = contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
 //			info.setAvatarUrl(url);
@@ -1723,12 +1743,12 @@ public class UserServiceImpl implements UserService {
 		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
 		populateUserAvatar(info, queryUser.getAvatar());
-//		info.setAvatarUri(queryUser.getAvatar());
+//		info.setAvatar(queryUser.getAvatar());
 //		try{
 //			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
 //			info.setAvatarUrl(url);
 //		}catch(Exception e){
-//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatarUri());
+//			LOGGER.error("Failed to parse user avatar uri, userId=" + uid + ", avatar=" + info.getAvatar());
 //		}
 		if(queryUser.getCommunityId()!=null){
 			Community community = communityProvider.findCommunityById(queryUser.getCommunityId());
@@ -1809,7 +1829,7 @@ public class UserServiceImpl implements UserService {
 		}
         // 把用户头像的处理独立到一个方法中 by lqs 20151211
         populateUserAvatar(info, queryUser.getAvatar());
-//		info.setAvatarUri(queryUser.getAvatar());
+//		info.setAvatar(queryUser.getAvatar());
 //		try{
 //			String url=contentServerService.parserUri(queryUser.getAvatar(),EntityType.USER.getCode(),queryUser.getId());
 //			info.setAvatarUrl(url);
@@ -3059,5 +3079,214 @@ public class UserServiceImpl implements UserService {
         resp.setImpersonations(impers);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+
+	@Override
+	public SearchContentsBySceneReponse searchContentsByScene(
+			SearchContentsBySceneCommand cmd) {
+		long startTime = System.currentTimeMillis();
+		User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId(); 
+//	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+		 
+	    if(StringUtils.isEmpty(cmd.getContentType())) {
+	    	cmd.setContentType(SearchContentType.ALL.getCode());
+	    }
+	    SearchContentType contentType = SearchContentType.fromCode(cmd.getContentType());
+	    
+	    SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+	    switch(contentType) {
+	    case ACTIVITY:
+	    case POLL:
+	    case TOPIC:
+	    	response = forumService.searchContents(cmd, contentType);
+	    	break;
+		
+	    case NEWS:
+	    	response = newsService.searchNewsByScene(cmd);
+	    	break;
+	    case ALL:
+	    	int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
+	    	cmd.setPageSize(pageSize);
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+	    	}
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
+	    	}
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+	    	}
+	    	
+	    	
+	    	response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+	    	break;
+		
+	    default:
+	    	LOGGER.error("Unsupported content type for search, contentType=" + cmd.getContentType());
+	    	break;
+	    }
+		    
+	    if(LOGGER.isDebugEnabled()) {
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("search contents by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
+	            userId, namespaceId, (endTime - startTime), cmd);
+	    }
+		return response;
+	}
+
+	@Override
+	public ListSearchTypesBySceneReponse listSearchTypesByScene(
+			ListSearchTypesBySceneCommand cmd) {
+		User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    
+	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+	    
+	    //先按域空间查，ownerid和ownertype暂时不用
+	    ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
+	    response.setSearchTypes(new ArrayList<SearchTypeDTO>());
+	    List<SearchTypes> searchTypes = userActivityProvider.listByNamespaceId(namespaceId);
+	    if(searchTypes != null && searchTypes.size() > 0) {
+	    	response.getSearchTypes().addAll(searchTypes.stream().map(r -> {
+	    		SearchTypeDTO dto = ConvertHelper.convert(r, SearchTypeDTO.class);
+	    		return dto;
+	    	}).collect(Collectors.toList()));
+	    }
+	    return response;
+	}
+    
+    // 移自WebRequestInterceptor并改为public方法，使得其它地方也可以调用 by lqs 20160922
+    public boolean isValid(LoginToken token) {
+        if(token == null) {
+            User user = UserContext.current().getUser();
+            Long userId = -1L;
+            if(user != null) {
+                userId = user.getId();
+            }
+//          It's ok when using signature
+//          LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+            return false;
+        }
+
+        return this.isValidLoginToken(token);
+    }
+    
+    // 移自WebRequestInterceptor并改为public方法，使得其它地方也可以调用 by lqs 20160922
+    public LoginToken getLoginToken(HttpServletRequest request) {
+        Map<String, String[]> paramMap = request.getParameterMap();
+        String loginTokenString = null;
+        for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+            String value = StringUtils.join(entry.getValue(), ",");
+            if(LOGGER.isTraceEnabled())
+                LOGGER.trace("HttpRequest param " + entry.getKey() + ": " + value);
+            if(entry.getKey().equals("token"))
+                loginTokenString = value;
+        }
+
+        if(loginTokenString == null) {
+            if(request.getCookies() != null) {
+                List<Cookie> matchedCookies = new ArrayList<>();
+
+                for(Cookie cookie : request.getCookies()) {
+                    if(LOGGER.isTraceEnabled())
+                        LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
+
+                    if(cookie.getName().equals("token")) {
+                        matchedCookies.add(cookie);
+                    }
+                }
+
+                if(matchedCookies.size() > 0)
+                    loginTokenString = matchedCookies.get(matchedCookies.size() - 1).getValue();
+            }
+        }
+
+        if(loginTokenString != null)
+            try{
+                return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
+            } catch (Exception e) {
+                LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
+                return null;
+            }
+
+        return null;
+    }
+    
+    public UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response) {
+        List<User> userList = this.userProvider.findThirdparkUserByTokenAndType(namespaceId, userType, userToken);
+        if(userList == null || userList.size() == 0) {
+            LOGGER.error("Unable to find the thridpark user, namespaceId={}, userType={}, userToken={}", namespaceId, userType, userToken);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        User user = userList.get(0);
+        if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, 
+                "User account has not been activated yet");
+        }
+
+        UserLogin login = createLogin(namespaceId, user, null, null);
+        login.setStatus(UserLoginStatus.LOGGED_IN);
+        
+        //added by Janson, mark as disconnected
+        unregisterLoginConnection(login);
+
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("User logon succeed, namespaceId={}, userType={}, userToken={}, userLogin={}", namespaceId, userType, userToken, login);
+        }
+        
+        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+        LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+        WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response);
+        
+        return login;
+    }
+    
+    @Override
+    public boolean signupByThirdparkUser(User user, HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("Proxy-Client-IP"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("WL-Proxy-Client-IP"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("HTTP_CLIENT_IP"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getRemoteAddr(); 
+        } 
+
+        String regIp = ip;
+        user.setRegIp(regIp);
+        user.setStatus(UserStatus.ACTIVE.getCode());
+        
+        Integer namespaceId = user.getNamespaceId();
+        String namespaceUserType = user.getNamespaceUserType();
+        String namespaceUserToken = user.getNamespaceUserToken();
+        List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
+        if(userList == null || userList.size() == 0) {
+            userProvider.createUser(user);
+            return true;
+        } else {
+            LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
+            return false;
+        }
     }
 }

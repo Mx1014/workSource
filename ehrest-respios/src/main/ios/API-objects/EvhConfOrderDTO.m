@@ -40,8 +40,8 @@
         [jsonObject setObject: self.contactor forKey: @"contactor"];
     if(self.mobile)
         [jsonObject setObject: self.mobile forKey: @"mobile"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.buyChannel)
         [jsonObject setObject: self.buyChannel forKey: @"buyChannel"];
     if(self.quantity)
@@ -83,9 +83,9 @@
         if(self.mobile && [self.mobile isEqual:[NSNull null]])
             self.mobile = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.buyChannel = [jsonObject objectForKey: @"buyChannel"];
         if(self.buyChannel && [self.buyChannel isEqual:[NSNull null]])

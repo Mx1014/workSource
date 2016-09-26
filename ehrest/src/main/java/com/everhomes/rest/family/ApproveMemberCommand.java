@@ -1,9 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.family;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: 类型对应的Id，详情{@link com.everhomes.rest.family.BaseCommand}</li>
  * <li>memberUid: 成员Id</li>
  * <li>operatorRole: 操作者角色</li>
+ * <li>addressId: 地址id</li>
  * </ul>
  */
 public class ApproveMemberCommand extends BaseCommand{
@@ -18,6 +19,8 @@ public class ApproveMemberCommand extends BaseCommand{
     private Long memberUid;
     
     private Long operatorRole;
+
+    private Long addressId;// add by xq.tian   2016/09/17
 
     public ApproveMemberCommand() {
     }
@@ -36,6 +39,14 @@ public class ApproveMemberCommand extends BaseCommand{
 
     public void setOperatorRole(Long operatorRole) {
         this.operatorRole = operatorRole;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     @Override

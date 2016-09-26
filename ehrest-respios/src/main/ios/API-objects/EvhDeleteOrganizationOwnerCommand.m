@@ -34,8 +34,8 @@
         [jsonObject setObject: self.contactType forKey: @"contactType"];
     if(self.contactToken)
         [jsonObject setObject: self.contactToken forKey: @"contactToken"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -49,9 +49,9 @@
         if(self.contactToken && [self.contactToken isEqual:[NSNull null]])
             self.contactToken = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         return self;
     }

@@ -34,8 +34,12 @@ public class SearchUtils {
     public static final String EQUIPMENTSTANDARDINDEXTYPE = "equipmentStandard";
     
     public static final String PMOWNERINDEXTYPE = "pmowner";
-    
+
+    public static final String PM_OWNER_CAR_INDEX_TYPE = "organizationOwnerCar";
+
     public static final String PMTASK = "pmtask";
+    
+    public static final String SAREQUEST = "saRequest";
     
     public static Long getLongField(Object o) {
         Long v = -1l;

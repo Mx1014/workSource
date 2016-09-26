@@ -41,6 +41,8 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -293,5 +295,16 @@ public class ActivityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /*
+     * 
+     * <p>按namespace查询官方活动</p>
+     * <b>URL: /activity/listOfficialActivityByNamespace</b>
+     */
+    @RequestMapping("listOfficialActivityByNamespace")
+    @RestReturn(value=ListOfficialActivityByNamespaceResponse.class)
+    public RestResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
+    	return new RestResponse(activityService.listOfficialActivityByNamespace(cmd));
     }
 }

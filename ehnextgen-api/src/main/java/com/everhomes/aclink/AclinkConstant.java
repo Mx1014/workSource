@@ -9,4 +9,5 @@ public interface AclinkConstant {
     public static final String ACLINK_DRIVER_TYPE = "aclink.qr_driver_type";
     public static final String ACLINK_VISITOR_SHORTS = "aclink.visitor_shorts";
     public static final String ACLINK_QR_TIMEOUTS = "aclink.qr_timeout";
+    public static final String ACLINK_VISITOR_CNT = "aclink.qr_visitor_cnt";
 }

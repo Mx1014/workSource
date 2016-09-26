@@ -321,7 +321,7 @@ public class UserController extends ControllerBase {
         
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 
 		return new RestResponse(cmdResponse);
 	}
@@ -351,7 +351,7 @@ public class UserController extends ControllerBase {
 		
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 
 		return new RestResponse(cmdResponse);
 	}
@@ -375,7 +375,7 @@ public class UserController extends ControllerBase {
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
-		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+		LOGGER.debug(String.format("Return login info. token: %s, login info: %s", tokenString, StringHelper.toJsonString(login)));
 		setCookieInResponse("token", tokenString, request, response);
         
         // 当从园区版登录时，有指定的namespaceId，需要对这些用户进行特殊处理
@@ -389,7 +389,7 @@ public class UserController extends ControllerBase {
 
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 		
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
@@ -424,7 +424,7 @@ public class UserController extends ControllerBase {
 
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 		return new RestResponse(cmdResponse);
 	}
 	/**
@@ -671,15 +671,16 @@ public class UserController extends ControllerBase {
 		}).collect(Collectors.toList());
 	}
 
-	private String getContentServer(){
-		try {
-			ContentServer server = contentServerService.selectContentServer();
-			return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
-		} catch (Exception e) {
-			LOGGER.error("cannot find content server",e);
-			return null;
-		}
-	}
+	// 转移到ContentServerServiceImpl，使得其它模块也可以调用 by lqs 20160923
+//	private String getContentServer(){
+//		try {
+//			ContentServer server = contentServerService.selectContentServer();
+//			return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+//		} catch (Exception e) {
+//			LOGGER.error("cannot find content server",e);
+//			return null;
+//		}
+//	}
 
 	/**
 	 * <b>URL: /user/resendVerificationCodeByIdentifier</b>
@@ -937,7 +938,7 @@ public class UserController extends ControllerBase {
 
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 		return new RestResponse(cmdResponse);
 	}
 

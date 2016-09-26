@@ -40,8 +40,8 @@
         [jsonObject setObject: self.driver forKey: @"driver"];
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.manufacturer)
         [jsonObject setObject: self.manufacturer forKey: @"manufacturer"];
     if(self.doorId)
@@ -71,9 +71,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.manufacturer = [jsonObject objectForKey: @"manufacturer"];
         if(self.manufacturer && [self.manufacturer isEqual:[NSNull null]])

@@ -37,6 +37,8 @@ public interface PrivilegeConstants {
     public static final long TaskProcessingAndGrab = 307L; 
     
     // privileges defined by pm Task2.0 module
+    public static final long LISTALLTASK = 904L;
+    public static final long LISTUSERTASK = 805L;
     public static final long ASSIGNTASK = 331L;
     public static final long COMPLETETASK = 332L; 
     public static final long CLOSETASK = 333L;

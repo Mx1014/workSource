@@ -204,7 +204,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		User user = UserContext.current().getUser();
 		
 		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
@@ -227,19 +227,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		//根据机构获取全部要屏蔽的菜单
 		List<WebMenuScope> orgWebMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getOrganizationId()));
-		
-		//根据域获取全部要屏蔽的菜单
-		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
-		
+
 		//去掉机构要屏蔽的菜单
 		if(null != orgWebMenuScopes && orgWebMenuScopes.size() > 0){
 			menus = this.handleMenus(menus, orgWebMenuScopes);
+		}else{
+			//根据域获取全部要屏蔽的菜单
+			List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+			//去掉域要屏蔽的菜单
+			if(null != webMenuScopes && webMenuScopes.size() > 0)
+				menus = this.handleMenus(menus, webMenuScopes);
 		}
-		
-		//去掉域要屏蔽的菜单
-		if(null != webMenuScopes && webMenuScopes.size() > 0)
-			menus = this.handleMenus(menus, webMenuScopes);
-		
+
 		if(null == menus){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
@@ -253,8 +252,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		return res;
 	}
-	
-	
 
 	@Override
 	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
@@ -266,15 +263,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		//根据机构获取全部要屏蔽的菜单权限
 		List<WebMenuScope> orgWebMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.ORGANIZATIONS.getCode(), Long.valueOf(cmd.getOrganizationId()));
 		
+
+		if(null != orgWebMenuScopes && orgWebMenuScopes.size() > 0){
+			return this.getListWebMenuPrivilege(webMenuPrivileges, orgWebMenuScopes);
+		}
+
 		//屏蔽域下面的菜单权限
 		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
-		
-		if(null != webMenuScopes){
-			webMenuScopes.addAll(orgWebMenuScopes);
-		}else{
-			webMenuScopes = orgWebMenuScopes;
-		}
-		
 		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
 	
@@ -1146,26 +1141,38 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
 			}
 		}
-		
-		if(null != webMenuScopes){
+
+		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
+
+		if(null != webMenuScopes && webMenuScopes.size() > 0){
 			for (WebMenuScope webMenuScope : webMenuScopes) {
-				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
-					dtosMap.remove(webMenuScope.getMenuId());
+				WebMenu menu = menuMap.get(webMenuScope.getMenuId());
+				if(null == menu){
+					continue;
+				}
+
+				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT ||
+						WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					if(null != dtosMap.get(webMenuScope.getMenuId()) && dtosMap.get(webMenuScope.getMenuId()).size() > 0){
+						ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
+						dto.setModuleId(menu.getId());
+						dto.setModuleName(menu.getName());
+						dto.setDtos(dtosMap.get(webMenuScope.getMenuId()));
+						dtos.add(dto);
+					}
 				}
 			}
+		}else{
+			for (Long menuId : dtosMap.keySet()) {
+				ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
+				WebMenu menu = menuMap.get(menuId);
+				dto.setModuleId(menu.getId());
+				dto.setModuleName(menu.getName());
+				dto.setDtos(dtosMap.get(menuId));
+				dtos.add(dto);
+			}
 		}
-		
-		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
-		
-		for (Long menuId : dtosMap.keySet()) {
-			ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
-			WebMenu menu = menuMap.get(menuId);
-			dto.setModuleId(menu.getId());
-			dto.setModuleName(menu.getName());
-			dto.setDtos(dtosMap.get(menuId));
-			dtos.add(dto);
-		}
-		
+
 		return dtos;
 	}
 	
@@ -1180,22 +1187,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	for (WebMenu webMenu : menus) {
     		menuMap.put(webMenu.getId(), webMenu);
 		}
-    	
+
+		menus = new ArrayList<WebMenu>();
+
     	for (WebMenuScope webMenuScope : webMenuScopes) {
     		WebMenu webMenu = menuMap.get(webMenuScope.getMenuId());
-			if(null != webMenu && WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
-				menuMap.remove(webMenuScope.getMenuId());
-			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+
+			if(null == webMenu){
+				continue;
+			}
+
+			if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 				//override menu
 				webMenu.setName(webMenuScope.getMenuName());
+				menus.add(webMenu);
 			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
-				
+				menus.add(webMenu);
 			}
-		}
-    	
-    	menus = new ArrayList<WebMenu>();
-    	for (Long  key : menuMap.keySet()) {
-    		menus.add(menuMap.get(key));
 		}
     	return menus;
 	}

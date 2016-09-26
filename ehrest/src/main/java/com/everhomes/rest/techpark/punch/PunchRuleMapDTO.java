@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchRuleId: 打卡规则id</li>
  * <li>punchRuleName: 打卡规则name</li>
  * <li>reviewRuleId: 审批规则id</li>
+ * <li>reviewRuleName: 审批规则名称</li>
  * <li>description: 描述</li>
  * </ul>
  */
@@ -28,7 +29,16 @@ public class PunchRuleMapDTO {
 	private Long punchRuleId;
 	private String punchRuleName;
 	private Long reviewRuleId;
+	private String reviewRuleName;
 	private String description;
+
+	public String getReviewRuleName() {
+		return reviewRuleName;
+	}
+
+	public void setReviewRuleName(String reviewRuleName) {
+		this.reviewRuleName = reviewRuleName;
+	}
 
 	@Override
 	public String toString() {

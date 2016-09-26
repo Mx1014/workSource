@@ -48,8 +48,8 @@
         [jsonObject setObject: self.path forKey: @"path"];
     if(self.level)
         [jsonObject setObject: self.level forKey: @"level"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.OrganizationType)
         [jsonObject setObject: self.OrganizationType forKey: @"OrganizationType"];
     if(self.status)
@@ -64,8 +64,8 @@
         [jsonObject setObject: self.groupType forKey: @"groupType"];
     if(self.directlyEnterpriseId)
         [jsonObject setObject: self.directlyEnterpriseId forKey: @"directlyEnterpriseId"];
-    if(self.avatarUri)
-        [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
     if(self.contact)
@@ -137,9 +137,9 @@
         if(self.level && [self.level isEqual:[NSNull null]])
             self.level = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.OrganizationType = [jsonObject objectForKey: @"OrganizationType"];
         if(self.OrganizationType && [self.OrganizationType isEqual:[NSNull null]])
@@ -169,9 +169,9 @@
         if(self.directlyEnterpriseId && [self.directlyEnterpriseId isEqual:[NSNull null]])
             self.directlyEnterpriseId = nil;
 
-        self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
-        if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])
-            self.avatarUri = nil;
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])

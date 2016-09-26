@@ -15,14 +15,16 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 	VALUES ('183', 'pmtask.notification', '4', 'zh_CN', '任务操作模版', '您的任务已被 ${operatorName} ${operatorPhone} 关闭', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('195', 'pmtask.notification', '5', 'zh_CN', '任务操作模版', '您于<{day}>日<{hour}>时发起的服务已由<{operatorName}><{operatorPhone}>完成，快去评价打分吧~', '0');
+	VALUES ('195', 'pmtask.notification', '5', 'zh_CN', '任务操作模版', '您于${day}日${hour}时发起的服务已由 ${operatorName} ${operatorPhone} 完成，快去评价打分吧~', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('196', 'pmtask.notification', '6', 'zh_CN', '任务操作模版', '业主<{creatorName}><{creatorPhone}>发起的服务单已由<{operatorName}><{operatorPhone}>完成', '0');
+	VALUES ('196', 'pmtask.notification', '6', 'zh_CN', '任务操作模版', '业主 ${creatorName} ${creatorPhone} 发起的服务单已由 ${operatorName} ${operatorPhone} 完成', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('197', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '<{operatorName}><{operatorPhone}>已将一个<{categoryName}>单派发给你，请尽快处理', '999992');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('198', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '<{creatorName}><{creatorPhone}>已发起一个<{categoryName}>单，请尽快处理', '999992');
+	VALUES ('205', 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个任务，请尽快处理', '0');
 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('197', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '999992');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('198', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '999992');
 
 
 -- 物业报修2.0
@@ -374,7 +376,7 @@ delete  from eh_launch_pad_items where item_label = '物业服务' and namespace
 -- merge from dev-banner-delta-data.sql by lqs 20160914
 -- 增加广告管理菜单 by xq.tian 20160825
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47000,'广告管理',40000,null,null,0,2,'/40000/47000','park',458);
+VALUES (49600,'广告管理',40000,null,null,0,2,'/40000/49600','park',458);
 
 -- 添加权限
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
@@ -383,25 +385,93 @@ VALUES (830,0,'广告管理','广告管理',null);
 -- 添加菜单的权限
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),830,47000,'广告管理',1,1,'广告管理  全部权限',577);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),830,49600,'广告管理',1,1,'广告管理  全部权限',577);
 
 -- 添加菜单与权限的关联关系    role_id: 1001为物业公司超级管理员
 set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1001,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%47000%');
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1001,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%49600%');
 
 
 -- 添加banner激活数量配置
 set @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
-INSERT INTO `ehcore`.`eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'banner.max.active.count', '8', '一个域空间下激活banner的最多个数', '0', NULL);
 
 -- 添加banner提示
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'banner', '10003', 'zh_CN', '广告激活数量超过最大值啦!');
 
 -- 修改banner的关闭状态从0变为3
-UPDATE `ehcore`.`eh_banners` SET `status` = 3 WHERE `status` = 0;
+UPDATE `eh_banners` SET `status` = 3 WHERE `status` = 0;
 
 -- 修改场景类型的display_name
-UPDATE `ehcore`.`eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='default');
-UPDATE `ehcore`.`eh_scene_types` SET `display_name`='管理公司场景' WHERE (`name`='pm_admin');
+UPDATE `eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='default');
+UPDATE `eh_scene_types` SET `display_name`='管理公司场景' WHERE (`name`='pm_admin');
+
+-- 修改物业报修2.0 消息 短信模版
+delete from eh_locale_templates where id in (195, 196 , 197 , 198, 205);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('195', 'pmtask.notification', '5', 'zh_CN', '任务操作模版', '您于${day}日${hour}时发起的服务已由 ${operatorName} ${operatorPhone} 完成，快去评价打分吧~', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('196', 'pmtask.notification', '6', 'zh_CN', '任务操作模版', '业主 ${creatorName} ${creatorPhone} 发起的服务单已由 ${operatorName} ${operatorPhone} 完成', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('205', 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个任务，请尽快处理', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('197', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '<{operatorName}><{operatorPhone}>已将一个<{categoryName}>单派发给你，请尽快处理', '999992');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('198', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '<{creatorName}><{creatorPhone}>已发起一个任务，请尽快处理', '999992');
+
+-- 左邻 海岸 ibase 深业物业 讯美 add by xiongying20160914
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(95,2,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (60, 2, '3.9.0', '', '${homeurl}/web/download/apk/iOS-everhomes-3-9-0.html', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(96,28,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (61, 28, '3.9.0', '', '${homeurl}/web/download/apk/iOS-haian-3-9-0.html', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(97,39,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (62, 39, '3.9.0', '', '${homeurl}/web/download/apk/iOS-ibase-3-9-0.html', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(98,31,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (63, 31, '3.9.0', '', '${homeurl}/web/download/apk/iOS-sywy-3-9-0.html', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(99,6,'-0.1','3154944','0','3.9.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (64, 6, '3.9.0', '', '${homeurl}/web/download/apk/iOS-zz-3-9-0.html', '0');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+-- 屏蔽爱特家物业报修2.0菜单：
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 24000,'', 'EhNamespaces', 999988 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 25000,'', 'EhNamespaces', 999988 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 26000,'', 'EhNamespaces', 999988 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 27000,'', 'EhNamespaces', 999988 , 0);
+-- 屏蔽深业场所预定菜单：
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1), 42000,'', 'EhNamespaces', 999992 , 0);
+
+-- 升级规则ibase 深业 讯美 Android & ibase ios  add by xiongying20160922
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(105,38,'-0.1','3154946.0','0','3.9.2','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (70, 38, '3.9.2', 'http://apk.zuolin.com/apk/IBase-3.9.2.2016091412-release.apk', '${homeurl}/download/apk/andriod-ibase-3-9-2.html ', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(106,30,'-0.1','3154946.0','0','3.9.2','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (71, 30, '3.9.2', 'http://apk.zuolin.com/apk/ShenyeProperty-3.9.2.2016091412-release.apk', '${homeurl}/download/apk/andriod-sywy-3-9-2.html', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(107,5,'-0.1','3154946.0','0','3.9.2','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (72, 5, '3.9.2', 'http://apk.zuolin.com/apk/XmTecPark-3.9.2.2016091912-release.apk', '${homeurl}/download/apk/andriod-xunmei-3-9-2.html', '0');
+
+
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(108,39,'-0.1','3154946.0','0','3.9.2','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (73, 39, '3.9.2', '', '${homeurl}/download/apk/iOS-ibase-3-9-2.html', '0');

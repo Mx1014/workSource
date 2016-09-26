@@ -355,7 +355,7 @@ public class BannerServiceImpl implements BannerService {
 //            getCmd.setBannerLocation(cmd.getBannerLocation());
 //            getCmd.setNamespaceId(sceneToken.getNamespaceId());
 //            getCmd.setSceneType(sceneToken.getScene());
-//            orgCmd.setOrganizationId(sceneToken.getEntityId());
+//            orgCmd.setCommunityId(sceneToken.getEntityId());
 //            bannerList = getBannersByOrg(orgCmd, request);
 //            break;
 //        default:

@@ -32,8 +32,8 @@
 {
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.period)
         [jsonObject setObject: self.period forKey: @"period"];
     if(self.confType)
@@ -47,9 +47,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.period = [jsonObject objectForKey: @"period"];
         if(self.period && [self.period isEqual:[NSNull null]])
