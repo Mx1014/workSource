@@ -191,8 +191,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		
 		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "企业名称:" + organizationName
 				 + "\n" + "企业城市:" + cityName + "\n" + "企业行业:" + industry + "\n"
-				 + "项目描述:" + projectDesc + "\n" + "融资阶段:" + financingStage + "\n" + "融资金额:"
-				 + financingAmount + "\n" + "出让股份:" + transferShares + "\n";
+				 + "项目描述:" + projectDesc + "\n" + "融资阶段:" + financingStage + "\n" + "融资金额（万元）:"
+				 + financingAmount + "\n" + "出让股份 %:" + transferShares + "\n";
 		return note;
 	}
 
@@ -305,7 +305,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(fields.getFinancingAmount() != null) {
 			dto.setFieldValue(fields.getFinancingAmount().toString());
 		}
-		dto.setFieldName("融资金额");
+		dto.setFieldName("融资金额（万元）");
 		list.add(dto);
 		
 		dto = new RequestFieldDTO();
@@ -315,7 +315,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(fields.getTransferShares() != null) {
 			dto.setFieldValue(fields.getTransferShares().toString());
 		}
-		dto.setFieldName("出让股份");
+		dto.setFieldName("出让股份 %");
 		list.add(dto);
 		
 		dto = new RequestFieldDTO();
