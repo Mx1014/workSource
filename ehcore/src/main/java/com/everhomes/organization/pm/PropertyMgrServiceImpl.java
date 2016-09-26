@@ -566,7 +566,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//		}
 		String templateScope = SmsTemplateCode.SCOPE;
 		int templateId = SmsTemplateCode.VERIFICATION_CODE;
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = currentLocale();
 		smsProvider.sendSms( userList.get(0).getNamespaceId(), cellPhone, templateScope, templateId, templateLocale, null);
 	}
 
@@ -1320,7 +1320,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
 		String templateScope = SmsTemplateCode.SCOPE;
 		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = currentLocale();
 		String[] phoneArray = new String[phones.size()];
 		phones.toArray(phoneArray);
 		smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
@@ -3189,7 +3189,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				if(orgOwner.getContactToken() != null){
 					String templateScope = SmsTemplateCode.SCOPE;
 					int templateId = SmsTemplateCode.WY_BILL_CODE;
-					String templateLocale = UserContext.current().getUser().getLocale();
+					String templateLocale = currentLocale();
 					smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(), orgOwner.getContactToken(), templateScope, templateId, templateLocale, variables);
 				}
 			}
@@ -4211,7 +4211,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return ownerAddressList.stream().map(r -> {
             Address address = addressProvider.findAddressById(r.getAddressId());
             OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
-            String locale = UserContext.current().getUser().getLocale();
+            String locale = currentLocale();
             dto.setBuilding(address.getBuildingName());
             dto.setAddress(address.getAddress());
             dto.setAddressId(address.getId());
@@ -4442,7 +4442,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private OrganizationOwnerCarDTO convertOwnerCarToOwnerCarDTO(OrganizationOwnerCar ownerCar) {
         OrganizationOwnerCarDTO dto = ConvertHelper.convert(ownerCar, OrganizationOwnerCarDTO.class);
         LocaleString parkingTypeLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.PARKING_TYPE_SCOPE,
-                String.valueOf(ownerCar.getParkingType()), UserContext.current().getUser().getLocale());
+                String.valueOf(ownerCar.getParkingType()), currentLocale());
         dto.setParkingType(parkingTypeLocale != null ? parkingTypeLocale.getText() : "");
         return dto;
     }
@@ -4487,7 +4487,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         OrganizationOwnerDTO dto = ConvertHelper.convert(owner, OrganizationOwnerDTO.class);
         dto.setAvatarUrl(parserUri(dto.getAvatar(), EhOrganizationOwners.class.getSimpleName(), owner.getId()));
         LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE,
-                String.valueOf(owner.getGender()), UserContext.current().getUser().getLocale());
+                String.valueOf(owner.getGender()), currentLocale());
         if (genderLocale != null) {
             dto.setGender(genderLocale.getText());
         }
@@ -4507,7 +4507,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         RecordMapper<Record, ListOrganizationOwnerStatisticDTO> mapper = (r) -> {
             ListOrganizationOwnerStatisticDTO dto = new ListOrganizationOwnerStatisticDTO();
             LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getValue("gender", String.class)),
-                    UserContext.current().getUser().getLocale());
+                    currentLocale());
             dto.setFirst(genderLocale != null ? genderLocale.getText() : "");
             dto.setSecond(r.getValue("count", Integer.class));
             totalNum[0] += r.getValue("count", Integer.class);
@@ -4561,7 +4561,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         femaleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / femaleTotalNum[0] * 100)) + ""));
         totalDtoMap.values().forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
 
-        return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalDtoMap.values());
+        List<ListOrganizationOwnerStatisticDTO> totalList = (List<ListOrganizationOwnerStatisticDTO>) totalDtoMap.values();
+        Collections.sort(totalList, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
+
+        return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalList);
     }
 
     @Override
@@ -4710,7 +4713,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
         OrganizationOwnerCarDTO dto = ConvertHelper.convert(car, OrganizationOwnerCarDTO.class);
         LocaleString parkingTypeLocal = localeStringProvider.find(OrganizationOwnerLocaleStringScope.PARKING_TYPE_SCOPE,
-                String.valueOf(car.getParkingType()), UserContext.current().getUser().getLocale());
+                String.valueOf(car.getParkingType()), currentLocale());
         dto.setParkingType(parkingTypeLocal == null ? "" : parkingTypeLocal.getText());
         dto.setContentUrl(parserUri(car.getContentUri(), EhOrganizationOwnerCars.class.getSimpleName(), car.getId()));
         return dto;
@@ -4762,7 +4765,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         OrganizationOwnerDTO dto = new OrganizationOwnerDTO();
         LocaleString primaryFlagLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.PRIMARY_FLAG_SCOPE,
-                String.valueOf(newOwnerOwnerCar.getPrimaryFlag()), UserContext.current().getUser().getLocale());
+                String.valueOf(newOwnerOwnerCar.getPrimaryFlag()), currentLocale());
         dto.setPrimaryFlag(primaryFlagLocale == null ? "" : primaryFlagLocale.getText());
         dto.setContactName(pmOwner.getContactName());
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(pmOwner.getOrgOwnerTypeId());
@@ -4823,7 +4826,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address) {
         OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
-        String locale = UserContext.current().getUser().getLocale();
+        String locale = currentLocale();
         LocaleString livingStatus = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
                 String.valueOf(cmd.getLivingStatus()), locale);
         if (livingStatus != null) {
@@ -4928,11 +4931,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             dto.setOrgOwnerType(getOrganizationOwnerTypeDisplayName(ownerTypeId));
             dto.setId(r.getValue("ownerId", Long.class));// organization owner id
             LocaleString primaryFlagLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.PRIMARY_FLAG_SCOPE,
-                    r.getValue("primary_flag", String.class), UserContext.current().getUser().getLocale());
+                    r.getValue("primary_flag", String.class), currentLocale());
             dto.setPrimaryFlag(primaryFlagLocale != null ? primaryFlagLocale.getText() : "");
             return dto;
         };
-        return propertyMgrProvider.listOrganizationOwnersByCar(currentNamespaceId(), cmd.getCarId(), mapper);
+        List<OrganizationOwnerDTO> dtoList = propertyMgrProvider.listOrganizationOwnersByCar(currentNamespaceId(), cmd.getCarId(), mapper);
+        if (dtoList != null && dtoList.size() > 0) {
+            dtoList.sort((o1, o2) -> o2.getPrimaryFlag().compareTo(o1.getPrimaryFlag()));
+        }
+        return dtoList;
+    }
+
+    private String currentLocale() {
+        return UserContext.current().getUser().getLocale();
     }
 
     private String getOrganizationOwnerTypeDisplayName(Long ownerTypeId) {
@@ -4947,7 +4958,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarByOwnerId(currentNamespaceId(), cmd.getOwnerId());
         if (ownerCars != null) {
-            return ownerCars.stream().map(this::convertOwnerCarToOwnerCarDTO).collect(Collectors.toList());
+            return ownerCars.stream().map(this::convertOwnerCarToOwnerCarDTO).sorted().collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -5134,7 +5145,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	private Byte parseGender(String gender) {
 		LocaleString localeString = localeStringProvider.findByText(
-				UserLocalStringCode.SCOPE, gender, UserContext.current().getUser().getLocale());
+				UserLocalStringCode.SCOPE, gender, currentLocale());
 		if (localeString == null) {
 			LOGGER.error("The gender {} is invalid.", gender);
 			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
@@ -5145,7 +5156,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	private Byte parseLivingStatus(String livingStatus) {
 		LocaleString localeString = localeStringProvider.findByText(
-				OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE, livingStatus, UserContext.current().getUser().getLocale());
+				OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE, livingStatus, currentLocale());
 		if (localeString == null) {
 			LOGGER.error("The livingStatus {} is invalid.", livingStatus);
 			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
