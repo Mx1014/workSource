@@ -207,3 +207,16 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 340, 1001,0,1,now());
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 340, 1002,0,1,now());
+
+
+set @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'wx.auth.callback.url', '/wxauth/authCallback', '微信授权后回调URL', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'wx.offical.account.appid', 'wx19a1e0e756035c1c', '深圳湾公众号开发者AppId', 999987, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'wx.offical.account.secret', '2f4511758e90dda8bfbad40d4194a6b9', '深圳湾公众号开发者AppId', 999987, NULL);
+
+set @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'oauth2', '11', 'zh_CN', '跳转中...');
