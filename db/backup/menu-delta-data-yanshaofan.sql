@@ -1336,15 +1336,15 @@ SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56110,'考勤规则设置',56100,NULL,NULL,1,2,'/50000/56000/56100/56110','park',100);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56111,'规则管理',56105,NULL,'punch_rule',0,2,'/50000/56000/56100/56105/56111','park',110);
+VALUES (56111,'规则管理',56110,NULL,'punch_rule',0,2,'/50000/56000/56100/56110/56111','park',110);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56112,'时间管理',56105,NULL,'punch_time',0,2,'/50000/56000/56100/56105/56112','park',120);
+VALUES (56112,'时间管理',56110,NULL,'punch_time',0,2,'/50000/56000/56100/56110/56112','park',120);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56113,'地点管理',56105,NULL,'punch_location',0,2,'/50000/56000/56100/56105/56113','park',130);
+VALUES (56113,'地点管理',56110,NULL,'punch_location',0,2,'/50000/56000/56100/56110/56113','park',130);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56114,'wifi管理',56105,NULL,'punch_wifi',0,2,'/50000/56000/56100/56105/56114','park',567);
+VALUES (56114,'wifi管理',56110,NULL,'punch_wifi',0,2,'/50000/56000/56100/56110/56114','park',567);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56115,'排班管理',56105,NULL,'punch_scheduling',0,2,'/50000/56000/56100/56105/56115','park',140);
+VALUES (56115,'排班管理',56110,NULL,'punch_scheduling',0,2,'/50000/56000/56100/56110/56115','park',140);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (790,0,'规则管理','规则管理',NULL);
