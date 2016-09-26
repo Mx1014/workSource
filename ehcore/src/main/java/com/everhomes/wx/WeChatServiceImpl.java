@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class WeChatServiceImpl implements WeChatService {
 	@Override
 	public String getContentServerUrl(GetContentServerUrlCommand cmd) {
 		String accessToken = getAccessToken();
-		InputStream is = getInputStream(accessToken, cmd.getMediaId());
+		InputStream is = getInputStream(accessToken, cmd);
 
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		UploadCsFileResponse response = contentServerService.uploadFileToContentServer(is, cmd.getFileName(), token);
@@ -104,12 +105,25 @@ public class WeChatServiceImpl implements WeChatService {
 		return null;
 	}
 	
-	private InputStream getInputStream(String accessToken, String mediaId) {
+	public static String getFileName(String contentType) {
+	    LOGGER.info(" WeChatService contentType : " + contentType);
+	    if(!StringUtils.isEmpty(contentType)) {
+	    	String[] str = contentType.split("/");
+	    	String fileName = "wx_" + System.currentTimeMillis() + "." + str[1];
+	    	
+	    	return fileName;
+	    }
+	    
+	    return null;
+	  }
+	
+	private InputStream getInputStream(String accessToken, GetContentServerUrlCommand cmd) {
 		InputStream is = null;
-		String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + mediaId;
+		HttpURLConnection http = null;
+		String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + cmd.getMediaId();
 		try {
 			URL urlGet = new URL(url);
-			HttpURLConnection http = (HttpURLConnection) urlGet
+			http = (HttpURLConnection) urlGet
 					.openConnection();
 			http.setRequestMethod("GET"); 
 			http.setRequestProperty("Content-Type",
@@ -121,9 +135,14 @@ public class WeChatServiceImpl implements WeChatService {
 			http.connect();
 			// 获取文件转化为byte流
 			is = http.getInputStream();
+			
+			String fileName = getFileName(http.getHeaderField("Content-Type"));
+			cmd.setFileName(fileName);
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			http.disconnect();
 		}
 		return is;
 
