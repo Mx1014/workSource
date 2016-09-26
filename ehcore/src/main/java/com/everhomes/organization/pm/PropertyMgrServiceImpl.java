@@ -3859,7 +3859,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         User currentUser = UserContext.current().getUser();
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
-        owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+        if (cmd.getBirthday() != null) {
+            owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+        }
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(currentUser.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
@@ -3910,12 +3912,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 if (groups != null && groups.size() > 0) {
                     GroupMember member = groupProvider.findGroupMemberByMemberInfo(groups.get(0).getId(), EntityType.USER.getCode(), user.getId());
                     if (member != null) {
-                        ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                        // 审核当前用户
-                        // ApproveMemberCommand cmd = new ApproveMemberCommand();
-                        // cmd.setId(groups.get(0).getId());
-                        // cmd.setMemberUid(member.getId());
-                        // familySerivce.adminApproveMember(cmd);
+                        Group group = groupProvider.findGroupById(member.getGroupId());
+                        if (group != null && Objects.equals(group.getFamilyAddressId(), ownerAddress.getAddressId())) {
+                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                            // 审核当前用户
+                            ApproveMemberCommand cmd = new ApproveMemberCommand();
+                            cmd.setId(groups.get(0).getId());
+                            cmd.setMemberUid(member.getId());
+                            familySerivce.adminApproveMember(cmd);
+                        }
                     }
                 }
             }
@@ -3924,16 +3929,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     // 自动审核group member
     @Override
-    public void autoApprovalGroupMember(Long userId, Long communityId, Long groupId) {
+    public void autoApprovalGroupMember(Long userId, Long communityId, Long groupId, Long addressId) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
         if(userIdentifier != null) {
-            CommunityPmOwner pmOwner = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(currentNamespaceId(),
+            Integer namespaceId = currentNamespaceId();
+            CommunityPmOwner pmOwner = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId,
                     communityId, userIdentifier.getIdentifierToken());
             if (pmOwner != null) {
-                ApproveMemberCommand approveCmd = new ApproveMemberCommand();
-                approveCmd.setMemberUid(UserContext.current().getUser().getId());
-                approveCmd.setId(groupId);
-                familySerivce.adminApproveMember(approveCmd);
+                OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(namespaceId, pmOwner.getId(), addressId);
+                if (ownerAddress != null) {
+                    ApproveMemberCommand approveCmd = new ApproveMemberCommand();
+                    approveCmd.setMemberUid(UserContext.current().getUser().getId());
+                    approveCmd.setId(groupId);
+                    familySerivce.adminApproveMember(approveCmd);
+                }
             }
         }
     }
@@ -5042,7 +5051,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
                 owner.setContactToken(RowResult.trimString(result.getC()));
                 Address address = parseAddress(currentNamespaceId(), communityId, result.getD(), result.getE());
-                owner.setAddress(address.getAddress());
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
                 owner.setMaritalStatus(result.getJ());
@@ -5054,6 +5062,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
                 owner.setCommunityId(communityId);
+                owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);
 
