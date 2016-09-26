@@ -2329,6 +2329,22 @@ long id = sequenceProvider.getNextSequence(key);
 		}
 		return null;
 	}
+
+	@Override
+	public PunchDayLog findPunchDayLog(Long userId, Long enterpriseId, Date punchDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_DAY_LOGS)
+				.where(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId))
+				.and(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(enterpriseId))
+				.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchDayLog.class);
+		}
+		return null;
+	}
 	
 	
 }
