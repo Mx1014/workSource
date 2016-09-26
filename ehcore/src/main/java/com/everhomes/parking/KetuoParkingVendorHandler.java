@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -518,4 +520,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		return dto;
 	}
 
+	@PreDestroy
+	public void destroy() {
+		if (null != httpclient) {
+			try {
+				httpclient.close();
+			} catch (IOException e) {
+				LOGGER.error("Close httpclient error.");
+			}
+		}
+	}
 }
