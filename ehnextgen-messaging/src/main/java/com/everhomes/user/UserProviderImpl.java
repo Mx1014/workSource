@@ -1258,7 +1258,7 @@ public class UserProviderImpl implements UserProvider {
 		});
 		return identifiers;
 	}
-	
+
     @Override
     public List<User> findThirdparkUserByTokenAndType(Integer namespaceId, String userType, String userToken) {
         List<User> list = new ArrayList<User>();
