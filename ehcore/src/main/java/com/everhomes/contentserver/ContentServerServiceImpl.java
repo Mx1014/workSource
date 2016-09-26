@@ -358,10 +358,11 @@ public class ContentServerServiceImpl implements ContentServerService {
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         List<UploadCsFileResponse> csFileResponseList = new ArrayList<UploadCsFileResponse>();
         for(MultipartFile file : files) {
-            String fileSuffix = file.getContentType();
             UploadCsFileResponse csFileResponse = null;
+            InputStream fileStream = null;
             try {
-                csFileResponse = uploadFileToContentServer(file.getInputStream(), fileSuffix, token);
+                fileStream = file.getInputStream();
+                csFileResponse = uploadFileToContentServer(fileStream, file.getOriginalFilename(), token);
                 if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Upload file to content server, contentType={}, fileName={}, orgFileName={}, csFile={}", 
                         file.getContentType(), file.getName(), file.getOriginalFilename(), csFileResponse);
@@ -373,6 +374,15 @@ public class ContentServerServiceImpl implements ContentServerService {
                 csFileResponse.setErrorDescription(e.getMessage());
                 LOGGER.error("Failed to upload file, contentType={}, fileName={}, orgFileName={}", 
                     file.getContentType(), file.getName(), file.getOriginalFilename(), e);
+            } finally {
+                if(fileStream != null) {
+                    try {
+                        fileStream.close();
+                    } catch(Exception e) {
+                        LOGGER.error("Failed to close the file stream, contentType={}, fileName={}, orgFileName={}", 
+                    file.getContentType(), file.getName(), file.getOriginalFilename(), e);
+                    }
+                }
             }
             
             csFileResponseList.add(csFileResponse);
@@ -388,7 +398,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         
         // 通过文件后缀确定Content server中定义的媒体类型
         String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
-        String url = String.format("http://%s/upload/%s?token=", contentServerUri, mediaType, token);
+        String url = String.format("http://%s/upload/%s?token=%s", contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
         
         CloseableHttpResponse response = null;
