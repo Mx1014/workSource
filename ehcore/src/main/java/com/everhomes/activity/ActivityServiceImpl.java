@@ -359,6 +359,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
+        fixupVideoInfo(dto);//added by janson
         
         //Send message to creator
         Map<String, String> map = new HashMap<String, String>();
@@ -448,6 +449,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         dto.setPosterUrl(getActivityPosterUrl(activity));
+        fixupVideoInfo(dto);//added by janson
         
         //Send message to creator
         Map<String, String> map = new HashMap<String, String>();
@@ -567,6 +569,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setGroupId(activity.getGroupId());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
+        fixupVideoInfo(dto);//added by janson
         return dto;
     }
 
@@ -620,6 +623,7 @@ public class ActivityServiceImpl implements ActivityService {
         /////////////////////////////////////
         dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
         dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        fixupVideoInfo(dto);//added by janson
         ////////////////////////////////////
         response.setActivity(dto);
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
@@ -811,6 +815,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
+        fixupVideoInfo(dto);//added by janson
         
         //管理员同意活动的报名
         Map<String, String> map = new HashMap<String, String>();
@@ -871,6 +876,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
+        fixupVideoInfo(dto);//added by janson
         return dto;
     }
 
@@ -1000,6 +1006,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
+        fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
@@ -1148,6 +1155,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(getActivityPosterUrl(activity));
             dto.setForumId(post.getForumId());
+            fixupVideoInfo(dto);//added by janson
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         if(activityDtos.size()<value){
@@ -1204,6 +1212,7 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setStopTime(activity.getEndTime().toString());
           dto.setGroupId(activity.getGroupId());
           dto.setForumId(post.getForumId());
+          fixupVideoInfo(dto);//added by janson
           return dto;
        }).collect(Collectors.toList());
        if(result.size()<pageSize)
@@ -1290,6 +1299,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
+			fixupVideoInfo(dto);//added by janson
 			return dto;
        
 		}).collect(Collectors.toList());
@@ -1359,6 +1369,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
+			fixupVideoInfo(dto);//added by janson
 			return dto;
        
 		}).collect(Collectors.toList());
@@ -1610,6 +1621,7 @@ public class ActivityServiceImpl implements ActivityService {
             //add UserActivityStatus by xiongying 20160628
             ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
             dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+            fixupVideoInfo(dto);//added by janson
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         
@@ -1811,6 +1823,7 @@ public class ActivityServiceImpl implements ActivityService {
 		    	        dto.setPosterUrl(getActivityPosterUrl(activity));
 		    	        dto.setForumId(r.getForumId());
 		    	        dto.setGuest(activity.getGuest());
+		    	        fixupVideoInfo(dto);//added by janson
 		    			
 		    			return dto;
 	    			}
@@ -2057,6 +2070,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
         dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
         
         response.setContent(post.getContent());
@@ -2094,6 +2108,7 @@ public class ActivityServiceImpl implements ActivityService {
 				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
 				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
 				activity.setFavoriteFlag(p.getFavoriteFlag());
+				fixupVideoInfo(activity);//added by janson
 				activities.add(activity);
 			});
 		}
@@ -2289,4 +2304,14 @@ public class ActivityServiceImpl implements ActivityService {
        ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
        return ConvertHelper.convert(video, ActivityVideoDTO.class);
     }
+   
+   private void fixupVideoInfo(ActivityDTO dto) {
+       if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
+           ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
+           if(video != null && video.getVideoSid() != null) {
+               dto.setVideoUrl("yzb://" + video.getVideoSid());
+               dto.setVideoState(video.getVideoState());
+           }
+       }
+   }
 }
