@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -153,6 +154,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
@@ -1196,11 +1198,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 	}
 	
 	   private void fixupVideoInfo(ActivityDTO dto) {
-	       if(dto.getIsVideoSupport() != null) {
+	       if(dto.getVideoState() != null) {
 	           return;
 	       }
 	       
 	       dto.setIsVideoSupport((byte)0);
+	       dto.setVideoState(VideoState.UN_READY.getCode());
 	       if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
 	           ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
 	           if(video != null && video.getVideoSid() != null) {

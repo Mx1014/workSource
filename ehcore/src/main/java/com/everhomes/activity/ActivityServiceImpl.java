@@ -269,6 +269,7 @@ public class ActivityServiceImpl implements ActivityService {
         //added by janson
         activity.setIsVideoSupport(cmd.getIsVideoSupport());
         activity.setVideoUrl(cmd.getVideoUrl());
+        activity.setVideoState(VideoState.UN_READY.getCode());
         
         activityProvider.createActity(activity);
         
@@ -2262,7 +2263,6 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	            device.setState(VideoState.UN_READY.getCode());
 	            device.setStatus((byte)1); //valid
-               device.setRelativeId(cmd.getActivityId());
                device.setRelativeType("activity");
                device.setRoomId(cmd.getRoomId());
 	            yzbDeviceProvider.createYzbDevice(device);
@@ -2288,10 +2288,12 @@ public class ActivityServiceImpl implements ActivityService {
 	                yzbVideoService.setContinue(cmd.getRoomId(), 0);
 	            }
 	            
-	            device.setRelativeId(cmd.getActivityId());
 	        }
 	        
-	        if(!device.getState().equals(VideoState.LIVE.getCode()) || device.getLastVid() == null) {
+	        if(!device.getState().equals(VideoState.LIVE.getCode()) 
+	                || device.getLastVid() == null 
+	                || !device.getRelativeId().equals(cmd.getActivityId())
+	                ) {
                 YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
                 if(liveResp == null) {
                     throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -2305,6 +2307,7 @@ public class ActivityServiceImpl implements ActivityService {
                 
                 device.setState(VideoState.LIVE.getCode());
                 device.setLastVid(vid);
+                device.setRelativeId(cmd.getActivityId());
                 yzbDeviceProvider.updateYzbDevice(device);	            
 	        } else {
 	            //use old live vid
@@ -2348,11 +2351,12 @@ public class ActivityServiceImpl implements ActivityService {
     }
    
    private void fixupVideoInfo(ActivityDTO dto) {
-       if(dto.getIsVideoSupport() != null) {
+       if(dto.getVideoState() != null) {
            return;
        }
        
        dto.setIsVideoSupport((byte)0);
+       dto.setVideoState(VideoState.UN_READY.getCode());
        if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
            ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
            if(video != null && video.getVideoSid() != null) {
