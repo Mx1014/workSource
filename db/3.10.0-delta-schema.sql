@@ -110,6 +110,28 @@ CREATE TABLE `eh_service_alliance_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 入驻申请信息
+DROP TABLE IF EXISTS `eh_settle_requests`;
+CREATE TABLE `eh_settle_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT '0',
+  `type` BIGINT NOT NULL DEFAULT '0',
+  `category_id` BIGINT NOT NULL DEFAULT '0',
+  `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
+  `creator_name` VARCHAR(128) NOT NULL,
+  `creator_mobile` VARCHAR(128) NOT NULL,
+  `creator_organization_id` BIGINT NOT NULL DEFAULT '0',
+  `service_alliance_id` BIGINT NOT NULL DEFAULT '0',
+  `name` VARCHAR(128),
+  `mobile` VARCHAR(128),
+  `organization_name` VARCHAR(128),
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 保存服务联盟大类下设置的推送邮箱和推送消息的管理员信息
 DROP TABLE IF EXISTS `eh_service_alliance_notify_targets`;
 CREATE TABLE `eh_service_alliance_notify_targets` (

@@ -372,7 +372,7 @@ public class YellowPageController  extends ControllerBase {
     
     /**
    	 * <b>URL: /yellowPage/synchRequestInfo</b>
-   	 * <p> 搜索申请信息</p>
+   	 * <p> 同步申请信息</p>
    	 */
        @RequestMapping("synchRequestInfo")
        @RestReturn(value = String.class)

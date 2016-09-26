@@ -244,3 +244,6 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 570, 1001,0,1,now());
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 570, 1002,0,1,now());
 
+-- 入驻申请 add by xiongying20160926
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`) 
+    VALUES ('2', 'settle', '入驻申请模板', '提交入驻', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"林龙","requiredFlag":"0"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"13163366563","requiredFlag":"0"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"左邻","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP());
