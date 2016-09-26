@@ -190,9 +190,9 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),794,56115,'排班
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56120,'审批规则设置',56100,NULL,NULL,1,2,'/50000/56000/56100/56120','park',200);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56121,'审批规则',56120,NULL,'punch_rule',0,2,'/50000/56000/56100/56120/56121','park',210);
+VALUES (56121,'审批规则',56120,NULL,'approval_rule',0,2,'/50000/56000/56100/56120/56121','park',210);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (56122,'审批人设置',56120,NULL,'punch_time',0,2,'/50000/56000/56100/56120/56122','park',220);
+VALUES (56122,'审批人设置',56120,NULL,'approval_personal',0,2,'/50000/56000/56100/56120/56122','park',220);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (822,0,'审批规则','审批规则 全部权限',NULL);
