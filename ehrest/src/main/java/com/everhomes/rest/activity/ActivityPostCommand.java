@@ -61,6 +61,7 @@ public class ActivityPostCommand{
     //added by Janson
     private Byte isVideoSupport;
     private String videoUrl;
+    private Byte videoState;
     
     public Byte getOfficialFlag() {
 		return officialFlag;
@@ -255,6 +256,14 @@ public class ActivityPostCommand{
 
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
+    }
+
+    public Byte getVideoState() {
+        return videoState;
+    }
+
+    public void setVideoState(Byte videoState) {
+        this.videoState = videoState;
     }
 
     @Override
