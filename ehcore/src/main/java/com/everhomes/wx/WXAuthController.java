@@ -329,7 +329,7 @@ public class WXAuthController {// extends ControllerBase
         }
 
         User wxUser = new User();
-        wxUser.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+        wxUser.setNamespaceId(namespaceId);
         wxUser.setNamespaceUserType(NamespaceUserType.WX.getCode());
         wxUser.setNamespaceUserToken(userInfo.getOpenid());
         wxUser.setNickName(userInfo.getNickname());
