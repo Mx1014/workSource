@@ -193,7 +193,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	//timeRangeList为传输对象，approvalTimeRangeList为数据库表对应的对象
 	private boolean checkContainRequestedTime(Long userId, ApprovalOwnerInfo ownerInfo, List<TimeRange> timeRangeList) {
 		//查询当前用户的请假记录，再一个一个比较时间是否有重叠
-		List<ApprovalTimeRange> requestedTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByUserId(userId, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
+		List<ApprovalTimeRange> requestedTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByUserIdForCheckDuplicatedTime(userId, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
 		if (ListUtils.isNotEmpty(requestedTimeRangeList)) {
 			for (TimeRange timeRange : timeRangeList) {
 				for (ApprovalTimeRange requestedTimeRange : requestedTimeRangeList) {

@@ -4,6 +4,7 @@ package com.everhomes.user;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.family.FamilyDTO;
@@ -155,6 +156,15 @@ public interface UserService {
 
 
     void deleteUserImpersonation(DeleteUserImpersonationCommand cmd);
-    
 
+    boolean isValid(LoginToken token);
+    LoginToken getLoginToken(HttpServletRequest request);
+    UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
+    /**
+     * 注册第三方用户
+     * @param user
+     * @param request
+     * @return 如果创建了新用户则返回true，否则返回false
+     */
+    boolean signupByThirdparkUser(User user, HttpServletRequest request);
 }

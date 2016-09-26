@@ -16,6 +16,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TimeRangeType;
@@ -95,7 +96,7 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 	}
 
 	@Override
-	public List<ApprovalTimeRange> listApprovalTimeRangeByUserId(Long userId, Integer namespaceId, String ownerType,
+	public List<ApprovalTimeRange> listApprovalTimeRangeByUserIdForCheckDuplicatedTime(Long userId, Integer namespaceId, String ownerType,
 			Long ownerId) {
 		Result<Record> result = getReadOnlyContext().select(Tables.EH_APPROVAL_TIME_RANGES.fields()).from(Tables.EH_APPROVAL_TIME_RANGES)
 				.join(Tables.EH_APPROVAL_REQUESTS)
@@ -105,6 +106,7 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.WAITING_FOR_APPROVING.getCode()))
 				.fetch();
 				
 		if (result != null && result.isNotEmpty()) {

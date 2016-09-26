@@ -78,9 +78,9 @@ INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`
 
     
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
-    VALUES ('10666', '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5tTXhOelUxWm1ReE9ETmlaV0l3T0RnMk1qTXdOekEzWTJaa01tWXlNQQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+    VALUES ('10666', '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5tTXhOelUxWm1ReE9ETmlaV0l3T0RnMk1qTXdOekEzWTJaa01tWXlNQQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
-    VALUES ('10667', '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5tTXhOelUxWm1ReE9ETmlaV0l3T0RnMk1qTXdOekEzWTJaa01tWXlNQQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+    VALUES ('10667', '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5tTXhOelUxWm1ReE9ETmlaV0l3T0RnMk1qTXdOekEzWTJaa01tWXlNQQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
     
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('10012','资源预订','0',NULL,'0','999988');
@@ -152,7 +152,26 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 
 
+-- add by xiongying 20160921 任务 #2187
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10790', '999988', '0', '/home', 'Default', '0', '0', '活动1', 'atjia', 'cs://1/image/aW1hZ2UvTVRvMk1UbGhPVGswWTJFMk9ETmhNVGRtWm1Rd05HVmtNbUV4Tm1Vd09HSm1NZw', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10791', '999988', '0', '/home', 'Default', '0', '0', '活动1', 'atjia', 'cs://1/image/aW1hZ2UvTVRvMk1UbGhPVGswWTJFMk9ETmhNVGRtWm1Rd05HVmtNbUV4Tm1Vd09HSm1NZw', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
 
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10792', '999988', '0', '/home', 'Default', '0', '0', '活动2', 'atjia', 'cs://1/image/aW1hZ2UvTVRwbU9HWmpNVE0zTWpsak1UVXhNV0V4TnpRelpqa3hORFExWlRSallURTVOZw', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10793', '999988', '0', '/home', 'Default', '0', '0', '活动2', 'atjia', 'cs://1/image/aW1hZ2UvTVRwbU9HWmpNVE0zTWpsak1UVXhNV0V4TnpRelpqa3hORFExWlRSallURTVOZw', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10794', '999988', '0', '/home', 'Default', '0', '0', '活动3', 'atjia', 'cs://1/image/aW1hZ2UvTVRvelpEaG1OMk0yTldNME5EZzVaak15WTJabE1UZzNaRGszTVdRNVlqTm1ZZw', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10795', '999988', '0', '/home', 'Default', '0', '0', '活动3', 'atjia', 'cs://1/image/aW1hZ2UvTVRvelpEaG1OMk0yTldNME5EZzVaak15WTJabE1UZzNaRGszTVdRNVlqTm1ZZw', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10796', '999988', '0', '/home', 'Default', '0', '0', '活动4', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5HSTRZVFl4TUdZMU1qRTJPRGxtTVRsaE1HSTJNREZqTlRBeU56RTVaUQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES ('10797', '999988', '0', '/home', 'Default', '0', '0', '活动4', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5HSTRZVFl4TUdZMU1qRTJPRGxtTVRsaE1HSTJNREZqTlRBeU56RTVaUQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
 
 
 

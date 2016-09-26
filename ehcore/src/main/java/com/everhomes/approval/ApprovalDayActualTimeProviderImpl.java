@@ -87,6 +87,7 @@ public class ApprovalDayActualTimeProviderImpl implements ApprovalDayActualTimeP
 				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
 				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_REQUESTS.ID.eq(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.OWNER_ID))
 				.where(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.USER_ID.in(userIdList))
 				.and(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.TIME_DATE.ge(fromDate))
 				.and(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.TIME_DATE.lt(toDate))

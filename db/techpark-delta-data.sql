@@ -1,6 +1,6 @@
 -- 深业停车充值
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-VALUES ('160', 'parking.shenye.projectId', '207', '深业停车充值项目ID', '0', NULL);
+VALUES ('160', 'parking.shenye.projectId', '4403000043', '深业停车充值项目ID', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 VALUES ('161', 'parking.default.nickname', '默认昵称', '停车充值默认昵称', '0', NULL);
 
