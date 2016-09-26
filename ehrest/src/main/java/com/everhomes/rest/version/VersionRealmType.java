@@ -75,7 +75,9 @@ public enum VersionRealmType {
     ANDROID_ATMINI("Android_AtMini"),
     IOS_ATMINI("iOS_AtMini"),
     ANDROID_SZBAY("Android_SZbay"),
-    IOS_SZBAY("iOS_SZbay");
+    IOS_SZBAY("iOS_SZbay"),
+    ANDROID_INNOSPRING("Android_Innospring"),
+    IOS_INNOSPRING("iOS_Innospring");
     
     private String code;
     private VersionRealmType(String code) {
