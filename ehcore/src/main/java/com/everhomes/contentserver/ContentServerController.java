@@ -8,14 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contentserver.AddConfigItemCommand;
 import com.everhomes.rest.contentserver.AddContentServerCommand;
 import com.everhomes.rest.contentserver.ContentServerDTO;
+import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.RequireAuthentication;
 
@@ -88,4 +91,15 @@ public class ContentServerController extends ControllerBase {
         return new RestResponse("OK");
     }
 
+    @RequestMapping("uploadFile")
+    @RequireAuthentication(true)
+    @RestReturn(value = UploadCsFileResponse.class, collection = true)
+    public RestResponse uploadFileToContentServer(@RequestParam(value = "attachment") MultipartFile[] files) {
+        List<UploadCsFileResponse> csFileResponseList = contentService.uploadFileToContentServer(files);
+        
+        RestResponse response = new RestResponse(csFileResponseList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
