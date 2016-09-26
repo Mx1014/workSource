@@ -2250,16 +2250,35 @@ public class ActivityServiceImpl implements ActivityService {
 	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {
 	    ActivityVideo video = new ActivityVideo();
 	    String rmtp = "";
+	   
+	    YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
 	    if(cmd.getRoomId() == null) {
 	        //app sdk
 	        video.setIntegralTag1(0l);
 	        video.setVideoSid(cmd.getVid());
+	        if(oldDev != null) {
+	            //mark the old device as unready and use it next time
+	            oldDev.setState(VideoState.UN_READY.getCode());
+	            yzbDeviceProvider.updateYzbDevice(oldDev);
+	        }
 	    } else {
             //default, use device
 	        video.setRoomId(cmd.getRoomId());
 	        video.setIntegralTag1(1l);
 	        
-	        YzbDevice device = yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());
+	        YzbDevice device = null;
+	        if(oldDev != null && oldDev.getRoomId().equals(cmd.getRoomId())) {
+	            device = oldDev;
+	            oldDev = null;
+	        } else {
+	            device = yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());    
+	        }
+            if(oldDev != null) {
+                //mark the old device as unready and use it next time
+                oldDev.setState(VideoState.UN_READY.getCode());
+                yzbDeviceProvider.updateYzbDevice(oldDev);
+            }
+	        
 	        if(device == null) {
 	            //create new device
 	            device = new YzbDevice();
@@ -2267,8 +2286,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            if(cmd.getNamespaceId() == null) {
 	                device.setNamespaceId(UserContext.current().getNamespaceId());    
 	            }
-	            device.setState(YzbDeviceState.LIVING.getCode());//LIVING
-	            device.setStatus((byte)1);//valid
+	            device.setState(VideoState.UN_READY.getCode());
+	            device.setStatus((byte)1); //valid
                device.setRelativeId(cmd.getActivityId());
                device.setRelativeType("activity");
                device.setRoomId(cmd.getRoomId());
@@ -2277,8 +2296,17 @@ public class ActivityServiceImpl implements ActivityService {
 	            yzbVideoService.setContinue(cmd.getRoomId(), 0);
 	        } else {
 	            if(!cmd.getActivityId().equals(device.getRelativeId())
-	                    && device.getState().equals(YzbDeviceState.LIVING.getCode())) {
+	                    && device.getState().equals(VideoState.LIVE.getCode())) {
 	                LOGGER.warn("new living but device is already living, cmd=" + cmd + " device=" + device.getRelativeId());
+	                //Close old living right now
+	                ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(device.getRelativeId());
+	                if(oldVideo != null 
+	                        && oldVideo.getVideoSid() != null 
+	                        && !oldVideo.getVideoState().equals(VideoState.RECORDING.getCode())
+	                        ) {
+	                    oldVideo.setVideoState(VideoState.RECORDING.getCode());
+	                    activityVideoProvider.updateActivityVideo(oldVideo);
+	                }
 	            }
 	            
 	            if(device.getRelativeId() == null || !cmd.getActivityId().equals(device.getRelativeId())) {
@@ -2289,23 +2317,37 @@ public class ActivityServiceImpl implements ActivityService {
 	            device.setRelativeId(cmd.getActivityId());
 	        }
 	        
-	            YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
-	            if(liveResp == null) {
-	                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-	                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
-	            }
-	            String url = liveResp.getRetinfo().getDstexkey();
-	            String vid = url.substring(url.lastIndexOf("/")+1, url.length());
-	            video.setVideoSid(vid);
-	            rmtp = url;
-	            yzbVideoService.setContinue(cmd.getRoomId(), 1);
-	            
-	            yzbDeviceProvider.updateYzbDevice(device);
+	        if(!device.getState().equals(VideoState.LIVE.getCode()) || device.getLastVid() == null) {
+                YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
+                if(liveResp == null) {
+                    throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                            ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
+                }
+                String url = liveResp.getRetinfo().getDstexkey();
+                String vid = url.substring(url.lastIndexOf("/")+1, url.length());
+                video.setVideoSid(vid);
+                rmtp = url;
+                yzbVideoService.setContinue(cmd.getRoomId(), 1);
+                
+                device.setState(VideoState.LIVE.getCode());
+                device.setLastVid(vid);
+                yzbDeviceProvider.updateYzbDevice(device);	            
+	        } else {
+	            //use old live vid
+	            video.setVideoSid(device.getLastVid());
+	        }
 	    }
 	    
 	    if(video.getVideoSid() == null) {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_VIDEO_PARAM_ERROR, "video client params error");
+	    }
+	    
+	    ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+	    if(oldVideo != null) {
+	        //new activity, delete the old one
+	        oldVideo.setVideoState(VideoState.INVALID.getCode());
+	        activityVideoProvider.updateActivityVideo(oldVideo);
 	    }
 	    
 	    User user = UserContext.current().getUser();
@@ -2332,6 +2374,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
    
    private void fixupVideoInfo(ActivityDTO dto) {
+       dto.setIsVideoSupport((byte)0);
        if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
            ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
            if(video != null && video.getVideoSid() != null) {

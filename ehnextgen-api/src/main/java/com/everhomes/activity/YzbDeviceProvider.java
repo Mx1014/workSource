@@ -19,4 +19,6 @@ public interface YzbDeviceProvider {
 
     YzbDevice findYzbDeviceById(String deviceId);
 
+    YzbDevice findYzbDeviceByActivityId(Long activityId);
+
 }
