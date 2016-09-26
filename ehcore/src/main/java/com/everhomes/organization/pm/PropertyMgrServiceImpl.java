@@ -3899,7 +3899,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
     // 如果小区里有该手机号的用户, 则自动审核当前客户
-    private void autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
+    private boolean autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(currentNamespaceId(), contactToken);
         if(userIdentifier != null) {
             User user = userProvider.findUserById(userIdentifier.getOwnerUid());
@@ -3920,11 +3920,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                             cmd.setId(groups.get(0).getId());
                             cmd.setMemberUid(member.getId());
                             familySerivce.adminApproveMember(cmd);
+                            return true;
                         }
                     }
                 }
             }
         }
+        return false;
     }
 
     // 自动审核group member
@@ -3941,6 +3943,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     ApproveMemberCommand approveCmd = new ApproveMemberCommand();
                     approveCmd.setMemberUid(UserContext.current().getUser().getId());
                     approveCmd.setId(groupId);
+                    approveCmd.setAddressId(ownerAddress.getAddressId());
                     familySerivce.adminApproveMember(approveCmd);
                 }
             }
@@ -4652,11 +4655,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_EXIST,
                     "The organization owner %s already in address %s.", cmd.getOwnerId(), cmd.getAddressId());
         }
-        createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), cmd.getOwnerId());
+        ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), cmd.getOwnerId());
+        // 自动审核用户与客户
+        CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOwnerId());
+        if (pmOwner != null) {
+            boolean success = autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
+            if (success) {
+                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+            }
+        }
         return buildOrganizationOwnerAddressDTO(cmd, address);
     }
 
-	private void createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Long ownerId) {
+	private OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Long ownerId) {
 		OrganizationOwnerAddress ownerAddress = new OrganizationOwnerAddress();
 		ownerAddress.setAddressId(addressId);
 		ownerAddress.setLivingStatus(livingStatus);
@@ -4664,7 +4675,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ownerAddress.setNamespaceId(currentNamespaceId());
 		ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
 		propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-	}
+        return ownerAddress;
+    }
 
 	@Override
     public void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd) {
