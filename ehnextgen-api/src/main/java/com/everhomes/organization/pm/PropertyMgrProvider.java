@@ -455,4 +455,13 @@ public interface PropertyMgrProvider {
      * @return
      */
     List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressId(Integer namespaceId, Long addressId);
+
+    /**
+     * 根据小区及联系电话查询业主
+     * @param namespaceId
+     * @param communityId
+     * @param contactToken
+     * @return
+     */
+    CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken);
 }

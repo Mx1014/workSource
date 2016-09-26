@@ -1902,6 +1902,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
     @Override
+    public CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+                .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
+                .fetchOneInto(CommunityPmOwner.class);
+    }
+
+    @Override
     public int deleteOrganizationOwnerAttachmentByOwnerId(Integer namespaceId, Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return context.delete(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS)

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.highlight.HighlightField;
 import org.jooq.Condition;
@@ -4962,13 +4963,28 @@ public class ForumServiceImpl implements ForumService {
         	if(StringUtils.isEmpty(String.valueOf(highlight.get("subject")))){
         		dto.setSubject(String.valueOf(source.get("subject")));
 			} else {
-				dto.setSubject(String.valueOf(highlight.get("subject")));
+				
+//				测完搞成独立的method吧~
+				Text[] subjects = highlight.get("subject").getFragments();
+				StringBuilder sb = new StringBuilder();
+				for(Text subject: subjects) {
+					if(sb.length() != 0) {
+						sb.append("..." + subject);
+					} else {
+						sb.append(subject);
+					}
+				}
+				
+				String text = sb.toString();
+//				dto.setSubject(String.valueOf(highlight.get("subject")));
+				dto.setSubject(text);
+				
 			}
         	
         	if(StringUtils.isEmpty(String.valueOf(highlight.get("content")))){
-        		dto.setSubject(String.valueOf(source.get("content")));
+        		dto.setContent(String.valueOf(source.get("content")));
 			} else {
-				dto.setSubject(String.valueOf(highlight.get("content")));
+				dto.setContent(String.valueOf(highlight.get("content")));
 			}
         	
         	PostDTO postDto =  getTopicById(dto.getId(), null, true, true);
