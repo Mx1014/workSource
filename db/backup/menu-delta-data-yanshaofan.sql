@@ -1320,18 +1320,12 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),560,56230,'会议官网',1,1,'查看会议官网',641);
 
 
--- 新增车辆管理菜单   by xq.tian  20160920
-INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (37000,'车辆管理',30000,null,null,0,2,'/30000/37000','park',370);
-
-INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (420,0,'车辆管理','车辆管理',null);
 
 -- 考勤管理的菜单整理 by sfyan 20160922
 -- 删除之前的考勤管理菜单数据
 DELETE FROM `eh_web_menus` WHERE `path` LIKE '%56100/%';
 
-DELETE FROM `eh_acl_privileges` WHERE `id` IN (790,791,792,793,794,795,796,798,799,820,821,822,823);
+DELETE FROM `eh_acl_privileges` WHERE `id` IN (790,791,792,793,794,795,796,797,798,799,820,821,822,823);
 
 DELETE FROM `eh_web_menu_privileges` WHERE `menu_id` IN (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%56100/%');
 
