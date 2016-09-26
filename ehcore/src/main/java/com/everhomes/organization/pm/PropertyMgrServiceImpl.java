@@ -3919,6 +3919,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                             ApproveMemberCommand cmd = new ApproveMemberCommand();
                             cmd.setId(groups.get(0).getId());
                             cmd.setMemberUid(member.getId());
+                            cmd.setAddressId(ownerAddress.getAddressId());
                             familySerivce.adminApproveMember(cmd);
                             return true;
                         }
