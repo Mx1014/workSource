@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>startDay: 开始时间</li>
  *  <li>endDay：结束时间</li>
  *  <li>keyword：关键字（创建请求的用户姓名和机构名称）</li>
+ *  <li>requestType：申请类型 ServiceAlliance/Settle</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
@@ -30,6 +31,8 @@ public class SearchRequestInfoCommand {
 	private Long endDay;
 	
 	private String keyword;
+	
+	private String requestType;
 	
 	private Long pageAnchor;
 	
@@ -97,6 +100,14 @@ public class SearchRequestInfoCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public String getRequestType() {
+		return requestType;
+	}
+
+	public void setRequestType(String requestType) {
+		this.requestType = requestType;
 	}
 
 	@Override

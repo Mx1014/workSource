@@ -131,7 +131,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         
 		if(org != null) {
-			notifyMap.put("creatorOrganization", request.getCreatorMobile());
+			notifyMap.put("creatorOrganization", org.getName());
 		}
 			
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
