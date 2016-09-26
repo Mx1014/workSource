@@ -21,7 +21,7 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 
     
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES( 240111044331053935, UUID(), 14996, '深圳市',  14997, '南山区', '深圳湾创业广场', '深圳湾创业广场', '广东省深圳市南山区学府路与科园路交汇处', NULL, '软件产业基地位于深圳高新区南区核心地带，是深圳“十二五”规划建设的战略性新兴产业集聚区重点项目之一。用地面积12.30万平方米，建筑形态为18栋2-28层单体建筑，总建筑面积62.84万平方米，包括研发办公37.52万平方米、宿舍5.86万', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 2117, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', 1, 2, UTC_TIMESTAMP(), 999987);
+	VALUES( 240111044331053935, UUID(), 14996, '深圳市',  14997, '南山区', '深圳湾创业广场', '深圳湾创业广场', '广东省深圳市南山区学府路与科园路交汇处', NULL, '软件产业基地位于深圳高新区南区核心地带，是深圳“十二五”规划建设的战略性新兴产业集聚区重点项目之一。用地面积12.30万平方米，建筑形态为18栋2-28层单体建筑，总建筑面积62.84万平方米，包括研发办公37.52万平方米、宿舍5.86万', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 2117, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999987);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331049538, 240111044331053935, '', 113.945249, 22.530485, 'ws100vs3sdzf');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
@@ -100,7 +100,7 @@ INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `p
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '知识产权', '创业服务/知识产权', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', 'cs://1/image/aW1hZ2UvTVRvNVpXRm1aVFk1TVRFNE5EVXlZbUkzTkRKbE1HRmtZV1E1T1dVeU9HVmxOZw');
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
-    VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '人才招聘', '创业服务/人才招聘', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', '');
+    VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '人才招聘', '创业服务/人才招聘', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', 'cs://1/image/aW1hZ2UvTVRwalpUaGlORGt3TnprNU5qQXdPVGd3TURReVpHVmxOVFJqTWpVMllqSTNNdw');
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@sa_category_id := @sa_category_id + 1), 'community', '240111044331053935', '16', '其他', '创业服务/其他', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999987', 'cs://1/image/aW1hZ2UvTVRveE5UWm1aVFJqTkdaak9EVXdOak0yT1RkbFl6ZGlaV001TlRZME5USXdPQQ');
 
