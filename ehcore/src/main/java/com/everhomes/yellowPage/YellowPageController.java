@@ -45,6 +45,8 @@ import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.search.SettleRequestInfoSearcher;
+import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -67,6 +69,9 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
+	
+	@Autowired
+	private SettleRequestInfoSearcher settleRequestInfoSearcher;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -362,7 +367,14 @@ public class YellowPageController  extends ControllerBase {
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
     	
-    	SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
+    	SearchRequestInfoResponse resp = new SearchRequestInfoResponse();
+    	if(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM.equals(cmd.getRequestType())) {
+    		resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
+    	}
+    	
+    	if(CustomRequestConstants.SETTLE_REQUEST_CUSTOM.equals(cmd.getRequestType())) {
+    		resp = this.settleRequestInfoSearcher.searchRequestInfo(cmd);
+    	}
     	 
     	RestResponse response = new RestResponse(resp);
     	response.setErrorCode(ErrorCodes.SUCCESS);
@@ -379,10 +391,13 @@ public class YellowPageController  extends ControllerBase {
        public RestResponse synchRequestInfo() {
        	
        	this.saRequestInfoSearcher.syncFromDb();
+       	this.settleRequestInfoSearcher.syncFromDb();
        	 
        	RestResponse response = new RestResponse();
        	response.setErrorCode(ErrorCodes.SUCCESS);
        	response.setErrorDescription("OK");
        	return response;
        }
+       
+       
 }

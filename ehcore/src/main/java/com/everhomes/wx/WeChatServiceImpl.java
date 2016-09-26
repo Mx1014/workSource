@@ -173,9 +173,10 @@ public class WeChatServiceImpl implements WeChatService {
 	
 	//https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET
 	private String cacheAccessToken(RedisTemplate redisTemplate) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
     	String params = "grant_type=" + WeChatConstant.ACCESSTOKEN_GRANTTYPE
-    					+ "&appid=" + configProvider.getValue(WeChatConstant.WECHAT_APPID, "")
-    					+ "&secret=" + configProvider.getValue(WeChatConstant.WECHAT_APPSECRET, "");
+    					+ "&appid=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPID, "")
+    					+ "&secret=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPSECRET, "");
 		
 		String body = this.restCall(WeChatConstant.GET_ACCESSTOKEN, null, params);
 		
