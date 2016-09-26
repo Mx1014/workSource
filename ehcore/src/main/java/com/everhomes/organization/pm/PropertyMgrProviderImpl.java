@@ -1317,7 +1317,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		if(ids != null && ids.size() > 0)
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.in(ids));
-		
+
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -1526,6 +1527,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.join(Tables.EH_ORGANIZATION_OWNERS)
 				.on(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(Tables.EH_ORGANIZATION_OWNERS.ID))
 				.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
 				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
 				.fetch().map(mapper);
 		return dtoList;
@@ -1631,6 +1633,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if (pageAnchor != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.ge(pageAnchor));
         }
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
         query.addLimit(pageSize);
         return query.fetchInto(CommunityPmOwner.class);
     }
@@ -1701,6 +1704,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .on(Tables.EH_ORGANIZATION_OWNERS.ID.eq(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID))
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .orderBy(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.asc())
                 .fetch(mapper);
     }
@@ -1909,6 +1913,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
                 .fetchOneInto(CommunityPmOwner.class);
     }
