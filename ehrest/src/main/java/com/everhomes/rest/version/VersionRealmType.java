@@ -37,6 +37,8 @@ package com.everhomes.rest.version;
  * <li>IOS_ATMINI("iOS_AtMini"): 爱特家 iOS版APP</li>
  * <li>ANDROID_SZBAY("Android_SZbay"): 深圳湾 Android版APP</li>
  * <li>IOS_SZBAY("iOS_SZbay"): 深圳湾 iOS版APP</li>
+ * <li>ANDROID_INNOSPRING("Android_Innospring"): innospring Android版APP</li>
+ * <li>IOS_INNOSPRING("iOS_Innospring"): innospring iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
