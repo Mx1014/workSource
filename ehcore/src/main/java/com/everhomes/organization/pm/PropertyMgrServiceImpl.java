@@ -3802,8 +3802,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd) {
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
         validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         Tuple<CommunityPmOwner, Boolean> tuple =
                 coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
@@ -4073,16 +4073,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "The organization owner address is not exist.");
         }
         OrganizationOwnerBehaviorType behaviorType = OrganizationOwnerBehaviorType.fromCode(cmd.getBehaviorType());
-		if (!Objects.equals(ownerAddress.getLivingStatus(), behaviorType.getLivingStatus())) {
-			ownerAddress.setLivingStatus(behaviorType.getLivingStatus());
-			dbProvider.execute(status -> {
-				propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
-				// 创建用户行为记录
-				createOrganizationOwnerBehavior(cmd.getOwnerId(), address.getId(), System.currentTimeMillis(), behaviorType);
-				return null;
-			});
-		}
-	}
+        if (!Objects.equals(ownerAddress.getLivingStatus(), behaviorType.getLivingStatus())) {
+            ownerAddress.setLivingStatus(behaviorType.getLivingStatus());
+            dbProvider.execute(status -> {
+                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                // 创建用户行为记录
+                createOrganizationOwnerBehavior(cmd.getOwnerId(), address.getId(), System.currentTimeMillis(), behaviorType);
+                return null;
+            });
+        }
+        //  如果该地址的状态已经是该状态,则提示用户不用修改了
+        else {
+            LOGGER.error("The organization owner address livingStatus already is {}", behaviorType.getCode());
+            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_ALREADY_IS_THIS_STATUS,
+                    "The organization owner address livingStatus already is %s", behaviorType.getCode());
+        }
+    }
 
     @Override
     public List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd) {
@@ -4201,9 +4207,29 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         Integer namespaceId = currentNamespaceId();
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(namespaceId, cmd.getOwnerId());
-        List<Long> ids = ownerAddressList.stream().map(OrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
 
-        List<OrganizationOwnerAddressDTO> dtoList = new ArrayList<>();
+        return ownerAddressList.stream().map(r -> {
+            Address address = addressProvider.findAddressById(r.getAddressId());
+            OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
+            String locale = UserContext.current().getUser().getLocale();
+            dto.setBuilding(address.getBuildingName());
+            dto.setAddress(address.getAddress());
+            dto.setAddressId(address.getId());
+            dto.setApartment(address.getApartmentName());
+            LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
+                    String.valueOf(r.getAuthType()), locale);
+            if (addressStatusLocale != null) {
+                dto.setAuthType(addressStatusLocale.getText());
+            }
+            LocaleString livingStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
+                    String.valueOf(r.getLivingStatus()), locale);
+            if (livingStatusLocale != null) {
+                dto.setLivingStatus(livingStatusLocale.getText());
+            }
+            return dto;
+        }).collect(Collectors.toList());
+
+        /*List<OrganizationOwnerAddressDTO> dtoList = new ArrayList<>();
         if (ownerAddressList != null) {
             List<Address> addressList = addressProvider.listAddressByIds(namespaceId, ids);
             for (int i = 0; i < addressList.size(); i++) {
@@ -4228,7 +4254,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 dtoList.add(dto);
             }
         }
-        return dtoList;
+        return dtoList;*/
     }
 
     @Override
@@ -4354,7 +4380,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                         return dto;
                     });
 
-                    if (ownerOwnerCars != null || ownerOwnerCars.size() > 0) {
+                    if (ownerOwnerCars != null && ownerOwnerCars.size() > 0) {
                         OrganizationOwnerOwnerCar newPrimaryUserRecord = propertyMgrProvider.findOrganizationOwnerOwnerCarById(namespaceId, ownerOwnerCars.get(0).getId());
                         newPrimaryUserRecord.setPrimaryFlag(OrganizationOwnerOwnerCarPrimaryFlag.PRIMARY.getCode());
                         propertyMgrProvider.updateOrganizationOwnerOwnerCar(newPrimaryUserRecord);

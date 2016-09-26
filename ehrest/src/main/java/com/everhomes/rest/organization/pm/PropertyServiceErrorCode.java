@@ -26,4 +26,5 @@ public interface PropertyServiceErrorCode {
     int ERROR_OWNER_CAR_USER_EXIST = 16004;// 用户已经在车辆的使用者列表中
 
     int ERROR_OWNER_ADDRESS_EXIST = 17001;// 用户已经在楼栋门牌中
+    int ERROR_OWNER_ADDRESS_ALREADY_IS_THIS_STATUS = 17002;// 用户楼栋门牌已经处于某种状态
 }
