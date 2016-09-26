@@ -107,6 +107,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appKey', 'wxda4ca555d76459c1', '', '0', NULL);	
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appSecret', '73c5725ca71eeb22843a03f66b6425fb', '', '0', NULL);	
+<<<<<<< Updated upstream
 	
 
 -- 新增客户资料和车辆管理菜单 by sfyan 20160923
@@ -221,3 +222,8 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 set @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
 	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'oauth2', '11', 'zh_CN', '跳转中...');
+
+    
+-- 园区快讯 
+INSERT INTO `eh_news_categories` (`id`,  `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`) VALUES('0','0','园区快讯',NULL,NULL,'0','1','2016-09-26 11:20:54','0',NULL,'999989');
+
