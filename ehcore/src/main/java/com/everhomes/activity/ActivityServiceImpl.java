@@ -2295,7 +2295,7 @@ public class ActivityServiceImpl implements ActivityService {
 	                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
 	            }
 	            String url = liveResp.getRetinfo().getDstexkey();
-	            String vid = url.substring(0, url.lastIndexOf("/"));
+	            String vid = url.substring(url.lastIndexOf("/")+1, url.length());
 	            video.setVideoSid(vid);
 	            rmtp = url;
 	            yzbVideoService.setContinue(cmd.getRoomId(), 1);
