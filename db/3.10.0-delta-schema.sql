@@ -296,7 +296,7 @@ ALTER TABLE `eh_organization_owners` ADD COLUMN `marital_status` VARCHAR(10);
 ALTER TABLE `eh_organization_owners` ADD COLUMN `job` VARCHAR(10) COMMENT 'job';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `company` VARCHAR(100) COMMENT 'company';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `id_card_number` VARCHAR(18) COMMENT 'id card number';
-ALTER TABLE `eh_organization_owners` ADD COLUMN `avatar` VARCHAR(128) COMMENT 'avatar';
+ALTER TABLE `eh_organization_owners` ADD COLUMN `avatar` VARCHAR(1024) COMMENT 'avatar';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `status` TINYINT COMMENT 'delete: 0, normal: 1';
 ALTER TABLE `eh_organization_owners`  MODIFY COLUMN `address_id`  bigint(20) NULL COMMENT 'address id';
 
@@ -314,7 +314,7 @@ CREATE TABLE `eh_organization_owner_cars` (
   `plate_number` VARCHAR(20),
   `contacts` VARCHAR(20),
   `contact_number` VARCHAR(20),
-  `content_uri` VARCHAR(20),
+  `content_uri` VARCHAR(1024),
   `color` VARCHAR(20),
   `status` TINYINT COMMENT 'delete: 0, normal: 1',
   `create_time` DATETIME,
@@ -360,7 +360,7 @@ CREATE TABLE `eh_organization_owner_attachments` (
   `owner_id` BIGINT COMMENT 'organization owner id',
   `attachment_name` VARCHAR(100) COMMENT 'attachment name',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
-  `content_uri` VARCHAR(256) COMMENT 'attachment object link info on storage',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -376,7 +376,7 @@ CREATE TABLE `eh_organization_owner_car_attachments` (
   `owner_id` BIGINT COMMENT 'car id',
   `attachment_name` VARCHAR(100) COMMENT 'attachment name',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
-  `content_uri` VARCHAR(256) COMMENT 'attachment object link info on storage',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -413,5 +413,54 @@ CREATE TABLE `eh_organization_owner_type` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_activity_video`;
+CREATE TABLE `eh_activity_video` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `video_state` TINYINT NOT NULL DEFAULT 0 COMMENT '0:UN_READY, 1:DEBUG, 2:LIVE, 3:RECORDING, 4:EXCEPTION, 5:INVALID',
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'activity',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 ,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 ,
+  `start_time` BIGINT NOT NULL DEFAULT 0,
+  `end_time` BIGINT NOT NULL DEFAULT 0,
+  `room_type` VARCHAR(64),
+  `room_id` VARCHAR(64),
+  `video_sid` VARCHAR(64),
+  `manufacturer_type` VARCHAR(64) COMMENT 'YZB',
+  `extra` TEXT,
+  `integral_tag1` BIGINT,
+  `integral_tag2` BIGINT,
+  `integral_tag3` BIGINT,
+  `integral_tag4` BIGINT,
+  `integral_tag5` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_activities` ADD COLUMN `video_url` VARCHAR(128) COMMENT 'url of video support' AFTER `official_flag`;
+ALTER TABLE `eh_activities` ADD COLUMN `is_video_support` TINYINT NOT NULL DEFAULT 0 COMMENT 'is video support' AFTER `video_url`;
+
+-- DROP TABLE IF EXISTS `eh_yzb_devices`;
+CREATE TABLE `eh_yzb_devices` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `device_id` VARCHAR(64) NOT NULL COMMENT 'device_id of yzb',
+  `room_id` VARCHAR(64) NOT NULL COMMENT 'room_id of this devices',
+  `relative_id` BIGINT NOT NULL COMMENT 'activity_id',
+  `relative_type` VARCHAR(64) NOT NULL DEFAULT "activity",
+  `last_vid` VARCHAR(64) COMMENT 'the last vid',
+  `state` TINYINT NOT NULL DEFAULT 0 COMMENT 'the current state of this devices',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'INVALID, VALID',
+  `create_time` DATETIME,
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

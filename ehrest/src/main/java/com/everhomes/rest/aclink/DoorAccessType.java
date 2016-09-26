@@ -30,9 +30,14 @@ public enum DoorAccessType {
         switch(code.byteValue()) {
         case 0 :
             return ZLACLINK_WIFI;
-            
         case 1 :
             return ZLACLINK_NOWIFI;
+        case 5:
+            return ACLINK_ZL_GROUP;
+        case 6:
+            return ACLINK_LINGLING_GROUP;
+        case 11:
+            return ACLINK_LINGLING;
         }
         
         return null;
