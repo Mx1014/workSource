@@ -643,8 +643,9 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 -- 更新ibase、威新LINK+、科技园物业报修2.0 by sw 20160927
 delete from eh_launch_pad_layouts where name = 'PmLayout' and namespace_id in (999989, 999991, 1000000); 
 delete from eh_launch_pad_items where item_location = '/home/Pm' and namespace_id in (999989, 999991, 1000000);
-update eh_launch_pad_items set action_type = 14 , action_data='{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}' where id in (814, 10310, 10610, 10628, 109986, 109996);
-   
+update eh_launch_pad_items set action_type = 14 , action_data='{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}' where id in (814, 10628, 109996);
+update eh_launch_pad_items set action_type = 51 , action_data='' where id in (10310, 10610, 109986);
+  
 -- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 --	VALUES ('197', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '999992');
 -- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
