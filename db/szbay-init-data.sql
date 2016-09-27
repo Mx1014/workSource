@@ -51,14 +51,14 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 	VALUES(1534, 999987, 'COMMUNITY', 240111044331053935, UTC_TIMESTAMP());	
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('170', 'app.agreements.url', '', 'the relative path for szbay app agreements', '999987', NULL);	
+	VALUES ('182', 'app.agreements.url', '', 'the relative path for szbay app agreements', '999987', NULL);	
 	
 
 INSERT INTO `eh_version_realm` VALUES ('60', 'Android_SZbay', null, UTC_TIMESTAMP(), '999987');
 INSERT INTO `eh_version_realm` VALUES ('61', 'iOS_SZbay', null, UTC_TIMESTAMP(), '999987');
 
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(100,60,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(101,61,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(119,60,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(120,61,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 1, 'zh_CN', '验证码-深圳湾', '29699');
