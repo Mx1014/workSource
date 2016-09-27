@@ -2373,6 +2373,7 @@ public class ActivityServiceImpl implements ActivityService {
        String triggerName = YzbConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
        String jobName = triggerName;
        
+       Long now = System.currentTimeMillis();
        Long endTime = act.getEndTimeMs();
        if(endTime == null) {
            endTime = act.getEndTime().getTime();
@@ -2382,6 +2383,7 @@ public class ActivityServiceImpl implements ActivityService {
        //String cronExpression = "0/5 * * * * ?";
        map.put("id", act.getId().toString());
        map.put("endTime", endTime.toString());
+       map.put("now", now.toString());
        
        scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(endTime + 60*1000), ActivityVideoScheduleJob.class, map);
    }
