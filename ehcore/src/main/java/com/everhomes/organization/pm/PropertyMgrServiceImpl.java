@@ -4570,8 +4570,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         femaleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / femaleTotalNum[0] * 100)) + ""));
         totalDtoMap.values().forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
 
+        // 为了把101+的放在最后面
+        ListOrganizationOwnerStatisticDTO otherAgeDto = totalDtoMap.remove("101+");
+
         List<ListOrganizationOwnerStatisticDTO> totalList = totalDtoMap.values().stream().collect(Collectors.toList());
         Collections.sort(totalList, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
+        totalList.add(otherAgeDto);
 
         return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalList);
     }
@@ -5038,10 +5042,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private List<CommunityPmOwner> processorOrganizationOwner(long userId, long organizationId, Long communityId, ArrayList resultList) {
-        List<CommunityPmOwner> ownerList = new ArrayList<>();
-        List<String> contactTokenList = new ArrayList<>();
 		if(resultList != null && resultList.size() > 0) {
-			int row = resultList.size();
+            List<CommunityPmOwner> ownerList = new ArrayList<>();
+            List<String> contactTokenList = new ArrayList<>();
+            int row = resultList.size();
             for (int rowIndex = 2; rowIndex < row ; rowIndex++) {
                 RowResult result = (RowResult)resultList.get(rowIndex);
                 if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getF()).anyMatch(StringUtils::isEmpty)) {
@@ -5058,11 +5062,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
                 CommunityPmOwner owner = new CommunityPmOwner();
                 owner.setContactName(RowResult.trimString(result.getA()));
-                owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
                 owner.setContactToken(RowResult.trimString(result.getC()));
                 Address address = parseAddress(currentNamespaceId(), communityId, result.getD(), result.getE());
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
+                owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
                 owner.setMaritalStatus(result.getJ());
                 owner.setJob(result.getK());
                 owner.setCompany(result.getL());
@@ -5085,8 +5089,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 				ownerList.add(owner);
 			}
+            if (ownerList.isEmpty()) {
+                LOGGER.error("Import organization owner error.");
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_NO_DATA,
+                        "Import organization owner error.");
+            }
             return ownerList;
-		} else {
+        } else {
 			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
@@ -5094,10 +5103,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private List<OrganizationOwnerCar> processorOrganizationOwnerCar(Long communityId, ArrayList resultList) {
-        List<OrganizationOwnerCar> carList = new ArrayList<>();
-		List<String> plateNumberList = new ArrayList<>();
-		if(resultList != null && resultList.size() > 0) {
-			int row = resultList.size();
+        if(resultList != null && resultList.size() > 0) {
+            List<String> plateNumberList = new ArrayList<>();
+            List<OrganizationOwnerCar> carList = new ArrayList<>();
+            int row = resultList.size();
 			for (int rowIndex = 2; rowIndex < row ; rowIndex++) {
 				RowResult result = (RowResult)resultList.get(rowIndex);
                 if (result.getA() == null || result.getA().trim().isEmpty()) {
@@ -5133,8 +5142,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
                 carList.add(car);
 			}
+            if (carList.isEmpty()) {
+                LOGGER.error("Import organization owner car error.");
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_NO_DATA,
+                        "Import organization owner car error.");
+            }
             return carList;
-		} else {
+        } else {
 			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
@@ -5157,14 +5171,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			return java.sql.Date.valueOf(date);
 		} catch (Exception e) {
 			LOGGER.error("Parse date error.", e);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
+			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_BIRTHDAY_ERROR,
 					"Parse date %s error.", date);
 		}
 	}
 
 	private Byte parseGender(String gender) {
-		LocaleString localeString = localeStringProvider.findByText(
-				UserLocalStringCode.SCOPE, gender, currentLocale());
+		LocaleString localeString = localeStringProvider.findByText(UserLocalStringCode.SCOPE, gender, currentLocale());
 		if (localeString == null) {
 			LOGGER.error("The gender {} is invalid.", gender);
 			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
@@ -5190,7 +5203,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
             LOGGER.error("The address {} is not exist.", addressText);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
+			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_ERROR,
 					"The address %s is not exist.", addressText);
 		}
 		return address;
