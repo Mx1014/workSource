@@ -642,3 +642,7 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 
 -- 隐藏业主管理菜单   add by xq.tian   20160927
 UPDATE `eh_web_menu_scopes` SET `apply_policy` = '0' WHERE (`menu_id` = '36000');
+
+-- 园区简介 讯美 by sfyan 20160922
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49700,'', 'EhNamespaces', 999999,2);
