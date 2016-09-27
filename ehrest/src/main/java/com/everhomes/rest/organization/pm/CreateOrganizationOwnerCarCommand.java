@@ -30,7 +30,6 @@ public class CreateOrganizationOwnerCarCommand {
     private String brand;
     @Size(max = 20)
     private String parkingSpace;
-    @Size(max = 20)
     private Byte   parkingType;
     @Size(max = 20)
     private String contacts;
