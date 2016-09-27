@@ -31,6 +31,7 @@ INSERT INTO `eh_organization_owner_type` (`id`, `namespace_id`, `name`, `display
 SET @eh_locale_strings_id = (SELECT max(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.behavior', 'immigration', 'zh_CN', '迁入');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.behavior', 'emigration', 'zh_CN', '迁出');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.behavior', 'delete', 'zh_CN', '删除');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.authType', '2', 'zh_CN', '无效');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.authType', '0', 'zh_CN', '未认证');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.authType', '1', 'zh_CN', '认证');

@@ -42,6 +42,7 @@ import com.everhomes.server.schema.tables.daos.EhServiceAllianceCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceNotifyTargetsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceAlliancesDao;
+import com.everhomes.server.schema.tables.daos.EhSettleRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPageAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPagesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
@@ -53,6 +54,7 @@ import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
+import com.everhomes.server.schema.tables.pojos.EhSettleRequests;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
@@ -64,6 +66,7 @@ import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRec
 import com.everhomes.server.schema.tables.records.EhServiceAllianceNotifyTargetsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAllianceRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
+import com.everhomes.server.schema.tables.records.EhSettleRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPagesRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -682,6 +685,64 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             query.fetch().map((r) -> {
             	
             	requests.add(ConvertHelper.convert(r, ServiceAllianceRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
+	}
+
+
+	@Override
+	public void createSettleRequests(SettleRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSettleRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhSettleRequestsDao dao = new EhSettleRequestsDao(context.configuration());
+        dao.insert(request);
+		
+	}
+
+
+	@Override
+	public SettleRequests findSettleRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhSettleRequestsDao dao = new EhSettleRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), SettleRequests.class);
+	}
+
+
+	@Override
+	public List<SettleRequests> listSettleRequests(
+			CrossShardListingLocator locator, int pageSize) {
+
+		List<SettleRequests> requests = new ArrayList<SettleRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhSettleRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhSettleRequestsRecord> query = context.selectQuery(Tables.EH_SETTLE_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SETTLE_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, SettleRequests.class));
                 return null;
             });
 

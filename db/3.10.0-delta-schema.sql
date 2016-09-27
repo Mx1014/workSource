@@ -38,7 +38,7 @@ ALTER TABLE `eh_news` ADD COLUMN `category_id` BIGINT(20) NOT NULL DEFAULT '0' C
 
 -- merge from sa4.0 by xiongying
 -- 保存用户申请模板(通用，不仅限于服务联盟)
-DROP TABLE IF EXISTS `eh_request_templates`;
+-- DROP TABLE IF EXISTS `eh_request_templates`;
 CREATE TABLE `eh_request_templates` (
   `id` BIGINT NOT NULL,
   `template_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'i.e. EhServiceAllianceApplies type',
@@ -57,7 +57,7 @@ CREATE TABLE `eh_request_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 模板和域空间映射表 没配的域空间表示支持所有模板 配了的则仅支持配了的部分
-DROP TABLE IF EXISTS `eh_request_templates_namespace_mapping`;
+-- DROP TABLE IF EXISTS `eh_request_templates_namespace_mapping`;
 CREATE TABLE `eh_request_templates_namespace_mapping` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -67,7 +67,7 @@ CREATE TABLE `eh_request_templates_namespace_mapping` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 申请附件信息(通用，所有用模板进行申请带有的附件都放入此表)
-DROP TABLE IF EXISTS `eh_request_attachments`;
+-- DROP TABLE IF EXISTS `eh_request_attachments`;
 CREATE TABLE `eh_request_attachments` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'owner resource(i.e. EhServiceAllianceApplies) type',
@@ -83,7 +83,7 @@ CREATE TABLE `eh_request_attachments` (
 
 
 -- 服务联盟模板申请信息
-DROP TABLE IF EXISTS `eh_service_alliance_requests`;
+-- DROP TABLE IF EXISTS `eh_service_alliance_requests`;
 CREATE TABLE `eh_service_alliance_requests` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -110,30 +110,8 @@ CREATE TABLE `eh_service_alliance_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 入驻申请信息
-DROP TABLE IF EXISTS `eh_settle_requests`;
-CREATE TABLE `eh_settle_requests` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
-  `owner_id` BIGINT NOT NULL DEFAULT '0',
-  `type` BIGINT NOT NULL DEFAULT '0',
-  `category_id` BIGINT NOT NULL DEFAULT '0',
-  `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
-  `creator_name` VARCHAR(128) NOT NULL,
-  `creator_mobile` VARCHAR(128) NOT NULL,
-  `creator_organization_id` BIGINT NOT NULL DEFAULT '0',
-  `service_alliance_id` BIGINT NOT NULL DEFAULT '0',
-  `name` VARCHAR(128),
-  `mobile` VARCHAR(128),
-  `organization_name` VARCHAR(128),
-  `create_time` DATETIME,
-  
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- 保存服务联盟大类下设置的推送邮箱和推送消息的管理员信息
-DROP TABLE IF EXISTS `eh_service_alliance_notify_targets`;
+-- DROP TABLE IF EXISTS `eh_service_alliance_notify_targets`;
 CREATE TABLE `eh_service_alliance_notify_targets` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -319,7 +297,7 @@ ALTER TABLE `eh_organization_owners` ADD COLUMN `job` VARCHAR(10) COMMENT 'job';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `company` VARCHAR(100) COMMENT 'company';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `id_card_number` VARCHAR(18) COMMENT 'id card number';
 ALTER TABLE `eh_organization_owners` ADD COLUMN `avatar` VARCHAR(1024) COMMENT 'avatar';
-ALTER TABLE `eh_organization_owners` ADD COLUMN `status` TINYINT COMMENT 'delete: 0, normal: 1';
+ALTER TABLE `eh_organization_owners` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT 'delete: 0, normal: 1';
 ALTER TABLE `eh_organization_owners`  MODIFY COLUMN `address_id`  bigint(20) NULL COMMENT 'address id';
 
 --
@@ -484,5 +462,28 @@ CREATE TABLE `eh_yzb_devices` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'INVALID, VALID',
   `create_time` DATETIME,
 
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- add by xiongying20160926
+-- 入驻申请信息
+-- DROP TABLE IF EXISTS `eh_settle_requests`;
+CREATE TABLE `eh_settle_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT '0',
+  `type` BIGINT NOT NULL DEFAULT '0',
+  `category_id` BIGINT NOT NULL DEFAULT '0',
+  `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
+  `creator_name` VARCHAR(128) NOT NULL,
+  `creator_mobile` VARCHAR(128) NOT NULL,
+  `creator_organization_id` BIGINT NOT NULL DEFAULT '0',
+  `service_alliance_id` BIGINT NOT NULL DEFAULT '0',
+  `name` VARCHAR(128),
+  `mobile` VARCHAR(128),
+  `organization_name` VARCHAR(128),
+  `create_time` DATETIME,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
