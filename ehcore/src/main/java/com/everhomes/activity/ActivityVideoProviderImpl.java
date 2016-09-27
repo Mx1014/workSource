@@ -19,6 +19,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.activity.VideoState;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhActivityVideoDao;
@@ -78,6 +79,11 @@ public class ActivityVideoProviderImpl implements ActivityVideoProvider {
                 return ConvertHelper.convert(r, ActivityVideo.class);
             });
 
+        if(result[0] != null && result[0].getVideoState().equals(VideoState.INVALID.getCode())) {
+            //invalid
+            return null;
+        }
+        
         return result[0];
         } catch (Exception ex) {
             //fetchAny() maybe return null
@@ -119,6 +125,10 @@ public class ActivityVideoProviderImpl implements ActivityVideoProvider {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ACTIVITY_VIDEO.OWNER_ID.eq(activityId));
+                query.addConditions(Tables.EH_ACTIVITY_VIDEO.OWNER_TYPE.eq("activity"));
+                query.addConditions(Tables.EH_ACTIVITY_VIDEO.VIDEO_STATE.ne(VideoState.INVALID.getCode()));
+                query.addOrderBy(Tables.EH_ACTIVITY_VIDEO.ID.desc());
                 return query;
             }
             

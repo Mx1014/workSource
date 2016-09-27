@@ -17,6 +17,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.rest.hotTag.HotTagStatus;
@@ -95,6 +96,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 			post.setOfficialFlag(cmd.getOfficialFlag());
 		}
         
+        cmd.setVideoState(VideoState.UN_READY.getCode());
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         
         return post;
