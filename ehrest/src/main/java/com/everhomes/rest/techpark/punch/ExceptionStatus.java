@@ -21,7 +21,10 @@ public enum ExceptionStatus {
         return this.code;
     }
     
-    public static ExceptionStatus fromCode(byte code) {
+    public static ExceptionStatus fromCode(Byte code) {
+        if(null == code){
+            return null;
+        }
         for(ExceptionStatus t : ExceptionStatus.values()) {
             if (t.code == code) {
                 return t;
