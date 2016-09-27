@@ -74,14 +74,14 @@ public class WeChatServiceImpl implements WeChatService {
 	@Override
 	public String getAccessToken() {
 		Map<String, String> map = makeAccessToken();
-		String accessToken = map.get(ACCESS_TOKEN);
+		String accessToken = map.get(UserContext.getCurrentNamespaceId() + ACCESS_TOKEN);
 		return accessToken;
 	}
 	
 	@Override
 	public String getJsapiTicket() {
 		Map<String, String> map = makeJsApiTicket();
-		String jsapiTicket = map.get(JSAPI_TICKENT);
+		String jsapiTicket = map.get(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT);
 		return jsapiTicket;
 	}
 	
@@ -190,7 +190,7 @@ public class WeChatServiceImpl implements WeChatService {
         
         Accessor acc = this.bigCollectionProvider.getMapAccessor(ACCESS_TOKEN, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Object o = redisTemplate.opsForValue().get(ACCESS_TOKEN);
+        Object o = redisTemplate.opsForValue().get(UserContext.getCurrentNamespaceId() + ACCESS_TOKEN);
         
         String body = "";
         if(o != null) {
@@ -208,7 +208,7 @@ public class WeChatServiceImpl implements WeChatService {
         AccessTokenResponse resp = (AccessTokenResponse)StringHelper.fromJsonString(body, AccessTokenResponse.class);
         Map<String, String> keys = new HashMap<String, String>();
             
-        keys.put(ACCESS_TOKEN, resp.getAccess_token());
+        keys.put(UserContext.getCurrentNamespaceId() + ACCESS_TOKEN, resp.getAccess_token());
         
         return keys;
     }
@@ -228,7 +228,7 @@ public class WeChatServiceImpl implements WeChatService {
         }
         
         //manual cache it to redis
-        redisTemplate.opsForValue().set(ACCESS_TOKEN, body, 7000, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(namespaceId + ACCESS_TOKEN, body, 7000, TimeUnit.SECONDS);
         
 		return body;
 	}
@@ -247,7 +247,7 @@ public class WeChatServiceImpl implements WeChatService {
         }
         
         //manual cache it to redis
-        redisTemplate.opsForValue().set(JSAPI_TICKENT, body, 7000, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT, body, 7000, TimeUnit.SECONDS);
 		return body;
 	}
 	
@@ -255,7 +255,7 @@ public class WeChatServiceImpl implements WeChatService {
 		
 		Accessor acc = this.bigCollectionProvider.getMapAccessor(JSAPI_TICKENT, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Object o = redisTemplate.opsForValue().get(JSAPI_TICKENT);
+        Object o = redisTemplate.opsForValue().get(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT);
         
         String body = "";
         if(o != null) {
@@ -272,7 +272,7 @@ public class WeChatServiceImpl implements WeChatService {
         JsapiTicketResponse resp = (JsapiTicketResponse)StringHelper.fromJsonString(body, JsapiTicketResponse.class);
         Map<String, String> keys = new HashMap<String, String>();
             
-        keys.put(JSAPI_TICKENT, resp.getTicket());
+        keys.put(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT, resp.getTicket());
         
         return keys;
 	}
