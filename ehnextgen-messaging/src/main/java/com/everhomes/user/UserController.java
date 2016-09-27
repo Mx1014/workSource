@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.activity.ActivityService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -52,7 +53,10 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
+import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.AppIdStatusCommand;
 import com.everhomes.rest.user.AppIdStatusResponse;
 import com.everhomes.rest.user.AppServiceAccessCommand;
@@ -255,6 +259,9 @@ public class UserController extends ControllerBase {
 	
 	@Autowired
 	private SceneService sceneService;
+	
+	@Autowired
+    private ActivityService activityService;
 
 	public UserController() {
 	}
@@ -314,7 +321,7 @@ public class UserController extends ControllerBase {
         
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 
 		return new RestResponse(cmdResponse);
 	}
@@ -344,7 +351,7 @@ public class UserController extends ControllerBase {
 		
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 
 		return new RestResponse(cmdResponse);
 	}
@@ -382,7 +389,7 @@ public class UserController extends ControllerBase {
 
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 		
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
@@ -417,7 +424,7 @@ public class UserController extends ControllerBase {
 
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 		return new RestResponse(cmdResponse);
 	}
 	/**
@@ -664,15 +671,16 @@ public class UserController extends ControllerBase {
 		}).collect(Collectors.toList());
 	}
 
-	private String getContentServer(){
-		try {
-			ContentServer server = contentServerService.selectContentServer();
-			return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
-		} catch (Exception e) {
-			LOGGER.error("cannot find content server",e);
-			return null;
-		}
-	}
+	// 转移到ContentServerServiceImpl，使得其它模块也可以调用 by lqs 20160923
+//	private String getContentServer(){
+//		try {
+//			ContentServer server = contentServerService.selectContentServer();
+//			return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+//		} catch (Exception e) {
+//			LOGGER.error("cannot find content server",e);
+//			return null;
+//		}
+//	}
 
 	/**
 	 * <b>URL: /user/resendVerificationCodeByIdentifier</b>
@@ -930,7 +938,7 @@ public class UserController extends ControllerBase {
 
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
-		cmdResponse.setContentServer(getContentServer());
+		cmdResponse.setContentServer(contentServerService.getContentServer());
 		return new RestResponse(cmdResponse);
 	}
 
@@ -1053,4 +1061,31 @@ public class UserController extends ControllerBase {
     	resp.setErrorDescription("OK");
 	    return resp;
 	}
+    
+    /**
+     * <b>URL: /user/requestVideoPermission</b>
+     * <p>请求手机号权限</p>
+     */
+    @RequestMapping("requestVideoPermission")
+    @RestReturn(value = UserVideoPermissionDTO.class)
+    public RestResponse requestVideoPermission(@Valid RequestVideoPermissionCommand cmd) {
+        RestResponse resp = new RestResponse(activityService.requestVideoPermission(cmd));
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
+     * <b>URL: /user/getVideoPermission</b>
+     * <p>获取用户是否有视频权限</p>
+     */
+    @RequestMapping("getVideoPermission")
+    @RestReturn(value = UserVideoPermissionDTO.class)
+    public RestResponse getVideoPermisionByUserId() {
+        GetVideoPermissionInfoCommand cmd = new GetVideoPermissionInfoCommand(); 
+        RestResponse resp = new RestResponse(activityService.GetVideoPermisionInfo(cmd));
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 }

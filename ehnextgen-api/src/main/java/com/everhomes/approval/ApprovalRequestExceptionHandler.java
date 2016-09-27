@@ -30,11 +30,13 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
+import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
@@ -203,6 +205,20 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			}
 			punchProvider.createPunchExceptionApproval(punchExceptionApproval);
 		}
+		
+		//更新eh_punch_day_logs中的exception_status字段
+		PunchDayLog punchDayLog = punchProvider.findPunchDayLog(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId(), new Date(approvalExceptionContent.getPunchDate()));
+		if (punchDayLog != null) {
+			if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.TWICE.getCode().byteValue() && punchExceptionApproval.getApprovalStatus() != null && punchExceptionApproval.getApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				punchProvider.updatePunchDayLog(punchDayLog);
+			}else if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.FORTH.getCode().byteValue() && 
+					punchExceptionApproval.getMorningApprovalStatus() != null && punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode() &&
+					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				punchProvider.updatePunchDayLog(punchDayLog);
+			}
+		}
 	}
 
 	@Override
@@ -224,7 +240,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	}
 
 	@Override
-	public String processMessageToCreatorBody(ApprovalRequest approvalRequest) {
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
 		String scope = null;
 		int code = 0;
 		Map<String, Object> map = new HashMap<>();
@@ -235,7 +251,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}else {
 			scope = ApprovalNotificationTemplateCode.SCOPE;
 			code = ApprovalNotificationTemplateCode.EXCEPTION_REJECTED;
-			map.put("reason", approvalRequest.getReason());
+			map.put("reason", StringUtils.isBlank(reason)?approvalRequest.getReason():reason);
 			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");

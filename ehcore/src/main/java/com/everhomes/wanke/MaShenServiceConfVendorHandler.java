@@ -59,6 +59,7 @@ import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.LogonCommandResponse;
+import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
@@ -66,7 +67,6 @@ import com.everhomes.rest.wanke.GetSignCommand;
 import com.everhomes.rest.wanke.GetSignDTO;
 import com.everhomes.rest.wanke.ListCommunityCommand;
 import com.everhomes.rest.wanke.ListCommunityResponse;
-import com.everhomes.rest.wanke.Type;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -207,7 +207,8 @@ public class MaShenServiceConfVendorHandler implements ServiceConfVendorHandler{
 				user.setRegChannelId(0L);
 				user.setNamespaceId(newNamespaceId);
 				user.setNamespaceUserToken(userToken);
-				user.setNamespaceUserType(Type.WANKE.getCode());
+				// Type类名称太过简单，不易读，改为与数据库字段相匹配的类名，且该类放到user包中供所有模块使用 by lqs 20160922
+				user.setNamespaceUserType(NamespaceUserType.WANKE.getCode());
 				user.setGender(UserGender.UNDISCLOSURED.getCode());
 				user.setNickName(nickName);
 				String salt=EncryptionUtils.createRandomSalt();

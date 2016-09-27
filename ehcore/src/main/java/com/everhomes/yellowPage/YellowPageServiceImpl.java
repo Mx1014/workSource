@@ -519,8 +519,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 		if(!StringUtils.isEmpty(response.getTemplateType())) {
 			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
-			response.setTemplateName(template.getName());
-			response.setButtonTitle(template.getButtonTitle());
+			if(template != null) {
+				response.setTemplateName(template.getName());
+				response.setButtonTitle(template.getButtonTitle());
+			}
+			
 		}
 //		response.setDisplayName(serviceAlliance.getNickName());
 		
@@ -593,8 +596,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 			if(!StringUtils.isEmpty(dto.getTemplateType())) {
 				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
-				dto.setTemplateName(template.getName());
-				dto.setButtonTitle(template.getButtonTitle());
+				if(template != null) {
+					dto.setTemplateName(template.getName());
+					dto.setButtonTitle(template.getButtonTitle());
+				}
 			}
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);

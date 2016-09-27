@@ -427,11 +427,11 @@ public class PunchServiceImpl implements PunchService {
 				pdl.setMorningApprovalStatus(exceptionApproval.getMorningApprovalStatus());
 				pdl.setAfternoonApprovalStatus(exceptionApproval.getAfternoonApprovalStatus());
 				Byte morningStatus = pdl.getMorningPunchStatus();
-				if(null!=pdl.getMorningApprovalStatus())
-					morningStatus = pdl.getMorningApprovalStatus();
+				if(null!=exceptionApproval.getMorningApprovalStatus())
+					morningStatus = exceptionApproval.getMorningApprovalStatus();
 				Byte afternoonStatus = pdl.getAfternoonPunchStatus();
-				if(null!=pdl.getAfternoonApprovalStatus())
-					morningStatus = pdl.getAfternoonApprovalStatus();
+				if(null!=exceptionApproval.getAfternoonApprovalStatus())
+					afternoonStatus = exceptionApproval.getAfternoonApprovalStatus();
 				if (calculateExceptionCode(afternoonStatus).equals(ExceptionStatus.NORMAL.getCode())
 						&&calculateExceptionCode(morningStatus).equals(ExceptionStatus.NORMAL.getCode())) {
 				 
@@ -4199,8 +4199,11 @@ public class PunchServiceImpl implements PunchService {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 			if (null != member) {
 				dto.setUserName(member.getContactName());
-				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());  
-				dto.setDeptName(dept.getName());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());
+				if(null != dept){
+					dto.setDeptName(dept.getName());
+				}
+
 				   
 //				dto.setUserPhoneNumber(member.getContactToken());
 				// dto.setUserDepartment(enterpriseContact.get);

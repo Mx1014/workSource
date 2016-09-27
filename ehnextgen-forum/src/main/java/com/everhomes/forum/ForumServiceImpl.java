@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.highlight.HighlightField;
 import org.jooq.Condition;
@@ -4944,6 +4945,21 @@ public class ForumServiceImpl implements ForumService {
 		return resp;
 	}
 	
+	private String highlightText(Text[] texts) {
+		StringBuilder sb = new StringBuilder();
+		for(Text text: texts) {
+			if(sb.length() != 0) {
+				sb.append("..." + text);
+			} else {
+				sb.append(text);
+			}
+		}
+		
+		String str = sb.toString();
+		
+		return str;
+	}
+	
 	private SearchContentsBySceneReponse analyzeSearchResponse(SearchResponse rsp, int pageSize, Long anchor, String searchContentType) {
     	SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
     	
@@ -4959,16 +4975,19 @@ public class ForumServiceImpl implements ForumService {
         	Map<String, Object> source = sd.getSource();
         	Map<String, HighlightField> highlight = sd.getHighlightFields();
         	
-        	if(StringUtils.isEmpty(String.valueOf(highlight.get("subject")))){
+        	if(StringUtils.isEmpty(String.valueOf(highlight.get("subject"))) || "null".equals(String.valueOf(highlight.get("subject")))){
         		dto.setSubject(String.valueOf(source.get("subject")));
 			} else {
-				dto.setSubject(String.valueOf(highlight.get("subject")));
+				String subject = highlightText(highlight.get("subject").getFragments());
+				dto.setSubject(subject);
+				
 			}
         	
-        	if(StringUtils.isEmpty(String.valueOf(highlight.get("content")))){
-        		dto.setSubject(String.valueOf(source.get("content")));
+        	if(StringUtils.isEmpty(String.valueOf(highlight.get("content"))) || "null".equals(String.valueOf(highlight.get("content")))){
+        		dto.setContent(String.valueOf(source.get("content")));
 			} else {
-				dto.setSubject(String.valueOf(highlight.get("content")));
+				String content = highlightText(highlight.get("content").getFragments());
+				dto.setContent(content);
 			}
         	
         	PostDTO postDto =  getTopicById(dto.getId(), null, true, true);

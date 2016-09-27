@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -31,19 +32,25 @@ public class CreateOrganizationOwnerCommand {
     private Long organizationId;
     @NotNull
     private Long communityId;
-    @NotNull
+    @NotNull @Size(max = 20)
     private String contactName;
-    @NotNull
+    @NotNull @Size(max = 20)
     private String contactToken;
     @NotNull
     private Long orgOwnerTypeId;
     private Byte gender;
     private Long birthday;
+    @Size(max = 10)
     private String maritalStatus;
+    @Size(max = 10)
     private String job;
+    @Size(max = 100)
     private String company;
+    @Size(max = 18)
     private String idCardNumber;
+    @Size(max = 128)
     private String registeredResidence;
+    @Size(max = 1024)
     private String avatar;
     @NotNull
     @ItemType(OrganizationOwnerAddressCommand.class)

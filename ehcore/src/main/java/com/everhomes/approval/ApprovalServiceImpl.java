@@ -1407,7 +1407,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 						approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
 						updateApprovalRequest(userId, approvalRequest);
 						//2. 发消息给申请单创建者
-						sendMessageToCreator(approvalRequest);
+						sendMessageToCreator(approvalRequest, null);
 						//3. 最终同意回调业务方法
 						handler.processFinalApprove(approvalRequest);
 					}else {
@@ -1441,10 +1441,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		nextLevelUser.forEach(n->sendMessageToUser(n.getTargetId(), body, null));
 	}
 
-	private void sendMessageToCreator(ApprovalRequest approvalRequest) {
+	private void sendMessageToCreator(ApprovalRequest approvalRequest, String reason) {
 		//分为四种情况，同意请假、驳回请假、同意异常、驳回异常
 		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
-		String body = handler.processMessageToCreatorBody(approvalRequest);
+		String body = handler.processMessageToCreatorBody(approvalRequest, reason);
 		sendMessageToUser(approvalRequest.getCreatorUid(), body, null);
 	}
 
@@ -1498,7 +1498,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 					approvalRequest.setApprovalStatus(ApprovalStatus.REJECTION.getCode());
 					updateApprovalRequest(userId, approvalRequest);
 					//2. 发消息给申请单创建者
-					sendMessageToCreator(approvalRequest);
+					sendMessageToCreator(approvalRequest, cmd.getReason());
 					
 					//3. 添加日志
 					ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();

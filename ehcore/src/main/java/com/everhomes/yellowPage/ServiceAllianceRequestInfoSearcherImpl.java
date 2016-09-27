@@ -1,6 +1,8 @@
 package com.everhomes.yellowPage;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,6 +58,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
+	
+	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Override
 	public void deleteById(Long id) {
@@ -183,7 +187,13 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("ownerId", request.getOwnerId());
             b.field("creatorName", request.getCreatorName());
             b.field("creatorMobile", request.getCreatorMobile());
-            b.field("createDate", new Date(request.getCreateTime().getTime()));
+            String d = format.format(request.getCreateTime().getTime());  
+            try {
+				Date date=format.parse(d);
+				b.field("createDate", date.getTime());
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
             
 			Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
           
@@ -221,7 +231,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             	dto.setCreatorMobile(String.valueOf(source.get("creatorMobile")));
             	dto.setCreatorOrganization(String.valueOf(source.get("creatorOrganization")));
             	dto.setServiceOrganization(String.valueOf(source.get("serviceOrganization")));
-            	dto.setCreateTime(String.valueOf(source.get("createDate")));
+            	Long time = SearchUtils.getLongField(source.get("createDate"));  
+                String day = format.format(time);
+            	dto.setCreateTime(day);
             	
             	dtos.add(dto);
             }

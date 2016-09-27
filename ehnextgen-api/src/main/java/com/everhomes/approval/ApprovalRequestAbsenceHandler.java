@@ -193,7 +193,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	//timeRangeList为传输对象，approvalTimeRangeList为数据库表对应的对象
 	private boolean checkContainRequestedTime(Long userId, ApprovalOwnerInfo ownerInfo, List<TimeRange> timeRangeList) {
 		//查询当前用户的请假记录，再一个一个比较时间是否有重叠
-		List<ApprovalTimeRange> requestedTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByUserId(userId, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
+		List<ApprovalTimeRange> requestedTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByUserIdForCheckDuplicatedTime(userId, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
 		if (ListUtils.isNotEmpty(requestedTimeRangeList)) {
 			for (TimeRange timeRange : timeRangeList) {
 				for (ApprovalTimeRange requestedTimeRange : requestedTimeRangeList) {
@@ -622,7 +622,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 
 	@Override
-	public String processMessageToCreatorBody(ApprovalRequest approvalRequest) {
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
 		String scope = null;
 		int code = 0;
 		Map<String, Object> map = new HashMap<>();
@@ -633,7 +633,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}else {
 			scope = ApprovalNotificationTemplateCode.SCOPE;
 			code = ApprovalNotificationTemplateCode.ABSENCE_REJECTED;
-			map.put("reason", approvalRequest.getReason());
+			map.put("reason", StringUtils.isBlank(reason)?approvalRequest.getReason():reason);
 			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");

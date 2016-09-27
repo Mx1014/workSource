@@ -2,7 +2,7 @@
 package com.everhomes.rest.pmtask;
 
 public enum PmTaskPrivilege {
-	VIEWTASKLIST("VIEWTASKLIST"), ASSIGNTASK("ASSIGNTASK"), COMPLETETASK("COMPLETETASK"), CLOSETASK("CLOSETASK");
+	LISTALLTASK("LISTALLTASK"), LISTUSERTASK("LISTUSERTASK"), ASSIGNTASK("ASSIGNTASK"), COMPLETETASK("COMPLETETASK"), CLOSETASK("CLOSETASK");
     
     private String code;
     private PmTaskPrivilege(String code) {

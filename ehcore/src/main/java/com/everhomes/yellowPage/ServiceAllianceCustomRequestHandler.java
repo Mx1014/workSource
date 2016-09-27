@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -130,7 +131,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         
 		if(org != null) {
-			notifyMap.put("creatorOrganization", request.getCreatorMobile());
+			notifyMap.put("creatorOrganization", org.getName());
 		}
 			
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
@@ -178,10 +179,20 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	
 	private String getNote(ServiceAllianceRequests request) {
 		
-		String note = "姓名" + request.getName() + "\n" + "手机号" + request.getMobile() + "\n" + "企业名称" + request.getOrganizationName()
-				 + "\n" + "企业城市" + request.getCityName() + "\n" + "企业行业" + request.getIndustry() + "\n"
-				 + "项目描述" + request.getProjectDesc() + "\n" + "融资阶段" + request.getFinancingStage() + "\n" + "融资金额"
-				 + request.getFinancingAmount() + "\n" + "出让股份" + request.getTransferShares() + "\n";
+		String name = (request.getName() == null) ? "" : request.getName();
+		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
+		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
+		String cityName = (request.getCityName() == null) ? "" : request.getCityName();
+		String industry = (request.getIndustry() == null) ? "" : request.getIndustry();
+		String projectDesc = (request.getProjectDesc() == null) ? "" : request.getProjectDesc();
+		String financingStage = (request.getFinancingStage() == null) ? "" : request.getFinancingStage();
+		BigDecimal financingAmount = (request.getFinancingAmount() == null) ? new BigDecimal(0) : request.getFinancingAmount();
+		Double transferShares = (request.getTransferShares() == null) ? 0.0 : request.getTransferShares();
+		
+		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "企业名称:" + organizationName
+				 + "\n" + "企业城市:" + cityName + "\n" + "企业行业:" + industry + "\n"
+				 + "项目描述:" + projectDesc + "\n" + "融资阶段:" + financingStage + "\n" + "融资金额（万元）:"
+				 + financingAmount + "\n" + "出让股份 %:" + transferShares + "\n";
 		return note;
 	}
 
@@ -210,7 +221,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			notifyMap.put("categoryName", categoryName);
 			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 			
-	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, content);
+	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content);
 		}
 	}
 	
@@ -294,7 +305,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(fields.getFinancingAmount() != null) {
 			dto.setFieldValue(fields.getFinancingAmount().toString());
 		}
-		dto.setFieldName("融资金额");
+		dto.setFieldName("融资金额（万元）");
 		list.add(dto);
 		
 		dto = new RequestFieldDTO();
@@ -304,7 +315,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(fields.getTransferShares() != null) {
 			dto.setFieldValue(fields.getTransferShares().toString());
 		}
-		dto.setFieldName("出让股份");
+		dto.setFieldName("出让股份 %");
 		list.add(dto);
 		
 		dto = new RequestFieldDTO();

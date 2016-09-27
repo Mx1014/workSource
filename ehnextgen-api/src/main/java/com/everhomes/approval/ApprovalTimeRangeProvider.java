@@ -17,7 +17,7 @@ public interface ApprovalTimeRangeProvider {
 
 	void createApprovalTimeRanges(List<ApprovalTimeRange> approvalTimeRanges);
 
-	List<ApprovalTimeRange> listApprovalTimeRangeByUserId(Long userId, Integer namespaceId, String ownerType,
+	List<ApprovalTimeRange> listApprovalTimeRangeByUserIdForCheckDuplicatedTime(Long userId, Integer namespaceId, String ownerType,
 			Long ownerId);
 
 }

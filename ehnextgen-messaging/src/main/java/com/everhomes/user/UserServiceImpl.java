@@ -18,7 +18,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
@@ -55,6 +57,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -3160,4 +3163,130 @@ public class UserServiceImpl implements UserService {
 	    }
 	    return response;
 	}
+    
+    // 移自WebRequestInterceptor并改为public方法，使得其它地方也可以调用 by lqs 20160922
+    public boolean isValid(LoginToken token) {
+        if(token == null) {
+            User user = UserContext.current().getUser();
+            Long userId = -1L;
+            if(user != null) {
+                userId = user.getId();
+            }
+//          It's ok when using signature
+//          LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+            return false;
+        }
+
+        return this.isValidLoginToken(token);
+    }
+    
+    // 移自WebRequestInterceptor并改为public方法，使得其它地方也可以调用 by lqs 20160922
+    public LoginToken getLoginToken(HttpServletRequest request) {
+        Map<String, String[]> paramMap = request.getParameterMap();
+        String loginTokenString = null;
+        for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+            String value = StringUtils.join(entry.getValue(), ",");
+            if(LOGGER.isTraceEnabled())
+                LOGGER.trace("HttpRequest param " + entry.getKey() + ": " + value);
+            if(entry.getKey().equals("token"))
+                loginTokenString = value;
+        }
+
+        if(loginTokenString == null) {
+            if(request.getCookies() != null) {
+                List<Cookie> matchedCookies = new ArrayList<>();
+
+                for(Cookie cookie : request.getCookies()) {
+                    if(LOGGER.isTraceEnabled())
+                        LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
+
+                    if(cookie.getName().equals("token")) {
+                        matchedCookies.add(cookie);
+                    }
+                }
+
+                if(matchedCookies.size() > 0)
+                    loginTokenString = matchedCookies.get(matchedCookies.size() - 1).getValue();
+            }
+        }
+
+        if(loginTokenString != null)
+            try{
+                return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
+            } catch (Exception e) {
+                LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
+                return null;
+            }
+
+        return null;
+    }
+    
+    public UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response) {
+        List<User> userList = this.userProvider.findThirdparkUserByTokenAndType(namespaceId, userType, userToken);
+        if(userList == null || userList.size() == 0) {
+            LOGGER.error("Unable to find the thridpark user, namespaceId={}, userType={}, userToken={}", namespaceId, userType, userToken);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        User user = userList.get(0);
+        if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, 
+                "User account has not been activated yet");
+        }
+
+        UserLogin login = createLogin(namespaceId, user, null, null);
+        login.setStatus(UserLoginStatus.LOGGED_IN);
+        
+        //added by Janson, mark as disconnected
+        unregisterLoginConnection(login);
+
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("User logon succeed, namespaceId={}, userType={}, userToken={}, userLogin={}", namespaceId, userType, userToken, login);
+        }
+        
+        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+        LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+        WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response);
+        
+        return login;
+    }
+    
+    @Override
+    public boolean signupByThirdparkUser(User user, HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("Proxy-Client-IP"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("WL-Proxy-Client-IP"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("HTTP_CLIENT_IP"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR"); 
+        } 
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
+            ip = request.getRemoteAddr(); 
+        } 
+
+        String regIp = ip;
+        user.setRegIp(regIp);
+        user.setStatus(UserStatus.ACTIVE.getCode());
+        
+        Integer namespaceId = user.getNamespaceId();
+        String namespaceUserType = user.getNamespaceUserType();
+        String namespaceUserToken = user.getNamespaceUserToken();
+        List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
+        if(userList == null || userList.size() == 0) {
+            userProvider.createUser(user);
+            return true;
+        } else {
+            LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
+            return false;
+        }
+    }
 }

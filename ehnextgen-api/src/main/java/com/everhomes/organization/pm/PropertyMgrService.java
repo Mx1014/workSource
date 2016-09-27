@@ -141,7 +141,10 @@ public interface PropertyMgrService {
 
 	void pushMessage(PropCommunityBuildAddessCommand cmd,User user);
 
-	void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd);
+    // 自动审核group member
+    void autoApprovalGroupMember(Long userId, Long communityId, Long groupId, Long addressId);
+
+    void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd);
 
 	void createPMPropertyOwnerAddress(CreatePropOwnerAddressCommand cmd);
 
@@ -395,4 +398,13 @@ public interface PropertyMgrService {
      * 同步车辆索引
      */
     void syncOwnerCarIndex();
+
+    /**
+     * 更新客户资料的认证状态
+     * @param userId
+     * @param communityId
+     * @param addressId
+     * @param authType
+     */
+    void updateOrganizationOwnerAddressAuthType(Long userId, Long communityId, Long addressId, OrganizationOwnerAddressAuthType authType);
 }

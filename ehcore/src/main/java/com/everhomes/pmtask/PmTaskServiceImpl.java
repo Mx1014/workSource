@@ -194,23 +194,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User current = UserContext.current().getUser();
 		
 		Byte status = cmd.getStatus();
-//		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
-//				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-//			
-//			if(null == cmd.getOrganizationId()){
-//				LOGGER.error("OrganizationId cannot be null.");
-//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//	    				"OrganizationId cannot be null.");
-//			}
-//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
-//	    	if(!privileges.contains(PrivilegeConstants.VIEWTASKLIST)){
-//	    		returnNoPrivileged(privileges, current);
-//			}
-//		}
+		List<PmTask> list = new ArrayList<>();
+		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+			
+			if(null == cmd.getOrganizationId()){
+				LOGGER.error("OrganizationId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"OrganizationId cannot be null.");
+			}
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else{
+				returnNoPrivileged(privileges, current);
+			}
+	    	
+		}else{
+			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+					, cmd.getPageAnchor(), cmd.getPageSize());
+		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
-		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
-				, cmd.getPageAnchor(), cmd.getPageSize());
+		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
@@ -283,8 +293,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<String> result = new ArrayList<String>();
 		for(Long p:privileges){
-			if(p.longValue() == PrivilegeConstants.VIEWTASKLIST)
-				result.add(PmTaskPrivilege.VIEWTASKLIST.getCode());
+			if(p.longValue() == PrivilegeConstants.LISTALLTASK)
+				result.add(PmTaskPrivilege.LISTALLTASK.getCode());
+			else if(p.longValue() == PrivilegeConstants.LISTUSERTASK)
+				result.add(PmTaskPrivilege.LISTUSERTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
 				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.COMPLETETASK)
@@ -1109,7 +1121,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 			
 			for(PmTaskStatistics p: list){
-				Long id = p.getId();
+				Long id = p.getCategoryId();
 				PmTaskStatistics pts = null;
 				if(tempMap.containsKey(id)){
 					pts = tempMap.get(id);
@@ -1118,6 +1130,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
 					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
 					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+					pts.setStar1(pts.getStar1() + p.getStar1());
+					pts.setStar2(pts.getStar2() + p.getStar2());
+					pts.setStar3(pts.getStar3() + p.getStar3());
+					pts.setStar4(pts.getStar4() + p.getStar4());
+					pts.setStar5(pts.getStar5() + p.getStar5());
 					continue;
 				}
 				tempMap.put(id, p);
