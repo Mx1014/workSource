@@ -119,6 +119,10 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
         List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
         List<Long> ids = getIds(rsp);
+        if(ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        }
         if (ids != null && ids.size() > 0) {
             List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
             ownerDTOList = pmOwners.stream().map(r -> {
@@ -127,11 +131,6 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
                 return dto;
             }).collect(Collectors.toList());
-
-            if(ids.size() > pageSize) {
-                response.setNextPageAnchor(anchor + 1);
-                ids.remove(ids.size() - 1);
-            }
         }
         response.setOwners(ownerDTOList);
         return response;

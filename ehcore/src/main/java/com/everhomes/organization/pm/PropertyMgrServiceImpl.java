@@ -81,7 +81,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -3905,24 +3904,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             User user = userProvider.findUserById(userIdentifier.getOwnerUid());
             if(user != null) {
                 List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
-                    Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
-                    query.addConditions(c);
+                    query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+                    query.addConditions(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(ownerAddress.getAddressId()));
                     return query;
                 });
                 if (groups != null && groups.size() > 0) {
                     GroupMember member = groupProvider.findGroupMemberByMemberInfo(groups.get(0).getId(), EntityType.USER.getCode(), user.getId());
                     if (member != null) {
-                        Group group = groupProvider.findGroupById(member.getGroupId());
-                        if (group != null && Objects.equals(group.getFamilyAddressId(), ownerAddress.getAddressId())) {
-                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                            // 审核当前用户
-                            ApproveMemberCommand cmd = new ApproveMemberCommand();
-                            cmd.setId(groups.get(0).getId());
-                            cmd.setMemberUid(member.getId());
-                            cmd.setAddressId(ownerAddress.getAddressId());
-                            familySerivce.adminApproveMember(cmd);
-                            return true;
-                        }
+                        ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                        // 审核当前用户
+                        ApproveMemberCommand cmd = new ApproveMemberCommand();
+                        cmd.setId(groups.get(0).getId());
+                        cmd.setMemberUid(user.getId());
+                        cmd.setAddressId(ownerAddress.getAddressId());
+                        familySerivce.adminApproveMember(cmd);
+                        return true;
                     }
                 }
             }
@@ -4335,10 +4331,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 propertyMgrProvider.updateOrganizationOwnerCar(car);
                 propertyMgrProvider.deleteOrganizationOwnerOwnerCarByCarId(namespaceId, car.getId());
                 propertyMgrProvider.deleteOrganizationOwnerCarAttachmentByCarId(namespaceId, car.getId());
-                ownerCarSearcher.deleteById(car.getId());
                 return null;
             });
         }
+        ownerCarSearcher.deleteById(car.getId());
         createAuditLog(car.getId(), car.getClass());
     }
 
@@ -4660,10 +4656,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         // 自动审核用户与客户
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOwnerId());
         if (pmOwner != null) {
-            boolean success = autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
-            if (success) {
-                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
-            }
+            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
         return buildOrganizationOwnerAddressDTO(cmd, address);
     }

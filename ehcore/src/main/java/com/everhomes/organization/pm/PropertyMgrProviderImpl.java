@@ -557,6 +557,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		if(addressId != null && !"".equals(addressId)) {
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
 		}
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -1590,6 +1591,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if(ids != null && ids.size() > 0) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.ID.in(ids));
         }
+        query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.STATUS.eq(OrganizationOwnerCarStatus.NORMAL.getCode()));
         query.addOrderBy(Tables.EH_ORGANIZATION_OWNER_CARS.ID.desc());
         return query.fetchInto(OrganizationOwnerCar.class);
     }
