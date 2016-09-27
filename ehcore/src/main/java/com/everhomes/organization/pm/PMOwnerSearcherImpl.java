@@ -1,13 +1,17 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
+import com.everhomes.rest.user.UserLocalStringCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -40,6 +44,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
+
+    @Autowired
+    private LocaleStringProvider localeStringProvider;
 
 	@Override
 	public void deleteById(Long id) {
@@ -129,6 +136,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                 OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
                 dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
+                LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getGender()),
+                        UserContext.current().getUser().getLocale());
+                dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 return dto;
             }).collect(Collectors.toList());
         }

@@ -1115,8 +1115,26 @@ public class PunchServiceImpl implements PunchService {
 
 			e.printStackTrace();
 		}
-		if (punCalendar.get(Calendar.HOUR_OF_DAY) < 5) {
-			// 如果打卡时间小于5，用昨天
+		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
+		if (null == pr  )
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+ 				"公司没有设置打卡规则");
+		PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(pr.getTimeRuleId());
+		if (null == ptr  )
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+ 				"公司没有设置打卡时间规则");
+		//把当天的时分秒转换成Long型
+		Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
+		punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
+		punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
+		//默认分界点是5点,如果timerule有设置就用设置的
+		Long splitTime = 5*3600*1000L;
+		if(null != ptr.getDaySplitTime())
+			splitTime = convertTimeToGMTMillisecond(ptr.getDaySplitTime());
+		if (punchTimeLong.compareTo(splitTime)<0) {
+			// 如果打卡时间小于设定的分界点，就用昨天
 			punCalendar.add(Calendar.DATE, -1);
 		}
 		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(punCalendar
@@ -2688,6 +2706,7 @@ public class PunchServiceImpl implements PunchService {
  			punchTimeRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
 			punchTimeRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
+			punchTimeRule.setDaySplitTime(convertTime(cmd.getDaySplitTime()));
 			convertTime(punchTimeRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
 			punchTimeRule.setCreatorUid(userId);
 			punchTimeRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -2734,6 +2753,7 @@ public class PunchServiceImpl implements PunchService {
  			punchTimeRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
 			punchTimeRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
+			punchTimeRule.setDaySplitTime(convertTime(cmd.getDaySplitTime()));
 			convertTime(punchTimeRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
 			punchTimeRule.setOperatorUid(userId);
 			punchTimeRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -2784,6 +2804,7 @@ public class PunchServiceImpl implements PunchService {
 			dto.setStartEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()));
 			dto.setStartLateTime(convertTimeToGMTMillisecond(other.getStartLateTime()));
 			dto.setEndEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()) + convertTimeToGMTMillisecond(other.getWorkTime()));
+			dto.setDaySplitTime(convertTimeToGMTMillisecond(other.getDaySplitTime()));
 			response.getTimeRules().add(dto);
 		});
 		return response;
@@ -4178,8 +4199,11 @@ public class PunchServiceImpl implements PunchService {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 			if (null != member) {
 				dto.setUserName(member.getContactName());
-				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());  
-				dto.setDeptName(dept.getName());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());
+				if(null != dept){
+					dto.setDeptName(dept.getName());
+				}
+
 				   
 //				dto.setUserPhoneNumber(member.getContactToken());
 				// dto.setUserDepartment(enterpriseContact.get);

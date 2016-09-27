@@ -102,15 +102,15 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 
 	@Test
 	public void defaultTest(){
-		addTimeRuleTest();
-		addLocationRuleTest();
-		addWIFIRuleTest();
-		addPunchWorkdayRuleTest();
-		addRuleTest();
-		addRuleMapTest();
+		Long timeRuleId = addTimeRuleTest();
+		Long locationId = addLocationRuleTest();
+		Long wifiId = addWIFIRuleTest();
+		Long workdayId = addPunchWorkdayRuleTest();
+		Long ruleId = addRuleTest(timeRuleId,locationId,wifiId,workdayId);
+		addRuleMapTest(ruleId);
 	}
 
-	public void addTimeRuleTest(){
+	public Long addTimeRuleTest(){
 		logon(null, userIdentifier, plainTexPassword);
 
 		String commandRelativeUri = "/punch/addPunchTimeRule";
@@ -125,6 +125,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		cmd.setEndEarlyTime(18*3600*1000L);
 		cmd.setNoonLeaveTime(11*3600*1000L);
 		cmd.setAfternoonArriveTime(14*3600*1000L);
+		cmd.setDaySplitTime(3*3600*1000L);
 		RestResponse  response = httpClientService.restGet(
 				commandRelativeUri, cmd, RestResponse.class,
 				context);
@@ -155,7 +156,10 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		assertEquals(cmd.getEndEarlyTime().longValue() , convertTimeToGMTMillisecond(rule.getStartEarlyTime())+convertTimeToGMTMillisecond(rule.getWorkTime()).longValue());
 		assertEquals(cmd.getAfternoonArriveTime().longValue(), convertTimeToGMTMillisecond(rule.getAfternoonArriveTime()).longValue());
 		assertEquals(cmd.getOwnerId(), rule.getOwnerId()); 
+		assertEquals(cmd.getDaySplitTime().longValue(), convertTimeToGMTMillisecond(rule.getDaySplitTime()).longValue());
+
 		updateTimeRuleTest(rule.getId());
+		return rule.getId();
 	}
 	
 
@@ -176,6 +180,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		cmd.setEndEarlyTime(20*3600*1000L);
 		cmd.setNoonLeaveTime(13*3600*1000L);
 		cmd.setAfternoonArriveTime(14*3600*1000L);
+		cmd.setDaySplitTime(5*3600*1000L);
 		RestResponse  response = httpClientService.restGet(
 				commandRelativeUri, cmd, RestResponse.class,
 				context);
@@ -205,7 +210,8 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		assertEquals(cmd.getPunchTimesPerDay(), rule.getPunchTimesPerDay());
 		assertEquals(cmd.getEndEarlyTime().longValue() , convertTimeToGMTMillisecond(rule.getStartEarlyTime())+convertTimeToGMTMillisecond(rule.getWorkTime()).longValue());
 		assertEquals(cmd.getAfternoonArriveTime().longValue(), convertTimeToGMTMillisecond(rule.getAfternoonArriveTime()).longValue());
-		assertEquals(cmd.getOwnerId(), rule.getOwnerId()); 
+		assertEquals(cmd.getOwnerId(), rule.getOwnerId());
+		assertEquals(cmd.getDaySplitTime().longValue(), convertTimeToGMTMillisecond(rule.getDaySplitTime()).longValue());
 		listTimeRuleTest(cmd);
 	}
 	
@@ -235,7 +241,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		assertEquals(cmd1.getAfternoonArriveTime().longValue(), dto.getAfternoonArriveTime().longValue()); 
 	}
 
-	public void addLocationRuleTest(){
+	public Long addLocationRuleTest(){
 		logon(null, userIdentifier, plainTexPassword);
 
 		String commandRelativeUri = "/punch/addPunchLocationRule";
@@ -300,6 +306,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		
 		
 		updatePunchLocationRuleTest(rule.getId());
+		return rule.getId();
 	}
 	
 
@@ -398,7 +405,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 	}
 	
 
-	public void addWIFIRuleTest(){
+	public Long addWIFIRuleTest(){
 		logon(null, userIdentifier, plainTexPassword);
 
 		String commandRelativeUri = "/punch/addPunchWiFiRule";
@@ -460,6 +467,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		
 		
 		updatePunchWifiRuleTest(rule.getId());
+		return rule.getId();
 	}
 	
 
@@ -557,7 +565,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
-	public void addPunchWorkdayRuleTest(){
+	public Long addPunchWorkdayRuleTest(){
 		logon(null, userIdentifier, plainTexPassword);
 
 		String commandRelativeUri = "/punch/addPunchWorkdayRule";
@@ -648,10 +656,12 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 			
 			
 			updatePunchWorkdayRuleTest(rule.getId());
+			return rule.getId();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
 
@@ -793,7 +803,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 	
 
 
-	public void addRuleTest(){
+	public Long addRuleTest(Long timeRuleId, Long locationId, Long wifiId, Long workdayId){
 		logon(null, userIdentifier, plainTexPassword);
 
 		String commandRelativeUri = "/punch/addPunchRule";
@@ -802,10 +812,10 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		cmd.setOwnerType(this.ownerType);
 		cmd.setOwnerId(ownerId);
 		cmd.setName("wifi");
-		cmd.setLocationRuleId(2L);
-		cmd.setTimeRuleId(2L);
-		cmd.setWifiRuleId(2L);
-		cmd.setWorkdayRuleId(2L);
+		cmd.setLocationRuleId(locationId);
+		cmd.setTimeRuleId(timeRuleId);
+		cmd.setWifiRuleId(wifiId);
+		cmd.setWorkdayRuleId(workdayId);
 		
 		RestResponse  response = httpClientService.restGet(
 				commandRelativeUri, cmd, RestResponse.class,
@@ -841,6 +851,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		 
 		
 		updatePunchRuleTest(rule.getId());
+		return rule.getId();
 	}
 	
 
@@ -926,7 +937,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 
 
 
-	public void addRuleMapTest(){
+	public void addRuleMapTest(Long ruleId){
 		logon(null, userIdentifier, plainTexPassword);
 		String commandRelativeUri = "/punch/addPunchRuleMap";
 
@@ -935,7 +946,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		cmd.setOwnerId(ownerId); 
 		cmd.setTargetId(ownerId);
 		cmd.setTargetType(ownerType); 
-		cmd.setPunchRuleId(3L);
+		cmd.setPunchRuleId(ruleId);
 		cmd.setDescription("");
 		
 		
@@ -971,11 +982,11 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		
 		 
 		
-		updatePunchRuleMapTest(rule.getId());
+		updatePunchRuleMapTest(rule.getId(),ruleId);
 	}
 	
 
-	public void updatePunchRuleMapTest(Long id){
+	public void updatePunchRuleMapTest(Long id, Long ruleId){
 		logon(null, userIdentifier, plainTexPassword);
 
 		String commandRelativeUri = "/punch/addPunchRuleMap";
@@ -985,7 +996,7 @@ public class PunchTimeRuleTest extends BaseLoginAuthTestCase{
 		cmd.setOwnerId(ownerId); 
 		cmd.setTargetId(ownerId);
 		cmd.setTargetType(ownerType); 
-		cmd.setPunchRuleId(2L);
+		cmd.setPunchRuleId(ruleId);
 		cmd.setDescription("");
 		
 		

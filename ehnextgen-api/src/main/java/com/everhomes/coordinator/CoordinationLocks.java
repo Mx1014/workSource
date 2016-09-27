@@ -31,7 +31,8 @@ public enum CoordinationLocks {
 	UPDATE_APPROVAL_REQUEST("update_approval_request"),
     STAT_SETTLEMENT("stat.settlement"),
 
-    UPDATE_ORGANIZATION_OWNER("organization.owner.update");
+    UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
+    UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update");
 
 
     private String code;

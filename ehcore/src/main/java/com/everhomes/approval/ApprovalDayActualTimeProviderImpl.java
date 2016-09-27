@@ -18,6 +18,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -87,6 +88,7 @@ public class ApprovalDayActualTimeProviderImpl implements ApprovalDayActualTimeP
 				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
 				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode()))
 				.and(Tables.EH_APPROVAL_REQUESTS.ID.eq(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.OWNER_ID))
 				.where(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.USER_ID.in(userIdList))
 				.and(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.TIME_DATE.ge(fromDate))
