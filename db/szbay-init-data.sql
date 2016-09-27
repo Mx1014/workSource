@@ -5,12 +5,12 @@ INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `crea
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (230031, UUID(), '19059784470', '梁晓明', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999987);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (226946, 230031,  '0',  '18620390059',  '221616',  3, UTC_TIMESTAMP(), 999987);
+	VALUES (227156, 230031,  '0',  '18620390059',  '221616',  3, UTC_TIMESTAMP(), 999987);
     
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (230071, UUID(), '19060784510', '张巍', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999987);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (226947, 230071,  '0',  '18128861306',  '221616',  3, UTC_TIMESTAMP(), 999987);
+	VALUES (227157, 230071,  '0',  '18128861306',  '221616',  3, UTC_TIMESTAMP(), 999987);
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
 	VALUES ('14995', '0', '广东', 'GUANGDONG', 'GD', '/广东', '1', '1', '', '', '2', '2', '999987');
@@ -51,14 +51,14 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 	VALUES(1534, 999987, 'COMMUNITY', 240111044331053935, UTC_TIMESTAMP());	
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('170', 'app.agreements.url', '', 'the relative path for szbay app agreements', '999987', NULL);	
+	VALUES ('182', 'app.agreements.url', '', 'the relative path for szbay app agreements', '999987', NULL);	
 	
 
 INSERT INTO `eh_version_realm` VALUES ('60', 'Android_SZbay', null, UTC_TIMESTAMP(), '999987');
 INSERT INTO `eh_version_realm` VALUES ('61', 'iOS_SZbay', null, UTC_TIMESTAMP(), '999987');
 
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(100,60,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(101,61,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(119,60,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(120,61,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999987, 'sms.default.yzx', 1, 'zh_CN', '验证码-深圳湾', '29699');
@@ -4462,5 +4462,10 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) VALUES (23087, 1005034, 240111044331053935, 239825274387115464, '深圳市软件产业基地7栋—7-302', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) VALUES (23088, 1005034, 240111044331053935, 239825274387115465, '深圳市软件产业基地7栋—7-401', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`) VALUES (23089, 1005034, 240111044331053935, 239825274387115466, '深圳市软件产业基地7栋—7-501', '0');
+
+-- configuration表下方配活动
+set @configuration_id = (select max(id) from `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+    VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14748898157962984908%3F_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
 
                                                                                                      
