@@ -2323,7 +2323,7 @@ public class ActivityServiceImpl implements ActivityService {
 	                || !device.getRelativeId().equals(cmd.getActivityId())
 	                ) {
                 YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
-                if(liveResp == null || liveResp.getRetval() != "EOK") {
+                if(liveResp == null || !liveResp.getRetval().equals("EOK")) {
                     LOGGER.error("yzb got resp=" + liveResp);
                     throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                             ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
