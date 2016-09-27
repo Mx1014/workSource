@@ -193,6 +193,7 @@ public class WeChatServiceImpl implements WeChatService {
 	//https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET
 	private String cacheAccessToken(RedisTemplate redisTemplate) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		LOGGER.info("cacheAccessToken :" + namespaceId);
     	String params = "grant_type=" + WeChatConstant.ACCESSTOKEN_GRANTTYPE
     					+ "&appid=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPID, "")
     					+ "&secret=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPSECRET, "");
