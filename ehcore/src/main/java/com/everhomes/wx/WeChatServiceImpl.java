@@ -1,5 +1,6 @@
 package com.everhomes.wx;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -16,13 +17,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -33,12 +38,14 @@ import org.springframework.web.client.AsyncRestTemplate;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.wx.GetContentServerUrlCommand;
 import com.everhomes.rest.wx.GetSignatureCommand;
 import com.everhomes.rest.wx.GetSignatureResponse;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.wx.WeChatService;
@@ -94,14 +101,59 @@ public class WeChatServiceImpl implements WeChatService {
 	@Override
 	public String getContentServerUrl(GetContentServerUrlCommand cmd) {
 		String accessToken = getAccessToken();
-		InputStream is = getInputStream(accessToken, cmd);
+		String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + cmd.getMediaId();
 
-		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-		UploadCsFileResponse response = contentServerService.uploadFileToContentServer(is, cmd.getFileName(), token);
-		if(response.getErrorCode() == 0) {
-			String url = response.getResponse().getUrl();
-			return url;
-		}
+		CloseableHttpClient httpclient = null;
+        
+        CloseableHttpResponse response = null;
+        String result = null;
+        try {
+            httpclient = HttpClients.createDefault();
+            HttpGet httpGet = new HttpGet(url);
+            response = httpclient.execute(httpGet);
+
+            int status = response.getStatusLine().getStatusCode();
+            if(status != 200){
+                LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                        "Failed to get the http result");
+            } else {
+            	HttpEntity entity =  response.getEntity();
+            	InputStream is = entity.getContent();
+            	
+        		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+        		UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, cmd.getFileName(), token);
+        		if(fileResp.getErrorCode() == 0) {
+        			String fileUrl = fileResp.getResponse().getUrl();
+        			return fileUrl;
+        		}
+
+        		
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Get http result, url={}, result={}", url, result);
+                }
+            }
+            
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", url, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            if(httpclient != null) {
+                try {
+                    httpclient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+		
 		return null;
 	}
 	
@@ -117,36 +169,6 @@ public class WeChatServiceImpl implements WeChatService {
 	    return null;
 	  }
 	
-	private InputStream getInputStream(String accessToken, GetContentServerUrlCommand cmd) {
-		InputStream is = null;
-		HttpURLConnection http = null;
-		String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + cmd.getMediaId();
-		try {
-			URL urlGet = new URL(url);
-			http = (HttpURLConnection) urlGet
-					.openConnection();
-			http.setRequestMethod("GET"); 
-			http.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded");
-			http.setDoOutput(true);
-			http.setDoInput(true);
-			System.setProperty("sun.net.client.defaultConnectTimeout", "30000");// 连接超时30秒
-			System.setProperty("sun.net.client.defaultReadTimeout", "30000"); // 读取超时30秒
-			http.connect();
-			// 获取文件转化为byte流
-			is = http.getInputStream();
-			
-			String fileName = getFileName(http.getHeaderField("Content-Type"));
-			cmd.setFileName(fileName);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			http.disconnect();
-		}
-		return is;
-
-	}
 	
 	private String getRestUri(String methodName) {
         String serverUrl = configProvider.getValue(WeChatConstant.WECHAT_SERVER, "");

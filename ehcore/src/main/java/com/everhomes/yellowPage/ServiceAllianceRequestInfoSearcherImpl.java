@@ -1,6 +1,7 @@
 package com.everhomes.yellowPage;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +45,8 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
+import com.everhomes.videoconf.ConfAccounts;
 
 @Component
 public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearch
@@ -84,9 +87,6 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                 break;
             }
         }
-
-        this.optimize(1);
-        this.refresh();
         
         LOGGER.info("sync for service alliance request ok");
 		
@@ -105,7 +105,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	            if(null != source) {
 	                LOGGER.info("service alliance request id:" + request.getId());
 	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-	                        .id(request.getId().toString()).source(source));    
+	                        .id(request.getId().toString()).source(source)); 
 	                }
             
         }

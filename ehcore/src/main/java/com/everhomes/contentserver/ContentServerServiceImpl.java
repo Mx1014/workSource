@@ -437,13 +437,7 @@ public class ContentServerServiceImpl implements ContentServerService {
                     e.printStackTrace();
                 }
             }
-            if(fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            
         }
     }
 }
