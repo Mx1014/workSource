@@ -4178,8 +4178,11 @@ public class PunchServiceImpl implements PunchService {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 			if (null != member) {
 				dto.setUserName(member.getContactName());
-				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());  
-				dto.setDeptName(dept.getName());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());
+				if(null != dept){
+					dto.setDeptName(dept.getName());
+				}
+
 				   
 //				dto.setUserPhoneNumber(member.getContactToken());
 				// dto.setUserDepartment(enterpriseContact.get);
