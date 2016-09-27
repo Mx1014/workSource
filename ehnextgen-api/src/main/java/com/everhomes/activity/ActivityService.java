@@ -101,4 +101,8 @@ public interface ActivityService {
 
     ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd);
 
+    void createScheduleForActivity(Activity act);
+
+    void onActivityFinished(Long activityId, Long endTime);
+
 }
