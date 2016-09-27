@@ -4575,7 +4575,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         List<ListOrganizationOwnerStatisticDTO> totalList = totalDtoMap.values().stream().collect(Collectors.toList());
         Collections.sort(totalList, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
-        totalList.add(otherAgeDto);
+        if (otherAgeDto != null) {
+            totalList.add(otherAgeDto);
+        }
 
         return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalList);
     }
