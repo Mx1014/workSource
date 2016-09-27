@@ -3837,6 +3837,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             if (gender != null) {
                 owner.setGender(gender.getCode());
             }
+            propertyMgrProvider.updatePropOwner(owner);
             if (needUpdateDoc) {
                 pmOwnerSearcher.feedDoc(owner);
             }
@@ -4363,7 +4364,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 propertyMgrProvider.updateOrganizationOwnerCar(ownerCar);
                 return null;
             });
-            // ownerCarSearcher.feedDoc(ownerCar);
         }
     }
 
@@ -4570,7 +4570,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         femaleDtoList.forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / femaleTotalNum[0] * 100)) + ""));
         totalDtoMap.values().forEach(r -> r.setThird((int)((Double.valueOf(r.getSecond()) / totalNum[0] * 100)) + ""));
 
-        List<ListOrganizationOwnerStatisticDTO> totalList = (List<ListOrganizationOwnerStatisticDTO>) totalDtoMap.values();
+        List<ListOrganizationOwnerStatisticDTO> totalList = totalDtoMap.values().stream().collect(Collectors.toList());
         Collections.sort(totalList, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
 
         return new ListOrganizationOwnerStatisticByAgeDTO(maleDtoList, femaleDtoList, totalList);
@@ -4581,40 +4581,44 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(currentNamespaceId(), cmd.getId());
-        if (car == null) {
-            LOGGER.error("Organization owner car are not exist, id = {}", cmd.getId());
-            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_NOT_EXIST,
-                    "Organization owner car are not exist, id = %s", cmd.getId());
-        }
-        boolean needUpdateDoc = false;
-        if (cmd.getParkingType() != null) {
-            car.setParkingType(cmd.getParkingType());
-        }
-        if (cmd.getBrand() != null) {
-            car.setBrand(cmd.getBrand());
-        }
-        if (cmd.getColor() != null) {
-            car.setColor(cmd.getColor());
-        }
-        if (cmd.getContacts() != null) {
-            car.setContacts(cmd.getContacts());
-            needUpdateDoc = true;
-        }
-        if (cmd.getContactNumber() != null) {
-            car.setContactNumber(cmd.getContactNumber());
-        }
-        if (cmd.getParkingSpace() != null) {
-            car.setParkingSpace(cmd.getParkingSpace());
-        }
-        if (cmd.getContentUri() != null) {
-            car.setContentUri(cmd.getContentUri());
-        }
-        propertyMgrProvider.updateOrganizationOwnerCar(car);
-        if (needUpdateDoc) {
-            ownerCarSearcher.feedDoc(car);
-        }
-        return ConvertHelper.convert(car, OrganizationOwnerCarDTO.class);
+        Tuple<OrganizationOwnerCar, Boolean> tuple =
+                coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER_CAR.getCode()).enter(() -> {
+            OrganizationOwnerCar car = propertyMgrProvider.findOrganizationOwnerCar(currentNamespaceId(), cmd.getId());
+            if (car == null) {
+                LOGGER.error("Organization owner car are not exist, id = {}", cmd.getId());
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_NOT_EXIST,
+                        "Organization owner car are not exist, id = %s", cmd.getId());
+            }
+            if (cmd.getParkingType() != null) {
+                car.setParkingType(cmd.getParkingType());
+            }
+            if (cmd.getBrand() != null) {
+                car.setBrand(cmd.getBrand());
+            }
+            if (cmd.getColor() != null) {
+                car.setColor(cmd.getColor());
+            }
+            boolean needUpdateDoc = false;
+            if (cmd.getContacts() != null) {
+                car.setContacts(cmd.getContacts());
+                needUpdateDoc = true;
+            }
+            if (cmd.getContactNumber() != null) {
+                car.setContactNumber(cmd.getContactNumber());
+            }
+            if (cmd.getParkingSpace() != null) {
+                car.setParkingSpace(cmd.getParkingSpace());
+            }
+            if (cmd.getContentUri() != null) {
+                car.setContentUri(cmd.getContentUri());
+            }
+            propertyMgrProvider.updateOrganizationOwnerCar(car);
+            if (needUpdateDoc) {
+                ownerCarSearcher.feedDoc(car);
+            }
+            return car;
+        });
+        return convertOwnerCarToOwnerCarDTO(tuple.first());
     }
 
     @Override
