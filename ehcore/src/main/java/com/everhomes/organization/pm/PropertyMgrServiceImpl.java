@@ -81,7 +81,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -3859,7 +3858,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
         User currentUser = UserContext.current().getUser();
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
-        owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+        if (cmd.getBirthday() != null) {
+            owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+        }
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(currentUser.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
@@ -3897,14 +3898,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
     // 如果小区里有该手机号的用户, 则自动审核当前客户
-    private void autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
+    private boolean autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(currentNamespaceId(), contactToken);
         if(userIdentifier != null) {
             User user = userProvider.findUserById(userIdentifier.getOwnerUid());
             if(user != null) {
                 List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
-                    Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
-                    query.addConditions(c);
+                    query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+                    query.addConditions(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(ownerAddress.getAddressId()));
                     return query;
                 });
                 if (groups != null && groups.size() > 0) {
@@ -3912,28 +3913,36 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     if (member != null) {
                         ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
                         // 审核当前用户
-                        // ApproveMemberCommand cmd = new ApproveMemberCommand();
-                        // cmd.setId(groups.get(0).getId());
-                        // cmd.setMemberUid(member.getId());
-                        // familySerivce.adminApproveMember(cmd);
+                        ApproveMemberCommand cmd = new ApproveMemberCommand();
+                        cmd.setId(groups.get(0).getId());
+                        cmd.setMemberUid(user.getId());
+                        cmd.setAddressId(ownerAddress.getAddressId());
+                        familySerivce.adminApproveMember(cmd);
+                        return true;
                     }
                 }
             }
         }
+        return false;
     }
 
     // 自动审核group member
     @Override
-    public void autoApprovalGroupMember(Long userId, Long communityId, Long groupId) {
+    public void autoApprovalGroupMember(Long userId, Long communityId, Long groupId, Long addressId) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
         if(userIdentifier != null) {
-            CommunityPmOwner pmOwner = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(currentNamespaceId(),
+            Integer namespaceId = currentNamespaceId();
+            CommunityPmOwner pmOwner = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId,
                     communityId, userIdentifier.getIdentifierToken());
             if (pmOwner != null) {
-                ApproveMemberCommand approveCmd = new ApproveMemberCommand();
-                approveCmd.setMemberUid(UserContext.current().getUser().getId());
-                approveCmd.setId(groupId);
-                familySerivce.adminApproveMember(approveCmd);
+                OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(namespaceId, pmOwner.getId(), addressId);
+                if (ownerAddress != null) {
+                    ApproveMemberCommand approveCmd = new ApproveMemberCommand();
+                    approveCmd.setMemberUid(UserContext.current().getUser().getId());
+                    approveCmd.setId(groupId);
+                    approveCmd.setAddressId(ownerAddress.getAddressId());
+                    familySerivce.adminApproveMember(approveCmd);
+                }
             }
         }
     }
@@ -4322,10 +4331,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 propertyMgrProvider.updateOrganizationOwnerCar(car);
                 propertyMgrProvider.deleteOrganizationOwnerOwnerCarByCarId(namespaceId, car.getId());
                 propertyMgrProvider.deleteOrganizationOwnerCarAttachmentByCarId(namespaceId, car.getId());
-                ownerCarSearcher.deleteById(car.getId());
                 return null;
             });
         }
+        ownerCarSearcher.deleteById(car.getId());
         createAuditLog(car.getId(), car.getClass());
     }
 
@@ -4643,11 +4652,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_EXIST,
                     "The organization owner %s already in address %s.", cmd.getOwnerId(), cmd.getAddressId());
         }
-        createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), cmd.getOwnerId());
+        ownerAddress = createOrganizationOwnerAddress(address.getId(), cmd.getLivingStatus(), cmd.getOwnerId());
+        // 自动审核用户与客户
+        CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOwnerId());
+        if (pmOwner != null) {
+            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
+        }
         return buildOrganizationOwnerAddressDTO(cmd, address);
     }
 
-	private void createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Long ownerId) {
+	private OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Long ownerId) {
 		OrganizationOwnerAddress ownerAddress = new OrganizationOwnerAddress();
 		ownerAddress.setAddressId(addressId);
 		ownerAddress.setLivingStatus(livingStatus);
@@ -4655,7 +4669,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ownerAddress.setNamespaceId(currentNamespaceId());
 		ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
 		propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-	}
+        return ownerAddress;
+    }
 
 	@Override
     public void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd) {
@@ -5042,7 +5057,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
                 owner.setContactToken(RowResult.trimString(result.getC()));
                 Address address = parseAddress(currentNamespaceId(), communityId, result.getD(), result.getE());
-                owner.setAddress(address.getAddress());
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
                 owner.setMaritalStatus(result.getJ());
@@ -5054,6 +5068,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
                 owner.setCommunityId(communityId);
+                owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);
 
