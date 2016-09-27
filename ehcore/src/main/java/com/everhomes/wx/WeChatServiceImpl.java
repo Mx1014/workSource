@@ -120,18 +120,19 @@ public class WeChatServiceImpl implements WeChatService {
             } else {
             	HttpEntity entity =  response.getEntity();
             	InputStream is = entity.getContent();
-            	
+                 
+            	String fileName = getFileName(response.getFirstHeader("Content-Type").getValue());
         		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        		UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, cmd.getFileName(), token);
+        		UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
         		if(fileResp.getErrorCode() == 0) {
-        			String fileUrl = fileResp.getResponse().getUrl();
-        			return fileUrl;
+        			result = fileResp.getResponse().getUrl();
+        			
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Get http result, url={}, fileUrl={}", url, result);
+                    }
+
         		}
 
-        		
-                if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Get http result, url={}, result={}", url, result);
-                }
             }
             
         } catch (Exception e) {
@@ -154,7 +155,7 @@ public class WeChatServiceImpl implements WeChatService {
             }
         }
 		
-		return null;
+		return result;
 	}
 	
 	public static String getFileName(String contentType) {
