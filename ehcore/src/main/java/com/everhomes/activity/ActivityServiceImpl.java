@@ -2325,6 +2325,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            if(device.getRelativeId() == null || !cmd.getActivityId().equals(device.getRelativeId())) {
 	                //new live stream
 	                yzbVideoService.setContinue(cmd.getRoomId(), 0);
+	                //got next vid
+	                yzbVideoService.startLive(cmd.getRoomId());
 	            }
 	            
 	        }
@@ -2333,26 +2335,27 @@ public class ActivityServiceImpl implements ActivityService {
 	                || device.getLastVid() == null 
 	                || !device.getRelativeId().equals(cmd.getActivityId())
 	                ) {
-                YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
-                if(liveResp == null || !liveResp.getRetval().equals("EOK")) {
-                    LOGGER.error("yzb got resp=" + liveResp);
-                    throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                            ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
-                }
-                String url = liveResp.getRetinfo().getDstexkey();
-                String vid = url.substring(url.lastIndexOf("/")+1, url.length());
-                video.setVideoSid(vid);
-                rmtp = url;
-                yzbVideoService.setContinue(cmd.getRoomId(), 1);
-                
-                device.setState(VideoState.LIVE.getCode());
-                device.setLastVid(vid);
-                device.setRelativeId(cmd.getActivityId());
-                yzbDeviceProvider.updateYzbDevice(device);	            
-	        } else {
-	            //use old live vid
-	            video.setVideoSid(device.getLastVid());
+           LOGGER.warn("new live stream");
 	        }
+	        
+	        //MUST set continue before got a live response
+	        yzbVideoService.setContinue(cmd.getRoomId(), 1);
+	        
+            YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
+            if(liveResp == null || !liveResp.getRetval().equals("EOK")) {
+                LOGGER.error("yzb got resp=" + liveResp);
+                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
+            }
+            String url = liveResp.getRetinfo().getDstexkey();
+            String vid = url.substring(url.lastIndexOf("/")+1, url.length());
+            video.setVideoSid(vid);
+            rmtp = url;
+            
+            device.setState(VideoState.LIVE.getCode());
+            device.setLastVid(vid);
+            device.setRelativeId(cmd.getActivityId());
+            yzbDeviceProvider.updateYzbDevice(device);   
 	    }
 	    
 	    if(video.getVideoSid() == null) {
