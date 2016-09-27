@@ -121,7 +121,7 @@ public class WeChatServiceImpl implements WeChatService {
             	HttpEntity entity =  response.getEntity();
             	InputStream is = entity.getContent();
                  
-            	String fileName = getFileName(response.getFirstHeader("Content-Type").getValue());
+            	String fileName = getFileName(response.getLastHeader("Content-Type").getValue());
         		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         		UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
         		if(fileResp.getErrorCode() == 0) {
