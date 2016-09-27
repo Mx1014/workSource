@@ -52,6 +52,8 @@ import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
+import com.everhomes.promotion.OpPromotionConstant;
+import com.everhomes.promotion.OpPromotionScheduleJob;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
@@ -120,6 +122,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -221,6 +224,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private YzbVideoService yzbVideoService;
+    
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -270,11 +276,15 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
         //added by janson
+        if(cmd.getIsVideoSupport() == null) {
+            cmd.setIsVideoSupport((byte)0);
+        }
         activity.setIsVideoSupport(cmd.getIsVideoSupport());
         activity.setVideoUrl(cmd.getVideoUrl());
         activity.setVideoState(VideoState.UN_READY.getCode());
         
         activityProvider.createActity(activity);
+        createScheduleForActivity(activity);
         
         ActivityRoster roster = new ActivityRoster();
         roster.setFamilyId(user.getAddressId());
@@ -1243,7 +1253,8 @@ public class ActivityServiceImpl implements ActivityService {
 		activity.setStatus((byte)0);
 		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateActivity(activity);
-		 
+		
+		createScheduleForActivity(activity);
 	}
 
 	@Override
@@ -2378,6 +2389,55 @@ public class ActivityServiceImpl implements ActivityService {
        ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
        return ConvertHelper.convert(video, ActivityVideoDTO.class);
     }
+   
+   @Override
+   public void createScheduleForActivity(Activity act) {
+       if(act.getIsVideoSupport() == null || act.getIsVideoSupport() <= 0) {
+           return;
+       }
+       
+       String triggerName = YzbConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
+       String jobName = triggerName;
+       
+       Long now = System.currentTimeMillis();
+       Long endTime = act.getEndTimeMs();
+       if(endTime == null) {
+           endTime = act.getEndTime().getTime();
+       }
+       
+       Map<String, Object> map = new HashMap<String, Object>();
+       //String cronExpression = "0/5 * * * * ?";
+       map.put("id", act.getId().toString());
+       map.put("endTime", endTime.toString());
+       map.put("now", now.toString());
+       
+       scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(endTime + 60*1000), ActivityVideoScheduleJob.class, map);
+   }
+   
+   @Override
+   public void onActivityFinished(Long activityId, Long endTime) {
+       Activity activity = activityProvider.findActivityById(activityId);
+       if(activity == null || !activity.getEndTimeMs().equals(endTime)) {
+           LOGGER.warn("invalid activityId=" + activityId + " endTime=" + endTime);
+           return;
+       }
+       
+       ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(activityId);
+       if(oldVideo != null) {
+           if(oldVideo.getVideoState().equals(VideoState.LIVE.getCode())) {
+               oldVideo.setVideoState(VideoState.RECORDING.getCode());
+               activityVideoProvider.updateActivityVideo(oldVideo);
+           }
+           
+           YzbDevice dev = yzbDeviceProvider.findYzbDeviceByActivityId(activityId);
+           if(dev != null && dev.getState().equals(VideoState.LIVE.getCode())) {
+               dev.setState(VideoState.UN_READY.getCode());
+               dev.setRelativeId(0l);
+               yzbDeviceProvider.updateYzbDevice(dev);
+           }
+           
+       }
+   }
    
    private void fixupVideoInfo(ActivityDTO dto) {
        if(dto.getVideoUrl() != null) {

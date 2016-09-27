@@ -109,9 +109,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appKey', 'wxda4ca555d76459c1', '', '0', NULL);	
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appSecret', '73c5725ca71eeb22843a03f66b6425fb', '', '0', NULL);	
-
-
+	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appSecret', '73c5725ca71eeb22843a03f66b6425fb', '', '0', NULL);
 
 -- 新增客户资料和车辆管理菜单 by sfyan 20160923
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
@@ -691,3 +689,10 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
 	VALUES ('10', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '1000000');
 	
+
+-- 隐藏业主管理菜单   add by xq.tian   20160927
+UPDATE `eh_web_menu_scopes` SET `apply_policy` = '0' WHERE (`menu_id` = '36000');
+
+-- 园区简介 讯美 by sfyan 20160922
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49700,'', 'EhNamespaces', 999999,2);
