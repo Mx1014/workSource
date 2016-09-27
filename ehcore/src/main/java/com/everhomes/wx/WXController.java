@@ -114,17 +114,17 @@ public class WXController extends ControllerBase {
 		response.sendRedirect(sourceUrl); 
 	}
 	
-    @RequestMapping("/onAuth/{appId}")  
-    public String onAuth(@PathVariable("appId")String appId, HttpServletRequest request, HttpServletResponse response){
-        LOGGER.info("Auth result from wx: appId={}, obj={}", appId, StringHelper.toJsonString(request.getParameterMap()));
-        return "0";
-    }
-    
-    @RequestMapping("/onMessage/{appId}")  
-    public String onMessage(@PathVariable("appId")String appId, HttpServletRequest request, HttpServletResponse response){
-        LOGGER.info("Message result from wx: appId={}, obj={}", appId, StringHelper.toJsonString(request.getParameterMap()));
-        return "0";
-    }
+//    @RequestMapping("/onAuth/{appId}")  
+//    public String onAuth(@PathVariable("appId")String appId, HttpServletRequest request, HttpServletResponse response){
+//        LOGGER.info("Auth result from wx: appId={}, obj={}", appId, StringHelper.toJsonString(request.getParameterMap()));
+//        return "0";
+//    }
+//    
+//    @RequestMapping("/onMessage/{appId}")  
+//    public String onMessage(@PathVariable("appId")String appId, HttpServletRequest request, HttpServletResponse response){
+//        LOGGER.info("Message result from wx: appId={}, obj={}", appId, StringHelper.toJsonString(request.getParameterMap()));
+//        return "0";
+//    }
     
     /**
      * <b>URL: /user/getUserInfo</b>

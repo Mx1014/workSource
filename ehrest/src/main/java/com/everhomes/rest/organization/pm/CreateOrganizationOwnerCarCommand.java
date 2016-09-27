@@ -3,6 +3,7 @@ package com.everhomes.rest.organization.pm;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <ul>
@@ -22,14 +23,21 @@ import javax.validation.constraints.NotNull;
 public class CreateOrganizationOwnerCarCommand {
 
     @NotNull private Long communityId;
+    @Size(max = 20)
     @NotNull private String plateNumber;
     @NotNull private Long organizationId;
+    @Size(max = 20)
     private String brand;
+    @Size(max = 20)
     private String parkingSpace;
     private Byte   parkingType;
+    @Size(max = 20)
     private String contacts;
+    @Size(max = 20)
     private String contactNumber;
+    @Size(max = 20)
     private String color;
+    @Size(max = 1024)
     private String contentUri;
 
     public Long getOrganizationId() {

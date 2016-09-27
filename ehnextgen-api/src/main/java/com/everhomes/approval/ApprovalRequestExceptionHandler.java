@@ -30,11 +30,13 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
+import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
@@ -202,6 +204,20 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 				punchExceptionApproval.setPunchTimesPerDay(PunchTimesPerDay.FORTH.getCode());
 			}
 			punchProvider.createPunchExceptionApproval(punchExceptionApproval);
+		}
+		
+		//更新eh_punch_day_logs中的exception_status字段
+		PunchDayLog punchDayLog = punchProvider.findPunchDayLog(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId(), new Date(approvalExceptionContent.getPunchDate()));
+		if (punchDayLog != null) {
+			if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.TWICE.getCode().byteValue() && punchExceptionApproval.getApprovalStatus() != null && punchExceptionApproval.getApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				punchProvider.updatePunchDayLog(punchDayLog);
+			}else if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.FORTH.getCode().byteValue() && 
+					punchExceptionApproval.getMorningApprovalStatus() != null && punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode() &&
+					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				punchProvider.updatePunchDayLog(punchDayLog);
+			}
 		}
 	}
 

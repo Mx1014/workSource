@@ -19,6 +19,9 @@ public interface PropertyServiceErrorCode {
     int ERROR_OWNER_CONTACT_TOKEN_REPEAT = 14003;// 业主手机重复
 
     int ERROR_IMPORT = 15001;// 导入失败
+    int ERROR_IMPORT_NO_DATA = 15002;// 导入失败, 没有解析到数据
+    int ERROR_IMPORT_ADDRESS_ERROR = 15003;// 导入失败, 楼栋门牌信息错误
+    int ERROR_IMPORT_BIRTHDAY_ERROR = 15004;// 导入失败, 生日信息错误
 
     int ERROR_OWNER_CAR_EXIST = 16001;// 车辆已存在
     int ERROR_OWNER_CAR_NOT_EXIST = 16002;// 车辆不存在
@@ -26,4 +29,5 @@ public interface PropertyServiceErrorCode {
     int ERROR_OWNER_CAR_USER_EXIST = 16004;// 用户已经在车辆的使用者列表中
 
     int ERROR_OWNER_ADDRESS_EXIST = 17001;// 用户已经在楼栋门牌中
+    int ERROR_OWNER_ADDRESS_ALREADY_IS_THIS_STATUS = 17002;// 用户楼栋门牌已经处于某种状态
 }

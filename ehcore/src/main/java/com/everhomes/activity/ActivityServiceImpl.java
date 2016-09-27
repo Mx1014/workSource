@@ -282,9 +282,9 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setIsVideoSupport(cmd.getIsVideoSupport());
         activity.setVideoUrl(cmd.getVideoUrl());
         activity.setVideoState(VideoState.UN_READY.getCode());
-        createScheduleForActivity(activity);
         
         activityProvider.createActity(activity);
+        createScheduleForActivity(activity);
         
         ActivityRoster roster = new ActivityRoster();
         roster.setFamilyId(user.getAddressId());

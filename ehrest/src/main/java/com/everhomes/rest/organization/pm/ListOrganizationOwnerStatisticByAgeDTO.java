@@ -2,7 +2,6 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.discover.ItemType;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,14 +18,14 @@ public class ListOrganizationOwnerStatisticByAgeDTO {
     @ItemType(ListOrganizationOwnerStatisticDTO.class)
     private List<ListOrganizationOwnerStatisticDTO> female;
     @ItemType(ListOrganizationOwnerStatisticDTO.class)
-    private Collection<ListOrganizationOwnerStatisticDTO> total;
+    private List<ListOrganizationOwnerStatisticDTO> total;
 
     public ListOrganizationOwnerStatisticByAgeDTO() {
     }
 
     public ListOrganizationOwnerStatisticByAgeDTO(List<ListOrganizationOwnerStatisticDTO> male,
                                                   List<ListOrganizationOwnerStatisticDTO> female,
-                                                  Collection<ListOrganizationOwnerStatisticDTO> total) {
+                                                  List<ListOrganizationOwnerStatisticDTO> total) {
         this.male = male;
         this.female = female;
         this.total = total;
@@ -48,11 +47,11 @@ public class ListOrganizationOwnerStatisticByAgeDTO {
         this.female = female;
     }
 
-    public Collection<ListOrganizationOwnerStatisticDTO> getTotal() {
+    public List<ListOrganizationOwnerStatisticDTO> getTotal() {
         return total;
     }
 
-    public void setTotal(Collection<ListOrganizationOwnerStatisticDTO> total) {
+    public void setTotal(List<ListOrganizationOwnerStatisticDTO> total) {
         this.total = total;
     }
 }

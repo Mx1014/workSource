@@ -142,7 +142,7 @@ public interface PropertyMgrService {
 	void pushMessage(PropCommunityBuildAddessCommand cmd,User user);
 
     // 自动审核group member
-    void autoApprovalGroupMember(Long userId, Long communityId, Long groupId);
+    void autoApprovalGroupMember(Long userId, Long communityId, Long groupId, Long addressId);
 
     void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd);
 

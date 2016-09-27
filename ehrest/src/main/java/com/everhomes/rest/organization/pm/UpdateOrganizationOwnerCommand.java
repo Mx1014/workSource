@@ -3,6 +3,7 @@ package com.everhomes.rest.organization.pm;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <ul>
@@ -24,15 +25,25 @@ public class UpdateOrganizationOwnerCommand {
 
     @NotNull private Long id;
     @NotNull private Long organizationId;
+    @NotNull @Size(max = 20)
     private String contactName;
+    @NotNull @Size(max = 20)
+    private String contactToken;
+    @NotNull
     private Long orgOwnerTypeId;
     private Byte gender;
     private Long birthday;
+    @Size(max = 10)
     private String maritalStatus;
+    @Size(max = 10)
     private String job;
+    @Size(max = 100)
     private String company;
+    @Size(max = 18)
     private String idCardNumber;
+    @Size(max = 128)
     private String registeredResidence;
+    @Size(max = 1024)
     private String avatar;
 
     public String getContactName() {
@@ -49,6 +60,14 @@ public class UpdateOrganizationOwnerCommand {
 
     public void setOrgOwnerTypeId(Long orgOwnerTypeId) {
         this.orgOwnerTypeId = orgOwnerTypeId;
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
     }
 
     public Byte getGender() {

@@ -543,7 +543,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
 
         FamilyDTO familyDTO = processNewAddressClaimV2(cmd);
-        autoApproveMember(familyDTO.getCommunityId(), familyDTO.getId());
+        autoApproveMember(familyDTO.getCommunityId(), familyDTO.getId(), familyDTO.getAddressId());
 
         if(cmd.getReplacedAddressId() != null) {
             DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
@@ -553,9 +553,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return familyDTO;
     }
 
-    private void autoApproveMember(Long communityId, Long groupId) {
+    private void autoApproveMember(Long communityId, Long groupId, Long addressId) {
         if (communityId != null && groupId != null) {
-            propertyMgrService.autoApprovalGroupMember(UserContext.current().getUser().getId(), communityId, groupId);
+            propertyMgrService.autoApprovalGroupMember(UserContext.current().getUser().getId(), communityId, groupId, addressId);
         }
     }
 
