@@ -2290,6 +2290,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            device.setState(VideoState.UN_READY.getCode());
 	            device.setStatus((byte)1); //valid
                device.setRelativeType("activity");
+               device.setRelativeId(cmd.getActivityId());
+               device.setLastVid("");
                device.setRoomId(cmd.getRoomId());
 	            yzbDeviceProvider.createYzbDevice(device);
 	            
