@@ -383,21 +383,36 @@ public class YellowPageController  extends ControllerBase {
     }
     
     /**
-   	 * <b>URL: /yellowPage/synchRequestInfo</b>
+   	 * <b>URL: /yellowPage/syncSARequestInfo</b>
    	 * <p> 同步申请信息</p>
    	 */
-       @RequestMapping("synchRequestInfo")
+       @RequestMapping("syncSARequestInfo")
        @RestReturn(value = String.class)
-       public RestResponse synchRequestInfo() {
+       public RestResponse syncSARequestInfo() {
        	
        	this.saRequestInfoSearcher.syncFromDb();
-       	this.settleRequestInfoSearcher.syncFromDb();
        	 
        	RestResponse response = new RestResponse();
        	response.setErrorCode(ErrorCodes.SUCCESS);
        	response.setErrorDescription("OK");
        	return response;
        }
+       
+       /**
+      	 * <b>URL: /yellowPage/syncSettleRequestInfo</b>
+      	 * <p> 同步申请信息</p>
+      	 */
+          @RequestMapping("syncSettleRequestInfo")
+          @RestReturn(value = String.class)
+          public RestResponse syncSettleRequestInfo() {
+          	
+          	this.settleRequestInfoSearcher.syncFromDb();
+          	 
+          	RestResponse response = new RestResponse();
+          	response.setErrorCode(ErrorCodes.SUCCESS);
+          	response.setErrorDescription("OK");
+          	return response;
+          }
        
        
 }

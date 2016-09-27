@@ -183,3 +183,8 @@ INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_i
 	VALUES(2111457, 1005034, 'USER', 233086, 'manager', '陈慕葶', 0, '13043452532', 3);	 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(12572, 'EhOrganizations', 1005034, 'EhUsers', 233086, 1001, 1, UTC_TIMESTAMP());  
+
+-- configuration表下方配活动
+set @configuration_id = (select max(id) from `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+    VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14479317048231612302%3F_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
