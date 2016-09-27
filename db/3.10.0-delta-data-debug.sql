@@ -78,6 +78,8 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
     FROM `eh_web_menu_privileges`
     WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%37000%');
 
+-- 隐藏业主管理菜单
+UPDATE `eh_web_menu_scopes` SET `apply_policy` = '0' WHERE (`menu_id` = '36000');
 
 
 -- 插入审批类型对应的汉字文本，add by tt, 20160901

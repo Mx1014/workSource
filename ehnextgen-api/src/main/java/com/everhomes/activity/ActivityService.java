@@ -105,4 +105,8 @@ public interface ActivityService {
 
 	ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
 
+    void createScheduleForActivity(Activity act);
+
+    void onActivityFinished(Long activityId, Long endTime);
+
 }

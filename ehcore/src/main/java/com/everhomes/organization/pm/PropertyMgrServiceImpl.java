@@ -4666,7 +4666,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (pmOwner != null) {
             autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
-        return buildOrganizationOwnerAddressDTO(cmd, address);
+        return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
     }
 
 	private OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Long ownerId) {
@@ -4847,7 +4847,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
     }
 
-    private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address) {
+    private OrganizationOwnerAddressDTO buildOrganizationOwnerAddressDTO(AddOrganizationOwnerAddressCommand cmd, Address address, OrganizationOwnerAddress ownerAddress) {
         OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
         String locale = currentLocale();
         LocaleString livingStatus = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
@@ -4856,7 +4856,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             dto.setLivingStatus(livingStatus.getText());
         }
         LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
-                String.valueOf(address.getStatus()), locale);
+                String.valueOf(ownerAddress.getAuthType()), locale);
         if (addressStatusLocale != null) {
             dto.setAuthType(addressStatusLocale.getText());
         }
