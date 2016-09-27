@@ -41,7 +41,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 @Component
 public class SettleRequestInfoSearcherImpl extends AbstractElasticSearch implements SettleRequestInfoSearcher {
 
-private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceRequestInfoSearcherImpl.class);
+private static final Logger LOGGER = LoggerFactory.getLogger(SettleRequestInfoSearcherImpl.class);
 	
 	@Autowired
 	private YellowPageProvider yellowPageProvider;
