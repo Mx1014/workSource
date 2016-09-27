@@ -194,26 +194,26 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
     VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14479317048231612302%3F_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
 
 -- 更新ibase、威新LINK+、科技园物业报修2.0
-delete from eh_launch_pad_layouts where name = 'PmLayout' and namespace_id in (999990, 999991, 1000000); 
-delete from eh_launch_pad_items where item_location = '/home/Pm' and namespace_id in (999990, 999991, 1000000);
+delete from eh_launch_pad_layouts where name = 'PmLayout' and namespace_id in (999989, 999991, 1000000); 
+delete from eh_launch_pad_items where item_location = '/home/Pm' and namespace_id in (999989, 999991, 1000000);
 update eh_launch_pad_items set action_type = 14 , action_data='{"url":"http://alpha.lab.everhomes.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}' where id in (814, 10310, 10610, 10628, 109986, 109996);
    
 -- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 --	VALUES ('197', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '999992');
 -- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 --	VALUES ('198', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '999992');
-delete from eh_web_menu_scopes where owner_id = 999990 and menu_id in (21000, 22000, 23000);
+delete from eh_web_menu_scopes where owner_id = 999989 and menu_id in (21000, 22000, 23000);
 delete from eh_web_menu_scopes where owner_id = 999991 and menu_id in (21000, 22000, 23000);
 delete from eh_web_menu_scopes where owner_id = 1000000 and menu_id in (21000, 22000, 23000);
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),24000,'', 'EhNamespaces', 999990,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),24000,'', 'EhNamespaces', 999989,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),25000,'', 'EhNamespaces', 999990,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),25000,'', 'EhNamespaces', 999989,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),26000,'', 'EhNamespaces', 999990,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),26000,'', 'EhNamespaces', 999989,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES((@menu_scope_id := @menu_scope_id + 1),27000,'', 'EhNamespaces', 999990,2);
+	VALUES((@menu_scope_id := @menu_scope_id + 1),27000,'', 'EhNamespaces', 999989,2);
 	
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES((@menu_scope_id := @menu_scope_id + 1),24000,'', 'EhNamespaces', 999991,2);
@@ -234,7 +234,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 	VALUES((@menu_scope_id := @menu_scope_id + 1),27000,'', 'EhNamespaces', 1000000,2);
 
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
-	VALUES ('8', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999990');
+	VALUES ('8', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999989');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
 	VALUES ('9', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999991');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
