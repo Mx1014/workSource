@@ -519,8 +519,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 		if(!StringUtils.isEmpty(response.getTemplateType())) {
 			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
-			response.setTemplateName(template.getName());
-			response.setButtonTitle(template.getButtonTitle());
+			if(template != null) {
+				response.setTemplateName(template.getName());
+				response.setButtonTitle(template.getButtonTitle());
+			}
+			
 		}
 //		response.setDisplayName(serviceAlliance.getNickName());
 		
