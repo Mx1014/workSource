@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>noonLeaveTime：中午下班时间</li>
  * <li>afternoonArriveTime： 下午上班时间</li>
  * <li>punchTimesPerDay：每天打卡次数，2次或者4次)</li>
+ * <li>daySplitTime：前一天与后一天的分界点</li>
  * </ul>
  */
 public class UpdatePunchTimeRuleCommand {
@@ -43,6 +44,9 @@ public class UpdatePunchTimeRuleCommand {
 	private Long afternoonArriveTime;
 	@NotNull
 	private Byte punchTimesPerDay;
+
+	private Long daySplitTime;
+	
 
 	public Long getStartEarlyTime() {
 		return startEarlyTime;
@@ -127,6 +131,14 @@ public class UpdatePunchTimeRuleCommand {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Long getDaySplitTime() {
+		return daySplitTime;
+	}
+
+	public void setDaySplitTime(Long daySplitTime) {
+		this.daySplitTime = daySplitTime;
 	}
 
 }

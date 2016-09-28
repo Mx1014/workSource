@@ -15,4 +15,5 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_CHECKIN_ALREADY=10009;
     static final int ERROR_VIDEO_SERVER_ERROR=10010;
     static final int ERROR_VIDEO_PARAM_ERROR=10011;
+    static final int ERROR_VIDEO_DEVICE_RESTART=10012;
 }

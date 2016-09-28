@@ -60,7 +60,7 @@ public class YzbVideoServiceImpl implements YzbVideoService {
     public YzbLiveVideoResponse setContinue(String deviceId, int b) {
         AsyncRestTemplate template = new AsyncRestTemplate();
         String url = getRestUri(YzbConstant.SET_CONTINUE);
-        String body = String.format("%s??devid=%s&continue=%d", url, deviceId, b);
+        String body = String.format("%s?devid=%s&continue=%d", url, deviceId, b);
         
         URI uri = URI.create(body);
         ListenableFuture<ResponseEntity<String>> future = template.getForEntity(uri, String.class);

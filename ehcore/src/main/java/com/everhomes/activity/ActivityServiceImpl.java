@@ -52,6 +52,8 @@ import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
+import com.everhomes.promotion.OpPromotionConstant;
+import com.everhomes.promotion.OpPromotionScheduleJob;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
@@ -120,6 +122,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -221,6 +224,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private YzbVideoService yzbVideoService;
+    
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -270,11 +276,15 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
         //added by janson
+        if(cmd.getIsVideoSupport() == null) {
+            cmd.setIsVideoSupport((byte)0);
+        }
         activity.setIsVideoSupport(cmd.getIsVideoSupport());
         activity.setVideoUrl(cmd.getVideoUrl());
         activity.setVideoState(VideoState.UN_READY.getCode());
         
         activityProvider.createActity(activity);
+        createScheduleForActivity(activity);
         
         ActivityRoster roster = new ActivityRoster();
         roster.setFamilyId(user.getAddressId());
@@ -1243,7 +1253,8 @@ public class ActivityServiceImpl implements ActivityService {
 		activity.setStatus((byte)0);
 		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateActivity(activity);
-		 
+		
+		createScheduleForActivity(activity);
 	}
 
 	@Override
@@ -2247,37 +2258,79 @@ public class ActivityServiceImpl implements ActivityService {
         return dto;
 	}
 	
-	@Override
-	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {
+	//live from normal user
+	private ActivityVideoDTO setUserActivityVideo(SetActivityVideoInfoCommand cmd) {
 	    ActivityVideo video = new ActivityVideo();
-	    String rmtp = "";
-	   
-	    YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
+        //app sdk
+        video.setIntegralTag1(0l);
+        video.setVideoSid(cmd.getVid());
+        
+        YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
+        if(oldDev != null) {
+            oldDev.setState(VideoState.UN_READY.getCode());
+            yzbDeviceProvider.updateYzbDevice(oldDev);
+            
+            yzbVideoService.setContinue(oldDev.getDeviceId(), 0); 
+        }
+        
+        User user = UserContext.current().getUser();
+        
+        if(video.getVideoSid() == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_VIDEO_PARAM_ERROR, "video client params error");
+        }
+        
+        ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+        if(oldVideo != null) {
+            //new activity, delete the old one
+            oldVideo.setVideoState(VideoState.INVALID.getCode());
+            activityVideoProvider.updateActivityVideo(oldVideo);
+        }
+        
+        video.setCreatorUid(user.getId());
+        video.setManufacturerType(VideoManufacturerType.YZB.toString());
+        video.setRoomType(ActivityVideoRoomType.YZB.toString());
+        video.setStartTime(System.currentTimeMillis());
+        video.setIntegralTag1(0l);
+        video.setVideoState(VideoState.LIVE.getCode());
+        video.setOwnerType("activity");
+        video.setOwnerId(cmd.getActivityId());
+        activityVideoProvider.createActivityVideo(video);
+        ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+        dto.setVideoUrl("yzb://" + video.getVideoSid());
+        dto.setRmtp("");
+        
+        return dto;
+	}
+	
+	@Override
+	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {	   
 	    if(cmd.getRoomId() == null) {
-	        //app sdk
-	        video.setIntegralTag1(0l);
-	        video.setVideoSid(cmd.getVid());
-	        if(oldDev != null) {
-	            //mark the old device as unready and use it next time
-	            oldDev.setState(VideoState.UN_READY.getCode());
-	            yzbDeviceProvider.updateYzbDevice(oldDev);
-	        }
+	        return setUserActivityVideo(cmd);
 	    } else {
+	        //live from device
+	        ActivityVideo video = new ActivityVideo();
+	        String rmtp = "";
+	        boolean setContinue = true;
+	        
             //default, use device
 	        video.setRoomId(cmd.getRoomId());
 	        video.setIntegralTag1(1l);
 	        
 	        YzbDevice device = null;
+	        YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
 	        if(oldDev != null && oldDev.getRoomId().equals(cmd.getRoomId())) {
+	            //found old device
 	            device = oldDev;
 	            oldDev = null;
 	        } else {
 	            device = yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());    
 	        }
             if(oldDev != null) {
-                //mark the old device as unready and use it next time
+                //set old device to no ready
                 oldDev.setState(VideoState.UN_READY.getCode());
                 yzbDeviceProvider.updateYzbDevice(oldDev);
+                yzbVideoService.setContinue(oldDev.getDeviceId(), 0);
             }
 	        
 	        if(device == null) {
@@ -2295,7 +2348,7 @@ public class ActivityServiceImpl implements ActivityService {
                device.setRoomId(cmd.getRoomId());
 	            yzbDeviceProvider.createYzbDevice(device);
 	            
-	            yzbVideoService.setContinue(cmd.getRoomId(), 0);
+	            setContinue = false;
 	        } else {
 	            if(!cmd.getActivityId().equals(device.getRelativeId())
 	                    && device.getState().equals(VideoState.LIVE.getCode())) {
@@ -2311,66 +2364,71 @@ public class ActivityServiceImpl implements ActivityService {
 	                }
 	            }
 	            
-	            if(device.getRelativeId() == null || !cmd.getActivityId().equals(device.getRelativeId())) {
-	                //new live stream
-	                yzbVideoService.setContinue(cmd.getRoomId(), 0);
+	            if(device.getRelativeId() == null 
+	                    || !cmd.getActivityId().equals(device.getRelativeId())
+	                    || !device.getState().equals(VideoState.LIVE.getCode())) {
+	                setContinue = false;
 	            }
 	            
 	        }
-	        
-	        if(!device.getState().equals(VideoState.LIVE.getCode()) 
-	                || device.getLastVid() == null 
-	                || !device.getRelativeId().equals(cmd.getActivityId())
-	                ) {
-                YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
-                if(liveResp == null || !liveResp.getRetval().equals("EOK")) {
-                    LOGGER.error("yzb got resp=" + liveResp);
-                    throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                            ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
-                }
-                String url = liveResp.getRetinfo().getDstexkey();
-                String vid = url.substring(url.lastIndexOf("/")+1, url.length());
-                video.setVideoSid(vid);
-                rmtp = url;
-                yzbVideoService.setContinue(cmd.getRoomId(), 1);
-                
-                device.setState(VideoState.LIVE.getCode());
-                device.setLastVid(vid);
-                device.setRelativeId(cmd.getActivityId());
-                yzbDeviceProvider.updateYzbDevice(device);	            
+
+            //MUST set continue before got a live response
+            yzbVideoService.setContinue(cmd.getRoomId(), 1);
+            YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
+            if(liveResp == null || !liveResp.getRetval().equals("EOK")) {
+                LOGGER.error("yzb got resp=" + liveResp);
+                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
+            }
+            String url = liveResp.getRetinfo().getDstexkey();
+            String vid = url.substring(url.lastIndexOf("/")+1, url.length());
+            
+	        if(setContinue) {
+	            device.setState(VideoState.LIVE.getCode());
+	            video.setVideoState(VideoState.LIVE.getCode());
 	        } else {
-	            //use old live vid
-	            video.setVideoSid(device.getLastVid());
+               LOGGER.warn("new live video stream, restart the device and try again");
+               if(vid.equals(device.getLastVid())) {
+                   LOGGER.warn("have to restart the device to get last correct vid");
+                   yzbVideoService.setContinue(cmd.getRoomId(), 0);
+                   device.setState(VideoState.UN_READY.getCode());
+                   video.setVideoState(VideoState.UN_READY.getCode());
+               } else {
+                   device.setState(VideoState.LIVE.getCode());
+                   video.setVideoState(VideoState.LIVE.getCode());
+                   setContinue = true;
+               }
 	        }
+	        
+            video.setVideoSid(vid);
+            rmtp = url;
+            
+            device.setLastVid(vid);
+            device.setRelativeId(cmd.getActivityId());
+            yzbDeviceProvider.updateYzbDevice(device); 
+	        
+            ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+            if(oldVideo != null) {
+                //new activity, delete the old one
+                oldVideo.setVideoState(VideoState.INVALID.getCode());
+                activityVideoProvider.updateActivityVideo(oldVideo);
+            }
+            
+            User user = UserContext.current().getUser();
+            video.setCreatorUid(user.getId());
+            video.setManufacturerType(VideoManufacturerType.YZB.toString());
+            video.setRoomType(ActivityVideoRoomType.YZB.toString());
+            video.setStartTime(System.currentTimeMillis());
+            video.setIntegralTag1(0l);
+            video.setOwnerType("activity");
+            video.setOwnerId(cmd.getActivityId());
+            activityVideoProvider.createActivityVideo(video);
+            ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+            dto.setVideoUrl("yzb://" + video.getVideoSid());
+            dto.setRmtp(rmtp);
+            
+            return dto;
 	    }
-	    
-	    if(video.getVideoSid() == null) {
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_VIDEO_PARAM_ERROR, "video client params error");
-	    }
-	    
-	    ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
-	    if(oldVideo != null) {
-	        //new activity, delete the old one
-	        oldVideo.setVideoState(VideoState.INVALID.getCode());
-	        activityVideoProvider.updateActivityVideo(oldVideo);
-	    }
-	    
-	    User user = UserContext.current().getUser();
-	    video.setCreatorUid(user.getId());
-	    video.setManufacturerType(VideoManufacturerType.YZB.toString());
-	    video.setRoomType(ActivityVideoRoomType.YZB.toString());
-	    video.setStartTime(System.currentTimeMillis());
-	    video.setIntegralTag1(0l);
-	    video.setVideoState(VideoState.LIVE.getCode());
-	    video.setOwnerType("activity");
-	    video.setOwnerId(cmd.getActivityId());
-	    activityVideoProvider.createActivityVideo(video);
-	    ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
-	    dto.setVideoUrl("yzb://" + video.getVideoSid());
-	    dto.setRmtp(rmtp);
-	    
-	    return dto;
 	}
 	
    @Override
@@ -2378,6 +2436,55 @@ public class ActivityServiceImpl implements ActivityService {
        ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
        return ConvertHelper.convert(video, ActivityVideoDTO.class);
     }
+   
+   @Override
+   public void createScheduleForActivity(Activity act) {
+       if(act.getIsVideoSupport() == null || act.getIsVideoSupport() <= 0) {
+           return;
+       }
+       
+       String triggerName = YzbConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
+       String jobName = triggerName;
+       
+       Long now = System.currentTimeMillis();
+       Long endTime = act.getEndTimeMs();
+       if(endTime == null) {
+           endTime = act.getEndTime().getTime();
+       }
+       
+       Map<String, Object> map = new HashMap<String, Object>();
+       //String cronExpression = "0/5 * * * * ?";
+       map.put("id", act.getId().toString());
+       map.put("endTime", endTime.toString());
+       map.put("now", now.toString());
+       
+       scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(endTime + 60*1000), ActivityVideoScheduleJob.class, map);
+   }
+   
+   @Override
+   public void onActivityFinished(Long activityId, Long endTime) {
+       Activity activity = activityProvider.findActivityById(activityId);
+       if(activity == null || !activity.getEndTimeMs().equals(endTime)) {
+           LOGGER.warn("invalid activityId=" + activityId + " endTime=" + endTime);
+           return;
+       }
+       
+       ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(activityId);
+       if(oldVideo != null) {
+           if(oldVideo.getVideoState().equals(VideoState.LIVE.getCode())) {
+               oldVideo.setVideoState(VideoState.RECORDING.getCode());
+               activityVideoProvider.updateActivityVideo(oldVideo);
+           }
+           
+           YzbDevice dev = yzbDeviceProvider.findYzbDeviceByActivityId(activityId);
+           if(dev != null && dev.getState().equals(VideoState.LIVE.getCode())) {
+               dev.setState(VideoState.UN_READY.getCode());
+               dev.setRelativeId(0l);
+               yzbDeviceProvider.updateYzbDevice(dev);
+           }
+           
+       }
+   }
    
    private void fixupVideoInfo(ActivityDTO dto) {
        if(dto.getVideoUrl() != null) {
