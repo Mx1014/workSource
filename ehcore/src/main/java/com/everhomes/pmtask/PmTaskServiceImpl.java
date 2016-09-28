@@ -195,29 +195,29 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Byte status = cmd.getStatus();
 		List<PmTask> list = new ArrayList<>();
-		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
-				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-			
-			if(null == cmd.getOrganizationId()){
-				LOGGER.error("OrganizationId cannot be null.");
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-	    				"OrganizationId cannot be null.");
-			}
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
-	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
-	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
-						, cmd.getPageAnchor(), cmd.getPageSize());
-			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
-				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
-						, cmd.getPageAnchor(), cmd.getPageSize());
-			}else{
-				returnNoPrivileged(privileges, current);
-			}
-	    	
-		}else{
+//		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+//				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+//			
+//			if(null == cmd.getOrganizationId()){
+//				LOGGER.error("OrganizationId cannot be null.");
+//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//	    				"OrganizationId cannot be null.");
+//			}
+//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+//	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
+//	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+//						, cmd.getPageAnchor(), cmd.getPageSize());
+//			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+//				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
+//						, cmd.getPageAnchor(), cmd.getPageSize());
+//			}else{
+//				returnNoPrivileged(privileges, current);
+//			}
+//	    	
+//		}else{
 			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
 					, cmd.getPageAnchor(), cmd.getPageSize());
-		}
+//		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
 		

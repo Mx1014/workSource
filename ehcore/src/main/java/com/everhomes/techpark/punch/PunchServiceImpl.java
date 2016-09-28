@@ -3984,17 +3984,22 @@ public class PunchServiceImpl implements PunchService {
 			break;
 		}
 		ExceptionStatus exception = ExceptionStatus.fromCode(dto.getExceptionStatus());
-		switch(exception){
-		case NORMAL: 
-			row.createCell(++i).setCellValue("正常"); 
-			break;
-		case EXCEPTION: 
-			row.createCell(++i).setCellValue("异常"); 
-			 break;
-		default :
-			++i; 
-			break;
-		} 
+		if(null != exception){
+			switch(exception){
+				case NORMAL:
+					row.createCell(++i).setCellValue("正常");
+					break;
+				case EXCEPTION:
+					row.createCell(++i).setCellValue("异常");
+					break;
+				default :
+					++i;
+					break;
+			}
+		}else{
+			++i;
+		}
+
 	}
 	private void createPunchDetailsBookSheetHead(Sheet sheet) {
 		Row row = sheet.createRow(sheet.getLastRowNum());
