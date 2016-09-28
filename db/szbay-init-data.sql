@@ -171,6 +171,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
     VALUES (111416, 999987, 0, 0, 0, '/home', 'Bizs', '快递', '快递', 'cs://1/image/aW1hZ2UvTVRvNVlUZzRNak5rTkRaa09URTBaVFJtTkdGaVltVXhOVGsyWWpVeVkyWTRZdw', 1, 1, 14, '{"url":"http://m.kuaidi100.com/"}', 0, 0, 1, 0,'','0',NULL,NULL,NULL, '1', 'pm_admin', '1');    
     
+
 -- park_tourist
 --INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
 --    VALUES (111417, 999987, 0, 0, 0, '/home', 'Bizs', '全景地图', '全景地图', 'cs://1/image/aW1hZ2UvTVRwak5qZ3lZbVJqWXpneVkyTTRaakUxTjJZM1pEbGlPRGN6TmpjMFltRTBPUQ', 1, 1, 14, '{"url":"http://101.201.145.127:8090/htht/"}', 0, 0, 1, 1,'','0',NULL,NULL,NULL, '1', 'park_tourist', '1');    
@@ -4474,7 +4475,9 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- 更多不可编辑
 update eh_launch_pad_items set default_order = 100000 where id in(111409, 111424) and namespace_id = 999987;
 update eh_launch_pad_items set delete_flag = 0 where id in(111409, 111424) and namespace_id = 999987;
-      
+ 
+-- 咨询热线拿出来
+update eh_launch_pad_items set display_flag = 1 where id in(111411, 111426) and namespace_id = 999987; 
 
 -- 快讯增加默认封面图 add by xiongying 20160928    
 update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvek5EQXlaVGt4TVRNd1pETXdORFUyTXpZMk9XVTVZVGxrTkROa1pqTmxPQQ' where id = 1;
