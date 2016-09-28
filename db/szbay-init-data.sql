@@ -123,6 +123,7 @@ INSERT INTO `eh_news_categories` (`id`,  `parent_id`, `name`, `path`, `default_o
     VALUES('1','0','活动快讯',NULL,NULL,'0','1',UTC_TIMESTAMP(),'0',NULL,'999987');
 INSERT INTO `eh_news_categories` (`id`,  `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`) 
     VALUES('2','0','行业动态',NULL,NULL,'0','1',UTC_TIMESTAMP(),'0',NULL,'999987');
+
     
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
     VALUES ('10798', '999987', '0', '/home', 'Default', '0', '0', '深圳湾', 'szbay', 'cs://1/image/aW1hZ2UvTVRveE1qWXhPVEJpTURSalpEVmtNR1V6T0dWbE5Ua3lPRE5tTm1JMlkyVXpaUQ', 0, '', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'park_tourist', '0');
@@ -4468,4 +4469,6 @@ set @configuration_id = (select max(id) from `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
     VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14748898157962984908%3F_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
 
-                                                                                                     
+-- 快讯增加默认封面图 add by xiongying 20160928    
+update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvek5EQXlaVGt4TVRNd1pETXdORFUyTXpZMk9XVTVZVGxrTkROa1pqTmxPQQ' where id = 1;
+update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvM05tSXhNakZsWXpsaVlUZ3pNMlEyTkdNM01qYzRZV0V6WXpCa00yRTBZUQ' where id = 2;                                                                                                     
