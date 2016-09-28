@@ -493,3 +493,9 @@ ALTER TABLE `eh_punch_time_rules` ADD COLUMN `day_split_time` TIME DEFAULT '05:0
 
 -- 给快讯类型增加默认封面图
 ALTER TABLE `eh_news_categories` ADD COLUMN `logo_uri` VARCHAR(1024) COMMENT 'default cover uri';
+
+-- 加默认值alter table表名 modify colname varchar(100) not null;
+ALTER TABLE eh_service_alliance_requests MODIFY creator_name VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_service_alliance_requests MODIFY creator_mobile VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_settle_requests MODIFY creator_name VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_settle_requests MODIFY creator_mobile VARCHAR(128) DEFAULT NULL;
