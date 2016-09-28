@@ -4468,7 +4468,7 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 -- configuration表下方配活动
 set @configuration_id = (select max(id) from `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-    VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14748898157962984908%3F_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
+    VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdefault%3Fpos%3D1%26_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
 
 
 -- 更多不可编辑
