@@ -154,6 +154,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
     VALUES (111409, 999987, 0, 0, 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvelptWXdOMkkwWXpGaVlUQmhOamt3TWpCaE1UQmtOekZqTUdJek1UZ3laZw', 1, 1, 1, '{\"itemLocation\":\"/home\",\"itemGroup\":\"Bizs\"}', 0, 0, 1, 1,'','0',NULL,NULL,NULL, '1', 'pm_admin', '1');
 
+    
 -- 更多里面的
 --INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
  --   VALUES (111410, 999987, 0, 0, 0, '/home', 'Bizs', '热门展区', '热门展区', 'cs://1/image/aW1hZ2UvTVRveE5XRXdOREZpT1RjMFptVTJaRE0zT1dGaU9HUTNabU14TlRCa1kySTBOZw', 1, 1, 14, '{"url":"http://member.extremevision.com.cn/demo/zuolin/index.html"}', 0, 0, 1, 0,'','0',NULL,NULL,NULL, '1', 'pm_admin', '1');
@@ -4469,6 +4470,12 @@ set @configuration_id = (select max(id) from `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
     VALUES (@configuration_id:=@configuration_id+1, 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14748898157962984908%3F_k%3Dzlbiz#sign_suffix', 'business url', '999987', NULL);
 
+
+-- 更多不可编辑
+update eh_launch_pad_items set default_order = 100000 where id in(111409, 111424) and namespace_id = 999987;
+update eh_launch_pad_items set delete_flag = 0 where id in(111409, 111424) and namespace_id = 999987;
+      
+
 -- 快讯增加默认封面图 add by xiongying 20160928    
 update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvek5EQXlaVGt4TVRNd1pETXdORFUyTXpZMk9XVTVZVGxrTkROa1pqTmxPQQ' where id = 1;
-update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvM05tSXhNakZsWXpsaVlUZ3pNMlEyTkdNM01qYzRZV0V6WXpCa00yRTBZUQ' where id = 2;                                                                                                     
+update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvM05tSXhNakZsWXpsaVlUZ3pNMlEyTkdNM01qYzRZV0V6WXpCa00yRTBZUQ' where id = 2;            
