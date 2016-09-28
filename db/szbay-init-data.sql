@@ -20,6 +20,13 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 	VALUES ('14997', '14996', '南山区', 'NANSHANQU', 'NSQ', '/广东/深圳市/南山区', '3', '3', NULL, '0755', '2', '0', '999987');
 
     
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(182595, UUID(), 999987, 2, 'EhGroups', 0,'深圳湾创业广场','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(182596, UUID(), 999987, 2, 'EhGroups', 0,'深圳湾创业广场意见反馈','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
+update eh_communities set default_forum_id = 182595 where id = 240111044331053935 and namespace_id = 999987;
+update eh_communities set feedback_forum_id = 182596 where id = 240111044331053935 and namespace_id = 999987;
+    
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES( 240111044331053935, UUID(), 14996, '深圳市',  14997, '南山区', '深圳湾创业广场', '深圳湾创业广场', '广东省深圳市南山区学府路与科园路交汇处', NULL, '软件产业基地位于深圳高新区南区核心地带，是深圳“十二五”规划建设的战略性新兴产业集聚区重点项目之一。用地面积12.30万平方米，建筑形态为18栋2-28层单体建筑，总建筑面积62.84万平方米，包括研发办公37.52万平方米、宿舍5.86万', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 2117, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 999987);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
