@@ -87,6 +87,7 @@ import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.VideoManufacturerType;
 import com.everhomes.rest.activity.VideoState;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -2419,7 +2420,6 @@ public class ActivityServiceImpl implements ActivityService {
             video.setManufacturerType(VideoManufacturerType.YZB.toString());
             video.setRoomType(ActivityVideoRoomType.YZB.toString());
             video.setStartTime(System.currentTimeMillis());
-            video.setIntegralTag1(0l);
             video.setOwnerType("activity");
             video.setOwnerId(cmd.getActivityId());
             activityVideoProvider.createActivityVideo(video);
@@ -2484,6 +2484,42 @@ public class ActivityServiceImpl implements ActivityService {
            }
            
        }
+   }
+   
+   @Override 
+   public void onVideoDeviceChange(YzbVideoDeviceChangeCommand cmd) {
+       LOGGER.info("video ondevicechange=" + cmd);
+       if(cmd.getDevid() == null) {
+           return;
+       }
+       
+       YzbDevice device = yzbDeviceProvider.findYzbDeviceById(cmd.getDevid());
+       if(device == null) {
+       return;    
+       }
+       
+       if(cmd.getOptcode().equals("livestart")) {
+           if(device.getState().equals(VideoState.UN_READY.getCode())) {
+               ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(device.getRelativeId());
+               LOGGER.info("video ondevicechange, video=" + video);
+               if(video != null && video.getIntegralTag1().equals(1l) && cmd.getVid() != null && !cmd.getVid().isEmpty()) {
+                   video.setVideoSid(cmd.getVid());
+                   video.setVideoState(VideoState.LIVE.getCode());
+                   activityVideoProvider.updateActivityVideo(video);
+                   
+                   if(!device.getState().equals(VideoState.LIVE.getCode())) {
+                       device.setState(VideoState.LIVE.getCode());
+                       yzbDeviceProvider.updateYzbDevice(device);
+                   }
+                   
+               }
+           }     
+       } else if(cmd.getOptcode().equals("livestop")) {
+           device.setState(VideoState.UN_READY.getCode());
+           yzbDeviceProvider.updateYzbDevice(device);
+           LOGGER.info("video livestop");
+       }
+      
    }
    
    private void fixupVideoInfo(ActivityDTO dto) {
