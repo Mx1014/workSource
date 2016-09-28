@@ -132,10 +132,12 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		notifyMap.put("creatorMobile", creatorMobile);
 		notifyMap.put("note", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-        
+		
+		String creatorOrganization = "";
 		if(org != null) {
-			notifyMap.put("creatorOrganization", org.getName());
+			creatorOrganization = org.getName();
 		}
+		notifyMap.put("creatorOrganization", creatorOrganization);
 			
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
