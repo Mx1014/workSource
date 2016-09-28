@@ -19,6 +19,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhNewsCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhNewsDao;
 import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.util.ConvertHelper;
@@ -122,5 +123,14 @@ public class NewsProviderImpl implements NewsProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+
+
+	@Override
+	public NewsCategory findNewsCategoryById(Long categoryId) { 
+		assert(categoryId != null);
+		EhNewsCategoriesDao dao = new EhNewsCategoriesDao(getReadOnlyContext().configuration());
+		return ConvertHelper.convert(dao.findById(categoryId), NewsCategory.class);
 	}
 }

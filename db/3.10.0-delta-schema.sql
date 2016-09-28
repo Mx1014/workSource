@@ -490,3 +490,12 @@ CREATE TABLE `eh_settle_requests` (
 
 -- 给打卡时间设置增加一天临界时间 by wh 2016-9-22
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `day_split_time` TIME DEFAULT '05:00:00' COMMENT 'the time a day begin';
+
+-- 给快讯类型增加默认封面图
+ALTER TABLE `eh_news_categories` ADD COLUMN `logo_uri` VARCHAR(1024) COMMENT 'default cover uri';
+
+-- 加默认值 by xiongying20160928
+ALTER TABLE eh_service_alliance_requests MODIFY creator_name VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_service_alliance_requests MODIFY creator_mobile VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_settle_requests MODIFY creator_name VARCHAR(128) DEFAULT NULL;
+ALTER TABLE eh_settle_requests MODIFY creator_mobile VARCHAR(128) DEFAULT NULL;

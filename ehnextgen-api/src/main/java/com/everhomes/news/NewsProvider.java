@@ -19,4 +19,6 @@ public interface NewsProvider {
 
 	List<News> findAllActiveNewsByPage(Long from, Integer pageSize);
 
+	NewsCategory findNewsCategoryById(Long categoryId);
+
 }

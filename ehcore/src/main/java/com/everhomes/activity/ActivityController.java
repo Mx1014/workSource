@@ -43,6 +43,7 @@ import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -292,6 +293,21 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=ActivityVideoDTO.class)
     public RestResponse setActivityVideoInfo(@Valid SetActivityVideoInfoCommand cmd) {
         RestResponse response = new RestResponse(activityService.setActivityVideo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/devicechange</b>
+     * <p>更新直播信息</p>
+     */
+    @RequestMapping("devicechange")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse videoDeviceChange(@Valid YzbVideoDeviceChangeCommand cmd) {
+        activityService.onVideoDeviceChange(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
