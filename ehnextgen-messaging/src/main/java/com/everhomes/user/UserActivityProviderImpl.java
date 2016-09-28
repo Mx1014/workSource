@@ -834,7 +834,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
 		assert(attachment.getOwnerId() != null);
         
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhRequestAttachments.class, attachment.getOwnerId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRequestAttachments.class));
         attachment.setId(id);
         attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
