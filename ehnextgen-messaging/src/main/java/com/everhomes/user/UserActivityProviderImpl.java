@@ -28,6 +28,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionEquipments;
+import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
@@ -76,6 +77,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
+import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
 import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
 import com.everhomes.server.schema.tables.records.EhRequestAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
@@ -614,18 +616,45 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 	public List<UserPost> listPostedTopics(Long uid, String targetType, 
 			CrossShardListingLocator locator, int count) {
 		
-		if (locator.getAnchor() == null) {
-            locator.setAnchor(0L);
-        }
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
-        List<UserPost> posts = new ArrayList<UserPost>();
+	    // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+	    // 也就是下一页和第一页取得的结果是一样的，需要倒排着查 by lqs 20160928
+//		if (locator.getAnchor() == null) {
+//            locator.setAnchor(0L);
+//        }
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+//        List<UserPost> posts = new ArrayList<UserPost>();
+//        
+//        context.select().from(Tables.EH_USER_POSTS).where(Tables.EH_USER_POSTS.OWNER_UID.eq(uid))
+//        .and(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType)).and(Tables.EH_USER_POSTS.ID.ge(locator.getAnchor()))
+//        .limit(count).fetch().forEach(p -> {
+//        	UserPost post = ConvertHelper.convert(p, UserPost.class);
+//        	posts.add(post);
+//        });
         
-        context.select().from(Tables.EH_USER_POSTS).where(Tables.EH_USER_POSTS.OWNER_UID.eq(uid))
-        .and(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType)).and(Tables.EH_USER_POSTS.ID.ge(locator.getAnchor()))
-        .limit(count).fetch().forEach(p -> {
-        	UserPost post = ConvertHelper.convert(p, UserPost.class);
-        	posts.add(post);
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        SelectQuery<EhUserPostsRecord> query = context.selectQuery(Tables.EH_USER_POSTS);
+        query.addConditions(Tables.EH_USER_POSTS.OWNER_UID.eq(uid));
+        query.addConditions(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType));
+        
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+        }
+        
+        query.addOrderBy(Tables.EH_USER_POSTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query user posted topics by count, sql=" + query.getSQL());
+            LOGGER.debug("Query user posted topics, bindValues=" + query.getBindValues());
+        }
+        
+        List<UserPost> posts = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, UserPost.class);
         });
+        
+        if(posts.size() > 0) {
+            locator.setAnchor(posts.get(posts.size() -1).getId());
+        }
         
         return posts;
 	}
