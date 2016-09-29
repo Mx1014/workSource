@@ -31,6 +31,7 @@ import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.GetVideoCapabilityCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
@@ -43,6 +44,7 @@ import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
@@ -307,6 +309,19 @@ public class ActivityController extends ControllerBase {
     @RequireAuthentication(false)
     public RestResponse videoDeviceChange(@Valid YzbVideoDeviceChangeCommand cmd) {
         activityService.onVideoDeviceChange(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/getVideoCapability</b>
+     * <p>获取直播的能力</p>
+     */
+    @RequestMapping("getVideoCapability")
+    @RestReturn(value=VideoCapabilityResponse.class)
+    public RestResponse getVideoCapability(@Valid GetVideoCapabilityCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
