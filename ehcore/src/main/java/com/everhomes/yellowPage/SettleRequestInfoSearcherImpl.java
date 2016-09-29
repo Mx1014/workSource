@@ -21,6 +21,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +159,13 @@ private static final Logger LOGGER = LoggerFactory.getLogger(SettleRequestInfoSe
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
         
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
+        }
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("SettleRequestInfoSearcherImpl query builder ："+builder);
+        
         SearchResponse rsp = builder.execute().actionGet();
         SearchRequestInfoResponse response = new SearchRequestInfoResponse();
         List<RequestInfoDTO> dtos = getDTOs(rsp);
@@ -179,6 +188,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(SettleRequestInfoSe
             b.field("ownerId", request.getOwnerId());
             b.field("creatorName", request.getCreatorName());
             b.field("creatorMobile", request.getCreatorMobile());
+            b.field("createTime", request.getCreateTime().getTime());
             String d = format.format(request.getCreateTime().getTime());  
             try {
 				Date date=format.parse(d);

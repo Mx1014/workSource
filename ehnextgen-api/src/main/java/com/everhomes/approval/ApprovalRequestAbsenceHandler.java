@@ -252,8 +252,8 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					//0. 计算每天的实际时长
 					calculateEverydayResultTime(userId, punchRule, punchTimeRule, fromTime, endTime, approvalDayActualTimeList);
 					//1. 格式化起止时间，如果小于最晚上班时间，则以最晚上班时间计算，如果大于最早下班时间，则以最早下班时间计算，分别记为fromTime, endTime
-					fromTime = formatFromTime(a.getFromTime(), punchTimeRule.getStartLateTime());
-					endTime = formatEndTime(a.getEndTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()));
+					fromTime = formatTime(a.getFromTime(), punchTimeRule.getStartLateTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime())); //formatFromTime(a.getFromTime(), punchTimeRule.getStartLateTime());
+					endTime = formatTime(a.getEndTime(), punchTimeRule.getStartLateTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime())); //formatEndTime(a.getEndTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()));
 					//2. 计算午休时间差, 记为deltaNoonRestTime
 					long deltaNoonRestTime = punchTimeRule.getAfternoonArriveTime().getTime() - punchTimeRule.getNoonLeaveTime().getTime();
 					//3. 计算最早下班时间与最晚上班时间的时间差并扣除午休时间，记为deltaWorkTime
@@ -458,6 +458,29 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}
 	}
 
+	//不管对于开始时间还是结束时间，都需要格式化，如果小于最晚上班时间则格式化最晚上班时间，如果大于最早下班时间则格式化为最早下班时间
+	private Date formatTime(Long time, Time startLateTime, Time endEarlyTime) {
+		if (Time.valueOf(timeSF.format(new Date(time))).getTime() < startLateTime.getTime()) {
+			try {
+				return datetimeSF.parse(dateSF.format(new Date(time)) + " " + timeSF.format(startLateTime));
+			} catch (ParseException e) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"format time error");
+			}
+		}
+		
+		if (Time.valueOf(timeSF.format(new Date(time))).getTime() > endEarlyTime.getTime()) {
+			try {
+				return datetimeSF.parse(dateSF.format(new Date(time)) + " " + timeSF.format(endEarlyTime));
+			} catch (ParseException e) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"format end time error");
+			}
+		}
+		
+		return new Date(time);
+	}
+	
 	private Date formatFromTime(Long fromTime, Time startLateTime) {
 		if (Time.valueOf(timeSF.format(new Date(fromTime))).getTime() < startLateTime.getTime()) {
 			try {
