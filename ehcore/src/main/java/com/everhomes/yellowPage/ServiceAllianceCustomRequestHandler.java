@@ -118,21 +118,26 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
+		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
+		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
+		String categoryName = (category.getName() == null) ? "" : category.getName();
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
 		String locale = "zh_CN";
 		
 		Map<String, Object> notifyMap = new HashMap<String, Object>();
-		notifyMap.put("categoryName", category.getName());
-		notifyMap.put("creatorName", request.getCreatorName());
-		notifyMap.put("creatorMobile", request.getCreatorMobile());
+		notifyMap.put("categoryName", categoryName);
+		notifyMap.put("creatorName", creatorName);
+		notifyMap.put("creatorMobile", creatorMobile);
 		notifyMap.put("note", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-        
+		
+		String creatorOrganization = "";
 		if(org != null) {
-			notifyMap.put("creatorOrganization", org.getName());
+			creatorOrganization = org.getName();
 		}
+		notifyMap.put("creatorOrganization", creatorOrganization);
 			
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");

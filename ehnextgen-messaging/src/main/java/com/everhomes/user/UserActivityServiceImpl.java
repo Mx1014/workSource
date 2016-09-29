@@ -597,16 +597,20 @@ public class UserActivityServiceImpl implements UserActivityService {
             return response;
         }
         
-        if(result.size() > pageSize) {
-        	locator.setAnchor(result.get(result.size() - 1).getId());
-        	result = result.subList(0, result.size() - 1);
-        } else {
-        	locator.setAnchor(null);
-        }
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后anchor的设置在provider里 by lqs 20160928
+//        if(result.size() > pageSize) {
+//        	locator.setAnchor(result.get(result.size() - 1).getId());
+//        	result = result.subList(0, result.size() - 1);
+//        } else {
+//        	locator.setAnchor(null);
+//        }
         
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
-        Collections.sort(ids);
-        Collections.reverse(ids);
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928        
+//        Collections.sort(ids);
+//        Collections.reverse(ids);
         List<PostDTO> posts = forumService.getTopicById(ids, cmd.getCommunityId(), false, true);
         
         Long nextPageAnchor = locator.getAnchor();
@@ -987,18 +991,22 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (CollectionUtils.isEmpty(result)) {
             return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
         }
-        
-        if(result.size() > pageSize) {
-        	locator.setAnchor(result.get(result.size() - 1).getId());
-        	result = result.subList(0, result.size() - 1);
-        } else {
-        	locator.setAnchor(null);
-        }
+
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后anchor的设置在provider里 by lqs 20160928
+//        if(result.size() > pageSize) {
+//        	locator.setAnchor(result.get(result.size() - 1).getId());
+//        	result = result.subList(0, result.size() - 1);
+//        } else {
+//        	locator.setAnchor(null);
+//        }
         
         Long nextPageAnchor = locator.getAnchor();
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
-        Collections.sort(ids);
-        Collections.reverse(ids);
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928   
+//        Collections.sort(ids);
+//        Collections.reverse(ids);
         List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
         for(Long postId : ids) {
         	Activity activity =  activityProivider.findSnapshotByPostId(postId);
