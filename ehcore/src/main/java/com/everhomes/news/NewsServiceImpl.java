@@ -182,6 +182,15 @@ public class NewsServiceImpl implements NewsService {
 					"Invalid parameters");
 		}
 	}
+	
+	private void checkNewsParameterOfImport(Long userId, CreateNewsCommand cmd) {
+		if (StringUtils.isEmpty(cmd.getTitle()) || StringUtils.isEmpty(cmd.getContent())) {
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR,
+					"Invalid parameters");
+		}
+	}
 
 	private Organization checkOwner(Long userId, Long ownerId, String ownerType) {
 		if (ownerId == null || StringUtils.isEmpty(ownerType)) {
@@ -263,14 +272,15 @@ public class NewsServiceImpl implements NewsService {
 					command.setSourceDesc(sourceDesc);
 					command.setSourceUrl(sourceUrl);
 					command.setCategoryId(cmd.getCategoryId());
-					checkNewsParameter(userId, command);
+					checkNewsParameterOfImport(userId, command);
 					newsList.add(processNewsCommand(userId, namespaceId, command));
 				}
 			}
 			return newsList;
 		}
 		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+				NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR,
 				"excel data format is not correct");
 	}
 
@@ -284,7 +294,8 @@ public class NewsServiceImpl implements NewsService {
 			return date.getTime();
 		} catch (ParseException e) {
 			LOGGER.error("date format error, date: " + string);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR,
 					"date format error, date: " + string);
 		}
 	}
