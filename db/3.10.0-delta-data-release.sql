@@ -650,5 +650,5 @@ UPDATE `eh_web_menu_scopes` SET `apply_policy` = '0' WHERE (`menu_id` = '36000')
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49700,'', 'EhNamespaces', 999999,2);
 
--- 园区快讯不要默认图片 by xiongying20160929
-update eh_news_categories set logo_uri = '';
+-- 园区快讯换默认图片 by xiongying20160929
+update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvNU1qRmtOamxtT0dJMU5qRmpNVGhqT1RZM1lUSTBOelZrTVRFeE9UVXlPQQ';
