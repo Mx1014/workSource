@@ -1399,6 +1399,7 @@ public class ForumServiceImpl implements ForumService {
     
     private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
     	User user = UserContext.current().getUser();
+        Long userId = user.getId();
     	
     	Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
         
@@ -1459,6 +1460,15 @@ public class ForumServiceImpl implements ForumService {
         		}
         	}
         	
+        	//添加用户是否收藏，add by tt, 20160928
+        	List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), r.getId());
+            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), r.getId());
+            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
+            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            } else {
+            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+            }
+            
           return dto;  
         }).collect(Collectors.toList());
     }

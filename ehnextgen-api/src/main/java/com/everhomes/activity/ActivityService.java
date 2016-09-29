@@ -32,6 +32,7 @@ import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
@@ -108,5 +109,7 @@ public interface ActivityService {
     void createScheduleForActivity(Activity act);
 
     void onActivityFinished(Long activityId, Long endTime);
+
+    void onVideoDeviceChange(YzbVideoDeviceChangeCommand cmd);
 
 }

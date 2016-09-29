@@ -336,6 +336,11 @@ public class NewsServiceImpl implements NewsService {
 		if (!isScene) {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());
 		}
+		if(newsDTO.getCoverUri() == null ){
+			NewsCategory category = this.newsProvider.findNewsCategoryById(news.getCategoryId());
+			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(), UserContext.current()
+				.getUser().getId()));
+		}
 		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		
 		return newsDTO;
@@ -481,7 +486,13 @@ public class NewsServiceImpl implements NewsService {
 		newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		newsDTO.setContent(null);
 		newsDTO.setContentUrl(getContentUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
-		newsDTO.setCoverUri(news.getCoverUri());
+		if(news.getCoverUri() != null)
+			newsDTO.setCoverUri(news.getCoverUri());
+		else{
+			NewsCategory category = this.newsProvider.findNewsCategoryById(news.getCategoryId());
+			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(), UserContext.current()
+				.getUser().getId()));
+		}
 		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
 		return newsDTO;
