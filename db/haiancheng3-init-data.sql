@@ -3537,5 +3537,8 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES(1113798, 240111044331054835, 'organization', 1004927, 3, 0, UTC_TIMESTAMP());
 
+-- 物业缴费 初始数据
+INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) 
+	VALUES ('1', '0', '240111044331054835', '00100120131200000015', '075523685550', '<p>请在每月20日之前及时缴纳上月费用，否则将产生滞纳金。</p>');
 
 

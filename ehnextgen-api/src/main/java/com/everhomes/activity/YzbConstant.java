@@ -8,8 +8,8 @@ public interface YzbConstant {
     //http://video.zuolin.com/evh/api/activity/devicechange?optcode=livestart&devid=98877787&yzb_user_id=98826894&vid=R0lKuxjprrsrgV&app_nonce=1106876739
     public final static String YZB_SERVER_DEFAULT = "http://hzgate.boreyun.cn";
     public final static String YZB_SERVER = "yzb.video.server";
-    public final static String START_LIVE = "/hzapi/startlive";
-    public final static String SET_CONTINUE = "/hzapi/setcontinue";
+    public final static String START_LIVE = "hzapi/startlive";
+    public final static String SET_CONTINUE = "hzapi/setcontinue";
     
     public final static String SCHEDULE_TARGET_NAME = "video-cron-";
 }
