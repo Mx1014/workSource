@@ -652,3 +652,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 -- 园区快讯换默认图片 by xiongying20160929
 update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvNU1qRmtOamxtT0dJMU5qRmpNVGhqT1RZM1lUSTBOelZrTVRFeE9UVXlPQQ';
+
+-- 科技园广场icon改成可删的 by xiongying20160929
+update eh_launch_pad_items set delete_flag = 1 where id in(813,10309,10170,10171,818,10313,816,10311,819,10314,814,10310,812,817,10308,10312,820,10315,833,10322,832,10321,111304,12928,111303,110047,914,915) and namespace_id = 1000000 and item_group = 'Bizs';
