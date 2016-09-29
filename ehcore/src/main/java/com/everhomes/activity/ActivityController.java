@@ -305,7 +305,7 @@ public class ActivityController extends ControllerBase {
      * <b>URL: /activity/devicechange</b>
      * <p>更新直播信息</p>
      */
-    @RequestMapping("api/devicechange")
+    @RequestMapping("devicechange")
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
     public RestResponse videoDeviceChange(@Valid YzbVideoDeviceChangeCommand cmd) {
