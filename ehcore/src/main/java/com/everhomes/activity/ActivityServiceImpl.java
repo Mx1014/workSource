@@ -2317,6 +2317,8 @@ public class ActivityServiceImpl implements ActivityService {
             //default, use device
 	        video.setRoomId(cmd.getRoomId());
 	        video.setIntegralTag1(1l);
+	        video.setVideoState(VideoState.UN_READY.getCode());
+	        video.setVideoSid("");
 	        
 	        YzbDevice device = null;
 	        YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
@@ -2372,48 +2374,27 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	            
 	        }
-
-            //MUST set continue before got a live response
-            yzbVideoService.setContinue(cmd.getRoomId(), 1);
-            YzbLiveVideoResponse liveResp = yzbVideoService.startLive(cmd.getRoomId());
-            if(liveResp == null || !liveResp.getRetval().equals("EOK")) {
-                LOGGER.error("yzb got resp=" + liveResp);
-                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                        ActivityServiceErrorCode.ERROR_VIDEO_SERVER_ERROR, "video server error");
-            }
-            String url = liveResp.getRetinfo().getDstexkey();
-            String vid = url.substring(url.lastIndexOf("/")+1, url.length());
-            
-	        if(setContinue) {
-	            device.setState(VideoState.LIVE.getCode());
-	            video.setVideoState(VideoState.LIVE.getCode());
-	        } else {
-               LOGGER.warn("new live video stream, restart the device and try again");
-               if(vid.equals(device.getLastVid())) {
-                   LOGGER.warn("have to restart the device to get last correct vid");
-                   yzbVideoService.setContinue(cmd.getRoomId(), 0);
-                   device.setState(VideoState.UN_READY.getCode());
-                   video.setVideoState(VideoState.UN_READY.getCode());
-               } else {
-                   device.setState(VideoState.LIVE.getCode());
-                   video.setVideoState(VideoState.LIVE.getCode());
-                   setContinue = true;
-               }
-	        }
-	        
-            video.setVideoSid(vid);
-            rmtp = url;
-            
-            device.setLastVid(vid);
-            device.setRelativeId(cmd.getActivityId());
-            yzbDeviceProvider.updateYzbDevice(device); 
 	        
             ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
             if(oldVideo != null) {
                 //new activity, delete the old one
                 oldVideo.setVideoState(VideoState.INVALID.getCode());
                 activityVideoProvider.updateActivityVideo(oldVideo);
+                
+                video.setVideoSid(oldVideo.getVideoSid());
+                video.setVideoState(oldVideo.getVideoState());
             }
+            
+            if(setContinue) {
+                //continue use old vid
+                yzbVideoService.setContinue(cmd.getRoomId(), 1);
+            } else {
+                //start new vid
+               yzbVideoService.setContinue(cmd.getRoomId(), 0);
+            }
+            
+            device.setRelativeId(cmd.getActivityId());
+            yzbDeviceProvider.updateYzbDevice(device); 
             
             User user = UserContext.current().getUser();
             video.setCreatorUid(user.getId());
