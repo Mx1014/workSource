@@ -45,6 +45,7 @@ import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
+import com.everhomes.rest.activity.VideoSupportType;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
@@ -322,7 +323,9 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("getVideoCapability")
     @RestReturn(value=VideoCapabilityResponse.class)
     public RestResponse getVideoCapability(@Valid GetVideoCapabilityCommand cmd) {
-        RestResponse response = new RestResponse();
+        VideoCapabilityResponse obj = new VideoCapabilityResponse();
+        obj.setVideoSupportType(VideoSupportType.VIDEO_BOTH.getCode());
+        RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
