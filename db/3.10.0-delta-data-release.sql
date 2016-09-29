@@ -659,4 +659,4 @@ update eh_launch_pad_items set delete_flag = 1 where id in(813,10309,10170,10171
 
 -- 修改新闻导入Excel出错的错误提示, add by tt, 20160929
 update eh_locale_strings set text = '文件格式不正确，上传失败' where scope = 'news' and code = '10007';
->>>>>>> 6eb677434fcfa75f7184ef6b74a13012653c7bd4
+
