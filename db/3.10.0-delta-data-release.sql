@@ -649,3 +649,6 @@ UPDATE `eh_web_menu_scopes` SET `apply_policy` = '0' WHERE (`menu_id` = '36000')
 -- 园区简介 讯美 by sfyan 20160922
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49700,'', 'EhNamespaces', 999999,2);
+
+-- 园区快讯不要默认图片 by xiongying20160929
+update eh_news_categories set logo_uri = '';
