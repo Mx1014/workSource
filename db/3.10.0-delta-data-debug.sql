@@ -242,7 +242,4 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 	VALUES ('10', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '1000000');
 
 -- 修改新闻导入Excel出错的错误提示, add by tt, 20160929
-update eh_locale_strings
-set text = '文件格式不正确，上传失败'
-where scope = 'news'
-and code = '10007';
+update eh_locale_strings set text = '文件格式不正确，上传失败' where scope = 'news' and code = '10007';
