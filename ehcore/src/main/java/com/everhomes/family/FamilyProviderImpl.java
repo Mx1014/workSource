@@ -2,31 +2,6 @@
 package com.everhomes.family;
 
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.hibernate.type.descriptor.java.CalendarTypeDescriptor.CalendarMutabilityPlan;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -45,7 +20,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -54,8 +28,8 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.organization.BillTransactionResult;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
@@ -74,6 +48,19 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 
 
@@ -178,8 +165,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 							}
 						}
 						//删除正常家庭成员，成员数-1
-	                    if(m.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
-	                        family.setMemberCount(family.getMemberCount() - 1);
+	                    if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
+                            long memberCount = family.getMemberCount() - 1;
+                            family.setMemberCount(memberCount >= 0 ? memberCount : 0);
 	                    }
 						this.groupProvider.updateGroup(family);
 					}
