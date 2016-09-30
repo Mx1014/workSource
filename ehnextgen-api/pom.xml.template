@@ -146,8 +146,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
-			<artifactId>${ooxml-security.version}</artifactId>
-			<version>1.1</version>
+			<artifactId>ooxml-security</artifactId>
+			<version>${ooxml-security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
