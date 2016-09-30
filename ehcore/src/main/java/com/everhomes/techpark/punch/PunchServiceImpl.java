@@ -727,12 +727,12 @@ public class PunchServiceImpl implements PunchService {
 				if (dateSF.format(now).equals(
 								dateSF.format(logDay.getTime()))) {
 					//今天的话,exception
-					pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
+					pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 				 
 					return pdl;
 				}
-				pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				makeExceptionForDayList(userId, companyId, logDay, pdl);
 				return pdl;
