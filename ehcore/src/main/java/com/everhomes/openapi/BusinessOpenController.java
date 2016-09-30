@@ -55,6 +55,7 @@ import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.openapi.ValidateUserPassCommand;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -668,5 +669,18 @@ public class BusinessOpenController extends ControllerBase {
         }
         
         return new RestResponse();
+    }
+    
+    /**
+     * <b>URL: /openapi/validateUserPass</b>
+     */
+    @RequestMapping("validateUserPass")
+    @RestReturn(value=UserInfo.class)
+    public RestResponse validateUserPass(@Valid ValidateUserPassCommand cmd) {
+    	UserInfo user = businessService.validateUserPass(cmd);
+    	RestResponse response = new RestResponse(user);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 }
