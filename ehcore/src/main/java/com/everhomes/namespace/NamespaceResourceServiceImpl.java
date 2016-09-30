@@ -87,6 +87,10 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 		List<CommunityDTO> communityList = communityProvider.listCommunitiesByType(communityIds, cmd.getCommunityType(), locator, pageSize);		
         response.setCommunities(communityList);
         
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List communtiies by namespace, namespaceId={}, communityIds={}, cmd={}", namespaceId, communityIds, cmd);
+        }
+        
         return response;
     }
 	
