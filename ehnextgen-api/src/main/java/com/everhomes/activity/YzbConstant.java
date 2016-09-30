@@ -12,4 +12,7 @@ public interface YzbConstant {
     public final static String SET_CONTINUE = "hzapi/setcontinue";
     
     public final static String SCHEDULE_TARGET_NAME = "video-cron-";
+    public final static String VIDEO_OFFICIAL_SUPPORT = "video.official.support";
+    public final static String VIDEO_NONE_OFFICIAL_SUPPORT = "video.none_official.support";
+    public final static String VIDEO_NORMAL_SUPPORT = "video.normal.support";
 }

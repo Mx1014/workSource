@@ -323,9 +323,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("getVideoCapability")
     @RestReturn(value=VideoCapabilityResponse.class)
     public RestResponse getVideoCapability(@Valid GetVideoCapabilityCommand cmd) {
-        VideoCapabilityResponse obj = new VideoCapabilityResponse();
-        obj.setVideoSupportType(VideoSupportType.VIDEO_BOTH.getCode());
-        RestResponse response = new RestResponse(obj);
+        RestResponse response = new RestResponse(activityService.getVideoCapability(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
