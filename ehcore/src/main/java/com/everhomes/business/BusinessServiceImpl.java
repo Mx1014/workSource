@@ -2117,7 +2117,7 @@ public class BusinessServiceImpl implements BusinessService {
 	
 	@Override
 	public UserInfo validateUserPass(ValidateUserPassCommand cmd) {
-		//this.verifyVerifyUserPassCommand(cmd);
+		this.verifyVerifyUserPassCommand(cmd);
 		ListUserByIdentifierCommand listUserCmd = new ListUserByIdentifierCommand();
 		listUserCmd.setIdentifier(cmd.getUserIdentifier());
 		List<UserInfo> users = listUserByIdentifier(listUserCmd);
@@ -2138,5 +2138,22 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		return null;
 	}
-
+	
+	private void verifyVerifyUserPassCommand(ValidateUserPassCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			LOGGER.error("namespaceId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"namespaceId is null");
+		}
+		if(StringUtils.isEmpty(cmd.getUserIdentifier())) {
+			LOGGER.error("userIdentitier is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"userIdentitier is null");
+		}
+		if(StringUtils.isEmpty(cmd.getPassword())) {
+			LOGGER.error("password is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"password is null");
+		}
+	}
 }
