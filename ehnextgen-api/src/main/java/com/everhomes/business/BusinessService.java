@@ -42,6 +42,7 @@ import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.openapi.ValidateUserPassCommand;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -101,4 +102,5 @@ public interface BusinessService {
 	Integer findUserOrderCount(UserCouponsCommand cmd);
 	void updateUserOrderCount(UpdateUserOrderCountCommand cmd);
 	List<RegionDTO> listRegion(ListRegionCommand cmd);
+	UserInfo validateUserPass(ValidateUserPassCommand cmd);
 }
