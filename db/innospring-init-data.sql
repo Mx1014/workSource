@@ -25,7 +25,7 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (233082  , UUID(), '9202013', 'innospring', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (228015 , 233082  ,  '0',  '18051307125',  '221616',  3, UTC_TIMESTAMP(), 999986);
+	VALUES (228615 , 233082  ,  '0',  '18051307125',  '221616',  3, UTC_TIMESTAMP(), 999986);
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
 	VALUES ('15102', '11982', '崇川区', 'CHONGCHUANQU', 'CCQ', '/江苏/南通市/崇川区', '3', '3', NULL, '0513', '2', '0', '0');
@@ -35,7 +35,7 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES(1112511, 240111044331054735, 'organization', 1004140, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2111453, 1004140, 'USER', 233082  , 'manager', 'innospring', 0, '18051307125', 3, 999986);	
+	VALUES(2111953, 1004140, 'USER', 233082  , 'manager', 'innospring', 0, '18051307125', 3, 999986);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(11668, 'EhOrganizations', 1004140, 'EhUsers', 233082  , 1001, 1, UTC_TIMESTAMP());
