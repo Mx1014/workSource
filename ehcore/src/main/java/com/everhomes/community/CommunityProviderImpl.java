@@ -14,6 +14,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -1060,10 +1061,14 @@ public class CommunityProviderImpl implements CommunityProvider {
 	        		if(null != locator.getAnchor()){
 	        			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
 	        		}
-	            context.select().from(Tables.EH_COMMUNITIES)
-	                .where(cond)
-	                .limit(pageSize)
-	                .fetch().map((r) -> {
+	        		SelectOffsetStep<Record> query = context.select().from(Tables.EH_COMMUNITIES)
+	        		    .where(cond).limit(pageSize);
+	        		if(LOGGER.isDebugEnabled()) {
+	                    LOGGER.debug("Query communities by type, sql=" + query.getSQL());
+	                    LOGGER.debug("Query communities by type, bindValues=" + query.getBindValues());
+	                }
+	        		
+	                query.fetch().map((r) -> {
 	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
 	                results.add(community);
 	                locator.setAnchor(null);
