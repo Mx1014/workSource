@@ -1905,253 +1905,253 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	VALUES (25151, 1004140, 240111044331054735, 239825274387125685, '9幢-806', '0');
 
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004670, UUID(), '南通崇川区布艺乐乎家纺设计工作室', '南通崇川区布艺乐乎家纺设计工作室', 1, 1, 1004672, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183134, 1, 999986);
+	VALUES (1005939, UUID(), '南通崇川区布艺乐乎家纺设计工作室', '南通崇川区布艺乐乎家纺设计工作室', 1, 1, 1006053, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184391, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183134, UUID(), 999986, 2, 'EhGroups', 1004670,'南通崇川区布艺乐乎家纺设计工作室','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184391, UUID(), 999986, 2, 'EhGroups', 1005939,'南通崇川区布艺乐乎家纺设计工作室','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004672, 0, 'ENTERPRISE', '南通崇川区布艺乐乎家纺设计工作室', 0, '', '/1004672', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006053, 0, 'ENTERPRISE', '南通崇川区布艺乐乎家纺设计工作室', 0, '', '/1006053', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113543, 240111044331054735, 'organization', 1004672, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114899, 240111044331054735, 'organization', 1006053, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004671, UUID(), '南通泽阳智能科技有限公司', '南通泽阳智能科技有限公司', 1, 1, 1004673, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183135, 1, 999986);
+	VALUES (1005940, UUID(), '南通泽阳智能科技有限公司', '南通泽阳智能科技有限公司', 1, 1, 1006054, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184392, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183135, UUID(), 999986, 2, 'EhGroups', 1004671,'南通泽阳智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184392, UUID(), 999986, 2, 'EhGroups', 1005940,'南通泽阳智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004673, 0, 'ENTERPRISE', '南通泽阳智能科技有限公司', 0, '', '/1004673', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006054, 0, 'ENTERPRISE', '南通泽阳智能科技有限公司', 0, '', '/1006054', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113544, 240111044331054735, 'organization', 1004673, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114900, 240111044331054735, 'organization', 1006054, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004672, UUID(), '南通华建智能科技有限公司', '南通华建智能科技有限公司', 1, 1, 1004674, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183136, 1, 999986);
+	VALUES (1005941, UUID(), '南通华建智能科技有限公司', '南通华建智能科技有限公司', 1, 1, 1006055, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184393, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183136, UUID(), 999986, 2, 'EhGroups', 1004672,'南通华建智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184393, UUID(), 999986, 2, 'EhGroups', 1005941,'南通华建智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004674, 0, 'ENTERPRISE', '南通华建智能科技有限公司', 0, '', '/1004674', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006055, 0, 'ENTERPRISE', '南通华建智能科技有限公司', 0, '', '/1006055', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113545, 240111044331054735, 'organization', 1004674, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114901, 240111044331054735, 'organization', 1006055, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004673, UUID(), '南通新华传媒有限公司', '南通新华传媒有限公司', 1, 1, 1004675, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183137, 1, 999986);
+	VALUES (1005942, UUID(), '南通新华传媒有限公司', '南通新华传媒有限公司', 1, 1, 1006056, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184394, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183137, UUID(), 999986, 2, 'EhGroups', 1004673,'南通新华传媒有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184394, UUID(), 999986, 2, 'EhGroups', 1005942,'南通新华传媒有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004675, 0, 'ENTERPRISE', '南通新华传媒有限公司', 0, '', '/1004675', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006056, 0, 'ENTERPRISE', '南通新华传媒有限公司', 0, '', '/1006056', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113546, 240111044331054735, 'organization', 1004675, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114902, 240111044331054735, 'organization', 1006056, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004674, UUID(), '江苏益美智能科技有限公司', '江苏益美智能科技有限公司', 1, 1, 1004676, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183138, 1, 999986);
+	VALUES (1005943, UUID(), '江苏益美智能科技有限公司', '江苏益美智能科技有限公司', 1, 1, 1006057, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184395, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183138, UUID(), 999986, 2, 'EhGroups', 1004674,'江苏益美智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184395, UUID(), 999986, 2, 'EhGroups', 1005943,'江苏益美智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004676, 0, 'ENTERPRISE', '江苏益美智能科技有限公司', 0, '', '/1004676', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006057, 0, 'ENTERPRISE', '江苏益美智能科技有限公司', 0, '', '/1006057', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113547, 240111044331054735, 'organization', 1004676, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114903, 240111044331054735, 'organization', 1006057, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004675, UUID(), '江苏全通工程技术有限公司', '江苏全通工程技术有限公司', 1, 1, 1004677, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183139, 1, 999986);
+	VALUES (1005944, UUID(), '江苏全通工程技术有限公司', '江苏全通工程技术有限公司', 1, 1, 1006058, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184396, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183139, UUID(), 999986, 2, 'EhGroups', 1004675,'江苏全通工程技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184396, UUID(), 999986, 2, 'EhGroups', 1005944,'江苏全通工程技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004677, 0, 'ENTERPRISE', '江苏全通工程技术有限公司', 0, '', '/1004677', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006058, 0, 'ENTERPRISE', '江苏全通工程技术有限公司', 0, '', '/1006058', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113548, 240111044331054735, 'organization', 1004677, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114904, 240111044331054735, 'organization', 1006058, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004676, UUID(), '上海泛微网络科技股份有限公司', '上海泛微网络科技股份有限公司', 1, 1, 1004678, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183140, 1, 999986);
+	VALUES (1005945, UUID(), '上海泛微网络科技股份有限公司', '上海泛微网络科技股份有限公司', 1, 1, 1006059, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184397, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183140, UUID(), 999986, 2, 'EhGroups', 1004676,'上海泛微网络科技股份有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184397, UUID(), 999986, 2, 'EhGroups', 1005945,'上海泛微网络科技股份有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004678, 0, 'ENTERPRISE', '上海泛微网络科技股份有限公司', 0, '', '/1004678', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006059, 0, 'ENTERPRISE', '上海泛微网络科技股份有限公司', 0, '', '/1006059', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113549, 240111044331054735, 'organization', 1004678, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114905, 240111044331054735, 'organization', 1006059, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004677, UUID(), '南通车安电子科技有限公司', '南通车安电子科技有限公司', 1, 1, 1004679, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183141, 1, 999986);
+	VALUES (1005946, UUID(), '南通车安电子科技有限公司', '南通车安电子科技有限公司', 1, 1, 1006060, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184398, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183141, UUID(), 999986, 2, 'EhGroups', 1004677,'南通车安电子科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184398, UUID(), 999986, 2, 'EhGroups', 1005946,'南通车安电子科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004679, 0, 'ENTERPRISE', '南通车安电子科技有限公司', 0, '', '/1004679', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006060, 0, 'ENTERPRISE', '南通车安电子科技有限公司', 0, '', '/1006060', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113550, 240111044331054735, 'organization', 1004679, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114906, 240111044331054735, 'organization', 1006060, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004678, UUID(), '中国民族建筑研究会建筑装饰研究院', '中国民族建筑研究会建筑装饰研究院', 1, 1, 1004680, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183142, 1, 999986);
+	VALUES (1005947, UUID(), '中国民族建筑研究会建筑装饰研究院', '中国民族建筑研究会建筑装饰研究院', 1, 1, 1006061, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184399, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183142, UUID(), 999986, 2, 'EhGroups', 1004678,'中国民族建筑研究会建筑装饰研究院','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184399, UUID(), 999986, 2, 'EhGroups', 1005947,'中国民族建筑研究会建筑装饰研究院','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004680, 0, 'ENTERPRISE', '中国民族建筑研究会建筑装饰研究院', 0, '', '/1004680', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006061, 0, 'ENTERPRISE', '中国民族建筑研究会建筑装饰研究院', 0, '', '/1006061', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113551, 240111044331054735, 'organization', 1004680, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114907, 240111044331054735, 'organization', 1006061, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004679, UUID(), '南通智慧建筑产业研究院有限公司', '南通智慧建筑产业研究院有限公司', 1, 1, 1004681, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183143, 1, 999986);
+	VALUES (1005948, UUID(), '南通智慧建筑产业研究院有限公司', '南通智慧建筑产业研究院有限公司', 1, 1, 1006062, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184400, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183143, UUID(), 999986, 2, 'EhGroups', 1004679,'南通智慧建筑产业研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184400, UUID(), 999986, 2, 'EhGroups', 1005948,'南通智慧建筑产业研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004681, 0, 'ENTERPRISE', '南通智慧建筑产业研究院有限公司', 0, '', '/1004681', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006062, 0, 'ENTERPRISE', '南通智慧建筑产业研究院有限公司', 0, '', '/1006062', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113552, 240111044331054735, 'organization', 1004681, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114908, 240111044331054735, 'organization', 1006062, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004680, UUID(), '江苏公证天业会计师事务所', '江苏公证天业会计师事务所', 1, 1, 1004682, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183144, 1, 999986);
+	VALUES (1005949, UUID(), '江苏公证天业会计师事务所', '江苏公证天业会计师事务所', 1, 1, 1006063, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184401, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183144, UUID(), 999986, 2, 'EhGroups', 1004680,'江苏公证天业会计师事务所','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184401, UUID(), 999986, 2, 'EhGroups', 1005949,'江苏公证天业会计师事务所','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004682, 0, 'ENTERPRISE', '江苏公证天业会计师事务所', 0, '', '/1004682', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006063, 0, 'ENTERPRISE', '江苏公证天业会计师事务所', 0, '', '/1006063', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113553, 240111044331054735, 'organization', 1004682, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114909, 240111044331054735, 'organization', 1006063, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004681, UUID(), '南通天行健环境科技有限公司', '南通天行健环境科技有限公司', 1, 1, 1004683, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183145, 1, 999986);
+	VALUES (1005950, UUID(), '南通天行健环境科技有限公司', '南通天行健环境科技有限公司', 1, 1, 1006064, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184402, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183145, UUID(), 999986, 2, 'EhGroups', 1004681,'南通天行健环境科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184402, UUID(), 999986, 2, 'EhGroups', 1005950,'南通天行健环境科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004683, 0, 'ENTERPRISE', '南通天行健环境科技有限公司', 0, '', '/1004683', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006064, 0, 'ENTERPRISE', '南通天行健环境科技有限公司', 0, '', '/1006064', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113554, 240111044331054735, 'organization', 1004683, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114910, 240111044331054735, 'organization', 1006064, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004682, UUID(), '南通欣诚教育软件有限公司', '南通欣诚教育软件有限公司', 1, 1, 1004684, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183146, 1, 999986);
+	VALUES (1005951, UUID(), '南通欣诚教育软件有限公司', '南通欣诚教育软件有限公司', 1, 1, 1006065, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184403, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183146, UUID(), 999986, 2, 'EhGroups', 1004682,'南通欣诚教育软件有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184403, UUID(), 999986, 2, 'EhGroups', 1005951,'南通欣诚教育软件有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004684, 0, 'ENTERPRISE', '南通欣诚教育软件有限公司', 0, '', '/1004684', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006065, 0, 'ENTERPRISE', '南通欣诚教育软件有限公司', 0, '', '/1006065', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113555, 240111044331054735, 'organization', 1004684, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114911, 240111044331054735, 'organization', 1006065, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004683, UUID(), '江苏金土地房产评估测绘咨询有限公司', '江苏金土地房产评估测绘咨询有限公司', 1, 1, 1004685, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183147, 1, 999986);
+	VALUES (1005952, UUID(), '江苏金土地房产评估测绘咨询有限公司', '江苏金土地房产评估测绘咨询有限公司', 1, 1, 1006066, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184404, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183147, UUID(), 999986, 2, 'EhGroups', 1004683,'江苏金土地房产评估测绘咨询有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184404, UUID(), 999986, 2, 'EhGroups', 1005952,'江苏金土地房产评估测绘咨询有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004685, 0, 'ENTERPRISE', '江苏金土地房产评估测绘咨询有限公司', 0, '', '/1004685', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006066, 0, 'ENTERPRISE', '江苏金土地房产评估测绘咨询有限公司', 0, '', '/1006066', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113556, 240111044331054735, 'organization', 1004685, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114912, 240111044331054735, 'organization', 1006066, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004684, UUID(), '南通三和市政水利建设工程有限公公司', '南通三和市政水利建设工程有限公公司', 1, 1, 1004686, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183148, 1, 999986);
+	VALUES (1005953, UUID(), '南通三和市政水利建设工程有限公公司', '南通三和市政水利建设工程有限公公司', 1, 1, 1006067, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184405, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183148, UUID(), 999986, 2, 'EhGroups', 1004684,'南通三和市政水利建设工程有限公公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184405, UUID(), 999986, 2, 'EhGroups', 1005953,'南通三和市政水利建设工程有限公公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004686, 0, 'ENTERPRISE', '南通三和市政水利建设工程有限公公司', 0, '', '/1004686', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006067, 0, 'ENTERPRISE', '南通三和市政水利建设工程有限公公司', 0, '', '/1006067', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113557, 240111044331054735, 'organization', 1004686, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114913, 240111044331054735, 'organization', 1006067, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004685, UUID(), '南通禾墅装饰工程有限公司', '南通禾墅装饰工程有限公司', 1, 1, 1004687, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183149, 1, 999986);
+	VALUES (1005954, UUID(), '南通禾墅装饰工程有限公司', '南通禾墅装饰工程有限公司', 1, 1, 1006068, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184406, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183149, UUID(), 999986, 2, 'EhGroups', 1004685,'南通禾墅装饰工程有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184406, UUID(), 999986, 2, 'EhGroups', 1005954,'南通禾墅装饰工程有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004687, 0, 'ENTERPRISE', '南通禾墅装饰工程有限公司', 0, '', '/1004687', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006068, 0, 'ENTERPRISE', '南通禾墅装饰工程有限公司', 0, '', '/1006068', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113558, 240111044331054735, 'organization', 1004687, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114914, 240111044331054735, 'organization', 1006068, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004686, UUID(), '南通黑白灰家纺设计有限公司', '南通黑白灰家纺设计有限公司', 1, 1, 1004688, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183150, 1, 999986);
+	VALUES (1005955, UUID(), '南通黑白灰家纺设计有限公司', '南通黑白灰家纺设计有限公司', 1, 1, 1006069, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184407, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183150, UUID(), 999986, 2, 'EhGroups', 1004686,'南通黑白灰家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184407, UUID(), 999986, 2, 'EhGroups', 1005955,'南通黑白灰家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004688, 0, 'ENTERPRISE', '南通黑白灰家纺设计有限公司', 0, '', '/1004688', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006069, 0, 'ENTERPRISE', '南通黑白灰家纺设计有限公司', 0, '', '/1006069', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113559, 240111044331054735, 'organization', 1004688, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114915, 240111044331054735, 'organization', 1006069, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004687, UUID(), '南通杰思策划创意有限公司', '南通杰思策划创意有限公司', 1, 1, 1004689, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183151, 1, 999986);
+	VALUES (1005956, UUID(), '南通杰思策划创意有限公司', '南通杰思策划创意有限公司', 1, 1, 1006070, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184408, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183151, UUID(), 999986, 2, 'EhGroups', 1004687,'南通杰思策划创意有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184408, UUID(), 999986, 2, 'EhGroups', 1005956,'南通杰思策划创意有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004689, 0, 'ENTERPRISE', '南通杰思策划创意有限公司', 0, '', '/1004689', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006070, 0, 'ENTERPRISE', '南通杰思策划创意有限公司', 0, '', '/1006070', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113560, 240111044331054735, 'organization', 1004689, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114916, 240111044331054735, 'organization', 1006070, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004688, UUID(), '南通睿祺智能科技有限公司', '南通睿祺智能科技有限公司', 1, 1, 1004690, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183152, 1, 999986);
+	VALUES (1005957, UUID(), '南通睿祺智能科技有限公司', '南通睿祺智能科技有限公司', 1, 1, 1006071, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184409, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183152, UUID(), 999986, 2, 'EhGroups', 1004688,'南通睿祺智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184409, UUID(), 999986, 2, 'EhGroups', 1005957,'南通睿祺智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004690, 0, 'ENTERPRISE', '南通睿祺智能科技有限公司', 0, '', '/1004690', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006071, 0, 'ENTERPRISE', '南通睿祺智能科技有限公司', 0, '', '/1006071', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113561, 240111044331054735, 'organization', 1004690, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114917, 240111044331054735, 'organization', 1006071, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004689, UUID(), '江苏得得空间信息科技有限公司', '江苏得得空间信息科技有限公司', 1, 1, 1004691, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183153, 1, 999986);
+	VALUES (1005958, UUID(), '江苏得得空间信息科技有限公司', '江苏得得空间信息科技有限公司', 1, 1, 1006072, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184410, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183153, UUID(), 999986, 2, 'EhGroups', 1004689,'江苏得得空间信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184410, UUID(), 999986, 2, 'EhGroups', 1005958,'江苏得得空间信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004691, 0, 'ENTERPRISE', '江苏得得空间信息科技有限公司', 0, '', '/1004691', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006072, 0, 'ENTERPRISE', '江苏得得空间信息科技有限公司', 0, '', '/1006072', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113562, 240111044331054735, 'organization', 1004691, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114918, 240111044331054735, 'organization', 1006072, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004690, UUID(), '南通云景信息科技有限公司', '南通云景信息科技有限公司', 1, 1, 1004692, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183154, 1, 999986);
+	VALUES (1005959, UUID(), '南通云景信息科技有限公司', '南通云景信息科技有限公司', 1, 1, 1006073, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184411, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183154, UUID(), 999986, 2, 'EhGroups', 1004690,'南通云景信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184411, UUID(), 999986, 2, 'EhGroups', 1005959,'南通云景信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004692, 0, 'ENTERPRISE', '南通云景信息科技有限公司', 0, '', '/1004692', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006073, 0, 'ENTERPRISE', '南通云景信息科技有限公司', 0, '', '/1006073', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113563, 240111044331054735, 'organization', 1004692, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114919, 240111044331054735, 'organization', 1006073, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004691, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1004693, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183155, 1, 999986);
+	VALUES (1005960, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1006074, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184412, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183155, UUID(), 999986, 2, 'EhGroups', 1004691,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184412, UUID(), 999986, 2, 'EhGroups', 1005960,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004693, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1004693', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006074, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1006074', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113564, 240111044331054735, 'organization', 1004693, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114920, 240111044331054735, 'organization', 1006074, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004692, UUID(), '南通绿业中试技术研究院有限公司', '南通绿业中试技术研究院有限公司', 1, 1, 1004694, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183156, 1, 999986);
+	VALUES (1005961, UUID(), '南通绿业中试技术研究院有限公司', '南通绿业中试技术研究院有限公司', 1, 1, 1006075, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184413, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183156, UUID(), 999986, 2, 'EhGroups', 1004692,'南通绿业中试技术研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184413, UUID(), 999986, 2, 'EhGroups', 1005961,'南通绿业中试技术研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004694, 0, 'ENTERPRISE', '南通绿业中试技术研究院有限公司', 0, '', '/1004694', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006075, 0, 'ENTERPRISE', '南通绿业中试技术研究院有限公司', 0, '', '/1006075', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113565, 240111044331054735, 'organization', 1004694, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114921, 240111044331054735, 'organization', 1006075, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004693, UUID(), '江苏正远信息技术有限公司', '江苏正远信息技术有限公司', 1, 1, 1004695, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183157, 1, 999986);
+	VALUES (1005962, UUID(), '江苏正远信息技术有限公司', '江苏正远信息技术有限公司', 1, 1, 1006076, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184414, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183157, UUID(), 999986, 2, 'EhGroups', 1004693,'江苏正远信息技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184414, UUID(), 999986, 2, 'EhGroups', 1005962,'江苏正远信息技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004695, 0, 'ENTERPRISE', '江苏正远信息技术有限公司', 0, '', '/1004695', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006076, 0, 'ENTERPRISE', '江苏正远信息技术有限公司', 0, '', '/1006076', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113566, 240111044331054735, 'organization', 1004695, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114922, 240111044331054735, 'organization', 1006076, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004694, UUID(), '江苏宁创智能科技有限公司', '江苏宁创智能科技有限公司', 1, 1, 1004696, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183158, 1, 999986);
+	VALUES (1005963, UUID(), '江苏宁创智能科技有限公司', '江苏宁创智能科技有限公司', 1, 1, 1006077, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184415, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183158, UUID(), 999986, 2, 'EhGroups', 1004694,'江苏宁创智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184415, UUID(), 999986, 2, 'EhGroups', 1005963,'江苏宁创智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004696, 0, 'ENTERPRISE', '江苏宁创智能科技有限公司', 0, '', '/1004696', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006077, 0, 'ENTERPRISE', '江苏宁创智能科技有限公司', 0, '', '/1006077', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113567, 240111044331054735, 'organization', 1004696, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114923, 240111044331054735, 'organization', 1006077, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004695, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1004697, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183159, 1, 999986);
+	VALUES (1005964, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1006078, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184416, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183159, UUID(), 999986, 2, 'EhGroups', 1004695,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184416, UUID(), 999986, 2, 'EhGroups', 1005964,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004697, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1004697', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006078, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1006078', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113568, 240111044331054735, 'organization', 1004697, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114924, 240111044331054735, 'organization', 1006078, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004696, UUID(), '上海路图信息科技有限公司', '上海路图信息科技有限公司', 1, 1, 1004698, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183160, 1, 999986);
+	VALUES (1005965, UUID(), '上海路图信息科技有限公司', '上海路图信息科技有限公司', 1, 1, 1006079, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184417, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183160, UUID(), 999986, 2, 'EhGroups', 1004696,'上海路图信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184417, UUID(), 999986, 2, 'EhGroups', 1005965,'上海路图信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004698, 0, 'ENTERPRISE', '上海路图信息科技有限公司', 0, '', '/1004698', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006079, 0, 'ENTERPRISE', '上海路图信息科技有限公司', 0, '', '/1006079', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113569, 240111044331054735, 'organization', 1004698, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114925, 240111044331054735, 'organization', 1006079, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004697, UUID(), '江苏创时信息科技有限公司', '江苏创时信息科技有限公司', 1, 1, 1004699, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183161, 1, 999986);
+	VALUES (1005966, UUID(), '江苏创时信息科技有限公司', '江苏创时信息科技有限公司', 1, 1, 1006080, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184418, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183161, UUID(), 999986, 2, 'EhGroups', 1004697,'江苏创时信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184418, UUID(), 999986, 2, 'EhGroups', 1005966,'江苏创时信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004699, 0, 'ENTERPRISE', '江苏创时信息科技有限公司', 0, '', '/1004699', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006080, 0, 'ENTERPRISE', '江苏创时信息科技有限公司', 0, '', '/1006080', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113570, 240111044331054735, 'organization', 1004699, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114926, 240111044331054735, 'organization', 1006080, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004698, UUID(), '南通市上午家纺设计有限公司', '南通市上午家纺设计有限公司', 1, 1, 1004700, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183162, 1, 999986);
+	VALUES (1005967, UUID(), '南通市上午家纺设计有限公司', '南通市上午家纺设计有限公司', 1, 1, 1006081, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184419, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183162, UUID(), 999986, 2, 'EhGroups', 1004698,'南通市上午家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184419, UUID(), 999986, 2, 'EhGroups', 1005967,'南通市上午家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004700, 0, 'ENTERPRISE', '南通市上午家纺设计有限公司', 0, '', '/1004700', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006081, 0, 'ENTERPRISE', '南通市上午家纺设计有限公司', 0, '', '/1006081', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113571, 240111044331054735, 'organization', 1004700, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114927, 240111044331054735, 'organization', 1006081, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004699, UUID(), '上海讯生信息科技有限公司', '上海讯生信息科技有限公司', 1, 1, 1004701, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183163, 1, 999986);
+	VALUES (1005968, UUID(), '上海讯生信息科技有限公司', '上海讯生信息科技有限公司', 1, 1, 1006082, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184420, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183163, UUID(), 999986, 2, 'EhGroups', 1004699,'上海讯生信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184420, UUID(), 999986, 2, 'EhGroups', 1005968,'上海讯生信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004701, 0, 'ENTERPRISE', '上海讯生信息科技有限公司', 0, '', '/1004701', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006082, 0, 'ENTERPRISE', '上海讯生信息科技有限公司', 0, '', '/1006082', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113572, 240111044331054735, 'organization', 1004701, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114928, 240111044331054735, 'organization', 1006082, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004700, UUID(), '南通江海大数据管理有限公司', '南通江海大数据管理有限公司', 1, 1, 1004702, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183164, 1, 999986);
+	VALUES (1005969, UUID(), '南通江海大数据管理有限公司', '南通江海大数据管理有限公司', 1, 1, 1006083, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184421, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183164, UUID(), 999986, 2, 'EhGroups', 1004700,'南通江海大数据管理有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(184421, UUID(), 999986, 2, 'EhGroups', 1005969,'南通江海大数据管理有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004702, 0, 'ENTERPRISE', '南通江海大数据管理有限公司', 0, '', '/1004702', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1006083, 0, 'ENTERPRISE', '南通江海大数据管理有限公司', 0, '', '/1006083', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113573, 240111044331054735, 'organization', 1004702, 3, 0, UTC_TIMESTAMP());
+	VALUES(1114929, 240111044331054735, 'organization', 1006083, 3, 0, UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
