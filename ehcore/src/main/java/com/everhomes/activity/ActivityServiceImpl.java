@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import ch.hsr.geohash.GeoHash;
 
+import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -54,6 +55,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.OpPromotionConstant;
 import com.everhomes.promotion.OpPromotionScheduleJob;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
@@ -73,6 +75,7 @@ import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.ActivityVideoRoomType;
 import com.everhomes.rest.activity.GeoLocation;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.GetVideoCapabilityCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -85,8 +88,10 @@ import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.VideoManufacturerType;
 import com.everhomes.rest.activity.VideoState;
+import com.everhomes.rest.activity.VideoSupportType;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -2364,6 +2369,7 @@ public class ActivityServiceImpl implements ActivityService {
 	                        && !oldVideo.getVideoState().equals(VideoState.RECORDING.getCode())
 	                        ) {
 	                    oldVideo.setVideoState(VideoState.RECORDING.getCode());
+	                    oldVideo.setEndTime(System.currentTimeMillis());
 	                    activityVideoProvider.updateActivityVideo(oldVideo);
 	                }
 	            }
@@ -2459,6 +2465,7 @@ public class ActivityServiceImpl implements ActivityService {
        if(oldVideo != null) {
            if(oldVideo.getVideoState().equals(VideoState.LIVE.getCode())) {
                oldVideo.setVideoState(VideoState.RECORDING.getCode());
+               oldVideo.setEndTime(System.currentTimeMillis());
                activityVideoProvider.updateActivityVideo(oldVideo);
            }
            
@@ -2511,6 +2518,26 @@ public class ActivityServiceImpl implements ActivityService {
            
        }
       
+   }
+   
+   @Override
+   public VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd) {
+       Integer namespaceId = cmd.getNamespaceId();
+       if(namespaceId == null) {
+           namespaceId = UserContext.current().getNamespaceId();    
+       }
+   
+       VideoCapabilityResponse obj = new VideoCapabilityResponse();
+       if(cmd.getOfficialFlag() == null || cmd.getOfficialFlag().equals(OfficialFlag.NO.getCode())) {
+           Long official = this.configurationProvider.getLongValue(namespaceId
+                   , YzbConstant.VIDEO_NONE_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
+           obj.setVideoSupportType(official.byteValue());
+       } else {
+           Long official = this.configurationProvider.getLongValue(namespaceId
+                   , YzbConstant.VIDEO_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
+           obj.setVideoSupportType(official.byteValue()); 
+       }
+       return obj;
    }
    
    private void fixupVideoInfo(ActivityDTO dto) {

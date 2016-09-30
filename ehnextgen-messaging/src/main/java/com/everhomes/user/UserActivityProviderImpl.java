@@ -637,7 +637,8 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         query.addConditions(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType));
         
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+        	//修改EH_FORUM_POSTS为EH_USER_POSTS，by tt, 20160930
+            query.addConditions(Tables.EH_USER_POSTS.ID.lt(locator.getAnchor()));
         }
         
         query.addOrderBy(Tables.EH_USER_POSTS.CREATE_TIME.desc());

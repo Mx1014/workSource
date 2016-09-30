@@ -3,14 +3,14 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 
 -- merge from sa4.0 by xiongying
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) 
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`)
     VALUES( 'serviceAlliance.request.notification', 1, 'zh_CN', '提交申请通知给管理员', '您收到一条${categoryName}的申请 \n 提交者信息：\n 预订人：${creatorName} \n 手机号：${creatorMobile} \n 公司名称：${creatorOrganization} \n \n 提交的信息：\n ${note} \n 您可以登录管理后台查看详情');
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) 
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`)
     VALUES( 'serviceAlliance.request.notification', 2, 'zh_CN', '提交申请通知给机构', '您收到一条${categoryName}的申请 \n 提交者信息：\n 预订人：${creatorName} \n 手机号：${creatorMobile} \n 公司名称：${creatorOrganization} \n \n 提交的信息：\n ${note}');
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) 
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`)
     VALUES( 'serviceAlliance.request.notification', 3, 'zh_CN', '邮件主题', '您收到一条${categoryName}的申请');
-    
-INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`) 
+
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`)
     VALUES ('1', 'ServiceAlliance', 'BP融资模板', '提交BP', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入姓名","requiredFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入手机号","requiredFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入企业全称","requiredFlag":"1"},{"fieldName":"cityName","fieldDisplayName":"企业城市","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所在城市","requiredFlag":"1"},{"fieldName":"industry","fieldDisplayName":"企业行业","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所属行业","requiredFlag":"1"},{"fieldName":"financingStage","fieldDisplayName":"融资阶段","fieldType":"string","fieldContentType":"text","fieldDesc":"融资阶段","requiredFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"融资金额","fieldType":"decimal","fieldContentType":"text","fieldDesc":"融资金额（万元）","requiredFlag":"1"},{"fieldName":"transferShares","fieldDisplayName":"出让股份","fieldType":"number","fieldContentType":"text","fieldDesc":"出让股份 %","requiredFlag":"1"},{"fieldName":"projectDesc","fieldDisplayName":"项目描述","fieldType":"string","fieldContentType":"text","fieldDesc":"项目描述","requiredFlag":"1"},{"fieldName":"attachments","fieldDisplayName":"附件图片","fieldType":"blob","fieldContentType":"image","fieldDesc":"","requiredFlag":"0"},{"fieldName":"attachments","fieldDisplayName":"商业计划书","fieldType":"blob","fieldContentType":"file","fieldDesc":"","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP());
 
 
@@ -100,15 +100,15 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SET @configuration_id := (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES (@configuration_id:=@configuration_id+1, 'mail.smtp.account', 'shenzhenbay@zuolin.com', '', '999987', NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES (@configuration_id:=@configuration_id+1, 'mail.smtp.passwod', 'Zuolin1802', '', '999987', NULL);	
-    
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES (@configuration_id:=@configuration_id+1, 'mail.smtp.passwod', 'Zuolin1802', '', '999987', NULL);
+
 -- 微信公众号的开发者id和秘钥 add by xiongying20160926
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
- 	VALUES (@configuration_id:=@configuration_id+1, 'wechat.server', 'https://api.weixin.qq.com', '', '0', NULL);	
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appKey', 'wxda4ca555d76459c1', '', '999987', NULL);	
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+ 	VALUES (@configuration_id:=@configuration_id+1, 'wechat.server', 'https://api.weixin.qq.com', '', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appKey', 'wxda4ca555d76459c1', '', '999987', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES (@configuration_id:=@configuration_id+1, 'wechat.appSecret', '73c5725ca71eeb22843a03f66b6425fb', '', '999987', NULL);
 
 -- 新增客户资料和车辆管理菜单 by sfyan 20160923
@@ -226,11 +226,11 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 	VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'wx.offical.account.secret', '2f4511758e90dda8bfbad40d4194a6b9', '深圳湾公众号开发者AppId', 999987, NULL);
 
 SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'oauth2', '11', 'zh_CN', '跳转中...');
 
-    
--- 园区快讯 
+
+-- 园区快讯
 INSERT INTO `eh_news_categories` (`id`,  `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`) VALUES('0','0','园区快讯',NULL,NULL,'0','1','2016-09-26 11:20:54','0',NULL,'999989');
 
 
@@ -245,8 +245,8 @@ SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),570,49700,'园区简介',1,1,'园区简介',350);
 
-SET @acl_id = (SELECT MAX(id) FROM `eh_acls`); 
-	
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+
 -- 考勤管理的菜单整理 by sfyan 20160922
 -- 删除之前的考勤管理菜单数据
 DELETE FROM `eh_web_menus` WHERE `path` LIKE '%56100/%';
@@ -630,17 +630,17 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),56171,'', 'EhOrganizations', 1004005,2);
 
 -- 入驻申请 add by xiongying20160926
-INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`) 
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`)
     VALUES ('2', 'Settle', '入驻申请模板', '申请入驻', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入姓名","requiredFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入手机号","requiredFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入企业全称","requiredFlag":"1"}]}', '1', '1', UTC_TIMESTAMP());
- 
+
 -- 园区快讯历史的layout数据需要修改配置 added by wuhan  2016-9-26
 UPDATE `eh_launch_pad_layouts` SET layout_json ='{"versionCode":"2016081701","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21}]}' WHERE   id = 224 ;
 
 UPDATE `eh_launch_pad_layouts` SET layout_json ='{"versionCode":"2016081701","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21}]}' WHERE   id = 226 ;
- 
+
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 570, 1001,0,1,NOW());
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 570, 1002,0,1,NOW());	
-	
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 570, 1002,0,1,NOW());
+
 
 
 -- 隐藏业主管理菜单   add by xq.tian   20160927
@@ -662,4 +662,8 @@ update eh_locale_strings set text = '文件格式不正确，上传失败' where
 
 -- 更新迅美去认证
 update eh_launch_pad_items set action_type = 52,action_data = '' where id in (10501, 10511) and namespace_id = 999999;
+
+-- video
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('video.official.support', '0', 'offical video support', 999987, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('video.none_official.support', '1', 'none offical video support', 999987, NULL);
 

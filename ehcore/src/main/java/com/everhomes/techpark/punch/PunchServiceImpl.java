@@ -732,7 +732,7 @@ public class PunchServiceImpl implements PunchService {
 				 
 					return pdl;
 				}
-				pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				makeExceptionForDayList(userId, companyId, logDay, pdl);
 				return pdl;
