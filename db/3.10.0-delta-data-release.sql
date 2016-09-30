@@ -660,3 +660,6 @@ update eh_launch_pad_items set delete_flag = 1 where id in(813,10309,10170,10171
 -- 修改新闻导入Excel出错的错误提示, add by tt, 20160929
 update eh_locale_strings set text = '文件格式不正确，上传失败' where scope = 'news' and code = '10007';
 
+-- 更新迅美去认证
+update eh_launch_pad_items set action_type = 52,action_data = '' where id in (10501, 10511) and namespace_id = 999999;
+

@@ -7098,7 +7098,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Integer topDepartmentNum = 10000;
 		for (OrganizationDTO dto : dtos) {
 			if(dto.getPath().split("/").length <  topDepartmentNum){
-				topDepartmentNum = dto.getPath().length();
+				topDepartmentNum = dto.getPath().split("/").length;
 				topDepartment = dto;
 			}
 		}
