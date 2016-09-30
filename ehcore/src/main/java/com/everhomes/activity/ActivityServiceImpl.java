@@ -2522,13 +2522,18 @@ public class ActivityServiceImpl implements ActivityService {
    
    @Override
    public VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd) {
+       Integer namespaceId = cmd.getNamespaceId();
+       if(namespaceId == null) {
+           namespaceId = UserContext.current().getNamespaceId();    
+       }
+   
        VideoCapabilityResponse obj = new VideoCapabilityResponse();
        if(cmd.getOfficialFlag() == null || cmd.getOfficialFlag().equals(OfficialFlag.NO.getCode())) {
-           Long official = this.configurationProvider.getLongValue(cmd.getNamespaceId()
+           Long official = this.configurationProvider.getLongValue(namespaceId
                    , YzbConstant.VIDEO_NONE_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
            obj.setVideoSupportType(official.byteValue());
        } else {
-           Long official = this.configurationProvider.getLongValue(cmd.getNamespaceId()
+           Long official = this.configurationProvider.getLongValue(namespaceId
                    , YzbConstant.VIDEO_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
            obj.setVideoSupportType(official.byteValue()); 
        }
