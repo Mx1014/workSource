@@ -18,7 +18,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-创源', '30109', '999986');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-创源', '30110', '999986');
 
 
