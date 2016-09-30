@@ -74,2086 +74,2084 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 	VALUES(180007, 240111044331054735, '8幢', '8幢', 0, NULL, '江苏省南通市崇川区南通创源科技园', 25856.82, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999986);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
 	VALUES(180008, 240111044331054735, '9幢', '9幢', 0, NULL, '江苏省南通市崇川区南通创源科技园', 11683.04, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999986);
-
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113864,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-101','1幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125229,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-101','1幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113865,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-102','1幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125230,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-102','1幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113866,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-103','1幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125231,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-103','1幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113867,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-104','1幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125232,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-104','1幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113868,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-105','1幢','105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125233,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-105','1幢','105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113869,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-106','1幢','106','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125234,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-106','1幢','106','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113870,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-107','1幢','107','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125235,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-107','1幢','107','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113871,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-108','1幢','108','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125236,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-108','1幢','108','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113872,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-109','1幢','109','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125237,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-109','1幢','109','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113873,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-1010','1幢','1010','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125238,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-1010','1幢','1010','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113874,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-1011','1幢','1011','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125239,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-1011','1幢','1011','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113875,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-1012','1幢','1012','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125240,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-1012','1幢','1012','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113876,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-201','1幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125241,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-201','1幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113877,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-202','1幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125242,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-202','1幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113878,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-203','1幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125243,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-203','1幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113879,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-204','1幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125244,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-204','1幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113880,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-205','1幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125245,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-205','1幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113881,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-206','1幢','206','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125246,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-206','1幢','206','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113882,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-207','1幢','207','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125247,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-207','1幢','207','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113883,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-208','1幢','208','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125248,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-208','1幢','208','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113884,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-209','1幢','209','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125249,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-209','1幢','209','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113885,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-2010','1幢','2010','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125250,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-2010','1幢','2010','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113886,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-2011','1幢','2011','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125251,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-2011','1幢','2011','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113887,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-302','1幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125252,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'1幢-302','1幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113888,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-101','2幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125253,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-101','2幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113889,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-102','2幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125254,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-102','2幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113890,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-103','2幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125255,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-103','2幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113891,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-104','2幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125256,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-104','2幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113892,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-105','2幢','105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125257,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-105','2幢','105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113893,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-106','2幢','106','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125258,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-106','2幢','106','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113894,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-201','2幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125259,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-201','2幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113895,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-202','2幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125260,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-202','2幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113896,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-203','2幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125261,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-203','2幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113897,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-204','2幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125262,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-204','2幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113898,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-205','2幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125263,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-205','2幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113899,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-301','2幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125264,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-301','2幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113900,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-302','2幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125265,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-302','2幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113901,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-303','2幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125266,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-303','2幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113902,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-304','2幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125267,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-304','2幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113903,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-305','2幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125268,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-305','2幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113904,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-306','2幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125269,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-306','2幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113905,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-401','2幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125270,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-401','2幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113906,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-402','2幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125271,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-402','2幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113907,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-403','2幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125272,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-403','2幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113908,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-404','2幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125273,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-404','2幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113909,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-405','2幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125274,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-405','2幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113910,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-406','2幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125275,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-406','2幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113911,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-501','2幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125276,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-501','2幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113912,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-502','2幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125277,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-502','2幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113913,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-503','2幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125278,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-503','2幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113914,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-504','2幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125279,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-504','2幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113915,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-505','2幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125280,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-505','2幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113916,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-506','2幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125281,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-506','2幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113917,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-601','2幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125282,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-601','2幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113918,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-602','2幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125283,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-602','2幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113919,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-603','2幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125284,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-603','2幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113920,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-604','2幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125285,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-604','2幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113921,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-605','2幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125286,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-605','2幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113922,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-606','2幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125287,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-606','2幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113923,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-701','2幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125288,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-701','2幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113924,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-702','2幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125289,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-702','2幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113925,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-703','2幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125290,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-703','2幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113926,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-704','2幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125291,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-704','2幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113927,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-705','2幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125292,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-705','2幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113928,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-706','2幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125293,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-706','2幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113929,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-801','2幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125294,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-801','2幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113930,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-802','2幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125295,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-802','2幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113931,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-803','2幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125296,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-803','2幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113932,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-804','2幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125297,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-804','2幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113933,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-805','2幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125298,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-805','2幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113934,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-806','2幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125299,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-806','2幢','806','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113935,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-901','2幢','901','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125300,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-901','2幢','901','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113936,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-902','2幢','902','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125301,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-902','2幢','902','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113937,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-903','2幢','903','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125302,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-903','2幢','903','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113938,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-904','2幢','904','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125303,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-904','2幢','904','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113939,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-905','2幢','905','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125304,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-905','2幢','905','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113940,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-906','2幢','906','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125305,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'2幢-906','2幢','906','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113941,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-101','3幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125306,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-101','3幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113942,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-102','3幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125307,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-102','3幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113943,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-103','3幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125308,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-103','3幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113944,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-104','3幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125309,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-104','3幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113945,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-105','3幢','105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125310,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-105','3幢','105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113946,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-201','3幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125311,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-201','3幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113947,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-202','3幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125312,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-202','3幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113948,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-203','3幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125313,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-203','3幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113949,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-204','3幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125314,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-204','3幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113950,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-205','3幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125315,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-205','3幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113951,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-206','3幢','206','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125316,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-206','3幢','206','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113952,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-301','3幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125317,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-301','3幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113953,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-302','3幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125318,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-302','3幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113954,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-303','3幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125319,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-303','3幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113955,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-304','3幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125320,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-304','3幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113956,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-305','3幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125321,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-305','3幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113957,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-306','3幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125322,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-306','3幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113958,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-401','3幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125323,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-401','3幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113959,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-402','3幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125324,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-402','3幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113960,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-403','3幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125325,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-403','3幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113961,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-404','3幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125326,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-404','3幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113962,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-405','3幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125327,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-405','3幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113963,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-406','3幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125328,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-406','3幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113964,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-501','3幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125329,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-501','3幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113965,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-502','3幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125330,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-502','3幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113966,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-503','3幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125331,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-503','3幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113967,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-504','3幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125332,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-504','3幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113968,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-505','3幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125333,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-505','3幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113969,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-506','3幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125334,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-506','3幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113970,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-601','3幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125335,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-601','3幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113971,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-602','3幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125336,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-602','3幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113972,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-603','3幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125337,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-603','3幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113973,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-604','3幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125338,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-604','3幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113974,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-605','3幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125339,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-605','3幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113975,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-606','3幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125340,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-606','3幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113976,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-701','3幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125341,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-701','3幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113977,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-702','3幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125342,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-702','3幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113978,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-703','3幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125343,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-703','3幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113979,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-704','3幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125344,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-704','3幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113980,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-705','3幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125345,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-705','3幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113981,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-706','3幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125346,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-706','3幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113982,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-801','3幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125347,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-801','3幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113983,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-802','3幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125348,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-802','3幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113984,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-803','3幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125349,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-803','3幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113985,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-804','3幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125350,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-804','3幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113986,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-805','3幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125351,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-805','3幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113987,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-806','3幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125352,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'3幢-806','3幢','806','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113988,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-101','5幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125353,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-101','5幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113989,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-102','5幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125354,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-102','5幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113990,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-103','5幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125355,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-103','5幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113991,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-104','5幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125356,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-104','5幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113992,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-105','5幢','105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125357,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-105','5幢','105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113993,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-106','5幢','106','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125358,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-106','5幢','106','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113994,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-107','5幢','107','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125359,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-107','5幢','107','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113995,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-201','5幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125360,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-201','5幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113996,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-202','5幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125361,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-202','5幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113997,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-203','5幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125362,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-203','5幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113998,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-204','5幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125363,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-204','5幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387113999,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-205','5幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125364,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-205','5幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114000,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-206','5幢','206','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125365,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-206','5幢','206','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114001,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-301','5幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125366,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-301','5幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114002,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-302','5幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125367,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-302','5幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114003,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-303','5幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125368,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-303','5幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114004,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-304','5幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125369,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-304','5幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114005,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-305','5幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125370,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-305','5幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114006,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-306','5幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125371,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-306','5幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114007,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-401','5幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125372,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-401','5幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114008,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-402','5幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125373,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-402','5幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114009,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-403','5幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125374,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-403','5幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114010,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-404','5幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125375,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-404','5幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114011,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-405','5幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125376,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-405','5幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114012,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-406','5幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125377,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-406','5幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114013,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-501','5幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125378,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-501','5幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114014,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-502','5幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125379,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-502','5幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114015,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-503','5幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125380,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-503','5幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114016,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-504','5幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125381,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-504','5幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114017,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-505','5幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125382,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-505','5幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114018,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-506','5幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125383,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-506','5幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114019,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-601','5幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125384,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-601','5幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114020,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-602','5幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125385,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-602','5幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114021,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-603','5幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125386,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-603','5幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114022,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-604','5幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125387,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-604','5幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114023,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-605','5幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125388,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-605','5幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114024,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-606','5幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125389,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-606','5幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114025,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-701','5幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125390,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-701','5幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114026,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-702','5幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125391,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-702','5幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114027,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-703','5幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125392,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-703','5幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114028,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-704','5幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125393,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-704','5幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114029,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-705','5幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125394,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-705','5幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114030,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-706','5幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125395,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-706','5幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114031,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-801','5幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125396,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-801','5幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114032,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-802','5幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125397,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-802','5幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114033,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-803','5幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125398,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-803','5幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114034,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-804','5幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125399,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-804','5幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114035,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-805','5幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125400,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-805','5幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114036,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-806','5幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125401,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-806','5幢','806','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114037,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-901','5幢','901','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125402,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-901','5幢','901','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114038,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-902','5幢','902','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125403,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-902','5幢','902','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114039,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-903','5幢','903','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125404,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-903','5幢','903','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114040,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-904','5幢','904','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125405,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-904','5幢','904','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114041,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-905','5幢','905','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125406,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-905','5幢','905','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114042,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-906','5幢','906','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125407,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'5幢-906','5幢','906','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114043,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-101','6幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125408,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-101','6幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114044,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-102','6幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125409,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-102','6幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114045,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-103','6幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125410,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-103','6幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114046,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-104','6幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125411,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-104','6幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114047,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-201','6幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125412,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-201','6幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114048,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-202','6幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125413,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-202','6幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114049,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-203','6幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125414,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-203','6幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114050,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-204','6幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125415,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-204','6幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114051,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-205','6幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125416,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-205','6幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114052,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-206','6幢','206','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125417,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-206','6幢','206','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114053,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-301','6幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125418,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-301','6幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114054,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-302','6幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125419,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-302','6幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114055,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-303','6幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125420,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-303','6幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114056,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-304','6幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125421,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-304','6幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114057,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-305','6幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125422,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-305','6幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114058,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-306','6幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125423,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-306','6幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114059,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-401','6幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125424,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-401','6幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114060,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-402','6幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125425,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-402','6幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114061,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-403','6幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125426,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-403','6幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114062,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-404','6幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125427,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-404','6幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114063,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-405','6幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125428,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-405','6幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114064,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-406','6幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125429,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-406','6幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114065,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-501','6幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125430,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-501','6幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114066,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-502','6幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125431,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-502','6幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114067,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-503','6幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125432,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-503','6幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114068,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-504','6幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125433,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-504','6幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114069,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-505','6幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125434,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-505','6幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114070,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-506','6幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125435,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-506','6幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114071,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-601','6幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125436,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-601','6幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114072,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-602','6幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125437,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-602','6幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114073,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-603','6幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125438,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-603','6幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114074,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-604','6幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125439,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-604','6幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114075,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-605','6幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125440,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-605','6幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114076,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-606','6幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125441,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-606','6幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114077,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-701','6幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125442,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-701','6幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114078,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-702','6幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125443,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-702','6幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114079,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-703','6幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125444,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-703','6幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114080,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-704','6幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125445,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-704','6幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114081,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-705','6幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125446,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-705','6幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114082,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-706','6幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125447,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-706','6幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114083,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-801','6幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125448,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-801','6幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114084,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-802','6幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125449,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-802','6幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114085,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-803','6幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125450,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-803','6幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114086,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-804','6幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125451,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-804','6幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114087,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-805','6幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125452,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-805','6幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114088,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-806','6幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125453,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-806','6幢','806','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114089,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-901','6幢','901','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125454,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-901','6幢','901','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114090,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-902','6幢','902','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125455,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-902','6幢','902','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114091,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-903','6幢','903','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125456,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-903','6幢','903','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114092,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-904','6幢','904','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125457,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-904','6幢','904','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114093,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-905','6幢','905','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125458,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-905','6幢','905','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114094,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-906','6幢','906','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125459,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-906','6幢','906','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114095,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1001','6幢','1001','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125460,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1001','6幢','1001','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114096,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1002','6幢','1002','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125461,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1002','6幢','1002','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114097,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1003','6幢','1003','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125462,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1003','6幢','1003','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114098,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1004','6幢','1004','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125463,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1004','6幢','1004','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114099,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1005','6幢','1005','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125464,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1005','6幢','1005','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114100,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1006','6幢','1006','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125465,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'6幢-1006','6幢','1006','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114101,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-101','7幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125466,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-101','7幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114102,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-102','7幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125467,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-102','7幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114103,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-103','7幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125468,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-103','7幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114104,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-105','7幢','105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125469,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-105','7幢','105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114105,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-201','7幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125470,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-201','7幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114106,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-202','7幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125471,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-202','7幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114107,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-203','7幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125472,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-203','7幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114108,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-204','7幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125473,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-204','7幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114109,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-205','7幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125474,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-205','7幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114110,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-301','7幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125475,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-301','7幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114111,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-302','7幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125476,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-302','7幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114112,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-303','7幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125477,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-303','7幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114113,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-304','7幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125478,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-304','7幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114114,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-305','7幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125479,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-305','7幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114115,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-306','7幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125480,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-306','7幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114116,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-401','7幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125481,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-401','7幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114117,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-402','7幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125482,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-402','7幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114118,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-403','7幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125483,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-403','7幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114119,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-404','7幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125484,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-404','7幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114120,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-405','7幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125485,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-405','7幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114121,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-406','7幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125486,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-406','7幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114122,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-501','7幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125487,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-501','7幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114123,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-502','7幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125488,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-502','7幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114124,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-503','7幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125489,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-503','7幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114125,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-504','7幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125490,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-504','7幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114126,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-505','7幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125491,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-505','7幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114127,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-506','7幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125492,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-506','7幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114128,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-601','7幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125493,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-601','7幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114129,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-602','7幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125494,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-602','7幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114130,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-603','7幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125495,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-603','7幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114131,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-604','7幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125496,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-604','7幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114132,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-605','7幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125497,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-605','7幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114133,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-606','7幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125498,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-606','7幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114134,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-701','7幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125499,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-701','7幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114135,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-702','7幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125500,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-702','7幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114136,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-703','7幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125501,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-703','7幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114137,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-704','7幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125502,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-704','7幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114138,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-705','7幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125503,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-705','7幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114139,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-706','7幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125504,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-706','7幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114140,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-801','7幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125505,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-801','7幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114141,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-802','7幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125506,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-802','7幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114142,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-803','7幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125507,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-803','7幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114143,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-804','7幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125508,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-804','7幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114144,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-805','7幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125509,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-805','7幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114145,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-806','7幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125510,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-806','7幢','806','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114146,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-901','7幢','901','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125511,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-901','7幢','901','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114147,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-902','7幢','902','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125512,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-902','7幢','902','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114148,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-903','7幢','903','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125513,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-903','7幢','903','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114149,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-904','7幢','904','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125514,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-904','7幢','904','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114150,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-905','7幢','905','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125515,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-905','7幢','905','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114151,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-906','7幢','906','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125516,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-906','7幢','906','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114152,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1001','7幢','1001','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125517,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1001','7幢','1001','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114153,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1002','7幢','1002','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125518,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1002','7幢','1002','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114154,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1003','7幢','1003','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125519,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1003','7幢','1003','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114155,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1004','7幢','1004','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125520,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1004','7幢','1004','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114156,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1005','7幢','1005','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125521,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1005','7幢','1005','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114157,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1006','7幢','1006','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125522,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'7幢-1006','7幢','1006','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114158,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-101','8幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125523,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-101','8幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114159,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-102','8幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125524,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-102','8幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114160,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-103','8幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125525,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-103','8幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114161,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-104','8幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125526,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-104','8幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114162,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-105','8幢','105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125527,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-105','8幢','105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114163,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-106','8幢','106','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125528,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-106','8幢','106','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114164,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-107','8幢','107','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125529,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-107','8幢','107','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114165,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-108','8幢','108','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125530,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-108','8幢','108','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114166,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-109','8幢','109','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125531,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-109','8幢','109','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114167,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1010','8幢','1010','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125532,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1010','8幢','1010','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114168,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1011','8幢','1011','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125533,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1011','8幢','1011','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114169,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1012','8幢','1012','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125534,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1012','8幢','1012','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114170,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-201','8幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125535,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-201','8幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114171,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-202','8幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125536,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-202','8幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114172,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-203','8幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125537,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-203','8幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114173,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-207','8幢','207','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125538,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-207','8幢','207','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114174,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-208','8幢','208','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125539,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-208','8幢','208','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114175,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-209','8幢','209','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125540,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-209','8幢','209','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114176,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-2012','8幢','2012','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125541,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-2012','8幢','2012','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114177,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-2013','8幢','2013','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125542,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-2013','8幢','2013','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114178,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-2014','8幢','2014','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125543,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-2014','8幢','2014','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114179,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-301','8幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125544,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-301','8幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114180,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-302','8幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125545,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-302','8幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114181,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-303','8幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125546,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-303','8幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114182,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-304','8幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125547,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-304','8幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114183,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-305','8幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125548,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-305','8幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114184,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-306','8幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125549,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-306','8幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114185,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-307','8幢','307','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125550,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-307','8幢','307','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114186,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-308','8幢','308','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125551,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-308','8幢','308','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114187,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-309','8幢','309','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125552,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-309','8幢','309','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114188,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3010','8幢','3010','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125553,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3010','8幢','3010','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114189,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3011','8幢','3011','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125554,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3011','8幢','3011','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114190,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3012','8幢','3012','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125555,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3012','8幢','3012','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114191,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3013','8幢','3013','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125556,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-3013','8幢','3013','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114192,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-401','8幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125557,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-401','8幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114193,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-402','8幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125558,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-402','8幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114194,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-403','8幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125559,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-403','8幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114195,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-404','8幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125560,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-404','8幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114196,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-405','8幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125561,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-405','8幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114197,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-406','8幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125562,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-406','8幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114198,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-407','8幢','407','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125563,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-407','8幢','407','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114199,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-408','8幢','408','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125564,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-408','8幢','408','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114200,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-501','8幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125565,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-501','8幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114201,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-502','8幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125566,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-502','8幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114202,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-503','8幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125567,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-503','8幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114203,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-504','8幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125568,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-504','8幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114204,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-505','8幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125569,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-505','8幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114205,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-506','8幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125570,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-506','8幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114206,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-507','8幢','507','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125571,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-507','8幢','507','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114207,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-507','8幢','507','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125572,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-507','8幢','507','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114208,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-601','8幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125573,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-601','8幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114209,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-602','8幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125574,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-602','8幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114210,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-603','8幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125575,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-603','8幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114211,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-604','8幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125576,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-604','8幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114212,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-605','8幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125577,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-605','8幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114213,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-606','8幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125578,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-606','8幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114214,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-607','8幢','607','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125579,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-607','8幢','607','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114215,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-608','8幢','608','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125580,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-608','8幢','608','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114216,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-701','8幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125581,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-701','8幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114217,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-702','8幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125582,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-702','8幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114218,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-703','8幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125583,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-703','8幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114219,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-704','8幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125584,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-704','8幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114220,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-705','8幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125585,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-705','8幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114221,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-706','8幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125586,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-706','8幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114222,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-707','8幢','707','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125587,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-707','8幢','707','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114223,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-708','8幢','708','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125588,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-708','8幢','708','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114224,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-801','8幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125589,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-801','8幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114225,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-802','8幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125590,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-802','8幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114226,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-803','8幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125591,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-803','8幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114227,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-804','8幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125592,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-804','8幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114228,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-805','8幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125593,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-805','8幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114229,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-806','8幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125594,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-806','8幢','806','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114230,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-807','8幢','807','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125595,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-807','8幢','807','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114231,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-808','8幢','808','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125596,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-808','8幢','808','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114232,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-901','8幢','901','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125597,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-901','8幢','901','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114233,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-902','8幢','902','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125598,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-902','8幢','902','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114234,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-903','8幢','903','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125599,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-903','8幢','903','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114235,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-904','8幢','904','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125600,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-904','8幢','904','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114236,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-905','8幢','905','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125601,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-905','8幢','905','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114237,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-906','8幢','906','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125602,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-906','8幢','906','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114238,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-907','8幢','907','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125603,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-907','8幢','907','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114239,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-908','8幢','908','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125604,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-908','8幢','908','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114240,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1001','8幢','1001','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125605,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1001','8幢','1001','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114241,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1002','8幢','1002','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125606,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1002','8幢','1002','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114242,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1003','8幢','1003','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125607,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1003','8幢','1003','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114243,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1004','8幢','1004','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125608,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1004','8幢','1004','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114244,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1005','8幢','1005','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125609,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1005','8幢','1005','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114245,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1006','8幢','1006','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125610,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1006','8幢','1006','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114246,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1007','8幢','1007','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125611,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1007','8幢','1007','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114247,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1008','8幢','1008','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125612,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1008','8幢','1008','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114248,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1101','8幢','1101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125613,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1101','8幢','1101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114249,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1102','8幢','1102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125614,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1102','8幢','1102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114250,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1103','8幢','1103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125615,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1103','8幢','1103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114251,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1104','8幢','1104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125616,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1104','8幢','1104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114252,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1105','8幢','1105','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125617,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1105','8幢','1105','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114253,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1106','8幢','1106','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125618,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1106','8幢','1106','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114254,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1107','8幢','1107','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125619,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1107','8幢','1107','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114255,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1108','8幢','1108','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125620,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1108','8幢','1108','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114256,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1201','8幢','1201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125621,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1201','8幢','1201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114257,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1202','8幢','1202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125622,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1202','8幢','1202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114258,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1203','8幢','1203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125623,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1203','8幢','1203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114259,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1204','8幢','1204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125624,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1204','8幢','1204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114260,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1205','8幢','1205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125625,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1205','8幢','1205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114261,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1206','8幢','1206','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125626,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1206','8幢','1206','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114262,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1207','8幢','1207','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125627,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1207','8幢','1207','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114263,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1208','8幢','1208','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125628,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1208','8幢','1208','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114264,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1301','8幢','1301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125629,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1301','8幢','1301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114265,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1302','8幢','1302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125630,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1302','8幢','1302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114266,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1303','8幢','1303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125631,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1303','8幢','1303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114267,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1304','8幢','1304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125632,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1304','8幢','1304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114268,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1305','8幢','1305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125633,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1305','8幢','1305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114269,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1306','8幢','1306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125634,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1306','8幢','1306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114270,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1401','8幢','1401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125635,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1401','8幢','1401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114271,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1402','8幢','1402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125636,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1402','8幢','1402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114272,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1403','8幢','1403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125637,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1403','8幢','1403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114273,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1404','8幢','1404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125638,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1404','8幢','1404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114274,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1405','8幢','1405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125639,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1405','8幢','1405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114275,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1406','8幢','1406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125640,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'8幢-1406','8幢','1406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114276,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-101','9幢','101','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125641,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-101','9幢','101','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114277,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-102','9幢','102','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125642,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-102','9幢','102','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114278,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-103','9幢','103','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125643,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-103','9幢','103','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114279,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-104','9幢','104','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125644,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-104','9幢','104','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114280,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-201','9幢','201','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125645,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-201','9幢','201','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114281,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-202','9幢','202','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125646,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-202','9幢','202','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114282,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-203','9幢','203','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125647,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-203','9幢','203','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114283,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-204','9幢','204','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125648,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-204','9幢','204','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114284,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-205','9幢','205','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125649,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-205','9幢','205','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114285,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-301','9幢','301','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125650,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-301','9幢','301','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114286,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-302','9幢','302','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125651,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-302','9幢','302','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114287,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-303','9幢','303','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125652,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-303','9幢','303','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114288,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-304','9幢','304','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125653,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-304','9幢','304','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114289,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-305','9幢','305','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125654,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-305','9幢','305','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114290,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-306','9幢','306','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125655,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-306','9幢','306','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114291,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-401','9幢','401','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125656,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-401','9幢','401','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114292,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-402','9幢','402','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125657,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-402','9幢','402','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114293,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-403','9幢','403','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125658,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-403','9幢','403','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114294,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-404','9幢','404','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125659,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-404','9幢','404','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114295,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-405','9幢','405','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125660,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-405','9幢','405','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114296,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-406','9幢','406','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125661,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-406','9幢','406','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114297,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-501','9幢','501','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125662,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-501','9幢','501','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114298,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-502','9幢','502','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125663,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-502','9幢','502','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114299,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-503','9幢','503','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125664,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-503','9幢','503','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114300,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-504','9幢','504','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125665,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-504','9幢','504','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114301,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-505','9幢','505','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125666,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-505','9幢','505','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114302,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-506','9幢','506','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125667,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-506','9幢','506','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114303,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-601','9幢','601','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125668,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-601','9幢','601','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114304,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-602','9幢','602','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125669,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-602','9幢','602','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114305,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-603','9幢','603','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125670,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-603','9幢','603','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114306,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-604','9幢','604','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125671,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-604','9幢','604','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114307,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-605','9幢','605','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125672,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-605','9幢','605','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114308,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-606','9幢','606','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125673,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-606','9幢','606','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114309,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-701','9幢','701','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125674,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-701','9幢','701','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114310,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-702','9幢','702','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125675,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-702','9幢','702','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114311,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-703','9幢','703','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125676,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-703','9幢','703','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114312,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-704','9幢','704','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125677,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-704','9幢','704','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114313,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-705','9幢','705','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125678,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-705','9幢','705','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114314,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-706','9幢','706','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125679,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-706','9幢','706','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114315,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-801','9幢','801','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125680,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-801','9幢','801','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114316,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-802','9幢','802','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125681,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-802','9幢','802','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114317,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-803','9幢','803','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125682,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-803','9幢','803','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114318,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-804','9幢','804','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125683,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-804','9幢','804','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114319,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-805','9幢','805','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125684,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-805','9幢','805','2','0',UTC_TIMESTAMP(), 999986);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387114320,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-806','9幢','806','2','0',UTC_TIMESTAMP(), 999986);
+	VALUES(239825274387125685,UUID(),240111044331054735, 15101, '南通市',  15102, '崇川区' ,'9幢-806','9幢','806','2','0',UTC_TIMESTAMP(), 999986);
 	
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24695, 1004140, 240111044331054735, 239825274387125229, '1幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24696, 1004140, 240111044331054735, 239825274387125230, '1幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24697, 1004140, 240111044331054735, 239825274387125231, '1幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24698, 1004140, 240111044331054735, 239825274387125232, '1幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24699, 1004140, 240111044331054735, 239825274387125233, '1幢-105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24700, 1004140, 240111044331054735, 239825274387125234, '1幢-106', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24701, 1004140, 240111044331054735, 239825274387125235, '1幢-107', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24702, 1004140, 240111044331054735, 239825274387125236, '1幢-108', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24703, 1004140, 240111044331054735, 239825274387125237, '1幢-109', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24704, 1004140, 240111044331054735, 239825274387125238, '1幢-1010', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24705, 1004140, 240111044331054735, 239825274387125239, '1幢-1011', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24706, 1004140, 240111044331054735, 239825274387125240, '1幢-1012', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24707, 1004140, 240111044331054735, 239825274387125241, '1幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24708, 1004140, 240111044331054735, 239825274387125242, '1幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24709, 1004140, 240111044331054735, 239825274387125243, '1幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24710, 1004140, 240111044331054735, 239825274387125244, '1幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24711, 1004140, 240111044331054735, 239825274387125245, '1幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24712, 1004140, 240111044331054735, 239825274387125246, '1幢-206', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24713, 1004140, 240111044331054735, 239825274387125247, '1幢-207', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24714, 1004140, 240111044331054735, 239825274387125248, '1幢-208', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24715, 1004140, 240111044331054735, 239825274387125249, '1幢-209', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24716, 1004140, 240111044331054735, 239825274387125250, '1幢-2010', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24717, 1004140, 240111044331054735, 239825274387125251, '1幢-2011', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24718, 1004140, 240111044331054735, 239825274387125252, '1幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24719, 1004140, 240111044331054735, 239825274387125253, '2幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24720, 1004140, 240111044331054735, 239825274387125254, '2幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24721, 1004140, 240111044331054735, 239825274387125255, '2幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24722, 1004140, 240111044331054735, 239825274387125256, '2幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24723, 1004140, 240111044331054735, 239825274387125257, '2幢-105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24724, 1004140, 240111044331054735, 239825274387125258, '2幢-106', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24725, 1004140, 240111044331054735, 239825274387125259, '2幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24726, 1004140, 240111044331054735, 239825274387125260, '2幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24727, 1004140, 240111044331054735, 239825274387125261, '2幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24728, 1004140, 240111044331054735, 239825274387125262, '2幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24729, 1004140, 240111044331054735, 239825274387125263, '2幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24730, 1004140, 240111044331054735, 239825274387125264, '2幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24731, 1004140, 240111044331054735, 239825274387125265, '2幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24732, 1004140, 240111044331054735, 239825274387125266, '2幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24733, 1004140, 240111044331054735, 239825274387125267, '2幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24734, 1004140, 240111044331054735, 239825274387125268, '2幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24735, 1004140, 240111044331054735, 239825274387125269, '2幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24736, 1004140, 240111044331054735, 239825274387125270, '2幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24737, 1004140, 240111044331054735, 239825274387125271, '2幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24738, 1004140, 240111044331054735, 239825274387125272, '2幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24739, 1004140, 240111044331054735, 239825274387125273, '2幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24740, 1004140, 240111044331054735, 239825274387125274, '2幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24741, 1004140, 240111044331054735, 239825274387125275, '2幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24742, 1004140, 240111044331054735, 239825274387125276, '2幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24743, 1004140, 240111044331054735, 239825274387125277, '2幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24744, 1004140, 240111044331054735, 239825274387125278, '2幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24745, 1004140, 240111044331054735, 239825274387125279, '2幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24746, 1004140, 240111044331054735, 239825274387125280, '2幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24747, 1004140, 240111044331054735, 239825274387125281, '2幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24748, 1004140, 240111044331054735, 239825274387125282, '2幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24749, 1004140, 240111044331054735, 239825274387125283, '2幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24750, 1004140, 240111044331054735, 239825274387125284, '2幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24751, 1004140, 240111044331054735, 239825274387125285, '2幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24752, 1004140, 240111044331054735, 239825274387125286, '2幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24753, 1004140, 240111044331054735, 239825274387125287, '2幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24754, 1004140, 240111044331054735, 239825274387125288, '2幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24755, 1004140, 240111044331054735, 239825274387125289, '2幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24756, 1004140, 240111044331054735, 239825274387125290, '2幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24757, 1004140, 240111044331054735, 239825274387125291, '2幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24758, 1004140, 240111044331054735, 239825274387125292, '2幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24759, 1004140, 240111044331054735, 239825274387125293, '2幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24760, 1004140, 240111044331054735, 239825274387125294, '2幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24761, 1004140, 240111044331054735, 239825274387125295, '2幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24762, 1004140, 240111044331054735, 239825274387125296, '2幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24763, 1004140, 240111044331054735, 239825274387125297, '2幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24764, 1004140, 240111044331054735, 239825274387125298, '2幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24765, 1004140, 240111044331054735, 239825274387125299, '2幢-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24766, 1004140, 240111044331054735, 239825274387125300, '2幢-901', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24767, 1004140, 240111044331054735, 239825274387125301, '2幢-902', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24768, 1004140, 240111044331054735, 239825274387125302, '2幢-903', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24769, 1004140, 240111044331054735, 239825274387125303, '2幢-904', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24770, 1004140, 240111044331054735, 239825274387125304, '2幢-905', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24771, 1004140, 240111044331054735, 239825274387125305, '2幢-906', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24772, 1004140, 240111044331054735, 239825274387125306, '3幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24773, 1004140, 240111044331054735, 239825274387125307, '3幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24774, 1004140, 240111044331054735, 239825274387125308, '3幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24775, 1004140, 240111044331054735, 239825274387125309, '3幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24776, 1004140, 240111044331054735, 239825274387125310, '3幢-105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24777, 1004140, 240111044331054735, 239825274387125311, '3幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24778, 1004140, 240111044331054735, 239825274387125312, '3幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24779, 1004140, 240111044331054735, 239825274387125313, '3幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24780, 1004140, 240111044331054735, 239825274387125314, '3幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24781, 1004140, 240111044331054735, 239825274387125315, '3幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24782, 1004140, 240111044331054735, 239825274387125316, '3幢-206', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24783, 1004140, 240111044331054735, 239825274387125317, '3幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24784, 1004140, 240111044331054735, 239825274387125318, '3幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24785, 1004140, 240111044331054735, 239825274387125319, '3幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24786, 1004140, 240111044331054735, 239825274387125320, '3幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24787, 1004140, 240111044331054735, 239825274387125321, '3幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24788, 1004140, 240111044331054735, 239825274387125322, '3幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24789, 1004140, 240111044331054735, 239825274387125323, '3幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24790, 1004140, 240111044331054735, 239825274387125324, '3幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24791, 1004140, 240111044331054735, 239825274387125325, '3幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24792, 1004140, 240111044331054735, 239825274387125326, '3幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24793, 1004140, 240111044331054735, 239825274387125327, '3幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24794, 1004140, 240111044331054735, 239825274387125328, '3幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24795, 1004140, 240111044331054735, 239825274387125329, '3幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24796, 1004140, 240111044331054735, 239825274387125330, '3幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24797, 1004140, 240111044331054735, 239825274387125331, '3幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24798, 1004140, 240111044331054735, 239825274387125332, '3幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24799, 1004140, 240111044331054735, 239825274387125333, '3幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24800, 1004140, 240111044331054735, 239825274387125334, '3幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24801, 1004140, 240111044331054735, 239825274387125335, '3幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24802, 1004140, 240111044331054735, 239825274387125336, '3幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24803, 1004140, 240111044331054735, 239825274387125337, '3幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24804, 1004140, 240111044331054735, 239825274387125338, '3幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24805, 1004140, 240111044331054735, 239825274387125339, '3幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24806, 1004140, 240111044331054735, 239825274387125340, '3幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24807, 1004140, 240111044331054735, 239825274387125341, '3幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24808, 1004140, 240111044331054735, 239825274387125342, '3幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24809, 1004140, 240111044331054735, 239825274387125343, '3幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24810, 1004140, 240111044331054735, 239825274387125344, '3幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24811, 1004140, 240111044331054735, 239825274387125345, '3幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24812, 1004140, 240111044331054735, 239825274387125346, '3幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24813, 1004140, 240111044331054735, 239825274387125347, '3幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24814, 1004140, 240111044331054735, 239825274387125348, '3幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24815, 1004140, 240111044331054735, 239825274387125349, '3幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24816, 1004140, 240111044331054735, 239825274387125350, '3幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24817, 1004140, 240111044331054735, 239825274387125351, '3幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24818, 1004140, 240111044331054735, 239825274387125352, '3幢-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24819, 1004140, 240111044331054735, 239825274387125353, '5幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24820, 1004140, 240111044331054735, 239825274387125354, '5幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24821, 1004140, 240111044331054735, 239825274387125355, '5幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24822, 1004140, 240111044331054735, 239825274387125356, '5幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24823, 1004140, 240111044331054735, 239825274387125357, '5幢-105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24824, 1004140, 240111044331054735, 239825274387125358, '5幢-106', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24825, 1004140, 240111044331054735, 239825274387125359, '5幢-107', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24826, 1004140, 240111044331054735, 239825274387125360, '5幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24827, 1004140, 240111044331054735, 239825274387125361, '5幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24828, 1004140, 240111044331054735, 239825274387125362, '5幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24829, 1004140, 240111044331054735, 239825274387125363, '5幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24830, 1004140, 240111044331054735, 239825274387125364, '5幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24831, 1004140, 240111044331054735, 239825274387125365, '5幢-206', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24832, 1004140, 240111044331054735, 239825274387125366, '5幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24833, 1004140, 240111044331054735, 239825274387125367, '5幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24834, 1004140, 240111044331054735, 239825274387125368, '5幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24835, 1004140, 240111044331054735, 239825274387125369, '5幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24836, 1004140, 240111044331054735, 239825274387125370, '5幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24837, 1004140, 240111044331054735, 239825274387125371, '5幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24838, 1004140, 240111044331054735, 239825274387125372, '5幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24839, 1004140, 240111044331054735, 239825274387125373, '5幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24840, 1004140, 240111044331054735, 239825274387125374, '5幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24841, 1004140, 240111044331054735, 239825274387125375, '5幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24842, 1004140, 240111044331054735, 239825274387125376, '5幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24843, 1004140, 240111044331054735, 239825274387125377, '5幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24844, 1004140, 240111044331054735, 239825274387125378, '5幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24845, 1004140, 240111044331054735, 239825274387125379, '5幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24846, 1004140, 240111044331054735, 239825274387125380, '5幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24847, 1004140, 240111044331054735, 239825274387125381, '5幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24848, 1004140, 240111044331054735, 239825274387125382, '5幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24849, 1004140, 240111044331054735, 239825274387125383, '5幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24850, 1004140, 240111044331054735, 239825274387125384, '5幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24851, 1004140, 240111044331054735, 239825274387125385, '5幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24852, 1004140, 240111044331054735, 239825274387125386, '5幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24853, 1004140, 240111044331054735, 239825274387125387, '5幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24854, 1004140, 240111044331054735, 239825274387125388, '5幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24855, 1004140, 240111044331054735, 239825274387125389, '5幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24856, 1004140, 240111044331054735, 239825274387125390, '5幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24857, 1004140, 240111044331054735, 239825274387125391, '5幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24858, 1004140, 240111044331054735, 239825274387125392, '5幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24859, 1004140, 240111044331054735, 239825274387125393, '5幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24860, 1004140, 240111044331054735, 239825274387125394, '5幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24861, 1004140, 240111044331054735, 239825274387125395, '5幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24862, 1004140, 240111044331054735, 239825274387125396, '5幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24863, 1004140, 240111044331054735, 239825274387125397, '5幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24864, 1004140, 240111044331054735, 239825274387125398, '5幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24865, 1004140, 240111044331054735, 239825274387125399, '5幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24866, 1004140, 240111044331054735, 239825274387125400, '5幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24867, 1004140, 240111044331054735, 239825274387125401, '5幢-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24868, 1004140, 240111044331054735, 239825274387125402, '5幢-901', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24869, 1004140, 240111044331054735, 239825274387125403, '5幢-902', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24870, 1004140, 240111044331054735, 239825274387125404, '5幢-903', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24871, 1004140, 240111044331054735, 239825274387125405, '5幢-904', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24872, 1004140, 240111044331054735, 239825274387125406, '5幢-905', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24873, 1004140, 240111044331054735, 239825274387125407, '5幢-906', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24874, 1004140, 240111044331054735, 239825274387125408, '6幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24875, 1004140, 240111044331054735, 239825274387125409, '6幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24876, 1004140, 240111044331054735, 239825274387125410, '6幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24877, 1004140, 240111044331054735, 239825274387125411, '6幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24878, 1004140, 240111044331054735, 239825274387125412, '6幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24879, 1004140, 240111044331054735, 239825274387125413, '6幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24880, 1004140, 240111044331054735, 239825274387125414, '6幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24881, 1004140, 240111044331054735, 239825274387125415, '6幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24882, 1004140, 240111044331054735, 239825274387125416, '6幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24883, 1004140, 240111044331054735, 239825274387125417, '6幢-206', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24884, 1004140, 240111044331054735, 239825274387125418, '6幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24885, 1004140, 240111044331054735, 239825274387125419, '6幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24886, 1004140, 240111044331054735, 239825274387125420, '6幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24887, 1004140, 240111044331054735, 239825274387125421, '6幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24888, 1004140, 240111044331054735, 239825274387125422, '6幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24889, 1004140, 240111044331054735, 239825274387125423, '6幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24890, 1004140, 240111044331054735, 239825274387125424, '6幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24891, 1004140, 240111044331054735, 239825274387125425, '6幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24892, 1004140, 240111044331054735, 239825274387125426, '6幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24893, 1004140, 240111044331054735, 239825274387125427, '6幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24894, 1004140, 240111044331054735, 239825274387125428, '6幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24895, 1004140, 240111044331054735, 239825274387125429, '6幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24896, 1004140, 240111044331054735, 239825274387125430, '6幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24897, 1004140, 240111044331054735, 239825274387125431, '6幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24898, 1004140, 240111044331054735, 239825274387125432, '6幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24899, 1004140, 240111044331054735, 239825274387125433, '6幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24900, 1004140, 240111044331054735, 239825274387125434, '6幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24901, 1004140, 240111044331054735, 239825274387125435, '6幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24902, 1004140, 240111044331054735, 239825274387125436, '6幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24903, 1004140, 240111044331054735, 239825274387125437, '6幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24904, 1004140, 240111044331054735, 239825274387125438, '6幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24905, 1004140, 240111044331054735, 239825274387125439, '6幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24906, 1004140, 240111044331054735, 239825274387125440, '6幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24907, 1004140, 240111044331054735, 239825274387125441, '6幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24908, 1004140, 240111044331054735, 239825274387125442, '6幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24909, 1004140, 240111044331054735, 239825274387125443, '6幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24910, 1004140, 240111044331054735, 239825274387125444, '6幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24911, 1004140, 240111044331054735, 239825274387125445, '6幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24912, 1004140, 240111044331054735, 239825274387125446, '6幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24913, 1004140, 240111044331054735, 239825274387125447, '6幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24914, 1004140, 240111044331054735, 239825274387125448, '6幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24915, 1004140, 240111044331054735, 239825274387125449, '6幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24916, 1004140, 240111044331054735, 239825274387125450, '6幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24917, 1004140, 240111044331054735, 239825274387125451, '6幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24918, 1004140, 240111044331054735, 239825274387125452, '6幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24919, 1004140, 240111044331054735, 239825274387125453, '6幢-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24920, 1004140, 240111044331054735, 239825274387125454, '6幢-901', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24921, 1004140, 240111044331054735, 239825274387125455, '6幢-902', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24922, 1004140, 240111044331054735, 239825274387125456, '6幢-903', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24923, 1004140, 240111044331054735, 239825274387125457, '6幢-904', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24924, 1004140, 240111044331054735, 239825274387125458, '6幢-905', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24925, 1004140, 240111044331054735, 239825274387125459, '6幢-906', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24926, 1004140, 240111044331054735, 239825274387125460, '6幢-1001', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24927, 1004140, 240111044331054735, 239825274387125461, '6幢-1002', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24928, 1004140, 240111044331054735, 239825274387125462, '6幢-1003', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24929, 1004140, 240111044331054735, 239825274387125463, '6幢-1004', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24930, 1004140, 240111044331054735, 239825274387125464, '6幢-1005', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24931, 1004140, 240111044331054735, 239825274387125465, '6幢-1006', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24932, 1004140, 240111044331054735, 239825274387125466, '7幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24933, 1004140, 240111044331054735, 239825274387125467, '7幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24934, 1004140, 240111044331054735, 239825274387125468, '7幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24935, 1004140, 240111044331054735, 239825274387125469, '7幢-105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24936, 1004140, 240111044331054735, 239825274387125470, '7幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24937, 1004140, 240111044331054735, 239825274387125471, '7幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24938, 1004140, 240111044331054735, 239825274387125472, '7幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24939, 1004140, 240111044331054735, 239825274387125473, '7幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24940, 1004140, 240111044331054735, 239825274387125474, '7幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24941, 1004140, 240111044331054735, 239825274387125475, '7幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24942, 1004140, 240111044331054735, 239825274387125476, '7幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24943, 1004140, 240111044331054735, 239825274387125477, '7幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24944, 1004140, 240111044331054735, 239825274387125478, '7幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24945, 1004140, 240111044331054735, 239825274387125479, '7幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24946, 1004140, 240111044331054735, 239825274387125480, '7幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24947, 1004140, 240111044331054735, 239825274387125481, '7幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24948, 1004140, 240111044331054735, 239825274387125482, '7幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24949, 1004140, 240111044331054735, 239825274387125483, '7幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24950, 1004140, 240111044331054735, 239825274387125484, '7幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24951, 1004140, 240111044331054735, 239825274387125485, '7幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24952, 1004140, 240111044331054735, 239825274387125486, '7幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24953, 1004140, 240111044331054735, 239825274387125487, '7幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24954, 1004140, 240111044331054735, 239825274387125488, '7幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24955, 1004140, 240111044331054735, 239825274387125489, '7幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24956, 1004140, 240111044331054735, 239825274387125490, '7幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24957, 1004140, 240111044331054735, 239825274387125491, '7幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24958, 1004140, 240111044331054735, 239825274387125492, '7幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24959, 1004140, 240111044331054735, 239825274387125493, '7幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24960, 1004140, 240111044331054735, 239825274387125494, '7幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24961, 1004140, 240111044331054735, 239825274387125495, '7幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24962, 1004140, 240111044331054735, 239825274387125496, '7幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24963, 1004140, 240111044331054735, 239825274387125497, '7幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24964, 1004140, 240111044331054735, 239825274387125498, '7幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24965, 1004140, 240111044331054735, 239825274387125499, '7幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24966, 1004140, 240111044331054735, 239825274387125500, '7幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24967, 1004140, 240111044331054735, 239825274387125501, '7幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24968, 1004140, 240111044331054735, 239825274387125502, '7幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24969, 1004140, 240111044331054735, 239825274387125503, '7幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24970, 1004140, 240111044331054735, 239825274387125504, '7幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24971, 1004140, 240111044331054735, 239825274387125505, '7幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24972, 1004140, 240111044331054735, 239825274387125506, '7幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24973, 1004140, 240111044331054735, 239825274387125507, '7幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24974, 1004140, 240111044331054735, 239825274387125508, '7幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24975, 1004140, 240111044331054735, 239825274387125509, '7幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24976, 1004140, 240111044331054735, 239825274387125510, '7幢-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24977, 1004140, 240111044331054735, 239825274387125511, '7幢-901', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24978, 1004140, 240111044331054735, 239825274387125512, '7幢-902', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24979, 1004140, 240111044331054735, 239825274387125513, '7幢-903', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24980, 1004140, 240111044331054735, 239825274387125514, '7幢-904', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24981, 1004140, 240111044331054735, 239825274387125515, '7幢-905', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24982, 1004140, 240111044331054735, 239825274387125516, '7幢-906', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24983, 1004140, 240111044331054735, 239825274387125517, '7幢-1001', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24984, 1004140, 240111044331054735, 239825274387125518, '7幢-1002', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24985, 1004140, 240111044331054735, 239825274387125519, '7幢-1003', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24986, 1004140, 240111044331054735, 239825274387125520, '7幢-1004', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24987, 1004140, 240111044331054735, 239825274387125521, '7幢-1005', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24988, 1004140, 240111044331054735, 239825274387125522, '7幢-1006', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24989, 1004140, 240111044331054735, 239825274387125523, '8幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24990, 1004140, 240111044331054735, 239825274387125524, '8幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24991, 1004140, 240111044331054735, 239825274387125525, '8幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24992, 1004140, 240111044331054735, 239825274387125526, '8幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24993, 1004140, 240111044331054735, 239825274387125527, '8幢-105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24994, 1004140, 240111044331054735, 239825274387125528, '8幢-106', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24995, 1004140, 240111044331054735, 239825274387125529, '8幢-107', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24996, 1004140, 240111044331054735, 239825274387125530, '8幢-108', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24997, 1004140, 240111044331054735, 239825274387125531, '8幢-109', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24998, 1004140, 240111044331054735, 239825274387125532, '8幢-1010', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (24999, 1004140, 240111044331054735, 239825274387125533, '8幢-1011', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25000, 1004140, 240111044331054735, 239825274387125534, '8幢-1012', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25001, 1004140, 240111044331054735, 239825274387125535, '8幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25002, 1004140, 240111044331054735, 239825274387125536, '8幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25003, 1004140, 240111044331054735, 239825274387125537, '8幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25004, 1004140, 240111044331054735, 239825274387125538, '8幢-207', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25005, 1004140, 240111044331054735, 239825274387125539, '8幢-208', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25006, 1004140, 240111044331054735, 239825274387125540, '8幢-209', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25007, 1004140, 240111044331054735, 239825274387125541, '8幢-2012', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25008, 1004140, 240111044331054735, 239825274387125542, '8幢-2013', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25009, 1004140, 240111044331054735, 239825274387125543, '8幢-2014', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25010, 1004140, 240111044331054735, 239825274387125544, '8幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25011, 1004140, 240111044331054735, 239825274387125545, '8幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25012, 1004140, 240111044331054735, 239825274387125546, '8幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25013, 1004140, 240111044331054735, 239825274387125547, '8幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25014, 1004140, 240111044331054735, 239825274387125548, '8幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25015, 1004140, 240111044331054735, 239825274387125549, '8幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25016, 1004140, 240111044331054735, 239825274387125550, '8幢-307', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25017, 1004140, 240111044331054735, 239825274387125551, '8幢-308', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25018, 1004140, 240111044331054735, 239825274387125552, '8幢-309', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25019, 1004140, 240111044331054735, 239825274387125553, '8幢-3010', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25020, 1004140, 240111044331054735, 239825274387125554, '8幢-3011', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25021, 1004140, 240111044331054735, 239825274387125555, '8幢-3012', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25022, 1004140, 240111044331054735, 239825274387125556, '8幢-3013', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25023, 1004140, 240111044331054735, 239825274387125557, '8幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25024, 1004140, 240111044331054735, 239825274387125558, '8幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25025, 1004140, 240111044331054735, 239825274387125559, '8幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25026, 1004140, 240111044331054735, 239825274387125560, '8幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25027, 1004140, 240111044331054735, 239825274387125561, '8幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25028, 1004140, 240111044331054735, 239825274387125562, '8幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25029, 1004140, 240111044331054735, 239825274387125563, '8幢-407', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25030, 1004140, 240111044331054735, 239825274387125564, '8幢-408', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25031, 1004140, 240111044331054735, 239825274387125565, '8幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25032, 1004140, 240111044331054735, 239825274387125566, '8幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25033, 1004140, 240111044331054735, 239825274387125567, '8幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25034, 1004140, 240111044331054735, 239825274387125568, '8幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25035, 1004140, 240111044331054735, 239825274387125569, '8幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25036, 1004140, 240111044331054735, 239825274387125570, '8幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25037, 1004140, 240111044331054735, 239825274387125571, '8幢-507', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25038, 1004140, 240111044331054735, 239825274387125572, '8幢-507', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25039, 1004140, 240111044331054735, 239825274387125573, '8幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25040, 1004140, 240111044331054735, 239825274387125574, '8幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25041, 1004140, 240111044331054735, 239825274387125575, '8幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25042, 1004140, 240111044331054735, 239825274387125576, '8幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25043, 1004140, 240111044331054735, 239825274387125577, '8幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25044, 1004140, 240111044331054735, 239825274387125578, '8幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25045, 1004140, 240111044331054735, 239825274387125579, '8幢-607', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25046, 1004140, 240111044331054735, 239825274387125580, '8幢-608', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25047, 1004140, 240111044331054735, 239825274387125581, '8幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25048, 1004140, 240111044331054735, 239825274387125582, '8幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25049, 1004140, 240111044331054735, 239825274387125583, '8幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25050, 1004140, 240111044331054735, 239825274387125584, '8幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25051, 1004140, 240111044331054735, 239825274387125585, '8幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25052, 1004140, 240111044331054735, 239825274387125586, '8幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25053, 1004140, 240111044331054735, 239825274387125587, '8幢-707', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25054, 1004140, 240111044331054735, 239825274387125588, '8幢-708', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25055, 1004140, 240111044331054735, 239825274387125589, '8幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25056, 1004140, 240111044331054735, 239825274387125590, '8幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25057, 1004140, 240111044331054735, 239825274387125591, '8幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25058, 1004140, 240111044331054735, 239825274387125592, '8幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25059, 1004140, 240111044331054735, 239825274387125593, '8幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25060, 1004140, 240111044331054735, 239825274387125594, '8幢-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25061, 1004140, 240111044331054735, 239825274387125595, '8幢-807', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25062, 1004140, 240111044331054735, 239825274387125596, '8幢-808', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25063, 1004140, 240111044331054735, 239825274387125597, '8幢-901', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25064, 1004140, 240111044331054735, 239825274387125598, '8幢-902', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25065, 1004140, 240111044331054735, 239825274387125599, '8幢-903', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25066, 1004140, 240111044331054735, 239825274387125600, '8幢-904', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25067, 1004140, 240111044331054735, 239825274387125601, '8幢-905', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25068, 1004140, 240111044331054735, 239825274387125602, '8幢-906', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25069, 1004140, 240111044331054735, 239825274387125603, '8幢-907', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25070, 1004140, 240111044331054735, 239825274387125604, '8幢-908', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25071, 1004140, 240111044331054735, 239825274387125605, '8幢-1001', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25072, 1004140, 240111044331054735, 239825274387125606, '8幢-1002', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25073, 1004140, 240111044331054735, 239825274387125607, '8幢-1003', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25074, 1004140, 240111044331054735, 239825274387125608, '8幢-1004', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25075, 1004140, 240111044331054735, 239825274387125609, '8幢-1005', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25076, 1004140, 240111044331054735, 239825274387125610, '8幢-1006', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25077, 1004140, 240111044331054735, 239825274387125611, '8幢-1007', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25078, 1004140, 240111044331054735, 239825274387125612, '8幢-1008', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25079, 1004140, 240111044331054735, 239825274387125613, '8幢-1101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25080, 1004140, 240111044331054735, 239825274387125614, '8幢-1102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25081, 1004140, 240111044331054735, 239825274387125615, '8幢-1103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25082, 1004140, 240111044331054735, 239825274387125616, '8幢-1104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25083, 1004140, 240111044331054735, 239825274387125617, '8幢-1105', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25084, 1004140, 240111044331054735, 239825274387125618, '8幢-1106', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25085, 1004140, 240111044331054735, 239825274387125619, '8幢-1107', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25086, 1004140, 240111044331054735, 239825274387125620, '8幢-1108', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25087, 1004140, 240111044331054735, 239825274387125621, '8幢-1201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25088, 1004140, 240111044331054735, 239825274387125622, '8幢-1202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25089, 1004140, 240111044331054735, 239825274387125623, '8幢-1203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25090, 1004140, 240111044331054735, 239825274387125624, '8幢-1204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25091, 1004140, 240111044331054735, 239825274387125625, '8幢-1205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25092, 1004140, 240111044331054735, 239825274387125626, '8幢-1206', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25093, 1004140, 240111044331054735, 239825274387125627, '8幢-1207', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25094, 1004140, 240111044331054735, 239825274387125628, '8幢-1208', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25095, 1004140, 240111044331054735, 239825274387125629, '8幢-1301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25096, 1004140, 240111044331054735, 239825274387125630, '8幢-1302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25097, 1004140, 240111044331054735, 239825274387125631, '8幢-1303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25098, 1004140, 240111044331054735, 239825274387125632, '8幢-1304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25099, 1004140, 240111044331054735, 239825274387125633, '8幢-1305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25100, 1004140, 240111044331054735, 239825274387125634, '8幢-1306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25101, 1004140, 240111044331054735, 239825274387125635, '8幢-1401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25102, 1004140, 240111044331054735, 239825274387125636, '8幢-1402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25103, 1004140, 240111044331054735, 239825274387125637, '8幢-1403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25104, 1004140, 240111044331054735, 239825274387125638, '8幢-1404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25105, 1004140, 240111044331054735, 239825274387125639, '8幢-1405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25106, 1004140, 240111044331054735, 239825274387125640, '8幢-1406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25107, 1004140, 240111044331054735, 239825274387125641, '9幢-101', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25108, 1004140, 240111044331054735, 239825274387125642, '9幢-102', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25109, 1004140, 240111044331054735, 239825274387125643, '9幢-103', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25110, 1004140, 240111044331054735, 239825274387125644, '9幢-104', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25111, 1004140, 240111044331054735, 239825274387125645, '9幢-201', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25112, 1004140, 240111044331054735, 239825274387125646, '9幢-202', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25113, 1004140, 240111044331054735, 239825274387125647, '9幢-203', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25114, 1004140, 240111044331054735, 239825274387125648, '9幢-204', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25115, 1004140, 240111044331054735, 239825274387125649, '9幢-205', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25116, 1004140, 240111044331054735, 239825274387125650, '9幢-301', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25117, 1004140, 240111044331054735, 239825274387125651, '9幢-302', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25118, 1004140, 240111044331054735, 239825274387125652, '9幢-303', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25119, 1004140, 240111044331054735, 239825274387125653, '9幢-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25120, 1004140, 240111044331054735, 239825274387125654, '9幢-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25121, 1004140, 240111044331054735, 239825274387125655, '9幢-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25122, 1004140, 240111044331054735, 239825274387125656, '9幢-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25123, 1004140, 240111044331054735, 239825274387125657, '9幢-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25124, 1004140, 240111044331054735, 239825274387125658, '9幢-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25125, 1004140, 240111044331054735, 239825274387125659, '9幢-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25126, 1004140, 240111044331054735, 239825274387125660, '9幢-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25127, 1004140, 240111044331054735, 239825274387125661, '9幢-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25128, 1004140, 240111044331054735, 239825274387125662, '9幢-501', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25129, 1004140, 240111044331054735, 239825274387125663, '9幢-502', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25130, 1004140, 240111044331054735, 239825274387125664, '9幢-503', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25131, 1004140, 240111044331054735, 239825274387125665, '9幢-504', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25132, 1004140, 240111044331054735, 239825274387125666, '9幢-505', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25133, 1004140, 240111044331054735, 239825274387125667, '9幢-506', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25134, 1004140, 240111044331054735, 239825274387125668, '9幢-601', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25135, 1004140, 240111044331054735, 239825274387125669, '9幢-602', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25136, 1004140, 240111044331054735, 239825274387125670, '9幢-603', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25137, 1004140, 240111044331054735, 239825274387125671, '9幢-604', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25138, 1004140, 240111044331054735, 239825274387125672, '9幢-605', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25139, 1004140, 240111044331054735, 239825274387125673, '9幢-606', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25140, 1004140, 240111044331054735, 239825274387125674, '9幢-701', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25141, 1004140, 240111044331054735, 239825274387125675, '9幢-702', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25142, 1004140, 240111044331054735, 239825274387125676, '9幢-703', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25143, 1004140, 240111044331054735, 239825274387125677, '9幢-704', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25144, 1004140, 240111044331054735, 239825274387125678, '9幢-705', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25145, 1004140, 240111044331054735, 239825274387125679, '9幢-706', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25146, 1004140, 240111044331054735, 239825274387125680, '9幢-801', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25147, 1004140, 240111044331054735, 239825274387125681, '9幢-802', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25148, 1004140, 240111044331054735, 239825274387125682, '9幢-803', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25149, 1004140, 240111044331054735, 239825274387125683, '9幢-804', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25150, 1004140, 240111044331054735, 239825274387125684, '9幢-805', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (25151, 1004140, 240111044331054735, 239825274387125685, '9幢-806', '0');
 
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21874, 1004140, 240111044331054735, 239825274387113864, '1幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21875, 1004140, 240111044331054735, 239825274387113865, '1幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21876, 1004140, 240111044331054735, 239825274387113866, '1幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21877, 1004140, 240111044331054735, 239825274387113867, '1幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21878, 1004140, 240111044331054735, 239825274387113868, '1幢-105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21879, 1004140, 240111044331054735, 239825274387113869, '1幢-106', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21880, 1004140, 240111044331054735, 239825274387113870, '1幢-107', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21881, 1004140, 240111044331054735, 239825274387113871, '1幢-108', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21882, 1004140, 240111044331054735, 239825274387113872, '1幢-109', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21883, 1004140, 240111044331054735, 239825274387113873, '1幢-1010', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21884, 1004140, 240111044331054735, 239825274387113874, '1幢-1011', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21885, 1004140, 240111044331054735, 239825274387113875, '1幢-1012', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21886, 1004140, 240111044331054735, 239825274387113876, '1幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21887, 1004140, 240111044331054735, 239825274387113877, '1幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21888, 1004140, 240111044331054735, 239825274387113878, '1幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21889, 1004140, 240111044331054735, 239825274387113879, '1幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21890, 1004140, 240111044331054735, 239825274387113880, '1幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21891, 1004140, 240111044331054735, 239825274387113881, '1幢-206', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21892, 1004140, 240111044331054735, 239825274387113882, '1幢-207', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21893, 1004140, 240111044331054735, 239825274387113883, '1幢-208', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21894, 1004140, 240111044331054735, 239825274387113884, '1幢-209', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21895, 1004140, 240111044331054735, 239825274387113885, '1幢-2010', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21896, 1004140, 240111044331054735, 239825274387113886, '1幢-2011', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21897, 1004140, 240111044331054735, 239825274387113887, '1幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21898, 1004140, 240111044331054735, 239825274387113888, '2幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21899, 1004140, 240111044331054735, 239825274387113889, '2幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21900, 1004140, 240111044331054735, 239825274387113890, '2幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21901, 1004140, 240111044331054735, 239825274387113891, '2幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21902, 1004140, 240111044331054735, 239825274387113892, '2幢-105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21903, 1004140, 240111044331054735, 239825274387113893, '2幢-106', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21904, 1004140, 240111044331054735, 239825274387113894, '2幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21905, 1004140, 240111044331054735, 239825274387113895, '2幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21906, 1004140, 240111044331054735, 239825274387113896, '2幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21907, 1004140, 240111044331054735, 239825274387113897, '2幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21908, 1004140, 240111044331054735, 239825274387113898, '2幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21909, 1004140, 240111044331054735, 239825274387113899, '2幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21910, 1004140, 240111044331054735, 239825274387113900, '2幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21911, 1004140, 240111044331054735, 239825274387113901, '2幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21912, 1004140, 240111044331054735, 239825274387113902, '2幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21913, 1004140, 240111044331054735, 239825274387113903, '2幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21914, 1004140, 240111044331054735, 239825274387113904, '2幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21915, 1004140, 240111044331054735, 239825274387113905, '2幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21916, 1004140, 240111044331054735, 239825274387113906, '2幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21917, 1004140, 240111044331054735, 239825274387113907, '2幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21918, 1004140, 240111044331054735, 239825274387113908, '2幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21919, 1004140, 240111044331054735, 239825274387113909, '2幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21920, 1004140, 240111044331054735, 239825274387113910, '2幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21921, 1004140, 240111044331054735, 239825274387113911, '2幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21922, 1004140, 240111044331054735, 239825274387113912, '2幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21923, 1004140, 240111044331054735, 239825274387113913, '2幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21924, 1004140, 240111044331054735, 239825274387113914, '2幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21925, 1004140, 240111044331054735, 239825274387113915, '2幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21926, 1004140, 240111044331054735, 239825274387113916, '2幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21927, 1004140, 240111044331054735, 239825274387113917, '2幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21928, 1004140, 240111044331054735, 239825274387113918, '2幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21929, 1004140, 240111044331054735, 239825274387113919, '2幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21930, 1004140, 240111044331054735, 239825274387113920, '2幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21931, 1004140, 240111044331054735, 239825274387113921, '2幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21932, 1004140, 240111044331054735, 239825274387113922, '2幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21933, 1004140, 240111044331054735, 239825274387113923, '2幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21934, 1004140, 240111044331054735, 239825274387113924, '2幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21935, 1004140, 240111044331054735, 239825274387113925, '2幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21936, 1004140, 240111044331054735, 239825274387113926, '2幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21937, 1004140, 240111044331054735, 239825274387113927, '2幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21938, 1004140, 240111044331054735, 239825274387113928, '2幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21939, 1004140, 240111044331054735, 239825274387113929, '2幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21940, 1004140, 240111044331054735, 239825274387113930, '2幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21941, 1004140, 240111044331054735, 239825274387113931, '2幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21942, 1004140, 240111044331054735, 239825274387113932, '2幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21943, 1004140, 240111044331054735, 239825274387113933, '2幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21944, 1004140, 240111044331054735, 239825274387113934, '2幢-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21945, 1004140, 240111044331054735, 239825274387113935, '2幢-901', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21946, 1004140, 240111044331054735, 239825274387113936, '2幢-902', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21947, 1004140, 240111044331054735, 239825274387113937, '2幢-903', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21948, 1004140, 240111044331054735, 239825274387113938, '2幢-904', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21949, 1004140, 240111044331054735, 239825274387113939, '2幢-905', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21950, 1004140, 240111044331054735, 239825274387113940, '2幢-906', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21951, 1004140, 240111044331054735, 239825274387113941, '3幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21952, 1004140, 240111044331054735, 239825274387113942, '3幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21953, 1004140, 240111044331054735, 239825274387113943, '3幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21954, 1004140, 240111044331054735, 239825274387113944, '3幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21955, 1004140, 240111044331054735, 239825274387113945, '3幢-105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21956, 1004140, 240111044331054735, 239825274387113946, '3幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21957, 1004140, 240111044331054735, 239825274387113947, '3幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21958, 1004140, 240111044331054735, 239825274387113948, '3幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21959, 1004140, 240111044331054735, 239825274387113949, '3幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21960, 1004140, 240111044331054735, 239825274387113950, '3幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21961, 1004140, 240111044331054735, 239825274387113951, '3幢-206', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21962, 1004140, 240111044331054735, 239825274387113952, '3幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21963, 1004140, 240111044331054735, 239825274387113953, '3幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21964, 1004140, 240111044331054735, 239825274387113954, '3幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21965, 1004140, 240111044331054735, 239825274387113955, '3幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21966, 1004140, 240111044331054735, 239825274387113956, '3幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21967, 1004140, 240111044331054735, 239825274387113957, '3幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21968, 1004140, 240111044331054735, 239825274387113958, '3幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21969, 1004140, 240111044331054735, 239825274387113959, '3幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21970, 1004140, 240111044331054735, 239825274387113960, '3幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21971, 1004140, 240111044331054735, 239825274387113961, '3幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21972, 1004140, 240111044331054735, 239825274387113962, '3幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21973, 1004140, 240111044331054735, 239825274387113963, '3幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21974, 1004140, 240111044331054735, 239825274387113964, '3幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21975, 1004140, 240111044331054735, 239825274387113965, '3幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21976, 1004140, 240111044331054735, 239825274387113966, '3幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21977, 1004140, 240111044331054735, 239825274387113967, '3幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21978, 1004140, 240111044331054735, 239825274387113968, '3幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21979, 1004140, 240111044331054735, 239825274387113969, '3幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21980, 1004140, 240111044331054735, 239825274387113970, '3幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21981, 1004140, 240111044331054735, 239825274387113971, '3幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21982, 1004140, 240111044331054735, 239825274387113972, '3幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21983, 1004140, 240111044331054735, 239825274387113973, '3幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21984, 1004140, 240111044331054735, 239825274387113974, '3幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21985, 1004140, 240111044331054735, 239825274387113975, '3幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21986, 1004140, 240111044331054735, 239825274387113976, '3幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21987, 1004140, 240111044331054735, 239825274387113977, '3幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21988, 1004140, 240111044331054735, 239825274387113978, '3幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21989, 1004140, 240111044331054735, 239825274387113979, '3幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21990, 1004140, 240111044331054735, 239825274387113980, '3幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21991, 1004140, 240111044331054735, 239825274387113981, '3幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21992, 1004140, 240111044331054735, 239825274387113982, '3幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21993, 1004140, 240111044331054735, 239825274387113983, '3幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21994, 1004140, 240111044331054735, 239825274387113984, '3幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21995, 1004140, 240111044331054735, 239825274387113985, '3幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21996, 1004140, 240111044331054735, 239825274387113986, '3幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21997, 1004140, 240111044331054735, 239825274387113987, '3幢-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21998, 1004140, 240111044331054735, 239825274387113988, '5幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (21999, 1004140, 240111044331054735, 239825274387113989, '5幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22000, 1004140, 240111044331054735, 239825274387113990, '5幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22001, 1004140, 240111044331054735, 239825274387113991, '5幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22002, 1004140, 240111044331054735, 239825274387113992, '5幢-105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22003, 1004140, 240111044331054735, 239825274387113993, '5幢-106', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22004, 1004140, 240111044331054735, 239825274387113994, '5幢-107', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22005, 1004140, 240111044331054735, 239825274387113995, '5幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22006, 1004140, 240111044331054735, 239825274387113996, '5幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22007, 1004140, 240111044331054735, 239825274387113997, '5幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22008, 1004140, 240111044331054735, 239825274387113998, '5幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22009, 1004140, 240111044331054735, 239825274387113999, '5幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22010, 1004140, 240111044331054735, 239825274387114000, '5幢-206', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22011, 1004140, 240111044331054735, 239825274387114001, '5幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22012, 1004140, 240111044331054735, 239825274387114002, '5幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22013, 1004140, 240111044331054735, 239825274387114003, '5幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22014, 1004140, 240111044331054735, 239825274387114004, '5幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22015, 1004140, 240111044331054735, 239825274387114005, '5幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22016, 1004140, 240111044331054735, 239825274387114006, '5幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22017, 1004140, 240111044331054735, 239825274387114007, '5幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22018, 1004140, 240111044331054735, 239825274387114008, '5幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22019, 1004140, 240111044331054735, 239825274387114009, '5幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22020, 1004140, 240111044331054735, 239825274387114010, '5幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22021, 1004140, 240111044331054735, 239825274387114011, '5幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22022, 1004140, 240111044331054735, 239825274387114012, '5幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22023, 1004140, 240111044331054735, 239825274387114013, '5幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22024, 1004140, 240111044331054735, 239825274387114014, '5幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22025, 1004140, 240111044331054735, 239825274387114015, '5幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22026, 1004140, 240111044331054735, 239825274387114016, '5幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22027, 1004140, 240111044331054735, 239825274387114017, '5幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22028, 1004140, 240111044331054735, 239825274387114018, '5幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22029, 1004140, 240111044331054735, 239825274387114019, '5幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22030, 1004140, 240111044331054735, 239825274387114020, '5幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22031, 1004140, 240111044331054735, 239825274387114021, '5幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22032, 1004140, 240111044331054735, 239825274387114022, '5幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22033, 1004140, 240111044331054735, 239825274387114023, '5幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22034, 1004140, 240111044331054735, 239825274387114024, '5幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22035, 1004140, 240111044331054735, 239825274387114025, '5幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22036, 1004140, 240111044331054735, 239825274387114026, '5幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22037, 1004140, 240111044331054735, 239825274387114027, '5幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22038, 1004140, 240111044331054735, 239825274387114028, '5幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22039, 1004140, 240111044331054735, 239825274387114029, '5幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22040, 1004140, 240111044331054735, 239825274387114030, '5幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22041, 1004140, 240111044331054735, 239825274387114031, '5幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22042, 1004140, 240111044331054735, 239825274387114032, '5幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22043, 1004140, 240111044331054735, 239825274387114033, '5幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22044, 1004140, 240111044331054735, 239825274387114034, '5幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22045, 1004140, 240111044331054735, 239825274387114035, '5幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22046, 1004140, 240111044331054735, 239825274387114036, '5幢-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22047, 1004140, 240111044331054735, 239825274387114037, '5幢-901', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22048, 1004140, 240111044331054735, 239825274387114038, '5幢-902', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22049, 1004140, 240111044331054735, 239825274387114039, '5幢-903', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22050, 1004140, 240111044331054735, 239825274387114040, '5幢-904', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22051, 1004140, 240111044331054735, 239825274387114041, '5幢-905', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22052, 1004140, 240111044331054735, 239825274387114042, '5幢-906', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22053, 1004140, 240111044331054735, 239825274387114043, '6幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22054, 1004140, 240111044331054735, 239825274387114044, '6幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22055, 1004140, 240111044331054735, 239825274387114045, '6幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22056, 1004140, 240111044331054735, 239825274387114046, '6幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22057, 1004140, 240111044331054735, 239825274387114047, '6幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22058, 1004140, 240111044331054735, 239825274387114048, '6幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22059, 1004140, 240111044331054735, 239825274387114049, '6幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22060, 1004140, 240111044331054735, 239825274387114050, '6幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22061, 1004140, 240111044331054735, 239825274387114051, '6幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22062, 1004140, 240111044331054735, 239825274387114052, '6幢-206', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22063, 1004140, 240111044331054735, 239825274387114053, '6幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22064, 1004140, 240111044331054735, 239825274387114054, '6幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22065, 1004140, 240111044331054735, 239825274387114055, '6幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22066, 1004140, 240111044331054735, 239825274387114056, '6幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22067, 1004140, 240111044331054735, 239825274387114057, '6幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22068, 1004140, 240111044331054735, 239825274387114058, '6幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22069, 1004140, 240111044331054735, 239825274387114059, '6幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22070, 1004140, 240111044331054735, 239825274387114060, '6幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22071, 1004140, 240111044331054735, 239825274387114061, '6幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22072, 1004140, 240111044331054735, 239825274387114062, '6幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22073, 1004140, 240111044331054735, 239825274387114063, '6幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22074, 1004140, 240111044331054735, 239825274387114064, '6幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22075, 1004140, 240111044331054735, 239825274387114065, '6幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22076, 1004140, 240111044331054735, 239825274387114066, '6幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22077, 1004140, 240111044331054735, 239825274387114067, '6幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22078, 1004140, 240111044331054735, 239825274387114068, '6幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22079, 1004140, 240111044331054735, 239825274387114069, '6幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22080, 1004140, 240111044331054735, 239825274387114070, '6幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22081, 1004140, 240111044331054735, 239825274387114071, '6幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22082, 1004140, 240111044331054735, 239825274387114072, '6幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22083, 1004140, 240111044331054735, 239825274387114073, '6幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22084, 1004140, 240111044331054735, 239825274387114074, '6幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22085, 1004140, 240111044331054735, 239825274387114075, '6幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22086, 1004140, 240111044331054735, 239825274387114076, '6幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22087, 1004140, 240111044331054735, 239825274387114077, '6幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22088, 1004140, 240111044331054735, 239825274387114078, '6幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22089, 1004140, 240111044331054735, 239825274387114079, '6幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22090, 1004140, 240111044331054735, 239825274387114080, '6幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22091, 1004140, 240111044331054735, 239825274387114081, '6幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22092, 1004140, 240111044331054735, 239825274387114082, '6幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22093, 1004140, 240111044331054735, 239825274387114083, '6幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22094, 1004140, 240111044331054735, 239825274387114084, '6幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22095, 1004140, 240111044331054735, 239825274387114085, '6幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22096, 1004140, 240111044331054735, 239825274387114086, '6幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22097, 1004140, 240111044331054735, 239825274387114087, '6幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22098, 1004140, 240111044331054735, 239825274387114088, '6幢-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22099, 1004140, 240111044331054735, 239825274387114089, '6幢-901', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22100, 1004140, 240111044331054735, 239825274387114090, '6幢-902', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22101, 1004140, 240111044331054735, 239825274387114091, '6幢-903', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22102, 1004140, 240111044331054735, 239825274387114092, '6幢-904', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22103, 1004140, 240111044331054735, 239825274387114093, '6幢-905', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22104, 1004140, 240111044331054735, 239825274387114094, '6幢-906', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22105, 1004140, 240111044331054735, 239825274387114095, '6幢-1001', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22106, 1004140, 240111044331054735, 239825274387114096, '6幢-1002', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22107, 1004140, 240111044331054735, 239825274387114097, '6幢-1003', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22108, 1004140, 240111044331054735, 239825274387114098, '6幢-1004', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22109, 1004140, 240111044331054735, 239825274387114099, '6幢-1005', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22110, 1004140, 240111044331054735, 239825274387114100, '6幢-1006', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22111, 1004140, 240111044331054735, 239825274387114101, '7幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22112, 1004140, 240111044331054735, 239825274387114102, '7幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22113, 1004140, 240111044331054735, 239825274387114103, '7幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22114, 1004140, 240111044331054735, 239825274387114104, '7幢-105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22115, 1004140, 240111044331054735, 239825274387114105, '7幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22116, 1004140, 240111044331054735, 239825274387114106, '7幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22117, 1004140, 240111044331054735, 239825274387114107, '7幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22118, 1004140, 240111044331054735, 239825274387114108, '7幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22119, 1004140, 240111044331054735, 239825274387114109, '7幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22120, 1004140, 240111044331054735, 239825274387114110, '7幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22121, 1004140, 240111044331054735, 239825274387114111, '7幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22122, 1004140, 240111044331054735, 239825274387114112, '7幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22123, 1004140, 240111044331054735, 239825274387114113, '7幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22124, 1004140, 240111044331054735, 239825274387114114, '7幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22125, 1004140, 240111044331054735, 239825274387114115, '7幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22126, 1004140, 240111044331054735, 239825274387114116, '7幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22127, 1004140, 240111044331054735, 239825274387114117, '7幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22128, 1004140, 240111044331054735, 239825274387114118, '7幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22129, 1004140, 240111044331054735, 239825274387114119, '7幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22130, 1004140, 240111044331054735, 239825274387114120, '7幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22131, 1004140, 240111044331054735, 239825274387114121, '7幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22132, 1004140, 240111044331054735, 239825274387114122, '7幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22133, 1004140, 240111044331054735, 239825274387114123, '7幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22134, 1004140, 240111044331054735, 239825274387114124, '7幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22135, 1004140, 240111044331054735, 239825274387114125, '7幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22136, 1004140, 240111044331054735, 239825274387114126, '7幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22137, 1004140, 240111044331054735, 239825274387114127, '7幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22138, 1004140, 240111044331054735, 239825274387114128, '7幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22139, 1004140, 240111044331054735, 239825274387114129, '7幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22140, 1004140, 240111044331054735, 239825274387114130, '7幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22141, 1004140, 240111044331054735, 239825274387114131, '7幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22142, 1004140, 240111044331054735, 239825274387114132, '7幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22143, 1004140, 240111044331054735, 239825274387114133, '7幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22144, 1004140, 240111044331054735, 239825274387114134, '7幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22145, 1004140, 240111044331054735, 239825274387114135, '7幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22146, 1004140, 240111044331054735, 239825274387114136, '7幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22147, 1004140, 240111044331054735, 239825274387114137, '7幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22148, 1004140, 240111044331054735, 239825274387114138, '7幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22149, 1004140, 240111044331054735, 239825274387114139, '7幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22150, 1004140, 240111044331054735, 239825274387114140, '7幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22151, 1004140, 240111044331054735, 239825274387114141, '7幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22152, 1004140, 240111044331054735, 239825274387114142, '7幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22153, 1004140, 240111044331054735, 239825274387114143, '7幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22154, 1004140, 240111044331054735, 239825274387114144, '7幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22155, 1004140, 240111044331054735, 239825274387114145, '7幢-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22156, 1004140, 240111044331054735, 239825274387114146, '7幢-901', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22157, 1004140, 240111044331054735, 239825274387114147, '7幢-902', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22158, 1004140, 240111044331054735, 239825274387114148, '7幢-903', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22159, 1004140, 240111044331054735, 239825274387114149, '7幢-904', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22160, 1004140, 240111044331054735, 239825274387114150, '7幢-905', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22161, 1004140, 240111044331054735, 239825274387114151, '7幢-906', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22162, 1004140, 240111044331054735, 239825274387114152, '7幢-1001', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22163, 1004140, 240111044331054735, 239825274387114153, '7幢-1002', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22164, 1004140, 240111044331054735, 239825274387114154, '7幢-1003', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22165, 1004140, 240111044331054735, 239825274387114155, '7幢-1004', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22166, 1004140, 240111044331054735, 239825274387114156, '7幢-1005', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22167, 1004140, 240111044331054735, 239825274387114157, '7幢-1006', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22168, 1004140, 240111044331054735, 239825274387114158, '8幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22169, 1004140, 240111044331054735, 239825274387114159, '8幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22170, 1004140, 240111044331054735, 239825274387114160, '8幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22171, 1004140, 240111044331054735, 239825274387114161, '8幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22172, 1004140, 240111044331054735, 239825274387114162, '8幢-105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22173, 1004140, 240111044331054735, 239825274387114163, '8幢-106', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22174, 1004140, 240111044331054735, 239825274387114164, '8幢-107', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22175, 1004140, 240111044331054735, 239825274387114165, '8幢-108', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22176, 1004140, 240111044331054735, 239825274387114166, '8幢-109', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22177, 1004140, 240111044331054735, 239825274387114167, '8幢-1010', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22178, 1004140, 240111044331054735, 239825274387114168, '8幢-1011', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22179, 1004140, 240111044331054735, 239825274387114169, '8幢-1012', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22180, 1004140, 240111044331054735, 239825274387114170, '8幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22181, 1004140, 240111044331054735, 239825274387114171, '8幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22182, 1004140, 240111044331054735, 239825274387114172, '8幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22183, 1004140, 240111044331054735, 239825274387114173, '8幢-207', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22184, 1004140, 240111044331054735, 239825274387114174, '8幢-208', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22185, 1004140, 240111044331054735, 239825274387114175, '8幢-209', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22186, 1004140, 240111044331054735, 239825274387114176, '8幢-2012', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22187, 1004140, 240111044331054735, 239825274387114177, '8幢-2013', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22188, 1004140, 240111044331054735, 239825274387114178, '8幢-2014', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22189, 1004140, 240111044331054735, 239825274387114179, '8幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22190, 1004140, 240111044331054735, 239825274387114180, '8幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22191, 1004140, 240111044331054735, 239825274387114181, '8幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22192, 1004140, 240111044331054735, 239825274387114182, '8幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22193, 1004140, 240111044331054735, 239825274387114183, '8幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22194, 1004140, 240111044331054735, 239825274387114184, '8幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22195, 1004140, 240111044331054735, 239825274387114185, '8幢-307', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22196, 1004140, 240111044331054735, 239825274387114186, '8幢-308', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22197, 1004140, 240111044331054735, 239825274387114187, '8幢-309', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22198, 1004140, 240111044331054735, 239825274387114188, '8幢-3010', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22199, 1004140, 240111044331054735, 239825274387114189, '8幢-3011', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22200, 1004140, 240111044331054735, 239825274387114190, '8幢-3012', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22201, 1004140, 240111044331054735, 239825274387114191, '8幢-3013', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22202, 1004140, 240111044331054735, 239825274387114192, '8幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22203, 1004140, 240111044331054735, 239825274387114193, '8幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22204, 1004140, 240111044331054735, 239825274387114194, '8幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22205, 1004140, 240111044331054735, 239825274387114195, '8幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22206, 1004140, 240111044331054735, 239825274387114196, '8幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22207, 1004140, 240111044331054735, 239825274387114197, '8幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22208, 1004140, 240111044331054735, 239825274387114198, '8幢-407', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22209, 1004140, 240111044331054735, 239825274387114199, '8幢-408', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22210, 1004140, 240111044331054735, 239825274387114200, '8幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22211, 1004140, 240111044331054735, 239825274387114201, '8幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22212, 1004140, 240111044331054735, 239825274387114202, '8幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22213, 1004140, 240111044331054735, 239825274387114203, '8幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22214, 1004140, 240111044331054735, 239825274387114204, '8幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22215, 1004140, 240111044331054735, 239825274387114205, '8幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22216, 1004140, 240111044331054735, 239825274387114206, '8幢-507', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22217, 1004140, 240111044331054735, 239825274387114207, '8幢-507', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22218, 1004140, 240111044331054735, 239825274387114208, '8幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22219, 1004140, 240111044331054735, 239825274387114209, '8幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22220, 1004140, 240111044331054735, 239825274387114210, '8幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22221, 1004140, 240111044331054735, 239825274387114211, '8幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22222, 1004140, 240111044331054735, 239825274387114212, '8幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22223, 1004140, 240111044331054735, 239825274387114213, '8幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22224, 1004140, 240111044331054735, 239825274387114214, '8幢-607', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22225, 1004140, 240111044331054735, 239825274387114215, '8幢-608', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22226, 1004140, 240111044331054735, 239825274387114216, '8幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22227, 1004140, 240111044331054735, 239825274387114217, '8幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22228, 1004140, 240111044331054735, 239825274387114218, '8幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22229, 1004140, 240111044331054735, 239825274387114219, '8幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22230, 1004140, 240111044331054735, 239825274387114220, '8幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22231, 1004140, 240111044331054735, 239825274387114221, '8幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22232, 1004140, 240111044331054735, 239825274387114222, '8幢-707', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22233, 1004140, 240111044331054735, 239825274387114223, '8幢-708', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22234, 1004140, 240111044331054735, 239825274387114224, '8幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22235, 1004140, 240111044331054735, 239825274387114225, '8幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22236, 1004140, 240111044331054735, 239825274387114226, '8幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22237, 1004140, 240111044331054735, 239825274387114227, '8幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22238, 1004140, 240111044331054735, 239825274387114228, '8幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22239, 1004140, 240111044331054735, 239825274387114229, '8幢-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22240, 1004140, 240111044331054735, 239825274387114230, '8幢-807', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22241, 1004140, 240111044331054735, 239825274387114231, '8幢-808', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22242, 1004140, 240111044331054735, 239825274387114232, '8幢-901', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22243, 1004140, 240111044331054735, 239825274387114233, '8幢-902', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22244, 1004140, 240111044331054735, 239825274387114234, '8幢-903', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22245, 1004140, 240111044331054735, 239825274387114235, '8幢-904', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22246, 1004140, 240111044331054735, 239825274387114236, '8幢-905', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22247, 1004140, 240111044331054735, 239825274387114237, '8幢-906', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22248, 1004140, 240111044331054735, 239825274387114238, '8幢-907', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22249, 1004140, 240111044331054735, 239825274387114239, '8幢-908', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22250, 1004140, 240111044331054735, 239825274387114240, '8幢-1001', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22251, 1004140, 240111044331054735, 239825274387114241, '8幢-1002', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22252, 1004140, 240111044331054735, 239825274387114242, '8幢-1003', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22253, 1004140, 240111044331054735, 239825274387114243, '8幢-1004', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22254, 1004140, 240111044331054735, 239825274387114244, '8幢-1005', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22255, 1004140, 240111044331054735, 239825274387114245, '8幢-1006', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22256, 1004140, 240111044331054735, 239825274387114246, '8幢-1007', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22257, 1004140, 240111044331054735, 239825274387114247, '8幢-1008', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22258, 1004140, 240111044331054735, 239825274387114248, '8幢-1101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22259, 1004140, 240111044331054735, 239825274387114249, '8幢-1102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22260, 1004140, 240111044331054735, 239825274387114250, '8幢-1103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22261, 1004140, 240111044331054735, 239825274387114251, '8幢-1104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22262, 1004140, 240111044331054735, 239825274387114252, '8幢-1105', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22263, 1004140, 240111044331054735, 239825274387114253, '8幢-1106', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22264, 1004140, 240111044331054735, 239825274387114254, '8幢-1107', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22265, 1004140, 240111044331054735, 239825274387114255, '8幢-1108', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22266, 1004140, 240111044331054735, 239825274387114256, '8幢-1201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22267, 1004140, 240111044331054735, 239825274387114257, '8幢-1202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22268, 1004140, 240111044331054735, 239825274387114258, '8幢-1203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22269, 1004140, 240111044331054735, 239825274387114259, '8幢-1204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22270, 1004140, 240111044331054735, 239825274387114260, '8幢-1205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22271, 1004140, 240111044331054735, 239825274387114261, '8幢-1206', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22272, 1004140, 240111044331054735, 239825274387114262, '8幢-1207', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22273, 1004140, 240111044331054735, 239825274387114263, '8幢-1208', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22274, 1004140, 240111044331054735, 239825274387114264, '8幢-1301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22275, 1004140, 240111044331054735, 239825274387114265, '8幢-1302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22276, 1004140, 240111044331054735, 239825274387114266, '8幢-1303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22277, 1004140, 240111044331054735, 239825274387114267, '8幢-1304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22278, 1004140, 240111044331054735, 239825274387114268, '8幢-1305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22279, 1004140, 240111044331054735, 239825274387114269, '8幢-1306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22280, 1004140, 240111044331054735, 239825274387114270, '8幢-1401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22281, 1004140, 240111044331054735, 239825274387114271, '8幢-1402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22282, 1004140, 240111044331054735, 239825274387114272, '8幢-1403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22283, 1004140, 240111044331054735, 239825274387114273, '8幢-1404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22284, 1004140, 240111044331054735, 239825274387114274, '8幢-1405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22285, 1004140, 240111044331054735, 239825274387114275, '8幢-1406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22286, 1004140, 240111044331054735, 239825274387114276, '9幢-101', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22287, 1004140, 240111044331054735, 239825274387114277, '9幢-102', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22288, 1004140, 240111044331054735, 239825274387114278, '9幢-103', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22289, 1004140, 240111044331054735, 239825274387114279, '9幢-104', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22290, 1004140, 240111044331054735, 239825274387114280, '9幢-201', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22291, 1004140, 240111044331054735, 239825274387114281, '9幢-202', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22292, 1004140, 240111044331054735, 239825274387114282, '9幢-203', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22293, 1004140, 240111044331054735, 239825274387114283, '9幢-204', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22294, 1004140, 240111044331054735, 239825274387114284, '9幢-205', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22295, 1004140, 240111044331054735, 239825274387114285, '9幢-301', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22296, 1004140, 240111044331054735, 239825274387114286, '9幢-302', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22297, 1004140, 240111044331054735, 239825274387114287, '9幢-303', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22298, 1004140, 240111044331054735, 239825274387114288, '9幢-304', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22299, 1004140, 240111044331054735, 239825274387114289, '9幢-305', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22300, 1004140, 240111044331054735, 239825274387114290, '9幢-306', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22301, 1004140, 240111044331054735, 239825274387114291, '9幢-401', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22302, 1004140, 240111044331054735, 239825274387114292, '9幢-402', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22303, 1004140, 240111044331054735, 239825274387114293, '9幢-403', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22304, 1004140, 240111044331054735, 239825274387114294, '9幢-404', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22305, 1004140, 240111044331054735, 239825274387114295, '9幢-405', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22306, 1004140, 240111044331054735, 239825274387114296, '9幢-406', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22307, 1004140, 240111044331054735, 239825274387114297, '9幢-501', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22308, 1004140, 240111044331054735, 239825274387114298, '9幢-502', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22309, 1004140, 240111044331054735, 239825274387114299, '9幢-503', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22310, 1004140, 240111044331054735, 239825274387114300, '9幢-504', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22311, 1004140, 240111044331054735, 239825274387114301, '9幢-505', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22312, 1004140, 240111044331054735, 239825274387114302, '9幢-506', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22313, 1004140, 240111044331054735, 239825274387114303, '9幢-601', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22314, 1004140, 240111044331054735, 239825274387114304, '9幢-602', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22315, 1004140, 240111044331054735, 239825274387114305, '9幢-603', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22316, 1004140, 240111044331054735, 239825274387114306, '9幢-604', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22317, 1004140, 240111044331054735, 239825274387114307, '9幢-605', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22318, 1004140, 240111044331054735, 239825274387114308, '9幢-606', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22319, 1004140, 240111044331054735, 239825274387114309, '9幢-701', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22320, 1004140, 240111044331054735, 239825274387114310, '9幢-702', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22321, 1004140, 240111044331054735, 239825274387114311, '9幢-703', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22322, 1004140, 240111044331054735, 239825274387114312, '9幢-704', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22323, 1004140, 240111044331054735, 239825274387114313, '9幢-705', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22324, 1004140, 240111044331054735, 239825274387114314, '9幢-706', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22325, 1004140, 240111044331054735, 239825274387114315, '9幢-801', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22326, 1004140, 240111044331054735, 239825274387114316, '9幢-802', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22327, 1004140, 240111044331054735, 239825274387114317, '9幢-803', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22328, 1004140, 240111044331054735, 239825274387114318, '9幢-804', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22329, 1004140, 240111044331054735, 239825274387114319, '9幢-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (22330, 1004140, 240111044331054735, 239825274387114320, '9幢-806', '0');
-
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004539, UUID(), '南通崇川区布艺乐乎家纺设计工作室', '南通崇川区布艺乐乎家纺设计工作室', 1, 1, 1004541, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183003, 1, 999986);
+	VALUES (1004670, UUID(), '南通崇川区布艺乐乎家纺设计工作室', '南通崇川区布艺乐乎家纺设计工作室', 1, 1, 1004672, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183134, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183003, UUID(), 999986, 2, 'EhGroups', 1004539,'南通崇川区布艺乐乎家纺设计工作室','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183134, UUID(), 999986, 2, 'EhGroups', 1004670,'南通崇川区布艺乐乎家纺设计工作室','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004541, 0, 'ENTERPRISE', '南通崇川区布艺乐乎家纺设计工作室', 0, '', '/1004541', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004672, 0, 'ENTERPRISE', '南通崇川区布艺乐乎家纺设计工作室', 0, '', '/1004672', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113412, 240111044331054735, 'organization', 1004541, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113543, 240111044331054735, 'organization', 1004672, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004540, UUID(), '南通泽阳智能科技有限公司', '南通泽阳智能科技有限公司', 1, 1, 1004542, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183004, 1, 999986);
+	VALUES (1004671, UUID(), '南通泽阳智能科技有限公司', '南通泽阳智能科技有限公司', 1, 1, 1004673, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183135, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183004, UUID(), 999986, 2, 'EhGroups', 1004540,'南通泽阳智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183135, UUID(), 999986, 2, 'EhGroups', 1004671,'南通泽阳智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004542, 0, 'ENTERPRISE', '南通泽阳智能科技有限公司', 0, '', '/1004542', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004673, 0, 'ENTERPRISE', '南通泽阳智能科技有限公司', 0, '', '/1004673', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113413, 240111044331054735, 'organization', 1004542, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113544, 240111044331054735, 'organization', 1004673, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004541, UUID(), '南通华建智能科技有限公司', '南通华建智能科技有限公司', 1, 1, 1004543, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183005, 1, 999986);
+	VALUES (1004672, UUID(), '南通华建智能科技有限公司', '南通华建智能科技有限公司', 1, 1, 1004674, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183136, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183005, UUID(), 999986, 2, 'EhGroups', 1004541,'南通华建智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183136, UUID(), 999986, 2, 'EhGroups', 1004672,'南通华建智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004543, 0, 'ENTERPRISE', '南通华建智能科技有限公司', 0, '', '/1004543', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004674, 0, 'ENTERPRISE', '南通华建智能科技有限公司', 0, '', '/1004674', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113414, 240111044331054735, 'organization', 1004543, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113545, 240111044331054735, 'organization', 1004674, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004542, UUID(), '南通新华传媒有限公司', '南通新华传媒有限公司', 1, 1, 1004544, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183006, 1, 999986);
+	VALUES (1004673, UUID(), '南通新华传媒有限公司', '南通新华传媒有限公司', 1, 1, 1004675, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183137, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183006, UUID(), 999986, 2, 'EhGroups', 1004542,'南通新华传媒有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183137, UUID(), 999986, 2, 'EhGroups', 1004673,'南通新华传媒有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004544, 0, 'ENTERPRISE', '南通新华传媒有限公司', 0, '', '/1004544', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004675, 0, 'ENTERPRISE', '南通新华传媒有限公司', 0, '', '/1004675', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113415, 240111044331054735, 'organization', 1004544, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113546, 240111044331054735, 'organization', 1004675, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004543, UUID(), '江苏益美智能科技有限公司', '江苏益美智能科技有限公司', 1, 1, 1004545, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183007, 1, 999986);
+	VALUES (1004674, UUID(), '江苏益美智能科技有限公司', '江苏益美智能科技有限公司', 1, 1, 1004676, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183138, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183007, UUID(), 999986, 2, 'EhGroups', 1004543,'江苏益美智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183138, UUID(), 999986, 2, 'EhGroups', 1004674,'江苏益美智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004545, 0, 'ENTERPRISE', '江苏益美智能科技有限公司', 0, '', '/1004545', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004676, 0, 'ENTERPRISE', '江苏益美智能科技有限公司', 0, '', '/1004676', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113416, 240111044331054735, 'organization', 1004545, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113547, 240111044331054735, 'organization', 1004676, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004544, UUID(), '江苏全通工程技术有限公司', '江苏全通工程技术有限公司', 1, 1, 1004546, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183008, 1, 999986);
+	VALUES (1004675, UUID(), '江苏全通工程技术有限公司', '江苏全通工程技术有限公司', 1, 1, 1004677, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183139, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183008, UUID(), 999986, 2, 'EhGroups', 1004544,'江苏全通工程技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183139, UUID(), 999986, 2, 'EhGroups', 1004675,'江苏全通工程技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004546, 0, 'ENTERPRISE', '江苏全通工程技术有限公司', 0, '', '/1004546', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004677, 0, 'ENTERPRISE', '江苏全通工程技术有限公司', 0, '', '/1004677', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113417, 240111044331054735, 'organization', 1004546, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113548, 240111044331054735, 'organization', 1004677, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004545, UUID(), '上海泛微网络科技股份有限公司', '上海泛微网络科技股份有限公司', 1, 1, 1004547, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183009, 1, 999986);
+	VALUES (1004676, UUID(), '上海泛微网络科技股份有限公司', '上海泛微网络科技股份有限公司', 1, 1, 1004678, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183140, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183009, UUID(), 999986, 2, 'EhGroups', 1004545,'上海泛微网络科技股份有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183140, UUID(), 999986, 2, 'EhGroups', 1004676,'上海泛微网络科技股份有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004547, 0, 'ENTERPRISE', '上海泛微网络科技股份有限公司', 0, '', '/1004547', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004678, 0, 'ENTERPRISE', '上海泛微网络科技股份有限公司', 0, '', '/1004678', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113418, 240111044331054735, 'organization', 1004547, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113549, 240111044331054735, 'organization', 1004678, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004546, UUID(), '南通车安电子科技有限公司', '南通车安电子科技有限公司', 1, 1, 1004548, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183010, 1, 999986);
+	VALUES (1004677, UUID(), '南通车安电子科技有限公司', '南通车安电子科技有限公司', 1, 1, 1004679, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183141, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183010, UUID(), 999986, 2, 'EhGroups', 1004546,'南通车安电子科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183141, UUID(), 999986, 2, 'EhGroups', 1004677,'南通车安电子科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004548, 0, 'ENTERPRISE', '南通车安电子科技有限公司', 0, '', '/1004548', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004679, 0, 'ENTERPRISE', '南通车安电子科技有限公司', 0, '', '/1004679', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113419, 240111044331054735, 'organization', 1004548, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113550, 240111044331054735, 'organization', 1004679, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004547, UUID(), '中国民族建筑研究会建筑装饰研究院', '中国民族建筑研究会建筑装饰研究院', 1, 1, 1004549, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183011, 1, 999986);
+	VALUES (1004678, UUID(), '中国民族建筑研究会建筑装饰研究院', '中国民族建筑研究会建筑装饰研究院', 1, 1, 1004680, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183142, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183011, UUID(), 999986, 2, 'EhGroups', 1004547,'中国民族建筑研究会建筑装饰研究院','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183142, UUID(), 999986, 2, 'EhGroups', 1004678,'中国民族建筑研究会建筑装饰研究院','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004549, 0, 'ENTERPRISE', '中国民族建筑研究会建筑装饰研究院', 0, '', '/1004549', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004680, 0, 'ENTERPRISE', '中国民族建筑研究会建筑装饰研究院', 0, '', '/1004680', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113420, 240111044331054735, 'organization', 1004549, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113551, 240111044331054735, 'organization', 1004680, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004548, UUID(), '南通智慧建筑产业研究院有限公司', '南通智慧建筑产业研究院有限公司', 1, 1, 1004550, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183012, 1, 999986);
+	VALUES (1004679, UUID(), '南通智慧建筑产业研究院有限公司', '南通智慧建筑产业研究院有限公司', 1, 1, 1004681, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183143, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183012, UUID(), 999986, 2, 'EhGroups', 1004548,'南通智慧建筑产业研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183143, UUID(), 999986, 2, 'EhGroups', 1004679,'南通智慧建筑产业研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004550, 0, 'ENTERPRISE', '南通智慧建筑产业研究院有限公司', 0, '', '/1004550', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004681, 0, 'ENTERPRISE', '南通智慧建筑产业研究院有限公司', 0, '', '/1004681', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113421, 240111044331054735, 'organization', 1004550, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113552, 240111044331054735, 'organization', 1004681, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004549, UUID(), '江苏公证天业会计师事务所', '江苏公证天业会计师事务所', 1, 1, 1004551, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183013, 1, 999986);
+	VALUES (1004680, UUID(), '江苏公证天业会计师事务所', '江苏公证天业会计师事务所', 1, 1, 1004682, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183144, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183013, UUID(), 999986, 2, 'EhGroups', 1004549,'江苏公证天业会计师事务所','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183144, UUID(), 999986, 2, 'EhGroups', 1004680,'江苏公证天业会计师事务所','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004551, 0, 'ENTERPRISE', '江苏公证天业会计师事务所', 0, '', '/1004551', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004682, 0, 'ENTERPRISE', '江苏公证天业会计师事务所', 0, '', '/1004682', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113422, 240111044331054735, 'organization', 1004551, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113553, 240111044331054735, 'organization', 1004682, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004550, UUID(), '南通天行健环境科技有限公司', '南通天行健环境科技有限公司', 1, 1, 1004552, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183014, 1, 999986);
+	VALUES (1004681, UUID(), '南通天行健环境科技有限公司', '南通天行健环境科技有限公司', 1, 1, 1004683, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183145, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183014, UUID(), 999986, 2, 'EhGroups', 1004550,'南通天行健环境科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183145, UUID(), 999986, 2, 'EhGroups', 1004681,'南通天行健环境科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004552, 0, 'ENTERPRISE', '南通天行健环境科技有限公司', 0, '', '/1004552', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004683, 0, 'ENTERPRISE', '南通天行健环境科技有限公司', 0, '', '/1004683', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113423, 240111044331054735, 'organization', 1004552, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113554, 240111044331054735, 'organization', 1004683, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004551, UUID(), '南通欣诚教育软件有限公司', '南通欣诚教育软件有限公司', 1, 1, 1004553, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183015, 1, 999986);
+	VALUES (1004682, UUID(), '南通欣诚教育软件有限公司', '南通欣诚教育软件有限公司', 1, 1, 1004684, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183146, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183015, UUID(), 999986, 2, 'EhGroups', 1004551,'南通欣诚教育软件有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183146, UUID(), 999986, 2, 'EhGroups', 1004682,'南通欣诚教育软件有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004553, 0, 'ENTERPRISE', '南通欣诚教育软件有限公司', 0, '', '/1004553', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004684, 0, 'ENTERPRISE', '南通欣诚教育软件有限公司', 0, '', '/1004684', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113424, 240111044331054735, 'organization', 1004553, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113555, 240111044331054735, 'organization', 1004684, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004552, UUID(), '江苏金土地房产评估测绘咨询有限公司', '江苏金土地房产评估测绘咨询有限公司', 1, 1, 1004554, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183016, 1, 999986);
+	VALUES (1004683, UUID(), '江苏金土地房产评估测绘咨询有限公司', '江苏金土地房产评估测绘咨询有限公司', 1, 1, 1004685, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183147, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183016, UUID(), 999986, 2, 'EhGroups', 1004552,'江苏金土地房产评估测绘咨询有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183147, UUID(), 999986, 2, 'EhGroups', 1004683,'江苏金土地房产评估测绘咨询有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004554, 0, 'ENTERPRISE', '江苏金土地房产评估测绘咨询有限公司', 0, '', '/1004554', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004685, 0, 'ENTERPRISE', '江苏金土地房产评估测绘咨询有限公司', 0, '', '/1004685', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113425, 240111044331054735, 'organization', 1004554, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113556, 240111044331054735, 'organization', 1004685, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004553, UUID(), '南通三和市政水利建设工程有限公公司', '南通三和市政水利建设工程有限公公司', 1, 1, 1004555, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183017, 1, 999986);
+	VALUES (1004684, UUID(), '南通三和市政水利建设工程有限公公司', '南通三和市政水利建设工程有限公公司', 1, 1, 1004686, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183148, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183017, UUID(), 999986, 2, 'EhGroups', 1004553,'南通三和市政水利建设工程有限公公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183148, UUID(), 999986, 2, 'EhGroups', 1004684,'南通三和市政水利建设工程有限公公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004555, 0, 'ENTERPRISE', '南通三和市政水利建设工程有限公公司', 0, '', '/1004555', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004686, 0, 'ENTERPRISE', '南通三和市政水利建设工程有限公公司', 0, '', '/1004686', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113426, 240111044331054735, 'organization', 1004555, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113557, 240111044331054735, 'organization', 1004686, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004554, UUID(), '南通禾墅装饰工程有限公司', '南通禾墅装饰工程有限公司', 1, 1, 1004556, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183018, 1, 999986);
+	VALUES (1004685, UUID(), '南通禾墅装饰工程有限公司', '南通禾墅装饰工程有限公司', 1, 1, 1004687, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183149, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183018, UUID(), 999986, 2, 'EhGroups', 1004554,'南通禾墅装饰工程有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183149, UUID(), 999986, 2, 'EhGroups', 1004685,'南通禾墅装饰工程有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004556, 0, 'ENTERPRISE', '南通禾墅装饰工程有限公司', 0, '', '/1004556', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004687, 0, 'ENTERPRISE', '南通禾墅装饰工程有限公司', 0, '', '/1004687', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113427, 240111044331054735, 'organization', 1004556, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113558, 240111044331054735, 'organization', 1004687, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004555, UUID(), '南通黑白灰家纺设计有限公司', '南通黑白灰家纺设计有限公司', 1, 1, 1004557, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183019, 1, 999986);
+	VALUES (1004686, UUID(), '南通黑白灰家纺设计有限公司', '南通黑白灰家纺设计有限公司', 1, 1, 1004688, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183150, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183019, UUID(), 999986, 2, 'EhGroups', 1004555,'南通黑白灰家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183150, UUID(), 999986, 2, 'EhGroups', 1004686,'南通黑白灰家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004557, 0, 'ENTERPRISE', '南通黑白灰家纺设计有限公司', 0, '', '/1004557', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004688, 0, 'ENTERPRISE', '南通黑白灰家纺设计有限公司', 0, '', '/1004688', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113428, 240111044331054735, 'organization', 1004557, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113559, 240111044331054735, 'organization', 1004688, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004556, UUID(), '南通杰思策划创意有限公司', '南通杰思策划创意有限公司', 1, 1, 1004558, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183020, 1, 999986);
+	VALUES (1004687, UUID(), '南通杰思策划创意有限公司', '南通杰思策划创意有限公司', 1, 1, 1004689, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183151, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183020, UUID(), 999986, 2, 'EhGroups', 1004556,'南通杰思策划创意有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183151, UUID(), 999986, 2, 'EhGroups', 1004687,'南通杰思策划创意有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004558, 0, 'ENTERPRISE', '南通杰思策划创意有限公司', 0, '', '/1004558', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004689, 0, 'ENTERPRISE', '南通杰思策划创意有限公司', 0, '', '/1004689', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113429, 240111044331054735, 'organization', 1004558, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113560, 240111044331054735, 'organization', 1004689, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004557, UUID(), '南通睿祺智能科技有限公司', '南通睿祺智能科技有限公司', 1, 1, 1004559, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183021, 1, 999986);
+	VALUES (1004688, UUID(), '南通睿祺智能科技有限公司', '南通睿祺智能科技有限公司', 1, 1, 1004690, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183152, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183021, UUID(), 999986, 2, 'EhGroups', 1004557,'南通睿祺智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183152, UUID(), 999986, 2, 'EhGroups', 1004688,'南通睿祺智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004559, 0, 'ENTERPRISE', '南通睿祺智能科技有限公司', 0, '', '/1004559', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004690, 0, 'ENTERPRISE', '南通睿祺智能科技有限公司', 0, '', '/1004690', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113430, 240111044331054735, 'organization', 1004559, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113561, 240111044331054735, 'organization', 1004690, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004558, UUID(), '江苏得得空间信息科技有限公司', '江苏得得空间信息科技有限公司', 1, 1, 1004560, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183022, 1, 999986);
+	VALUES (1004689, UUID(), '江苏得得空间信息科技有限公司', '江苏得得空间信息科技有限公司', 1, 1, 1004691, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183153, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183022, UUID(), 999986, 2, 'EhGroups', 1004558,'江苏得得空间信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183153, UUID(), 999986, 2, 'EhGroups', 1004689,'江苏得得空间信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004560, 0, 'ENTERPRISE', '江苏得得空间信息科技有限公司', 0, '', '/1004560', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004691, 0, 'ENTERPRISE', '江苏得得空间信息科技有限公司', 0, '', '/1004691', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113431, 240111044331054735, 'organization', 1004560, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113562, 240111044331054735, 'organization', 1004691, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004559, UUID(), '南通云景信息科技有限公司', '南通云景信息科技有限公司', 1, 1, 1004561, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183023, 1, 999986);
+	VALUES (1004690, UUID(), '南通云景信息科技有限公司', '南通云景信息科技有限公司', 1, 1, 1004692, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183154, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183023, UUID(), 999986, 2, 'EhGroups', 1004559,'南通云景信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183154, UUID(), 999986, 2, 'EhGroups', 1004690,'南通云景信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004561, 0, 'ENTERPRISE', '南通云景信息科技有限公司', 0, '', '/1004561', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004692, 0, 'ENTERPRISE', '南通云景信息科技有限公司', 0, '', '/1004692', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113432, 240111044331054735, 'organization', 1004561, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113563, 240111044331054735, 'organization', 1004692, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004560, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1004562, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183024, 1, 999986);
+	VALUES (1004691, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1004693, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183155, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183024, UUID(), 999986, 2, 'EhGroups', 1004560,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183155, UUID(), 999986, 2, 'EhGroups', 1004691,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004562, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1004562', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004693, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1004693', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113433, 240111044331054735, 'organization', 1004562, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113564, 240111044331054735, 'organization', 1004693, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004561, UUID(), '南通绿业中试技术研究院有限公司', '南通绿业中试技术研究院有限公司', 1, 1, 1004563, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183025, 1, 999986);
+	VALUES (1004692, UUID(), '南通绿业中试技术研究院有限公司', '南通绿业中试技术研究院有限公司', 1, 1, 1004694, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183156, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183025, UUID(), 999986, 2, 'EhGroups', 1004561,'南通绿业中试技术研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183156, UUID(), 999986, 2, 'EhGroups', 1004692,'南通绿业中试技术研究院有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004563, 0, 'ENTERPRISE', '南通绿业中试技术研究院有限公司', 0, '', '/1004563', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004694, 0, 'ENTERPRISE', '南通绿业中试技术研究院有限公司', 0, '', '/1004694', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113434, 240111044331054735, 'organization', 1004563, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113565, 240111044331054735, 'organization', 1004694, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004562, UUID(), '江苏正远信息技术有限公司', '江苏正远信息技术有限公司', 1, 1, 1004564, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183026, 1, 999986);
+	VALUES (1004693, UUID(), '江苏正远信息技术有限公司', '江苏正远信息技术有限公司', 1, 1, 1004695, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183157, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183026, UUID(), 999986, 2, 'EhGroups', 1004562,'江苏正远信息技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183157, UUID(), 999986, 2, 'EhGroups', 1004693,'江苏正远信息技术有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004564, 0, 'ENTERPRISE', '江苏正远信息技术有限公司', 0, '', '/1004564', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004695, 0, 'ENTERPRISE', '江苏正远信息技术有限公司', 0, '', '/1004695', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113435, 240111044331054735, 'organization', 1004564, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113566, 240111044331054735, 'organization', 1004695, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004563, UUID(), '江苏宁创智能科技有限公司', '江苏宁创智能科技有限公司', 1, 1, 1004565, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183027, 1, 999986);
+	VALUES (1004694, UUID(), '江苏宁创智能科技有限公司', '江苏宁创智能科技有限公司', 1, 1, 1004696, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183158, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183027, UUID(), 999986, 2, 'EhGroups', 1004563,'江苏宁创智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183158, UUID(), 999986, 2, 'EhGroups', 1004694,'江苏宁创智能科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004565, 0, 'ENTERPRISE', '江苏宁创智能科技有限公司', 0, '', '/1004565', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004696, 0, 'ENTERPRISE', '江苏宁创智能科技有限公司', 0, '', '/1004696', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113436, 240111044331054735, 'organization', 1004565, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113567, 240111044331054735, 'organization', 1004696, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004564, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1004566, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183028, 1, 999986);
+	VALUES (1004695, UUID(), '南通信息化建设发展有限公司', '南通信息化建设发展有限公司', 1, 1, 1004697, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183159, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183028, UUID(), 999986, 2, 'EhGroups', 1004564,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183159, UUID(), 999986, 2, 'EhGroups', 1004695,'南通信息化建设发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004566, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1004566', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004697, 0, 'ENTERPRISE', '南通信息化建设发展有限公司', 0, '', '/1004697', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113437, 240111044331054735, 'organization', 1004566, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113568, 240111044331054735, 'organization', 1004697, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004565, UUID(), '上海路图信息科技有限公司', '上海路图信息科技有限公司', 1, 1, 1004567, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183029, 1, 999986);
+	VALUES (1004696, UUID(), '上海路图信息科技有限公司', '上海路图信息科技有限公司', 1, 1, 1004698, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183160, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183029, UUID(), 999986, 2, 'EhGroups', 1004565,'上海路图信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183160, UUID(), 999986, 2, 'EhGroups', 1004696,'上海路图信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004567, 0, 'ENTERPRISE', '上海路图信息科技有限公司', 0, '', '/1004567', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004698, 0, 'ENTERPRISE', '上海路图信息科技有限公司', 0, '', '/1004698', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113438, 240111044331054735, 'organization', 1004567, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113569, 240111044331054735, 'organization', 1004698, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004566, UUID(), '江苏创时信息科技有限公司', '江苏创时信息科技有限公司', 1, 1, 1004568, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183030, 1, 999986);
+	VALUES (1004697, UUID(), '江苏创时信息科技有限公司', '江苏创时信息科技有限公司', 1, 1, 1004699, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183161, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183030, UUID(), 999986, 2, 'EhGroups', 1004566,'江苏创时信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183161, UUID(), 999986, 2, 'EhGroups', 1004697,'江苏创时信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004568, 0, 'ENTERPRISE', '江苏创时信息科技有限公司', 0, '', '/1004568', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004699, 0, 'ENTERPRISE', '江苏创时信息科技有限公司', 0, '', '/1004699', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113439, 240111044331054735, 'organization', 1004568, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113570, 240111044331054735, 'organization', 1004699, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004567, UUID(), '南通市上午家纺设计有限公司', '南通市上午家纺设计有限公司', 1, 1, 1004569, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183031, 1, 999986);
+	VALUES (1004698, UUID(), '南通市上午家纺设计有限公司', '南通市上午家纺设计有限公司', 1, 1, 1004700, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183162, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183031, UUID(), 999986, 2, 'EhGroups', 1004567,'南通市上午家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183162, UUID(), 999986, 2, 'EhGroups', 1004698,'南通市上午家纺设计有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004569, 0, 'ENTERPRISE', '南通市上午家纺设计有限公司', 0, '', '/1004569', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004700, 0, 'ENTERPRISE', '南通市上午家纺设计有限公司', 0, '', '/1004700', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113440, 240111044331054735, 'organization', 1004569, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113571, 240111044331054735, 'organization', 1004700, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004568, UUID(), '上海讯生信息科技有限公司', '上海讯生信息科技有限公司', 1, 1, 1004570, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183032, 1, 999986);
+	VALUES (1004699, UUID(), '上海讯生信息科技有限公司', '上海讯生信息科技有限公司', 1, 1, 1004701, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183163, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183032, UUID(), 999986, 2, 'EhGroups', 1004568,'上海讯生信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183163, UUID(), 999986, 2, 'EhGroups', 1004699,'上海讯生信息科技有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004570, 0, 'ENTERPRISE', '上海讯生信息科技有限公司', 0, '', '/1004570', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004701, 0, 'ENTERPRISE', '上海讯生信息科技有限公司', 0, '', '/1004701', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113441, 240111044331054735, 'organization', 1004570, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113572, 240111044331054735, 'organization', 1004701, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004569, UUID(), '南通江海大数据管理有限公司', '南通江海大数据管理有限公司', 1, 1, 1004571, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183033, 1, 999986);
+	VALUES (1004700, UUID(), '南通江海大数据管理有限公司', '南通江海大数据管理有限公司', 1, 1, 1004702, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183164, 1, 999986);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183033, UUID(), 999986, 2, 'EhGroups', 1004569,'南通江海大数据管理有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(183164, UUID(), 999986, 2, 'EhGroups', 1004700,'南通江海大数据管理有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004571, 0, 'ENTERPRISE', '南通江海大数据管理有限公司', 0, '', '/1004571', 1, 2, 'ENTERPRISE', 999986);
+	VALUES(1004702, 0, 'ENTERPRISE', '南通江海大数据管理有限公司', 0, '', '/1004702', 1, 2, 'ENTERPRISE', 999986);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113442, 240111044331054735, 'organization', 1004571, 3, 0, UTC_TIMESTAMP());
+	VALUES(1113573, 240111044331054735, 'organization', 1004702, 3, 0, UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
@@ -2170,6 +2168,11 @@ INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `ban
     VALUES (11802, 999986, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRvMllqYzNOemMwTjJVeVpUUmlNVGhtTnpWaVpUYzBaR0U0TVdGaE9EVTNOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('10062','资源预订','0',NULL,'0','999986');
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES ('15', 'community', '240111044331054735', '0', '创源服务', '创源服务', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999986', '');
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES ('16', 'community', '240111044331054735', '0', '增值服务', '增值服务', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999986', '');
+
 
 -- 园区管理员场景
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
