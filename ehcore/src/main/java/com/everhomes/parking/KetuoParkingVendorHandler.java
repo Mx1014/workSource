@@ -516,7 +516,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
 		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
-		dto.setOrderNo(tempFee.getOrderNo());
+		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
 	}
 
