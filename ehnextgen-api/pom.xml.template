@@ -129,11 +129,6 @@
 			<artifactId>poi-excelant</artifactId>
 			<version>${poi-excelant.version}</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml-schemas</artifactId>
-			<version>${poi-ooxml-schemas.version}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-scratchpad</artifactId>
