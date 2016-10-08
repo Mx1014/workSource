@@ -134,7 +134,7 @@
 			<artifactId>poi-scratchpad</artifactId>
 			<version>${poi-scratchpad.version}</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-schemas</artifactId>
 			<version>${ooxml-schemas.version}</version>
@@ -143,7 +143,7 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-security</artifactId>
 			<version>${ooxml-security.version}</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>ch.hsr</groupId>
 			<artifactId>geohash</artifactId>
