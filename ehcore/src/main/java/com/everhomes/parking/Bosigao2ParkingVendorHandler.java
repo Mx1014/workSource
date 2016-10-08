@@ -62,8 +62,8 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 //	private static final String FLAG1 = "1"; //1:卡号
 	private static final String FLAG2 = "2"; //2:车牌
 	
-	private static ParkWebService service = new ParkWebService();
-	private static ParkWebServiceSoap port = service.getParkWebServiceSoap();
+	private ParkWebService service = new ParkWebService();
+	private ParkWebServiceSoap port = service.getParkWebServiceSoap();
 	
 	@Autowired
 	private ParkingProvider parkingProvider;

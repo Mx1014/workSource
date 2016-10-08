@@ -1,18 +1,35 @@
 package com.everhomes.contentserver;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
@@ -21,6 +38,7 @@ import com.everhomes.rest.contentserver.AddContentServerCommand;
 import com.everhomes.rest.contentserver.ContentServerDTO;
 import com.everhomes.rest.contentserver.ContentServerErrorCode;
 import com.everhomes.rest.contentserver.UpdateContentServerCommand;
+import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.contentserver.WebSocketConstant;
 import com.everhomes.rest.messaging.ImageBody;
 import com.everhomes.rest.rpc.PduFrame;
@@ -41,6 +59,26 @@ public class ContentServerServiceImpl implements ContentServerService {
 
     @Autowired
     private ContentServerProvider contentServerProvider;
+    
+    private CloseableHttpClient httpClient;
+    
+    @PostConstruct
+    protected void init() {
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        this.httpClient = httpClientBuilder.build();
+    }
+    
+    @PreDestroy
+    protected void clean() {
+        if(httpClient != null) {
+            try {
+                // 关闭流并释放资源
+                httpClient.close();
+            } catch (Exception e) {
+                LOGGER.error("Failed to close the http client", e);
+            }
+        }
+    }
 
     @Override
     public ContentServer addContentServer(AddContentServerCommand cmd) {
@@ -302,5 +340,100 @@ public class ContentServerServiceImpl implements ContentServerService {
 		imageBody.setUrl(url);
 		
 		return imageBody;
+    }
+    
+    @Override
+    public String getContentServer(){
+        try {
+            ContentServer server = selectContentServer();
+            return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+        } catch (Exception e) {
+            LOGGER.error("Failed to find content server", e);
+            return null;
+        }
+    }
+    
+    @Override
+    public List<UploadCsFileResponse> uploadFileToContentServer(MultipartFile[] files) {
+        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+        List<UploadCsFileResponse> csFileResponseList = new ArrayList<UploadCsFileResponse>();
+        for(MultipartFile file : files) {
+            String fileSuffix = file.getContentType();
+            UploadCsFileResponse csFileResponse = null;
+            try {
+                csFileResponse = uploadFileToContentServer(file.getInputStream(), fileSuffix, token);
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Upload file to content server, contentType={}, fileName={}, orgFileName={}, csFile={}", 
+                        file.getContentType(), file.getName(), file.getOriginalFilename(), csFileResponse);
+                }
+            } catch(Exception e) {
+                csFileResponse = new UploadCsFileResponse();
+                // 错误码是在Content Server里统排，这里定一个特殊的错误码，标识不能处理的错误
+                csFileResponse.setErrorCode(999999); 
+                csFileResponse.setErrorDescription(e.getMessage());
+                LOGGER.error("Failed to upload file, contentType={}, fileName={}, orgFileName={}", 
+                    file.getContentType(), file.getName(), file.getOriginalFilename(), e);
+            }
+            
+            csFileResponseList.add(csFileResponse);
+        }
+        
+        return csFileResponseList;
+    }
+    
+    @Override
+    public UploadCsFileResponse uploadFileToContentServer(InputStream fileStream, String fileName, String token) {
+        String contentServerUri = getContentServer();
+        String fileSuffix = FilenameUtils.getExtension(fileName);
+        
+        // 通过文件后缀确定Content server中定义的媒体类型
+        String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
+        String url = String.format("http://%s/upload/%s?token=", contentServerUri, mediaType, token);
+        HttpPost httpPost = new HttpPost(url);
+        
+        CloseableHttpResponse response = null;
+        try {
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addBinaryBody("upload_file", fileStream,
+                    ContentType.APPLICATION_OCTET_STREAM, fileSuffix);
+            HttpEntity multipart = builder.build();
+
+            httpPost.setEntity(multipart);
+            
+            response = httpClient.execute(httpPost);
+            if(response.getStatusLine().getStatusCode() == 200) {
+                HttpEntity resEntity = response.getEntity();
+                String responseBody = EntityUtils.toString(resEntity);
+                
+                UploadCsFileResponse csFileResponse = (UploadCsFileResponse)StringHelper.fromJsonString(responseBody, UploadCsFileResponse.class);
+                if(csFileResponse != null) {
+                    csFileResponse.setOriginalName(fileName);
+                }
+                return csFileResponse;
+            } else {
+                LOGGER.error("Failed to upload file, fileSuffix={}, status={}", fileSuffix, response.getStatusLine());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                        "Failed to upload file");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to upload file, fileSuffix={}", fileSuffix, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                "Failed to upload file", e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if(fileStream != null) {
+                try {
+                    fileStream.close();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

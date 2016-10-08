@@ -48,8 +48,8 @@
         [jsonObject setObject: self.contentType forKey: @"contentType"];
     if(self.content)
         [jsonObject setObject: self.content forKey: @"content"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhNewsAttachmentDTO* item in self.attachments) {
@@ -98,9 +98,9 @@
         if(self.content && [self.content isEqual:[NSNull null]])
             self.content = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];

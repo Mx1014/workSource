@@ -48,8 +48,8 @@
         [jsonObject setObject: self.userName forKey: @"userName"];
     if(self.token)
         [jsonObject setObject: self.token forKey: @"token"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.orgType)
         [jsonObject setObject: self.orgType forKey: @"orgType"];
 }
@@ -93,9 +93,9 @@
         if(self.token && [self.token isEqual:[NSNull null]])
             self.token = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.orgType = [jsonObject objectForKey: @"orgType"];
         if(self.orgType && [self.orgType isEqual:[NSNull null]])

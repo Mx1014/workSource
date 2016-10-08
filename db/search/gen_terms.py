@@ -20,7 +20,7 @@ txt = '''
 			"senderAvatar":{"type":"string", "index":"no", "store":"yes"},
 			"forumName":{"type":"string", "index":"no", "store":"yes"},
 			"displayName":{"type":"string", "index":"no", "store":"yes"},
-			"createTime":{"type":"date"}
+			"behaviorTime":{"type":"date"}
 '''
 
 for t1 in txt.split('\n'):

@@ -1258,4 +1258,31 @@ public class UserProviderImpl implements UserProvider {
 		});
 		return identifiers;
 	}
+
+    @Override
+    public List<User> findThirdparkUserByTokenAndType(Integer namespaceId, String userType, String userToken) {
+        List<User> list = new ArrayList<User>();
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj)->{
+            SelectQuery<EhUsersRecord> query = context.selectQuery(Tables.EH_USERS);
+            query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+            // namespace_user_type字段是后来才加的，数据库中不一定有该字段的值，
+            // 实际上是两种形式：1) namespace_id+namespace_user_token
+            // 2) namespace_id+namespace_user_type+namespace_user_token(此种情况namespace_id可能为0）
+            if(userType != null && userType.trim().length() > 0) {
+                query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(userType));
+            }
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(userToken));
+            
+            query.fetch().map(r -> {
+                User user = ConvertHelper.convert(r,User.class);
+                list.add(user);
+                return null;
+            });
+            
+            return true;
+        });
+        
+        return list;
+    }
 }

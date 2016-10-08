@@ -343,7 +343,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVideoconfEnterprise.class));
 //        enterprise.setId(id);
 //        enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//        enterprise.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        enterprise.setBehaviorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //        enterprise.setCreatorUid(UserContext.current().getUser().getId());
 //        enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //        enterprise.setStatus((byte) 1);

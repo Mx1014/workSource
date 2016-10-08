@@ -186,7 +186,7 @@ public class QualityProviderImpl implements QualityProvider {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).tryEnter(()-> {
 			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
-					"0 0 3 * * ? ", QualityInspectionScheduleJob.class, null);
+					"0 0 7 * * ? ", QualityInspectionScheduleJob.class, null);
         });
 		
 	}

@@ -46,8 +46,8 @@
         [jsonObject setObject: self.actionData forKey: @"actionData"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.url)
         [jsonObject setObject: self.url forKey: @"url"];
 }
@@ -87,9 +87,9 @@
         if(self.status && [self.status isEqual:[NSNull null]])
             self.status = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.url = [jsonObject objectForKey: @"url"];
         if(self.url && [self.url isEqual:[NSNull null]])

@@ -132,8 +132,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			Map<String, String> userAgents = getUserAgent(request);
 			setupNamespaceIdContext(userAgents);
 			if(isProtected(handler)) {
-				LoginToken token = getLoginToken(request);
-				if(!isValid(token)) {
+				LoginToken token = userService.getLoginToken(request);
+				// isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
+				if(!userService.isValid(token)) {
 					if(this.isInnerSignLogon(request)){
 						token = this.innerSignLogon(request,response);
 						setupUserContext(token);                    
@@ -170,8 +171,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 				}
 
 			} else {
-				LoginToken token = getLoginToken(request);
-				if(token != null && isValid(token)) {
+				LoginToken token = userService.getLoginToken(request);
+				if(token != null && userService.isValid(token)) {
 					setupUserContext(token);                    
 					MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
 				} else {
@@ -203,20 +204,21 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		}
 	}
 
-	private boolean isValid(LoginToken token) {
-		if(token == null) {
-			User user = UserContext.current().getUser();
-			Long userId = -1L;
-			if(user != null) {
-				userId = user.getId();
-			}
-//			It's ok when using signature
-//			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
-			return false;
-		}
-
-		return this.userService.isValidLoginToken(token);
-	}
+	// 转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
+//	private boolean isValid(LoginToken token) {
+//		if(token == null) {
+//			User user = UserContext.current().getUser();
+//			Long userId = -1L;
+//			if(user != null) {
+//				userId = user.getId();
+//			}
+////			It's ok when using signature
+////			LOGGER.error("Invalid token, token={}, userId={}", token, userId);
+//			return false;
+//		}
+//
+//		return this.userService.isValidLoginToken(token);
+//	}
 
 	private boolean isProtected(Object handler) {
 		if(handler instanceof HandlerMethod) {
@@ -231,45 +233,45 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		return false;
 	}
 
-	private LoginToken getLoginToken(HttpServletRequest request) {
-		Map<String, String[]> paramMap = request.getParameterMap();
-		String loginTokenString = null;
-		for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
-			String value = StringUtils.join(entry.getValue(), ",");
-			if(LOGGER.isTraceEnabled())
-				LOGGER.trace("HttpRequest param " + entry.getKey() + ": " + value);
-			if(entry.getKey().equals("token"))
-				loginTokenString = value;
-		}
-
-		if(loginTokenString == null) {
-			if(request.getCookies() != null) {
-				List<Cookie> matchedCookies = new ArrayList<>();
-
-				for(Cookie cookie : request.getCookies()) {
-					if(LOGGER.isTraceEnabled())
-						LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
-
-					if(cookie.getName().equals("token")) {
-						matchedCookies.add(cookie);
-					}
-				}
-
-				if(matchedCookies.size() > 0)
-					loginTokenString = matchedCookies.get(matchedCookies.size() - 1).getValue();
-			}
-		}
-
-		if(loginTokenString != null)
-			try{
-				return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
-			} catch (Exception e) {
-				LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
-				return null;
-			}
-
-		return null;
-	}
+//	private LoginToken getLoginToken(HttpServletRequest request) {
+//		Map<String, String[]> paramMap = request.getParameterMap();
+//		String loginTokenString = null;
+//		for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+//			String value = StringUtils.join(entry.getValue(), ",");
+//			if(LOGGER.isTraceEnabled())
+//				LOGGER.trace("HttpRequest param " + entry.getKey() + ": " + value);
+//			if(entry.getKey().equals("token"))
+//				loginTokenString = value;
+//		}
+//
+//		if(loginTokenString == null) {
+//			if(request.getCookies() != null) {
+//				List<Cookie> matchedCookies = new ArrayList<>();
+//
+//				for(Cookie cookie : request.getCookies()) {
+//					if(LOGGER.isTraceEnabled())
+//						LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
+//
+//					if(cookie.getName().equals("token")) {
+//						matchedCookies.add(cookie);
+//					}
+//				}
+//
+//				if(matchedCookies.size() > 0)
+//					loginTokenString = matchedCookies.get(matchedCookies.size() - 1).getValue();
+//			}
+//		}
+//
+//		if(loginTokenString != null)
+//			try{
+//				return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
+//			} catch (Exception e) {
+//				LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
+//				return null;
+//			}
+//
+//		return null;
+//	}
 
 	private Map<String, String> getUserAgent(HttpServletRequest request) {
 		Map<String, String> map = new HashMap<String, String>();
@@ -479,7 +481,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		}
 	}
 
-	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
+	// 改为public方法，使得第三方帐号的登录也可以使用同一套代码，见UserServiceImpl.logonBythirdPartAccount by lqs 20160922
+	public static void setCookieInResponse(String name, String value, HttpServletRequest request,
 			HttpServletResponse response) {
 
 		Cookie cookie = findCookieInRequest(name, request);

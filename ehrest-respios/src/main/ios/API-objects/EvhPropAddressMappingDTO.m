@@ -34,8 +34,8 @@
         [jsonObject setObject: self.id forKey: @"id"];
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
-    if(self.addressId)
-        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.apartmentId)
+        [jsonObject setObject: self.apartmentId forKey: @"apartmentId"];
     if(self.addressName)
         [jsonObject setObject: self.addressName forKey: @"addressName"];
     if(self.organizationAddress)
@@ -53,9 +53,9 @@
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
 
-        self.addressId = [jsonObject objectForKey: @"addressId"];
-        if(self.addressId && [self.addressId isEqual:[NSNull null]])
-            self.addressId = nil;
+        self.apartmentId = [jsonObject objectForKey: @"apartmentId"];
+        if(self.apartmentId && [self.apartmentId isEqual:[NSNull null]])
+            self.apartmentId = nil;
 
         self.addressName = [jsonObject objectForKey: @"addressName"];
         if(self.addressName && [self.addressName isEqual:[NSNull null]])

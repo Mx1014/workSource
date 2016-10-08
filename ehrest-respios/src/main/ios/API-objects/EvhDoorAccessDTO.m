@@ -42,8 +42,8 @@
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
     if(self.longitude)
         [jsonObject setObject: self.longitude forKey: @"longitude"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.doorType)
         [jsonObject setObject: self.doorType forKey: @"doorType"];
     if(self.geohash)
@@ -105,9 +105,9 @@
         if(self.longitude && [self.longitude isEqual:[NSNull null]])
             self.longitude = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.doorType = [jsonObject objectForKey: @"doorType"];
         if(self.doorType && [self.doorType isEqual:[NSNull null]])

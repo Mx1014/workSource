@@ -32,8 +32,8 @@
 {
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.organizationId)
-        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.organizationType)
         [jsonObject setObject: self.organizationType forKey: @"organizationType"];
     if(self.applyEntityType)
@@ -56,8 +56,8 @@
         [jsonObject setObject: self.operateTime forKey: @"operateTime"];
     if(self.creatorUid)
         [jsonObject setObject: self.creatorUid forKey: @"creatorUid"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.unprocessedTime)
         [jsonObject setObject: self.unprocessedTime forKey: @"unprocessedTime"];
     if(self.processingTime)
@@ -83,9 +83,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.organizationId = [jsonObject objectForKey: @"organizationId"];
-        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
-            self.organizationId = nil;
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         self.organizationType = [jsonObject objectForKey: @"organizationType"];
         if(self.organizationType && [self.organizationType isEqual:[NSNull null]])
@@ -131,9 +131,9 @@
         if(self.creatorUid && [self.creatorUid isEqual:[NSNull null]])
             self.creatorUid = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.unprocessedTime = [jsonObject objectForKey: @"unprocessedTime"];
         if(self.unprocessedTime && [self.unprocessedTime isEqual:[NSNull null]])

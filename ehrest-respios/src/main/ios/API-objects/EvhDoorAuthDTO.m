@@ -38,8 +38,8 @@
         [jsonObject setObject: self.validFromMs forKey: @"validFromMs"];
     if(self.userId)
         [jsonObject setObject: self.userId forKey: @"userId"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.validEndMs)
         [jsonObject setObject: self.validEndMs forKey: @"validEndMs"];
     if(self.ownerId)
@@ -89,9 +89,9 @@
         if(self.userId && [self.userId isEqual:[NSNull null]])
             self.userId = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.validEndMs = [jsonObject objectForKey: @"validEndMs"];
         if(self.validEndMs && [self.validEndMs isEqual:[NSNull null]])

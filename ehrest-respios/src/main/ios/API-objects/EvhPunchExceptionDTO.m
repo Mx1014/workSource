@@ -32,8 +32,8 @@
 {
     if(self.name)
         [jsonObject setObject: self.name forKey: @"name"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.behaviorTime)
+        [jsonObject setObject: self.behaviorTime forKey: @"behaviorTime"];
     if(self.exceptionComment)
         [jsonObject setObject: self.exceptionComment forKey: @"exceptionComment"];
     if(self.requestType)
@@ -49,9 +49,9 @@
         if(self.name && [self.name isEqual:[NSNull null]])
             self.name = nil;
 
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
+        self.behaviorTime = [jsonObject objectForKey: @"behaviorTime"];
+        if(self.behaviorTime && [self.behaviorTime isEqual:[NSNull null]])
+            self.behaviorTime = nil;
 
         self.exceptionComment = [jsonObject objectForKey: @"exceptionComment"];
         if(self.exceptionComment && [self.exceptionComment isEqual:[NSNull null]])
