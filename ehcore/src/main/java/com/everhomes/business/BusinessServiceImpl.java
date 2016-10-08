@@ -114,6 +114,7 @@ import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.openapi.ValidateUserPassCommand;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionAdminStatus;
@@ -127,6 +128,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.ValidatePassCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
@@ -2112,5 +2114,46 @@ public class BusinessServiceImpl implements BusinessService {
                 .collect(Collectors.toList());
         
 	}
-
+	
+	@Override
+	public UserInfo validateUserPass(ValidateUserPassCommand cmd) {
+		this.verifyVerifyUserPassCommand(cmd);
+		ListUserByIdentifierCommand listUserCmd = new ListUserByIdentifierCommand();
+		listUserCmd.setIdentifier(cmd.getUserIdentifier());
+		List<UserInfo> users = listUserByIdentifier(listUserCmd);
+		if(users != null && !users.isEmpty()) {
+			for(UserInfo user : users) {
+				if(user.getNamespaceId().compareTo(cmd.getNamespaceId()) == 0) {
+					ValidatePassCommand passCmd = new ValidatePassCommand();
+					passCmd.setUserId(user.getId());
+					passCmd.setPassword(cmd.getPassword());
+					Boolean validatePass = userService.validateUserPass(passCmd);
+					if (validatePass) {
+						return user;
+					} else {
+						return null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	private void verifyVerifyUserPassCommand(ValidateUserPassCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			LOGGER.error("namespaceId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"namespaceId is null");
+		}
+		if(StringUtils.isEmpty(cmd.getUserIdentifier())) {
+			LOGGER.error("userIdentitier is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"userIdentitier is null");
+		}
+		if(StringUtils.isEmpty(cmd.getPassword())) {
+			LOGGER.error("password is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"password is null");
+		}
+	}
 }

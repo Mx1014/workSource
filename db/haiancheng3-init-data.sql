@@ -3392,14 +3392,6 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES(1113779, 240111044331054835, 'organization', 1004908, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004907, UUID(), '深圳市圆成投资有限公司', '深圳市圆成投资有限公司', 1, 1, 1004909, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183371, 1, 999993);
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183371, UUID(), 999993, 2, 'EhGroups', 1004907,'深圳市圆成投资有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004909, 0, 'ENTERPRISE', '深圳市圆成投资有限公司', 0, '', '/1004909', 1, 2, 'ENTERPRISE', 999993);
-INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113780, 240111044331054835, 'organization', 1004909, 3, 0, UTC_TIMESTAMP());
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES (1004908, UUID(), '清珠（北京）创意文化发展有限公司', '清珠（北京）创意文化发展有限公司', 1, 1, 1004910, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183372, 1, 999993);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(183372, UUID(), 999993, 2, 'EhGroups', 1004908,'清珠（北京）创意文化发展有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
@@ -3472,30 +3464,6 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES(1113789, 240111044331054835, 'organization', 1004918, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004917, UUID(), '深圳市彩众传媒有限公司', '深圳市彩众传媒有限公司', 1, 1, 1004919, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183381, 1, 999993);
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183381, UUID(), 999993, 2, 'EhGroups', 1004917,'深圳市彩众传媒有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004919, 0, 'ENTERPRISE', '深圳市彩众传媒有限公司', 0, '', '/1004919', 1, 2, 'ENTERPRISE', 999993);
-INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113790, 240111044331054835, 'organization', 1004919, 3, 0, UTC_TIMESTAMP());
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004918, UUID(), '深圳市森森海实业有限公司', '深圳市森森海实业有限公司', 1, 1, 1004920, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183382, 1, 999993);
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183382, UUID(), 999993, 2, 'EhGroups', 1004918,'深圳市森森海实业有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004920, 0, 'ENTERPRISE', '深圳市森森海实业有限公司', 0, '', '/1004920', 1, 2, 'ENTERPRISE', 999993);
-INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113791, 240111044331054835, 'organization', 1004920, 3, 0, UTC_TIMESTAMP());
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1004919, UUID(), '深圳知租网房地产信息咨询有限公司', '深圳知租网房地产信息咨询有限公司', 1, 1, 1004921, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183383, 1, 999993);
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(183383, UUID(), 999993, 2, 'EhGroups', 1004919,'深圳知租网房地产信息咨询有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
-	VALUES(1004921, 0, 'ENTERPRISE', '深圳知租网房地产信息咨询有限公司', 0, '', '/1004921', 1, 2, 'ENTERPRISE', 999993);
-INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1113792, 240111044331054835, 'organization', 1004921, 3, 0, UTC_TIMESTAMP());
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES (1004920, UUID(), '国泰君安证券股份有限公司深圳海德三道证券营业部', '国泰君安证券股份有限公司深圳海德三道证券营业部', 1, 1, 1004922, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183384, 1, 999993);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(183384, UUID(), 999993, 2, 'EhGroups', 1004920,'国泰君安证券股份有限公司深圳海德三道证券营业部','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
@@ -3537,5 +3505,44 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES(1113798, 240111044331054835, 'organization', 1004927, 3, 0, UTC_TIMESTAMP());
 
+--
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES (1004938, UUID(), '深圳知租网房地产信息咨询有限公司', '深圳知租网房地产信息咨询有限公司', 1, 1, 1004921, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183383, 1, 999993);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(183383, UUID(), 999993, 2, 'EhGroups', 1004938,'深圳知租网房地产信息咨询有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
+	VALUES(1004921, 0, 'ENTERPRISE', '深圳知租网房地产信息咨询有限公司', 0, '', '/1004921', 1, 2, 'ENTERPRISE', 999993);
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
+	VALUES(1113792, 240111044331054835, 'organization', 1004921, 3, 0, UTC_TIMESTAMP());		
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES (1004935, UUID(), '深圳市圆成投资有限公司', '深圳市圆成投资有限公司', 1, 1, 1004909, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183371, 1, 999993);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(183371, UUID(), 999993, 2, 'EhGroups', 1004935,'深圳市圆成投资有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
+	VALUES(1004909, 0, 'ENTERPRISE', '深圳市圆成投资有限公司', 0, '', '/1004909', 1, 2, 'ENTERPRISE', 999993);
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
+	VALUES(1113780, 240111044331054835, 'organization', 1004909, 3, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES (1004936, UUID(), '深圳市彩众传媒有限公司', '深圳市彩众传媒有限公司', 1, 1, 1004919, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183381, 1, 999993);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(183381, UUID(), 999993, 2, 'EhGroups', 1004936,'深圳市彩众传媒有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
+	VALUES(1004919, 0, 'ENTERPRISE', '深圳市彩众传媒有限公司', 0, '', '/1004919', 1, 2, 'ENTERPRISE', 999993);
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
+	VALUES(1113790, 240111044331054835, 'organization', 1004919, 3, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES (1004937, UUID(), '深圳市森森海实业有限公司', '深圳市森森海实业有限公司', 1, 1, 1004920, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 183382, 1, 999993);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(183382, UUID(), 999993, 2, 'EhGroups', 1004937,'深圳市森森海实业有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`)
+	VALUES(1004920, 0, 'ENTERPRISE', '深圳市森森海实业有限公司', 0, '', '/1004920', 1, 2, 'ENTERPRISE', 999993);
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
+	VALUES(1113791, 240111044331054835, 'organization', 1004920, 3, 0, UTC_TIMESTAMP());
+
+	
+	
+-- 物业缴费 初始数据
+INSERT INTO `eh_pmsy_communities` (`id`, `namespace_id`, `community_id`, `community_token`, `contact`, `bill_tip`) 
+	VALUES ('1', '0', '240111044331054835', '00100120131200000015', '075523685550', '<p>请在每月20日之前及时缴纳上月费用，否则将产生滞纳金。</p>');
 
 

@@ -305,7 +305,7 @@ public class ActivityController extends ControllerBase {
      * <b>URL: /activity/devicechange</b>
      * <p>更新直播信息</p>
      */
-    @RequestMapping("api/devicechange")
+    @RequestMapping("devicechange")
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
     public RestResponse videoDeviceChange(@Valid YzbVideoDeviceChangeCommand cmd) {
@@ -323,9 +323,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("getVideoCapability")
     @RestReturn(value=VideoCapabilityResponse.class)
     public RestResponse getVideoCapability(@Valid GetVideoCapabilityCommand cmd) {
-        VideoCapabilityResponse obj = new VideoCapabilityResponse();
-        obj.setVideoSupportType(VideoSupportType.VIDEO_BOTH.getCode());
-        RestResponse response = new RestResponse(obj);
+        RestResponse response = new RestResponse(activityService.getVideoCapability(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
