@@ -789,7 +789,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), organizationId);
-		Long roleId = null;
+		List<Long> roleIds = new ArrayList<Long>();
 		outer:
 		for(Role r: roles) {
 			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, r.getId());
@@ -797,19 +797,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 				if(acl.getPrivilegeId().equals(PrivilegeConstants.ASSIGNTASK) ||
 						acl.getPrivilegeId().equals(PrivilegeConstants.COMPLETETASK) ||
 						acl.getPrivilegeId().equals(PrivilegeConstants.CLOSETASK)) {
-					roleId = r.getId();
-					break outer;
+					roleIds.add(r.getId());
+					continue outer;
 				}
 			}
 		}
 		
-		if(null == roleId)
+		if(roleIds.isEmpty())
 			return result;
 		
 		List<RoleAssignment> roleAssgnments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
 		for(RoleAssignment ra: roleAssgnments){
 			if(EntityType.USER.getCode().equals(ra.getTargetType()) &&
-					ra.getRoleId().longValue() == roleId.longValue()) {
+					roleIds.contains(ra.getRoleId())) {
 				result.add(ra.getTargetId());
 			}
 		}
