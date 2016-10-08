@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -416,7 +417,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if(cmd.getStartDate() != null)
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
-			new Timestamp(cmd.getEndDate());
+			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
@@ -444,7 +445,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if(cmd.getStartDate() != null)
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
-			new Timestamp(cmd.getEndDate());
+			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
@@ -462,7 +463,7 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	return response;
 	}
-	
+
 	@Override
 	public void setParkingLotConfig(SetParkingLotConfigCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
