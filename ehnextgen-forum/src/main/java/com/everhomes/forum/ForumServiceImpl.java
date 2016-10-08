@@ -4980,8 +4980,11 @@ public class ForumServiceImpl implements ForumService {
         for (SearchHit sd : docs) {
         	ContentBriefDTO dto = new ContentBriefDTO();
         	dto.setId(Long.parseLong(sd.getId()));
-        	dto.setSearchTypeId(searchType.getId());
-			dto.setSearchTypeName(searchType.getName());
+        	if(searchType != null) {
+        		dto.setSearchTypeId(searchType.getId());
+    			dto.setSearchTypeName(searchType.getName());
+        	}
+        	
         	Map<String, Object> source = sd.getSource();
         	Map<String, HighlightField> highlight = sd.getHighlightFields();
         	

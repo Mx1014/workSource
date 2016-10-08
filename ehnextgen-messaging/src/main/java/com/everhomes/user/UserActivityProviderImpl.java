@@ -748,6 +748,10 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 			return null;
 		});
 
+		if(result.size() == 0) {
+			return null;
+		}
+		
 		return result.get(0);
 	}
 

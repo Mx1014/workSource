@@ -1087,8 +1087,10 @@ public class NewsServiceImpl implements NewsService {
 						dto.setContent(briefNews.getContentAbstract());
 						dto.setSubject(briefNews.getTitle());
 						dto.setPostUrl(briefNews.getCoverUri());
-						dto.setSearchTypeId(searchType.getId());
-						dto.setSearchTypeName(searchType.getName());
+						if(searchType != null) {
+							dto.setSearchTypeId(searchType.getId());
+							dto.setSearchTypeName(searchType.getName());
+						}
 						
 						NewsFootnote footNote = new NewsFootnote();
 						footNote.setAuthor(briefNews.getAuthor());
