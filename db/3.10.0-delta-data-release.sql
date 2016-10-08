@@ -667,3 +667,5 @@ update eh_launch_pad_items set action_type = 52,action_data = '' where id in (10
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('video.official.support', '0', 'offical video support', 999987, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('video.none_official.support', '1', 'none offical video support', 999987, NULL);
 
+-- 更新innospring 门禁考勤 icon
+UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU9XSTJObVF5WkdGaFkyTXhaakJsWlRNMU9HWXlPRGxrWkdZM01ESmhPUQ' where id = 112323;
