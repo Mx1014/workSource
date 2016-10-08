@@ -28,7 +28,10 @@ import com.everhomes.rest.activity.ActivityRejectCommand;
 import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.GetVideoCapabilityCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
@@ -38,6 +41,12 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.VideoCapabilityResponse;
+import com.everhomes.rest.activity.VideoSupportType;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -266,4 +275,68 @@ public class ActivityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /activity/getActivityVideoInfo</b>
+     * <p>获取直播信息详情</p>
+     */
+    @RequestMapping("getActivityVideoInfo")
+    @RestReturn(value=ActivityVideoDTO.class)
+    public RestResponse getActivityVideoInfo(@Valid GetActivityVideoInfoCommand cmd) {
+        RestResponse response = new RestResponse(activityService.getActivityVideo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/setActivityVideoInfo</b>
+     * <p>更新直播信息</p>
+     */
+    @RequestMapping("setActivityVideoInfo")
+    @RestReturn(value=ActivityVideoDTO.class)
+    public RestResponse setActivityVideoInfo(@Valid SetActivityVideoInfoCommand cmd) {
+        RestResponse response = new RestResponse(activityService.setActivityVideo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/devicechange</b>
+     * <p>更新直播信息</p>
+     */
+    @RequestMapping("devicechange")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse videoDeviceChange(@Valid YzbVideoDeviceChangeCommand cmd) {
+        activityService.onVideoDeviceChange(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/getVideoCapability</b>
+     * <p>获取直播的能力</p>
+     */
+    @RequestMapping("getVideoCapability")
+    @RestReturn(value=VideoCapabilityResponse.class)
+    public RestResponse getVideoCapability(@Valid GetVideoCapabilityCommand cmd) {
+        RestResponse response = new RestResponse(activityService.getVideoCapability(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /*
+     * 
+     * <p>按namespace查询官方活动</p>
+     * <b>URL: /activity/listOfficialActivityByNamespace</b>
+     */
+    @RequestMapping("listOfficialActivityByNamespace")
+    @RestReturn(value=ListOfficialActivityByNamespaceResponse.class)
+    public RestResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
+    	return new RestResponse(activityService.listOfficialActivityByNamespace(cmd));
+    }
 }

@@ -25,6 +25,7 @@ public class SearchTopicCommand {
     private Long actionCategory;
     
     private Integer searchFlag;
+    private String searchContentType;
     private Long pageAnchor;
     
     private Integer pageSize;
@@ -120,7 +121,15 @@ public class SearchTopicCommand {
         this.communityId = communityId;
     }
 
-    @Override
+    public String getSearchContentType() {
+		return searchContentType;
+	}
+
+	public void setSearchContentType(String searchContentType) {
+		this.searchContentType = searchContentType;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -16,5 +16,7 @@ public interface SearchProvider {
 	JSONArray query(String type, String json, String fields);
 
 	String clearType(String type);
+	
+	JSONArray queryTopHits(String type, String json, String fields);
 
 }

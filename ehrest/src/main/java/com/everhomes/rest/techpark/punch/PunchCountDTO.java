@@ -1,5 +1,8 @@
 package com.everhomes.rest.techpark.punch;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -40,9 +43,17 @@ public class PunchCountDTO {
     private Double overTimeSum;
 	private java.lang.Byte     punchTimesPerDay;
 	private String userEnterpriseGroup;
+	@ItemType(AbsenceTimeDTO.class)
+	private List<AbsenceTimeDTO> absenceTimeList;
 	
 	
-    public Integer getWorkDayCount() {
+    public List<AbsenceTimeDTO> getAbsenceTimeList() {
+		return absenceTimeList;
+	}
+	public void setAbsenceTimeList(List<AbsenceTimeDTO> absenceTimeList) {
+		this.absenceTimeList = absenceTimeList;
+	}
+	public Integer getWorkDayCount() {
 		return workDayCount;
 	}
 	public void setWorkDayCount(Integer workDayCount) {

@@ -2,6 +2,7 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.discover.ItemType;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -14,8 +15,8 @@ import java.util.List;
  */
 public class ListOrganizationOwnerStatisticCommand {
 
-    private Long organizationId;
-    private Long communityId;
+    @NotNull private Long organizationId;
+    @NotNull private Long communityId;
     private Byte livingStatus;
     @ItemType(Long.class)
     private List<Long> orgOwnerTypeIds;

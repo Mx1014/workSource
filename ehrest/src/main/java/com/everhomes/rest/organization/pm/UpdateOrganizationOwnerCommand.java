@@ -1,17 +1,15 @@
 package com.everhomes.rest.organization.pm;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <ul>
  * <li>id: 业主id</li>
- * <li>communityId: 小区id</li>
  * <li>organizationId: 公司id</li>
  * <li>contactName: 联系人名称</li>
- * <li>contactToken:联系人电话</li>
  * <li>orgOwnerTypeId: 业主类型Id</li>
  * <li>gender: 性别 {@link com.everhomes.rest.user.UserGender}</li>
  * <li>birthday: 生日</li>
@@ -21,35 +19,32 @@ import java.util.List;
  * <li>idCardNumber: 身份照号码</li>
  * <li>registeredResidence: 户籍</li>
  * <li>avatar: 头像URI地址</li>
- * <li>addresses: 地址列表</li>
  * </ul>
  */
-public class CreateOrUpdateOrganizationOwnerCommand {
+public class UpdateOrganizationOwnerCommand {
 
-    private Long id;
-    private Long organizationId;
-    private Long communityId;
+    @NotNull private Long id;
+    @NotNull private Long organizationId;
+    @NotNull @Size(max = 20)
     private String contactName;
+    @NotNull @Size(max = 20)
     private String contactToken;
+    @NotNull
     private Long orgOwnerTypeId;
     private Byte gender;
     private Long birthday;
+    @Size(max = 10)
     private String maritalStatus;
+    @Size(max = 10)
     private String job;
+    @Size(max = 100)
     private String company;
+    @Size(max = 18)
     private String idCardNumber;
+    @Size(max = 128)
     private String registeredResidence;
+    @Size(max = 1024)
     private String avatar;
-    @ItemType(OrganizationOwnerAddressCommand.class)
-    private List<OrganizationOwnerAddressCommand> addresses;
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
 
     public String getContactName() {
         return contactName;
@@ -59,20 +54,20 @@ public class CreateOrUpdateOrganizationOwnerCommand {
         this.contactName = contactName;
     }
 
-    public String getContactToken() {
-        return contactToken;
-    }
-
-    public void setContactToken(String contactToken) {
-        this.contactToken = contactToken;
-    }
-
     public Long getOrgOwnerTypeId() {
         return orgOwnerTypeId;
     }
 
     public void setOrgOwnerTypeId(Long orgOwnerTypeId) {
         this.orgOwnerTypeId = orgOwnerTypeId;
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
     }
 
     public Byte getGender() {
@@ -153,14 +148,6 @@ public class CreateOrUpdateOrganizationOwnerCommand {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-    }
-
-    public List<OrganizationOwnerAddressCommand> getAddresses() {
-        return addresses;
-    }
-
-    public void setAddresses(List<OrganizationOwnerAddressCommand> addresses) {
-        this.addresses = addresses;
     }
 
     @Override

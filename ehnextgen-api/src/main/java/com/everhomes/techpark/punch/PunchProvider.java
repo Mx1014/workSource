@@ -272,6 +272,8 @@ public interface PunchProvider {
 	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
 	public PunchExceptionApproval findPunchExceptionApproval(Long creatorUid, Long ownerId, Date date);
+
+	public PunchDayLog findPunchDayLog(Long userId, Long enterpriseId, Date punchDate);
  
  
  

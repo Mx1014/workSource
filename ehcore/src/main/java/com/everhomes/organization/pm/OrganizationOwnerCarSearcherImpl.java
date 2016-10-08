@@ -79,11 +79,10 @@ public class OrganizationOwnerCarSearcherImpl extends AbstractElasticSearch impl
 	@Override
 	public void syncFromDb() {
         this.deleteAll();
-        /*List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwners(null, null);
-
-        if(owners.size() > 0) {
-            this.bulkUpdate(owners);
-        }*/
+        List<OrganizationOwnerCar> cars = propertyMgrProvider.listOrganizationOwnerCarsByIds(null);
+        if(cars.size() > 0) {
+            this.bulkUpdate(cars);
+        }
         this.optimize(1);
         this.refresh();
         LOGGER.info("Sync for organization owner car index OK");
@@ -127,6 +126,10 @@ public class OrganizationOwnerCarSearcherImpl extends AbstractElasticSearch impl
         ListOrganizationOwnerCarResponse response = new ListOrganizationOwnerCarResponse();
         List<OrganizationOwnerCarDTO> ownerCarDTOList = Collections.emptyList();
         List<Long> ids = getIds(rsp);
+        if(ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        }
         if (ids != null && ids.size() > 0) {
             List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarsByIds(ids);
             ownerCarDTOList = ownerCars.stream().map(r -> {
@@ -139,11 +142,6 @@ public class OrganizationOwnerCarSearcherImpl extends AbstractElasticSearch impl
                 }
                 return dto;
             }).collect(Collectors.toList());
-
-            if(ids.size() > pageSize) {
-                response.setNextPageAnchor(anchor + 1);
-                ids.remove(ids.size() - 1);
-            }
         }
         response.setCars(ownerCarDTOList);
         return response;

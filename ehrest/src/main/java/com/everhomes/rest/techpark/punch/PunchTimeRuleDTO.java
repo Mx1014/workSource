@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime：创建时间</li>
  * <li>updateUid：更新人id</li>
  * <li>updateTime：更新时间</li>
+ * <li>daySplitTime：前一天与后一天的分界点</li>
  * </ul>
  */
 public class PunchTimeRuleDTO {
@@ -48,7 +49,8 @@ public class PunchTimeRuleDTO {
 	private Long afternoonArriveTime;
 	
 	private Byte punchTimesPerDay;
-	 
+
+	private Long daySplitTime;
 	
 	 
 	 
@@ -152,5 +154,17 @@ public class PunchTimeRuleDTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+
+
+	public Long getDaySplitTime() {
+		return daySplitTime;
+	}
+
+
+
+	public void setDaySplitTime(Long daySplitTime) {
+		this.daySplitTime = daySplitTime;
 	}
 }

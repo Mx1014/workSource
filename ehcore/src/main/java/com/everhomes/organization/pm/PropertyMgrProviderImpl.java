@@ -557,6 +557,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		if(addressId != null && !"".equals(addressId)) {
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
 		}
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -1317,7 +1318,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		if(ids != null && ids.size() > 0)
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.in(ids));
-		
+
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -1333,9 +1335,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
-		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
-		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -1352,6 +1355,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
@@ -1384,7 +1388,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
     @Override
-    public List<OrganizationOwnerAddress> listOrganizationOwnerAddress(Integer namespaceId, Long ownerId) {
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByOwnerId(Integer namespaceId, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select()
                 .from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
@@ -1524,6 +1528,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.join(Tables.EH_ORGANIZATION_OWNERS)
 				.on(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(Tables.EH_ORGANIZATION_OWNERS.ID))
 				.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
 				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
 				.fetch().map(mapper);
 		return dtoList;
@@ -1586,6 +1591,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if(ids != null && ids.size() > 0) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.ID.in(ids));
         }
+        query.addConditions(Tables.EH_ORGANIZATION_OWNER_CARS.STATUS.eq(OrganizationOwnerCarStatus.NORMAL.getCode()));
         query.addOrderBy(Tables.EH_ORGANIZATION_OWNER_CARS.ID.desc());
         return query.fetchInto(OrganizationOwnerCar.class);
     }
@@ -1629,6 +1635,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if (pageAnchor != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.ge(pageAnchor));
         }
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
         query.addLimit(pageSize);
         return query.fetchInto(CommunityPmOwner.class);
     }
@@ -1699,6 +1706,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .on(Tables.EH_ORGANIZATION_OWNERS.ID.eq(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.ORGANIZATION_OWNER_ID))
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(carId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .orderBy(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.asc())
                 .fetch(mapper);
     }
@@ -1890,6 +1898,26 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addGroupBy(Tables.EH_ORGANIZATION_OWNERS.GENDER);
         query.addGroupBy(ageGroups);
         return query.fetch(mapper);
+    }
+
+    @Override
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressId(Integer namespaceId, Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+                .fetchInto(OrganizationOwnerAddress.class);
+    }
+
+    @Override
+    public CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+                .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
+                .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
+                .fetchOneInto(CommunityPmOwner.class);
     }
 
     @Override

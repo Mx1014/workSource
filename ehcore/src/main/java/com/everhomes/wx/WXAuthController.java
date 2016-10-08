@@ -92,44 +92,6 @@ public class WXAuthController {// extends ControllerBase
     @Value("${server.contextPath:}")
     private String contextPath;
     
-    /**
-     * <b>URL: /wxauth/test</b>
-     * <p>请求微信授权。</p>
-     */
-    @RequestMapping("test")
-    //@RestReturn(String.class)
-    //@RequireAuthentication(false)
-    public void test(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        response.setContentType("text/html; charset=utf8");  
-        PrintWriter out = null;
-        String redirectUrl = "https://biz-beta.zuolin.com/zl-ec/rest/service/front/wechatRedirect?mallId=4000000&code=021Mmhkn0Yq9ze1smCkn0yNnkn0Mmhk7&ns=999987&srcUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%3";
-        try {
-            out = response.getWriter();
-            out.println("<!DOCTYPE html>"); 
-            out.println("<html lang=\"en\">"); 
-            out.println("<head>"); 
-            out.println("<meta charset=\"UTF-8\">"); 
-            out.println("<title>跳转中...</title>"); 
-            out.println("</head>"); 
-            out.println("<body>"); 
-            out.println("<script>"); 
-            out.println("location.href=\"" + redirectUrl + "\";"); 
-            out.println("</script>"); 
-            out.println("</body>"); 
-            out.println("</html>"); 
-        } catch(Exception e) {
-            LOGGER.error("Failed to print ouput by response, redirectUrl={}", redirectUrl, e);
-        } finally {
-            if(out != null) {
-                try {
-                    out.close();
-                } catch(Exception e) {
-                    LOGGER.error("Failed to close response writer, redirectUrl={}", redirectUrl, e);
-                }
-            }
-        }
-    }
-    
 	/**
 	 * <b>URL: /wxauth/authReq</b>
 	 * <p>请求微信授权。</p>
@@ -138,6 +100,11 @@ public class WXAuthController {// extends ControllerBase
 	//@RestReturn(String.class)
 	//@RequireAuthentication(false)
 	public void authReq(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    long startTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(req calculate), startTime={}", startTime);
+        }
+        
         HttpSession session = request.getSession();
         String sessionId = session.getId();
 
@@ -172,6 +139,10 @@ public class WXAuthController {// extends ControllerBase
         LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
         String sourceUrl = params.get(KEY_SOURCE_URL);
         redirectByWx(response, sourceUrl);
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
+        }
 	}
 	/**
 	 * <b>URL: /wx/authCallback</b>
@@ -181,6 +152,11 @@ public class WXAuthController {// extends ControllerBase
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
 	public void authCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    long startTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback calculate), startTime={}", startTime);
+        }
+	    
         String requestUrl = request.getRequestURL().toString();
         Map<String, String> params = getRequestParams(request);
         if(LOGGER.isDebugEnabled()) {
@@ -212,6 +188,11 @@ public class WXAuthController {// extends ControllerBase
             String sourceUrl = params.get(KEY_SOURCE_URL);
             redirectByWx(response, sourceUrl);
             
+        }
+        
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
 	}
 	
@@ -338,6 +319,11 @@ public class WXAuthController {// extends ControllerBase
     }
     
     private void processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
+        }
+        
         String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
         String secret = configurationProvider.getValue(namespaceId, "wx.offical.account.secret", "");
         // 微信提供的临时code
@@ -367,7 +353,7 @@ public class WXAuthController {// extends ControllerBase
         }
 
         User wxUser = new User();
-        wxUser.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+        wxUser.setNamespaceId(namespaceId);
         wxUser.setNamespaceUserType(NamespaceUserType.WX.getCode());
         wxUser.setNamespaceUserToken(userInfo.getOpenid());
         wxUser.setNickName(userInfo.getNickname());
@@ -378,6 +364,11 @@ public class WXAuthController {// extends ControllerBase
         
         userService.signupByThirdparkUser(wxUser, request);
         userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
+        
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
+        }
     }
     
     private String httpGet(String url, String safeUrl) {

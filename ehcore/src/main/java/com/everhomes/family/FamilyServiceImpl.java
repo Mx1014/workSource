@@ -919,7 +919,11 @@ public class FamilyServiceImpl implements FamilyService {
         
     }
 
-    public boolean approveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
+    //
+    // 认证organization owner
+    // add by xq.tian   20160922
+    //
+    private boolean approveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
         if (addressId != null) {
             User memberUser = userProvider.findUserById(memberUid);
             UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
@@ -933,9 +937,9 @@ public class FamilyServiceImpl implements FamilyService {
                         if (ownerAddress != null && ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
                             ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
                             propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
-                            return true;
                         }
                     }
+                    return true;
                 }
             }
         }

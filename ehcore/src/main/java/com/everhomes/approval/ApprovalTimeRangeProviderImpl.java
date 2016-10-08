@@ -16,8 +16,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TimeRange;
+import com.everhomes.rest.approval.TimeRangeType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalTimeRangesDao;
@@ -38,6 +40,9 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 	public void createApprovalTimeRange(ApprovalTimeRange approvalTimeRange) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalTimeRanges.class));
 		approvalTimeRange.setId(id);
+		if (approvalTimeRange.getType() == null) {
+			approvalTimeRange.setType(TimeRangeType.TIME.getCode());
+		}
 		getReadWriteDao().insert(approvalTimeRange);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalTimeRanges.class, null);
 	}
@@ -47,6 +52,9 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 		List<EhApprovalTimeRanges> list = approvalTimeRanges.stream().map(a->{
 			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhApprovalTimeRanges.class));
 			a.setId(id);
+			if (a.getType() == null) {
+				a.setType(TimeRangeType.TIME.getCode());
+			}
 			return ConvertHelper.convert(a, EhApprovalTimeRanges.class);
 		}).collect(Collectors.toList());
 		getReadWriteDao().insert(list);
@@ -88,7 +96,7 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 	}
 
 	@Override
-	public List<ApprovalTimeRange> listApprovalTimeRangeByUserId(Long userId, Integer namespaceId, String ownerType,
+	public List<ApprovalTimeRange> listApprovalTimeRangeByUserIdForCheckDuplicatedTime(Long userId, Integer namespaceId, String ownerType,
 			Long ownerId) {
 		Result<Record> result = getReadOnlyContext().select(Tables.EH_APPROVAL_TIME_RANGES.fields()).from(Tables.EH_APPROVAL_TIME_RANGES)
 				.join(Tables.EH_APPROVAL_REQUESTS)
@@ -98,6 +106,7 @@ public class ApprovalTimeRangeProviderImpl implements ApprovalTimeRangeProvider 
 				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.WAITING_FOR_APPROVING.getCode()))
 				.fetch();
 				
 		if (result != null && result.isNotEmpty()) {

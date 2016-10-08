@@ -3,6 +3,7 @@ package com.everhomes.user;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,19 +22,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.equipment.EquipmentInspectionEquipments;
+import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.SearchTypesStatus;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
+import com.everhomes.server.schema.tables.daos.EhSearchTypesDao;
+import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
+import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
+import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhRequestAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhRequestTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
 import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
@@ -45,6 +59,14 @@ import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
 import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
 import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
+import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.server.schema.tables.pojos.EhRequestAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRequestTemplates;
 import com.everhomes.server.schema.tables.pojos.EhUserContacts;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -54,6 +76,12 @@ import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
+import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
+import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
+import com.everhomes.server.schema.tables.records.EhRequestAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
+import com.everhomes.server.schema.tables.records.EhRequestTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
 import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -588,18 +616,46 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 	public List<UserPost> listPostedTopics(Long uid, String targetType, 
 			CrossShardListingLocator locator, int count) {
 		
-		if (locator.getAnchor() == null) {
-            locator.setAnchor(0L);
-        }
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
-        List<UserPost> posts = new ArrayList<UserPost>();
+	    // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+	    // 也就是下一页和第一页取得的结果是一样的，需要倒排着查 by lqs 20160928
+//		if (locator.getAnchor() == null) {
+//            locator.setAnchor(0L);
+//        }
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+//        List<UserPost> posts = new ArrayList<UserPost>();
+//        
+//        context.select().from(Tables.EH_USER_POSTS).where(Tables.EH_USER_POSTS.OWNER_UID.eq(uid))
+//        .and(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType)).and(Tables.EH_USER_POSTS.ID.ge(locator.getAnchor()))
+//        .limit(count).fetch().forEach(p -> {
+//        	UserPost post = ConvertHelper.convert(p, UserPost.class);
+//        	posts.add(post);
+//        });
         
-        context.select().from(Tables.EH_USER_POSTS).where(Tables.EH_USER_POSTS.OWNER_UID.eq(uid))
-        .and(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType)).and(Tables.EH_USER_POSTS.ID.ge(locator.getAnchor()))
-        .limit(count).fetch().forEach(p -> {
-        	UserPost post = ConvertHelper.convert(p, UserPost.class);
-        	posts.add(post);
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, uid));
+        SelectQuery<EhUserPostsRecord> query = context.selectQuery(Tables.EH_USER_POSTS);
+        query.addConditions(Tables.EH_USER_POSTS.OWNER_UID.eq(uid));
+        query.addConditions(Tables.EH_USER_POSTS.TARGET_TYPE.eq(targetType));
+        
+        if(locator.getAnchor() != null) {
+        	//修改EH_FORUM_POSTS为EH_USER_POSTS，by tt, 20160930
+            query.addConditions(Tables.EH_USER_POSTS.ID.lt(locator.getAnchor()));
+        }
+        
+        query.addOrderBy(Tables.EH_USER_POSTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query user posted topics by count, sql=" + query.getSQL());
+            LOGGER.debug("Query user posted topics, bindValues=" + query.getBindValues());
+        }
+        
+        List<UserPost> posts = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, UserPost.class);
         });
+        
+        if(posts.size() > 0) {
+            locator.setAnchor(posts.get(posts.size() -1).getId());
+        }
         
         return posts;
 	}
@@ -634,6 +690,189 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         dao.update(userProfile);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserProfiles.class, userProfile.getId());
+		
+	}
+
+	@Override
+	public List<SearchTypes> listByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhSearchTypesRecord> query = context.selectQuery(Tables.EH_SEARCH_TYPES);
+		query.addConditions(Tables.EH_SEARCH_TYPES.NAMESPACE_ID.eq(namespaceId));
+		
+		query.addConditions(Tables.EH_SEARCH_TYPES.STATUS.eq(SearchTypesStatus.ACTIVE.getCode()));
+		 
+		List<SearchTypes> result = new ArrayList<SearchTypes>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, SearchTypes.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		
+		return result;
+	}
+
+	@Override
+	public RequestTemplates getCustomRequestTemplate(String templateType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.TEMPLATE_TYPE.eq(templateType));
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.STATUS.eq((byte) 1));
+		 
+		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplates.class));
+
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		
+		return result.get(0);
+	}
+
+	@Override
+	public SearchTypes findByContentAndNamespaceId(Integer namespaceId,
+			String contentType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhSearchTypesRecord> query = context.selectQuery(Tables.EH_SEARCH_TYPES);
+		query.addConditions(Tables.EH_SEARCH_TYPES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_SEARCH_TYPES.CONTENT_TYPE.eq(contentType));
+		
+		query.addConditions(Tables.EH_SEARCH_TYPES.STATUS.eq(SearchTypesStatus.ACTIVE.getCode()));
+		 
+		List<SearchTypes> result = new ArrayList<SearchTypes>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, SearchTypes.class));
+			return null;
+		});
+
+		return result.get(0);
+	}
+
+	@Override
+	public RequestTemplates getCustomRequestTemplate(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.ID.eq(id));
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.STATUS.eq((byte) 1));
+		 
+		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplates.class));
+
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result.get(0);
+	}
+
+	@Override
+	public void createSearchTypes(SearchTypes searchType) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSearchTypes.class));
+		
+		searchType.setId(id);
+		searchType.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		searchType.setStatus(SearchTypesStatus.ACTIVE.getCode());
+		LOGGER.info("createSearchTypes: " + searchType);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSearchTypes.class, id));
+		EhSearchTypesDao dao = new EhSearchTypesDao(context.configuration());
+        dao.insert(searchType);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSearchTypes.class, null);
+		
+	}
+
+	@Override
+	public void deleteSearchTypes(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSearchTypes.class));
+		EhSearchTypesDao dao = new EhSearchTypesDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+	@Override
+	public List<RequestTemplatesNamespaceMapping> getRequestTemplatesNamespaceMappings(
+			Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesNamespaceMappingRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING.NAMESPACE_ID.eq(namespaceId));
+		 
+		List<RequestTemplatesNamespaceMapping> result = new ArrayList<RequestTemplatesNamespaceMapping>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplatesNamespaceMapping.class));
+			return null;
+		});
+		
+		return result;
+	}
+
+	@Override
+	public List<RequestTemplates> listCustomRequestTemplates() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestTemplatesRecord> query = context.selectQuery(Tables.EH_REQUEST_TEMPLATES);
+		query.addConditions(Tables.EH_REQUEST_TEMPLATES.STATUS.eq((byte) 1));
+		 
+		List<RequestTemplates> result = new ArrayList<RequestTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RequestTemplates.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result;
+	}
+
+	@Override
+	public List<RequestAttachments> listRequestAttachments(String ownerType,
+			Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRequestAttachmentsRecord> query = context.selectQuery(Tables.EH_REQUEST_ATTACHMENTS);
+		query.addConditions(Tables.EH_REQUEST_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_REQUEST_ATTACHMENTS.OWNER_ID.eq(ownerId));
+		
+		Map<String, RequestAttachments> map = new HashMap<String, RequestAttachments>();
+		List<RequestAttachments> result = new ArrayList<RequestAttachments>();
+		query.fetch().map((r) -> {
+			if(map.get(r.getTargetFieldName()) != null) {
+				RequestAttachments attachment = map.get(r.getTargetFieldName());
+				attachment.setContentUri(attachment.getContentUri() + "," + r.getContentUri());
+				map.put(r.getTargetFieldName(), attachment);
+			} else {
+				map.put(r.getTargetFieldName(), ConvertHelper.convert(r, RequestAttachments.class));
+			}
+			return null;
+		});
+		
+		Iterator it = map.entrySet().iterator();
+		while(it.hasNext()){
+			java.util.Map.Entry entry = (java.util.Map.Entry)it.next();
+			RequestAttachments attachment = (RequestAttachments) entry.getValue();
+			result.add(attachment);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public void createRequestAttachments(RequestAttachments attachment) {
+
+		assert(attachment.getOwnerId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRequestAttachments.class));
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        EhRequestAttachmentsDao dao = new EhRequestAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhRequestAttachments.class, null);
 		
 	}
 

@@ -2,7 +2,11 @@ package com.everhomes.approval;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -12,21 +16,27 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
+import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
+import com.everhomes.rest.approval.ApprovalServiceErrorCode;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
+import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
@@ -43,6 +53,8 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ApprovalRequestHandler.APPROVAL_REQUEST_OBJECT_PREFIX + ApprovalTypeTemplateCode.EXCEPTION)
 public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandler {
 
+	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	
 	@Autowired
 	private PunchProvider punchProvider;
 	
@@ -51,6 +63,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	
 	@Autowired
 	private ApprovalService approvalService;
+
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 	
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
@@ -70,7 +85,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	public ApprovalRequest preProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo,
 			CreateApprovalRequestBySceneCommand cmd) {
 		if (StringUtils.isBlank(cmd.getReason())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.EXCEPTION_EMPTY_REASON,
 					"reason cannot be empty");
 		}
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
@@ -78,6 +93,13 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"invalid parameters, content json="+approvalExceptionContent);
 		}
+		try {
+			approvalExceptionContent.setPunchDate(dateSF.parse(dateSF.format(new Date(approvalExceptionContent.getPunchDate()))).getTime());
+		} catch (ParseException e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"format punch date error");
+		}
+		
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
 		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate());
@@ -183,6 +205,20 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			}
 			punchProvider.createPunchExceptionApproval(punchExceptionApproval);
 		}
+		
+		//更新eh_punch_day_logs中的exception_status字段
+		PunchDayLog punchDayLog = punchProvider.findPunchDayLog(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId(), new Date(approvalExceptionContent.getPunchDate()));
+		if (punchDayLog != null) {
+			if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.TWICE.getCode().byteValue() && punchExceptionApproval.getApprovalStatus() != null && punchExceptionApproval.getApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				punchProvider.updatePunchDayLog(punchDayLog);
+			}else if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.FORTH.getCode().byteValue() && 
+					punchExceptionApproval.getMorningApprovalStatus() != null && punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode() &&
+					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				punchProvider.updatePunchDayLog(punchDayLog);
+			}
+		}
 	}
 
 	@Override
@@ -202,6 +238,51 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		return JSON.toJSONString(resultList);
 	}
-	
+
+	@Override
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("punchDate", getPunchDate(approvalRequest));
+		if (approvalRequest.getApprovalStatus().byteValue() == ApprovalStatus.AGREEMENT.getCode()) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_APPROVED;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_REJECTED;
+			map.put("reason", StringUtils.isBlank(reason)?approvalRequest.getReason():reason);
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
+
+	private String getPunchDate(ApprovalRequest approvalRequest) {
+		SimpleDateFormat dateSF = new SimpleDateFormat("MM月dd日");
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		String result = dateSF.format(new java.util.Date(content.getPunchDate()));
+		if (result.startsWith("0")) {
+			return result.substring(1);
+		}
+		return result;
+	}
+
+	@Override
+	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("creatorName", approvalService.getUserName(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId()));
+		//当前级别为0表示用户刚提交
+		if (approvalRequest.getCurrentLevel().byteValue() == (byte)0) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_COMMIT_REQUEST;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.EXCEPTION_TO_NEXT_LEVEL;
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
 	
 }

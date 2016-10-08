@@ -64,6 +64,8 @@ CREATE TABLE `eh_approval_categories` (
 	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
 	`creator_uid` BIGINT,
 	`create_time` DATETIME, 
+	`update_time` DATETIME,
+	`operator_uid` BIGINT, 
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -81,7 +83,7 @@ CREATE TABLE `eh_approval_requests` (
 	`attachment_flag` TINYINT NOT NULL DEFAULT '0' COMMENT 'if there are attachments, 0. no, 1. yes',
 	`time_flag` TINYINT NOT NULL DEFAULT '0' COMMENT 'if there are time ranges, 0. no, 1. yes',
 	`flow_id` BIGINT COMMENT 'id of flow',
-	`current_level` TINYINT COMMENT 'current levle of flow',
+	`current_level` TINYINT COMMENT 'current level of flow',
 	`next_level` TINYINT COMMENT 'next level of flow',
 	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',
 	`status` TINYINT NOT NULL COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
@@ -120,6 +122,20 @@ CREATE TABLE `eh_approval_time_ranges` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 申请时间具体到每一天的实际时长
+-- DROP TABLE IF EXISTS  `eh_approval_day_actual_time`;
+CREATE TABLE `eh_approval_day_actual_time` (
+	`id` BIGINT NOT NULL,
+	`owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g request_id',
+	`user_id`  BIGINT NOT NULL,
+	`time_date` DATE NOT NULL COMMENT 'concrete date',
+	`actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours',
+	`creator_uid` BIGINT NOT NULL,
+	`create_time` DATETIME NOT NULL,
+	
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 申请处理日志表
 -- DROP TABLE IF EXISTS  `eh_approval_op_requests`;
 CREATE TABLE `eh_approval_op_requests` (
@@ -127,6 +143,8 @@ CREATE TABLE `eh_approval_op_requests` (
 	`request_id` BIGINT NOT NULL COMMENT 'id of request',
 	`requestor_comment` TEXT COMMENT 'comment of reqeust',
 	`process_message` TEXT COMMENT 'process message',
+	`flow_id` BIGINT COMMENT 'id of flow',
+	`level` TINYINT COMMENT 'which level approved',
 	`operator_uid` BIGINT,
 	`create_time` DATETIME,
 	`approval_status` TINYINT NOT NULL COMMENT '0. waitingForApproving, 1. agreement, 2. rejection',

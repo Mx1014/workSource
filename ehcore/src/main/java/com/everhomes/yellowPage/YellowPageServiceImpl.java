@@ -3,6 +3,7 @@ package com.everhomes.yellowPage;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -11,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import ch.hsr.geohash.GeoHash;
+
+
 
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
-import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -25,11 +26,11 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.rentalv2.AttachmentType;
+import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
@@ -39,14 +40,21 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
+import com.everhomes.rest.yellowPage.NotifyTargetDTO;
+import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
+import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
+import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
 import com.everhomes.rest.yellowPage.YellowPageDTO;
 import com.everhomes.rest.yellowPage.YellowPageListResponse;
@@ -54,8 +62,12 @@ import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.RequestTemplates;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -84,6 +96,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Autowired
 	private AuditLogProvider auditLogProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
+	
+	@Autowired
+	private UserActivityProvider userActivityProvider;
     
 
 	private void populateYellowPage(YellowPage yellowPage) { 
@@ -374,6 +392,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 //			}
 			category.setParentId(parent.getId());
 			category.setPath(parent.getName() + "/" + cmd.getName());
+			category.setLogoUrl(cmd.getLogoUrl());
 			yellowPageProvider.createCategory(category);
 		} else {
 			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
@@ -384,6 +403,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 //				category.setPath(parent.getName() + "/" + cmd.getName());
 //			}
 			category.setPath(parent.getName() + "/" + cmd.getName());
+			category.setLogoUrl(cmd.getLogoUrl());
 			yellowPageProvider.updateCategory(category);
 			
 			//yellow page中引用该类型的记录的serviceType字段也要更新
@@ -497,6 +517,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 //		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+		if(!StringUtils.isEmpty(response.getTemplateType())) {
+			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+			if(template != null) {
+				response.setTemplateName(template.getName());
+				response.setButtonTitle(template.getButtonTitle());
+			}
+			
+		}
 //		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
@@ -566,6 +594,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 				sa.setServiceType(category.getName());
 			}
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+			if(!StringUtils.isEmpty(dto.getTemplateType())) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
+				if(template != null) {
+					dto.setTemplateName(template.getName());
+					dto.setButtonTitle(template.getButtonTitle());
+				}
+			}
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
 
@@ -801,5 +836,107 @@ public class YellowPageServiceImpl implements YellowPageService {
 			 }
 		 }
 	 }
+
+	@Override
+	public void addTarget(AddNotifyTargetCommand cmd) {
+		
+		ServiceAllianceNotifyTargets isExist = this.yellowPageProvider.findNotifyTarget(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getCategoryId(), cmd.getContactType() , cmd.getContactToken());
+		if(isExist != null) {
+			if(ContactType.EMAIL.equals(ContactType.fromCode(cmd.getContactType()))) {
+				throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+						YellowPageServiceErrorCode.ERROR_NOTIFY_EMAIL_EXIST,
+	 				"邮箱已存在，请重新输入");
+			} 
+			
+			if(ContactType.MOBILE.equals(ContactType.fromCode(cmd.getContactType()))) {
+				throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+						YellowPageServiceErrorCode.ERROR_NOTIFY_MOBILE_EXIST,
+	 				"该手机号已添加");
+			} 
+				
+		}
+		ServiceAllianceNotifyTargets target = ConvertHelper.convert(cmd, ServiceAllianceNotifyTargets.class);
+		target.setNamespaceId(UserContext.getCurrentNamespaceId());
+		
+		this.yellowPageProvider.createNotifyTarget(target);
+		
+	}
+
+	@Override
+	public void deleteNotifyTarget(DeleteNotifyTargetCommand cmd) {
+
+		ServiceAllianceNotifyTargets target = verifyNotifyTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
+		this.yellowPageProvider.deleteNotifyTarget(cmd.getId());
+	}
+
+	@Override
+	public void setNotifyTargetStatus(SetNotifyTargetStatusCommand cmd) {
+		ServiceAllianceNotifyTargets target = verifyNotifyTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
+		target.setStatus(cmd.getStatus());
+		this.yellowPageProvider.updateNotifyTarget(target);
+		
+	}
+	
+	private ServiceAllianceNotifyTargets verifyNotifyTarget(String ownerType, Long ownerId, Long id) {
+		ServiceAllianceNotifyTargets target = this.yellowPageProvider.findNotifyTarget(ownerType, ownerId, id);
+		if(target == null) {
+			throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+					YellowPageServiceErrorCode.ERROR_NOTIFY_TARGET,
+ 				"推送者不存在");
+		}
+		return target;
+	}
+
+	@Override
+	public ListNotifyTargetsResponse listNotifyTargets(
+			ListNotifyTargetsCommand cmd) {
+		ListNotifyTargetsResponse response = new ListNotifyTargetsResponse();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+		List<ServiceAllianceNotifyTargets> targets = this.yellowPageProvider.listNotifyTargets(cmd.getOwnerType(), cmd.getOwnerId(), 
+				cmd.getContactType(), cmd.getCategoryId(), locator, pageSize+1);
+		
+		if(targets != null && targets.size() > 0) {
+			
+			Long nextPageAnchor = null;
+			if(targets.size() > pageSize) {
+	        	targets.remove(targets.size() - 1);
+	            nextPageAnchor = targets.get(targets.size() - 1).getId();
+	        }
+			
+			List<NotifyTargetDTO> dtos = targets.stream().map((target) -> {
+				NotifyTargetDTO dto = ConvertHelper.convert(target, NotifyTargetDTO.class);
+				return dto;
+			}).filter(r->r!=null).collect(Collectors.toList());
+			
+			response.setDtos(dtos);
+			
+	        response.setNextPageAnchor(nextPageAnchor);
+		}
+		return response;
+	}
+
+	@Override
+	public void verifyNotifyTarget(VerifyNotifyTargetCommand cmd) {
+
+		ServiceAllianceNotifyTargets target = this.yellowPageProvider.findNotifyTarget(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getCategoryId(), ContactType.MOBILE.getCode() , cmd.getContactToken());
+		if(target != null) {
+			throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+					YellowPageServiceErrorCode.ERROR_NOTIFY_MOBILE_EXIST,
+ 				"该手机号已添加");
+		}
+		
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), cmd.getContactToken());
+		if(identifier == null) {
+			throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
+					YellowPageServiceErrorCode.ERROR_NOTIFY_TARGET_NOT_REGISTER,
+ 				"该手机号还未注册，请先注册");
+		}
+	}
 
 }

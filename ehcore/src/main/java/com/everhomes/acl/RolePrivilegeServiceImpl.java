@@ -1166,6 +1166,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			for (Long menuId : dtosMap.keySet()) {
 				ListWebMenuPrivilegeDTO dto = new ListWebMenuPrivilegeDTO();
 				WebMenu menu = menuMap.get(menuId);
+				if(null == menu)
+					LOGGER.error("Menu not found menuId={}", menuId);
 				dto.setModuleId(menu.getId());
 				dto.setModuleName(menu.getName());
 				dto.setDtos(dtosMap.get(menuId));

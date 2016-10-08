@@ -11,12 +11,14 @@ public interface NewsProvider {
 
 	News findNewsById(Long id);
 
-	List<News> listNews(Integer namespaceId, Long from, Integer pageSize);
+	List<News> listNews(Long categoryId, Integer namespaceId, Long from, Integer pageSize);
 
 	Long getMaxTopIndex(Integer namespaceId);
 
 	void createNewsList(List<News> newsList);
 
 	List<News> findAllActiveNewsByPage(Long from, Integer pageSize);
+
+	NewsCategory findNewsCategoryById(Long categoryId);
 
 }

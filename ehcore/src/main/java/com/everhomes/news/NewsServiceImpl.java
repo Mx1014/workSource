@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.news.AddNewsCommentCommand;
+import com.everhomes.rest.news.AddNewsCommentForWebCommand;
 import com.everhomes.rest.news.AddNewsCommentResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.news.BriefNewsDTO;
@@ -62,28 +65,37 @@ import com.everhomes.rest.news.NewsTopFlag;
 import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
+import com.everhomes.rest.ui.user.NewsFootnote;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.search.SearchProvider;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.SearchTypes;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -122,6 +134,9 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private SearchProvider searchProvider;
 
+	@Autowired
+	private UserActivityProvider userActivityProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
@@ -141,7 +156,7 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
-		News news = ConvertHelper.convert(cmd, News.class);
+		News news = ConvertHelper.convert(cmd, News.class); 
 		news.setNamespaceId(namespaceId);
 		news.setOwnerType(cmd.getOwnerType().toLowerCase());
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
@@ -164,6 +179,15 @@ public class NewsServiceImpl implements NewsService {
 		if (StringUtils.isEmpty(cmd.getTitle()) || StringUtils.isEmpty(cmd.getContent())) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+	}
+	
+	private void checkNewsParameterOfImport(Long userId, CreateNewsCommand cmd) {
+		if (StringUtils.isEmpty(cmd.getTitle()) || StringUtils.isEmpty(cmd.getContent())) {
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR,
 					"Invalid parameters");
 		}
 	}
@@ -247,14 +271,16 @@ public class NewsServiceImpl implements NewsService {
 					command.setPublishTime(covertStringToLongTime(publishTime));
 					command.setSourceDesc(sourceDesc);
 					command.setSourceUrl(sourceUrl);
-					checkNewsParameter(userId, command);
+					command.setCategoryId(cmd.getCategoryId());
+					checkNewsParameterOfImport(userId, command);
 					newsList.add(processNewsCommand(userId, namespaceId, command));
 				}
 			}
 			return newsList;
 		}
 		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+				NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR,
 				"excel data format is not correct");
 	}
 
@@ -268,7 +294,8 @@ public class NewsServiceImpl implements NewsService {
 			return date.getTime();
 		} catch (ParseException e) {
 			LOGGER.error("date format error, date: " + string);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR,
 					"date format error, date: " + string);
 		}
 	}
@@ -277,19 +304,27 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
-		return listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize());
+		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
 	}
 
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize) {
-		return listNews(userId, namespaceId, pageAnchor, pageSize, false);
+	@Override
+	public ListNewsResponse listNewsForWeb(ListNewsCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = UserContext.getCurrentNamespaceId();
+		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+	}
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long categoryId,Long pageAnchor, Integer pageSize) {
+		return listNews(userId, namespaceId,categoryId, pageAnchor, pageSize, false);
 	}
 
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize,
+	private ListNewsResponse listNews(Long userId, Integer namespaceId,Long categoryId, Long pageAnchor, Integer pageSize,
 			boolean isScene) {
+		if(null == categoryId)
+			categoryId = 0L;
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
 		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
 		Long from = pageAnchor * pageSize;
-		List<BriefNewsDTO> list = newsProvider.listNews(namespaceId, from, pageSize + 1).stream()
+		List<BriefNewsDTO> list = newsProvider.listNews(categoryId,namespaceId, from, pageSize + 1).stream()
 				.map(news -> convertNewsToBriefNewsDTO(userId, news, isScene)).collect(Collectors.toList());
 
 		if (list.size() > pageSize) {
@@ -312,6 +347,13 @@ public class NewsServiceImpl implements NewsService {
 		if (!isScene) {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());
 		}
+		if(newsDTO.getCoverUri() == null ){
+			NewsCategory category = this.newsProvider.findNewsCategoryById(news.getCategoryId());
+			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(), UserContext.current()
+				.getUser().getId()));
+		}
+		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		
 		return newsDTO;
 	}
 
@@ -344,16 +386,21 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		return searchNews(userId, namespaceId, cmd.getKeyword(), pageAnchor, pageSize);
+		return searchNews(userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
 	}
-
-	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, String keyword, Long pageAnchor,
+ 
+	/**
+	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理
+	 * xiongying
+	 */
+	private String getSearchJson(Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
+ 
 			Integer pageSize) {
 		Long from = pageAnchor * pageSize;
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
 		JSONObject json = JSONObject.parseObject(
-				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}}}");
+				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":8,\"fields\":{\"title\":{},\"content\":{},\"sourceDesc\":{}}}}");
 		// 设置from和size
 		json.put("from", from);
 		json.put("size", pageSize + 1);
@@ -363,6 +410,7 @@ public class NewsServiceImpl implements NewsService {
 		sort.add(JSONObject.parseObject("{\"topIndex\":{\"order\":\"desc\"}}"));
 		sort.add(JSONObject.parseObject("{\"createTime\":{\"order\":\"desc\"}}"));
 
+		
 		// 设置查询关键字
 		JSONObject query = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("query");
 		query.put("query_string",
@@ -373,12 +421,28 @@ public class NewsServiceImpl implements NewsService {
 				.getJSONObject("bool").getJSONArray("must");
 		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
 		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
+ 
+		//设置过滤条件
+		if(null != categoryId){
+			must.add(JSONObject.parse("{ \"term\": { \"categoryId\": "+categoryId+"}} "));
+		}
+ 
+		
+		return json.toJSONString();
+	}
+	
 
+	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
+			Integer pageSize) {
+		
+
+		String jsonString = getSearchJson(userId, namespaceId,categoryId, keyword, pageAnchor, pageSize);
+ 
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 
 		// 从es查询
-		JSONArray result = searchProvider.query(SearchUtils.NEWS, json.toJSONString(), fields);
+		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
 
 		// 处理分页
 		Long nextPageAnchor = null;
@@ -402,13 +466,14 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setChildCount(o.getLong("childCount"));
 			newsDTO.setTopFlag(o.getByte("topFlag"));
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
+			newsDTO.setCategoryId(o.getLong("categoryId"));
 			return newsDTO;
 		}).collect(Collectors.toList());
 
 		SearchNewsResponse response = new SearchNewsResponse();
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setNewsList(list);
-
+		
 		return response;
 	}
 
@@ -432,8 +497,28 @@ public class NewsServiceImpl implements NewsService {
 		newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		newsDTO.setContent(null);
 		newsDTO.setContentUrl(getContentUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		if(news.getCoverUri() != null)
+			newsDTO.setCoverUri(news.getCoverUri());
+		else{
+			NewsCategory category = this.newsProvider.findNewsCategoryById(news.getCategoryId());
+			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(), UserContext.current()
+				.getUser().getId()));
+		}
+		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
 		return newsDTO;
+	}
+
+	private String getNewsUrl(Integer namespaceId, String newsToken) {
+		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+		String contentUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_PAGE_URL, "");
+		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
+			LOGGER.error("Invalid home url or news page url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
+		} else {
+			return homeUrl + contentUrl  + newsToken;
+		}
 	}
 
 	private String getContentUrl(Integer namespaceId, String newsToken) {
@@ -628,6 +713,11 @@ public class NewsServiceImpl implements NewsService {
 		return comment;
 	}
 
+	private Comment processComment(Long userId, Long newsId, AddNewsCommentForWebCommand cmd) {
+		AddNewsCommentCommand newCmd = ConvertHelper.convert(cmd, AddNewsCommentCommand.class);
+		return processComment(userId,newsId,newCmd);
+	}
+
 	private List<Attachment> processAttachments(Long userId, Long commentId, List<AttachmentDescriptor> attachments) {
 		if (attachments == null || attachments.size() == 0) {
 			return null;
@@ -762,7 +852,7 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		return ConvertHelper.convert(listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize(), true),
+		return ConvertHelper.convert(listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
 				ListNewsBySceneResponse.class);
 	}
 
@@ -897,6 +987,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getId() != null) {
 			syncNews(cmd.getId());
 		} else {
+			searchProvider.clearType(SearchUtils.NEWS);
 			// 一次同步200条，防止一次同步太多内存被压爆
 			Integer pageSize = 200;
 			int i = 0;
@@ -906,6 +997,10 @@ public class NewsServiceImpl implements NewsService {
 				if (list != null && list.size() > 0) {
 					StringBuilder sb = new StringBuilder();
 					list.forEach(n -> {
+						//正则表达式去掉content中的富文本内容 modified by xiongying20160908
+						String content = n.getContent();
+						content = removeTag(content);
+						n.setContent(content);
 						sb.append("{\"index\":{\"_id\":\"").append(n.getId()).append("\"}}\n")
 								.append(JSONObject.toJSONString(n)).append("\n");
 					});
@@ -922,15 +1017,203 @@ public class NewsServiceImpl implements NewsService {
 			}
 		}
 	}
+	
+	public static String removeTag(String htmlStr) {
+        String regEx_script = "<script[^>]*?>[\\s\\S]*?<\\/script>"; // script
+        String regEx_style = "<style[^>]*?>[\\s\\S]*?<\\/style>"; // style
+        String regEx_html = "<[^>]+>"; // HTML tag
+        String regEx_space = "\\s+|\t|\r|\n";// other characters
+
+        Pattern p_script = Pattern.compile(regEx_script,
+                Pattern.CASE_INSENSITIVE);
+        Matcher m_script = p_script.matcher(htmlStr);
+        htmlStr = m_script.replaceAll("");
+
+        Pattern p_style = Pattern
+                .compile(regEx_style, Pattern.CASE_INSENSITIVE);
+        Matcher m_style = p_style.matcher(htmlStr);
+        htmlStr = m_style.replaceAll("");
+
+        Pattern p_html = Pattern.compile(regEx_html, Pattern.CASE_INSENSITIVE);
+        Matcher m_html = p_html.matcher(htmlStr);
+        htmlStr = m_html.replaceAll("");
+
+        Pattern p_space = Pattern
+                .compile(regEx_space, Pattern.CASE_INSENSITIVE);
+        Matcher m_space = p_space.matcher(htmlStr);
+        htmlStr = m_space.replaceAll(" ");
+
+        return htmlStr;
+
+    }
 
 	private void syncNews(Long id) {
 		News news = newsProvider.findNewsById(id);
 		if (news != null) {
+			//正则表达式去掉content中的富文本内容 modified by xiongying20160908
+			String content = news.getContent();
+			content = removeTag(content);
+			news.setContent(content);
 			searchProvider.insertOrUpdate(SearchUtils.NEWS, news.getId().toString(), JSONObject.toJSONString(news));
 		}
 	}
 
 	private void syncNewsWhenDelete(Long id) {
 		searchProvider.deleteById(SearchUtils.NEWS, id.toString());
+	} 
+	
+	@Override
+	public SearchContentsBySceneReponse searchNewsByScene(
+			SearchContentsBySceneCommand cmd) {
+		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = checkOwner(userId, sceneTokenDto.getEntityId(), sceneTokenDto.getEntityType()).getNamespaceId();
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
+		if (StringUtils.isEmpty(cmd.getKeyword())) {
+			ListNewsCommand command = new ListNewsCommand();
+			
+			command.setOwnerId(sceneTokenDto.getEntityId());
+			command.setOwnerType(sceneTokenDto.getEntityType());
+			command.setPageAnchor(cmd.getPageAnchor());
+			command.setPageSize(cmd.getPageSize());
+			ListNewsResponse news = listNews(command);
+			if(news != null) {
+				response.setNextPageAnchor(news.getNextPageAnchor());
+				if(news.getNewsList() != null && news.getNewsList().size() > 0) {
+					List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+					for (BriefNewsDTO briefNews : news.getNewsList()) {
+						ContentBriefDTO dto = new ContentBriefDTO();
+						dto.setContent(briefNews.getContentAbstract());
+						dto.setSubject(briefNews.getTitle());
+						dto.setPostUrl(briefNews.getCoverUri());
+						dto.setSearchTypeId(searchType.getId());
+						dto.setSearchTypeName(searchType.getName());
+						
+						NewsFootnote footNote = new NewsFootnote();
+						footNote.setAuthor(briefNews.getAuthor());
+						footNote.setCreateTime(briefNews.getPublishTime());
+						footNote.setSourceDesc(briefNews.getSourceDesc());
+						footNote.setNewsToken(briefNews.getNewsToken());
+						dto.setFootnoteJson(StringHelper.toJsonString(footNote));
+						
+						dtos.add(dto);
+					}
+					response.setDtos(dtos);
+				}
+			}
+			
+			return response;
+		}
+		
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+
+		String jsonString = getSearchJson(userId, namespaceId,null, cmd.getKeyword(), pageAnchor, pageSize);
+		// 需要查询的字段
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
+
+		// 从es查询
+		JSONArray result = searchProvider.queryTopHits(SearchUtils.NEWS, jsonString, fields);
+
+		// 处理分页
+		Long nextPageAnchor = null;
+		if (result.size() > pageSize) {
+			result.remove(result.size() - 1);
+			nextPageAnchor = pageAnchor + 1;
+		}
+
+		//处理返回的topHit
+		List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+		for (int i = 0; i < result.size(); i++) {
+			ContentBriefDTO dto = new ContentBriefDTO();
+			JSONObject highlight = result.getJSONObject(i).getJSONObject("highlight");
+			JSONObject source = result.getJSONObject(i).getJSONObject("_source");
+			
+			if(StringUtils.isEmpty(highlight.getString("title"))){
+				dto.setSubject(source.getString("title"));
+			} else {
+				dto.setSubject(highlight.getString("title"));
+			}
+			
+			if(StringUtils.isEmpty(highlight.getString("content"))){
+				dto.setContent(source.getString("content"));
+			} else {
+				dto.setContent(highlight.getString("content"));
+			}
+			
+			dto.setPostUrl(source.getString("coverUri"));
+			
+			dto.setSearchTypeId(searchType.getId());
+			dto.setSearchTypeName(searchType.getName());
+			NewsFootnote footNote = new NewsFootnote();
+			footNote.setAuthor(source.getString("author"));
+			footNote.setCreateTime(source.getTimestamp("publishTime"));
+			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
+			
+			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
+				footNote.setSourceDesc(source.getString("sourceDesc"));
+			} else {
+				footNote.setSourceDesc(highlight.getString("sourceDesc"));
+			}
+			
+			dto.setFootnoteJson(StringHelper.toJsonString(footNote));
+			
+			dtos.add(dto);
+		}
+
+		response.setDtos(dtos);
+		response.setNextPageAnchor(nextPageAnchor);
+		return response;
 	}
+
+	@Override
+	public AddNewsCommentResponse addNewsForWebComment(AddNewsCommentForWebCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		// 检查参数
+		// 检查评论类型
+		checkCommentType(userId, cmd.getContentType());
+		// 检查附件类型
+		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
+		}
+
+		final List<Comment> comments = new ArrayList<>();
+		final List<Attachment> attachments = new ArrayList<>();
+
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
+			dbProvider.execute(s -> {
+				News news = findNewsById(userId, newsId);
+				// 创建评论
+				Comment comment = processComment(userId, newsId, cmd);
+				comments.add(comment);
+				commentProvider.createComment(EhNewsComment.class, comment);
+
+				// 创建附件
+				if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+					attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
+					attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+				}
+
+				news.setChildCount(news.getChildCount() + 1L);
+				newsProvider.updateNews(news);
+				return true;
+			});
+			return null;
+		});
+
+		AddNewsCommentResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentResponse.class);
+		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
+				.collect(Collectors.toList()));
+
+		return commentDTO;
+	}
+
+	@Override
+	public void setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		setNewsLikeFlag(userId, cmd.getNewsToken());
+	}
+ 
 }

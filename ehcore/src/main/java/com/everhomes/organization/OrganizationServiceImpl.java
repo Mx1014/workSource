@@ -61,6 +61,7 @@ import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.region.RegionScope;
@@ -6505,6 +6506,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
+	public Long getTopOrganizationId(Long organizationId){
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if (organization != null) {
+			String path = organization.getPath();
+			String[] ogs = path.split("/");
+			return Long.valueOf(ogs[1]);
+		}
+		return null;
+	}
+	
+	@Override
 	public SearchOrganizationCommandResponse searchOrganization(
 			SearchOrganizationCommand cmd) {
 		SearchOrganizationCommandResponse resp = new SearchOrganizationCommandResponse();
@@ -6743,6 +6755,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null != identifier) {
 			LOGGER.warn("User identifier token has already been claimed.");
 		}
+
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_NEW_ORG.getCode()).tryEnter(()-> {
 			this.dbProvider.execute((TransactionStatus status) -> {
 				
@@ -7085,7 +7098,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Integer topDepartmentNum = 10000;
 		for (OrganizationDTO dto : dtos) {
 			if(dto.getPath().split("/").length <  topDepartmentNum){
-				topDepartmentNum = dto.getPath().length();
+				topDepartmentNum = dto.getPath().split("/").length;
 				topDepartment = dto;
 			}
 		}

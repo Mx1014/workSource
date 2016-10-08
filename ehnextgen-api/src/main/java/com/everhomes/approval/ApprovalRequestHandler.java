@@ -23,5 +23,9 @@ public interface ApprovalRequestHandler {
 	void processFinalApprove(ApprovalRequest approvalRequest);
 
 	String processListApprovalRequest(List<ApprovalRequest> approvalRequestList);
+
+	String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason);
+
+	String processMessageToNextLevelBody(ApprovalRequest approvalRequest);
 	
 }

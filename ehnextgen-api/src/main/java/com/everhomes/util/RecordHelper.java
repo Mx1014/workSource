@@ -1,6 +1,7 @@
 package com.everhomes.util;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.jooq.Record;
 
@@ -13,10 +14,10 @@ public class RecordHelper {
 		
 		try {
 			T t = clazz.newInstance();
-			Field[] fields = clazz.getDeclaredFields();
-			if (fields == null || fields.length == 0 || (fields.length == 1 && fields[0].getName().equals("serialVersionUID"))) {
-				fields = clazz.getSuperclass().getDeclaredFields();
-			}
+			Field[] thisFields = clazz.getDeclaredFields();
+			Field[] superFields = clazz.getSuperclass().getDeclaredFields();
+			Field[] fields = Arrays.copyOf(thisFields, thisFields.length + superFields.length);
+			System.arraycopy(superFields, 0, fields, thisFields.length, superFields.length);  
 			for (Field field : fields) {
 				if (field.getModifiers() == 2) {
 					String name = field.getName();

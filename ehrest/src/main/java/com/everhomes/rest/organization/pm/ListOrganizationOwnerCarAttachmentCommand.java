@@ -1,5 +1,7 @@
 package com.everhomes.rest.organization.pm;
 
+import javax.validation.constraints.NotNull;
+
 /**
  *  <ul>
  *      <li>carId: 车辆id</li>
@@ -8,8 +10,8 @@ package com.everhomes.rest.organization.pm;
  */
 public class ListOrganizationOwnerCarAttachmentCommand {
 
-    private Long carId;
-    private Long organizationId;
+    @NotNull private Long carId;
+    @NotNull private Long organizationId;
 
     public Long getCarId() {
         return carId;

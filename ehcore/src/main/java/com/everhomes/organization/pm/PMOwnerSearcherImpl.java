@@ -1,13 +1,17 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
+import com.everhomes.rest.user.UserLocalStringCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -41,6 +45,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	@Autowired
 	private ConfigurationProvider configProvider;
 
+    @Autowired
+    private LocaleStringProvider localeStringProvider;
+
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
@@ -65,25 +72,19 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	@Override
 	public void feedDoc(CommunityPmOwner owner) {
 		XContentBuilder source = createDoc(owner);
-        
         feedDoc(owner.getId().toString(), source);
 	}
 
 	@Override
 	public void syncFromDb() {
         this.deleteAll();
-        
         List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwners(null, null);
-        
         if(owners.size() > 0) {
             this.bulkUpdate(owners);
         }
-        
         this.optimize(1);
         this.refresh();
-        
         LOGGER.info("sync for organization owner ok");
-
 	}
 
 	@Override
@@ -115,28 +116,31 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         }
         
         qb = QueryBuilders.filteredQuery(qb, fb);
-        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
-        builder.setQuery(qb);
-        
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH)
+                .setFrom(anchor.intValue() * pageSize)
+                .setSize(pageSize + 1)
+                .setQuery(qb);
+
         SearchResponse rsp = builder.execute().actionGet();
 
         ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
         List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
         List<Long> ids = getIds(rsp);
+        if(ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        }
         if (ids != null && ids.size() > 0) {
             List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
             ownerDTOList = pmOwners.stream().map(r -> {
                 OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                 OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
                 dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
+                LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getGender()),
+                        UserContext.current().getUser().getLocale());
+                dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 return dto;
             }).collect(Collectors.toList());
-
-            if(ids.size() > pageSize) {
-                response.setNextPageAnchor(anchor + 1);
-                ids.remove(ids.size() - 1);
-            }
         }
         response.setOwners(ownerDTOList);
         return response;

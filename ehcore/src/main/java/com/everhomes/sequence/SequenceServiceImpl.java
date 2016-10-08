@@ -855,7 +855,15 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
         });
-        
+        syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhYzbDevices.class, Tables.EH_YZB_DEVICES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_YZB_DEVICES.ID.max()).from(Tables.EH_YZB_DEVICES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhSearchTypes.class, Tables.EH_SEARCH_TYPES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_SEARCH_TYPES.ID.max()).from(Tables.EH_SEARCH_TYPES).fetchOne().value1(); 
+        });
         //审批相关表, add by tt, 160907
         syncTableSequence(null, EhApprovalFlows.class, Tables.EH_APPROVAL_FLOWS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_APPROVAL_FLOWS.ID.max()).from(Tables.EH_APPROVAL_FLOWS).fetchOne().value1();
@@ -883,6 +891,24 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhApprovalOpRequests.class, Tables.EH_APPROVAL_OP_REQUESTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_APPROVAL_OP_REQUESTS.ID.max()).from(Tables.EH_APPROVAL_OP_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRequestTemplates.class, Tables.EH_REQUEST_TEMPLATES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REQUEST_TEMPLATES.ID.max()).from(Tables.EH_REQUEST_TEMPLATES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRequestTemplatesNamespaceMapping.class, Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING.ID.max()).from(Tables.EH_REQUEST_TEMPLATES_NAMESPACE_MAPPING).fetchOne().value1();
+        });
+        syncTableSequence(null, EhRequestAttachments.class, Tables.EH_REQUEST_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REQUEST_ATTACHMENTS.ID.max()).from(Tables.EH_REQUEST_ATTACHMENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceRequests.class, Tables.EH_SERVICE_ALLIANCE_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceNotifyTargets.class, Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_NOTIFY_TARGETS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhSettleRequests.class, Tables.EH_SETTLE_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SETTLE_REQUESTS.ID.max()).from(Tables.EH_SETTLE_REQUESTS).fetchOne().value1();
         });
     }
 

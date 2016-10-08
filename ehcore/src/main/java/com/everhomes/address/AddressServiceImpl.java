@@ -26,6 +26,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
@@ -37,6 +38,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -124,6 +126,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private UserGroupHistoryProvider userGroupHistoryProvider;
+
+    @Autowired
+    private PropertyMgrService propertyMgrService;
     
     @PostConstruct
     public void setup() {
@@ -536,19 +541,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 this.userGroupHistoryProvider.deleteUserGroupHistory(history);
             }
         }
-        
-        if(cmd.getReplacedAddressId() == null) {
-            return processNewAddressClaimV2(cmd);
-        } else {
-            FamilyDTO info = processNewAddressClaimV2(cmd);
-            
+
+        FamilyDTO familyDTO = processNewAddressClaimV2(cmd);
+        autoApproveMember(familyDTO.getCommunityId(), familyDTO.getId(), familyDTO.getAddressId());
+
+        if(cmd.getReplacedAddressId() != null) {
             DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
             disclaimCmd.setAddressId(cmd.getReplacedAddressId());
             disclaimAddress(disclaimCmd);
-            return info;
+        }
+        return familyDTO;
+    }
+
+    private void autoApproveMember(Long communityId, Long groupId, Long addressId) {
+        if (communityId != null && groupId != null) {
+            propertyMgrService.autoApprovalGroupMember(UserContext.current().getUser().getId(), communityId, groupId, addressId);
         }
     }
-    
+
     public void disclaimAddress(DisclaimAddressCommand cmd) {
         if(cmd.getAddressId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -584,6 +594,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
         leaveCmd.setId(family.getId());
         familyService.leave(leaveCmd, null);
+
+        // 修改用户对应的客户资料认证状态  add by xq.tian  20160923
+        propertyMgrService.updateOrganizationOwnerAddressAuthType(UserContext.current().getUser().getId(), family.getCommunityId(),
+                family.getAddressId(), OrganizationOwnerAddressAuthType.INACTIVE);
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +62,28 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalCategory.class));
 	}
 	
+	@Override
+	public List<ApprovalCategory> listApprovalCategoryForStatistics(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Date fromDate) {
+		//请假类型被删除，下个月的统计不出现该类型的统计项，本月及以前仍然有该类型的统计项
+		Result<Record> result = getReadOnlyContext().select().from(Tables.EH_APPROVAL_CATEGORIES)
+				.where(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_CATEGORIES.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode())
+						.or(Tables.EH_APPROVAL_CATEGORIES.STATUS.eq(CommonStatus.INACTIVE.getCode())
+								.and(Tables.EH_APPROVAL_CATEGORIES.UPDATE_TIME.gt(new Timestamp(fromDate.getTime())))))
+				.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID.asc())
+				.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalCategory.class));
+		}
+		
+		return new ArrayList<ApprovalCategory>();
+	}
+
 	private EhApprovalCategoriesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

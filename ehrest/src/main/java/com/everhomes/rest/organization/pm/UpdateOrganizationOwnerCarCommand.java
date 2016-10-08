@@ -1,5 +1,10 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 /**
  * <ul>
  *     <li>id: carId</li>
@@ -8,7 +13,7 @@ package com.everhomes.rest.organization.pm;
  *     <li>brand: 品牌</li>
  *     <li>plateNumber: 车牌号</li>
  *     <li>parkingSpace: 停车位</li>
- *     <li>parkingType: 停车类型 {@link com.everhomes.rest.organization.pm.OrganizationOwnerCarParkingType}</li>
+ *     <li>parkingType: 停车类型 {@link OrganizationOwnerCarParkingType}</li>
  *     <li>contacts: 联系人</li>
  *     <li>contactNumber: 联系人电话</li>
  *     <li>color: 颜色</li>
@@ -16,19 +21,26 @@ package com.everhomes.rest.organization.pm;
  *     <li>contentUrl: 图片的URL</li>
  * </ul>
  */
-public class CreateOrUpdateOrganizationOwnerCarCommand {
+public class UpdateOrganizationOwnerCarCommand {
 
-    private Long   id;
-    private Long   communityId;
+    @NotNull private Long id;
+    @NotNull private Long communityId;
+    @Size(max = 20)
+    @NotNull private String plateNumber;
+    @NotNull private Long organizationId;
+    @Size(max = 20)
     private String brand;
-    private String plateNumber;
+    @Size(max = 20)
     private String parkingSpace;
     private Byte   parkingType;
+    @Size(max = 20)
     private String contacts;
+    @Size(max = 20)
     private String contactNumber;
+    @Size(max = 20)
     private String color;
+    @Size(max = 1024)
     private String contentUri;
-    private Long   organizationId;
 
     public Long getId() {
         return id;
@@ -116,5 +128,10 @@ public class CreateOrUpdateOrganizationOwnerCarCommand {
 
     public void setContentUri(String contentUri) {
         this.contentUri = contentUri;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

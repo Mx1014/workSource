@@ -4,6 +4,7 @@ package com.everhomes.news;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.news.AddNewsCommentCommand;
+import com.everhomes.rest.news.AddNewsCommentForWebCommand;
 import com.everhomes.rest.news.AddNewsCommentResponse;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.CreateNewsResponse;
@@ -21,6 +22,7 @@ import com.everhomes.rest.news.ListNewsResponse;
 import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
@@ -29,6 +31,8 @@ import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 
 public interface NewsService {
 
@@ -65,5 +69,13 @@ public interface NewsService {
 	void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd);
 
 	void syncNews(SyncNewsCommand cmd);
+
+	ListNewsResponse listNewsForWeb(ListNewsCommand cmd);
+	
+	SearchContentsBySceneReponse searchNewsByScene(SearchContentsBySceneCommand cmd);
+
+	AddNewsCommentResponse addNewsForWebComment(AddNewsCommentForWebCommand cmd);
+
+	void setNewsLikeFlagForWeb(SetNewsLikeFlagForWebCommand cmd);
 	
 }

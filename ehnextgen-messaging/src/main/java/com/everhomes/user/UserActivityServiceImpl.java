@@ -10,57 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -118,10 +67,13 @@ import com.everhomes.activity.Activity;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityRoster;
 import com.everhomes.activity.ActivityStatus;
+import com.everhomes.activity.ActivityVideo;
+import com.everhomes.activity.ActivityVideoProvider;
 import com.everhomes.activity.CheckInStatus;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.community.Community;
@@ -137,6 +89,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Attachment;
+import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -149,6 +102,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
@@ -163,8 +117,11 @@ import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.repeat.RangeDTO;
+import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
 import com.everhomes.rest.user.BizOrderHolder;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
@@ -172,6 +129,10 @@ import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FieldDTO;
+import com.everhomes.rest.user.FieldTemplateDTO;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
@@ -183,6 +144,8 @@ import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
 import com.everhomes.rest.user.OrderCountDTO;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -260,6 +223,9 @@ public class UserActivityServiceImpl implements UserActivityService {
     
     @Autowired
     BizHttpRestCallProvider bizHttpRestCallProvider;
+    
+    @Autowired
+    private ActivityVideoProvider activityVideoProvider;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -631,16 +597,20 @@ public class UserActivityServiceImpl implements UserActivityService {
             return response;
         }
         
-        if(result.size() > pageSize) {
-        	locator.setAnchor(result.get(result.size() - 1).getId());
-        	result = result.subList(0, result.size() - 1);
-        } else {
-        	locator.setAnchor(null);
-        }
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后anchor的设置在provider里 by lqs 20160928
+//        if(result.size() > pageSize) {
+//        	locator.setAnchor(result.get(result.size() - 1).getId());
+//        	result = result.subList(0, result.size() - 1);
+//        } else {
+//        	locator.setAnchor(null);
+//        }
         
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
-        Collections.sort(ids);
-        Collections.reverse(ids);
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928        
+//        Collections.sort(ids);
+//        Collections.reverse(ids);
         List<PostDTO> posts = forumService.getTopicById(ids, cmd.getCommunityId(), false, true);
         
         Long nextPageAnchor = locator.getAnchor();
@@ -989,6 +959,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         	Activity activity =  activityProivider.findSnapshotByPostId(postId);
         	if(activity != null && activity.getStatus() == PostStatus.ACTIVE.getCode()) {
         		ActivityDTO dto = convertToActivityDto(activity, uid);
+        		fixupVideoInfo(dto); // added by janson
         		
         		activities.add(dto);
         	}
@@ -1020,23 +991,29 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (CollectionUtils.isEmpty(result)) {
             return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
         }
-        
-        if(result.size() > pageSize) {
-        	locator.setAnchor(result.get(result.size() - 1).getId());
-        	result = result.subList(0, result.size() - 1);
-        } else {
-        	locator.setAnchor(null);
-        }
+
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后anchor的设置在provider里 by lqs 20160928
+//        if(result.size() > pageSize) {
+//        	locator.setAnchor(result.get(result.size() - 1).getId());
+//        	result = result.subList(0, result.size() - 1);
+//        } else {
+//        	locator.setAnchor(null);
+//        }
         
         Long nextPageAnchor = locator.getAnchor();
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
-        Collections.sort(ids);
-        Collections.reverse(ids);
+        // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
+        // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928   
+//        Collections.sort(ids);
+//        Collections.reverse(ids);
         List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
         for(Long postId : ids) {
         	Activity activity =  activityProivider.findSnapshotByPostId(postId);
         	if(activity != null && activity.getStatus() == PostStatus.ACTIVE.getCode()) {
         		ActivityDTO dto = convertToActivityDto(activity, uid);
+        		fixupVideoInfo(dto); // added by janson
+        		
         		
         		activities.add(dto);
         	} 
@@ -1078,6 +1055,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         	Activity activity =  activityProivider.findActivityById(id);
         	if(activity != null && activity.getStatus() == PostStatus.ACTIVE.getCode()) {
         		ActivityDTO dto = convertToActivityDto(activity, uid);
+        		fixupVideoInfo(dto); // added by janson
         		
         		activities.add(dto);
         	}
@@ -1116,6 +1094,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         dto.setGroupId(activity.getGroupId());
         String posterUrl = getActivityPosterUrl(activity);
         dto.setPosterUrl(posterUrl);
+        fixupVideoInfo(dto); // added by janson
         
         ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid);
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
@@ -1182,4 +1161,103 @@ public class UserActivityServiceImpl implements UserActivityService {
 		}
 		userActivityProvider.updateProfileIfNotExist(userId, itemName, itemValue);
 	}
+
+	@Override
+	public RequestTemplateDTO getCustomRequestTemplate(
+			GetCustomRequestTemplateCommand cmd) {
+		RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(cmd.getTemplateType());
+		if(template != null) {
+			RequestTemplateDTO dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+			List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+			dto.setDtos(fields);
+			
+			return dto;
+		}
+		
+		return null;
+	}
+	
+	private List<FieldDTO> analyzefields(String fieldsJson) {
+		Gson gson = new Gson();
+		FieldTemplateDTO fields = gson.fromJson(fieldsJson, new TypeToken<FieldTemplateDTO>() {}.getType());
+		List<FieldDTO> dto = fields.getFields();
+		return dto;
+	}
+
+	@Override
+	public List<RequestTemplateDTO> getCustomRequestTemplateByNamespace() {
+		List<RequestTemplateDTO> dtos = new ArrayList<RequestTemplateDTO>();
+		List<RequestTemplatesNamespaceMapping> mappings = this.userActivityProvider.getRequestTemplatesNamespaceMappings(UserContext.getCurrentNamespaceId());
+		//配了mapping的从mapping里捞 ，没配的把所有模板都返回
+		if(mappings != null && mappings.size() > 0) {
+			dtos = mappings.stream().map(mapping -> {
+				RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(mapping.getTemplateId());
+				RequestTemplateDTO dto = null;
+				if(template != null) {
+					dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+					List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+					dto.setDtos(fields);
+				}
+				return dto;
+			}).filter(r->r!=null).collect(Collectors.toList());
+		
+		} else {
+			List<RequestTemplates> templates = this.userActivityProvider.listCustomRequestTemplates();
+			if(templates != null && templates.size() > 0) {
+				dtos = templates.stream().map(template -> {
+					RequestTemplateDTO dto = ConvertHelper.convert(template, RequestTemplateDTO.class);
+					List<FieldDTO> fields = analyzefields(template.getFieldsJson());
+					dto.setDtos(fields);
+					return dto;
+				}).filter(r->r!=null).collect(Collectors.toList());
+			}
+		}
+		
+		return dtos;
+	}
+
+	@Override
+	public void addCustomRequest(AddRequestCommand cmd) {
+
+		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		handler.addCustomRequest(cmd);
+	}
+
+	@Override
+	public List<RequestFieldDTO> getCustomRequestInfo(GetRequestInfoCommand cmd) {
+		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		
+		List<RequestFieldDTO> dto = handler.getCustomRequestInfo(cmd.getId());
+		return dto;
+	}
+	
+	private CustomRequestHandler getCustomRequestHandler(String templateType) {
+		CustomRequestHandler handler = null;
+        
+        if(!StringUtils.isEmpty(templateType)) {
+            String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + templateType);
+        }
+        
+        return handler;
+    }
+	
+	   private void fixupVideoInfo(ActivityDTO dto) {
+	       if(dto.getVideoUrl() != null) {
+	           return;
+	       }
+	       
+	       if(dto.getIsVideoSupport() == null) {
+	           dto.setIsVideoSupport((byte)0);
+	       }
+	       dto.setVideoState(VideoState.UN_READY.getCode());
+	       
+	       if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
+	           ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
+	           if(video != null && video.getVideoSid() != null) {
+	               dto.setVideoUrl("yzb://" + video.getVideoSid());
+	               dto.setVideoState(video.getVideoState());
+	           }
+	       }
+	   }
 }

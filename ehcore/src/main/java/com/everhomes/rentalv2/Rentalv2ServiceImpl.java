@@ -4410,7 +4410,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							!monthDay.equals( chooseCalendar.get(Calendar.DAY_OF_MONTH) ))
 						continue;
 					//每天循环的
-					if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
+						if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
 						//按小时
 						Timestamp beginTime = Timestamp.valueOf(dateSF.format(start.getTime().getTime())+ " "
 								+ String.valueOf( cmd.getBeginTime().intValue())

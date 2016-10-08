@@ -14,10 +14,14 @@ import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
@@ -41,6 +45,7 @@ import com.everhomes.rest.user.UserImpersonationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserLoginResponse;
+import com.everhomes.rest.user.ValidatePassCommand;
 import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
 import com.everhomes.rest.user.VerifyAndLogonCommand;
 import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
@@ -142,7 +147,14 @@ public interface UserService {
 
     UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd);
     SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd);
+
+    
+    SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+    ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
+
+
     void deleteUserImpersonation(DeleteUserImpersonationCommand cmd);
+
     boolean isValid(LoginToken token);
     LoginToken getLoginToken(HttpServletRequest request);
     UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
@@ -153,4 +165,5 @@ public interface UserService {
      * @return 如果创建了新用户则返回true，否则返回false
      */
     boolean signupByThirdparkUser(User user, HttpServletRequest request);
+	Boolean validateUserPass(ValidatePassCommand passCmd);
 }

@@ -2,6 +2,7 @@ package com.everhomes.namespace;
 
 import java.util.List;
 
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 
 public interface NamespacesProvider {
@@ -13,5 +14,6 @@ public interface NamespacesProvider {
 	void updateNamespace(Namespace namespace);
 	void updateNamespaceDetail(NamespaceDetail namespaceDetail);
 	NamespaceDetail findNamespaceDetailByNamespaceId(Integer id);
+	List<NamespaceResource> listNamespaceResources(Integer namespaceId, String resourceType);
 
 }

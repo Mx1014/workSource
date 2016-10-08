@@ -61,4 +61,20 @@ public interface YellowPageProvider {
 	
 	List<ServiceAllianceCategories> listChildCategories(Integer namespaceId, Long parentId, CategoryAdminStatus status);
  
+	void createNotifyTarget(ServiceAllianceNotifyTargets target);
+	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
+	void deleteNotifyTarget(Long id);
+	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long id);
+	ServiceAllianceNotifyTargets findNotifyTarget(String ownerType, Long ownerId, Long categoryId, Byte contactType, String contactToken);
+	List<ServiceAllianceNotifyTargets> listNotifyTargets(String ownerType, Long ownerId, Byte contactType, 
+			Long categoryId, CrossShardListingLocator locator, int pageSize);
+	
+	void createServiceAllianceRequests(ServiceAllianceRequests request);
+	ServiceAllianceRequests findServiceAllianceRequests(Long id);
+	List<ServiceAllianceRequests> listServiceAllianceRequests(CrossShardListingLocator locator, int pageSize);
+	
+	void createSettleRequests(SettleRequests request);
+	SettleRequests findSettleRequests(Long id);
+	List<SettleRequests> listSettleRequests(CrossShardListingLocator locator, int pageSize);
+
 }

@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import ch.hsr.geohash.GeoHash;
 
+import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -30,6 +31,7 @@ import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -51,6 +53,9 @@ import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
+import com.everhomes.promotion.OpPromotionConstant;
+import com.everhomes.promotion.OpPromotionScheduleJob;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
@@ -66,7 +71,11 @@ import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.ActivityVideoRoomType;
 import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.GetVideoCapabilityCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -75,7 +84,15 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.VideoCapabilityResponse;
+import com.everhomes.rest.activity.VideoManufacturerType;
+import com.everhomes.rest.activity.VideoState;
+import com.everhomes.rest.activity.VideoSupportType;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -100,14 +117,18 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
+import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -200,6 +221,18 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private ActivityVideoProvider activityVideoProvider;
+    
+    @Autowired
+    private YzbDeviceProvider yzbDeviceProvider;
+    
+    @Autowired
+    private YzbVideoService yzbVideoService;
+    
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -247,7 +280,17 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setStartTimeMs(startTimeMs);
         activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        //added by janson
+        if(cmd.getIsVideoSupport() == null) {
+            cmd.setIsVideoSupport((byte)0);
+        }
+        activity.setIsVideoSupport(cmd.getIsVideoSupport());
+        activity.setVideoUrl(cmd.getVideoUrl());
+        activity.setVideoState(VideoState.UN_READY.getCode());
+        
         activityProvider.createActity(activity);
+        createScheduleForActivity(activity);
         
         ActivityRoster roster = new ActivityRoster();
         roster.setFamilyId(user.getAddressId());
@@ -336,6 +379,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
+        fixupVideoInfo(dto);//added by janson
         
         //Send message to creator
         Map<String, String> map = new HashMap<String, String>();
@@ -425,6 +469,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         dto.setPosterUrl(getActivityPosterUrl(activity));
+        fixupVideoInfo(dto);//added by janson
         
         //Send message to creator
         Map<String, String> map = new HashMap<String, String>();
@@ -544,6 +589,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setGroupId(activity.getGroupId());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
+        fixupVideoInfo(dto);//added by janson
         return dto;
     }
 
@@ -597,6 +643,7 @@ public class ActivityServiceImpl implements ActivityService {
         /////////////////////////////////////
         dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
         dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        fixupVideoInfo(dto);//added by janson
         ////////////////////////////////////
         response.setActivity(dto);
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
@@ -788,6 +835,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
+        fixupVideoInfo(dto);//added by janson
         
         //管理员同意活动的报名
         Map<String, String> map = new HashMap<String, String>();
@@ -848,6 +896,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
+        fixupVideoInfo(dto);//added by janson
         return dto;
     }
 
@@ -977,6 +1026,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
+        fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
@@ -1125,6 +1175,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(getActivityPosterUrl(activity));
             dto.setForumId(post.getForumId());
+            fixupVideoInfo(dto);//added by janson
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         if(activityDtos.size()<value){
@@ -1181,6 +1232,7 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setStopTime(activity.getEndTime().toString());
           dto.setGroupId(activity.getGroupId());
           dto.setForumId(post.getForumId());
+          fixupVideoInfo(dto);//added by janson
           return dto;
        }).collect(Collectors.toList());
        if(result.size()<pageSize)
@@ -1207,7 +1259,8 @@ public class ActivityServiceImpl implements ActivityService {
 		activity.setStatus((byte)0);
 		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateActivity(activity);
-		 
+		
+		createScheduleForActivity(activity);
 	}
 
 	@Override
@@ -1267,6 +1320,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
+			fixupVideoInfo(dto);//added by janson
 			return dto;
        
 		}).collect(Collectors.toList());
@@ -1336,6 +1390,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
+			fixupVideoInfo(dto);//added by janson
 			return dto;
        
 		}).collect(Collectors.toList());
@@ -1587,6 +1642,7 @@ public class ActivityServiceImpl implements ActivityService {
             //add UserActivityStatus by xiongying 20160628
             ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
             dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+            fixupVideoInfo(dto);//added by janson
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         
@@ -1788,6 +1844,7 @@ public class ActivityServiceImpl implements ActivityService {
 		    	        dto.setPosterUrl(getActivityPosterUrl(activity));
 		    	        dto.setForumId(r.getForumId());
 		    	        dto.setGuest(activity.getGuest());
+		    	        fixupVideoInfo(dto);//added by janson
 		    			
 		    			return dto;
 	    			}
@@ -2034,6 +2091,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
         dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
         
         response.setContent(post.getContent());
@@ -2071,6 +2129,7 @@ public class ActivityServiceImpl implements ActivityService {
 				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
 				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
 				activity.setFavoriteFlag(p.getFavoriteFlag());
+				fixupVideoInfo(activity);//added by janson
 				activities.add(activity);
 			});
 		}
@@ -2145,6 +2204,358 @@ public class ActivityServiceImpl implements ActivityService {
 	    // 补充小区/园区ID，方便后面构建查询条件：既要查本园区的官方活动，又要查对应的管理公司发给所有园区的官方活动 by lqs 20160730
 	    cmd.setCommunityId(communityId);
 	}
+
+	@Override
+	public ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(
+			ListOfficialActivityByNamespaceCommand cmd) {
+		if (cmd.getNamespaceId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameters, cmd="+cmd);
+		}
+		ListPostCommandResponse postResponse = forumService.listOfficialActivityByNamespace(cmd);
+		List<PostDTO> posts = postResponse.getPosts();
+		final List<ActivityDTO> activities = new ArrayList<>();
+		if (posts != null && posts.size() > 0) {
+			posts.forEach(p->{
+				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
+				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
+				activity.setFavoriteFlag(p.getFavoriteFlag());
+				activities.add(activity);
+			});
+		}
+		
+		ListOfficialActivityByNamespaceResponse reponse = new ListOfficialActivityByNamespaceResponse(postResponse.getNextPageAnchor(), activities);
+		return reponse;
+	}
 	
+	@Override
+	public UserVideoPermissionDTO requestVideoPermission(RequestVideoPermissionCommand cmd) {
+        User user = UserContext.current().getUser();
+        UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
+        if(null != profile) {
+            profile.setItemValue(cmd.toString());
+            userActivityProvider.updateUserProfile(profile);
+        } else {
+            UserProfile p2 = new UserProfile();
+            p2.setItemName(UserProfileContstant.YZB_VIDEO_PERMISION);
+            p2.setItemKind((byte)0);
+            p2.setItemValue(cmd.toString());
+            p2.setOwnerId(user.getId());
+            userActivityProvider.addUserProfile(p2);
+        }
+        
+        return GetVideoPermisionInfo(new GetVideoPermissionInfoCommand());
+	}
 	
+	@Override
+	public UserVideoPermissionDTO GetVideoPermisionInfo(GetVideoPermissionInfoCommand cmd) {
+	    UserVideoPermissionDTO dto = new UserVideoPermissionDTO();
+	    User user = UserContext.current().getUser();
+	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.YZB_VIDEO_PERMISION);
+        if(profile == null || null == profile.getItemValue()) {
+            return dto;
+        }
+        
+        RequestVideoPermissionCommand req = (RequestVideoPermissionCommand)StringHelper.fromJsonString(profile.getItemValue(), RequestVideoPermissionCommand.class);
+        
+        dto.setVideoToken(req.getVideoToken());
+        dto.setSessionId(req.getSessionId());
+        
+        return dto;
+	}
+	
+	//live from normal user
+	private ActivityVideoDTO setUserActivityVideo(SetActivityVideoInfoCommand cmd) {
+	    ActivityVideo video = new ActivityVideo();
+        //app sdk
+        video.setIntegralTag1(0l);
+        video.setVideoSid(cmd.getVid());
+        
+        YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
+        if(oldDev != null) {
+            oldDev.setState(VideoState.UN_READY.getCode());
+            yzbDeviceProvider.updateYzbDevice(oldDev);
+            
+            yzbVideoService.setContinue(oldDev.getDeviceId(), 0); 
+        }
+        
+        User user = UserContext.current().getUser();
+        
+        if(video.getVideoSid() == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_VIDEO_PARAM_ERROR, "video client params error");
+        }
+        
+        ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+        if(oldVideo != null) {
+            //new activity, delete the old one
+            oldVideo.setVideoState(VideoState.INVALID.getCode());
+            activityVideoProvider.updateActivityVideo(oldVideo);
+        }
+        
+        video.setCreatorUid(user.getId());
+        video.setManufacturerType(VideoManufacturerType.YZB.toString());
+        video.setRoomType(ActivityVideoRoomType.YZB.toString());
+        video.setStartTime(System.currentTimeMillis());
+        video.setIntegralTag1(0l);
+        video.setVideoState(VideoState.LIVE.getCode());
+        video.setOwnerType("activity");
+        video.setOwnerId(cmd.getActivityId());
+        activityVideoProvider.createActivityVideo(video);
+        ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+        dto.setVideoUrl("yzb://" + video.getVideoSid());
+        dto.setRmtp("");
+        
+        return dto;
+	}
+	
+	@Override
+	public ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd) {	   
+	    if(cmd.getRoomId() == null) {
+	        return setUserActivityVideo(cmd);
+	    } else {
+	        //live from device
+	        ActivityVideo video = new ActivityVideo();
+	        String rmtp = "";
+	        boolean setContinue = true;
+	        
+            //default, use device
+	        video.setRoomId(cmd.getRoomId());
+	        video.setIntegralTag1(1l);
+	        video.setVideoState(VideoState.UN_READY.getCode());
+	        video.setVideoSid("");
+            video.setStartTime(System.currentTimeMillis());
+	        
+	        YzbDevice device = null;
+	        YzbDevice oldDev = yzbDeviceProvider.findYzbDeviceByActivityId(cmd.getActivityId());
+	        if(oldDev != null && oldDev.getRoomId().equals(cmd.getRoomId())) {
+	            //found old device
+	            device = oldDev;
+	            oldDev = null;
+	        } else {
+	            device = yzbDeviceProvider.findYzbDeviceById(cmd.getRoomId());    
+	        }
+            if(oldDev != null) {
+                //set old device to no ready
+                oldDev.setState(VideoState.UN_READY.getCode());
+                yzbDeviceProvider.updateYzbDevice(oldDev);
+                yzbVideoService.setContinue(oldDev.getDeviceId(), 0);
+            }
+	        
+	        if(device == null) {
+	            //create new device
+	            device = new YzbDevice();
+	            device.setDeviceId(cmd.getRoomId());
+	            if(cmd.getNamespaceId() == null) {
+	                device.setNamespaceId(UserContext.current().getNamespaceId());    
+	            }
+	            device.setState(VideoState.UN_READY.getCode());
+	            device.setStatus((byte)1); //valid
+               device.setRelativeType("activity");
+               device.setRelativeId(0l);
+               device.setLastVid("");
+               device.setRoomId(cmd.getRoomId());
+	            yzbDeviceProvider.createYzbDevice(device);
+	            
+	            setContinue = false;
+	        } else {
+	            if(!cmd.getActivityId().equals(device.getRelativeId())
+	                    && device.getState().equals(VideoState.LIVE.getCode())) {
+	                LOGGER.warn("new living but device is already living, cmd=" + cmd + " device=" + device.getRelativeId());
+	                //Close old living right now
+	                ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(device.getRelativeId());
+	                if(oldVideo != null 
+	                        && oldVideo.getVideoSid() != null 
+	                        && !oldVideo.getVideoState().equals(VideoState.RECORDING.getCode())
+	                        ) {
+	                    oldVideo.setVideoState(VideoState.RECORDING.getCode());
+	                    oldVideo.setEndTime(System.currentTimeMillis());
+	                    activityVideoProvider.updateActivityVideo(oldVideo);
+	                }
+	            }
+	            
+	            if(device.getRelativeId() == null 
+	                    || !cmd.getActivityId().equals(device.getRelativeId())
+	                    || !device.getState().equals(VideoState.LIVE.getCode())) {
+	                setContinue = false;
+	            }
+	            
+	        }
+	        
+            ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+            if(oldVideo != null) {
+                video.setVideoSid(oldVideo.getVideoSid());
+                video.setVideoState(oldVideo.getVideoState());
+                video.setStartTime(oldVideo.getStartTime());
+                
+                //new activity, delete the old one
+                oldVideo.setVideoState(VideoState.INVALID.getCode());
+                activityVideoProvider.updateActivityVideo(oldVideo);
+            }
+            
+            if(setContinue) {
+                //continue use old vid
+                yzbVideoService.setContinue(cmd.getRoomId(), 1);
+            } else {
+                //start new vid
+               yzbVideoService.setContinue(cmd.getRoomId(), 0);
+            }
+            
+            if(cmd.getActivityId().equals(device.getRelativeId())) {
+                video.setVideoSid(device.getLastVid());
+            }
+            
+            device.setRelativeId(cmd.getActivityId());
+            yzbDeviceProvider.updateYzbDevice(device); 
+            
+            User user = UserContext.current().getUser();
+            video.setCreatorUid(user.getId());
+            video.setManufacturerType(VideoManufacturerType.YZB.toString());
+            video.setRoomType(ActivityVideoRoomType.YZB.toString());
+            video.setOwnerType("activity");
+            video.setOwnerId(cmd.getActivityId());
+            activityVideoProvider.createActivityVideo(video);
+            ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+            dto.setVideoUrl("yzb://" + video.getVideoSid());
+            dto.setRmtp(rmtp);
+            
+            return dto;
+	    }
+	}
+	
+   @Override
+    public ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd) {
+       ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
+       return ConvertHelper.convert(video, ActivityVideoDTO.class);
+    }
+   
+   @Override
+   public void createScheduleForActivity(Activity act) {
+       if(act.getIsVideoSupport() == null || act.getIsVideoSupport() <= 0) {
+           return;
+       }
+       
+       String triggerName = YzbConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
+       String jobName = triggerName;
+       
+       Long now = System.currentTimeMillis();
+       Long endTime = act.getEndTimeMs();
+       if(endTime == null) {
+           endTime = act.getEndTime().getTime();
+       }
+       
+       Map<String, Object> map = new HashMap<String, Object>();
+       //String cronExpression = "0/5 * * * * ?";
+       map.put("id", act.getId().toString());
+       map.put("endTime", endTime.toString());
+       map.put("now", now.toString());
+       
+       scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(endTime + 60*1000), ActivityVideoScheduleJob.class, map);
+   }
+   
+   @Override
+   public void onActivityFinished(Long activityId, Long endTime) {
+       Activity activity = activityProvider.findActivityById(activityId);
+       if(activity == null || !activity.getEndTimeMs().equals(endTime)) {
+           LOGGER.warn("invalid activityId=" + activityId + " endTime=" + endTime);
+           return;
+       }
+       
+       ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByActivityId(activityId);
+       if(oldVideo != null) {
+           if(oldVideo.getVideoState().equals(VideoState.LIVE.getCode())) {
+               oldVideo.setVideoState(VideoState.RECORDING.getCode());
+               oldVideo.setEndTime(System.currentTimeMillis());
+               activityVideoProvider.updateActivityVideo(oldVideo);
+           }
+           
+           YzbDevice dev = yzbDeviceProvider.findYzbDeviceByActivityId(activityId);
+           if(dev != null && dev.getState().equals(VideoState.LIVE.getCode())) {
+               dev.setState(VideoState.UN_READY.getCode());
+               dev.setRelativeId(0l);
+               yzbDeviceProvider.updateYzbDevice(dev);
+           }
+           
+       }
+   }
+   
+   @Override 
+   public void onVideoDeviceChange(YzbVideoDeviceChangeCommand cmd) {
+       LOGGER.info("video ondevicechange=" + cmd);
+       if(cmd.getDevid() == null) {
+           return;
+       }
+       
+       YzbDevice device = yzbDeviceProvider.findYzbDeviceById(cmd.getDevid());
+       if(device == null) {
+       return;    
+       }
+       
+       if(cmd.getOptcode().equals("livestart")) {
+           ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(device.getRelativeId());
+           LOGGER.info("video ondevicechange, video=" + video);
+           if(video != null && video.getIntegralTag1().equals(1l) 
+                   && !video.getVideoState().equals(VideoState.RECORDING.getCode())
+                   && cmd.getVid() != null && !cmd.getVid().isEmpty()) {
+               video.setVideoSid(cmd.getVid());
+               video.setVideoState(VideoState.LIVE.getCode());
+               activityVideoProvider.updateActivityVideo(video);
+
+               device.setLastVid(cmd.getVid());
+               device.setState(VideoState.LIVE.getCode());
+               yzbDeviceProvider.updateYzbDevice(device);
+               
+           }
+       } else if(cmd.getOptcode().equals("livestop")) {
+           LOGGER.info("video livestop");
+           device.setState(VideoState.UN_READY.getCode());
+           yzbDeviceProvider.updateYzbDevice(device);
+//           ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(device.getRelativeId());
+//           if(video != null && video.getVideoState().equals(VideoState.LIVE.getCode())) {
+//               video.setVideoState(VideoState.RECORDING.getCode());
+//               activityVideoProvider.updateActivityVideo(video);
+//           }
+           
+       }
+      
+   }
+   
+   @Override
+   public VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd) {
+       Integer namespaceId = cmd.getNamespaceId();
+       if(namespaceId == null) {
+           namespaceId = UserContext.current().getNamespaceId();    
+       }
+   
+       VideoCapabilityResponse obj = new VideoCapabilityResponse();
+       if(cmd.getOfficialFlag() == null || cmd.getOfficialFlag().equals(OfficialFlag.NO.getCode())) {
+           Long official = this.configurationProvider.getLongValue(namespaceId
+                   , YzbConstant.VIDEO_NONE_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
+           obj.setVideoSupportType(official.byteValue());
+       } else {
+           Long official = this.configurationProvider.getLongValue(namespaceId
+                   , YzbConstant.VIDEO_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
+           obj.setVideoSupportType(official.byteValue()); 
+       }
+       return obj;
+   }
+   
+   private void fixupVideoInfo(ActivityDTO dto) {
+       if(dto.getVideoUrl() != null) {
+           return;
+       }
+       
+       if(dto.getIsVideoSupport() == null) {
+           dto.setIsVideoSupport((byte)0);
+       }
+       dto.setVideoState(VideoState.UN_READY.getCode());
+       
+       if(dto.getIsVideoSupport() != null && dto.getIsVideoSupport().byteValue() > 0) {
+           ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(dto.getActivityId());
+           if(video != null && video.getVideoSid() != null) {
+               dto.setVideoUrl("yzb://" + video.getVideoSid());
+               dto.setVideoState(video.getVideoState());
+           }
+       }
+   }
 }

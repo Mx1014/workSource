@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,10 +9,8 @@ import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.jooq.Row;
 import org.jooq.Row2;
 import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,11 +23,12 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.ApprovalQueryType;
 import com.everhomes.rest.approval.ApprovalRequestCondition;
 import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
-import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ListUtils;
 
@@ -74,7 +74,8 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
 				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(condition.getNamespaceId()))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(condition.getOwnerType()))
-				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(condition.getOwnerId()));
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(condition.getOwnerId()))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 		
 		if (condition.getApprovalType() != null) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(condition.getApprovalType()));
@@ -104,15 +105,16 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	}
 
 	@Override
-	public List<ApprovalRequest> listApprovalRequestForWeb(Integer namespaceId, String ownerType, Long ownerId,
-			Byte approvalType, Long categoryId, Long fromDate, Long endDate, Byte queryType,
+	public List<ApprovalRequest> listApprovalRequestWaitingForApproving(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Long categoryId, Long fromDate, Long endDate,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userIds, Long pageAnchor, int pageSize) {
 		
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
 				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType));
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 				
 		if (categoryId != null) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
@@ -126,11 +128,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
 		}
 		
-		if (queryType.byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
-		}else if (queryType.byteValue() == ApprovalQueryType.APPROVED.getCode()) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.REJECTION.getCode()));
-		}
+		step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
 		
 		if (ListUtils.isNotEmpty(userIds)) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.in(userIds));
@@ -150,6 +148,99 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		}
 		
 		return new ArrayList<ApprovalRequest>();
+	}
+
+	@Override
+	public List<ApprovalRequest> listApprovalRequestApproved(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Long categoryId, Long fromDate, Long endDate,
+			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userIds, Long pageAnchor, int pageSize) {
+		/**
+		 * 
+			select *
+			from eh_approval_requests t1
+			where t1.namespace_id = 1000000
+			and t1.owner_type = 'organization'
+			and t1.owner_id = 1000001
+			and t1.approval_type = 2
+			and t1.status = 2
+			and t1.category_id = 1
+			and t1.long_tag1 >= 10000
+			and t1.long_tag1 < 20000
+			and t1.creator_uid in (1,2,3)
+			and exists (
+				select 1
+				from eh_approval_op_requests t2
+				where t1.id = t2.request_id
+				and (t2.flow_id, t2.level) in ((3,1), (3,2))
+				and t2.approval_status in (1,2)	
+			)
+			order by t1.update_time desc
+			limit 0, 20
+		 */
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+				
+		if (categoryId != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
+		}
+		
+		if (fromDate != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.ge(fromDate));
+		}
+		
+		if (endDate != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
+		}
+		
+		if (ListUtils.isNotEmpty(userIds)) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.in(userIds));
+		}
+		List<Row2<Long, Byte>> flowLevelList = approvalFlowLevelList.stream().map(a->DSL.row(a.getFlowId(), a.getLevel())).collect(Collectors.toList());
+		step = step.andExists(
+				getReadOnlyContext().selectOne().from(Tables.EH_APPROVAL_OP_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.ID.eq(Tables.EH_APPROVAL_OP_REQUESTS.REQUEST_ID))
+				.and(DSL.row(Tables.EH_APPROVAL_OP_REQUESTS.FLOW_ID, Tables.EH_APPROVAL_OP_REQUESTS.LEVEL).in(flowLevelList))
+				.and(Tables.EH_APPROVAL_OP_REQUESTS.APPROVAL_STATUS.in(ApprovalStatus.AGREEMENT.getCode(), ApprovalStatus.REJECTION.getCode()))
+				);
+		
+		if (pageAnchor == null) {
+			pageAnchor = 0L;
+		}
+		
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.UPDATE_TIME.desc()).limit(Long.valueOf(pageAnchor*pageSize).intValue(), pageSize).fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
+		}
+		
+		return new ArrayList<ApprovalRequest>();
+	}
+
+	@Override
+	public boolean checkExcludeAbsenceRequest(Long userId, Long requestId, Date date) {
+		ApprovalRequest approvalRequest = findApprovalRequestById(requestId);
+		//针对同一天既有请假申请，又有忘打卡申请，已最后提交的申请为依据
+		Record record = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(approvalRequest.getNamespaceId()))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(approvalRequest.getOwnerType()))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(approvalRequest.getOwnerId()))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(ApprovalType.EXCEPTION.getCode()))
+				.and(Tables.EH_APPROVAL_REQUESTS.CREATE_TIME.gt(approvalRequest.getCreateTime()))
+				.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.eq(date.getTime()))
+				.limit(1)
+				.fetchOne();
+		
+		if (record != null) {
+			return true;
+		}
+		
+		return false;
 	}
 
 	private EhApprovalRequestsDao getReadWriteDao() {

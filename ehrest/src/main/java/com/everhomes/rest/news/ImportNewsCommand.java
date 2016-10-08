@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属类型ID</li>
+ * <li>categoryId: 新闻类型ID</li>
  * </ul>
  */
 public class ImportNewsCommand {
@@ -18,6 +19,7 @@ public class ImportNewsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
+	private Long categoryId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -38,6 +40,14 @@ public class ImportNewsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 }

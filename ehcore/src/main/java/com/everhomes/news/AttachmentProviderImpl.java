@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.RecordMapper;
+import org.jooq.Result;
 import org.jooq.impl.DAOImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 
 @Component
 public class AttachmentProviderImpl implements AttachmentProvider {
@@ -106,9 +107,14 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 		Record blankRecord = meta.getBlankRecordObject();
 		assert (blankRecord != null);
 		// 下面where的写法与 where("owner_id = ?", ownerId)是一样的
-		return context.select().from(meta.getTableName())
-				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).fetch()
-				.map(new MyAttachmentRecordMapper());
+		Result<Record> result = context.select().from(meta.getTableName())
+				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Attachment.class));
+		}
+		
+		return new ArrayList<Attachment>();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -181,20 +187,20 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 		return dbProvider.getDslContext(accessSpec);
 	}
 
-	private class MyAttachmentRecordMapper implements RecordMapper<Record, Attachment> {
-
-		@Override
-		public Attachment map(Record r) {
-			Attachment attachment = new Attachment();
-			attachment.setId(r.getValue("id", Long.class));
-			attachment.setOwnerId(r.getValue("owner_id", Long.class));
-			attachment.setContentType(r.getValue("attachment_name", String.class));
-			attachment.setContentType(r.getValue("content_type", String.class));
-			attachment.setContentUri(r.getValue("content_uri", String.class));
-			attachment.setCreatorUid(r.getValue("creator_uid", Long.class));
-			attachment.setCreateTime(r.getValue("create_time", Timestamp.class));
-			return attachment;
-		}
-
-	}
+//	private class MyAttachmentRecordMapper implements RecordMapper<Record, Attachment> {
+//
+//		@Override
+//		public Attachment map(Record r) {
+//			Attachment attachment = new Attachment();
+//			attachment.setId(r.getValue("id", Long.class));
+//			attachment.setOwnerId(r.getValue("owner_id", Long.class));
+//			attachment.setContentType(r.getValue("attachment_name", String.class));
+//			attachment.setContentType(r.getValue("content_type", String.class));
+//			attachment.setContentUri(r.getValue("content_uri", String.class));
+//			attachment.setCreatorUid(r.getValue("creator_uid", Long.class));
+//			attachment.setCreateTime(r.getValue("create_time", Timestamp.class));
+//			return attachment;
+//		}
+//
+//	}
 }

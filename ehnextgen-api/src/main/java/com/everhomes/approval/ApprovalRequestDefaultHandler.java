@@ -110,6 +110,16 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
 		return null;
 	}
+
+	@Override
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
+		return null;
+	}
+
+	@Override
+	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
+		return null;
+	}
 	
 	
 }

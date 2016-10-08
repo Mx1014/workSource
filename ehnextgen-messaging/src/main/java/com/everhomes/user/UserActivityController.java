@@ -17,19 +17,21 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.locale.LocalAppProvier;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.local.AppVersionCommand;
 import com.everhomes.rest.local.GetAppVersion;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
+import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
 import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.ListContactRespose;
 import com.everhomes.rest.user.ListContactsCommand;
@@ -41,6 +43,7 @@ import com.everhomes.rest.user.ListSignupActivitiesCommand;
 import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
@@ -312,5 +315,65 @@ public class UserActivityController extends ControllerBase {
     public RestResponse listSignupActivities(@Valid ListSignupActivitiesCommand cmd) {
     	ListActivitiesReponse response = userActivityService.listSignupActivities(cmd);
         return new RestResponse(response);
+    }
+    
+    /**
+	 * <b>URL: /user/getCustomRequestTemplate</b>
+	 * <p> 获取模板（根据templateType）</p>
+	 */
+    @RequestMapping("getCustomRequestTemplate")
+    @RestReturn(value = RequestTemplateDTO.class)
+    public RestResponse getCustomRequestTemplate(@Valid GetCustomRequestTemplateCommand cmd) {
+    	RequestTemplateDTO dto = this.userActivityService.getCustomRequestTemplate(cmd);
+    	 
+    	RestResponse response = new RestResponse(dto);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+	 * <b>URL: /user/getCustomRequestTemplateByNamespace</b>
+	 * <p> 获取模板（根据namespace）</p>
+	 */
+    @RequestMapping("getCustomRequestTemplateByNamespace")
+    @RestReturn(value = RequestTemplateDTO.class, collection = true)
+    public RestResponse getCustomRequestTemplateByNamespace() {
+    	List<RequestTemplateDTO> dtos = this.userActivityService.getCustomRequestTemplateByNamespace();
+    	
+    	RestResponse response = new RestResponse(dtos);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    
+    /**
+	 * <b>URL: /user/addCustomRequest</b>
+	 * <p> 提交申请  </p>
+	 */
+    @RequestMapping("addCustomRequest")
+    @RestReturn(value = String.class)
+    public RestResponse addCustomRequest(@Valid AddRequestCommand cmd) {
+    	this.userActivityService.addCustomRequest(cmd);
+    	
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+	 * <b>URL: /user/getCustomRequestInfo</b>
+	 * <p> 获取申请信息  </p>
+	 */
+    @RequestMapping("getCustomRequestInfo")
+    @RestReturn(value = RequestFieldDTO.class, collection = true)
+    public RestResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd) {
+    	List<RequestFieldDTO> dto = this.userActivityService.getCustomRequestInfo(cmd);
+    	RestResponse response = new RestResponse(dto);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 }

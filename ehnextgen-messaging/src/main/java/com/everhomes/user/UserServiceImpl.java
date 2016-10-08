@@ -7,11 +7,9 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,8 +68,8 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.forum.ForumService;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
@@ -86,15 +84,11 @@ import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.news.NewsService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.point.PointType;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -107,7 +101,6 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
-import com.everhomes.rest.forum.ForumNotificationTemplateCode;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -115,19 +108,29 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagePopupFlag;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MessagingLocalStringCode;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
+import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.SearchTypeDTO;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
 import com.everhomes.rest.user.CreateInvitationCommand;
@@ -164,6 +167,7 @@ import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.ValidatePassCommand;
 import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
 import com.everhomes.rest.user.VerifyAndLogonCommand;
 import com.everhomes.rest.user.admin.InvitatedUsers;
@@ -187,7 +191,6 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
-import com.mysql.jdbc.log.Log;
 
 /**
  * 
@@ -309,6 +312,15 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private UserImpersonationProvider userImpersonationProvider;
+    
+    @Autowired
+    private NewsService newsService;
+    
+    @Autowired
+    private ForumService forumService;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
     
 
 	private static final String DEVICE_KEY = "device_login";
@@ -3063,6 +3075,89 @@ public class UserServiceImpl implements UserService {
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
+
+	@Override
+	public SearchContentsBySceneReponse searchContentsByScene(
+			SearchContentsBySceneCommand cmd) {
+		long startTime = System.currentTimeMillis();
+		User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId(); 
+//	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+		 
+	    if(StringUtils.isEmpty(cmd.getContentType())) {
+	    	cmd.setContentType(SearchContentType.ALL.getCode());
+	    }
+	    SearchContentType contentType = SearchContentType.fromCode(cmd.getContentType());
+	    
+	    SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+	    switch(contentType) {
+	    case ACTIVITY:
+	    case POLL:
+	    case TOPIC:
+	    	response = forumService.searchContents(cmd, contentType);
+	    	break;
+		
+	    case NEWS:
+	    	response = newsService.searchNewsByScene(cmd);
+	    	break;
+	    case ALL:
+	    	int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
+	    	cmd.setPageSize(pageSize);
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+	    	}
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
+	    	}
+	    	
+	    	if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
+	    			&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
+	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+	    	}
+	    	
+	    	
+	    	response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+	    	break;
+		
+	    default:
+	    	LOGGER.error("Unsupported content type for search, contentType=" + cmd.getContentType());
+	    	break;
+	    }
+		    
+	    if(LOGGER.isDebugEnabled()) {
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("search contents by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
+	            userId, namespaceId, (endTime - startTime), cmd);
+	    }
+		return response;
+	}
+
+	@Override
+	public ListSearchTypesBySceneReponse listSearchTypesByScene(
+			ListSearchTypesBySceneCommand cmd) {
+		User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    
+	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+	    
+	    //先按域空间查，ownerid和ownertype暂时不用
+	    ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
+	    response.setSearchTypes(new ArrayList<SearchTypeDTO>());
+	    List<SearchTypes> searchTypes = userActivityProvider.listByNamespaceId(namespaceId);
+	    if(searchTypes != null && searchTypes.size() > 0) {
+	    	response.getSearchTypes().addAll(searchTypes.stream().map(r -> {
+	    		SearchTypeDTO dto = ConvertHelper.convert(r, SearchTypeDTO.class);
+	    		return dto;
+	    	}).collect(Collectors.toList()));
+	    }
+	    return response;
+	}
     
     // 移自WebRequestInterceptor并改为public方法，使得其它地方也可以调用 by lqs 20160922
     public boolean isValid(LoginToken token) {
@@ -3189,4 +3284,28 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
+    
+    @Override
+	public Boolean validateUserPass(ValidatePassCommand cmd) {
+		if(cmd.getUserId() == null) {
+			LOGGER.error("userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "userId is null");
+		}
+		if(StringUtils.isEmpty(cmd.getPassword())) {
+			LOGGER.error("password is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "password is null");
+		}
+		User user = userProvider.findUserById(cmd.getUserId());
+		if(user == null) {
+			LOGGER.error("user not found.userId=" + cmd.getUserId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+                    "user not found");
+		}
+		if(!EncryptionUtils.validateHashPassword(cmd.getPassword(), user.getSalt(), user.getPasswordHash())) {
+			return false;
+		}
+		return true;
+	}
 }

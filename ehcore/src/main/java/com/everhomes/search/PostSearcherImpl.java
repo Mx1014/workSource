@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -17,6 +18,8 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.jooq.Record;
@@ -25,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -34,6 +39,7 @@ import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Forum;
+import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.IteratePostCallback;
@@ -60,15 +66,20 @@ import com.everhomes.rest.forum.SearchByMultiForumAndCmntyCommand;
 import com.everhomes.rest.forum.SearchTopicCommand;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.SearchTypes;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -117,6 +128,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Autowired
     OrganizationProvider organizationProvider;
+
+	@Autowired
+	private UserActivityProvider userActivityProvider;
     
     private final String contentcategory = "contentcategory";
     private final String actioncategory = "actioncategory";
@@ -148,6 +162,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("visibleRegionType", post.getVisibleRegionType());
             b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("parentPostId", post.getParentPostId());
+            b.field("embeddedAppId", post.getEmbeddedAppId());
             Forum forum = forumProvider.findForumById(post.getForumId());
             Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
             if(forum != null) {
@@ -341,10 +356,15 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         return fb;
     }
+    
 
-    @Override
-    public ListPostCommandResponse query(SearchTopicCommand cmd) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+    /**
+	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理
+	 * xiongying
+	 */
+    private SearchResponse getQuery(SearchTopicCommand cmd) {
+    	
+    	SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb = null;
         if(cmd.getQueryString() == null || cmd.getQueryString().isEmpty()) {
@@ -385,6 +405,40 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         FilterBuilder fb = getForumFilter(cmd);
         
+        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
+        	if(SearchContentType.ACTIVITY.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		if(null == fb) {
+        			fb = FilterBuilders.termFilter("embeddedAppId", 3);
+        		} else {
+                    fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("embeddedAppId", 3));
+                }
+                
+            } 
+        
+        	if(SearchContentType.POLL.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		if(null == fb) {
+        			fb = FilterBuilders.termFilter("embeddedAppId", 14);
+        		} else {
+                    fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("embeddedAppId", 14));
+                }
+                
+            } 
+        
+        	if(SearchContentType.TOPIC.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		 int[] notEmbeddedAppIds = new int[2];
+        		 notEmbeddedAppIds[0] = 3;
+        		 notEmbeddedAppIds[1] = 14;
+        		 
+        		FilterBuilder nfb = FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds);
+        		if(null == fb) {
+        			fb = FilterBuilders.notFilter(nfb);
+        		} else {
+                    fb = FilterBuilders.boolFilter().mustNot(fb, nfb);
+                }
+                
+            } 
+        }
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -404,10 +458,22 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 			LOGGER.info("PostSearcherImpl query builder ："+builder);
         
         SearchResponse rsp = builder.execute().actionGet();
+    	return rsp;
+    }
+    
+    @Override
+    public ListPostCommandResponse query(SearchTopicCommand cmd) {
+    	SearchResponse rsp = getQuery(cmd);
         List<Long> ids = getIds(rsp);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.info("PostSearcherImpl query SearchResponse ids ："+ids);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
         
         ListPostCommandResponse listPost = new ListPostCommandResponse();
         if(ids.size() > pageSize) {
@@ -564,6 +630,52 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         return response;
     }
     
+    @Override
+    public SearchResponse searchByScene(SearchTopicBySceneCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        SearchResponse response = null;
+        
+        Integer namespaceId = sceneToken.getNamespaceId();
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+            response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, sceneToken.getEntityId());
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, family.getCommunityId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+            Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            if(organization != null) {
+                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+                response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, communityId);
+            }
+            break;
+        case PM_ADMIN:
+        	SearchByMultiForumAndCmntyCommand orgTopicCmd = getGlobalPostByOrganizationIdQuery(cmd, sceneToken, sceneToken.getEntityId());
+        	response = getQueryByMultiForumAndCmnty(orgTopicCmd);
+            break;
+        default:
+            break;
+        }
+        
+        return response;
+    }
+    
+    
+    
     private ListPostCommandResponse queryGlobalPostByCommunityId(Integer namespaceId, SearchTopicBySceneCommand cmd, 
         SceneTokenDTO sceneToken, Long communityId) {
         Community community = communityProvider.findCommunityById(communityId);
@@ -582,9 +694,31 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         return null;
     }
     
-    private ListPostCommandResponse queryGlobalPostByOrganizationId(SearchTopicBySceneCommand cmd, 
+    private SearchResponse searchGlobalPostByCommunityId(Integer namespaceId, SearchTopicBySceneCommand cmd, 
+            SceneTokenDTO sceneToken, Long communityId) {
+            Community community = communityProvider.findCommunityById(communityId);
+            if(community != null) {
+                SearchTopicCommand cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
+                cmntyTopicCmd.setNamespaceId(namespaceId);
+                cmntyTopicCmd.setCommunityId(community.getId());
+                cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
+                cmntyTopicCmd.setSearchContentType(cmd.getSearchContentType());
+                
+                SearchResponse searchResponse = getQuery(cmntyTopicCmd);
+                return searchResponse;
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", communityId=" + communityId);
+                }
+            }
+            
+            return null;
+        
+    }
+    
+    private SearchByMultiForumAndCmntyCommand getGlobalPostByOrganizationIdQuery(SearchTopicBySceneCommand cmd, 
             SceneTokenDTO sceneToken, Long organizationId) {
-        List<Long> forumIdList = new ArrayList<Long>();
+    	List<Long> forumIdList = new ArrayList<Long>();
         List<Long> organizationList = new ArrayList<Long>();
         
         // 本公司论坛
@@ -627,7 +761,15 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         orgTopicCmd.setCommunityIds(communityIdList);
         orgTopicCmd.setForumIds(forumIdList);
         orgTopicCmd.setRegionIds(organizationList);
+        orgTopicCmd.setSearchContentType(cmd.getSearchContentType());
         
+        return orgTopicCmd;
+    }
+    
+    private ListPostCommandResponse queryGlobalPostByOrganizationId(SearchTopicBySceneCommand cmd, 
+            SceneTokenDTO sceneToken, Long organizationId) {
+        
+    	SearchByMultiForumAndCmntyCommand orgTopicCmd = getGlobalPostByOrganizationIdQuery(cmd, sceneToken, organizationId);
         return queryByMultiForumAndCmnty(orgTopicCmd);
     }
     
@@ -650,8 +792,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         return null;
     }
 
-	@Override
-	public ListPostCommandResponse queryByMultiForumAndCmnty(SearchByMultiForumAndCmntyCommand cmd) {
+    private SearchResponse getQueryByMultiForumAndCmnty(SearchByMultiForumAndCmntyCommand cmd) {
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb = null;
@@ -670,6 +811,35 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         FilterBuilder fb = null;
         
+        if(!StringUtils.isEmpty(cmd.getSearchContentType())) {
+        	if(SearchContentType.ACTIVITY.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+
+        		fb = FilterBuilders.termFilter("embeddedAppId", 3);
+            } 
+        
+        	if(SearchContentType.POLL.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		if(null == fb) {
+        			fb = FilterBuilders.termFilter("embeddedAppId", 14);
+        		} else {
+                    fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("embeddedAppId", 14));
+                }
+                
+            } 
+        
+        	if(SearchContentType.TOPIC.equals(SearchContentType.fromCode(cmd.getSearchContentType()))) {
+        		 int[] notEmbeddedAppIds = new int[2];
+        		 notEmbeddedAppIds[0] = 3;
+        		 notEmbeddedAppIds[1] = 14;
+        		 
+        		FilterBuilder nfb = FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds);
+        		if(null == fb) {
+        			fb = FilterBuilders.notFilter(nfb);
+        		} else {
+                    fb = FilterBuilders.boolFilter().mustNot(fb, nfb);
+                }
+                
+            } 
+        }
         // 社区论坛里符合小区的过滤条件
         FilterBuilder cmntyFilter = null;
         if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
@@ -737,10 +907,23 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 			LOGGER.info("PostSearcherImpl query builder ："+builder);
         
         SearchResponse rsp = builder.execute().actionGet();
-        List<Long> ids = getIds(rsp);
+
+        return rsp;
+    }
+    
+	@Override
+	public ListPostCommandResponse queryByMultiForumAndCmnty(SearchByMultiForumAndCmntyCommand cmd) {
+		SearchResponse rsp = getQueryByMultiForumAndCmnty(cmd);
+		List<Long> ids = getIds(rsp);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.info("PostSearcherImpl query SearchResponse ids ："+ids);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
         
         ListPostCommandResponse listPost = new ListPostCommandResponse();
         if(ids.size() > pageSize) {
