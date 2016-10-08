@@ -2530,11 +2530,11 @@ public class ActivityServiceImpl implements ActivityService {
        VideoCapabilityResponse obj = new VideoCapabilityResponse();
        if(cmd.getOfficialFlag() == null || cmd.getOfficialFlag().equals(OfficialFlag.NO.getCode())) {
            Long official = this.configurationProvider.getLongValue(namespaceId
-                   , YzbConstant.VIDEO_NONE_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
+                   , YzbConstant.VIDEO_NONE_OFFICIAL_SUPPORT, (long)VideoSupportType.NO_SUPPORT.getCode());
            obj.setVideoSupportType(official.byteValue());
        } else {
            Long official = this.configurationProvider.getLongValue(namespaceId
-                   , YzbConstant.VIDEO_OFFICIAL_SUPPORT, (long)VideoSupportType.VIDEO_BOTH.getCode());
+                   , YzbConstant.VIDEO_OFFICIAL_SUPPORT, (long)VideoSupportType.NO_SUPPORT.getCode());
            obj.setVideoSupportType(official.byteValue()); 
        }
        return obj;
