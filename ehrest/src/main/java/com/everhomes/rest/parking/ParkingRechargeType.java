@@ -3,17 +3,23 @@ package com.everhomes.rest.parking;
 
 /**
  * <ul>
- * <li>MONTHLY(1): 月卡缴费</li>
+ * <li>MONTHLY(1): 月卡充值</li>
  * <li>TEMPORARY(2): 临时缴费</li>
  * </ul>
  */
 public enum ParkingRechargeType {
-	MONTHLY((byte)1), TEMPORARY((byte)2);
+	MONTHLY((byte)1, "月卡充值"), TEMPORARY((byte)2, "临时缴费");
     
     private byte code;
+    private String describe;
     
-    private ParkingRechargeType(byte code) {
+    public String getDescribe() {
+		return describe;
+	}
+
+	private ParkingRechargeType(byte code, String describe) {
         this.code = code;
+        this.describe = describe;
     }
     
     public byte getCode() {

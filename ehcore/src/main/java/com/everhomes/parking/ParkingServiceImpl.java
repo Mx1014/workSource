@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -49,6 +48,7 @@ import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
@@ -279,16 +279,24 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
-		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
+		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), null);
 	}
 	
 	@Override
-	public CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd) {
-		return createParkingTempOrder(cmd, ParkingRechargeType.TEMPORARY.getCode());
+	public CommonOrderDTO createParkingTempOrder(CreateParkingTempOrderCommand cmd) {
+		checkOrderToken(cmd.getOrderToken());
+		CreateParkingRechargeOrderCommand param = new CreateParkingRechargeOrderCommand();
+		param.setOwnerType(cmd.getOwnerType());
+		param.setOwnerId(cmd.getOwnerId());
+		param.setParkingLotId(cmd.getParkingLotId());
+		param.setPlateNumber(cmd.getPlateNumber());
+		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
+		param.setPrice(cmd.getPrice());
+		return createParkingTempOrder(param, ParkingRechargeType.TEMPORARY.getCode(), cmd.getOrderToken());
 
 	}
 	
-	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
+	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType, String orderToken) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
@@ -323,7 +331,7 @@ public class ParkingServiceImpl implements ParkingService {
 			handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
 		}else{
 			parkingRechargeOrder.setPrice(cmd.getPrice());
-			parkingRechargeOrder.setOrderToken(cmd.getOrderToken());
+			parkingRechargeOrder.setOrderToken(orderToken);
 		}
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
@@ -413,7 +421,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPayerPhone(), startDate, endDate, cmd.getPageAnchor(), pageSize);
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPageAnchor(), pageSize);
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -654,6 +662,14 @@ public class ParkingServiceImpl implements ParkingService {
         }
     }
     
+    private void checkOrderToken(String orderToken){
+    	if(StringUtils.isBlank(orderToken)) {
+        	LOGGER.error("OrderToken cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrderToken cannot be null.");
+        }
+    }
+    
     @Scheduled(cron="0 0 2 * * ? ")
    	@Override
    	public void invalidApplier() {
@@ -691,7 +707,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPayerPhone(), startDate, endDate, cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
 		
 		Font font = wb.createFont();   
@@ -706,17 +722,17 @@ public class ParkingServiceImpl implements ParkingService {
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("订单号");
 		row.createCell(1).setCellValue("车牌号");
-		row.createCell(2).setCellValue("车主名称");
-		row.createCell(3).setCellValue("付款人手机号");
-		row.createCell(4).setCellValue("充值时间");
-		row.createCell(5).setCellValue("充值月数");
-		row.createCell(6).setCellValue("充值价格");
-		row.createCell(7).setCellValue("付款方式");
-		row.createCell(8).setCellValue("充值状态");     
+		row.createCell(2).setCellValue("用户名");
+		row.createCell(3).setCellValue("手机号");
+		row.createCell(4).setCellValue("缴费时间");
+		row.createCell(5).setCellValue("缴费月数");
+		row.createCell(6).setCellValue("金额");
+		row.createCell(7).setCellValue("支付方式");
+		row.createCell(8).setCellValue("缴费类型"); 
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			ParkingRechargeOrder order = list.get(i);
-			tempRow.createCell(0).setCellValue(order.getOrderNo());
+			tempRow.createCell(0).setCellValue(String.valueOf(order.getOrderNo()));
 			tempRow.createCell(1).setCellValue(order.getPlateNumber());
 			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
 			tempRow.createCell(3).setCellValue(order.getPayerPhone());
@@ -724,8 +740,8 @@ public class ParkingServiceImpl implements ParkingService {
 			tempRow.createCell(5).setCellValue(order.getMonthCount().intValue());
 			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
 			VendorType type = VendorType.fromCode(order.getPaidType());
-			tempRow.createCell(7).setCellValue(null==type?"":type.toString());
-			tempRow.createCell(8).setCellValue(ParkingRechargeOrderRechargeStatus.fromCode(order.getRechargeStatus()).toString());
+			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
+			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
 			
 		}
 		ByteArrayOutputStream out = null;

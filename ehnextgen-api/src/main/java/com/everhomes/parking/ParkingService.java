@@ -9,6 +9,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
@@ -82,5 +83,5 @@ public interface ParkingService {
     
     ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd);
     
-    CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd);
+    CommonOrderDTO createParkingTempOrder(CreateParkingTempOrderCommand cmd);
 }

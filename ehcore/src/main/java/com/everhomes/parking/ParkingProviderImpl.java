@@ -330,7 +330,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Long pageAnchor, Integer pageSize) {
+    		Byte rechargeType, Long pageAnchor, Integer pageSize) {
     	List<ParkingRechargeOrder> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -349,6 +349,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.eq(plateOwnerName));
         if(StringUtils.isNotBlank(payerPhone))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
+        if(null != rechargeType)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
         if(null != startDate)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
         if(null != endDate)

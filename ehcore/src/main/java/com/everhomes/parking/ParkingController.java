@@ -19,6 +19,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
@@ -215,10 +216,9 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("createParkingTempOrder")
     @RestReturn(value=CommonOrderDTO.class)
-    public RestResponse createParkingTempOrder(CreateParkingRechargeOrderCommand cmd) {
-        CommonOrderDTO dto = null;
+    public RestResponse createParkingTempOrder(CreateParkingTempOrderCommand cmd) {
+        CommonOrderDTO dto = parkingService.createParkingTempOrder(cmd);
         
-        dto = parkingService.createParkingTempOrder(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

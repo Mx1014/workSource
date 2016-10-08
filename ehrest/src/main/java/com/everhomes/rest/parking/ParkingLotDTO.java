@@ -24,6 +24,7 @@ public class ParkingLotDTO {
     private String vendorName;
     private Integer cardReserveDays;
     private Timestamp createTime;
+    private Integer maxRequestNum;
     
     public ParkingLotDTO() {
     }
@@ -88,4 +89,12 @@ public class ParkingLotDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getMaxRequestNum() {
+		return maxRequestNum;
+	}
+
+	public void setMaxRequestNum(Integer maxRequestNum) {
+		this.maxRequestNum = maxRequestNum;
+	}
 }

@@ -33,7 +33,7 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Long pageAnchor, Integer pageSize);
+    		Byte rechargeType, Long pageAnchor, Integer pageSize);
     
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     
