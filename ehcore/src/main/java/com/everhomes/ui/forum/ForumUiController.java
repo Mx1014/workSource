@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,7 @@ public class ForumUiController extends ControllerBase {
      */
     @RequestMapping("listNoticeByScene")
     @RestReturn(value=ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
     	ListPostCommandResponse res = forumService.listNoticeByScene(cmd);
         RestResponse response = new RestResponse(res);

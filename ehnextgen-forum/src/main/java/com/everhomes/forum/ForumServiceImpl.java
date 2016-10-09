@@ -3865,6 +3865,8 @@ public class ForumServiceImpl implements ForumService {
         //查全部公告，对于小区，需要找到上级所有机构，对于管理公司，需要管理公司及其所在小区，对于普通公司，需要其管理公司及其所在小区
         List<Long> communityIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
         Long communityId = null;
         switch(sceneType) {
 	    case DEFAULT:
