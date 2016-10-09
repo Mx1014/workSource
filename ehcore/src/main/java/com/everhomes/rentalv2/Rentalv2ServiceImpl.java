@@ -1003,9 +1003,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rSiteDTO.setDayEndTime(convertTimeToGMTMillisecond(rentalSite.getDayEndTime()));
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
 		rSiteDTO.setSiteName(rentalSite.getResourceName());
-		User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
-		if(null != charger)
-			rSiteDTO.setChargeName(charger.getNickName());
+		//fix bug : charge uid null point 2016-10-9
+		if(null != rentalSite.getChargeUid() ){
+			User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
+			if(null != charger)
+				rSiteDTO.setChargeName(charger.getNickName());
+		}
 		Community community = this.communityProvider.findCommunityById(rSiteDTO.getCommunityId());
 		if(null != community)
 			rSiteDTO.setCommunityName(community.getName());
