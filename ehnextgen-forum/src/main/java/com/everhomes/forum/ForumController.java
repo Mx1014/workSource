@@ -270,6 +270,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("listTopicComments")
     @RestReturn(value=ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listTopicComments(@Valid ListTopicCommentCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopicComments(cmd);
         
