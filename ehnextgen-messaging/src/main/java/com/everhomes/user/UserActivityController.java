@@ -125,6 +125,7 @@ public class UserActivityController extends ControllerBase {
      */
     @RequestMapping(value = "syncActivity")
     @RestReturn(String.class)
+    @RequireAuthentication(false)
     public RestResponse syncActivity(@Valid SyncActivityCommand cmd) throws Exception {
     	final Logger STATISTICS_LOGGER = LoggerFactory.getLogger("statisticslog");
     	STATISTICS_LOGGER.debug(String.format("user activities：%s", StringHelper.toJsonString(cmd)));
