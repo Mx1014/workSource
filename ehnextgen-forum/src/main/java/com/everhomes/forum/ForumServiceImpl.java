@@ -938,7 +938,7 @@ public class ForumServiceImpl implements ForumService {
     	if(cmd.getPageAnchor() != null ) {
     		 if(!userService.isLogon()){
     			 LOGGER.error("Not logged in.");
-  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
   					   "Not logged in.");
 
     		 }
@@ -1551,7 +1551,7 @@ public class ForumServiceImpl implements ForumService {
     	if(cmd.getPageAnchor() != null ) {
     		 if(!userService.isLogon()){
     			 LOGGER.error("Not logged in.");
-  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
   					   "Not logged in.");
 
     		 }
