@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.everhomes.rest.user.UserServiceErrorCode;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -352,6 +353,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 
+	   // 判断是否是登录 by sfyan 20161009
+	   if(!userService.isLogon()){
+		   // 没登录 检查场景是否是游客
+		   if(sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN  || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH ){
+			   LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
+			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+					   "Not logged in.Cannot access this scene");
+		   }
+	   }
        switch(sceneType) {
        case DEFAULT:
        case PARK_TOURIST:

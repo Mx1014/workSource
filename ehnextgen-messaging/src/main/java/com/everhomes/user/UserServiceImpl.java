@@ -3339,6 +3339,7 @@ public class UserServiceImpl implements UserService {
 		if(null == user){
 			return false;
 		}
+		LOGGER.debug("Check for login. userId = {}", user.getId());
 		if(user.getId() > 0){
 			return true;
 		}
