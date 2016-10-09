@@ -391,6 +391,10 @@ public class BannerServiceImpl implements BannerService {
         Community community = null;
         List<BannerDTO> bannerList = null;
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
+
         switch(sceneType) {
         case DEFAULT:
         case PARK_TOURIST:

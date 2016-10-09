@@ -3345,4 +3345,17 @@ public class UserServiceImpl implements UserService {
 		}
 		return false;
 	}
+
+
+	public void checkUserScene(SceneType sceneType){
+		// 判断是否是登录 by sfyan 20161009
+		if(!this.isLogon()){
+			// 没登录 检查场景是否是游客
+			if(sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN  || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH ){
+				LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+						"Not logged in.Cannot access this scene");
+			}
+		}
+	}
 }

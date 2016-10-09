@@ -174,4 +174,10 @@ public interface UserService {
      * @return
      */
     boolean isLogon();
+
+    /**
+     * 检查游客是否能继续访问场景资源
+     * @param sceneType
+     */
+    void checkUserScene(SceneType sceneType);
 }
