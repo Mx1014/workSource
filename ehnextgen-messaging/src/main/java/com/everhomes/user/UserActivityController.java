@@ -264,6 +264,7 @@ public class UserActivityController extends ControllerBase {
      */
     @RequestMapping("listTreasure")
     @RestReturn(ListTreasureResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listTreasure(){
         return new RestResponse(userActivityService.getUserTreasure());
     }
