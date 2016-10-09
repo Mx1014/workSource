@@ -28,6 +28,7 @@ import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * <ul>
@@ -56,6 +57,7 @@ public class ForumUiController extends ControllerBase {
      */
     @RequestMapping("getTopicQueryFilters")
     @RestReturn(value=TopicFilterDTO.class, collection=true)
+    @RequireAuthentication(false)
     public RestResponse getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
         List<TopicFilterDTO> filterDtoList = forumService.getTopicQueryFilters(cmd);
         
