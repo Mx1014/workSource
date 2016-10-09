@@ -933,6 +933,17 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public ListPostCommandResponse listTopics(ListTopicCommand cmd) {
+    	
+    	// 非登录用户只能看第一页 add by xiongying20161009
+    	if(cmd.getPageAnchor() != null ) {
+    		 if(!userService.isLogon()){
+    			 LOGGER.error("Not logged in.");
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+  					   "Not logged in.");
+
+    		 }
+    	}
+    	
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
         Long operatorId = user.getId();
@@ -1536,6 +1547,17 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd) {
+    	// 非登录用户只能看第一页 add by xiongying20161009
+    	if(cmd.getPageAnchor() != null ) {
+    		 if(!userService.isLogon()){
+    			 LOGGER.error("Not logged in.");
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+  					   "Not logged in.");
+
+    		 }
+    	}
+    	
+    	
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
         String tag = "listTopicComments";
