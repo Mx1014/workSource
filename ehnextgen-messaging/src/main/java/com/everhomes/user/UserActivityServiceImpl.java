@@ -662,8 +662,8 @@ public class UserActivityServiceImpl implements UserActivityService {
         // 检查是否登陆，没登陆则只返回游客访问的电商url by sfyan 20161009
     	if(!userService.isLogon()){
             ListTreasureResponse rsp = new ListTreasureResponse();
-            rsp.setBusinessUrl(getBusinessUrl());
-            rsp.setBusinessRealm(getTouristBusinessUrl());
+            rsp.setBusinessUrl(getTouristBusinessUrl());
+            rsp.setBusinessRealm(getBusinessRealm());
             return rsp;
         }
         //2016-07-29:modify by liujinwen.get orderCount's value like couponCount

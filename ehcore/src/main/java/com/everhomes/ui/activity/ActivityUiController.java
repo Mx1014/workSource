@@ -1,5 +1,6 @@
 package com.everhomes.ui.activity;
 
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,7 @@ public class ActivityUiController extends ControllerBase {
      */
     @RequestMapping("listNearbyActivitiesByScene")
     @RestReturn(value=ListActivitiesReponse.class)
+    @RequireAuthentication(false)
     public RestResponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd){
     	com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand.class);
         ListActivitiesReponse rsp = activityService.listNearbyActivitiesByScene(command);
@@ -45,6 +47,7 @@ public class ActivityUiController extends ControllerBase {
      */
     @RequestMapping("listOfficialActivitiesByScene")
     @RestReturn(value=ListOfficialActivitiesBySceneReponse.class)
+    @RequireAuthentication(false)
     public RestResponse listOfficialActivitiesByScene(ListOfficialActivitiesBySceneCommand cmd){
     	com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand.class);
         ListActivitiesReponse rsp = activityService.listOfficialActivitiesByScene(command);
