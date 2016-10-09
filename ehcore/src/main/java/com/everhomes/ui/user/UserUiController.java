@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -283,5 +284,21 @@ public class UserUiController extends ControllerBase {
 	       
 	    return response;
 	}
-    
+
+	/**
+	 * <b>URL: /ui/user/listTouristRelatedScenes</b>
+	 * <p>列出游客当前域空间下的相关场景。</p>
+	 * <p>必须在请求的Header中提供域空间。</p>
+	 */
+	@RequestMapping("listTouristRelatedScenes")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listTouristRelatedScenes() {
+		List<SceneDTO> sceneDtoList = userService.listTouristRelatedScenes();
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

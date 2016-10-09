@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.everhomes.rest.user.UserServiceErrorCode;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -351,6 +352,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+
+	   //检查游客是否能继续访问此场景 by sfyan 20161009
+	   userService.checkUserScene(sceneType);
+
        switch(sceneType) {
        case DEFAULT:
        case PARK_TOURIST:
@@ -420,6 +425,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+	   //检查游客是否能继续访问此场景 by sfyan 20161009
+	   userService.checkUserScene(sceneType);
        switch(sceneType) {
        case DEFAULT:
        case PARK_TOURIST:
@@ -1379,6 +1386,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         Community community = null;
         ScopeType scopeType = null;
         Long scopeId = null;
+		//检查游客是否能继续访问此场景 by sfyan 20161009
+		userService.checkUserScene(sceneType);
         switch(sceneType) {
         case DEFAULT:
         case PARK_TOURIST:

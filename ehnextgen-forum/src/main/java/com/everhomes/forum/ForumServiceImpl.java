@@ -169,6 +169,7 @@ import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.PostAdminQueryFilter;
@@ -3865,6 +3866,8 @@ public class ForumServiceImpl implements ForumService {
         //查全部公告，对于小区，需要找到上级所有机构，对于管理公司，需要管理公司及其所在小区，对于普通公司，需要其管理公司及其所在小区
         List<Long> communityIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
         Long communityId = null;
         switch(sceneType) {
 	    case DEFAULT:
@@ -4007,6 +4010,11 @@ public class ForumServiceImpl implements ForumService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        
+      //检查游客是否能继续访问此场景 by xiongying 20161009
+        userService.checkUserScene(sceneType);
+
         
         // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
 //        List<TopicFilterDTO> filterList = null;

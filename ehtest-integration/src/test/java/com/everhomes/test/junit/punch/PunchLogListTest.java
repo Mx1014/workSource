@@ -95,7 +95,7 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			if (dayLog.getPunchDay().equals("10")) {
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewAfternoonPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatusNew()));
 			}
 			// 8月9 上午早退 下午迟到
 			else if (dayLog.getPunchDay().equals("9")) {
@@ -156,7 +156,7 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			if (dayLog.getPunchDay().equals("10")) {
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewAfternoonPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatusNew()));
 			}
 			// 8月9 上午早退 下午迟到
 			else if (dayLog.getPunchDay().equals("9")) {
@@ -171,9 +171,9 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 			// 8月5 加班 加班
 			if (dayLog.getPunchDay().equals("5")) {
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getMorningPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewMorningPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getMorningPunchStatusNew()));
 				assertEquals(PunchStatus.UNPUNCH, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
-				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getNewAfternoonPunchStatus()));
+				assertEquals(PunchStatus.FORGOT, PunchStatus.fromCode(dayLog.getAfternoonPunchStatusNew()));
 			}
 			// 8月4 上午 早退且迟到 下午 早退且迟到
 			if (dayLog.getPunchDay().equals("4")) {

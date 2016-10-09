@@ -98,6 +98,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopics(cmd);
         

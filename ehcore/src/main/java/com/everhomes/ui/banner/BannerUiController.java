@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class BannerUiController extends ControllerBase {
      */
     @RequestMapping("getBannersByScene")
     @RestReturn(value=BannerDTO.class,collection=true)
+    @RequireAuthentication(false)
     public RestResponse getBannersByScene(@Valid GetBannersBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         List<BannerDTO> result = bannerService.getBannersByScene(cmd, request);

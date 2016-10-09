@@ -203,7 +203,7 @@ public class CommunityImportTest extends BaseLoginAuthTestCase {
 		assertNotNull(namespaceInfoDTO.getResourceType());
 		
 		DSLContext context = dbProvider.getDslContext();
-		Result<Record> result = context.select().from(Tables.EH_NAMESPACES).fetch();
+		Result<Record> result = context.select().from(com.everhomes.schema.Tables.EH_NAMESPACES).fetch();
 		assertTrue(result != null && result.size()==3);
 	}
 
@@ -224,7 +224,7 @@ public class CommunityImportTest extends BaseLoginAuthTestCase {
 		assertNotNull(namespaceInfoDTO.getResourceType());
 		
 		DSLContext context = dbProvider.getDslContext();
-		Result<Record> result = context.select().from(Tables.EH_NAMESPACES).where("id=999995").fetch();
+		Result<Record> result = context.select().from(com.everhomes.schema.Tables.EH_NAMESPACES).where("id=999995").fetch();
 		assertNotNull(result);
 		assertEquals(1, result.size());;
 		assertEquals("我爱嘉园", result.get(0).getValue("name",String.class));
