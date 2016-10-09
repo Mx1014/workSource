@@ -3353,7 +3353,7 @@ public class UserServiceImpl implements UserService {
 			// 没登录 检查场景是否是游客
 			if(sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN  || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH ){
 				LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
-				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NOT_LOGGED_IN,
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
 						"Not logged in.Cannot access this scene");
 			}
 		}
