@@ -166,4 +166,12 @@ public interface UserService {
      */
     boolean signupByThirdparkUser(User user, HttpServletRequest request);
 	Boolean validateUserPass(ValidatePassCommand passCmd);
+
+    List<SceneDTO> listTouristRelatedScenes();
+
+    /**
+     * 判断是否登录
+     * @return
+     */
+    boolean isLogon();
 }

@@ -351,6 +351,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+
        switch(sceneType) {
        case DEFAULT:
        case PARK_TOURIST:
