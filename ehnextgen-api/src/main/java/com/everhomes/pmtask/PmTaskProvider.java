@@ -33,7 +33,7 @@ public interface PmTaskProvider {
 	
 	void createTaskStatistics(PmTaskStatistics statistics);
 	
-	List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Long dateStr,
+	List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Timestamp dateStr,
 			Long pageAnchor, Integer pageSize);
 	
 	Integer countTaskStatistics(Long ownerId, Long categoryId, Timestamp dateStr);
