@@ -17,6 +17,7 @@ import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * <ul>
@@ -39,6 +40,8 @@ public class NewsUiController extends ControllerBase{
 	 */
 	@RequestMapping("listNewsByScene")
 	@RestReturn(ListNewsBySceneResponse.class)
+	//2016-10-9 更改为不登录的
+	@RequireAuthentication(false)
 	public RestResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		ListNewsBySceneResponse newsListResponse = newsService.listNewsByScene(cmd);
 
