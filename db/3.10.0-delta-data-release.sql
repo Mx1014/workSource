@@ -729,10 +729,10 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10065', 'VIP车位预约', '0', NULL, '0', '1000000');
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10066', '会议室预约', '0', NULL, '0', '1000000');
 
-update eh_launch_pad_items set action_type = 49 where id in(818, 10313, 819, 10314, 820, 10315);
-update eh_launch_pad_items set action_data = {"resourceTypeId":10064,"pageType":0} where id in(818, 10313);
-update eh_launch_pad_items set action_data = {"resourceTypeId":10066,"pageType":0} where id in(819, 10314);
-update eh_launch_pad_items set action_data = {"resourceTypeId":10065,"pageType":0} where id in(820, 10315);
+update eh_launch_pad_items set action_type = 49 where id in(818, 10313, 819, 10314, 820, 10315) and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10064,"pageType":0}' where id in(818, 10313) and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10066,"pageType":0}' where id in(819, 10314) and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10065,"pageType":0}' where id in(820, 10315) and namespace_id = 1000000;
 
  
 -- 游客电商访问地址 by sfyan 20161009
