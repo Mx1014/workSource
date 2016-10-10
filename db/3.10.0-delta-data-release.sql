@@ -810,3 +810,6 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 update eh_service_alliances set parent_id = 11 where type = 11 and parent_id = 2 and owner_id = 240111044331048623;
 update eh_service_alliances a set category_id = (select id from eh_service_alliance_categories where name = a.service_type and owner_id = 240111044331048623);
 
+-- 删除科技园物业服务菜单
+DELETE FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = '1000000' AND `menu_id` IN (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%58000%');
+
