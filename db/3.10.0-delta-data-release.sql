@@ -739,3 +739,6 @@ update eh_launch_pad_items set action_data = '{"resourceTypeId":10065,"pageType"
 set @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)VALUES((@configuration_id := @configuration_id + 1), 'tourist.business.url','http://biz-beta.zuolin.com/nar/biz/web/app/notSigned/user/store_details_static.html','tourist business url',0);
 
+-- 科技园服务联盟数据问题 add by xiongying20161010
+update eh_service_alliances set parent_id = 11 where type = 11 and parent_id = 2 and owner_id = 240111044331048623;
+update eh_service_alliances a set category_id = (select id from eh_service_alliance_categories where name = a.service_type and owner_id = 240111044331048623);
