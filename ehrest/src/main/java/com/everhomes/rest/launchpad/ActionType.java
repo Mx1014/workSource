@@ -24,6 +24,8 @@ package com.everhomes.rest.launchpad;
  * <li>NOTICE_MANAGERMENT(43): 公告管理</li> 
  * <li>MANAGER_TASK(39): 任务管理</li> 
  * <li>ACLINK(40): 门禁</li> 
+ * <li>NEARBY_ACTIVITIES(41): 周边活动</li> 
+ * <li>NEARBY_PUBLIC_CYCLE(42): 周边俱乐部</li> 
  * <li>OFFLINE_WEBAPP(44): 离线web应用</li>
  * <li>SERVICE_HOT_LINE(45): 园区服务热线</li>
  * <li>CONTACTS(46): 通讯录</li>
@@ -42,7 +44,8 @@ public enum ActionType {
       POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22),PUNCH((byte)23),MEETINGROOM((byte)24),VIPPARKING((byte)25),
       ELECSCREEN((byte)26) ,VIDEO_MEETING((byte)27),ENTER_PARK((byte)28),EXCHANGE_HALL((byte)29),PARKING_RECHARGE((byte)30),TOPIC_BY_FORUM((byte)31),
       MAKERZONE((byte)32),SERVICEALLIANCE((byte)33),PARKENTERPRISE((byte)34), USER_GROUPS((byte)35), LIST_GROUPS((byte)36), SERVICE_ORDER((byte)37),
-      ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
+      ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NEARBY_ACTIVITIES((byte)41),NEARBY_PUBLIC_CYCLE((byte)42),
+      NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
       WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52);
     private byte code;
     
