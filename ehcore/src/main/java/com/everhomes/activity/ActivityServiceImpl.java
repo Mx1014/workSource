@@ -243,7 +243,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setNamespaceId(0);
         activity.setCreatorUid(user.getId());
         activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
-        Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         activity.setNamespaceId(namespaceId);
         activity.setGuest(cmd.getGuest());
         
@@ -1085,10 +1085,8 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public List<Category> listActivityCategories(ListActivityCategoriesCommand cmd) {
     	User user = UserContext.current().getUser();
-    	Integer namespaceId = ( null == cmd.getNamespaceId() ) ? user.getNamespaceId() : cmd.getNamespaceId();
-    	
-    	namespaceId = ( namespaceId == null ) ? 0 : namespaceId;
-    	
+    	Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
     	Long parentId = ( null == cmd.getParentId() ) ? CategoryConstants.CATEGORY_ID_ACTIVITY : cmd.getParentId();
     	
         Tuple[] orderBy = new Tuple[1]; 
@@ -1946,6 +1944,8 @@ public class ActivityServiceImpl implements ActivityService {
 	    
 	    ListActivitiesReponse resp = null;
 	    SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
 	    switch(sceneType) {
 	    case DEFAULT:
 	    case PARK_TOURIST:
@@ -2142,6 +2142,8 @@ public class ActivityServiceImpl implements ActivityService {
 		Long organizationId = null;
 		Long communityId = null;
 	    SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
 	    switch(sceneType) {
 	    case DEFAULT:
 	    case PARK_TOURIST:
@@ -2347,7 +2349,7 @@ public class ActivityServiceImpl implements ActivityService {
 	            device = new YzbDevice();
 	            device.setDeviceId(cmd.getRoomId());
 	            if(cmd.getNamespaceId() == null) {
-	                device.setNamespaceId(UserContext.current().getNamespaceId());    
+	                device.setNamespaceId(UserContext.getCurrentNamespaceId());
 	            }
 	            device.setState(VideoState.UN_READY.getCode());
 	            device.setStatus((byte)1); //valid
@@ -2522,10 +2524,8 @@ public class ActivityServiceImpl implements ActivityService {
    
    @Override
    public VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd) {
-       Integer namespaceId = cmd.getNamespaceId();
-       if(namespaceId == null) {
-           namespaceId = UserContext.current().getNamespaceId();    
-       }
+
+       Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
    
        VideoCapabilityResponse obj = new VideoCapabilityResponse();
        if(cmd.getOfficialFlag() == null || cmd.getOfficialFlag().equals(OfficialFlag.NO.getCode())) {

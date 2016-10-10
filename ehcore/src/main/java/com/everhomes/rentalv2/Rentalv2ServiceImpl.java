@@ -2277,11 +2277,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		signleCmd.setRentalSiteId(rs.getId());
 		signleCmd.setSiteCounts(rs.getResourceCounts());
 		signleCmd.setOpenWeekday(new ArrayList<Integer>());
-		int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
-        for(int i=1;i<8;i++){
-        	if(openWeekInt%10 == 1)
-        		signleCmd.getOpenWeekday().add(i);
-        	openWeekInt = openWeekInt/10;
+		if(null != rs.getOpenWeekday()){
+			int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
+	        for(int i=1;i<8;i++){
+	        	if(openWeekInt%10 == 1)
+	        		signleCmd.getOpenWeekday().add(i);
+	        	openWeekInt = openWeekInt/10;
+	        }
         }
 		 
         
