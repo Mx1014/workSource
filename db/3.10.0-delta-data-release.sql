@@ -801,14 +801,10 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016100901' WHERE `id`=11 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016100901' WHERE `id`=111 AND `namespace_id`=1000000;
 
-delete from eh_version_upgrade_rules where id in (32, 33);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	VALUES ('32', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+	VALUES ('115', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	VALUES ('33', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
-
-UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`='http://apk.zuolin.com/apk/TechPark-3.10.0.2016100906-release.apk', `info_url`='${homeurl}/web/download/apk/andriod-techpark-3-10-0.html' WHERE (`id`='8');
-UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`=NULL, `info_url`='${homeurl}/web/download/apk/iOS-techpark-3-10-0.html' WHERE (`id`='9');
+	VALUES ('116', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 
 
 -- 科技园服务联盟数据问题 add by xiongying20161010
@@ -821,6 +817,6 @@ DELETE FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_
 
 -- 2016-10-10 by wh 路演直播
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES('112360','999987','0','0','0','/home','Bizs','路演直播','路演直播','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','41','{\"scope\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0');
+ VALUES('112360','999987','0','0','0','/home','Bizs','路演直播','路演直播','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','41','{\"scope\":2}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
- VALUES('112361','999987','0','0','0','/home','Bizs','路演直播','路演直播','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','41','{\"scope\":0}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
+ VALUES('112361','999987','0','0','0','/home','Bizs','路演直播','路演直播','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','41','{\"scope\":2}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
