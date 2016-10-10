@@ -801,10 +801,14 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016100901' WHERE `id`=11 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016100901' WHERE `id`=111 AND `namespace_id`=1000000;
 
+delete from eh_version_upgrade_rules where id in (32, 33);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
 	VALUES ('115', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
 	VALUES ('116', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+
+UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`='http://apk.zuolin.com/apk/TechPark-3.10.0.2016100906-release.apk', `info_url`='${homeurl}/web/download/apk/andriod-techpark-3-10-0.html' WHERE (`id`='8');
+UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`=NULL, `info_url`='${homeurl}/web/download/apk/iOS-techpark-3-10-0.html' WHERE (`id`='9');
 
 
 -- 科技园服务联盟数据问题 add by xiongying20161010
