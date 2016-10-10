@@ -205,6 +205,11 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if(LOGGER.isDebugEnabled()){
+            LOGGER.debug("banner namespaceId = {}", namespaceId);
+        }
+
         String sceneTypeStr = cmd.getCurrentSceneType();
         
         Long communityId = null;
