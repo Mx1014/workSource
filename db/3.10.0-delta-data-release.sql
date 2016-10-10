@@ -814,9 +814,4 @@ UPDATE eh_service_alliances a SET category_id = (SELECT id FROM eh_service_allia
 -- 删除科技园物业服务菜单
 DELETE FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = '1000000' AND `menu_id` IN (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%58000%');
 
-
--- 2016-10-10 by wh 路演直播
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
- VALUES('112360','999987','0','0','0','/home','Bizs','路演直播','路演直播','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','41','{\"scope\":2}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0');
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
- VALUES('112361','999987','0','0','0','/home','Bizs','路演直播','路演直播','cs://1/image/aW1hZ2UvTVRvNE9UWTVNamc0WmpReU5EVXhNakJsTjJNek9EY3dNamczWTJObE1HWm1Ndw','1','1','41','{\"scope\":2}','0','0','1','0','1','0',NULL,NULL,NULL,'1','park_tourist','0');
+ 
