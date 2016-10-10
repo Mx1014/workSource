@@ -2375,7 +2375,7 @@ public class ForumServiceImpl implements ForumService {
         cmntyIdList.add(communityId);
         // 对于住宅小区还存在周边社区的概述（商业园区没有此概念），此时如果不指明是“本小区”则添加上周边各小区
         if(communityType == CommunityType.RESIDENTIAL && scope != VisibilityScope.COMMUNITY && community.getStatus() == CommunityAdminStatus.ACTIVE.getCode()) {
-            List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), communityId);
+            List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(), communityId);
             for(Community c : nearbyCmntyList) {
                 cmntyIdList.add(c.getId());
             }
@@ -2921,7 +2921,7 @@ public class ForumServiceImpl implements ForumService {
             List<Long> nearbyCmntyIdList = new ArrayList<Long>();
             List<Community> nearbyCmntyList = new ArrayList<Community>();
             if(community.getStatus() == CommunityAdminStatus.ACTIVE.getCode())
-            	nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), communityId);
+            	nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(), communityId);
             
             for(Community c : nearbyCmntyList) {
                 nearbyCmntyIdList.add(c.getId());
