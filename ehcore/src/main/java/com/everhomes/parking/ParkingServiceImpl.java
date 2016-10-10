@@ -186,7 +186,10 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
     	
-    	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> ConvertHelper.convert(r, ParkingLotDTO.class))
+    	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
+    		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
+    		return dto;
+    	})
     		.collect(Collectors.toList());
     	
     	return parkingLotList;
