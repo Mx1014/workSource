@@ -4231,6 +4231,54 @@ public class OrganizationServiceImpl implements OrganizationService {
         sendMessageForContactReject(member);
 	}
 	
+
+	/**
+	 * 批准用户加入企业
+	 */
+	@Override
+	public void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd) {
+
+        User operator = UserContext.current().getUser();
+        Long operatorUid = operator.getId();
+         
+        if(cmd.getEnterpriseId() != null && cmd.getUserIds() != null && cmd.getUserIds().size()>0) {
+            for(Long userId : cmd.getUserIds()){
+            	ApproveContactCommand approvalCmd = new ApproveContactCommand();
+            	approvalCmd.setEnterpriseId(cmd.getEnterpriseId());
+            	approvalCmd.setUserId(userId);
+            	this.approveForEnterpriseContact(approvalCmd);
+            	
+            }
+        } else {
+            LOGGER.error("Invalid enterprise id or target user id, operatorUid=" + operatorUid + ", cmd=" + cmd);
+        }
+         
+	}
+
+	/**
+	 * 拒绝申请
+	 */
+	@Override
+	public void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd) {
+
+        User operator = UserContext.current().getUser();
+        Long operatorUid = operator.getId();
+         
+        if(cmd.getEnterpriseId() != null && cmd.getUserIds() != null && cmd.getUserIds().size()>0) {
+            for(Long userId : cmd.getUserIds()){
+            	RejectContactCommand rejectCmd = new RejectContactCommand();
+            	rejectCmd.setEnterpriseId(cmd.getEnterpriseId());
+            	rejectCmd.setUserId(userId);
+            	rejectCmd.setRejectText(cmd.getRejectText());
+            	this.rejectForEnterpriseContact(rejectCmd);
+            	
+            }
+        } else {
+            LOGGER.error("Invalid enterprise id or target user id, operatorUid=" + operatorUid + ", cmd=" + cmd);
+        }
+         
+	}
+	
 	/**
 	 * 退出企业
 	 */

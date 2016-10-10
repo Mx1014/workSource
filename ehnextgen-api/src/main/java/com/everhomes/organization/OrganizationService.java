@@ -15,6 +15,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
@@ -386,4 +388,6 @@ public interface OrganizationService {
 	 */
 	List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes,String userName);
 	Long getTopOrganizationId(Long organizationId);
+	void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd);
+	void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd);
 }
