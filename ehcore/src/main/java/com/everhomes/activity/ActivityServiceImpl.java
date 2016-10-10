@@ -127,6 +127,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
@@ -1930,6 +1931,17 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public ListActivitiesReponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd) {
+		
+		// 非登录用户只能看第一页 add by xiongying20161010
+    	if(cmd.getPageAnchor() != null ) {
+    		 if(!userService.isLogon()){
+    			 LOGGER.error("Not logged in.");
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+  					   "Not logged in.");
+
+    		 }
+    	}
+		
 	    long startTime = System.currentTimeMillis();
 	    User user = UserContext.current().getUser();
 	    Long userId = user.getId();
