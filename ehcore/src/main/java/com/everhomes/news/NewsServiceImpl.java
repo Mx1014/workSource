@@ -1079,13 +1079,12 @@ public class NewsServiceImpl implements NewsService {
 		Integer namespaceId = sceneTokenDto.getNamespaceId();;
 		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
 		if (StringUtils.isEmpty(cmd.getKeyword())) {
-			ListNewsCommand command = new ListNewsCommand();
+			ListNewsBySceneCommand command = new ListNewsBySceneCommand();
 			
-			command.setOwnerId(sceneTokenDto.getEntityId());
-			command.setOwnerType(sceneTokenDto.getEntityType());
+			command.setSceneToken(cmd.getSceneToken());
 			command.setPageAnchor(cmd.getPageAnchor());
 			command.setPageSize(cmd.getPageSize());
-			ListNewsResponse news = listNews(command);
+			ListNewsBySceneResponse news = listNewsByScene(command);
 			if(news != null) {
 				response.setNextPageAnchor(news.getNextPageAnchor());
 				if(news.getNewsList() != null && news.getNewsList().size() > 0) {
