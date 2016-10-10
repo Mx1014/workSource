@@ -747,17 +747,17 @@ update eh_launch_pad_items set action_type = 14 , action_data='{"url":"http://co
 update eh_launch_pad_items set action_type = 51 , action_data='' where id in (10310, 10610, 109986);
    
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('197', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '1000000');
+	VALUES ('297', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '1000000');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('198', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '1000000');
+	VALUES ('298', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '1000000');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('197', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '999991');
+	VALUES ('299', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '30092', '999991');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('198', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '999991');
+	VALUES ('300', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '30094', '999991');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('197', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '999989');
+	VALUES ('301', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '30113', '999989');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('198', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '999989');
+	VALUES ('302', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '30091', '999989');
 
 delete from eh_web_menu_scopes where owner_id = 999989 and menu_id in (21000, 22000, 23000);
 delete from eh_web_menu_scopes where owner_id = 999991 and menu_id in (21000, 22000, 23000);
