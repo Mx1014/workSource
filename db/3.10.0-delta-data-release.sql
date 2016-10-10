@@ -722,10 +722,23 @@ UPDATE `eh_launch_pad_layouts` SET `layout_json`='{\"versionCode\":\"2016100901\
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"datetime","categoryId":60,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21}]}', `version_code` = '2016100901' WHERE (`id`='390');
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"datetime","categoryId":60,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21}]}', `version_code` = '2016100901' WHERE (`id`='394');
 
+
+
+-- 科技园资源预定升级到2.0 add by xiongying20161010
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10064', '电子屏预约', '0', NULL, '0', '1000000');
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10065', 'VIP车位预约', '0', NULL, '0', '1000000');
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10066', '会议室预约', '0', NULL, '0', '1000000');
+
+update eh_launch_pad_items set action_type = 49 where id in(818, 10313, 819, 10314, 820, 10315) and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10064,"pageType":0}' where id in(818, 10313) and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10066,"pageType":0}' where id in(819, 10314) and namespace_id = 1000000;
+update eh_launch_pad_items set action_data = '{"resourceTypeId":10065,"pageType":0}' where id in(820, 10315) and namespace_id = 1000000;
+
  
 -- 游客电商访问地址 by sfyan 20161009
 set @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)VALUES((@configuration_id := @configuration_id + 1), 'tourist.business.url','http://biz-beta.zuolin.com/nar/biz/web/app/notSigned/user/store_details_static.html','tourist business url',0);
+
 
 -- 更新科技园layout 电子屏 vip车位 会议室 物业报修
 delete from eh_launch_pad_layouts where name = 'PmLayout' and namespace_id in (1000000); 
@@ -773,10 +786,7 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 	VALUES ('116', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 
 
-
-
-
-
-
-
+-- 科技园服务联盟数据问题 add by xiongying20161010
+update eh_service_alliances set parent_id = 11 where type = 11 and parent_id = 2 and owner_id = 240111044331048623;
+update eh_service_alliances a set category_id = (select id from eh_service_alliance_categories where name = a.service_type and owner_id = 240111044331048623);
 
