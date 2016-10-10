@@ -803,9 +803,9 @@ UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","v
 
 delete from eh_version_upgrade_rules where id in (32, 33);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	VALUES ('115', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+	VALUES ('32', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	VALUES ('116', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+	VALUES ('33', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 
 UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`='http://apk.zuolin.com/apk/TechPark-3.10.0.2016100906-release.apk', `info_url`='${homeurl}/web/download/apk/andriod-techpark-3-10-0.html' WHERE (`id`='8');
 UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`=NULL, `info_url`='${homeurl}/web/download/apk/iOS-techpark-3-10-0.html' WHERE (`id`='9');
