@@ -96,20 +96,27 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
 			
-			Boolean validStatus = card.getValid();
-			this.checkValidStatusIsNull(validStatus,plateNumber);
+//			Boolean validStatus = card.getValid();
+//			this.checkValidStatusIsNull(validStatus,plateNumber);
+//			
+//			if(!validStatus){
+//				return resultList;
+//			}
+			String validEnd = card.getValidEnd();
+			Long endTime = strToLong(validEnd);
+			long now = System.currentTimeMillis();
 			
-			if(!validStatus){
+			if(endTime < now){
 				return resultList;
 			}
 			
 			String plateOwnerName = card.getUserName();
 			String carNumber = card.getCarNumber();
-			String validEnd = card.getValidEnd();
+			
 			String cardNumber = card.getCardCode();
 			String cardType = card.getCardDescript();
 			String plateOwnerPhone = card.getMobile();
-			Long endTime = strToLong(validEnd);
+			
 			
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
