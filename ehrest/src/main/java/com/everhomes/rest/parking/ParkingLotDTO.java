@@ -25,6 +25,7 @@ public class ParkingLotDTO {
     private Integer cardReserveDays;
     private Timestamp createTime;
     private Integer maxRequestNum;
+    private Byte tempfeeFlag;
     
     public ParkingLotDTO() {
     }
@@ -96,5 +97,13 @@ public class ParkingLotDTO {
 
 	public void setMaxRequestNum(Integer maxRequestNum) {
 		this.maxRequestNum = maxRequestNum;
+	}
+
+	public Byte getTempfeeFlag() {
+		return tempfeeFlag;
+	}
+
+	public void setTempfeeFlag(Byte tempfeeFlag) {
+		this.tempfeeFlag = tempfeeFlag;
 	}
 }
