@@ -382,6 +382,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("increasePostViewCount")
     @RestReturn(value=PostDTO.class)
+    @RequireAuthentication(false)
     public RestResponse increasePostViewCount(IncreasePostViewCountCommand cmd) {
 //        PostDTO postDto = this.forumService.getTopic(cmd);
         

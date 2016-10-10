@@ -1067,8 +1067,8 @@ public class UserServiceImpl implements UserService {
 			kickoffLoginByDevice(foundLogin);
 		}
 		
-//		if(!ref.getOldDeviceId().isEmpty()) {
-//		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+		if(!ref.getOldDeviceId().isEmpty()) {
+		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
 //	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
 //	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
 //	            locale = user.getLocale(); 
@@ -1081,7 +1081,7 @@ public class UserServiceImpl implements UserService {
 //	                locale,
 //	                "kickoff other devices");
 //		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
-//		}
+		}
 
 		return foundLogin;
 	}

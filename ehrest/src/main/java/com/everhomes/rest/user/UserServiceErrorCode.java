@@ -18,7 +18,6 @@ public interface UserServiceErrorCode {
     static final int ERROR_IDENTIFIER_ALREADY_CLAIMED = 10011;
     static final int ERROR_ACCOUNT_NAME_ALREADY_EXISTS = 10012;
     static final int ERROR_ACCOUNT_PASSWORD_NOT_SET = 10013;
-    static final int ERROR_NOT_LOGGED_IN = 10015;
 
     static final int ERROR_CHECK_INVITATION_CODE=10014;
     static final int ERROR_INVITATION_CODE=100015;
