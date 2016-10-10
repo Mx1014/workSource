@@ -886,9 +886,14 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		    String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 		    params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		    String url = serverURL + paidOrderApi;
-		    
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("request url = {}, params = {}", url, params);
+			}
+
 		    String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
-		    
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("response result = {}", result);
+			}
 		    ListModelInfoResponse response = (ListModelInfoResponse)StringHelper.fromJsonString(result, ListModelInfoResponse.class);
 		    
 		    if(null != response){
