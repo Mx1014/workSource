@@ -879,10 +879,10 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 		if (null != endDate)
 			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.STAT_DATE.lt(new Date(endDate))); 
 		if (null != locator && locator != null && locator.getAnchor() != null)
-			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.ID.gt(locator.getAnchor()));
+			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.ID.gt(locator.getAnchor()));
 		query.addConditions(condition);
 		query.addLimit(pageSize);
-		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		query.addOrderBy(Tables.EH_STAT_ACTIVE_USERS.ID.asc());
 		List<StatActiveUser> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, StatActiveUser.class));
@@ -904,7 +904,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 		if (null != date)
 			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.STAT_DATE.eq(date));  
 		query.addConditions(condition);
-		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		query.addOrderBy(Tables.EH_STAT_ACTIVE_USERS.ID.asc());
 		List<StatActiveUser> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, StatActiveUser.class));
