@@ -1,32 +1,32 @@
-<?xml VERSION="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.4.0.xsd">
 
 <!-- Configure the database connection here -->
 <jdbc>
     <driver>com.mysql.jdbc.Driver</driver>
-    <url>jdbc:mysql://db-MASTER:3306/ehcore</url>
-    <USER>ehcore</USER>
-    <PASSWORD>ehcore</PASSWORD>
+    <url>jdbc:mysql://db-master:3306/ehcore</url>
+    <user>ehcore</user>
+    <password>ehcore</password>
 </jdbc>
 
 <generator>
     <!-- The default code generator. You can override this one, to generate your own code style
-    Defaults TO org.jooq.util.DefaultGenerator -->
-    <NAME>org.jooq.util.DefaultGenerator</NAME>
+    Defaults to org.jooq.util.DefaultGenerator -->
+    <name>org.jooq.util.DefaultGenerator</name>
     <generate>
-        <daos>TRUE</daos>
+        <daos>true</daos>
     </generate>
-    <DATABASE>
+    <database>
         <!-- The database type. The format here is:
-        org.util.[DATABASE].[DATABASE]DATABASE -->
-        <NAME>org.jooq.util.mysql.MySQLDatabase</NAME>
+        org.util.[database].[database]Database -->
+        <name>org.jooq.util.mysql.MySQLDatabase</name>
 
         <!-- The database schema (or in the absence of schema support, in your RDBMS this
-            can be the OWNER, USER, DATABASE NAME) TO be generated -->
+            can be the owner, user, database name) to be generated -->
         <inputSchema>ehcore</inputSchema>
         <!-- All elements that are generated from your schema
-            (A Java regular expression. USE the pipe TO separate several expressions)
-            Watch OUT FOR CASE-sensitivity. Depending ON your DATABASE, this might be important! -->
+            (A Java regular expression. Use the pipe to separate several expressions)
+            Watch out for case-sensitivity. Depending on your database, this might be important! -->
         <includes>
         eh_users | eh_user_identifiers | eh_user_groups | eh_user_posts | eh_user_blacklist | eh_user_favorites | eh_user_profiles |
         eh_user_invitations | eh_user_invitation_roster | eh_user_followed_families | eh_user_likes | eh_user_service_addresses |
@@ -113,16 +113,16 @@
 		eh_region_codes | eh_stat_active_users |
         </includes>
             <!-- All elements that are excluded from your schema
-            (A Java regular expression. USE the pipe TO separate several expressions).
-            Excludes MATCH BEFORE includes -->
+            (A Java regular expression. Use the pipe to separate several expressions).
+            Excludes match before includes -->
         <excludes></excludes>
-    </DATABASE>
+    </database>
     <target>
         <!-- The destination package of your generated classes (within the destination directory) -->
         <packageName>com.everhomes.server.schema</packageName>
         <!-- The destination directory of your generated classes -->
         <!-- code generation will be run under the project root using maven, it is then relative to where POM file locates -->
-        <DIRECTORY>src/main/java</DIRECTORY>
+        <directory>src/main/java</directory>
     </target>
 </generator>
 
