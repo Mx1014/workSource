@@ -748,9 +748,9 @@ UPDATE eh_launch_pad_items SET action_type = 14 , action_data='{"url":"http://co
 UPDATE eh_launch_pad_items SET action_type = 51 , action_data='' WHERE id IN (10310, 10610, 109986);
    
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('297', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '1000000');
+	VALUES ('297', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '30093', '1000000');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('298', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '1000000');
+	VALUES ('298', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '30095', '1000000');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('299', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '30092', '999991');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
@@ -822,3 +822,7 @@ DELETE FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101102' WHERE `id`=111 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101102' WHERE `id`=11 AND `namespace_id`=1000000;
  
+-- 更新科技园短信模版
+update eh_locale_templates set text = 30093 where id = 297 and namespace_id = 1000000;
+update eh_locale_templates set text = 30095 where id = 298 and namespace_id = 1000000;
+
