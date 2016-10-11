@@ -20,7 +20,18 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
 	VALUES ('116319', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车充值', 'cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
 
--- 停车充值菜单	
+-- 停车充值菜单
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41000,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41300,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 999990,2);
+
 UPDATE `eh_web_menu_privileges` SET `privilege_id`='556', `menu_id`='41100', `name`='充值项管理列表',  `discription`='查询充值项管理列表' WHERE (`id`='17');
 UPDATE `eh_web_menu_privileges` SET `privilege_id`='512', `menu_id`='41100', `name`='增加停车充值项',  `discription`='增加停车充值项' WHERE (`id`='18');
 UPDATE `eh_web_menu_privileges` SET `privilege_id`='513', `menu_id`='41100', `name`='删除停车充值项',  `discription`='删除停车充值项' WHERE (`id`='19');
@@ -49,3 +60,15 @@ UPDATE `eh_acl_privileges` SET `name`='发放月卡', `description`='发放月�
 UPDATE `eh_acl_privileges` SET `name`='领取月卡', `description`='领取月卡' WHERE (`id`='518');
 UPDATE `eh_acl_privileges` SET `name`='查询充值项管理列表', `description`='查询充值项管理列表' WHERE (`id`='556');
 UPDATE `eh_acl_privileges` SET `name`='设置活动规则', `description`='设置活动规则' WHERE (`id`='557');
+
+
+
+
+
+
+
+
+
+
+
+
