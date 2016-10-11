@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,44 +22,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.everhomes.activity.Activity;
@@ -82,44 +45,37 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Attachment;
-import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.naming.NameMapper;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ListActiveStatResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.UserActiveStatDTO;
 import com.everhomes.rest.activity.VideoState;
-import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
-import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.ForumServiceErrorCode;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostFavoriteFlag;
-import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.repeat.ExpressionDTO;
-import com.everhomes.rest.repeat.RangeDTO;
-import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
@@ -136,6 +92,7 @@ import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
+import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -154,12 +111,7 @@ import com.everhomes.rest.user.SyncUserContactCommand;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
-import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -227,6 +179,8 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private ActivityVideoProvider activityVideoProvider;
 
+    @Autowired
+    private NamespacesService namespacesService;
     @Autowired
     private UserService userService;
 
@@ -1279,4 +1233,64 @@ public class UserActivityServiceImpl implements UserActivityService {
 	           }
 	       }
 	   }
+
+	@Override
+	public ListActiveStatResponse listActiveStat(ListActiveStatCommand cmd) { 
+		ListActiveStatResponse response = new ListActiveStatResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<StatActiveUser>  results = this.userActivityProvider.listActiveStats(cmd.getBeginDate(),cmd.getEndDate(),namespaceId,locator, pageSize + 1);
+        if (null == results)
+			return response;
+		Long nextPageAnchor = null;
+		if (results != null && results.size() > pageSize) {
+			results.remove(results.size() - 1);
+			nextPageAnchor = results.get(results.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);        
+		response.setActiveStats(new ArrayList<UserActiveStatDTO>());
+        for(StatActiveUser stat : results){
+        	UserActiveStatDTO dto = ConvertHelper.convert(stat, UserActiveStatDTO.class);
+        	dto.setStatDate(stat.getStatDate().getTime());
+        	response.getActiveStats().add(dto);
+        }
+		return response;
+	}
+	
+	/**
+	 * 每天早上3点10分刷前一天的活跃度
+	 * */
+	@Scheduled(cron = "0 10 3 * * ?") 
+	public void addAnyDayActive(){
+		Date statDate = new Date();
+		List<NamespaceInfoDTO>  namespaces = namespacesService.listNamespace();
+		for(NamespaceInfoDTO namespace : namespaces){
+			addAnyDayActive(statDate, namespace.getId());
+		}
+	}
+	
+	@Override
+	public void addAnyDayActive(Date statDate ,Integer namespaceId){
+		StatActiveUser stat = this.userActivityProvider.findStatActiveUserByDate(new java.sql.Date(statDate.getTime()),namespaceId);
+		if(null == stat){
+			stat = new StatActiveUser();
+			stat.setCreateTime(getCreateTime());
+			stat.setNamespaceId(namespaceId);
+			stat.setStatDate(new java.sql.Date(statDate.getTime()));
+			//活跃人数计算
+			String activeCountInterval = this.configurationProvider.getValue(namespaceId,"active.count", "0-1");
+			String[] arg = activeCountInterval.split("-");
+			int minInt = Integer.valueOf(arg[0]);
+			int maxInt = Integer.valueOf(arg[1]);
+			int activeCount = (int)(minInt+Math.random()*(maxInt-minInt+1));
+			stat.setActiveCount(activeCount);
+			//总人数
+			int totalCount = this.userProvider.countUserByNamespaceId(namespaceId, null);
+			stat.setTotalCount(totalCount);
+			
+			this.userActivityProvider.createStatActiveUser(stat);
+		}
+	}
 }

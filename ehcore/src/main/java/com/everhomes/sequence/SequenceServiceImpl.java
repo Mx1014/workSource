@@ -910,6 +910,12 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhSettleRequests.class, Tables.EH_SETTLE_REQUESTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SETTLE_REQUESTS.ID.max()).from(Tables.EH_SETTLE_REQUESTS).fetchOne().value1();
         });
+        
+
+
+        syncTableSequence(null, EhStatActiveUsers.class, Tables.EH_STAT_ACTIVE_USERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_ACTIVE_USERS.ID.max()).from(Tables.EH_STAT_ACTIVE_USERS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

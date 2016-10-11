@@ -1,5 +1,7 @@
 package com.everhomes.user;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -17,22 +19,24 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.locale.LocalAppProvier;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ListActiveStatResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.local.AppVersionCommand;
 import com.everhomes.rest.local.GetAppVersion;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.user.AddAnyDayActiveCommand;
 import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
-import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.CancelUserFavoriteCommand;
 import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.CreateInvitationCommand;
 import com.everhomes.rest.user.FeedbackCommand;
-import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
+import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
+import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListContactRespose;
 import com.everhomes.rest.user.ListContactsCommand;
 import com.everhomes.rest.user.ListPostResponse;
@@ -43,6 +47,7 @@ import com.everhomes.rest.user.ListSignupActivitiesCommand;
 import com.everhomes.rest.user.ListTreasureResponse;
 import com.everhomes.rest.user.ListUserFavoriteActivityCommand;
 import com.everhomes.rest.user.ListUserFavoriteTopicCommand;
+import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.SyncBehaviorCommand;
@@ -374,6 +379,43 @@ public class UserActivityController extends ControllerBase {
     public RestResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd) {
     	List<RequestFieldDTO> dto = this.userActivityService.getCustomRequestInfo(cmd);
     	RestResponse response = new RestResponse(dto);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    
+    /**
+	 * <b>URL: /user/listActiveStat</b>
+	 * <p> 获取活跃用户信息  </p>
+	 */
+    @RequestMapping("listActiveStat")
+    @RestReturn(value = ListActiveStatResponse.class )
+    public RestResponse listActiveStat(@Valid ListActiveStatCommand cmd) {
+    	ListActiveStatResponse dto = this.userActivityService.listActiveStat(cmd);
+    	RestResponse response = new RestResponse(dto);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    
+    /**
+	 * <b>URL: /user/addAnyDayActive</b>
+	 * <p> 计算某一日用户活跃  </p>
+	 */
+    @RequestMapping("addAnyDayActive")
+    @RestReturn(value = String.class )
+    public RestResponse addAnyDayActive(@Valid AddAnyDayActiveCommand cmd) {
+    	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+    	
+    	try {
+			this.userActivityService.addAnyDayActive(dateSF.parse(cmd.getStatDate()), cmd.getNamespaceId());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;

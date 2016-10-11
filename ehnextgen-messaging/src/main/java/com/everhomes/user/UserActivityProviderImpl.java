@@ -1,5 +1,6 @@
 package com.everhomes.user;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,32 +23,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.equipment.EquipmentInspectionEquipments;
-import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.SearchTypesStatus;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
-import com.everhomes.server.schema.tables.daos.EhSearchTypesDao;
-import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
-import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
-import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhRequestAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhRequestTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhSearchTypesDao;
+import com.everhomes.server.schema.tables.daos.EhStatActiveUsersDao;
 import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
 import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
@@ -59,14 +51,9 @@ import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
 import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
 import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
-import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhRequestAttachments;
-import com.everhomes.server.schema.tables.pojos.EhRequestTemplates;
+import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
+import com.everhomes.server.schema.tables.pojos.EhStatActiveUsers;
 import com.everhomes.server.schema.tables.pojos.EhUserContacts;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -75,13 +62,11 @@ import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
-import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
-import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
-import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
 import com.everhomes.server.schema.tables.records.EhRequestAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
 import com.everhomes.server.schema.tables.records.EhRequestTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
+import com.everhomes.server.schema.tables.records.EhStatActiveUsersRecord;
 import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
 import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -878,6 +863,66 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhRequestAttachments.class, null);
 		
+	}
+
+	@Override
+	public List<StatActiveUser> listActiveStats(Long beginDate, Long endDate, Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhStatActiveUsersRecord> query = context
+				.selectQuery(Tables.EH_STAT_ACTIVE_USERS);
+		 
+		Condition condition = Tables.EH_STAT_ACTIVE_USERS.ID.ne(-1L);
+		if (null != beginDate)
+			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.STAT_DATE.gt(new Date(beginDate)));
+		if (null != endDate)
+			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.STAT_DATE.lt(new Date(endDate))); 
+		if (null != locator && locator != null && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.ID.gt(locator.getAnchor()));
+		query.addConditions(condition);
+		query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<StatActiveUser> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, StatActiveUser.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
+	@Override
+	public StatActiveUser findStatActiveUserByDate(Date date, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhStatActiveUsersRecord> query = context
+				.selectQuery(Tables.EH_STAT_ACTIVE_USERS);
+		 
+		Condition condition = Tables.EH_STAT_ACTIVE_USERS.NAMESPACE_ID.eq(namespaceId);
+		if (null != date)
+			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.STAT_DATE.eq(date));  
+		query.addConditions(condition);
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<StatActiveUser> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, StatActiveUser.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result.get(0) ;
+		return null;
+	}
+
+	@Override
+	public void createStatActiveUser(StatActiveUser stat) { 
+		String key = NameMapper.getSequenceDomainFromTablePojo(EhStatActiveUsers.class);
+		long id = sequenceProvider.getNextSequence(key);
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+        stat.setId(id); 
+        EhStatActiveUsersDao dao = new EhStatActiveUsersDao(context.configuration());
+        dao.insert(stat);
 	}
 
 
