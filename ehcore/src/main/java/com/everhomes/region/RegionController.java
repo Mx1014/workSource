@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.region.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,9 @@ public class RegionController extends ControllerBase {
 
     @Autowired
     private RegionProvider regionProvider;
+
+    @Autowired
+    private RegionService regionService;
     
     /**
      * <b>URL: /region/list</b>
@@ -182,7 +186,10 @@ public class RegionController extends ControllerBase {
     @RequestMapping("listRegionCodes")
     @RestReturn(value=RegionCodeDTO.class, collection=true)
     public RestResponse listRegionCodes(@Valid ListRegionCodeCommand cmd) {
-        return new RestResponse();
+        RestResponse res = new RestResponse(regionService.listRegionCodes());
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
 
     /**
@@ -193,7 +200,11 @@ public class RegionController extends ControllerBase {
     @RequestMapping("createRegionCode")
     @RestReturn(value=String.class)
     public RestResponse createRegionCode(@Valid CreateRegionCodeCommand cmd) {
-        return new RestResponse();
+        regionService.createRegionCode(ConvertHelper.convert(cmd, RegionCodeDTO.class));
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
 
     /**
@@ -204,6 +215,10 @@ public class RegionController extends ControllerBase {
     @RequestMapping("updateRegionCode")
     @RestReturn(value=String.class)
     public RestResponse updateRegionCode(@Valid CreateRegionCodeCommand cmd) {
-        return new RestResponse();
+        regionService.updateRegionCode(ConvertHelper.convert(cmd, RegionCodeDTO.class));
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
 }
