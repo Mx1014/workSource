@@ -56,6 +56,7 @@ public class VersionController extends ControllerBase {
     
     @RequestMapping("getVersionUrls")
     @RestReturn(value=VersionUrlResponse.class)
+    @RequireAuthentication(false)
     public RestResponse getVersionUrls(@Valid VersionRequestCommand cmd) {
 
         VersionUrlResponse cmdResponse = this.versionService.getVersionUrls(cmd);

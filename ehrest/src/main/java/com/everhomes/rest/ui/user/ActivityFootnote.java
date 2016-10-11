@@ -16,6 +16,11 @@ public class ActivityFootnote {
 	
 	private String startTime;
 
+	public ActivityFootnote() {
+		this.startTime = "";
+		this.location = "";
+    }
+	
 	public String getLocation() {
 		return location;
 	}

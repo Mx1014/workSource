@@ -132,7 +132,10 @@ public class BannerServiceImpl implements BannerService {
         long cityId = community.getCityId();
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(LOGGER.isDebugEnabled()){
+            LOGGER.debug("banner namespaceId = {}", namespaceId);
+        }
         // 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
         // String sceneType = cmd.getCurrentSceneType();
         String sceneType = cmd.getSceneType();
@@ -205,6 +208,11 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if(LOGGER.isDebugEnabled()){
+            LOGGER.debug("banner namespaceId = {}", namespaceId);
+        }
+
         String sceneTypeStr = cmd.getCurrentSceneType();
         
         Long communityId = null;
@@ -391,6 +399,10 @@ public class BannerServiceImpl implements BannerService {
         Community community = null;
         List<BannerDTO> bannerList = null;
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
+
         switch(sceneType) {
         case DEFAULT:
         case PARK_TOURIST:

@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,7 @@ public class LauchPadUiController extends ControllerBase {
      */
     @RequestMapping("getLaunchPadItemsByScene")
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse getLaunchPadItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItemsByScene(cmd, request);
@@ -83,6 +85,7 @@ public class LauchPadUiController extends ControllerBase {
      */
     @RequestMapping("getLastLaunchPadLayoutByScene")
     @RestReturn(value=LaunchPadLayoutDTO.class)
+    @RequireAuthentication(false)
     public RestResponse getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd, HttpServletRequest request,HttpServletResponse response) {
         
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByScene(cmd);
@@ -136,6 +139,7 @@ public class LauchPadUiController extends ControllerBase {
      */
     @RequestMapping("getMoreItemsByScene")
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
     	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
     	RestResponse resp =  new RestResponse(commandResponse);

@@ -32,8 +32,9 @@ public enum CoordinationLocks {
     STAT_SETTLEMENT("stat.settlement"),
 
     UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
-    UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update");
+    UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update"),
 
+    PMTASK_STATISTICS("pmtask.statistics");
 
     private String code;
     private CoordinationLocks(String code) {

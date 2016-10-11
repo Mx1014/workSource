@@ -78,6 +78,7 @@ import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.NewsFootnote;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserLikeType;
@@ -92,6 +93,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -104,6 +106,9 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 public class NewsServiceImpl implements NewsService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewsServiceImpl.class);
 
+	@Autowired
+	private UserService userService ;
+	
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
@@ -868,6 +873,9 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_SCENETOKEN_INVALID, "scene token invalid");
 		}
+
+		//检查游客是否能继续访问此场景 by sfyan 20161009
+		userService.checkUserScene(SceneType.fromCode(sceneTokenDTO.getScene()));
 		return sceneTokenDTO.getNamespaceId();
 	}
 
@@ -1068,16 +1076,15 @@ public class NewsServiceImpl implements NewsService {
 		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = checkOwner(userId, sceneTokenDto.getEntityId(), sceneTokenDto.getEntityType()).getNamespaceId();
+		Integer namespaceId = sceneTokenDto.getNamespaceId();;
 		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
 		if (StringUtils.isEmpty(cmd.getKeyword())) {
-			ListNewsCommand command = new ListNewsCommand();
+			ListNewsBySceneCommand command = new ListNewsBySceneCommand();
 			
-			command.setOwnerId(sceneTokenDto.getEntityId());
-			command.setOwnerType(sceneTokenDto.getEntityType());
+			command.setSceneToken(cmd.getSceneToken());
 			command.setPageAnchor(cmd.getPageAnchor());
 			command.setPageSize(cmd.getPageSize());
-			ListNewsResponse news = listNews(command);
+			ListNewsBySceneResponse news = listNewsByScene(command);
 			if(news != null) {
 				response.setNextPageAnchor(news.getNextPageAnchor());
 				if(news.getNewsList() != null && news.getNewsList().size() > 0) {
@@ -1087,12 +1094,14 @@ public class NewsServiceImpl implements NewsService {
 						dto.setContent(briefNews.getContentAbstract());
 						dto.setSubject(briefNews.getTitle());
 						dto.setPostUrl(briefNews.getCoverUri());
-						dto.setSearchTypeId(searchType.getId());
-						dto.setSearchTypeName(searchType.getName());
+						if(searchType != null) {
+							dto.setSearchTypeId(searchType.getId());
+							dto.setSearchTypeName(searchType.getName());
+						}
 						
 						NewsFootnote footNote = new NewsFootnote();
 						footNote.setAuthor(briefNews.getAuthor());
-						footNote.setCreateTime(briefNews.getPublishTime());
+						footNote.setCreateTime(briefNews.getPublishTime().toString());
 						footNote.setSourceDesc(briefNews.getSourceDesc());
 						footNote.setNewsToken(briefNews.getNewsToken());
 						dto.setFootnoteJson(StringHelper.toJsonString(footNote));
@@ -1148,7 +1157,7 @@ public class NewsServiceImpl implements NewsService {
 			dto.setSearchTypeName(searchType.getName());
 			NewsFootnote footNote = new NewsFootnote();
 			footNote.setAuthor(source.getString("author"));
-			footNote.setCreateTime(source.getTimestamp("publishTime"));
+			footNote.setCreateTime(source.getTimestamp("publishTime").toString());
 			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
 			
 			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){

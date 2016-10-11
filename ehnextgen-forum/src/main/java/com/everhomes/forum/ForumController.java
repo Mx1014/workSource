@@ -98,6 +98,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopics(cmd);
         
@@ -269,6 +270,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("listTopicComments")
     @RestReturn(value=ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listTopicComments(@Valid ListTopicCommentCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopicComments(cmd);
         
@@ -380,6 +382,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("increasePostViewCount")
     @RestReturn(value=PostDTO.class)
+    @RequireAuthentication(false)
     public RestResponse increasePostViewCount(IncreasePostViewCountCommand cmd) {
 //        PostDTO postDto = this.forumService.getTopic(cmd);
         

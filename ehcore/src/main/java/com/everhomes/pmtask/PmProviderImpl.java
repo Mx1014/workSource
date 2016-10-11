@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -268,7 +269,7 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-	public List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Long dateStr,
+	public List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Timestamp dateStr,
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskStatistics.class));
         
@@ -279,6 +280,8 @@ public class PmProviderImpl implements PmTaskProvider{
         	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.CATEGORY_ID.eq(categoryId));
         if(null != ownerId)
         	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.OWNER_ID.eq(ownerId));
+        if(null != dateStr)
+        	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.DATE_STR.eq(dateStr));
         if(StringUtils.isNotBlank(keyword)){
         	query.join(Tables.EH_COMMUNITIES).on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_PM_TASK_STATISTICS.OWNER_ID));
         	condition = condition.and(Tables.EH_COMMUNITIES.NAME.like("%"+keyword+"%").or(Tables.EH_COMMUNITIES.ALIAS_NAME.like("%"+keyword+"%")));
@@ -299,7 +302,7 @@ public class PmProviderImpl implements PmTaskProvider{
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPmTasks.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                 	
-                	SelectJoinStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PM_TASK_STATISTICS);
+                	SelectJoinStep<Record1<BigDecimal>> query = context.select(Tables.EH_PM_TASK_STATISTICS.TOTAL_COUNT.sum()).from(Tables.EH_PM_TASK_STATISTICS);
                 	
                 	Condition condition = Tables.EH_PM_TASK_STATISTICS.OWNER_ID.equal(ownerId);
                 	if(null != categoryId)
@@ -307,7 +310,7 @@ public class PmProviderImpl implements PmTaskProvider{
                 	if(null != dateStr)
                     	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.DATE_STR.eq(dateStr));
 
-                    count[0] = query.fetchOneInto(Integer.class);
+                    count[0] = query.where(condition).fetchOneInto(BigDecimal.class).intValue();
                     return true;
                 });
 		return count[0];

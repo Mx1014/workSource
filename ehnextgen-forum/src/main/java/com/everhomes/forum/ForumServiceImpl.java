@@ -169,6 +169,7 @@ import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.PostAdminQueryFilter;
@@ -932,6 +933,17 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public ListPostCommandResponse listTopics(ListTopicCommand cmd) {
+    	
+    	// 非登录用户只能看第一页 add by xiongying20161009
+    	if(cmd.getPageAnchor() != null ) {
+    		 if(!userService.isLogon()){
+    			 LOGGER.error("Not logged in.");
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+  					   "Not logged in.");
+
+    		 }
+    	}
+    	
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
         Long operatorId = user.getId();
@@ -1535,6 +1547,17 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd) {
+    	// 非登录用户只能看第一页 add by xiongying20161009
+    	if(cmd.getPageAnchor() != null ) {
+    		 if(!userService.isLogon()){
+    			 LOGGER.error("Not logged in.");
+  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+  					   "Not logged in.");
+
+    		 }
+    	}
+    	
+    	
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
         String tag = "listTopicComments";
@@ -2352,7 +2375,7 @@ public class ForumServiceImpl implements ForumService {
         cmntyIdList.add(communityId);
         // 对于住宅小区还存在周边社区的概述（商业园区没有此概念），此时如果不指明是“本小区”则添加上周边各小区
         if(communityType == CommunityType.RESIDENTIAL && scope != VisibilityScope.COMMUNITY && community.getStatus() == CommunityAdminStatus.ACTIVE.getCode()) {
-            List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), communityId);
+            List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(), communityId);
             for(Community c : nearbyCmntyList) {
                 cmntyIdList.add(c.getId());
             }
@@ -2898,7 +2921,7 @@ public class ForumServiceImpl implements ForumService {
             List<Long> nearbyCmntyIdList = new ArrayList<Long>();
             List<Community> nearbyCmntyList = new ArrayList<Community>();
             if(community.getStatus() == CommunityAdminStatus.ACTIVE.getCode())
-            	nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), communityId);
+            	nearbyCmntyList = communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(), communityId);
             
             for(Community c : nearbyCmntyList) {
                 nearbyCmntyIdList.add(c.getId());
@@ -3865,6 +3888,8 @@ public class ForumServiceImpl implements ForumService {
         //查全部公告，对于小区，需要找到上级所有机构，对于管理公司，需要管理公司及其所在小区，对于普通公司，需要其管理公司及其所在小区
         List<Long> communityIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
+        //检查游客是否能继续访问此场景 by sfyan 20161009
+        userService.checkUserScene(sceneType);
         Long communityId = null;
         switch(sceneType) {
 	    case DEFAULT:
@@ -4007,6 +4032,11 @@ public class ForumServiceImpl implements ForumService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        
+      //检查游客是否能继续访问此场景 by xiongying 20161009
+        userService.checkUserScene(sceneType);
+
         
         // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
 //        List<TopicFilterDTO> filterList = null;
@@ -4980,8 +5010,11 @@ public class ForumServiceImpl implements ForumService {
         for (SearchHit sd : docs) {
         	ContentBriefDTO dto = new ContentBriefDTO();
         	dto.setId(Long.parseLong(sd.getId()));
-        	dto.setSearchTypeId(searchType.getId());
-			dto.setSearchTypeName(searchType.getName());
+        	if(searchType != null) {
+        		dto.setSearchTypeId(searchType.getId());
+    			dto.setSearchTypeName(searchType.getName());
+        	}
+        	
         	Map<String, Object> source = sd.getSource();
         	Map<String, HighlightField> highlight = sd.getHighlightFields();
         	

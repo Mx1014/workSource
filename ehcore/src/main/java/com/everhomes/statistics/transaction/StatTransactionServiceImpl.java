@@ -20,30 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import org.apache.http.protocol.HTTP;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -886,9 +863,14 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		    String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
 		    params.put("signature", URLEncoder.encode(signature,"UTF-8"));
 		    String url = serverURL + paidOrderApi;
-		    
-		    String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, null);
-		    
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("request url = {}, params = {}", url, params);
+			}
+
+		    String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("response result = {}", result);
+			}
 		    ListModelInfoResponse response = (ListModelInfoResponse)StringHelper.fromJsonString(result, ListModelInfoResponse.class);
 		    
 		    if(null != response){

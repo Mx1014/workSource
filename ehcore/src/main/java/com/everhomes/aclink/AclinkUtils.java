@@ -33,16 +33,16 @@ public class AclinkUtils {
     public static byte AES_USER_KEY_TYPE = 0x3a;
     
     public static String generateAESKey() {
-//        try {
-//            KeyGenerator generator = KeyGenerator.getInstance("AES");
-//            SecretKey key = generator.generateKey();
-//            return Base64.encodeBase64String(key.getEncoded());
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException("NoSuchAlgorithmException for AES", e);
-//        }
+        try {
+            KeyGenerator generator = KeyGenerator.getInstance("AES");
+            SecretKey key = generator.generateKey();
+            return Base64.encodeBase64String(key.getEncoded());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("NoSuchAlgorithmException for AES", e);
+        }
         
         //TODO now use static server key for test
-        return "s87SHk+R/IOw6dV7QkX/pA==";
+        //return "s87SHk+R/IOw6dV7QkX/pA==";
     }
     
     public static String generateAESIV(String base64Key) {

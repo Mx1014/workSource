@@ -166,4 +166,18 @@ public interface UserService {
      */
     boolean signupByThirdparkUser(User user, HttpServletRequest request);
 	Boolean validateUserPass(ValidatePassCommand passCmd);
+
+    List<SceneDTO> listTouristRelatedScenes();
+
+    /**
+     * 判断是否登录
+     * @return
+     */
+    boolean isLogon();
+
+    /**
+     * 检查游客是否能继续访问场景资源
+     * @param sceneType
+     */
+    void checkUserScene(SceneType sceneType);
 }

@@ -121,6 +121,7 @@ import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
@@ -1067,8 +1068,8 @@ public class UserServiceImpl implements UserService {
 			kickoffLoginByDevice(foundLogin);
 		}
 		
-//		if(!ref.getOldDeviceId().isEmpty()) {
-//		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+		if(!ref.getOldDeviceId().isEmpty()) {
+		    kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
 //	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
 //	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
 //	            locale = user.getLocale(); 
@@ -1081,7 +1082,7 @@ public class UserServiceImpl implements UserService {
 //	                locale,
 //	                "kickoff other devices");
 //		    sendMessageToUser(user.getId(), msg, MessagingConstants.MSG_FLAG_STORED_PUSH);
-//		}
+		}
 
 		return foundLogin;
 	}
@@ -2813,38 +2814,6 @@ public class UserServiceImpl implements UserService {
 	}
 	
     @Override
-    public SceneDTO toCommunitySceneDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
-        StringBuffer fullName = new StringBuffer();
-        StringBuffer aliasName = new StringBuffer();
-        
-        if(!StringUtils.isEmpty(community.getCityName())){
-            fullName.append(community.getCityName());
-        }
-        if(!StringUtils.isEmpty(community.getAreaName())){
-            fullName.append(community.getAreaName());
-        }
-        if(!StringUtils.isEmpty(community.getName())){
-            fullName.append(community.getName());
-            aliasName.append(community.getName());
-        }
-        
-        SceneDTO sceneDto = new SceneDTO();
-        sceneDto.setSceneType(sceneType.getCode());
-        sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
-        sceneDto.setName(fullName.toString());
-        sceneDto.setAliasName(aliasName.toString());
-        
-        String entityContent = StringHelper.toJsonString(community);
-        sceneDto.setEntityContent(entityContent);
-        
-        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, community, sceneType);
-        String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
-        sceneDto.setSceneToken(sceneToken);
-
-        return sceneDto;
-    }	
-    
-    @Override
     public SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
         SceneTokenDTO sceneTokenDto = new SceneTokenDTO();
         sceneTokenDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
@@ -2852,9 +2821,41 @@ public class UserServiceImpl implements UserService {
         sceneTokenDto.setEntityId(community.getId());
         sceneTokenDto.setNamespaceId(namespaceId);
         sceneTokenDto.setUserId(userId);
-        
+
         return sceneTokenDto;
-    }   
+    }
+
+	@Override
+	public SceneDTO toCommunitySceneDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
+		StringBuffer fullName = new StringBuffer();
+		StringBuffer aliasName = new StringBuffer();
+
+		if(!StringUtils.isEmpty(community.getCityName())){
+			fullName.append(community.getCityName());
+		}
+		if(!StringUtils.isEmpty(community.getAreaName())){
+			fullName.append(community.getAreaName());
+		}
+		if(!StringUtils.isEmpty(community.getName())){
+			fullName.append(community.getName());
+			aliasName.append(community.getName());
+		}
+
+		SceneDTO sceneDto = new SceneDTO();
+		sceneDto.setSceneType(sceneType.getCode());
+		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+		sceneDto.setName(fullName.toString());
+		sceneDto.setAliasName(aliasName.toString());
+
+		String entityContent = StringHelper.toJsonString(community);
+		sceneDto.setEntityContent(entityContent);
+
+		SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, community, sceneType);
+		String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+		sceneDto.setSceneToken(sceneToken);
+
+		return sceneDto;
+	}
 
     /**
      * 判断是否是小区版场景（相对于园区版）
@@ -3105,6 +3106,9 @@ public class UserServiceImpl implements UserService {
 	    	int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
 	    	cmd.setPageSize(pageSize);
 	    	
+	    	List<ContentBriefDTO> dtos = new ArrayList<ContentBriefDTO>();
+	    	response.setDtos(dtos);
+	    	
 	    	if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
 	    			&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
 	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
@@ -3120,8 +3124,11 @@ public class UserServiceImpl implements UserService {
 	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
 	    	}
 	    	
+	    	if(newsService.searchNewsByScene(cmd) != null 
+	    			&& newsService.searchNewsByScene(cmd).getDtos() != null) {
+	    		response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+	    	}
 	    	
-	    	response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
 	    	break;
 		
 	    default:
@@ -3307,5 +3314,55 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public List<SceneDTO> listTouristRelatedScenes() {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+		for (NamespaceResource resource : resources) {
+			Community community = communityProvider.findCommunityById(resource.getResourceId());
+			if(null != community){
+				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+				SceneType sceneType = SceneType.DEFAULT;
+				if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL){
+					sceneType = SceneType.PARK_TOURIST;
+				}
+				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+				sceneList.add(sceneDTO);
+			}
+		}
+		return sceneList;
+	}
+
+	/**
+	 * 判断是否登录
+	 * @return
+     */
+	public boolean isLogon(){
+		User user = UserContext.current().getUser();
+		if(null == user){
+			return false;
+		}
+		LOGGER.debug("Check for login. userId = {}", user.getId());
+		if(user.getId() > 0){
+			return true;
+		}
+		return false;
+	}
+
+
+	public void checkUserScene(SceneType sceneType){
+		// 判断是否是登录 by sfyan 20161009
+		if(!this.isLogon()){
+			// 没登录 检查场景是否是游客
+			if(sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN  || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH ){
+				LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+						"Not logged in.Cannot access this scene");
+			}
+		}
 	}
 }

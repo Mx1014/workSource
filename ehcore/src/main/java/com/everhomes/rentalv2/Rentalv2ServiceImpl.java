@@ -1003,9 +1003,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rSiteDTO.setDayEndTime(convertTimeToGMTMillisecond(rentalSite.getDayEndTime()));
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
 		rSiteDTO.setSiteName(rentalSite.getResourceName());
-		User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
-		if(null != charger)
-			rSiteDTO.setChargeName(charger.getNickName());
+		//fix bug : charge uid null point 2016-10-9
+		if(null != rentalSite.getChargeUid() ){
+			User charger = this.userProvider.findUserById(rentalSite.getChargeUid() );
+			if(null != charger)
+				rSiteDTO.setChargeName(charger.getNickName());
+		}
 		Community community = this.communityProvider.findCommunityById(rSiteDTO.getCommunityId());
 		if(null != community)
 			rSiteDTO.setCommunityName(community.getName());
@@ -2274,11 +2277,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		signleCmd.setRentalSiteId(rs.getId());
 		signleCmd.setSiteCounts(rs.getResourceCounts());
 		signleCmd.setOpenWeekday(new ArrayList<Integer>());
-		int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
-        for(int i=1;i<8;i++){
-        	if(openWeekInt%10 == 1)
-        		signleCmd.getOpenWeekday().add(i);
-        	openWeekInt = openWeekInt/10;
+		if(null != rs.getOpenWeekday()){
+			int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
+	        for(int i=1;i<8;i++){
+	        	if(openWeekInt%10 == 1)
+	        		signleCmd.getOpenWeekday().add(i);
+	        	openWeekInt = openWeekInt/10;
+	        }
         }
 		 
         
@@ -2315,32 +2320,33 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				signleCmd.getAttachments().add(ConvertHelper.convert(single, com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO .class));
 			}
 		}
-
-		signleCmd.setBeginDate(rs.getBeginDate().getTime());
-		signleCmd.setEndDate(rs.getEndDate().getTime());
-		signleCmd.setWeekendPrice(weekendPrice); 
-		signleCmd.setWorkdayPrice(workdayPrice);
-		if (rs.getRentalType().equals(RentalType.HOUR.getCode()))  {
-			if(signleCmd.getTimeIntervals() != null){
-				Double beginTime = null;
-				Double endTime = null;
-				for(TimeIntervalDTO timeInterval:signleCmd.getTimeIntervals()){ 
-					if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
-						continue;
-					if(beginTime==null||beginTime>timeInterval.getBeginTime())
-						beginTime=timeInterval.getBeginTime();
-					if(endTime==null||endTime<timeInterval.getEndTime())
-						endTime=timeInterval.getEndTime();
-					signleCmd.setBeginTime(timeInterval.getBeginTime());
-					signleCmd.setEndTime(timeInterval.getEndTime());
-					if(null!=timeInterval.getTimeStep())
-						signleCmd.setTimeStep(timeInterval.getTimeStep());
-					addRentalSiteSingleSimpleRule(signleCmd);
+		if(null != rs.getBeginDate() && null != rs.getEndDate()){
+			signleCmd.setBeginDate(rs.getBeginDate().getTime());
+			signleCmd.setEndDate(rs.getEndDate().getTime());
+			signleCmd.setWeekendPrice(weekendPrice); 
+			signleCmd.setWorkdayPrice(workdayPrice);
+			if (rs.getRentalType().equals(RentalType.HOUR.getCode()))  {
+				if(signleCmd.getTimeIntervals() != null){
+					Double beginTime = null;
+					Double endTime = null;
+					for(TimeIntervalDTO timeInterval:signleCmd.getTimeIntervals()){ 
+						if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+							continue;
+						if(beginTime==null||beginTime>timeInterval.getBeginTime())
+							beginTime=timeInterval.getBeginTime();
+						if(endTime==null||endTime<timeInterval.getEndTime())
+							endTime=timeInterval.getEndTime();
+						signleCmd.setBeginTime(timeInterval.getBeginTime());
+						signleCmd.setEndTime(timeInterval.getEndTime());
+						if(null!=timeInterval.getTimeStep())
+							signleCmd.setTimeStep(timeInterval.getTimeStep());
+						addRentalSiteSingleSimpleRule(signleCmd);
+					}
 				}
-			}
-		} else {  
-			addRentalSiteSingleSimpleRule(signleCmd);
-		}	
+			} else {  
+				addRentalSiteSingleSimpleRule(signleCmd);
+			}	
+		}
 	}
 	/**
 	 * 根据单一时段的规则生成单元格

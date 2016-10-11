@@ -227,6 +227,9 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private ActivityVideoProvider activityVideoProvider;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -656,8 +659,14 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public ListTreasureResponse getUserTreasure() {
-    	//2016-07-29:modify by liujinwen.get orderCount's value like couponCount
-    	
+        // 检查是否登陆，没登陆则只返回游客访问的电商url by sfyan 20161009
+    	if(!userService.isLogon()){
+            ListTreasureResponse rsp = new ListTreasureResponse();
+            rsp.setBusinessUrl(getTouristBusinessUrl());
+            rsp.setBusinessRealm(getBusinessRealm());
+            return rsp;
+        }
+        //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
         User user = UserContext.current().getUser();
         ListTreasureResponse rsp = ConvertHelper.convert(user, ListTreasureResponse.class);
         UserProfile item = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
@@ -722,6 +731,16 @@ public class UserActivityServiceImpl implements UserActivityService {
             return businessUrl;
         }
 	}
+
+    private String getTouristBusinessUrl() {
+        String touristBusinessUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.TOURIST_BUSINESS_URL, "");
+        if(touristBusinessUrl.length() == 0) {
+            LOGGER.error("Invalid business url path, businessUrl=" + touristBusinessUrl);
+            return null;
+        } else {
+            return touristBusinessUrl;
+        }
+    }
 
 	private String getMyOrderUrl() {
         String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");

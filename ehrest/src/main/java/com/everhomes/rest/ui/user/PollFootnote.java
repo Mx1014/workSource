@@ -14,8 +14,13 @@ public class PollFootnote {
 
 	private String creatorNickName;
 	
-	private Timestamp createTime;
+	private String createTime;
 
+	public PollFootnote() {
+		this.createTime = "";
+		this.creatorNickName = "";
+    }
+	
 	public String getCreatorNickName() {
 		return creatorNickName;
 	}
@@ -24,14 +29,14 @@ public class PollFootnote {
 		this.creatorNickName = creatorNickName;
 	}
 
-	public Timestamp getCreateTime() {
+	public String getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Timestamp createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

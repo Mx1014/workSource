@@ -173,6 +173,7 @@ public class YellowPageController  extends ControllerBase {
 	 * <b>URL: /yellowPage/listServiceAllianceCategories</b> 
 	 * <p> 列出服务联盟类型 </p>
 	 */
+    @RequireAuthentication(false)
 	@RequestMapping("listServiceAllianceCategories")
 	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {

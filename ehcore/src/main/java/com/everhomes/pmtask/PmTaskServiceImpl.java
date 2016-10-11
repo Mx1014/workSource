@@ -47,11 +47,14 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
@@ -103,6 +106,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.statistics.transaction.StatTaskLog;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -149,6 +153,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private AclProvider aclProvider;
 	@Autowired
     private DbProvider dbProvider;
+	@Autowired
+    private CoordinationProvider coordinationProvider;
 	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -742,7 +748,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		categoryName = parent.getName();
 	    	}
 	    	
-	    	List<Long> ids = getOrganizationMembers(cmd.getOrganizationId());
+	    	Long organizationId = cmd.getOrganizationId();
+	    	if(null == organizationId) {
+	            List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(ownerId);
+	            if(null != orgs && orgs.size() != 0) {
+	            	organizationId = orgs.get(0).getOrganizationId();
+	            }
+			}
+	    	List<Long> ids = getOrganizationMembers(organizationId);
 	    	int size = ids.size();
 	    	if(LOGGER.isDebugEnabled())
 	    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
@@ -783,9 +796,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private List<Long> getOrganizationMembers(Long organizationId){
 		List<Long> result = new ArrayList<>();
-		if(null == organizationId) {
-			return result;
-		}
+		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), organizationId);
@@ -1065,7 +1076,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		SearchTaskStatisticsResponse response = new SearchTaskStatisticsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), cmd.getDateStr(),
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
 		if(list.size() > 0){
@@ -1111,7 +1122,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		response.setOwnerId(cmd.getOwnerId());
 		
-		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, cmd.getDateStr(),
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, new Timestamp(cmd.getDateStr()),
 				null, null);
 		
 		if(null != cmd.getOwnerId()){
@@ -1193,19 +1204,30 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Scheduled(cron="0 5 0 1 * ? ")
 	public void createStatistics(){
 		
-		List<Namespace> namepaces = pmTaskProvider.listNamespace();
-		long now = System.currentTimeMillis();
-		Timestamp startDate = getBeginOfMonth(now);
-		Timestamp endDate = getEndOfMonth(now);
-		boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
-		if(isOperateByAdmin){
-			startDate = getEndOfMonth(now);
-			endDate = null;
-		}
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
+			List<Namespace> namepaces = pmTaskProvider.listNamespace();
+			long now = System.currentTimeMillis();
+			Timestamp startDate = getBeginOfMonth(now);
+			Timestamp endDate = getEndOfMonth(now);
+			boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
+			if(isOperateByAdmin){
+				startDate = getEndOfMonth(now);
+				endDate = null;
+			}
 		for(Namespace n: namepaces){
 			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
 			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), defaultName);
+			
 			if(ancestor != null){
+				//防止定时任务重复执行
+				
+					List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
+							null, 10);
+					if(list.size() != 0)
+						break;
+				
+				
+				
 				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
 				if(null != categories && !categories.isEmpty()){
 					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
@@ -1252,7 +1274,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				
 			}
 		}
-		
+		return null;
+        });
 		
 	}
 
@@ -1406,7 +1429,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Workbook wb = new XSSFWorkbook();
 		
-		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, cmd.getDateStr(),
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, cmd.getOwnerId(), null, null, new Timestamp(cmd.getDateStr()),
 				null, null);
 		
 		Map<Long, List<PmTaskStatistics>> map = convertStatistics(list);
@@ -1545,7 +1568,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		
-		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), cmd.getDateStr(),
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
 		XSSFWorkbook wb = new XSSFWorkbook();
