@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -16,7 +17,8 @@ public class BatchUpdateOrganizationPersonnelVisibleFlagCommand {
 	
     @NotNull
     private Long   organizationId;
-   
+
+	@ItemType(String.class)
 	private List<String> contactTokens;
 
 	private Byte visibleFlag;
