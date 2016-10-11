@@ -874,6 +874,8 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 				.selectQuery(Tables.EH_STAT_ACTIVE_USERS);
 		 
 		Condition condition = Tables.EH_STAT_ACTIVE_USERS.ID.ne(-1L);
+		if (null != namespaceId)
+			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.NAMESPACE_ID.eq(namespaceId));
 		if (null != beginDate)
 			condition = condition.and(Tables.EH_STAT_ACTIVE_USERS.STAT_DATE.gt(new Date(beginDate)));
 		if (null != endDate)

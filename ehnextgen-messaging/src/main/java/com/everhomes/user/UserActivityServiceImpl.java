@@ -1279,16 +1279,19 @@ public class UserActivityServiceImpl implements UserActivityService {
 			stat.setCreateTime(getCreateTime());
 			stat.setNamespaceId(namespaceId);
 			stat.setStatDate(new java.sql.Date(statDate.getTime()));
-			//活跃人数计算
-			String activeCountInterval = this.configurationProvider.getValue(namespaceId,"active.count", "0-1");
-			String[] arg = activeCountInterval.split("-");
-			int minInt = Integer.valueOf(arg[0]);
-			int maxInt = Integer.valueOf(arg[1]);
-			int activeCount = (int)(minInt+Math.random()*(maxInt-minInt+1));
-			stat.setActiveCount(activeCount);
 			//总人数
 			int totalCount = this.userProvider.countUserByNamespaceId(namespaceId, null);
 			stat.setTotalCount(totalCount);
+			
+			//活跃人数计算
+			String activeCountInterval = this.configurationProvider.getValue(namespaceId,"active.count", "0-1");
+			String[] arg = activeCountInterval.split("-");
+			int minIntRate = Integer.valueOf(arg[0]);
+			int minInt = totalCount*minIntRate/100;
+			int maxIntRate = Integer.valueOf(arg[1]);
+			int maxInt = totalCount*maxIntRate/100;
+			int activeCount = (int)(minInt+Math.random()*(maxInt-minInt+1));
+			stat.setActiveCount(activeCount);
 			
 			this.userActivityProvider.createStatActiveUser(stat);
 		}
