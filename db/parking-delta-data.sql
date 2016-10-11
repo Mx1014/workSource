@@ -1,3 +1,5 @@
+update eh_parking_recharge_orders set recharge_type = 1;
+
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('249', 'parking.chuneng.url', 'http://220.160.111.114:9099', '储能停车充值key', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
