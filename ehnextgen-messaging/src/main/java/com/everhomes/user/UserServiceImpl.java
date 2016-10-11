@@ -121,6 +121,7 @@ import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
@@ -3105,6 +3106,9 @@ public class UserServiceImpl implements UserService {
 	    	int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
 	    	cmd.setPageSize(pageSize);
 	    	
+	    	List<ContentBriefDTO> dtos = new ArrayList<ContentBriefDTO>();
+	    	response.setDtos(dtos);
+	    	
 	    	if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
 	    			&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
 	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
@@ -3120,8 +3124,11 @@ public class UserServiceImpl implements UserService {
 	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
 	    	}
 	    	
+	    	if(newsService.searchNewsByScene(cmd) != null 
+	    			&& newsService.searchNewsByScene(cmd).getDtos() != null) {
+	    		response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+	    	}
 	    	
-	    	response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
 	    	break;
 		
 	    default:

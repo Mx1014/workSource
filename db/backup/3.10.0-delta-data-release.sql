@@ -826,3 +826,19 @@ UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","v
 update eh_locale_templates set text = 30093 where id = 297 and namespace_id = 1000000;
 update eh_locale_templates set text = 30095 where id = 298 and namespace_id = 1000000;
 
+-- 路演直播 by sfyan 20161011
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (315,0,'路演直播','路演直播 全部功能',null);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (11400,'路演直播',10000,null,'road_show',0,2,'/10000/11400','park',117);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),315,11400,'路演直播',1,1,'路演直播  全部权限',16);
+
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11400,'', 'EhNamespaces', 999987,2);
+UPDATE `eh_web_menu_scopes` SET `menu_name` = '创业活动', `apply_policy` = 1 WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = 999987 AND `menu_id` = 11400;
+
