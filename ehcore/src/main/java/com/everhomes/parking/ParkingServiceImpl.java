@@ -741,7 +741,7 @@ public class ParkingServiceImpl implements ParkingService {
 			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
 			tempRow.createCell(3).setCellValue(order.getPayerPhone());
 			tempRow.createCell(4).setCellValue(order.getRechargeTime()==null?"":datetimeSF.format(order.getRechargeTime()));
-			tempRow.createCell(5).setCellValue(order.getMonthCount().intValue());
+			tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
 			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
 			VendorType type = VendorType.fromCode(order.getPaidType());
 			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
