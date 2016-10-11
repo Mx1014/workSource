@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class NewsFootnote {
 
-	private Timestamp createTime;
+	private String createTime;
 	
 	private String author;
 	
@@ -22,11 +22,18 @@ public class NewsFootnote {
 	
 	private String newsToken;
 
-	public Timestamp getCreateTime() {
+	public NewsFootnote() {
+		this.createTime = "";
+		this.author = "";
+		this.sourceDesc = "";
+		this.newsToken = "";
+    }
+	
+	public String getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Timestamp createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
 

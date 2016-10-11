@@ -1101,7 +1101,7 @@ public class NewsServiceImpl implements NewsService {
 						
 						NewsFootnote footNote = new NewsFootnote();
 						footNote.setAuthor(briefNews.getAuthor());
-						footNote.setCreateTime(briefNews.getPublishTime());
+						footNote.setCreateTime(briefNews.getPublishTime().toString());
 						footNote.setSourceDesc(briefNews.getSourceDesc());
 						footNote.setNewsToken(briefNews.getNewsToken());
 						dto.setFootnoteJson(StringHelper.toJsonString(footNote));

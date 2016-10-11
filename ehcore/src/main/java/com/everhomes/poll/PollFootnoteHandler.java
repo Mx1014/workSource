@@ -16,7 +16,7 @@ public class PollFootnoteHandler implements ForumFootnoteHandler {
 	public String renderContentFootnote(ContentBriefDTO dto, PostDTO postDto) {
         
         PollFootnote fn = new PollFootnote();
-        fn.setCreateTime(postDto.getCreateTime());
+        fn.setCreateTime(postDto.getCreateTime().toString());
         fn.setCreatorNickName(postDto.getCreatorNickName());
         
         dto.setFootnoteJson(StringHelper.toJsonString(fn));
