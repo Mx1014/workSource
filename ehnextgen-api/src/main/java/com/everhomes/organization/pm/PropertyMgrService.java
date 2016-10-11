@@ -168,6 +168,8 @@ public interface PropertyMgrService {
      */
 	OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd);
 
+    long createOrganizationOwnerByUser(User memberUser, String contactToken);
+
     /**
      * 创建业主
      */
@@ -348,6 +350,9 @@ public interface PropertyMgrService {
      */
     OrganizationOwnerAddressDTO addOrganizationOwnerAddress(AddOrganizationOwnerAddressCommand cmd);
 
+    OrganizationOwnerAddress createOrganizationOwnerAddress(Long addressId, Byte livingStatus, Integer namespaceId,
+                                                            Long ownerId, OrganizationOwnerAddressAuthType authType);
+
     /**
      * 移除业主与地址的之间的关系
      * @param cmd
@@ -401,10 +406,24 @@ public interface PropertyMgrService {
 
     /**
      * 更新客户资料的认证状态
-     * @param userId
+     * @param ownerId   organizationOwner id
      * @param communityId
      * @param addressId
      * @param authType
      */
-    void updateOrganizationOwnerAddressAuthType(Long userId, Long communityId, Long addressId, OrganizationOwnerAddressAuthType authType);
+    void updateOrganizationOwnerAddressAuthType(Long ownerId, Long communityId, Long addressId, OrganizationOwnerAddressAuthType authType);
+
+    /**
+     * 列出停车类型列表
+     * @param cmd
+     * @return
+     */
+    List<ParkingCardCategoryDTO> listParkingCardCategories(ListParkingCardCategoriesCommand cmd);
+
+    /**
+     * 解除客户资料地址之间的认证关系
+     * 涉及到用户在app端的地址状态
+     * @param cmd
+     */
+    void deleteOrganizationOwnerAddressAuthStatus(UpdateOrganizationOwnerAddressAuthTypeCommand cmd);
 }

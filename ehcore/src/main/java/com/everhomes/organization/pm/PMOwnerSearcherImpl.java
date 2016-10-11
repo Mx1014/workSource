@@ -1,8 +1,11 @@
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.AddressService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
@@ -30,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +51,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 
     @Autowired
     private LocaleStringProvider localeStringProvider;
+
+    @Autowired
+    private AddressService addressService;
 
 	@Override
 	public void deleteById(Long id) {
@@ -124,14 +131,37 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         SearchResponse rsp = builder.execute().actionGet();
 
         ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
-        List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
         List<Long> ids = getIds(rsp);
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
         }
-        if (ids != null && ids.size() > 0) {
+        List<OrganizationOwnerDTO> ownerDTOList = buildOrganizationOwnerDTOList(cmd, ids);
+        response.setOwners(ownerDTOList);
+        return response;
+	}
+
+    private List<OrganizationOwnerDTO> buildOrganizationOwnerDTOList(SearchOrganizationOwnersCommand cmd, List<Long> ids) {
+        List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
+        if (ids.size() > 0) {
             List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
+            // 如果有楼栋地址等信息的话, 过滤不符合条件的对象
+            List<Long> addressIds = new ArrayList<>();
+            if (cmd.getAddressId() != null) {
+                addressIds.add(cmd.getAddressId());
+                pmOwners = processCommunityPmOwners(pmOwners, addressIds);
+            } else if (cmd.getBuildingName() != null && !cmd.getBuildingName().isEmpty()) {
+                ListApartmentByBuildingNameCommand listBuildingNameCmd = new ListApartmentByBuildingNameCommand();
+                listBuildingNameCmd.setBuildingName(cmd.getBuildingName());
+                listBuildingNameCmd.setCommunityId(cmd.getCommunityId());
+
+                List<AddressDTO> addressDTOList = addressService.listAddressByBuildingName(listBuildingNameCmd);
+                if (addressDTOList != null && !addressDTOList.isEmpty()) {
+                    addressIds = addressDTOList.stream().map(AddressDTO::getId).collect(Collectors.toList());
+                }
+                pmOwners = processCommunityPmOwners(pmOwners, addressIds);
+            }
+
             ownerDTOList = pmOwners.stream().map(r -> {
                 OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                 OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
@@ -142,9 +172,15 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 return dto;
             }).collect(Collectors.toList());
         }
-        response.setOwners(ownerDTOList);
-        return response;
-	}
+        return ownerDTOList;
+    }
+
+    private List<CommunityPmOwner> processCommunityPmOwners(List<CommunityPmOwner> pmOwners, List<Long> addressIds) {
+        List<OrganizationOwnerAddress> ownerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByAddressIds(UserContext.getCurrentNamespaceId(), addressIds);
+        List<Long> organizationOwnerIds = ownerAddresses.stream().map(OrganizationOwnerAddress::getOrganizationOwnerId).distinct().collect(Collectors.toList());
+        pmOwners = pmOwners.stream().filter(r -> organizationOwnerIds.contains(r.getId())).collect(Collectors.toList());
+        return pmOwners;
+    }
 
     @Override
 	public String getIndexType() {

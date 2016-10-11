@@ -6,6 +6,7 @@ import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -464,4 +465,20 @@ public interface PropertyMgrProvider {
      * @return
      */
     CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken);
+
+    /**
+     * 停车类型列表
+     * @return
+     */
+    List<EhParkingCardCategories> listParkingCardCategories();
+
+    /**
+     * 根据多个addressId查询业主与地址的关联记录
+     * @param namespaceId
+     * @param addressIds
+     * @return
+     */
+    List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressIds(Integer namespaceId, List<Long> addressIds);
+
+    ParkingCardCategory findParkingCardCategory(Byte cardType);
 }

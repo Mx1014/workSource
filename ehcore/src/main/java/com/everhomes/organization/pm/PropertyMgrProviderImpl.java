@@ -512,7 +512,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, id);
 	}
 
-	@Cacheable(value="CommunityPmOwner", key="#id")
+	// @Cacheable(value="CommunityPmOwner", key="#id")
 	@Override
 	public CommunityPmOwner findPropOwnerById(long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1918,6 +1918,30 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
                 .fetchOneInto(CommunityPmOwner.class);
+    }
+
+    @Override
+    public List<EhParkingCardCategories> listParkingCardCategories() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhParkingCardCategoriesDao dao = new EhParkingCardCategoriesDao(context.configuration());
+        return dao.findAll();
+    }
+
+    @Override
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressIds(Integer namespaceId, List<Long> addressIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
+                .fetchInto(OrganizationOwnerAddress.class);
+    }
+
+    @Override
+    public ParkingCardCategory findParkingCardCategory(Byte cardType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)
+                .where(Tables.EH_PARKING_CARD_CATEGORIES.CARD_TYPE.eq(cardType))
+                .fetchOneInto(ParkingCardCategory.class);
     }
 
     @Override
