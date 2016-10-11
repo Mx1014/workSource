@@ -1157,7 +1157,7 @@ public class NewsServiceImpl implements NewsService {
 			dto.setSearchTypeName(searchType.getName());
 			NewsFootnote footNote = new NewsFootnote();
 			footNote.setAuthor(source.getString("author"));
-			footNote.setCreateTime(source.getTimestamp("publishTime"));
+			footNote.setCreateTime(source.getTimestamp("publishTime").toString());
 			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
 			
 			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
