@@ -877,4 +877,43 @@ public class OrganizationController extends ControllerBase {
           
           return res;
       }
+
+	/**
+	 * <b>URL: /org/updateOrganizationPersonnelVisibleFlag</b>
+	 * <p>修改隐藏显示通讯录</p>
+	 */
+	@RequestMapping("updateOrganizationPersonnelVisibleFlag")
+	@RestReturn(value=String.class)
+	public RestResponse updateOrganizationPersonnelVisibleFlag(UpdateOrganizationPersonnelVisibleFlagCommand cmd){
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/batchUpdateOrganizationPersonnelVisibleFlag</b>
+	 * <p>批量 修改隐藏显示通讯录</p>
+	 */
+	@RequestMapping("batchUpdateOrganizationPersonnelVisibleFlag")
+	@RestReturn(value=String.class)
+	public RestResponse batchUpdateOrganizationPersonnelVisibleFlag(BatchUpdateOrganizationPersonnelVisibleFlagCommand cmd){
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listAllTreeOrganizations</b>
+	 * <p>查询 机构子树形结构</p>
+	 */
+	@RequestMapping("listAllTreeOrganizations")
+	@RestReturn(value=OrganizationTreeDTO.class)
+	public RestResponse listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd){
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 }
