@@ -499,3 +499,5 @@ ALTER TABLE eh_service_alliance_requests MODIFY creator_name VARCHAR(128) DEFAUL
 ALTER TABLE eh_service_alliance_requests MODIFY creator_mobile VARCHAR(128) DEFAULT NULL;
 ALTER TABLE eh_settle_requests MODIFY creator_name VARCHAR(128) DEFAULT NULL;
 ALTER TABLE eh_settle_requests MODIFY creator_mobile VARCHAR(128) DEFAULT NULL;
+
+

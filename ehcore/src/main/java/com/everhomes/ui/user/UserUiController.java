@@ -247,6 +247,7 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("listNearbyActivitiesByScene")
     @RestReturn(value=ListActivitiesReponse.class)
+	@RequireAuthentication(false)
     public RestResponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd){
         ListActivitiesReponse rsp = activityService.listNearbyActivitiesByScene(cmd);
         RestResponse response = new RestResponse(rsp);

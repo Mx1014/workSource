@@ -14,6 +14,7 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
     VALUES ('1', 'ServiceAlliance', 'BP融资模板', '提交BP', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入姓名","requiredFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入手机号","requiredFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入企业全称","requiredFlag":"1"},{"fieldName":"cityName","fieldDisplayName":"企业城市","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所在城市","requiredFlag":"1"},{"fieldName":"industry","fieldDisplayName":"企业行业","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所属行业","requiredFlag":"1"},{"fieldName":"financingStage","fieldDisplayName":"融资阶段","fieldType":"string","fieldContentType":"text","fieldDesc":"融资阶段","requiredFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"融资金额","fieldType":"decimal","fieldContentType":"text","fieldDesc":"融资金额（万元）","requiredFlag":"1"},{"fieldName":"transferShares","fieldDisplayName":"出让股份","fieldType":"number","fieldContentType":"text","fieldDesc":"出让股份 %","requiredFlag":"1"},{"fieldName":"projectDesc","fieldDisplayName":"项目描述","fieldType":"string","fieldContentType":"text","fieldDesc":"项目描述","requiredFlag":"1"},{"fieldName":"attachments","fieldDisplayName":"附件图片","fieldType":"blob","fieldContentType":"image","fieldDesc":"","requiredFlag":"0"},{"fieldName":"attachments","fieldDisplayName":"商业计划书","fieldType":"blob","fieldContentType":"file","fieldDesc":"","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP());
 
 
+
 -- 插入审批类型对应的汉字文本，add by tt, 20160901
 SET @max_id = (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@max_id:=@max_id+1, 'approval.type', '1', 'zh_CN', '请假');
@@ -66,7 +67,7 @@ INSERT INTO `eh_organization_owner_type` (`id`, `namespace_id`, `name`, `display
 INSERT INTO `eh_organization_owner_type` (`id`, `namespace_id`, `name`, `display_name`, `status`) VALUES ('7', '0', 'other', '其它', '1');
 
 -- 插入模板       2016/09/02 by xq.tian
-SET @eh_locale_strings_id = (SELECT max(id) FROM `eh_locale_strings`);
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.behavior', 'immigration', 'zh_CN', '迁入');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.behavior', 'emigration', 'zh_CN', '迁出');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'pm.address.behavior', 'delete', 'zh_CN', '删除');
@@ -651,24 +652,24 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49700,'', 'EhNamespaces', 999999,2);
 
 -- 园区快讯换默认图片 by xiongying20160929
-update eh_news_categories set logo_uri = 'cs://1/image/aW1hZ2UvTVRvNU1qRmtOamxtT0dJMU5qRmpNVGhqT1RZM1lUSTBOelZrTVRFeE9UVXlPQQ';
+UPDATE eh_news_categories SET logo_uri = 'cs://1/image/aW1hZ2UvTVRvNU1qRmtOamxtT0dJMU5qRmpNVGhqT1RZM1lUSTBOelZrTVRFeE9UVXlPQQ';
 
 
 -- 科技园广场icon改成可删的 by xiongying20160929
-update eh_launch_pad_items set delete_flag = 1 where id in(813,10309,10170,10171,818,10313,816,10311,819,10314,814,10310,812,817,10308,10312,820,10315,833,10322,832,10321,111304,12928,111303,110047,914,915) and namespace_id = 1000000 and item_group = 'Bizs';
+UPDATE eh_launch_pad_items SET delete_flag = 1 WHERE id IN(813,10309,10170,10171,818,10313,816,10311,819,10314,814,10310,812,817,10308,10312,820,10315,833,10322,832,10321,111304,12928,111303,110047,914,915) AND namespace_id = 1000000 AND item_group = 'Bizs';
 
 -- 修改新闻导入Excel出错的错误提示, add by tt, 20160929
-update eh_locale_strings set text = '文件格式不正确，上传失败' where scope = 'news' and code = '10007';
+UPDATE eh_locale_strings SET TEXT = '文件格式不正确，上传失败' WHERE scope = 'news' AND CODE = '10007';
 
 -- 更新迅美去认证
-update eh_launch_pad_items set action_type = 52,action_data = '' where id in (10501, 10511) and namespace_id = 999999;
+UPDATE eh_launch_pad_items SET action_type = 52,action_data = '' WHERE id IN (10501, 10511) AND namespace_id = 999999;
 
 -- video
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('video.official.support', '0', 'offical video support', 999987, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('video.none_official.support', '1', 'none offical video support', 999987, NULL);
 
 -- 更新innospring 门禁考勤 icon
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU9XSTJObVF5WkdGaFkyTXhaakJsWlRNMU9HWXlPRGxrWkdZM01ESmhPUQ' where id = 112323;
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU9XSTJObVF5WkdGaFkyTXhaakJsWlRNMU9HWXlPRGxrWkdZM01ESmhPUQ' WHERE id = 112323;
 
 -- 深圳湾增加考勤菜单管理菜单 by sfyan 20161008
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -729,22 +730,22 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10065', 'VIP车位预约', '0', NULL, '0', '1000000');
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ('10066', '会议室预约', '0', NULL, '0', '1000000');
 
-update eh_launch_pad_items set action_type = 49 where id in(818, 10313, 819, 10314, 820, 10315) and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"resourceTypeId":10064,"pageType":0}' where id in(818, 10313) and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"resourceTypeId":10066,"pageType":0}' where id in(819, 10314) and namespace_id = 1000000;
-update eh_launch_pad_items set action_data = '{"resourceTypeId":10065,"pageType":0}' where id in(820, 10315) and namespace_id = 1000000;
+UPDATE eh_launch_pad_items SET action_type = 49 WHERE id IN(818, 10313, 819, 10314, 820, 10315) AND namespace_id = 1000000;
+UPDATE eh_launch_pad_items SET action_data = '{"resourceTypeId":10064,"pageType":0}' WHERE id IN(818, 10313) AND namespace_id = 1000000;
+UPDATE eh_launch_pad_items SET action_data = '{"resourceTypeId":10066,"pageType":0}' WHERE id IN(819, 10314) AND namespace_id = 1000000;
+UPDATE eh_launch_pad_items SET action_data = '{"resourceTypeId":10065,"pageType":0}' WHERE id IN(820, 10315) AND namespace_id = 1000000;
 
  
 -- 游客电商访问地址 by sfyan 20161009
-set @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)VALUES((@configuration_id := @configuration_id + 1), 'tourist.business.url','http://biz-beta.zuolin.com/nar/biz/web/app/notSigned/user/store_details_static.html','tourist business url',0);
 
 
 -- 更新科技园layout 电子屏 vip车位 会议室 更新ibase、威新LINK+、科技园物业报修2.0
-delete from eh_launch_pad_layouts where name = 'PmLayout' and namespace_id in (999989, 999991, 1000000); 
-delete from eh_launch_pad_items where item_location = '/home/Pm' and namespace_id in (999989, 999991, 1000000);
-update eh_launch_pad_items set action_type = 14 , action_data='{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}' where id in (814, 10628, 109996);
-update eh_launch_pad_items set action_type = 51 , action_data='' where id in (10310, 10610, 109986);
+DELETE FROM eh_launch_pad_layouts WHERE NAME = 'PmLayout' AND namespace_id IN (999989, 999991, 1000000); 
+DELETE FROM eh_launch_pad_items WHERE item_location = '/home/Pm' AND namespace_id IN (999989, 999991, 1000000);
+UPDATE eh_launch_pad_items SET action_type = 14 , action_data='{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}' WHERE id IN (814, 10628, 109996);
+UPDATE eh_launch_pad_items SET action_type = 51 , action_data='' WHERE id IN (10310, 10610, 109986);
    
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('297', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '1000000');
@@ -759,9 +760,9 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('302', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '30091', '999989');
 
-delete from eh_web_menu_scopes where owner_id = 999989 and menu_id in (21000, 22000, 23000);
-delete from eh_web_menu_scopes where owner_id = 999991 and menu_id in (21000, 22000, 23000);
-delete from eh_web_menu_scopes where owner_id = 1000000 and menu_id in (21000, 22000, 23000);
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 999989 AND menu_id IN (21000, 22000, 23000);
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 999991 AND menu_id IN (21000, 22000, 23000);
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 1000000 AND menu_id IN (21000, 22000, 23000);
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES((@menu_scope_id := @menu_scope_id + 1),24000,'', 'EhNamespaces', 999989,2);
@@ -797,19 +798,27 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
 	VALUES ('10', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '1000000');
 
-UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016100901' WHERE `id`=11 AND `namespace_id`=1000000;
-UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016100901","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016100901' WHERE `id`=111 AND `namespace_id`=1000000;
+UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101101","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101101' WHERE `id`=11 AND `namespace_id`=1000000;
+UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101101","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101101' WHERE `id`=111 AND `namespace_id`=1000000;
 
+delete from eh_version_upgrade_rules where id in (32, 33);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	VALUES ('115', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+	VALUES ('32', '3', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	VALUES ('116', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+	VALUES ('33', '4', '1048575.9', '3155968', '0', '3.10.0', '1', UTC_TIMESTAMP());
+
+UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`='http://apk.zuolin.com/apk/TechPark-3.10.0.2016100906-release.apk', `info_url`='${homeurl}/web/download/apk/andriod-techpark-3-10-0.html' WHERE (`id`='8');
+UPDATE `eh_version_urls` SET `target_version`='3.10.0', `download_url`=NULL, `info_url`='${homeurl}/web/download/apk/iOS-techpark-3-10-0.html' WHERE (`id`='9');
 
 
 -- 科技园服务联盟数据问题 add by xiongying20161010
-update eh_service_alliances set parent_id = 11 where type = 11 and parent_id = 2 and owner_id = 240111044331048623;
-update eh_service_alliances a set category_id = (select id from eh_service_alliance_categories where name = a.service_type and owner_id = 240111044331048623);
+UPDATE eh_service_alliances SET parent_id = 11 WHERE TYPE = 11 AND parent_id = 2 AND owner_id = 240111044331048623;
+UPDATE eh_service_alliances a SET category_id = (SELECT id FROM eh_service_alliance_categories WHERE NAME = a.service_type AND owner_id = 240111044331048623);
 
 -- 删除科技园物业服务菜单
 DELETE FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = '1000000' AND `menu_id` IN (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%58000%');
 
+-- 还原科技园服务广场 by sw 20161011
+UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101102' WHERE `id`=111 AND `namespace_id`=1000000;
+UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101102' WHERE `id`=11 AND `namespace_id`=1000000;
+ 

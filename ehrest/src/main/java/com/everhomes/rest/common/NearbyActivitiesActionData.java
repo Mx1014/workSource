@@ -4,17 +4,17 @@ import com.everhomes.util.StringHelper;
 
 // {"ownerType":"organization","entityTag":"GACW"}
 public class NearbyActivitiesActionData {
-	private String scope; 
+	private Integer scope; 
 	@Override
     public String toString() {
 
 		
         return StringHelper.toJsonString(this);
     }
-	public String getScope() {
+	public Integer getScope() {
 		return scope;
 	}
-	public void setScope(String scope) {
+	public void setScope(Integer scope) {
 		this.scope = scope;
 	} 
 	

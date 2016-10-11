@@ -54,6 +54,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
@@ -747,7 +748,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		categoryName = parent.getName();
 	    	}
 	    	
-	    	List<Long> ids = getOrganizationMembers(cmd.getOrganizationId());
+	    	Long organizationId = cmd.getOrganizationId();
+	    	if(null == organizationId) {
+	            List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(ownerId);
+	            if(null != orgs && orgs.size() != 0) {
+	            	organizationId = orgs.get(0).getOrganizationId();
+	            }
+			}
+	    	List<Long> ids = getOrganizationMembers(organizationId);
 	    	int size = ids.size();
 	    	if(LOGGER.isDebugEnabled())
 	    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
@@ -788,9 +796,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private List<Long> getOrganizationMembers(Long organizationId){
 		List<Long> result = new ArrayList<>();
-		if(null == organizationId) {
-			return result;
-		}
+		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), organizationId);
