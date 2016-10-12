@@ -62,9 +62,7 @@ public class ComOrganizationMemberDTO {
 	private Long creatorUid;
 	
 	private Long   employeeNo;
-	private Byte   gender;
-	@ItemType(OrgAdminDTO.class)
-	private List<OrgAdminDTO> admins;
+	private Byte   gender; 
 	public Long getId() {
         return id;
     }
@@ -249,12 +247,5 @@ public class ComOrganizationMemberDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
-	public List<OrgAdminDTO> getAdmins() {
-		return admins;
-	}
-
-	public void setAdmins(List<OrgAdminDTO> admins) {
-		this.admins = admins;
-	}
+ 
 }
