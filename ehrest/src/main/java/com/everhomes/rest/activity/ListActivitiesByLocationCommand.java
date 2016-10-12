@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>locationPointList: 经纬度列表</li>
  * <li>scope: 范围，{@link com.everhomes.rest.ui.user.ActivityLocationScope}</li>
  * <li>tag: 活动标签</li>
+ * <li>officialFlag:是否是官方活动</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -25,7 +26,9 @@ public class ListActivitiesByLocationCommand {
     private Byte scope;
     
     private String tag;
-    
+
+    private Byte officialFlag;
+
     private Long pageAnchor;
     
     private Integer pageSize;
@@ -60,6 +63,14 @@ public class ListActivitiesByLocationCommand {
 
     public void setScope(Byte scope) {
         this.scope = scope;
+    }
+
+    public Byte getOfficialFlag() {
+        return officialFlag;
+    }
+
+    public void setOfficialFlag(Byte officialFlag) {
+        this.officialFlag = officialFlag;
     }
 
     public Long getPageAnchor() {
