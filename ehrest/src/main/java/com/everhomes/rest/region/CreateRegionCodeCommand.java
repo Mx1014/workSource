@@ -2,7 +2,8 @@
 package com.everhomes.rest.region;
 
 import com.everhomes.util.StringHelper;
-import com.sun.istack.internal.NotNull;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -17,6 +18,7 @@ public class CreateRegionCodeCommand {
 
     @NotNull
     private String name;
+
     @NotNull
     private Integer code;
 
