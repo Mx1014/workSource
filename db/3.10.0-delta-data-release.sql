@@ -32,3 +32,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- 储能物业服务恢复到1.0 by sw 20161012
 UPDATE `eh_launch_pad_items` SET  `action_type`='2', `action_data`='{\"itemLocation\":\"/home/Pm\",\"layoutName\":\"PmLayout\",\"title\":\"物业服务\",\"entityTag\":\"PM\"}' WHERE `id`='10610' and namespace_id = 999990;
 UPDATE `eh_launch_pad_items` SET  `action_type`='2', `action_data`='{\"itemLocation\":\"/home/Pm\",\"layoutName\":\"PmLayout\",\"title\":\"物业服务\",\"entityTag\":\"PM\"}' WHERE `id`='10628' and namespace_id = 999990;
+
+-- 更新海岸东座园区类型 by sw 20161012
+update eh_communities set community_type = 1 where namespace_id = 999993 and id = 240111044331054835;
+
+
