@@ -219,11 +219,14 @@ public class UserImpersonationProviderImpl implements UserImpersonationProvider 
     }
     
     @Override
-    public List<UserImperInfo> searchUserByPhone(String keyword, Byte impOnly, CrossShardListingLocator locator, int pageSize) {
+    public List<UserImperInfo> searchUserByPhone(Integer namespaceId, String keyword, Byte impOnly, CrossShardListingLocator locator, int pageSize) {
         List<UserImperInfo> list = new ArrayList<UserImperInfo>();
         
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
             Condition cond = Tables.EH_USERS.ID.ne(0l);
+            if(namespaceId != null) {
+                cond = cond.and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+            }
             if(!StringUtils.isEmpty(keyword)){
                  Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword + "%");
                  cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword+"%"));

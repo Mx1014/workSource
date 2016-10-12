@@ -3056,7 +3056,7 @@ public class UserServiceImpl implements UserService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getAnchor());
         int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getPhone(), cmd.getImperOnly(), locator, count);
+        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getNamespaceId(), cmd.getPhone(), cmd.getImperOnly(), locator, count);
         for(UserImperInfo info : impers) {
             if(info.getOwnerId() != null && info.getTargetId() != null) {
                 UserInfo u1 = this.getUserInfo(info.getOwnerId());
@@ -3375,7 +3375,7 @@ public class UserServiceImpl implements UserService {
 	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 	    CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getAnchor());
-	    List<User> users = this.userProvider.listUserByKeyword(cmd.getKeyword(), cmd.getNamespaceId(), locator, count);
+	    List<User> users = this.userProvider.listUserByNamespace(cmd.getKeyword(), cmd.getNamespaceId(), locator, count);
 	    resp.setNextPageAnchor(locator.getAnchor());
 	    resp.setValues(new ArrayList<UserInfo>());
 	    for(User u : users) {
