@@ -1,0 +1,2 @@
+ALTER TABLE `eh_forum_posts` ADD COLUMN `constraint_quantity` INT COMMENT 'contraint person quantity';
+ALTER TABLE `eh_activities` ADD COLUMN `constraint_quantity` INT COMMENT 'contraint person quantity';

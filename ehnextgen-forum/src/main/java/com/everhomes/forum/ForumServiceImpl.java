@@ -32,6 +32,9 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.activity.Activity;
+import com.everhomes.activity.ActivityProivider;
+import com.everhomes.activity.ActivityRoster;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -71,6 +74,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
@@ -201,6 +205,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private AclProvider aclProvider;
+    
+    @Autowired
+    private ActivityProivider activityProivider;
     
     @Autowired
     private DbProvider dbProvider;
@@ -712,6 +719,10 @@ public class ForumServiceImpl implements ForumService {
                     		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
                     	}
                     }
+                    //如果是活动创建者删除活动，通知到已报名的人，add by tt, 20161012
+                    if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
+					}
                    return null;
                 });
                 
@@ -739,6 +750,10 @@ public class ForumServiceImpl implements ForumService {
                             		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
                             	}
                             }
+                            //如果是活动创建者删除活动，通知到已报名的人，add by tt, 20161012
+                            if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+        						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
+        					}
                         return null;
                         });
                 } catch(Exception e) {
@@ -749,6 +764,23 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
         }
+    }
+    
+    //当创建者删除活动时发消息通知已报名的人
+    private void sendMessageWhenCreatorDeleteActivity(Long activityId, Long userId){
+    	Activity activity = activityProivider.findActivityById(activityId);
+    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+    	String scope = ActivityNotificationTemplateCode.SCOPE;
+		int code = ActivityNotificationTemplateCode.CREATOR_DELETE_ACTIVITY;
+		Map<String, Object> map = new HashMap<>();
+		map.put("tag", activity.getTag());
+		map.put("title", activity.getSubject());
+		final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+    	activityRosters.forEach(r->{
+    		if (r.getUid().longValue() != userId.longValue()) {
+    			sendMessageToUser(r.getUid().longValue(), content, null);
+			}
+    	});
     }
     
     @Override
