@@ -6,16 +6,26 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Result;
+import org.jooq.SelectHavingStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.AuthVisitorStasticDTO;
 import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
 import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
@@ -33,6 +43,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DoorAuthProviderImpl.class);
     //Global tables for DoorAuth
     
     @Autowired
@@ -380,17 +391,41 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
     
+    @Override
     public AuthVisitorStasticResponse authVistorStatistic(AuthVisitorStatisticCommand cmd) {
-//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        Condition condition = Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getOwnerId());
-//        condition = condition.and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType()));
-//        condition = condition.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getStart()), new Timestamp(cmd.getEnd())));
-//        context.select(
-//                Tables.EH_DOOR_AUTH.CREATE_TIME,
-//                Tables.EH_STAT_TRANSACTIONS.COMMUNITY_ID,
-//                .from(Tables.EH_STAT_TRANSACTIONS)
-//                .where(condition)
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition condition = Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getOwnerId());
+        condition = condition.and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType()));
+        condition = condition.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getStart()), new Timestamp(cmd.getEnd())));
+        AuthVisitorStasticResponse resp = new AuthVisitorStasticResponse();
+        resp.setDtos(new ArrayList<AuthVisitorStasticDTO>());
+        
+        SelectHavingStep<Record2<Integer, Date>> groupBy = context.select(Tables.EH_DOOR_AUTH.ID.count().as("c"),
+                DSL.date(Tables.EH_DOOR_AUTH.CREATE_TIME).as("d"))
+                .from(Tables.EH_DOOR_AUTH)
+                .where(condition).groupBy(DSL.date(Tables.EH_DOOR_AUTH.CREATE_TIME).as("d"));
+        
+//        LOGGER.info("aa" + groupBy);
+        groupBy.fetch().map((r) -> {
+                    AuthVisitorStasticDTO dto = new AuthVisitorStasticDTO();
+                    dto.setCount(Long.parseLong(r.getValue("c").toString()));
+                    dto.setDate(r.getValue("d").toString());
+                    resp.getDtos().add(dto);
+                    return null;
+                });
+        
+        Result<Record1<Integer>> rlt = context.select(Tables.EH_DOOR_AUTH.ID.count().as("c")).from(Tables.EH_DOOR_AUTH)
+                .where(condition).fetch();
+        
+        resp.setTotal(new Long((Integer)rlt.get(0).getValue("c")));
+        
+        rlt = context.select(Tables.EH_DOOR_AUTH.ID.count().as("c")).from(Tables.EH_DOOR_AUTH)
+                .where(condition.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.INVALID.getCode()))).fetch();
+        
+        resp.setInvalidCount(new Long((Integer)rlt.get(0).getValue("c")));
+        
+        resp.setValidCount(resp.getTotal() - resp.getInvalidCount());
+        return resp;
     }
     
 }

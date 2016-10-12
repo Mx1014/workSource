@@ -11,11 +11,12 @@ public class AuthVisitorStatisticCommand {
     @NotNull
     private Byte ownerType;
     
-    @NotNull
     private Long start;
     
-    @NotNull
     private Long end;
+    
+    private String startStr;
+    private String endStr;
     
     public Long getStart() {
         return start;
@@ -41,6 +42,20 @@ public class AuthVisitorStatisticCommand {
     }
     public void setOwnerType(Byte ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public String getStartStr() {
+        return startStr;
+    }
+    public void setStartStr(String startStr) {
+        this.startStr = startStr;
+    }
+
+    public String getEndStr() {
+        return endStr;
+    }
+    public void setEndStr(String endStr) {
+        this.endStr = endStr;
     }
     @Override
     public String toString() {

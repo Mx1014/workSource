@@ -2,9 +2,11 @@ package com.everhomes.rest.aclink;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class AuthVisitorStasticResponse {
+    @ItemType(AuthVisitorStasticDTO.class)
     private List<AuthVisitorStasticDTO> dtos;
     private Long validCount;
     private Long invalidCount;
