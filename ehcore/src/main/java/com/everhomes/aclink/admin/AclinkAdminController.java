@@ -32,6 +32,7 @@ import com.everhomes.rest.aclink.AclinkQueryLogCommand;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.rest.aclink.AclinkUserResponse;
 import com.everhomes.rest.aclink.AesUserKeyDTO;
+import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
 import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
 import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
@@ -385,4 +386,18 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }    
+    
+    /**
+     * <b>URL: /admin/aclink/authVisitorStatistic</b>
+     * <p>访客统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("authVisitorStatistic")
+    @RestReturn(value=String.class)
+    public RestResponse authVisitorStatistic(@Valid AuthVisitorStatisticCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }        
 }

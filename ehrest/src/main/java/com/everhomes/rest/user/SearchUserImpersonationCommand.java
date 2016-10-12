@@ -3,11 +3,21 @@ package com.everhomes.rest.user;
 import com.everhomes.util.StringHelper;
 
 public class SearchUserImpersonationCommand {
+    private Integer namespaceId;
     private String phone;
     private Byte imperOnly;
     private Long anchor;
     
     private Integer pageSize;
+
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Byte getImperOnly() {
         return imperOnly;
