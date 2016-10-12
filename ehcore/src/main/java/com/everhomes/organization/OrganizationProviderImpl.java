@@ -1478,7 +1478,44 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds,Byte memberStatus , Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		pageSize = pageSize + 1;
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(orgIds);
+		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(memberStatus));
+		
+		if(!StringUtils.isEmpty(keywords)){
+			Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
+			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+keywords+"%"));
+			cond = cond.and(cond1);
+		}
+
+		if(contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+		}
+		
+		query.addConditions(cond);
+		if(null != locator.getAnchor())
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		locator.setAnchor(null);
+
+		if(result.size() >= pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+	}
 	@Override
 	public boolean updateOrganizationMemberByIds(List<Long> ids, Organization org) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

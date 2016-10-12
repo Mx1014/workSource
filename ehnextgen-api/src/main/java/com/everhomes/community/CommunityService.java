@@ -35,6 +35,8 @@ import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
+import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
 import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
@@ -123,4 +125,6 @@ public interface CommunityService {
 	void communityImportBaseConfig(CommunityImportBaseConfigCommand cmd);
 
 	void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd);
+
+	ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd);
 }
