@@ -4382,7 +4382,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization orgCommoand = new Organization();
 		orgCommoand.setId(org.getId());
-		orgCommoand.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
+		if (cmd.getStatus() == null)
+			orgCommoand.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
+		else 
+			orgCommoand.setStatus(cmd.getStatus());
 		orgCommoand.setGroupType(org.getGroupType());
 		
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null, locator, pageSize);

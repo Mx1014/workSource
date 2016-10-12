@@ -17,14 +17,13 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.family.ApproveMemberCommand;
-import com.everhomes.rest.family.ListAllFamilyMembersCommand;
+import com.everhomes.rest.family.BatchApproveMemberCommand;
+import com.everhomes.rest.family.BatchRejectMemberCommand;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
-import com.everhomes.rest.family.ListWaitApproveFamilyCommand;
 import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
 import com.everhomes.rest.family.RejectMemberCommand;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
@@ -76,6 +75,25 @@ public class FamilyAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/family/adminBatchApproveMember</b>
+     * <p>管理员批量 批准用户通过</p>
+     */
+    @RequestMapping("adminBatchApproveMember")
+    @RestReturn(value=String.class)
+    public RestResponse adminBatchApproveMember(@Valid BatchApproveMemberCommand cmd) {
+        
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        this.familyService.adminBatchApproveMember(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/family/adminRejectMember</b>
      * <p>管理员拒绝用户</p>
      */
@@ -94,7 +112,25 @@ public class FamilyAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/family/adminBatchRejectMember</b>
+     * <p>管理员批量  拒绝用户</p>
+     */
+    @RequestMapping("adminBatchRejectMember")
+    @RestReturn(value=String.class)
+    public RestResponse adminBatchRejectMember(@Valid BatchRejectMemberCommand cmd) {
+        
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        this.familyService.batchRejectMember(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     /**
      * <b>URL: /admin/family/listAllFamilyMembers</b>
      * <p>查询系统中存在家庭且状态正常的用户</p>
