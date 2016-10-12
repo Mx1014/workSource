@@ -5062,7 +5062,7 @@ public class ForumServiceImpl implements ForumService {
     private ForumFootnoteHandler getForumFootnoteHandler(String searchContentType) {
     	ForumFootnoteHandler handler = null;
         
-        if(StringUtils.isEmpty(searchContentType)) {
+        if(!StringUtils.isEmpty(searchContentType)) {
             String handlerPrefix = ForumFootnoteHandler.FORUM_FOOTNOTE_RESOLVER_PREFIX;
             handler = PlatformContext.getComponent(handlerPrefix + searchContentType);
         }

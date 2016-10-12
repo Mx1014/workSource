@@ -905,7 +905,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void checkNamespaceExist(Integer namespaceId) {
-		if (namespaceProvider.findNamespaceById(namespaceId) == null) {
+		if (namespaceId.intValue() != 0 && namespaceProvider.findNamespaceById(namespaceId) == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not exist namespace: "+namespaceId);
 		}
