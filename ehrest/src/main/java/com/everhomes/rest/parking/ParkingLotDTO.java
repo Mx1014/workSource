@@ -26,6 +26,7 @@ public class ParkingLotDTO {
     private Timestamp createTime;
     private Integer maxRequestNum;
     private Byte tempfeeFlag;
+    private Byte rateFlag;
     
     public ParkingLotDTO() {
     }
@@ -105,5 +106,13 @@ public class ParkingLotDTO {
 
 	public void setTempfeeFlag(Byte tempfeeFlag) {
 		this.tempfeeFlag = tempfeeFlag;
+	}
+
+	public Byte getRateFlag() {
+		return rateFlag;
+	}
+
+	public void setRateFlag(Byte rateFlag) {
+		this.rateFlag = rateFlag;
 	}
 }

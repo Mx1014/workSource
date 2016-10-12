@@ -6,3 +6,4 @@ ALTER TABLE eh_parking_recharge_orders ADD COLUMN `recharge_type` TINYINT NOT NU
 
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN `order_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'it may be from 3rd system';
 
+ALTER TABLE eh_parking_lots ADD COLUMN `rate_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'is support add or delete rate';
