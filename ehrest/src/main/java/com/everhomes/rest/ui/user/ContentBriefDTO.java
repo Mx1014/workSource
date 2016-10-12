@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>searchTypeId: 内容类型id</li>
  * <li>searchTypeName: 内容类型名称</li>
+ * <li>contentType: 内容类型</li>
  * <li>subject: 主题</li>
  * <li>content: 内容</li>
  * <li>postUrl: 图片url（活动封面或帖子的第一张图）</li>
@@ -21,6 +22,8 @@ public class ContentBriefDTO {
 	private Long searchTypeId;
 	
 	private String searchTypeName;
+	
+	private String contentType;
 	
 	private String subject;
 	
@@ -52,6 +55,14 @@ public class ContentBriefDTO {
 
 	public void setSearchTypeName(String searchTypeName) {
 		this.searchTypeName = searchTypeName;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	public String getSubject() {
