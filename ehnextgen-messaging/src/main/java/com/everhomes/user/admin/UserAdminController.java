@@ -34,6 +34,7 @@ import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.ListVerfyCodeResponse;
 import com.everhomes.rest.user.ListVestResponse;
 import com.everhomes.rest.user.PaginationCommand;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
 import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.UserIdentifierDTO;
@@ -457,6 +458,24 @@ public class UserAdminController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         RestResponse response = new RestResponse(userService.listUserImpersons(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 列出用户
+     * @return
+     */
+    @RequestMapping("searchUserByNamespace")
+    @RestReturn(ListRegisterUsersResponse.class)
+    public RestResponse searchUserByNamepsace(@Valid SearchUserByNamespaceCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        RestResponse response = new RestResponse(userService.searchUserByNamespace(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

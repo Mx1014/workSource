@@ -1,5 +1,7 @@
 package com.everhomes.rest.user;
 
+import com.everhomes.util.StringHelper;
+
 public class SearchUserImpersonationCommand {
     private String phone;
     private Byte imperOnly;
@@ -37,5 +39,10 @@ public class SearchUserImpersonationCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
