@@ -3379,7 +3379,7 @@ public class UserServiceImpl implements UserService {
 	    resp.setNextPageAnchor(locator.getAnchor());
 	    resp.setValues(new ArrayList<UserInfo>());
 	    for(User u : users) {
-	        UserInfo ui = this.getUserInfo(u.getId());
+	        UserInfo ui = getUserBasicInfoByQueryUser(u, false);
 	        if(ui != null) {
 	            resp.getValues().add(ui);
 	        }
