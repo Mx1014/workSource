@@ -5138,8 +5138,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 */
 	private void deleteEnterpriseContactStatus(Long operatorUid, OrganizationMember member){
 		 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
-			 //modify by wh  2016-10-12 拒绝后置为无效状态而非删除
-			 member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+			 //modify by wh  2016-10-12 拒绝后置为拒绝状态而非删除
+			 member.setStatus(OrganizationMemberStatus.REJECT.getCode());
 			 this.organizationProvider.updateOrganizationMember(member);
 			 //this.organizationProvider.deleteOrganizationMemberById(member.getId());
 	            return null;
