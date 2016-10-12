@@ -227,7 +227,7 @@ public class UserImpersonationProviderImpl implements UserImpersonationProvider 
             if(namespaceId != null) {
                 cond = cond.and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
             }
-            if(!StringUtils.isEmpty(keyword)){
+            if(keyword != null && !StringUtils.isEmpty(keyword)){
                  Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword + "%");
                  cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword+"%"));
                  cond = cond.and(cond1);
