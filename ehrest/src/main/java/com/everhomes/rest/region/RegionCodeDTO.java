@@ -20,6 +20,7 @@ public class RegionCodeDTO {
     private Long id;
     private String name;
     private Integer code;
+    private String regionCode;
     private String pinyin;
     private String firstLetter;
     private Byte hotFlag;
@@ -49,6 +50,14 @@ public class RegionCodeDTO {
 
     public void setCode(Integer code) {
         this.code = code;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getPinyin() {

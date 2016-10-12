@@ -33,7 +33,9 @@ public class RegionServiceImpl implements RegionService{
             return new ArrayList<RegionCodeDTO>();
         }
         List<RegionCodeDTO> regionCodeDTOs = regionCodes.stream().map(r -> {
-            return ConvertHelper.convert(r, RegionCodeDTO.class);
+            RegionCodeDTO dto= ConvertHelper.convert(r, RegionCodeDTO.class);
+            dto.setRegionCode("+" + dto.getCode());
+            return dto;
         }).collect(Collectors.toList());
         return regionCodeDTOs;
     }

@@ -292,9 +292,9 @@ public class UserController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
 		}
-		
-        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-		this.userService.resendVerficationCode(namespaceId, token);
+
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode());
 		return new RestResponse("OK");
 	}
 

@@ -354,7 +354,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(identifierToken);
-		Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
 		if(existingClaimedIdentifier != null && !overrideExisting) {
 			LOGGER.error("User identifier token has already been claimed, cmd=" + cmd + ", identifierId=" + existingClaimedIdentifier.getId() 
@@ -407,7 +407,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Send verfication code: " + verificationCode + " for new user: " + identifierToken);
 			//            String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 			//            smsProvider.sendSms(identifierToken, verificationCode,templateId);
-			sendVerificationCodeSms(newIdentifier.getNamespaceId(), identifierToken, verificationCode);
+			sendVerificationCodeSms(newIdentifier.getNamespaceId(), this.getRegionPhoneNumber(identifierToken, cmd.getRegionCode()), verificationCode);
 			return newIdentifier;
 		});
 
@@ -484,7 +484,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken) {
+	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode) {
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
 			LOGGER.error("User identifier not found in db, signupToken=" + signupToken);
@@ -501,14 +501,15 @@ public class UserServiceImpl implements UserService {
 				LOGGER.debug("Send notification code " + verificationCode + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), verificationCode, templateId);
-				sendVerificationCodeSms(namespaceId, identifier.getIdentifierToken(), verificationCode);
+				//增加区号发送短信 by sfyan 20161012
+				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
 			} else {
 
 				// TODO
 				LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), identifier.getVerificationCode(),templateId);
-				sendVerificationCodeSms(namespaceId, identifier.getIdentifierToken(), identifier.getVerificationCode());
+				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
 			}
 
 			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1570,7 +1571,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
 		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
-		sendVerificationCodeSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(),verificationCode);
+		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
 		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		this.userProvider.updateIdentifier(userIdentifier);
 	}
@@ -2331,12 +2332,11 @@ public class UserServiceImpl implements UserService {
 	        LOGGER.error("Phone number should not be empty, namespaceId=" + namespaceId + ", phoneNumber=" + phoneNumber);
 	        return;
 	    }
-	    
-	    namespaceId = (namespaceId == null) ? Namespace.DEFAULT_NAMESPACE : namespaceId;
+	    namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 	    String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
 	    if("true".equalsIgnoreCase(value)) {
 	        String verificationCode = RandomGenerator.getRandomDigitalString(6);
-	        sendVerificationCodeSms(namespaceId, phoneNumber, verificationCode);
+	        sendVerificationCodeSms(namespaceId,this.getRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
 	    }
 	}
 	
@@ -3357,5 +3357,14 @@ public class UserServiceImpl implements UserService {
 						"Not logged in.Cannot access this scene");
 			}
 		}
+	}
+
+
+	private String getRegionPhoneNumber(String identifierToken, Integer regionCode){
+		//国内电话不要拼区号，发送短信走国内通道，便宜
+		if(86 == regionCode){
+			return identifierToken;
+		}
+		return regionCode + identifierToken;
 	}
 }

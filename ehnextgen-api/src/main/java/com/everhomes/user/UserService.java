@@ -69,7 +69,7 @@ import com.everhomes.rest.user.admin.UsersWithAddrResponse;
 public interface UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
-    void resendVerficationCode(Integer namespaceId, SignupToken signupToken);
+    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
