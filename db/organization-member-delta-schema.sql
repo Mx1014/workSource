@@ -12,3 +12,6 @@ CREATE TABLE `eh_region_codes` (
   `hot_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes', 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 增加区号 by sfyan 20161012
+ALTER TABLE `eh_user_identifiers` ADD COLUMN `region_code` INTEGER DEFAULT 86 COMMENT 'region code 86 852';
