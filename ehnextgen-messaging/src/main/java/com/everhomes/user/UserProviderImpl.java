@@ -859,6 +859,7 @@ public class UserProviderImpl implements UserProvider {
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);
+            	user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
             	user.setId(r.getValue(Tables.EH_USERS.ID));
             	user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
             	user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));

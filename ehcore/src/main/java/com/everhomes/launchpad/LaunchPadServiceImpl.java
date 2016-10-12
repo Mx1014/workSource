@@ -474,7 +474,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private List<LaunchPadItemDTO> getBusinessItems(GetLaunchPadItemsCommand cmd,Community community) {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		// 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
         // String sceneType = cmd.getCurrentSceneType();
         String sceneType = cmd.getSceneType();
@@ -702,7 +702,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private List<LaunchPadItemDTO> getItemsByOrg(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request, ItemDisplayFlag itemDisplayFlag){
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         String sceneType = cmd.getCurrentSceneType();
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         
