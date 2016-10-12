@@ -402,6 +402,7 @@ public class UserServiceImpl implements UserService {
 			newIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
 			newIdentifier.setVerificationCode(verificationCode);
 			newIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			newIdentifier.setRegionCode(cmd.getRegionCode());
 			userProvider.createIdentifier(newIdentifier);
 
 			LOGGER.info("Send verfication code: " + verificationCode + " for new user: " + identifierToken);
@@ -513,6 +514,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			identifier.setRegionCode(regionCode);
 			this.userProvider.updateIdentifier(identifier);
 		} else {
 			LOGGER.error("Token status is not claiming or verifying, signupToken=" + signupToken + ", identifierId=" + identifier.getId() 

@@ -3,8 +3,6 @@ package com.everhomes.rest.region;
 
 import com.everhomes.util.StringHelper;
 import com.sun.istack.internal.NotNull;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * <ul>
