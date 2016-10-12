@@ -47,6 +47,7 @@ import com.everhomes.parking.ketuo.KetuoTemoFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.KetuoParkingCardType;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
@@ -166,7 +167,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			dto.setParkingLotId(parkingLotId);
 			dto.setRateToken(r.getRuleId());
 			dto.setRateName(r.getRuleName());
-			dto.setCardType(r.getRuleType());
+//			dto.setCardType(r.getRuleType());
+			dto.setCardType(KetuoParkingCardType.fromCode(RULE_TYPE).getText());
 			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
 //			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
 			dto.setPrice(new BigDecimal(0.01));
