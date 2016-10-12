@@ -3059,8 +3059,8 @@ public class UserServiceImpl implements UserService {
         List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getNamespaceId(), cmd.getPhone(), cmd.getImperOnly(), locator, count);
         for(UserImperInfo info : impers) {
             if(info.getOwnerId() != null && info.getTargetId() != null) {
-                UserInfo u1 = this.getUserInfo(info.getOwnerId());
-                UserInfo u2 = this.getUserInfo(info.getTargetId());
+                UserInfo u1 = this.getUserBasicInfo(info.getOwnerId(), false);
+                UserInfo u2 = this.getUserBasicInfo(info.getTargetId(), false);
                 if(u1 != null && u2 != null) {
                     if(u1.getId().equals(info.getId())) {
                         //ownerId match

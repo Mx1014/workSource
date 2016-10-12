@@ -16,6 +16,8 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
+import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
@@ -376,6 +378,19 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         }
         
         return auths.get(0);
+    }
+    
+    public AuthVisitorStasticResponse authVistorStatistic(AuthVisitorStatisticCommand cmd) {
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        Condition condition = Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getOwnerId());
+//        condition = condition.and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType()));
+//        condition = condition.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getStart()), new Timestamp(cmd.getEnd())));
+//        context.select(
+//                Tables.EH_DOOR_AUTH.CREATE_TIME,
+//                Tables.EH_STAT_TRANSACTIONS.COMMUNITY_ID,
+//                .from(Tables.EH_STAT_TRANSACTIONS)
+//                .where(condition)
+        return null;
     }
     
 }
