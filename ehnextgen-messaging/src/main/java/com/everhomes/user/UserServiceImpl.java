@@ -145,8 +145,10 @@ import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
+import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
 import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
@@ -3364,5 +3366,25 @@ public class UserServiceImpl implements UserService {
 						"Not logged in.Cannot access this scene");
 			}
 		}
+	}
+	
+	@Override
+	public ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd) {
+	    ListRegisterUsersResponse resp = new ListRegisterUsersResponse();
+	    
+	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    CrossShardListingLocator locator = new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getAnchor());
+	    List<User> users = this.userProvider.listUserByKeyword(cmd.getKeyword(), cmd.getNamespaceId(), locator, count);
+	    resp.setNextPageAnchor(locator.getAnchor());
+	    resp.setValues(new ArrayList<UserInfo>());
+	    for(User u : users) {
+	        UserInfo ui = getUserBasicInfoByQueryUser(u, false);
+	        if(ui != null) {
+	            resp.getValues().add(ui);
+	        }
+	    }
+	    
+	    return resp;
 	}
 }
