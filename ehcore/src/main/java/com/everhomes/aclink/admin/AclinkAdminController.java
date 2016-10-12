@@ -32,6 +32,7 @@ import com.everhomes.rest.aclink.AclinkQueryLogCommand;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.rest.aclink.AclinkUserResponse;
 import com.everhomes.rest.aclink.AesUserKeyDTO;
+import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
 import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
 import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
 import com.everhomes.rest.aclink.CreateDoorAccessGroup;
@@ -393,7 +394,7 @@ public class AclinkAdminController extends ControllerBase {
      * @return 门禁列表
      */
     @RequestMapping("authVisitorStatistic")
-    @RestReturn(value=String.class)
+    @RestReturn(value=AuthVisitorStasticResponse.class)
     public RestResponse authVisitorStatistic(@Valid AuthVisitorStatisticCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
