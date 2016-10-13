@@ -3,17 +3,17 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>organizationId：机构Id</li>
- * <li>tierNum：层数</li>
  * </ul>
  */
 public class ListAllTreeOrganizationsCommand {
 
+	@NotNull
 	private Long organizationId;
-
-	private Integer tierNum;
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -21,14 +21,6 @@ public class ListAllTreeOrganizationsCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-	public Integer getTierNum() {
-		return tierNum;
-	}
-
-	public void setTierNum(Integer tierNum) {
-		this.tierNum = tierNum;
 	}
 
 	@Override

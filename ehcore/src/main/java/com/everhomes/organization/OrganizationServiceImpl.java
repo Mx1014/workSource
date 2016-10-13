@@ -183,10 +183,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Autowired
     private AclProvider aclProvider;
-	
-	@Autowired
-    private OrganizationRoleMapProvider organizationRoleMapProvider;
-	
+
 	 @Autowired
 	private OrganizationSearcher organizationSearcher;
 	 
@@ -4088,12 +4085,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		return userRoleIds;
 	}
-	
+
 	/**
 	 * 申请加入企业
-	 * 
-	 * @param contact
-	 */
+	 * @param cmd
+	 * @return
+     */
 	@Override
 	public OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
 		User user = UserContext.current().getUser();
@@ -4267,7 +4264,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(), locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(),null, locator, pageSize);
 		
 		if(pinyinFlag){
 			organizationMembers = convertPinyin(organizationMembers);
@@ -4337,7 +4334,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		orgCommoand.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand,cmd.getIsSignedup(), null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -5096,14 +5093,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                + ", enterpriseId=" + member.getOrganizationId() + ", status=" + member.getStatus() + ", removeFromDb=" + member.getStatus());
 	        }
 	}
-	
-	
+
+
 	/**
 	 * 补充返回用户信息，部门 角色
 	 * @param organizationMembers
-	 * @param depts
+	 * @param org
 	 * @return
-	 */
+     */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -7144,7 +7141,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization orgCommoand = new Organization();
 			orgCommoand.setId(enterpriseId);
 			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			members = this.organizationProvider.listOrganizationPersonnels(userName,orgCommoand, null, new CrossShardListingLocator(), 100000);
+			members = this.organizationProvider.listOrganizationPersonnels(userName,orgCommoand, null,null, new CrossShardListingLocator(), 100000);
 		}
 		
 		for (OrganizationMember organizationMember : members) {
@@ -7152,6 +7149,159 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return dtos;
+	}
+
+	@Override
+	public void updateOrganizationContactVisibleFlag(UpdateOrganizationContactVisibleFlagCommand cmd) {
+
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+
+		VisibleFlag visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
+
+		if(null == visibleFlag){
+			visibleFlag = VisibleFlag.SHOW;
+		}
+
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+
+		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypeList);
+
+		List<Long> organizationIds = new ArrayList<Long>();
+		organizationIds.add(organization.getId());
+		for (Organization org : organizations) {
+			if(org.getDirectlyEnterpriseId().equals(organization.getId())){
+				organizationIds.add(organization.getId());
+			}
+
+		}
+
+		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(cmd.getContactToken(), organizationIds);
+
+		for (OrganizationMember member: members) {
+			member.setVisibleFlag(visibleFlag.getCode());
+			organizationProvider.updateOrganizationMember(member);
+		}
+
+	}
+
+	@Override
+	public void batchUpdateOrganizationContactVisibleFlag(BatchUpdateOrganizationContactVisibleFlagCommand cmd) {
+		List<String> contactTokens = cmd.getContactTokens();
+
+		//参数不传代表默认操作全部的通讯录隐藏显示
+		if(null == contactTokens){
+			List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(cmd.getOrganizationId());
+			contactTokens = members.stream().map(r -> {
+				return r.getContactToken();
+			}).collect(Collectors.toList());
+		}
+
+		for (String contactToken: contactTokens) {
+			UpdateOrganizationContactVisibleFlagCommand command = new UpdateOrganizationContactVisibleFlagCommand();
+			command.setVisibleFlag(cmd.getVisibleFlag());
+			command.setOrganizationId(cmd.getOrganizationId());
+			this.updateOrganizationContactVisibleFlag(command);
+		}
+	}
+
+	@Override
+	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
+
+		Organization org =  this.checkOrganization(cmd.getOrganizationId());
+
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypeList);
+
+		OrganizationTreeDTO dto = ConvertHelper.convert(org, OrganizationTreeDTO.class);
+		dto.setOrganizationId(org.getId());
+		dto.setOrganizationName(org.getName());
+		List<OrganizationTreeDTO> organizationTreeDTOs = new ArrayList<OrganizationTreeDTO>();
+		for (Organization organization : orgs) {
+			OrganizationTreeDTO orgTreeDTO = ConvertHelper.convert(organization, OrganizationTreeDTO.class);
+			orgTreeDTO.setOrganizationId(organization.getId());
+			orgTreeDTO.setOrganizationName(organization.getName());
+			if(organization.getDirectlyEnterpriseId().equals(org.getId())){
+				organizationTreeDTOs.add(orgTreeDTO);
+			}
+		}
+		dto = this.processOrganizationTree(organizationTreeDTOs, dto);
+		return dto;
+	}
+
+
+	/**
+	 * 机构树状处理
+	 * @param dtos
+	 * @param dto
+     * @return
+     */
+	private OrganizationTreeDTO processOrganizationTree(List<OrganizationTreeDTO> dtos, OrganizationTreeDTO dto){
+
+		List<OrganizationTreeDTO> trees = new ArrayList<OrganizationTreeDTO>();
+		dto.setOrganizationName("全部");
+		trees.add(dto);
+		for (OrganizationTreeDTO orgTreeDTO : dtos) {
+			if(orgTreeDTO.getOrganizationId().equals(dto.getParentId())){
+				OrganizationTreeDTO organizationTreeDTO= processOrganizationTree(dtos, orgTreeDTO);
+				trees.add(organizationTreeDTO);
+			}
+		}
+		dto.setTrees(trees);
+		return dto;
+	}
+
+	@Override
+	public ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd, boolean pinyinFlag) {
+		ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
+		Organization org = this.checkOrganization(cmd.getOrganizationId());
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		Organization orgCommoand = new Organization();
+		orgCommoand.setId(org.getId());
+		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		orgCommoand.setGroupType(org.getGroupType());
+
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(),VisibleFlag.SHOW, locator, pageSize);
+
+		//转拼音
+		organizationMembers = convertPinyin(organizationMembers);
+
+		if(0 == organizationMembers.size()){
+			return response;
+		}
+		List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
+			OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
+
+			//获取用户头像 昵称
+			if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())){
+				User user = userProvider.findUserById(r.getTargetId());
+				if(null != user){
+					dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+					dto.setNickName(dto.getNickName());
+				}
+			}
+
+			// 是否展示手机号
+			if(r.getIntegralTag4() != null && r.getIntegralTag4() == 1){
+				dto.setContactToken(null);
+			}
+
+			//其他字符置换成#号
+			if(!StringUtils.isEmpty(r.getInitial())){
+				dto.setInitial(r.getInitial().replace("~", "#"));
+			}
+			return dto;
+		}).collect(Collectors.toList());
+
+		response.setNextPageAnchor(locator.getAnchor());
+		response.setMembers(members);
+		return response;
 	}
 
 }

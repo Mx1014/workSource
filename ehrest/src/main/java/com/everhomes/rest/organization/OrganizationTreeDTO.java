@@ -10,6 +10,8 @@ public class OrganizationTreeDTO {
 
 	private Long organizationId;
 
+	private Long directlyEnterpriseId;
+
 	private String organizationName;
 
 	private Long parentId;
@@ -27,6 +29,14 @@ public class OrganizationTreeDTO {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public Long getDirectlyEnterpriseId() {
+		return directlyEnterpriseId;
+	}
+
+	public void setDirectlyEnterpriseId(Long directlyEnterpriseId) {
+		this.directlyEnterpriseId = directlyEnterpriseId;
 	}
 
 	public String getOrganizationName() {

@@ -443,7 +443,7 @@ public class UserController extends ControllerBase {
 	/**
 	 * <b>URL: /user/deleteUserIdentifier</b>
 	 * <p>删除用户标识</p>
-	 * @param userIdentifierId 用户标识ID<手机号或者邮箱>
+	 * @param cmd 用户标识ID<手机号或者邮箱>
 	 * @return
 	 */
 	@RequestMapping("deleteUserIdentifier")
@@ -501,7 +501,7 @@ public class UserController extends ControllerBase {
 	/**
 	 * <b>URL: /user/setCurrentCommunity</b>
 	 * <p>设置当前小区</p>
-	 * @param communityId 小区ID
+	 * @param cmd 小区ID
 	 * @return OK
 	 */
 	@RequestMapping("setCurrentCommunity")

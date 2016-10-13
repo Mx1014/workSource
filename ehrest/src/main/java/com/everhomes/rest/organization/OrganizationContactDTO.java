@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>id：主键id</li>
  * <li>organizationId：组织id。</li>
  * <li>contactName：联系名称</li>
- * <li>contactType：联系类型。0-手机号，1-邮箱 {@link com.everhomes.use.IdentifierType}</li>
+ * <li>contactType：联系类型。0-手机号，1-邮箱 {@link com.everhomes.rest.user.IdentifierType}</li>
  * <li>contactToken：联系方式:手机号/邮箱</li>
  * <li>creatorUid：创建者uId</li>
  * <li>createTime：创建时间</li>
@@ -24,6 +24,14 @@ public class OrganizationContactDTO {
 	private String   contactToken;
 	private Long     creatorUid;
 	private Timestamp createTime;
+
+	private String initial;
+	private String fullPinyin;
+	private String fullInitial;
+	private String   nickName;
+	private String   avatar;
+	private Long   employeeNo;
+	private Byte   gender;
 	
 	public OrganizationContactDTO() {
     }
@@ -82,6 +90,62 @@ public class OrganizationContactDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public String getInitial() {
+		return initial;
+	}
+
+	public void setInitial(String initial) {
+		this.initial = initial;
+	}
+
+	public String getFullPinyin() {
+		return fullPinyin;
+	}
+
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
+	}
+
+	public String getFullInitial() {
+		return fullInitial;
+	}
+
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
+	}
+
+	public String getNickName() {
+		return nickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
+	public Long getEmployeeNo() {
+		return employeeNo;
+	}
+
+	public void setEmployeeNo(Long employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public Byte getGender() {
+		return gender;
+	}
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
 	}
 
 	@Override

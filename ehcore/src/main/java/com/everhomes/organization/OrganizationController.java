@@ -879,12 +879,13 @@ public class OrganizationController extends ControllerBase {
       }
 
 	/**
-	 * <b>URL: /org/updateOrganizationPersonnelVisibleFlag</b>
+	 * <b>URL: /org/updateOrganizationContactVisibleFlag</b>
 	 * <p>修改隐藏显示通讯录</p>
 	 */
-	@RequestMapping("updateOrganizationPersonnelVisibleFlag")
+	@RequestMapping("updateOrganizationContactVisibleFlag")
 	@RestReturn(value=String.class)
-	public RestResponse updateOrganizationPersonnelVisibleFlag(UpdateOrganizationPersonnelVisibleFlagCommand cmd){
+	public RestResponse updateOrganizationContactVisibleFlag(UpdateOrganizationContactVisibleFlagCommand cmd){
+		organizationService.updateOrganizationContactVisibleFlag(cmd);
 		RestResponse res = new RestResponse();
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
@@ -892,12 +893,13 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /org/batchUpdateOrganizationPersonnelVisibleFlag</b>
+	 * <b>URL: /org/batchUpdateOrganizationContactVisibleFlag</b>
 	 * <p>批量 修改隐藏显示通讯录</p>
 	 */
-	@RequestMapping("batchUpdateOrganizationPersonnelVisibleFlag")
+	@RequestMapping("batchUpdateOrganizationContactVisibleFlag")
 	@RestReturn(value=String.class)
-	public RestResponse batchUpdateOrganizationPersonnelVisibleFlag(BatchUpdateOrganizationPersonnelVisibleFlagCommand cmd){
+	public RestResponse batchUpdateOrganizationContactVisibleFlag(BatchUpdateOrganizationContactVisibleFlagCommand cmd){
+		organizationService.batchUpdateOrganizationContactVisibleFlag(cmd);
 		RestResponse res = new RestResponse();
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
@@ -911,7 +913,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("listAllTreeOrganizations")
 	@RestReturn(value=OrganizationTreeDTO.class)
 	public RestResponse listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd){
-		RestResponse res = new RestResponse();
+		RestResponse res = new RestResponse(organizationService.listAllTreeOrganizations(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
