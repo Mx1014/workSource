@@ -101,7 +101,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	
+    	//储能月卡车没有 归属地区分
+    	plateNumber = plateNumber.substring(1, plateNumber.length());
     	KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -285,7 +286,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		String json = post(param, GET_CARd_RULE);
 		
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}", json);
+			LOGGER.debug("Result={}, param={}", json, param);
 		
 		KetuoJsonEntity<KetuoCardRate> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCardRate>>(){});
 		if(entity.isSuccess()){
@@ -298,13 +299,12 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private KetuoCard getCard(String plateNumber) {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
-		//储能月卡车没有 归属地区分
-		plateNumber = plateNumber.substring(1, plateNumber.length());
+		
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_CARD);
         
         if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}", json);
+			LOGGER.debug("Result={}, param={}", json, param);
         
 		KetuoJsonEntity<KetuoCard> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCard>>(){});
 		if(entity.isSuccess()){
@@ -338,11 +338,20 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		String json = post(param, RECHARGE);
         
         if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}", json);
+			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-		
-		return entity.isSuccess();
+//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
+//		
+//		return entity.isSuccess();
+		JSONObject jsonObject = JSONObject.parseObject(json);
+		Object obj = jsonObject.get("resCode");
+		if(null != obj ) {
+			int resCode = (int) obj;
+			if(resCode == 0)
+				return true;
+			
+		}
+		return false;
     }
 	
 	private boolean payTempCardFee(ParkingRechargeOrder order){
@@ -357,13 +366,34 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		String json = post(param, PAY_TEMP_FEE);
         
         if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}", json);
+			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-		
-		return entity.isSuccess();
+//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
+//		
+//		return entity.isSuccess();
+        JSONObject jsonObject = JSONObject.parseObject(json);
+		Object obj = jsonObject.get("resCode");
+		if(null != obj ) {
+			int resCode = (int) obj;
+			if(resCode == 0)
+				return true;
+			
+		}
+		return false;
     }
-	
+//	public static void main(String[] args) {
+//		String s= "{\"data\":{\"parkingTime\":109568},\"resCode\":0,\"resMsg\":null}";
+//		JSONObject json = JSONObject.parseObject(s);
+//		Object obj = json.get("resCode");
+//		if(null != obj ) {
+//			int resCode = (int) obj;
+//			if(resCode == 0)
+//				return true;
+//			
+//		}
+//		return false;
+//		
+//	}
 	private boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
@@ -421,7 +451,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         }
 		String json = result.toString();
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Card type from ketuo, json={}", json);
+			LOGGER.debug("Data from ketuo, json={}", json);
 		
 		return json;
 	}
@@ -458,7 +488,12 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		KetuoCard cardInfo = getCard(order.getPlateNumber());
+		//储能月卡车没有 归属地区分
+		String plateNumber = order.getPlateNumber();
+		plateNumber = plateNumber.substring(1, plateNumber.length());
+		order.setPlateNumber(plateNumber);
+
+		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
 		if(null != cardInfo) {
 			String cardType = cardInfo.getCarType();
@@ -487,7 +522,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		String json = post(param, GET_TEMP_FEE);
         
         if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}", json);
+			LOGGER.debug("Result={}, param={}", json, param);
         
 		KetuoJsonEntity<KetuoTemoFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTemoFee>>(){});
 		if(entity.isSuccess()){
@@ -499,22 +534,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         
         return tempFee;
     }
-	public static void main(String[] args) {
-		KetuoParkingVendorHandler k = new KetuoParkingVendorHandler();
-		k.getTempFee("浙A185VK");
-//		JSONObject param = new JSONObject();
-//		
-//		param.put("orderNo", "0001201609231559054139");
-//		param.put("amount", 84500);
-//	    param.put("discount", 0);
-//	    param.put("payType", 4);
-//		String json = k.post(param, PAY_TEMP_FEE);
-//        
-//        if(LOGGER.isDebugEnabled())
-//			LOGGER.debug("Result={}", json);
-//        
-//		KetuoJsonEntity<?> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<?>>(){});
-	}
+
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
 			Long parkingLotId, String plateNumber) {
