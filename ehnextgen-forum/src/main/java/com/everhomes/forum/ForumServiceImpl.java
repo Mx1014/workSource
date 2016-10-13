@@ -174,7 +174,6 @@ import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
-import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
