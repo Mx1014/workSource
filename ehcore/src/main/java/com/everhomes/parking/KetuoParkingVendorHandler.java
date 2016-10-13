@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -171,7 +172,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			dto.setCardType(KetuoParkingCardType.fromCode(RULE_TYPE).getText());
 			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
 //			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
-			dto.setPrice(new BigDecimal(0.01).setScale(2));
+			dto.setPrice(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 			dto.setVendorName(ParkingLotVendor.KETUO.getCode());
 			return dto;
 		}).collect(Collectors.toList());
@@ -527,7 +528,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
 //		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
-		dto.setPrice(new BigDecimal(0.01).setScale(2));
+		dto.setPrice(new BigDecimal(0.01).setScale(2, RoundingMode.FLOOR));
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
 	}
