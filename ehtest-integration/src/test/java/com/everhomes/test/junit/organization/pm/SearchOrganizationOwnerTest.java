@@ -30,6 +30,7 @@ public class SearchOrganizationOwnerTest extends BaseLoginAuthTestCase {
         cmd.setOrgOwnerTypeId(1L);
         cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(24206890946790405L);
+        cmd.setPageSize(10);
         cmd.setKeyword("王五");
 
         SearchOrganizationOwnersRestResponse resp = httpClientService.restPost(api, cmd, SearchOrganizationOwnersRestResponse.class);
@@ -53,6 +54,7 @@ public class SearchOrganizationOwnerTest extends BaseLoginAuthTestCase {
         cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(24206890946790405L);
         cmd.setAddressId(1L);
+        cmd.setPageSize(10);
         SearchOrganizationOwnersRestResponse resp = httpClientService.restPost(api, cmd, SearchOrganizationOwnersRestResponse.class);
 
         assertNotNull(resp);

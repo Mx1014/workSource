@@ -3855,7 +3855,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         newPmOwner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         newPmOwner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         newPmOwner.setAvatar(memberUser.getAvatar());
-        newPmOwner.setOrgOwnerTypeId(7L);// 没想到怎么做比较好, 先写死, 归类为"其他"
+        newPmOwner.setOrgOwnerTypeId(8L);// 没想到怎么做比较好, 先写死, 归类为"无"
         newPmOwner.setGender(memberUser.getGender());
         newPmOwner.setCommunityId(memberUser.getCommunityId());
         newPmOwner.setContactType(ContactType.MOBILE.getCode());
@@ -4899,12 +4899,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
+        OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(currentNamespaceId(), cmd.getOwnerId(), cmd.getAddressId());
+        if (ownerAddress == null || ownerAddress.getAuthType() == OrganizationOwnerAddressAuthType.INACTIVE.getCode()) {
+            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_ALREADY_INACTIVE,
+                    "The organization owner address is already inactive.");
+        }
         Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
         if(family == null){
-            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST,
-                    "Invalid addressId parameter,address is not found");
+            throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_ADDRESS_ALREADY_INACTIVE,
+                    "The organization owner address is already inactive.");
         }
-        leaveFamilyByOwnerId(cmd.getOwnerId(), family.getId());
+        dbProvider.execute(s -> {
+            leaveFamilyByOwnerId(cmd.getOwnerId(), family.getId());
+            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.INACTIVE.getCode());
+            propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+            return true;
+        });
     }
 
     private void leaveFamilyByOwnerId(Long ownerId, Long familyId) {

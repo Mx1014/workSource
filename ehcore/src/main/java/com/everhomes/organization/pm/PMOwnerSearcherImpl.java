@@ -34,7 +34,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,8 +95,35 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 
 	@Override
 	public ListOrganizationOwnersResponse query(SearchOrganizationOwnersCommand cmd) {
-		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-		QueryBuilder qb;
+        ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
+        if (cmd.getPageSize() != null) {
+            List<OrganizationOwnerDTO> ownerDTOList = new ArrayList<>();
+            Long anchor = buildOrganizationOwnerDTOList(cmd, ownerDTOList);
+
+            if (ownerDTOList.size() - cmd.getPageSize() > 1) {
+                response.setNextPageAnchor(anchor + cmd.getPageSize() - (ownerDTOList.size() - cmd.getPageSize()));
+            } else if (ownerDTOList.size() - cmd.getPageSize() == 1) {
+                response.setNextPageAnchor(anchor + cmd.getPageSize());
+            } else if (ownerDTOList.size() == cmd.getPageSize()){
+                response.setNextPageAnchor(anchor + cmd.getPageSize());
+            }
+            ownerDTOList = ownerDTOList.stream().limit(cmd.getPageSize()).collect(Collectors.toList());
+            response.setOwners(ownerDTOList);
+        }
+        return response;
+    }
+
+    private Long getAnchor(SearchOrganizationOwnersCommand cmd) {
+        Long anchor = 0L;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        return anchor;
+    }
+
+    private List<Long> getMatchOwnerIds(SearchOrganizationOwnersCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
@@ -116,33 +142,21 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("orgOwnerTypeId", cmd.getOrgOwnerTypeId()));
         }
 
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0L;
-        if(cmd.getPageAnchor() != null) {
-            anchor = cmd.getPageAnchor();
-        }
-        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = getAnchor(cmd);
+
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setFrom(anchor.intValue() * pageSize)
+                .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
                 .setQuery(qb);
 
         SearchResponse rsp = builder.execute().actionGet();
+        return getIds(rsp);
+    }
 
-        ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
-        List<Long> ids = getIds(rsp);
-        if(ids.size() > pageSize) {
-            response.setNextPageAnchor(anchor + 1);
-            ids.remove(ids.size() - 1);
-        }
-        List<OrganizationOwnerDTO> ownerDTOList = buildOrganizationOwnerDTOList(cmd, ids);
-        response.setOwners(ownerDTOList);
-        return response;
-	}
-
-    private List<OrganizationOwnerDTO> buildOrganizationOwnerDTOList(SearchOrganizationOwnersCommand cmd, List<Long> ids) {
-        List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
+    private Long buildOrganizationOwnerDTOList(SearchOrganizationOwnersCommand cmd, List<OrganizationOwnerDTO> ownerDTOList) {
+        List<Long> ids = getMatchOwnerIds(cmd);
         if (ids.size() > 0) {
             List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
             // 如果有楼栋地址等信息的话, 过滤不符合条件的对象
@@ -162,7 +176,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 pmOwners = processCommunityPmOwners(pmOwners, addressIds);
             }
 
-            ownerDTOList = pmOwners.stream().map(r -> {
+            ownerDTOList.addAll(pmOwners.stream().map(r -> {
                 OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                 OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
                 dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
@@ -170,9 +184,16 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                         UserContext.current().getUser().getLocale());
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 return dto;
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toList()));
+
+            Long anchor = getAnchor(cmd);
+            if (ownerDTOList.size() < cmd.getPageSize() && ids.size() > cmd.getPageSize()) {
+                cmd.setPageAnchor(anchor + cmd.getPageSize() + 1);
+                return buildOrganizationOwnerDTOList(cmd, ownerDTOList);
+            }
+            return anchor;
         }
-        return ownerDTOList;
+        return 0L;
     }
 
     private List<CommunityPmOwner> processCommunityPmOwners(List<CommunityPmOwner> pmOwners, List<Long> addressIds) {
