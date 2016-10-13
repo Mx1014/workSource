@@ -96,6 +96,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 			post.setOfficialFlag(cmd.getOfficialFlag());
 		}
         
+        // 设置活动在帖子中的内容，add by tt, 20161013，因为客户端查询帖子列表需要显示活动开始时间、结束时间、地点等信息
+        cmd.setDescription(post.getContent());
+        post.setContent("开始时间："+cmd.getStartTime()+"\n结束时间："+cmd.getEndTime()+"\n活动地点："+cmd.getLocation());
+        
         cmd.setVideoState(VideoState.UN_READY.getCode());
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         

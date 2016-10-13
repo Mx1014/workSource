@@ -29,6 +29,8 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetVideoCapabilityCommand;
@@ -338,5 +340,16 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=ListOfficialActivityByNamespaceResponse.class)
     public RestResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
     	return new RestResponse(activityService.listOfficialActivityByNamespace(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/getActivityDetailById</b>
+     * <p>查询活动详情里面的内容</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityDetailById")
+    @RestReturn(value=GetActivityDetailByIdResponse.class)
+    public RestResponse getActivityDetailById(GetActivityDetailByIdCommand cmd){
+    	return new RestResponse(activityService.getActivityDetailById(cmd));
     }
 }

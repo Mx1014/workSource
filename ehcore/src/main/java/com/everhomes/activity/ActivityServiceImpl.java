@@ -74,6 +74,8 @@ import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.ActivityVideoRoomType;
 import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetVideoCapabilityCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
@@ -2581,4 +2583,11 @@ public class ActivityServiceImpl implements ActivityService {
            }
        }
    }
+
+	@Override
+	public GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd) {
+		return forumService.getActivityDetailById(cmd);
+	}
+   
+   
 }

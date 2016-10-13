@@ -76,6 +76,8 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -137,6 +139,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -304,6 +307,16 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+    	//报名人数限制必须在1到10000之间，add by tt, 20161013
+    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getConstraintQuantity()!= null) {
+			if (cmd.getConstraintQuantity() < 1) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"constraint quantity should greater than 0!");
+			}else if (cmd.getConstraintQuantity() > 10000) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"constraint quantity should not greater than 10000");
+			}
+		}
         //checkForumPostPrivilege(cmd.getForumId());
         long startTime = System.currentTimeMillis();
         
@@ -552,6 +565,11 @@ public class ForumServiceImpl implements ForumService {
                     + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
             }
             
+            // 如果是活动，返回活动内容的链接，add by tt, 20161013
+            if (postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
+				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
+			}
+            
             return postDto;
 //            post = this.forumProvider.findPostById(postId);
 //            this.forumProvider.populatePostAttachments(post);
@@ -564,6 +582,18 @@ public class ForumServiceImpl implements ForumService {
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
+    }
+    
+    private String getActivityContentUrl(Long id){
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+		String contentUrl = configProvider.getValue(namespaceId, ConfigConstants.ACTIVITY_CONTENT_URL, "");
+		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
+			LOGGER.error("Invalid home url or content url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid home url or content url");
+		} else {
+			return homeUrl + contentUrl + "?id=" + id;
+		}
     }
     
     public List<PostDTO> getTopicById(List<Long> topicIds, Long communityId, boolean isDetail) {
@@ -3762,15 +3792,6 @@ public class ForumServiceImpl implements ForumService {
 	
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
-    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getConstraintQuantity()!= null) {
-			if (cmd.getConstraintQuantity() < 1) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"constraint quantity should greater than 0!");
-			}else if (cmd.getConstraintQuantity() > 10000) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"constraint quantity should not greater than 10000");
-			}
-		}
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
@@ -5158,6 +5179,32 @@ public class ForumServiceImpl implements ForumService {
                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
         }   
         return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+	}
+
+	@Override
+	public GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id cannot be empty");
+		}
+		
+		Post post = forumProvider.findPostById(cmd.getId());
+		if (post != null) {
+			String content = null;
+			Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+			if (activity != null && activity.getDescription() != null) {
+				content = activity.getDescription();
+			}else {
+				content = post.getContent();
+			}
+			forumProvider.populatePostAttachments(post);
+			populatePostAttachements(UserContext.current().getUser().getId(), post, post.getAttachments());
+			
+			return new GetActivityDetailByIdResponse(content, post.getAttachments().stream().map(a->ConvertHelper.convert(a, AttachmentDTO.class)).collect(Collectors.toList()));
+		}
+		
+		
+		return null;
 	}
     
 }

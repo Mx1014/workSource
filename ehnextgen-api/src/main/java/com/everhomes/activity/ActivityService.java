@@ -18,6 +18,8 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetVideoCapabilityCommand;
@@ -115,5 +117,7 @@ public interface ActivityService {
     void onVideoDeviceChange(YzbVideoDeviceChangeCommand cmd);
 
     VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd);
+
+	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd);
 
 }

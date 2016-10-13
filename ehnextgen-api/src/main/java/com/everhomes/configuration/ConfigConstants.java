@@ -67,5 +67,7 @@ public interface ConfigConstants {
     public static final String SCHEDULE_EQUIPMENT_TASK_TIME = "equipment.task.schedule.time";
 
 	public static final String NEWS_PAGE_URL = "news.url"; 
+	
+	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
      
 }

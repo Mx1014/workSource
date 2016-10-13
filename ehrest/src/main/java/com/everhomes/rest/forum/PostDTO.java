@@ -54,6 +54,7 @@ import com.everhomes.util.StringHelper;
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  * <li>constraintQuantity: 限制人数</li>
+ * <li>contentUrl: 内容链接</li>
  * </ul>
  */
 public class PostDTO {
@@ -149,7 +150,17 @@ public class PostDTO {
 
     private Integer constraintQuantity;
     
-    public Integer getConstraintQuantity() {
+    private String contentUrl;
+
+	public String getContentUrl() {
+		return contentUrl;
+	}
+
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
+	}
+
+	public Integer getConstraintQuantity() {
 		return constraintQuantity;
 	}
 
