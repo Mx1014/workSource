@@ -190,8 +190,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 //			dto.setCardType(r.getRuleType());
 			dto.setCardType(r.getTypeName());
 			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
-//			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
-			dto.setPrice(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
 			dto.setVendorName(ParkingLotVendor.KETUO.getCode());
 			return dto;
 		}).collect(Collectors.toList());

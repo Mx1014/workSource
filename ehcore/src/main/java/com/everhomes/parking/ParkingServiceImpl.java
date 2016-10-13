@@ -5,6 +5,8 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -352,7 +354,9 @@ public class ParkingServiceImpl implements ParkingService {
 		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		orderCmd.setSubject("停车充值订单");
-		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+//		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+		orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+
 		CommonOrderDTO dto = null;
 		try {
 			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
