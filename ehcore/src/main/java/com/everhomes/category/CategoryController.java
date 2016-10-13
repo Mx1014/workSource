@@ -100,8 +100,7 @@ public class CategoryController extends ControllerBase {
 			orderBy = defaultSort();
 		}
 
-		User user = UserContext.current().getUser();
-		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		namespaceId = cmd.getNamespaceId() == null ? namespaceId : cmd.getNamespaceId();
 		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, cmd.getParentId(),
 				CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
@@ -189,8 +188,7 @@ public class CategoryController extends ControllerBase {
 	@RestReturn(value = CategoryDTO.class, collection = true)
 	public RestResponse listInterestCategories(ListCategoryV2Command cmd, HttpServletRequest request, HttpServletResponse response) {
 	    LOGGER.info("listInterestCategories, cmd=" + cmd);
-		User user = UserContext.current().getUser();
-		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		@SuppressWarnings("rawtypes")
 		Tuple[] orderBy = defaultSort();
 		@SuppressWarnings("unchecked")
@@ -270,7 +268,7 @@ public class CategoryController extends ControllerBase {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 
-		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Tuple[] orderBy = defaultSort();
 		//暂时去掉
 		//        Category category = new Category();

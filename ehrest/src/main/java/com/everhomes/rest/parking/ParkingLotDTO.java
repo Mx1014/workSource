@@ -24,6 +24,9 @@ public class ParkingLotDTO {
     private String vendorName;
     private Integer cardReserveDays;
     private Timestamp createTime;
+    private Integer maxRequestNum;
+    private Byte tempfeeFlag;
+    private Byte rateFlag;
     
     public ParkingLotDTO() {
     }
@@ -88,4 +91,28 @@ public class ParkingLotDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getMaxRequestNum() {
+		return maxRequestNum;
+	}
+
+	public void setMaxRequestNum(Integer maxRequestNum) {
+		this.maxRequestNum = maxRequestNum;
+	}
+
+	public Byte getTempfeeFlag() {
+		return tempfeeFlag;
+	}
+
+	public void setTempfeeFlag(Byte tempfeeFlag) {
+		this.tempfeeFlag = tempfeeFlag;
+	}
+
+	public Byte getRateFlag() {
+		return rateFlag;
+	}
+
+	public void setRateFlag(Byte rateFlag) {
+		this.rateFlag = rateFlag;
+	}
 }

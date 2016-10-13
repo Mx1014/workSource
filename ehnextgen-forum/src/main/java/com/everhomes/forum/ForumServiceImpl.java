@@ -5013,6 +5013,7 @@ public class ForumServiceImpl implements ForumService {
         	if(searchType != null) {
         		dto.setSearchTypeId(searchType.getId());
     			dto.setSearchTypeName(searchType.getName());
+    			dto.setContentType(searchType.getContentType());
         	}
         	
         	Map<String, Object> source = sd.getSource();
@@ -5062,7 +5063,7 @@ public class ForumServiceImpl implements ForumService {
     private ForumFootnoteHandler getForumFootnoteHandler(String searchContentType) {
     	ForumFootnoteHandler handler = null;
         
-        if(StringUtils.isEmpty(searchContentType)) {
+        if(!StringUtils.isEmpty(searchContentType)) {
             String handlerPrefix = ForumFootnoteHandler.FORUM_FOOTNOTE_RESOLVER_PREFIX;
             handler = PlatformContext.getComponent(handlerPrefix + searchContentType);
         }

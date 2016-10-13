@@ -2,7 +2,7 @@ package com.bosigao2.rest;
 
 import com.everhomes.util.StringHelper;
 
-public class CardInfo {
+public class Bosigao2CardInfo {
 	private String cardCode;
 	private String userName;
 	private String mobile;

@@ -1442,6 +1442,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setTag(cmd.getTag());
         execCmd.setPageSize(cmd.getPageSize());
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        execCmd.setOfficialFlag(cmd.getOfficialFlag());
         return listActivitiesByLocation(execCmd);
 		
         // 把公用的代码转移到listActivitiesByLocation()中，公司场景和小区场景获取经纬度的方式不一样 by lqs 20160419
@@ -1565,7 +1566,11 @@ public class ActivityServiceImpl implements ActivityService {
         
         //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         Condition condition = buildNearbyActivityCondition(cmd.getNamespaceId(), geoHashCodes, cmd.getTag());
-        
+
+        if(null != cmd.getOfficialFlag()){
+            condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
+        }
+
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int ipageSize = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
@@ -2009,7 +2014,7 @@ public class ActivityServiceImpl implements ActivityService {
             execCmd.setPageSize(cmd.getPageSize());
             execCmd.setTag(cmd.getTag());
             execCmd.setRange(geoCharCount);
-            
+            execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
             return listActivitiesByTag(execCmd);
 	    } else {
 	        LOGGER.error("Community not found to query nearby activities, sceneTokenDto={}, communityId={}", sceneTokenDto, communityId);
@@ -2020,7 +2025,6 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
     public ListActivitiesReponse listOrgNearbyActivities(ListOrgNearbyActivitiesCommand cmd) {
         List<GeoLocation> geoLocationList = new ArrayList<GeoLocation>();
-
 	    OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 	    if(orgDetail != null && orgDetail.getLatitude() != null && orgDetail.getLongitude() != null) {
             GeoLocation geoLocation = new GeoLocation();
@@ -2062,7 +2066,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setTag(cmd.getTag());
         execCmd.setPageSize(cmd.getPageSize());
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        
+        execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
         return listActivitiesByLocation(execCmd);
    }
 

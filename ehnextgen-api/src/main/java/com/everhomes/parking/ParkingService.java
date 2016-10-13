@@ -9,9 +9,11 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
+import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
@@ -27,12 +29,13 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
 import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
+import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -57,7 +60,7 @@ public interface ParkingService {
     
     ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd);
     
-    void setParkingCardReserveDays(SetParkingCardReserveDaysCommand cmd);
+    void setParkingLotConfig(SetParkingLotConfigCommand cmd);
     
     void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd);
     
@@ -77,4 +80,8 @@ public interface ParkingService {
     void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd);
     
     ListCardTypeResponse listCardType(ListCardTypeCommand cmd);
+    
+    ParkingTempFeeDTO getParkingTempFee(GetParkingTempFeeCommand cmd);
+    
+    CommonOrderDTO createParkingTempOrder(CreateParkingTempOrderCommand cmd);
 }

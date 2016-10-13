@@ -748,9 +748,9 @@ UPDATE eh_launch_pad_items SET action_type = 14 , action_data='{"url":"http://co
 UPDATE eh_launch_pad_items SET action_type = 51 , action_data='' WHERE id IN (10310, 10610, 109986);
    
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('297', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '29479', '1000000');
+	VALUES ('297', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '30093', '1000000');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('298', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '29478', '1000000');
+	VALUES ('298', 'sms.default.yzx', '10', 'zh_CN', '任务操作模版', '30095', '1000000');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('299', 'sms.default.yzx', '11', 'zh_CN', '任务操作模版', '30092', '999991');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
@@ -822,3 +822,65 @@ DELETE FROM `eh_web_menu_scopes` WHERE `owner_type` = 'EhNamespaces' AND `owner_
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101102' WHERE `id`=111 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016101102","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016101102' WHERE `id`=11 AND `namespace_id`=1000000;
  
+-- 更新科技园短信模版
+update eh_locale_templates set text = 30093 where id = 297 and namespace_id = 1000000;
+update eh_locale_templates set text = 30095 where id = 298 and namespace_id = 1000000;
+
+-- 路演直播 by sfyan 20161011
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (315,0,'路演直播','路演直播 全部功能',null);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (11400,'路演直播',10000,null,'road_show',0,2,'/10000/11400','park',117);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),315,11400,'路演直播',1,1,'路演直播  全部权限',16);
+
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11400,'', 'EhNamespaces', 999987,2);
+UPDATE `eh_web_menu_scopes` SET `menu_name` = '创业活动', `apply_policy` = 1 WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = 999987 AND `menu_id` = 11400;
+
+
+-- 第三个文件合并过来，20161012
+-- added by wh 2016-10-11 设置活跃用户数的区间
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'active.count','6-10','active count ');
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (999987, 'active.count','6-10','active count ');
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (1000000, 'active.count','6-10','active count ');
+
+-- added by sfyan 20161011
+set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 315, 1001,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 315, 1002,0,1,now());
+
+-- added by sfyan 20161011
+UPDATE `eh_web_menu_scopes` SET `menu_name` = '创业活动', `apply_policy` = 1 WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = 999987 AND `menu_id` = 11100;
+UPDATE `eh_web_menu_scopes` SET `menu_name` = '路演直播', `apply_policy` = 1 WHERE `owner_type` = 'EhNamespaces' AND `owner_id` = 999987 AND `menu_id` = 11400;
+
+-- 增加日活统计菜单 added by sfyan 20161011
+set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (716,0,'日活统计','日活统计 全部功能',null);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (49800,'日活统计',40000,null,'dailyActive--dailyActive',0,2,'/40000/49800','park',459);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),716,49800,'日活统计',1,1,'日活统计  全部权限',16);
+
+set @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) VALUES((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 716, 1001,0,1,now());
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49800,'', 'EhNamespaces', 1000000,2);
+
+-- 储能物业服务恢复到1.0 by sw 20161012
+UPDATE `eh_launch_pad_items` SET  `action_type`='2', `action_data`='{\"itemLocation\":\"/home/Pm\",\"layoutName\":\"PmLayout\",\"title\":\"物业服务\",\"entityTag\":\"PM\"}' WHERE `id`='10610' and namespace_id = 999990;
+UPDATE `eh_launch_pad_items` SET  `action_type`='2', `action_data`='{\"itemLocation\":\"/home/Pm\",\"layoutName\":\"PmLayout\",\"title\":\"物业服务\",\"entityTag\":\"PM\"}' WHERE `id`='10628' and namespace_id = 999990;
+
+-- 更新海岸东座园区类型 by sw 20161012
+update eh_communities set community_type = 1 where namespace_id = 999993 and id = 240111044331054835;
+
+
+

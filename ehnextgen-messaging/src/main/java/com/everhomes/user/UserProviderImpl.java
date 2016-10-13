@@ -859,6 +859,7 @@ public class UserProviderImpl implements UserProvider {
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);
+            	user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
             	user.setId(r.getValue(Tables.EH_USERS.ID));
             	user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
             	user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
@@ -879,6 +880,50 @@ public class UserProviderImpl implements UserProvider {
 		
 		return list;
 	}
+	
+	   @Override
+	    public List<User> listUserByNamespace(String keyword, Integer namespaceId,
+	            CrossShardListingLocator locator, int pageSize) {
+	        
+	        List<User> list = new ArrayList<User>();
+	        
+	        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+	            Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
+	            if(!StringUtils.isEmpty(keyword)){
+	                 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword + "%");
+	                 cond = cond.and(cond1);
+	            }
+	             
+	            if(locator.getAnchor() != null ) {
+	                cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+	            }
+	            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+	            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+	            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+	            .limit(pageSize)
+	            .fetch().map(r -> {
+	                User user = ConvertHelper.convert(r,User.class);
+	                user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
+	                user.setId(r.getValue(Tables.EH_USERS.ID));
+	                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+	                user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+	                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+	                user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+	                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+	                list.add(user);
+	                return null;
+	            });
+	            return true;
+	        });
+	        
+	        if(list.size() == pageSize) {
+	            locator.setAnchor(list.get(pageSize-1).getCreateTime().getTime());
+	        } else {
+	            locator.setAnchor(null);
+	        }
+	        
+	        return list;
+	    }
 	
 	/**
 	 * added by Janson

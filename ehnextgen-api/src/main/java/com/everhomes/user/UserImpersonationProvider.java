@@ -28,6 +28,7 @@ public interface UserImpersonationProvider {
 
     List<UserImpersonation> findTargetUserImpersonations(Long userId, ListingLocator locator, int count);
 
-    List<UserImperInfo> searchUserByPhone(String keyword, Byte impOnly, CrossShardListingLocator locator, int pageSize);
+    List<UserImperInfo> searchUserByPhone(Integer namespaceId, String keyword, Byte impOnly,
+            CrossShardListingLocator locator, int pageSize);
 
 }
