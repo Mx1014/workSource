@@ -48,7 +48,6 @@ import com.everhomes.parking.ketuo.KetuoTemoFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.KetuoParkingCardType;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
@@ -128,7 +127,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
-			parkingCardDTO.setCardType(card.getCarType());
+			List<KetuoCardType> types = getCardType();
+			for(KetuoCardType kt: types) {
+				if(card.getCarType().equals(kt.getCarType())) {
+					parkingCardDTO.setCardType(kt.getTypeName());
+					break;
+				}
+			}
+			parkingCardDTO.setCardTypeId(card.getCarType());
 			parkingCardDTO.setCardNumber(card.getCardId().toString());
 			parkingCardDTO.setIsValid(true);
 			
@@ -142,11 +148,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
     	List<ParkingRechargeRateDTO> result = null;
     	List<KetuoCardRate> list = new ArrayList<>();
+		List<KetuoCardType> types = getCardType();
+
     	if(StringUtils.isBlank(plateNumber)) {
-    		List<KetuoCardType> types = getCardType();
     		for(KetuoCardType k: types) {
     			for(KetuoCardRate rate: getCardRule(k.getCarType())) {
     				if(RULE_TYPE.equals(rate.getRuleType())) {
+    					rate.setCarType(k.getCarType());
+    					rate.setTypeName(k.getTypeName());
     					list.add(rate);
     				}
     			}
@@ -155,8 +164,17 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     		KetuoCard cardInfo = getCard(plateNumber);
     		if(null != cardInfo) {
     			String cardType = cardInfo.getCarType();
+    			String typeName = null;
+    			for(KetuoCardType kt: types) {
+					if(cardType.equals(kt.getCarType())) {
+						typeName = kt.getTypeName();
+						break;
+					}
+				}
     			for(KetuoCardRate rate: getCardRule(cardType)) {
     				if(RULE_TYPE.equals(rate.getRuleType())) {
+    					rate.setCarType(cardType);
+    					rate.setTypeName(typeName);
     					list.add(rate);
     				}
     			}
@@ -170,7 +188,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			dto.setRateToken(r.getRuleId());
 			dto.setRateName(r.getRuleName());
 //			dto.setCardType(r.getRuleType());
-			dto.setCardType(KetuoParkingCardType.fromCode(RULE_TYPE).getText());
+			dto.setCardType(r.getTypeName());
 			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
 //			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
 			dto.setPrice(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
@@ -490,8 +508,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-		plateNumber = plateNumber.substring(1, plateNumber.length());
-		order.setPlateNumber(plateNumber);
+//		plateNumber = plateNumber.substring(1, plateNumber.length());
+//		order.setPlateNumber(plateNumber);
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;

@@ -25,6 +25,7 @@ public class ParkingCardDTO {
 	private String plateNumber;
 	private String plateOwnerName;
 	private String plateOwnerPhone;
+	private String cardTypeId;
 	private String cardType;
 	private String cardNumber;
 	private String cardName;
@@ -143,5 +144,13 @@ public class ParkingCardDTO {
 
 	public void setCardName(String cardName) {
 		this.cardName = cardName;
+	}
+
+	public String getCardTypeId() {
+		return cardTypeId;
+	}
+
+	public void setCardTypeId(String cardTypeId) {
+		this.cardTypeId = cardTypeId;
 	}
 }
