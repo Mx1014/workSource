@@ -317,7 +317,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
 		parkingRechargeOrder.setParkingLotId(parkingLot.getId());
 		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
-		parkingRechargeOrder.setPlateOwnerName(cmd.getPlateOwnerName());
+		parkingRechargeOrder.setPlateOwnerName(null != cmd.getPlateOwnerName()?cmd.getPlateOwnerName():user.getNickName());
 		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
 		
 		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
