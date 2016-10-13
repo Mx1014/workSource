@@ -408,7 +408,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Send verfication code: " + verificationCode + " for new user: " + identifierToken);
 			//            String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 			//            smsProvider.sendSms(identifierToken, verificationCode,templateId);
-			sendVerificationCodeSms(newIdentifier.getNamespaceId(), this.getRegionPhoneNumber(identifierToken, cmd.getRegionCode()), verificationCode);
+			sendVerificationCodeSms(newIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(identifierToken, cmd.getRegionCode()), verificationCode);
 			return newIdentifier;
 		});
 
@@ -503,14 +503,14 @@ public class UserServiceImpl implements UserService {
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), verificationCode, templateId);
 				//增加区号发送短信 by sfyan 20161012
-				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
+				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
 			} else {
 
 				// TODO
 				LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), identifier.getVerificationCode(),templateId);
-				sendVerificationCodeSms(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
+				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
 			}
 
 			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1573,7 +1573,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
 		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
-		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
+		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
 		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		this.userProvider.updateIdentifier(userIdentifier);
 	}
@@ -2338,7 +2338,7 @@ public class UserServiceImpl implements UserService {
 	    String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
 	    if("true".equalsIgnoreCase(value)) {
 	        String verificationCode = RandomGenerator.getRandomDigitalString(6);
-	        sendVerificationCodeSms(namespaceId,this.getRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
+	        sendVerificationCodeSms(namespaceId,this.getYzxRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
 	    }
 	}
 	
@@ -3362,11 +3362,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 
-	private String getRegionPhoneNumber(String identifierToken, Integer regionCode){
+	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
 		//国内电话不要拼区号，发送短信走国内通道，便宜
 		if(86 == regionCode){
 			return identifierToken;
 		}
-		return regionCode + identifierToken;
+		return "00" + regionCode + identifierToken;
 	}
+
+
 }

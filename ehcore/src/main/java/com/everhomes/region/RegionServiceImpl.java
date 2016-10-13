@@ -34,7 +34,7 @@ public class RegionServiceImpl implements RegionService{
         }
         List<RegionCodeDTO> regionCodeDTOs = regionCodes.stream().map(r -> {
             RegionCodeDTO dto= ConvertHelper.convert(r, RegionCodeDTO.class);
-            dto.setRegionCode("+" + dto.getCode());
+            dto.setRegionCode("+" + r.getCode());
             return dto;
         }).collect(Collectors.toList());
         return regionCodeDTOs;
@@ -72,23 +72,24 @@ public class RegionServiceImpl implements RegionService{
 
         RegionCodes regionCode = regionProvider.findRegionCodeById(dto.getId());
 
-        if(regionCode.getName().equals(dto.getName()) && regionCode.getName().equals(dto.getCode())){
-
-        }else{
+        if(!regionCode.getName().equals(dto.getName())){
+            regionCodes = regionProvider.listRegionCodes(dto.getName(), null);
             if(null != regionCodes && regionCodes.size() > 0){
                 LOGGER.error("create region code error. cmd = {}", dto);
                 throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGIONCODE_NAME_EXISTING,
                         "create region code error");
             }
+        }
 
+        if(!regionCode.getCode().equals(dto.getCode())){
             regionCodes = regionProvider.listRegionCodes(null, dto.getCode());
-
             if(null != regionCodes && regionCodes.size() > 0){
                 LOGGER.error("create region code error. cmd = {}", dto);
                 throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGIONCODE_CODE_EXISTING,
                         "create region code error");
             }
         }
+
         regionCode = ConvertHelper.convert(dto, RegionCodes.class);
         regionCode.setPinyin(PinYinHelper.getPinYin(regionCode.getName()));
         regionCode.setFirstLetter(PinYinHelper.getCapitalInitial(regionCode.getPinyin()));
