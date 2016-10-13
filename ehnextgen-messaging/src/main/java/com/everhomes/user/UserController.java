@@ -1062,7 +1062,7 @@ public class UserController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /user/verfiy</b>
+	 * <b>URL: /user/checkVerifyCode</b>
 	 * <p>忘记密码，核实验证码</p>
 	 * @return  OK
 	 */
