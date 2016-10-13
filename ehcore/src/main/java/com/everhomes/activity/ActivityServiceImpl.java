@@ -316,6 +316,13 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
+        //检查是否超过报名人数限制, add by tt, 20161012
+        List<ActivityRoster> activityRosters = activityProvider.listRosters(cmd.getActivityId());
+        if (activityRosters.size() > activity.getConstraintQuantity().intValue()) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"beyond contraint quantity!");
+		}
+        
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());

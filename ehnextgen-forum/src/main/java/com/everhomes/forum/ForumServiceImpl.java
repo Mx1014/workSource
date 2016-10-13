@@ -2552,6 +2552,9 @@ public class ForumServiceImpl implements ForumService {
 			post.setMediaDisplayFlag(cmd.getMediaDisplayFlag());
 		}
         
+        //添加人数限制，add by tt, 20161012
+        post.setConstraintQuantity(cmd.getConstraintQuantity());
+        
         return post;
     }
     
@@ -3759,6 +3762,15 @@ public class ForumServiceImpl implements ForumService {
 	
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getConstraintQuantity()!= null) {
+			if (cmd.getConstraintQuantity() < 1) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"constraint quantity should greater than 0!");
+			}else if (cmd.getConstraintQuantity() > 10000) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"constraint quantity should not greater than 10000");
+			}
+		}
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
