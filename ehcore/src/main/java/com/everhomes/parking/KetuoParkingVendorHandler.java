@@ -322,7 +322,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-		plateNumber = plateNumber.substring(1, plateNumber.length());
+//		plateNumber = plateNumber.substring(1, plateNumber.length());
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long time = strToLong(oldValidEnd);
@@ -348,9 +348,10 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		
+		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", order.getPrice().intValue()*100);
+//		param.put("amount", order.getPrice().intValue()*100);
+		param.put("amount", tempFee.getPayable());
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
 		String json = post(param, PAY_TEMP_FEE);
