@@ -256,9 +256,10 @@ public class UserImpersonationProviderImpl implements UserImpersonationProvider 
                 user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
                 user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
                 Long ownerId = r.getValue(Tables.EH_USER_IMPERSONATIONS.OWNER_ID);
-                Long targetId = r.getValue(Tables.EH_USER_IMPERSONATIONS.OWNER_ID);
+                Long targetId = r.getValue(Tables.EH_USER_IMPERSONATIONS.TARGET_ID);
                 user.setOwnerId(ownerId);
                 user.setTargetId(targetId);
+                user.setImperId(r.getValue(Tables.EH_USER_IMPERSONATIONS.ID));
                 user.setPhone(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
                 Timestamp ts = r.getValue(Tables.EH_USERS.CREATE_TIME);
                 if(ts != null) {
