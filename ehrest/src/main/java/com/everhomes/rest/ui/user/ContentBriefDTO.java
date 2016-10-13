@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>id: id</li>
+ * <li>forumId: 论坛id</li>
  * <li>searchTypeId: 内容类型id</li>
  * <li>searchTypeName: 内容类型名称</li>
  * <li>contentType: 内容类型</li>
@@ -18,6 +19,8 @@ import com.everhomes.util.StringHelper;
 public class ContentBriefDTO {
 	
 	private Long id;
+	
+	private Long forumId;
 	
 	private Long searchTypeId;
 	
@@ -39,6 +42,14 @@ public class ContentBriefDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getForumId() {
+		return forumId;
+	}
+
+	public void setForumId(Long forumId) {
+		this.forumId = forumId;
 	}
 
 	public Long getSearchTypeId() {
