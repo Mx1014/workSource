@@ -2412,7 +2412,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		List<Long> orgIds = new ArrayList<Long>();
 		for(OrganizationCommunity org : orgs){
-			orgIds.add(org.getId());
+			orgIds.add(org.getOrganizationId());
 		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
