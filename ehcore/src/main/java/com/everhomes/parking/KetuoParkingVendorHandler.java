@@ -171,7 +171,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			dto.setCardType(KetuoParkingCardType.fromCode(RULE_TYPE).getText());
 			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
 //			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
-			dto.setPrice(new BigDecimal(0.01));
+			dto.setPrice(new BigDecimal(0.01).setScale(2));
 			dto.setVendorName(ParkingLotVendor.KETUO.getCode());
 			return dto;
 		}).collect(Collectors.toList());
@@ -297,6 +297,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private KetuoCard getCard(String plateNumber) {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
+		//储能月卡车没有 归属地区分
+		plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_CARD);
         
@@ -317,7 +319,10 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		KetuoCard card = getCard(order.getPlateNumber());
+		//储能月卡车没有 归属地区分
+		String plateNumber = order.getPlateNumber();
+		plateNumber = plateNumber.substring(1, plateNumber.length());
+		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long time = strToLong(oldValidEnd);
 		String validStart = sdf1.format(addDays(time, 1));
@@ -522,7 +527,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
 //		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
-		dto.setPrice(new BigDecimal(0.01));
+		dto.setPrice(new BigDecimal(0.01).setScale(2));
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
 	}
