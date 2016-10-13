@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.elasticsearch.common.recycler.Recycler.V;
@@ -57,38 +58,6 @@ import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
-import com.everhomes.rest.user.AppIdStatusCommand;
-import com.everhomes.rest.user.AppIdStatusResponse;
-import com.everhomes.rest.user.AppServiceAccessCommand;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.DeleteUserIdentifierCommand;
-import com.everhomes.rest.user.FetchMessageCommandResponse;
-import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
-import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
-import com.everhomes.rest.user.FindTokenByUserIdCommand;
-import com.everhomes.rest.user.GetAppAgreementCommand;
-import com.everhomes.rest.user.GetFamilyMemberInfoCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserSnapshotInfoCommand;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.LogonByTokenCommand;
-import com.everhomes.rest.user.LogonCommand;
-import com.everhomes.rest.user.LogonCommandResponse;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.ResendVerificationCodeCommand;
-import com.everhomes.rest.user.SendMessageCommand;
-import com.everhomes.rest.user.SetCurrentCommunityCommand;
-import com.everhomes.rest.user.SetPasswordCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.VerifyAndResetPasswordCommand;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.DateHelper;
@@ -699,6 +668,7 @@ public class UserController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
 		}
+		userIdentifier.setRegionCode(cmd.getRegionCode());
 		userService.resendVerficationCode(userIdentifier);
 		return new RestResponse("OK");
 	}
@@ -1088,4 +1058,63 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+
+
+	/**
+	 * <b>URL: /user/verfiy</b>
+	 * <p>忘记密码，核实验证码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCode")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCode(@Valid CheckVerifyCodeCommand cmd) {
+		assert StringUtils.isNotEmpty(cmd.getVerifyCode());
+		assert StringUtils.isNotEmpty(cmd.getIdentifierToken());
+		UserIdentifier identifier = userProvider.findIdentifierByVerifyCode(cmd.getVerifyCode(),
+				cmd.getIdentifierToken());
+		if (null == identifier) {
+			LOGGER.error("invalid operation,can not find verify information");
+
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+					"invalid params");
+
+		}
+		// check the expire time
+		if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
+			LOGGER.error("the verifycode is invalid with timeout");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+		}
+
+		return new RestResponse("OK");
+	}
+
+	/**
+	 * <b>URL: /user/resetPassword</b>
+	 * <p>设置密码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "resetPassword")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse resetPassword(@Valid ResetPasswordCommand cmd) {
+		assert StringUtils.isNotEmpty(cmd.getNewPassword());
+		assert StringUtils.isNotEmpty(cmd.getIdentifierToken());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifierToken());
+		if (null == identifier) {
+			LOGGER.error("identifier token on-existent. token = {}", cmd.getIdentifierToken());
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS,
+					"Invalid token status");
+
+		}
+
+		// find user by uid
+		User user = userProvider.findUserById(identifier.getOwnerUid());
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
+		userProvider.updateUser(user);
+		return new RestResponse("OK");
+	}
 }
