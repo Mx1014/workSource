@@ -3,6 +3,7 @@ package com.everhomes.rest.activity;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.util.StringHelper;
 
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetActivityDetailByIdResponse {
 	private String content;
+	@ItemType(AttachmentDTO.class)
 	private List<AttachmentDTO> attachments;
 
 	public GetActivityDetailByIdResponse(String content, List<AttachmentDTO> attachments) {
