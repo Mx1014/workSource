@@ -24,6 +24,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
@@ -660,7 +662,23 @@ public class OrganizationAdminController extends ControllerBase {
          
          return res;
     }
-
+    
+    /**
+     * <b>URL: /admin/org/batchApproveForEnterpriseContact</b>
+     * <p>批量审批通过认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("batchApproveForEnterpriseContact")
+    @RestReturn(value=String.class)
+    public RestResponse batchApproveForEnterpriseContact(@Valid BatchApproveContactCommand cmd) {
+    	this.organizationService.batchApproveForEnterpriseContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
     /**
      * <b>URL: /admin/org/rejectForEnterpriseContact</b>
      * <p>审批拒绝认证申请</p>
@@ -670,6 +688,23 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse rejectForEnterpriseContact(@Valid RejectContactCommand cmd) {
     	this.organizationService.rejectForEnterpriseContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
+
+    /**
+     * <b>URL: /admin/org/batchRejectForEnterpriseContact</b>
+     * <p>批量审批拒绝认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("batchRejectForEnterpriseContact")
+    @RestReturn(value=String.class)
+    public RestResponse batchRejectForEnterpriseContact(@Valid BatchRejectContactCommand cmd) {
+    	this.organizationService.batchRejectForEnterpriseContact(cmd);
     	 RestResponse res = new RestResponse();
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");

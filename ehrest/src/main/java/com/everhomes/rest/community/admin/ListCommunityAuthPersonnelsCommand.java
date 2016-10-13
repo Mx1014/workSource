@@ -1,22 +1,20 @@
-// @formatter:off
-package com.everhomes.rest.organization;
+package com.everhomes.rest.community.admin;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
- * <li>organizationId：政府机构id</li>
+ * <li>communityId：园区id</li>
  * <li>isSignedup: 是否左邻注册用户</li>
  * <li>status: 状态:1-待认证 3-已同意 0-已拒绝</li>
  * <li>pageAnchor: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
- */
-public class ListOrganizationContactCommand {
+ */ 
+public class ListCommunityAuthPersonnelsCommand {
 	@NotNull
-	private Long    organizationId;
+	private Long    communityId;
 	private Byte isSignedup;
 	private Byte status;
 	private Integer pageOffset;
@@ -24,20 +22,8 @@ public class ListOrganizationContactCommand {
 	private Integer pageSize;
 	
 	private String keywords;
-	
-	public ListOrganizationContactCommand() {
-    }
 
-	
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
+	 
 	public Byte getIsSignedup() {
 		return isSignedup;
 	}
@@ -95,5 +81,13 @@ public class ListOrganizationContactCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 }
