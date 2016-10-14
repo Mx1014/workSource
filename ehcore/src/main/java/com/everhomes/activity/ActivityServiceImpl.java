@@ -89,7 +89,10 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.QueryActivityWarningCommand;
+import com.everhomes.rest.activity.QueryActivityWarningResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.VideoManufacturerType;
 import com.everhomes.rest.activity.VideoState;
@@ -2587,6 +2590,19 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd) {
 		return forumService.getActivityDetailById(cmd);
+	}
+
+	@Override
+	public void setActivityWarning(SetActivityWarningCommand cmd) {
+		
+		
+		
+		
+	}
+
+	@Override
+	public QueryActivityWarningResponse queryActivityWarning(QueryActivityWarningCommand cmd) {
+		return null;
 	}
    
    
