@@ -217,4 +217,6 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
 	
 	List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId);
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus,
+			Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize);
 }

@@ -22,7 +22,7 @@ public class ActivityFootnoteHandler implements ForumFootnoteHandler {
 		ActivityDTO result = activityService.findSnapshotByPostId(postDto.getId());
 		ActivityFootnote fn = new ActivityFootnote();
 		fn.setLocation(result.getLocation());
-		fn.setStartTime(result.getStartTime());
+		fn.setStartTime(result.getStartTime().substring(0, result.getStartTime().lastIndexOf(":")));
 		
 		dto.setPostUrl(result.getPosterUrl());
 		dto.setFootnoteJson(StringHelper.toJsonString(fn));

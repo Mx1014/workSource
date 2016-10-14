@@ -22,21 +22,18 @@ public interface ParkingProvider {
     
     void requestParkingCard(ParkingCardRequest parkingCardRequest);
     
-    List<ParkingCardRequest> listParkingCardRequests(Long userId,String ownerType,Long ownerId
-    		,Long parkingLotId,String plateNumber,Byte requestStatus,Byte unRequestStatus,
-    		Long pageAnchor,Integer pageSize);
+    List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId, Long parkingLotId,
+    		String plateNumber, Byte requestStatus, Byte unRequestStatus, Long pageAnchor, Integer pageSize);
     
-    List<ParkingCardRequest> listParkingCardRequests(Long userId,String ownerType,Long ownerId
-    		,Long parkingLotId,String plateNumber,String order,
-    		Long pageAnchor,Integer pageSize);
+    List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId, Long parkingLotId,
+    		String plateNumber, String order, Long pageAnchor, Integer pageSize);
     
-    List<ParkingRechargeOrder> listParkingRechargeOrders(String ownerType,Long ownerId
-    		,Long parkingLotId,String plateNumber,Long pageAnchor,Integer pageSize,Long userId);
+    List<ParkingRechargeOrder> listParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
+    		String plateNumber, Long userId, Long pageAnchor, Integer pageSize);
     
-    List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType,Long ownerId,
-    		Long parkingLotId, String plateNumber,String plateOwnerName,String plateOwnerPhone
-    		,String paidType ,String payerName,String payerPhone,Long pageAnchor,Integer pageSize,Timestamp startDate,
-    		Timestamp endDate,Byte rechargeStatus/*,Long userId*/);
+    List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
+    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
+    		Byte rechargeType, Long pageAnchor, Integer pageSize);
     
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     
@@ -44,11 +41,11 @@ public interface ParkingProvider {
     
     ParkingRechargeRate findParkingRechargeRatesById(Long id);
     
-    List<ParkingCardRequest> searchParkingCardRequests(String ownerType,Long ownerId,
-			Long parkingLotId,String plateNumber,String plateOwnerName,String plateOwnerPhone,
-			Timestamp startDate,Timestamp endDate,Byte status,Long pageAnchor,Integer pageSize);
+    List<ParkingCardRequest> searchParkingCardRequests(String ownerType,Long ownerId, Long parkingLotId,
+    		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
+    		Timestamp endDate, Byte status, Long pageAnchor, Integer pageSize);
     
-    void setParkingCardReserveDays(ParkingLot parkingLot);
+    void setParkingLotConfig(ParkingLot parkingLot);
     
     ParkingCardRequest findParkingCardRequestById(Long id);
     

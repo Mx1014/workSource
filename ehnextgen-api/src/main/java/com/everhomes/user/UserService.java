@@ -31,7 +31,9 @@ import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
+import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
 import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
@@ -180,4 +182,11 @@ public interface UserService {
      * @param sceneType
      */
     void checkUserScene(SceneType sceneType);
+    
+    /**
+     * 查询命名空间下的用户
+     * @param cmd
+     * @return
+     */
+    ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd);
 }

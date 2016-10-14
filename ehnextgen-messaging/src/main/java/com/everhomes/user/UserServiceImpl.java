@@ -121,6 +121,7 @@ import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
@@ -144,8 +145,10 @@ import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
+import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
 import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
@@ -3055,11 +3058,11 @@ public class UserServiceImpl implements UserService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getAnchor());
         int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getPhone(), cmd.getImperOnly(), locator, count);
+        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getNamespaceId(), cmd.getPhone(), cmd.getImperOnly(), locator, count);
         for(UserImperInfo info : impers) {
             if(info.getOwnerId() != null && info.getTargetId() != null) {
-                UserInfo u1 = this.getUserInfo(info.getOwnerId());
-                UserInfo u2 = this.getUserInfo(info.getTargetId());
+                UserInfo u1 = this.getUserBasicInfo(info.getOwnerId(), false);
+                UserInfo u2 = this.getUserBasicInfo(info.getTargetId(), false);
                 if(u1 != null && u2 != null) {
                     if(u1.getId().equals(info.getId())) {
                         //ownerId match
@@ -3107,6 +3110,9 @@ public class UserServiceImpl implements UserService {
 	    	int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
 	    	cmd.setPageSize(pageSize);
 	    	
+	    	List<ContentBriefDTO> dtos = new ArrayList<ContentBriefDTO>();
+	    	response.setDtos(dtos);
+	    	
 	    	if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
 	    			&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
 	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
@@ -3122,8 +3128,11 @@ public class UserServiceImpl implements UserService {
 	    		response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
 	    	}
 	    	
+	    	if(newsService.searchNewsByScene(cmd) != null 
+	    			&& newsService.searchNewsByScene(cmd).getDtos() != null) {
+	    		response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+	    	}
 	    	
-	    	response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
 	    	break;
 		
 	    default:
@@ -3361,7 +3370,6 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-
 	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
 		//国内电话不要拼区号，发送短信走国内通道，便宜
 		if(86 == regionCode){
@@ -3370,5 +3378,23 @@ public class UserServiceImpl implements UserService {
 		return "00" + regionCode + identifierToken;
 	}
 
-
+	@Override
+	public ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd) {
+	    ListRegisterUsersResponse resp = new ListRegisterUsersResponse();
+	    
+	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    CrossShardListingLocator locator = new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getAnchor());
+	    List<User> users = this.userProvider.listUserByNamespace(cmd.getKeyword(), cmd.getNamespaceId(), locator, count);
+	    resp.setNextPageAnchor(locator.getAnchor());
+	    resp.setValues(new ArrayList<UserInfo>());
+	    for(User u : users) {
+	        UserInfo ui = getUserBasicInfoByQueryUser(u, false);
+	        if(ui != null) {
+	            resp.getValues().add(ui);
+	        }
+	    }
+	    
+	    return resp;
+	}
 }

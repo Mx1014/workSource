@@ -4973,7 +4973,7 @@ public class ForumServiceImpl implements ForumService {
 		command.setPageSize(cmd.getPageSize());
 		command.setQueryString(cmd.getKeyword());
 		command.setSceneToken(cmd.getSceneToken());
-		command.setSearchContentType(cmd.getContentType());
+		command.setSearchContentType(contentType.getCode());
 		//是否全局搜索未设定
 		SearchResponse rsp = postSearcher.searchByScene(command);
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -4981,7 +4981,7 @@ public class ForumServiceImpl implements ForumService {
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-		SearchContentsBySceneReponse resp = analyzeSearchResponse(rsp, pageSize, anchor, cmd.getContentType());
+		SearchContentsBySceneReponse resp = analyzeSearchResponse(rsp, pageSize, anchor, contentType.getCode());
 		return resp;
 	}
 	
@@ -5010,13 +5010,17 @@ public class ForumServiceImpl implements ForumService {
         for (SearchHit sd : docs) {
         	ContentBriefDTO dto = new ContentBriefDTO();
         	dto.setId(Long.parseLong(sd.getId()));
+        	
         	if(searchType != null) {
         		dto.setSearchTypeId(searchType.getId());
     			dto.setSearchTypeName(searchType.getName());
+    			dto.setContentType(searchType.getContentType());
         	}
         	
         	Map<String, Object> source = sd.getSource();
         	Map<String, HighlightField> highlight = sd.getHighlightFields();
+        	
+        	dto.setForumId(Long.parseLong(source.get("forumId").toString()));
         	
         	if(StringUtils.isEmpty(String.valueOf(highlight.get("subject"))) || "null".equals(String.valueOf(highlight.get("subject")))){
         		dto.setSubject(String.valueOf(source.get("subject")));
@@ -5062,7 +5066,7 @@ public class ForumServiceImpl implements ForumService {
     private ForumFootnoteHandler getForumFootnoteHandler(String searchContentType) {
     	ForumFootnoteHandler handler = null;
         
-        if(StringUtils.isEmpty(searchContentType)) {
+        if(!StringUtils.isEmpty(searchContentType)) {
             String handlerPrefix = ForumFootnoteHandler.FORUM_FOOTNOTE_RESOLVER_PREFIX;
             handler = PlatformContext.getComponent(handlerPrefix + searchContentType);
         }

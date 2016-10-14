@@ -17,6 +17,7 @@ import com.everhomes.aclink.DoorAccess;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.aclink.DoorAuthMethodType;
+import com.everhomes.aclink.DoorAuthProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -32,6 +33,8 @@ import com.everhomes.rest.aclink.AclinkQueryLogCommand;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.rest.aclink.AclinkUserResponse;
 import com.everhomes.rest.aclink.AesUserKeyDTO;
+import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
+import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
 import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
 import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
@@ -58,6 +61,7 @@ import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.rest.aclink.SearchDoorAuthCommand;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Aclink Admin controller", site="core")
@@ -72,6 +76,9 @@ public class AclinkAdminController extends ControllerBase {
     
     @Autowired
     private AclinkLogProvider aclinkLogProvider;
+    
+    @Autowired
+    private DoorAuthProvider doorAuthProvider;
     
     @Autowired
     DoorAccessProvider doorAccessProvider;
@@ -385,4 +392,25 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }    
+    
+    /**
+     * <b>URL: /admin/aclink/authVisitorStatistic</b>
+     * <p>访客统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("authVisitorStatistic")
+    @RestReturn(value=AuthVisitorStasticResponse.class)
+    public RestResponse authVisitorStatistic(@Valid AuthVisitorStatisticCommand cmd) {
+        if(cmd.getStart() == null) {
+            cmd.setStart(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
+        }
+        if(cmd.getEnd() == null) {
+            cmd.setEnd(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime());
+        }
+        AuthVisitorStasticResponse obj = doorAuthProvider.authVistorStatistic(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }        
 }

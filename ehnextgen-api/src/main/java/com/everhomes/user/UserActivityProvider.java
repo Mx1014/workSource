@@ -95,4 +95,10 @@ public interface UserActivityProvider {
     List<RequestTemplates> listCustomRequestTemplates();
     List<RequestAttachments> listRequestAttachments(String ownerType, Long ownerId);
     void createRequestAttachments(RequestAttachments attachment);
+
+	List<StatActiveUser> listActiveStats(Long beginDate, Long endDate, Integer namespaceId, CrossShardListingLocator locator, int i);
+
+	StatActiveUser findStatActiveUserByDate(java.sql.Date date, Integer namespaceId);
+
+	void createStatActiveUser(StatActiveUser stat);
 }

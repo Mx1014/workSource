@@ -1101,7 +1101,7 @@ public class NewsServiceImpl implements NewsService {
 						
 						NewsFootnote footNote = new NewsFootnote();
 						footNote.setAuthor(briefNews.getAuthor());
-						footNote.setCreateTime(briefNews.getPublishTime());
+						footNote.setCreateTime(briefNews.getPublishTime().toString());
 						footNote.setSourceDesc(briefNews.getSourceDesc());
 						footNote.setNewsToken(briefNews.getNewsToken());
 						dto.setFootnoteJson(StringHelper.toJsonString(footNote));
@@ -1155,9 +1155,10 @@ public class NewsServiceImpl implements NewsService {
 			
 			dto.setSearchTypeId(searchType.getId());
 			dto.setSearchTypeName(searchType.getName());
+			dto.setContentType(searchType.getContentType());
 			NewsFootnote footNote = new NewsFootnote();
 			footNote.setAuthor(source.getString("author"));
-			footNote.setCreateTime(source.getTimestamp("publishTime"));
+			footNote.setCreateTime(timeToStr(source.getTimestamp("publishTime")));
 			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
 			
 			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
@@ -1174,6 +1175,11 @@ public class NewsServiceImpl implements NewsService {
 		response.setDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;
+	}
+	
+	private String timeToStr(Timestamp time) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return sdf.format(time);
 	}
 
 	@Override

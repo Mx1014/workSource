@@ -4228,6 +4228,54 @@ public class OrganizationServiceImpl implements OrganizationService {
         sendMessageForContactReject(member);
 	}
 	
+
+	/**
+	 * 批准用户加入企业
+	 */
+	@Override
+	public void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd) {
+
+        User operator = UserContext.current().getUser();
+        Long operatorUid = operator.getId();
+         
+        if(cmd.getEnterpriseId() != null && cmd.getUserIds() != null && cmd.getUserIds().size()>0) {
+            for(Long userId : cmd.getUserIds()){
+            	ApproveContactCommand approvalCmd = new ApproveContactCommand();
+            	approvalCmd.setEnterpriseId(cmd.getEnterpriseId());
+            	approvalCmd.setUserId(userId);
+            	this.approveForEnterpriseContact(approvalCmd);
+            	
+            }
+        } else {
+            LOGGER.error("Invalid enterprise id or target user id, operatorUid=" + operatorUid + ", cmd=" + cmd);
+        }
+         
+	}
+
+	/**
+	 * 拒绝申请
+	 */
+	@Override
+	public void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd) {
+
+        User operator = UserContext.current().getUser();
+        Long operatorUid = operator.getId();
+         
+        if(cmd.getEnterpriseId() != null && cmd.getUserIds() != null && cmd.getUserIds().size()>0) {
+            for(Long userId : cmd.getUserIds()){
+            	RejectContactCommand rejectCmd = new RejectContactCommand();
+            	rejectCmd.setEnterpriseId(cmd.getEnterpriseId());
+            	rejectCmd.setUserId(userId);
+            	rejectCmd.setRejectText(cmd.getRejectText());
+            	this.rejectForEnterpriseContact(rejectCmd);
+            	
+            }
+        } else {
+            LOGGER.error("Invalid enterprise id or target user id, operatorUid=" + operatorUid + ", cmd=" + cmd);
+        }
+         
+	}
+	
 	/**
 	 * 退出企业
 	 */
@@ -4331,7 +4379,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization orgCommoand = new Organization();
 		orgCommoand.setId(org.getId());
-		orgCommoand.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
+		if (cmd.getStatus() == null)
+			orgCommoand.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
+		else 
+			orgCommoand.setStatus(cmd.getStatus());
 		orgCommoand.setGroupType(org.getGroupType());
 		
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand,cmd.getIsSignedup(), null, locator, pageSize);
@@ -5084,7 +5135,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 */
 	private void deleteEnterpriseContactStatus(Long operatorUid, OrganizationMember member){
 		 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
-			 this.organizationProvider.deleteOrganizationMemberById(member.getId());
+			 //modify by wh  2016-10-12 拒绝后置为拒绝状态而非删除
+			 member.setStatus(OrganizationMemberStatus.REJECT.getCode());
+			 this.organizationProvider.updateOrganizationMember(member);
+			 //this.organizationProvider.deleteOrganizationMemberById(member.getId());
 	            return null;
 	        });
 	        

@@ -5,6 +5,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
+import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 
 public interface DoorAuthProvider {
@@ -37,5 +39,7 @@ public interface DoorAuthProvider {
             int count);
 
     List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count);
+
+    AuthVisitorStasticResponse authVistorStatistic(AuthVisitorStatisticCommand cmd);
 
 }

@@ -16,6 +16,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
@@ -291,14 +293,14 @@ public interface OrganizationService {
 	 * @param cmd
 	 */
 	OrganizationMemberDTO addOrganizationPersonnel(AddOrganizationPersonnelCommand cmd);
-	
+
 	/**
 	 * 获取最顶级部门
 	 * @param organizationGroupType
 	 * @param token
-	 * @param orgPath
-	 * @return
-	 */
+	 * @param organizationId
+     * @return
+     */
 	OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId);
 	
 	/**
@@ -333,8 +335,9 @@ public interface OrganizationService {
 	/**
 	 * 简单的通讯录
 	 * @param cmd
-	 * @param pinyinFlag
      * @return
      */
 	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd);
+	void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd);
+	void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd);
 }
