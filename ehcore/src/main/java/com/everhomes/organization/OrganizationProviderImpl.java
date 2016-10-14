@@ -276,7 +276,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void updateOrganizationMember(OrganizationMember departmentMember){
 		assert(departmentMember.getId() == null);
-
+		departmentMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
 		dao.update(departmentMember);
@@ -1465,7 +1465,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return null;
 	}
 	@Override
-	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize) {
+	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
@@ -1483,7 +1483,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
 			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
 		}
-		
+
+		if(null != visibleFlag){
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.VISIBLE_FLAG.eq(visibleFlag.getCode()));
+		}
+
 		query.addConditions(cond);
 		if(null != locator.getAnchor())
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));

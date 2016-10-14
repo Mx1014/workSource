@@ -62,9 +62,6 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 //	private static final String FLAG1 = "1"; //1:卡号
 	private static final String FLAG2 = "2"; //2:车牌
 	
-	private ParkWebService service = new ParkWebService();
-	private ParkWebServiceSoap port = service.getParkWebServiceSoap();
-	
 	@Autowired
 	private ParkingProvider parkingProvider;
 	
@@ -129,6 +126,8 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		map.put("clientID", configProvider.getValue("parking.shenye.projectId", ""));
 		String data = StringHelper.toJsonString(map);
 		
+		ParkWebService service = new ParkWebService();
+		ParkWebServiceSoap port = service.getParkWebServiceSoap();
 		String json = port.parkingSystemRequestService("", GET_TYPES, data, "");
         
         if(LOGGER.isDebugEnabled())
@@ -157,6 +156,8 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     	cmd.setPlateNo(plateNumber);
     	cmd.setFlag(FLAG2);
 
+    	ParkWebService service = new ParkWebService();
+    	ParkWebServiceSoap port = service.getParkWebServiceSoap();
         String json = port.parkingSystemRequestService("", GET_CARD, cmd.toString(), "");
         
         if(LOGGER.isDebugEnabled())
@@ -220,6 +221,8 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		cmd.setPayDate(sdf1.format(order.getPaidTime()));
 		cmd.setChargePaidNo(order.getId().toString());
 		
+		ParkWebService service = new ParkWebService();
+		ParkWebServiceSoap port = service.getParkWebServiceSoap();
         String json = port.parkingSystemRequestService("", RECHARGE, cmd.toString(), "");
 
 		Bosigao2ResultEntity result = GsonUtil.fromJson(json, Bosigao2ResultEntity.class);

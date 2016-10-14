@@ -1091,6 +1091,7 @@ public class NewsServiceImpl implements NewsService {
 					List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
 					for (BriefNewsDTO briefNews : news.getNewsList()) {
 						ContentBriefDTO dto = new ContentBriefDTO();
+						dto.setNewsToken(briefNews.getNewsToken());
 						dto.setContent(briefNews.getContentAbstract());
 						dto.setSubject(briefNews.getTitle());
 						dto.setPostUrl(briefNews.getCoverUri());

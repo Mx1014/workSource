@@ -15,6 +15,16 @@ public class ResendVerificationCodeByIdentifierCommand {
     
     private Integer namespaceId;
 
+    private Integer regionCode;
+
+    public Integer getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(Integer regionCode) {
+        this.regionCode = regionCode;
+    }
+
     public String getIdentifier() {
         return identifier;
     }
