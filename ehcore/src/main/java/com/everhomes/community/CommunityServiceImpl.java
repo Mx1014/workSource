@@ -162,6 +162,8 @@ import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -201,6 +203,8 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private ContentServerService contentServerService;
 
+    @Autowired
+    private UserGroupHistoryProvider userGroupHistoryProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
@@ -1219,7 +1223,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		Long communityId = cmd.getCommunityId();
-		
+
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
@@ -1234,7 +1238,11 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
+		List<GroupMember> groupMembers = null;
+		if(cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode()))
+			groupMembers =  listCommunityRejectUserAddress(groupIds,locator,pageSize);
+		else
+			groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
 			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
 			c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
             query.addConditions(c);
@@ -1242,7 +1250,7 @@ public class CommunityServiceImpl implements CommunityService {
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
             return query;
-        });
+			});
 		
 		
 		List<GroupMemberDTO> dtos = groupMembers.stream().map(r->{
@@ -1275,6 +1283,16 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 	
+	private List<GroupMember> listCommunityRejectUserAddress(List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
+		List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByGroupIds(groupIds,locator,pageSize);
+		return histories.stream().map(r->{
+			GroupMember dto = ConvertHelper.convert(r, GroupMember.class);
+			dto.setMemberId(r.getOwnerUid()); 
+			return dto;
+			}).collect(Collectors.toList());
+	}
+
+
 	@Override
 	public CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd){
 		Long communityId = cmd.getCommunityId();
