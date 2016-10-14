@@ -1479,13 +1479,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         Long lastTick = updateDoorAccessLastTick(resp.getId());
         //generate a time message
-        //if( (lastTick+5*60*1000) < System.currentTimeMillis() ) {
-            //return msgGenerator.generateTimeMessage(resp.getId());
-        //}
+        if( (lastTick+5*60*1000) < System.currentTimeMillis() ) {
+            return msgGenerator.generateTimeMessage(resp.getId());
+        }
         
-        //return msgGenerator.generateWebSocketMessage(resp.getId());
+        return msgGenerator.generateWebSocketMessage(resp.getId());
         
-        return null;
+//        return null;
     }
     
     @Override
