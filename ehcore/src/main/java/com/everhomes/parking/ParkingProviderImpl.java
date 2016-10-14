@@ -185,21 +185,34 @@ public class ParkingProviderImpl implements ParkingProvider {
         
         StringBuilder sb = new StringBuilder("");
         StringBuilder conditionSb = new StringBuilder("");
-        sb.append("select case e1.status when  1 then count(*) else 0 end as ranking,e1.* from eh_parking_card_requests e1 left join (select * from eh_parking_card_requests e3 where e3.status =1) e2 on e1.create_time >= e2.create_time ");
-        
+        StringBuilder condition2 = new StringBuilder("");
+        //status =1 时 统计排队
+        sb.append("select case e1.status when 1 then count(*) else 0 end as ranking,e1.* from eh_parking_card_requests e1 left join (select * from eh_parking_card_requests e3 where e3.status =1 ");
+       // case e1.status when  1 then count(*) else 0 end
         if(userId != null)
         	conditionSb.append(" and e1.REQUESTOR_UID = ").append(userId);
         if (pageAnchor != null && pageAnchor != 0)
         	conditionSb.append(" and e1.create_time < '").append(new Timestamp(pageAnchor)).append("'");
-        if(StringUtils.isNotBlank(ownerType))
+        if(StringUtils.isNotBlank(ownerType)) {
         	conditionSb.append(" and e1.OWNER_TYPE = '").append(ownerType).append("'");
-        if(ownerId != null)
+        	condition2.append(" and e3.OWNER_TYPE = '").append(ownerType).append("'");
+        }
+        if(ownerId != null) {
         	conditionSb.append(" and e1.OWNER_ID = ").append(ownerId);
-        if(parkingLotId != null)
+        	condition2.append(" and e3.OWNER_ID = ").append(ownerId);
+        }
+        if(parkingLotId != null) {
         	conditionSb.append(" and e1.PARKING_LOT_ID = ").append(parkingLotId);
-        if(StringUtils.isNotBlank(plateNumber))
+        	condition2.append(" and e3.PARKING_LOT_ID = ").append(parkingLotId);
+        }
+        if(StringUtils.isNotBlank(plateNumber)) {
         	conditionSb.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
-        
+        	condition2.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
+        }
+        if(!condition2.toString().equals("")){
+        	sb.append(condition2.toString());
+        }
+        sb.append(" ) e2 on e1.create_time >= e2.create_time ");
         if(!conditionSb.toString().equals("")){
         	sb.append(" where ").append(conditionSb.replace(0, 4, "").toString());
         }
