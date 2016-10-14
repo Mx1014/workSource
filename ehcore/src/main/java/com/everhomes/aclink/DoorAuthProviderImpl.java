@@ -397,6 +397,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         Condition condition = Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getOwnerId());
         condition = condition.and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType()));
         condition = condition.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getStart()), new Timestamp(cmd.getEnd())));
+        condition = condition.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
         AuthVisitorStasticResponse resp = new AuthVisitorStasticResponse();
         resp.setDtos(new ArrayList<AuthVisitorStasticDTO>());
         
@@ -405,7 +406,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 .from(Tables.EH_DOOR_AUTH)
                 .where(condition).groupBy(DSL.date(Tables.EH_DOOR_AUTH.CREATE_TIME).as("d"));
         
-//        LOGGER.info("aa" + groupBy);
+        LOGGER.info("statistics: " + groupBy);
         groupBy.fetch().map((r) -> {
                     AuthVisitorStasticDTO dto = new AuthVisitorStasticDTO();
                     dto.setCount(Long.parseLong(r.getValue("c").toString()));
