@@ -918,4 +918,30 @@ public class OrganizationController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
+	/**
+	 * <b>URL: /org/listOrganizationContacts</b>
+	 * <p>通讯录</p>
+	 */
+	@RequestMapping("listOrganizationContacts")
+	@RestReturn(value=ListOrganizationContactCommandResponse.class)
+	public RestResponse listOrganizationContacts(ListOrganizationContactCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationContacts(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/getUserContactByOrganizationId</b>
+	 * <p>通讯录</p>
+	 */
+	@RequestMapping("getUserContactByOrganizationId")
+	@RestReturn(value=GetUserContactByOrganizationId.class)
+	public RestResponse listOrganizationContacts(GetUserContactByOrganizationIdCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationContacts(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 }

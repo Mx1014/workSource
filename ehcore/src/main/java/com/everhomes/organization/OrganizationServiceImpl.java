@@ -7202,6 +7202,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			UpdateOrganizationContactVisibleFlagCommand command = new UpdateOrganizationContactVisibleFlagCommand();
 			command.setVisibleFlag(cmd.getVisibleFlag());
 			command.setOrganizationId(cmd.getOrganizationId());
+			command.setContactToken(contactToken);
 			this.updateOrganizationContactVisibleFlag(command);
 		}
 	}
@@ -7210,23 +7211,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
 
 		Organization org =  this.checkOrganization(cmd.getOrganizationId());
-
+		List<Organization> organizations = new ArrayList<Organization>();
 		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
-
-		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypeList);
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		List<Organization> enterprises = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypeList);
+		organizations.addAll(enterprises);
+		groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypeList);
+		organizations.addAll(departments);
 
 		OrganizationTreeDTO dto = ConvertHelper.convert(org, OrganizationTreeDTO.class);
 		dto.setOrganizationId(org.getId());
 		dto.setOrganizationName(org.getName());
 		List<OrganizationTreeDTO> organizationTreeDTOs = new ArrayList<OrganizationTreeDTO>();
-		for (Organization organization : orgs) {
+		for (Organization organization : organizations) {
 			OrganizationTreeDTO orgTreeDTO = ConvertHelper.convert(organization, OrganizationTreeDTO.class);
 			orgTreeDTO.setOrganizationId(organization.getId());
 			orgTreeDTO.setOrganizationName(organization.getName());
-			if(organization.getDirectlyEnterpriseId().equals(org.getId())){
+//			if(organization.getDirectlyEnterpriseId().equals(org.getId())){
 				organizationTreeDTOs.add(orgTreeDTO);
-			}
+//			}
 		}
 		dto = this.processOrganizationTree(organizationTreeDTOs, dto);
 		return dto;
@@ -7242,20 +7247,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private OrganizationTreeDTO processOrganizationTree(List<OrganizationTreeDTO> dtos, OrganizationTreeDTO dto){
 
 		List<OrganizationTreeDTO> trees = new ArrayList<OrganizationTreeDTO>();
-		dto.setOrganizationName("全部");
-		trees.add(dto);
+		OrganizationTreeDTO allTreeDTO = ConvertHelper.convert(dto, OrganizationTreeDTO.class);
+		allTreeDTO.setOrganizationName("全部");
+		trees.add(allTreeDTO);
 		for (OrganizationTreeDTO orgTreeDTO : dtos) {
-			if(orgTreeDTO.getOrganizationId().equals(dto.getParentId())){
+			if(orgTreeDTO.getParentId().equals(dto.getOrganizationId())){
 				OrganizationTreeDTO organizationTreeDTO= processOrganizationTree(dtos, orgTreeDTO);
 				trees.add(organizationTreeDTO);
 			}
 		}
+
 		dto.setTrees(trees);
 		return dto;
 	}
 
 	@Override
-	public ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd, boolean pinyinFlag) {
+	public ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd) {
 		ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

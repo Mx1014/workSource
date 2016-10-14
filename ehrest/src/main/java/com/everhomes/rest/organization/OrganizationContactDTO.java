@@ -2,6 +2,7 @@
 package com.everhomes.rest.organization;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -32,7 +33,7 @@ public class OrganizationContactDTO {
 	private String   avatar;
 	private Long   employeeNo;
 	private Byte   gender;
-	
+
 	public OrganizationContactDTO() {
     }
 	

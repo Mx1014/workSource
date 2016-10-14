@@ -336,5 +336,5 @@ public interface OrganizationService {
 	 * @param pinyinFlag
      * @return
      */
-	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd, boolean pinyinFlag);
+	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd);
 }
