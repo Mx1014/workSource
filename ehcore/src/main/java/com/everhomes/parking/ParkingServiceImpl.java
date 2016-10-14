@@ -354,8 +354,8 @@ public class ParkingServiceImpl implements ParkingService {
 		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		orderCmd.setSubject("停车充值订单");
-//		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
-		orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+//		orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
 
 		CommonOrderDTO dto = null;
 		try {
