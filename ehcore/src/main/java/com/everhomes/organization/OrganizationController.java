@@ -877,4 +877,71 @@ public class OrganizationController extends ControllerBase {
           
           return res;
       }
+
+	/**
+	 * <b>URL: /org/updateOrganizationContactVisibleFlag</b>
+	 * <p>修改隐藏显示通讯录</p>
+	 */
+	@RequestMapping("updateOrganizationContactVisibleFlag")
+	@RestReturn(value=String.class)
+	public RestResponse updateOrganizationContactVisibleFlag(UpdateOrganizationContactVisibleFlagCommand cmd){
+		organizationService.updateOrganizationContactVisibleFlag(cmd);
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/batchUpdateOrganizationContactVisibleFlag</b>
+	 * <p>批量 修改隐藏显示通讯录</p>
+	 */
+	@RequestMapping("batchUpdateOrganizationContactVisibleFlag")
+	@RestReturn(value=String.class)
+	public RestResponse batchUpdateOrganizationContactVisibleFlag(BatchUpdateOrganizationContactVisibleFlagCommand cmd){
+		organizationService.batchUpdateOrganizationContactVisibleFlag(cmd);
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listAllTreeOrganizations</b>
+	 * <p>查询 机构子树形结构</p>
+	 */
+	@RequestMapping("listAllTreeOrganizations")
+	@RestReturn(value=OrganizationTreeDTO.class)
+	public RestResponse listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listAllTreeOrganizations(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationContacts</b>
+	 * <p>通讯录</p>
+	 */
+	@RequestMapping("listOrganizationContacts")
+	@RestReturn(value=ListOrganizationContactCommandResponse.class)
+	public RestResponse listOrganizationContacts(ListOrganizationContactCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationContacts(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/getUserContactByOrganizationId</b>
+	 * <p>通讯录</p>
+	 */
+//	@RequestMapping("getUserContactByOrganizationId")
+//	@RestReturn(value=GetUserContactByOrganizationId.class)
+//	public RestResponse listOrganizationContacts(GetUserContactByOrganizationIdCommand cmd){
+//		RestResponse res = new RestResponse(organizationService.listOrganizationContacts(cmd));
+//		res.setErrorCode(ErrorCodes.SUCCESS);
+//		res.setErrorDescription("OK");
+//		return res;
+//	}
 }

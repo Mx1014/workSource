@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
+import com.everhomes.rest.organization.VisibleFlag;
 import org.jooq.Condition;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -118,7 +119,7 @@ public interface OrganizationProvider {
 	
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes);
 	
-	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize);
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 	
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 	

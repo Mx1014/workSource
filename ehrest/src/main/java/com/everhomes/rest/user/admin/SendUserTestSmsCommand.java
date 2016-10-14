@@ -7,6 +7,8 @@ public class SendUserTestSmsCommand {
     
 	private String phoneNumber;
 
+    private Integer regionCode;
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -21,6 +23,14 @@ public class SendUserTestSmsCommand {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Integer getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(Integer regionCode) {
+        this.regionCode = regionCode;
     }
 
     @Override
