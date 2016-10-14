@@ -139,4 +139,6 @@ public interface DoorAccessService {
     AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
 
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
+
+    void test();
 }

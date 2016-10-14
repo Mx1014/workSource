@@ -4,6 +4,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import com.atomikos.util.DateHelper;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
@@ -155,6 +159,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.httpclient.util.DateUtil;
 
 
 @Component
@@ -249,11 +254,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
-    final String LAST_TICK = "dooraccess:%d:lasttick";
-    final long TASK_TICK_TIMEOUT = 5*60*1000;
-    public static String Manufacturer = "zuolin001";
-    
-    private static long MAX_KEY_ID = 1024;
+    final static String LAST_TICK = "dooraccess:%d:lasttick";
+    final static long TASK_TICK_TIMEOUT = 5*60*1000;
+    public final static String Manufacturer = "zuolin001";
+    private final static long MAX_KEY_ID = 1024;
+    private static final long KEY_TICK_ONE_HOUR = 3600*1000l;
+    private static final long KEY_TICK_ONE_DAY = KEY_TICK_ONE_HOUR*24l;
+    private static final long KEY_TICK_7_DAY = KEY_TICK_ONE_DAY*7;
     
     @PostConstruct
     public void setup() {
@@ -889,7 +896,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorAuth.setOwnerId(doorAccess.getOwnerId());
                     doorAuth.setOwnerType(doorAccess.getOwnerType());
                     doorAuth.setValidFromMs(System.currentTimeMillis() -  60*1000);
-                    doorAuth.setValidEndMs(System.currentTimeMillis()+ 7*24*60*60*1000);//TODO 7 Days
+                    doorAuth.setValidEndMs(System.currentTimeMillis()+ KEY_TICK_7_DAY);//TODO 7 Days
                     doorAuth.setUserId(user.getId());
                     doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     UserIdentifier ui = userProvider.findIdentifierById(user.getId());
@@ -909,7 +916,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setDoorId(doorAccess.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
                         //7 Days
-                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*60*1000*24*7);
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + KEY_TICK_7_DAY);
                         aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
                         aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
@@ -1201,7 +1208,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setAuthId(doorAuth.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
                         //7 Days
-                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + KEY_TICK_7_DAY);
                         aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
                         aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
@@ -1550,7 +1557,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<String> sdkKeys = new ArrayList<String>();
         
         //TODO 支持后台配置有效时间
-        Long validTime = System.currentTimeMillis() + 1*1*60*60*1000;
+        Long validTime = System.currentTimeMillis() + KEY_TICK_ONE_HOUR;
         int maxCount = 120;
             
         qr.setDoorGroupId(doorAccess.getId());
@@ -1969,9 +1976,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             auth.setOrganization(cmd.getOrganization());
             auth.setPhone(cmd.getPhone());
             auth.setNickname(cmd.getUserName());
-            auth.setKeyValidTime(System.currentTimeMillis() + 24* 60*60 * 1000l);
+            auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
             auth.setValidFromMs(System.currentTimeMillis());
-            auth.setValidEndMs(System.currentTimeMillis() + 24* 60*60*1000l);
+            auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
             auth.setUserId(0l);
             auth.setOwnerType(doorAccess.getOwnerType());
             auth.setOwnerId(doorAccess.getOwnerId());
@@ -2042,7 +2049,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + 24* 60*60 * 1000l);
+        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
         
         List<DoorAccess> childs = null;
         
@@ -2444,5 +2451,36 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             resp.getDtos().add(dto);
         }
         return resp;
+    }
+    
+    @Override
+    public void test() {
+        try {
+            String aesServerKey = "s87SHk+R/IOw6dV7QkX/pA==";
+            String aesUserKey = "mf8eLAiV+bbmo6egNjsCzw==";
+            byte[] serverKey = Base64.decodeBase64(aesServerKey);
+            byte[] userKey = Base64.decodeBase64(aesUserKey);
+            SecretKeySpec skeySpec = new SecretKeySpec(serverKey, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+            byte[] rlt = cipher.doFinal(userKey);
+            
+            byte[] time = new byte[4];
+            System.arraycopy(rlt, 0, time, 0, 4);
+         
+            long timeL = DataUtil.byteArrayToInt(time);
+            LOGGER.info("time=" + timeL);
+            Date dt = new Date(timeL * 1000);
+            Date et = new Date(1476327557913l);
+            Date ct = new Date(1476317477917l);
+            
+            ct = new Date(1476327557913l + KEY_TICK_7_DAY);
+            LOGGER.info("date=" + DateHelper.format(dt) + " create=" + DateHelper.format(ct) + " expire=" + DateHelper.format(et));
+            LOGGER.info(StringHelper.toHexString(rlt));
+            
+        } catch(Exception ex) {
+            
+        }
+
     }
 }

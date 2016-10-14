@@ -464,7 +464,8 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("aclinkMessageTest")
     @RestReturn(value=ListDoorAccessResponse.class)
     public RestResponse aclinkMessageTest(@Valid AclinkMessageTestCommand cmd) {
-        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+//        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+        doorAccessService.test();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
