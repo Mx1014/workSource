@@ -35,6 +35,8 @@ public class ContentBriefDTO {
 	private String postUrl;
 	
 	private String footnoteJson;
+	
+	private String newsToken;
 
 	public Long getId() {
 		return id;
@@ -98,6 +100,14 @@ public class ContentBriefDTO {
 
 	public void setFootnoteJson(String footnoteJson) {
 		this.footnoteJson = footnoteJson;
+	}
+
+	public String getNewsToken() {
+		return newsToken;
+	}
+
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
 	public String getPostUrl() {
