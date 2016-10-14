@@ -12,10 +12,10 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
-import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalFlowInfoCommand;
 import com.everhomes.rest.approval.CreateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.CreateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.CreateApprovalRuleCommand;
 import com.everhomes.rest.approval.CreateApprovalRuleResponse;
 import com.everhomes.rest.approval.DeleteApprovalCategoryCommand;
@@ -23,6 +23,8 @@ import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetTargetApprovalRuleCommand;
+import com.everhomes.rest.approval.GetTargetApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryResponse;
 import com.everhomes.rest.approval.ListApprovalFlowCommand;
@@ -46,12 +48,13 @@ import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
-import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalFlowInfoCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowInfoResponse;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
+import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 
 @RestDoc("approval controller")
 @RestController
@@ -329,4 +332,41 @@ public class ApprovalController extends ControllerBase {
 	public RestResponse listApprovalRequest(ListApprovalRequestCommand cmd){
 		return new RestResponse(approvalService.listApprovalRequest(cmd));
 	}
+	
+	/**
+	 * 
+	 * <p>25.查询具体某机构/人 的审批规则</p>
+	 * <b>URL: /approval/getTargetApprovalRule</b>
+	 */
+	@RequestMapping("getTargetApprovalRule")
+	@RestReturn(GetTargetApprovalRuleResponse.class)
+	public RestResponse getTargetApprovalRule(GetTargetApprovalRuleCommand cmd){
+		return new RestResponse(approvalService.getTargetApprovalRule(cmd));
+	}
+	
+
+	/**
+	 * 
+	 * <p>26.更新具体某机构/人 的审批规则</p>
+	 * <b>URL: /approval/updateTargetApprovalRule</b>
+	 */
+	@RequestMapping("updateTargetApprovalRule")
+	@RestReturn(String.class)
+	public RestResponse updateTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd){
+		approvalService.getTargetApprovalRule(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * 
+	 * <p>27. 删除具体某机构/人 的审批规则</p>
+	 * <b>URL: /approval/getTargetApprovalRule</b>
+	 */
+	@RequestMapping("deleteTargetApprovalRule")
+	@RestReturn(GetTargetApprovalRuleResponse.class)
+	public RestResponse deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd){
+		approvalService.deleteTargetApprovalRule(cmd);
+		return new RestResponse();
+	}
+	
 }

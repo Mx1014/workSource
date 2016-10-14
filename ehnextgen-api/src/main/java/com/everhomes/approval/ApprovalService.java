@@ -22,6 +22,8 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetTargetApprovalRuleCommand;
+import com.everhomes.rest.approval.GetTargetApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
@@ -62,6 +64,7 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.news.AttachmentDescriptor;
 
 public interface ApprovalService {
@@ -137,5 +140,11 @@ public interface ApprovalService {
 	void cancelApprovalRequestByScene(CancelApprovalRequestBySceneCommand cmd);
 
 	String getUserName(Long userId, Long organizationId);
+
+	GetTargetApprovalRuleResponse getTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
+
+	void getTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd);
+
+	void deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
 
 }
