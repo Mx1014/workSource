@@ -1288,6 +1288,7 @@ public class CommunityServiceImpl implements CommunityService {
 		return histories.stream().map(r->{
 			GroupMember dto = ConvertHelper.convert(r, GroupMember.class);
 			dto.setMemberId(r.getOwnerUid()); 
+			dto.setApproveTime(r.getCreateTime());
 			return dto;
 			}).collect(Collectors.toList());
 	}
