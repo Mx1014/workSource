@@ -1,34 +1,34 @@
-ï»¿-- ¸üĞÂº£°¶¶«×ùÂÛÌ³id
+-- æ›´æ–°æµ·å²¸ä¸œåº§è®ºå›id
 update eh_communities set default_forum_id = 179511, feedback_forum_id = 179512 where namespace_id = 999993 and id = 240111044331054835;
 update eh_forum_posts set forum_id = 179511 where forum_id = 183102;
 
--- ¸üĞÂº£°¶¶«×ù¹ÜÀí´¦Ãû×Ö
-update eh_organizations set name = 'º£°¶´óÏÃ¶«×ùÎïÒµ·şÎñÖĞĞÄ' where id = 1004937 and namespace_id = 999993;
+-- æ›´æ–°æµ·å²¸ä¸œåº§ç®¡ç†å¤„åå­—
+update eh_organizations set name = 'æµ·å²¸å¤§å¦ä¸œåº§ç‰©ä¸šæœåŠ¡ä¸­å¿ƒ' where id = 1004937 and namespace_id = 999993;
 
--- ¸üĞÂÍ£³µ³äÖµ¶©µ¥ÎªÔÂ¿¨³äÖµ¶©µ¥ 
+-- æ›´æ–°åœè½¦å……å€¼è®¢å•ä¸ºæœˆå¡å……å€¼è®¢å• 
 update eh_parking_recharge_orders set recharge_type = 1;
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('351', 'parking.chuneng.url', 'http://113.108.41.29:8099', '´¢ÄÜÍ£³µ³äÖµkey', '0', NULL);
+	VALUES ('351', 'parking.chuneng.url', 'http://113.108.41.29:8099', 'å‚¨èƒ½åœè½¦å……å€¼key', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('352', 'parking.chuneng.key', 'F7A0B971B199FD2A52468575', '´¢ÄÜÍ£³µ³äÖµkey', '0', NULL);
+	VALUES ('352', 'parking.chuneng.key', 'F7A0B971B199FD2A52468575', 'å‚¨èƒ½åœè½¦å……å€¼key', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('353', 'parking.chuneng.user', 'ktapi', '´¢ÄÜÍ£³µ³äÖµÓÃ»§Ãû', '0', NULL);
+	VALUES ('353', 'parking.chuneng.user', 'ktapi', 'å‚¨èƒ½åœè½¦å……å€¼ç”¨æˆ·å', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('354', 'parking.chuneng.pwd', '0306C3', '´¢ÄÜÍ£³µ³äÖµÃÜÂë', '0', NULL);
+	VALUES ('354', 'parking.chuneng.pwd', '0306C3', 'å‚¨èƒ½åœè½¦å……å€¼å¯†ç ', '0', NULL);
 	
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`) 
-	VALUES ('10004', 'community', '240111044331051500', 'ÖĞ¹ú´¢ÄÜ´óÏÃÍ£³µ³¡', 'KETUO', NULL, '1', '2', '1025', '2016-08-29 17:28:10', '1', '1');
+	VALUES ('10004', 'community', '240111044331051500', 'ä¸­å›½å‚¨èƒ½å¤§å¦åœè½¦åœº', 'KETUO', NULL, '1', '2', '1025', '2016-08-29 17:28:10', '1', '1');
 
 	
--- ´¢ÄÜÍ£³µ³äÖµ¹ã³¡
+-- å‚¨èƒ½åœè½¦å……å€¼å¹¿åœº
 delete from eh_launch_pad_items where id in (10604, 10622);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
-	VALUES ('10604', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', 'Í£³µ', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
+	VALUES ('10604', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', 'åœè½¦', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
-	VALUES ('10622', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', 'Í£³µ', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
+	VALUES ('10622', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', 'åœè½¦', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
 
--- Í£³µ³äÖµ²Ëµ¥
+-- åœè½¦å……å€¼èœå•
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
@@ -40,94 +40,94 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 999990,2);
 
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='556', `menu_id`='41100', `name`='³äÖµÏî¹ÜÀíÁĞ±í',  `discription`='²éÑ¯³äÖµÏî¹ÜÀíÁĞ±í' WHERE (`id`='17');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='512', `menu_id`='41100', `name`='Ôö¼ÓÍ£³µ³äÖµÏî',  `discription`='Ôö¼ÓÍ£³µ³äÖµÏî' WHERE (`id`='18');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='513', `menu_id`='41100', `name`='É¾³ıÍ£³µ³äÖµÏî',  `discription`='É¾³ıÍ£³µ³äÖµÏî' WHERE (`id`='19');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='557', `menu_id`='41200', `name`='ÉèÖÃ»î¶¯¹æÔò',  `discription`='ÉèÖÃ»î¶¯¹æÔò' WHERE (`id`='20');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='515', `menu_id`='41400', `name`='½É·Ñ¼ÇÂ¼',  `discription`='²éÑ¯½É·Ñ¼ÇÂ¼' WHERE (`id`='21');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='516', `menu_id`='41300', `name`='ÔÂ¿¨ÉêÇë¼ÇÂ¼',  `discription`='²éÑ¯ÔÂ¿¨ÉêÇë¼ÇÂ¼' WHERE (`id`='22');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='514', `menu_id`='41300', `name`='ÉèÖÃÔÂ¿¨ÉêÇë²ÎÊı',  `discription`='ÉèÖÃÔÂ¿¨ÉêÇë²ÎÊı' WHERE (`id`='23');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='517', `menu_id`='41300', `name`='·¢·ÅÔÂ¿¨',  `discription`='·¢·ÅÔÂ¿¨' WHERE (`id`='24');
-UPDATE `eh_web_menu_privileges` SET `privilege_id`='518', `menu_id`='41300', `name`='ÁìÈ¡ÔÂ¿¨',  `discription`='ÁìÈ¡ÔÂ¿¨' WHERE (`id`='25');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='556', `menu_id`='41100', `name`='å……å€¼é¡¹ç®¡ç†åˆ—è¡¨',  `discription`='æŸ¥è¯¢å……å€¼é¡¹ç®¡ç†åˆ—è¡¨' WHERE (`id`='17');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='512', `menu_id`='41100', `name`='å¢åŠ åœè½¦å……å€¼é¡¹',  `discription`='å¢åŠ åœè½¦å……å€¼é¡¹' WHERE (`id`='18');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='513', `menu_id`='41100', `name`='åˆ é™¤åœè½¦å……å€¼é¡¹',  `discription`='åˆ é™¤åœè½¦å……å€¼é¡¹' WHERE (`id`='19');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='557', `menu_id`='41200', `name`='è®¾ç½®æ´»åŠ¨è§„åˆ™',  `discription`='è®¾ç½®æ´»åŠ¨è§„åˆ™' WHERE (`id`='20');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='515', `menu_id`='41400', `name`='ç¼´è´¹è®°å½•',  `discription`='æŸ¥è¯¢ç¼´è´¹è®°å½•' WHERE (`id`='21');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='516', `menu_id`='41300', `name`='æœˆå¡ç”³è¯·è®°å½•',  `discription`='æŸ¥è¯¢æœˆå¡ç”³è¯·è®°å½•' WHERE (`id`='22');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='514', `menu_id`='41300', `name`='è®¾ç½®æœˆå¡ç”³è¯·å‚æ•°',  `discription`='è®¾ç½®æœˆå¡ç”³è¯·å‚æ•°' WHERE (`id`='23');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='517', `menu_id`='41300', `name`='å‘æ”¾æœˆå¡',  `discription`='å‘æ”¾æœˆå¡' WHERE (`id`='24');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='518', `menu_id`='41300', `name`='é¢†å–æœˆå¡',  `discription`='é¢†å–æœˆå¡' WHERE (`id`='25');
 
-UPDATE `eh_web_menus` SET `name`='Í£³µ½É·Ñ' WHERE (`id`='41000');
+UPDATE `eh_web_menus` SET `name`='åœè½¦ç¼´è´¹' WHERE (`id`='41000');
 
-UPDATE `eh_web_menus` SET `name`='³äÖµÏî¹ÜÀí' WHERE (`id`='41100');
-UPDATE `eh_web_menus` SET `name`='»î¶¯¹æÔò' WHERE (`id`='41200');
-UPDATE `eh_web_menus` SET `name`='ÔÂ¿¨ÉêÇë' WHERE (`id`='41300');
-UPDATE `eh_web_menus` SET `name`='½É·Ñ¼ÇÂ¼' WHERE (`id`='41400');
+UPDATE `eh_web_menus` SET `name`='å……å€¼é¡¹ç®¡ç†' WHERE (`id`='41100');
+UPDATE `eh_web_menus` SET `name`='æ´»åŠ¨è§„åˆ™' WHERE (`id`='41200');
+UPDATE `eh_web_menus` SET `name`='æœˆå¡ç”³è¯·' WHERE (`id`='41300');
+UPDATE `eh_web_menus` SET `name`='ç¼´è´¹è®°å½•' WHERE (`id`='41400');
 
 DELETE from eh_web_menu_scopes where menu_id = 41200;
 
-UPDATE `eh_acl_privileges` SET `name`='Ôö¼ÓÍ£³µ³äÖµÏî', `description`='Ôö¼ÓÍ£³µ³äÖµÏî' WHERE (`id`='512');
-UPDATE `eh_acl_privileges` SET `name`='É¾³ıÍ£³µ³äÖµÏî', `description`='É¾³ıÍ£³µ³äÖµÏî' WHERE (`id`='513');
-UPDATE `eh_acl_privileges` SET `name`='ÉèÖÃÔÂ¿¨ÉêÇë²ÎÊı', `description`='ÉèÖÃÔÂ¿¨ÉêÇë²ÎÊı' WHERE (`id`='514');
-UPDATE `eh_acl_privileges` SET `name`='²éÑ¯½É·Ñ¼ÇÂ¼', `description`='²éÑ¯½É·Ñ¼ÇÂ¼' WHERE (`id`='515');
-UPDATE `eh_acl_privileges` SET `name`='²éÑ¯ÔÂ¿¨ÉêÇë¼ÇÂ¼', `description`='²éÑ¯ÔÂ¿¨ÉêÇë¼ÇÂ¼' WHERE (`id`='516');
-UPDATE `eh_acl_privileges` SET `name`='·¢·ÅÔÂ¿¨', `description`='·¢·ÅÔÂ¿¨' WHERE (`id`='517');
-UPDATE `eh_acl_privileges` SET `name`='ÁìÈ¡ÔÂ¿¨', `description`='ÁìÈ¡ÔÂ¿¨' WHERE (`id`='518');
-UPDATE `eh_acl_privileges` SET `name`='²éÑ¯³äÖµÏî¹ÜÀíÁĞ±í', `description`='²éÑ¯³äÖµÏî¹ÜÀíÁĞ±í' WHERE (`id`='556');
-UPDATE `eh_acl_privileges` SET `name`='ÉèÖÃ»î¶¯¹æÔò', `description`='ÉèÖÃ»î¶¯¹æÔò' WHERE (`id`='557');
+UPDATE `eh_acl_privileges` SET `name`='å¢åŠ åœè½¦å……å€¼é¡¹', `description`='å¢åŠ åœè½¦å……å€¼é¡¹' WHERE (`id`='512');
+UPDATE `eh_acl_privileges` SET `name`='åˆ é™¤åœè½¦å……å€¼é¡¹', `description`='åˆ é™¤åœè½¦å……å€¼é¡¹' WHERE (`id`='513');
+UPDATE `eh_acl_privileges` SET `name`='è®¾ç½®æœˆå¡ç”³è¯·å‚æ•°', `description`='è®¾ç½®æœˆå¡ç”³è¯·å‚æ•°' WHERE (`id`='514');
+UPDATE `eh_acl_privileges` SET `name`='æŸ¥è¯¢ç¼´è´¹è®°å½•', `description`='æŸ¥è¯¢ç¼´è´¹è®°å½•' WHERE (`id`='515');
+UPDATE `eh_acl_privileges` SET `name`='æŸ¥è¯¢æœˆå¡ç”³è¯·è®°å½•', `description`='æŸ¥è¯¢æœˆå¡ç”³è¯·è®°å½•' WHERE (`id`='516');
+UPDATE `eh_acl_privileges` SET `name`='å‘æ”¾æœˆå¡', `description`='å‘æ”¾æœˆå¡' WHERE (`id`='517');
+UPDATE `eh_acl_privileges` SET `name`='é¢†å–æœˆå¡', `description`='é¢†å–æœˆå¡' WHERE (`id`='518');
+UPDATE `eh_acl_privileges` SET `name`='æŸ¥è¯¢å……å€¼é¡¹ç®¡ç†åˆ—è¡¨', `description`='æŸ¥è¯¢å……å€¼é¡¹ç®¡ç†åˆ—è¡¨' WHERE (`id`='556');
+UPDATE `eh_acl_privileges` SET `name`='è®¾ç½®æ´»åŠ¨è§„åˆ™', `description`='è®¾ç½®æ´»åŠ¨è§„åˆ™' WHERE (`id`='557');
 
--- ËÑË÷ÀàĞÍÅäÖÃ by xiongying20161017
+-- æœç´¢ç±»å‹é…ç½® by xiongying20161017
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (1, '0', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (2, '0', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (3, '0', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (1, '0', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (2, '0', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (3, '0', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
 SET @search_type_id = (SELECT MAX(id) FROM `eh_search_types`);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999992', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999992', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999992', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999992', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999992', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999992', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999991', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999991', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999991', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999991', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999991', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999991', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', '¿ìÑ¶', 'news', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999989', '', '0', 'å¿«è®¯', 'news', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999990', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999990', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999990', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999990', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999990', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999990', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999993', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999993', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999993', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999993', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999993', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999993', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999999', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999999', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999999', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999999', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999999', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999999', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999988', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999988', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999988', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999988', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999988', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999988', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', '¿ìÑ¶', 'news', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999987', '', '0', 'å¿«è®¯', 'news', '1', NULL, NULL);
 
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', 'Í¶Æ±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', '»î¶¯', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', '»°Ìâ', 'topic', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', '¿ìÑ¶', 'news', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', 'æŠ•ç¥¨', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', 'æ´»åŠ¨', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', 'è¯é¢˜', 'topic', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '999986', '', '0', 'å¿«è®¯', 'news', '1', NULL, NULL);
 
--- ¿Æ¼¼Ô°Ìí¼Ó×óÁÚ»áÒéÊÒ
+-- ç§‘æŠ€å›­æ·»åŠ å·¦é‚»ä¼šè®®å®¤
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
-	VALUES('50','×óÁÚ»áÒéÊÒ','0',NULL,'0','1000000');
+	VALUES('50','å·¦é‚»ä¼šè®®å®¤','0',NULL,'0','1000000');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
-	VALUES (112372, '1000000', '0', '4', '178945', '/home', 'Bizs', 'MEETINGROOM', '×óÁÚ»áÒéÊÒ', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', '1', '1', '49', '{\"resourceTypeId\":50,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
+	VALUES (112372, '1000000', '0', '4', '178945', '/home', 'Bizs', 'MEETINGROOM', 'å·¦é‚»ä¼šè®®å®¤', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', '1', '1', '49', '{\"resourceTypeId\":50,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
-	VALUES (112373, '1000000', '0', '4', '178945', '/home', 'Bizs', 'MEETINGROOM', '×óÁÚ»áÒéÊÒ', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', '1', '1', '49', '{\"resourceTypeId\":50,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
+	VALUES (112373, '1000000', '0', '4', '178945', '/home', 'Bizs', 'MEETINGROOM', 'å·¦é‚»ä¼šè®®å®¤', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', '1', '1', '49', '{\"resourceTypeId\":50,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 
--- è¸¢å‡ºæç¤º by janson 20161017
-UPDATE `eh_locale_strings` SET `text`='ä½ çš„è´¦å·å·²åœ¨å¦ä¸€å°è®¾å¤‡ç™»å½•ï¼Œä½ è¢«è¿«ä¸‹çº¿ï¼Œè‹¥éæœ¬äººæ“ä½œï¼Œè¯·ç«‹å³ä¿®æ”¹å¯†ç ã€‚' WHERE `scope`='user' AND `code`='100018' AND `locale`='zh_CN';
+-- éŸªãˆ åš­é»æ„®ãš by janson 20161017
+UPDATE `eh_locale_strings` SET `text`='æµ£çŠµæ®‘ç’ï¹€å½¿å®¸æ’æ¹ªé™ï¸¿ç«´é™æ‹Œî†•æ¾¶å›©æ«¥è¤°æ›ªç´æµ£çŠºî¦æ©î‚¡ç¬…ç»¾åŒ¡ç´é‘»ãƒ©æ½ªéˆîƒ¿æ±‰é¿å¶„ç¶”é”›å²ƒî‡¬ç»”å¬ªåµ†æ·‡î†½æ•¼ç€µå—™çˆœéŠ†? WHERE `scope`='user' AND `code`='100018' AND `locale`='zh_CN';
 
 
