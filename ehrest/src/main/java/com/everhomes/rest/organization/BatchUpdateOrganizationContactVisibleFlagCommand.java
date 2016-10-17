@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>organizationId: 组织id</li>
- * <li>contactToken：联系信息</li>
+ * <li>contactTokens：联系信息</li>
  * <li>visibleFlag：隐藏显示</li>
  * </ul>
  */

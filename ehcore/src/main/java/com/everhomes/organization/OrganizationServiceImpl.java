@@ -7365,4 +7365,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return response;
 	}
 
+	@Override
+	public OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());
+	}
 }

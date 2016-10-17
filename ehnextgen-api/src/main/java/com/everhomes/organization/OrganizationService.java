@@ -340,4 +340,11 @@ public interface OrganizationService {
 	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd);
 	void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd);
 	void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd);
+
+	/**
+	 * 获取用户的最高部门
+	 * @param cmd
+	 * @return
+     */
+	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
 }

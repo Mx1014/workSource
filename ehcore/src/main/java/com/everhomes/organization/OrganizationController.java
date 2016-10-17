@@ -933,15 +933,17 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /org/getUserContactByOrganizationId</b>
-	 * <p>通讯录</p>
+	 * <b>URL: /org/getContactTopDepartment</b>
+	 * <p>获取用户在当前机构的最高部门</p>
 	 */
-//	@RequestMapping("getUserContactByOrganizationId")
-//	@RestReturn(value=GetUserContactByOrganizationId.class)
-//	public RestResponse listOrganizationContacts(GetUserContactByOrganizationIdCommand cmd){
-//		RestResponse res = new RestResponse(organizationService.listOrganizationContacts(cmd));
-//		res.setErrorCode(ErrorCodes.SUCCESS);
-//		res.setErrorDescription("OK");
-//		return res;
-//	}
+	@RequestMapping("getContactTopDepartment")
+	@RestReturn(value=OrganizationDTO.class)
+	public RestResponse getContactTopDepartment(GetContactTopDepartmentCommand cmd){
+		RestResponse res = new RestResponse(organizationService.getContactTopDepartment(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+
 }
