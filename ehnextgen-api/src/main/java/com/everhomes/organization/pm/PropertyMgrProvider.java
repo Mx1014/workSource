@@ -90,7 +90,7 @@ public interface PropertyMgrProvider {
 	public List<String> listPropBillDateStr(Long communityId);
 	
 	public int countCommunityPmMembers(long communityId, String contactToken);
-	public int countCommunityAddressMappings(long communityId,Byte livingStatus);
+	public int countCommunityAddressMappings(Long organizationId, Long communityId, Byte livingStatus);
 	public int countCommunityPmBills(long communityId, String dateStr, String address);
 	public int countCommunityPmOwners(long communityId, String address, String contactToken);
 	public int countCommunityPmTasks(Long communityId, Long entityId, String entityType, 

@@ -416,7 +416,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
 		long organizationId = org.getId();
 
-		int totalCount = propertyMgrProvider.countCommunityAddressMappings(organizationId,null);
+		int totalCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, null, null);
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
@@ -1727,12 +1727,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		long organizationId = org.getId();
 
-		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.DEFAULT.getCode());
-		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.LIVING.getCode());
-		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.RENT.getCode());
-		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.FREE.getCode());
-		int decorateCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.DECORATE.getCode());
-		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.UNSALE.getCode());
+		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.DEFAULT.getCode());
+		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.LIVING.getCode());
+		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.RENT.getCode());
+		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.FREE.getCode());
+		int decorateCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.DECORATE.getCode());
+		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.UNSALE.getCode());
 		dto.setAptCount(community.getAptCount()==null ?0 : community.getAptCount());
 		dto.setFamilyCount(familyCount);
 		dto.setUserCount(userCount);

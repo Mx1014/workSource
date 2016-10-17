@@ -311,16 +311,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public int countCommunityAddressMappings(long organizationId,Byte livingStatus) {
-
+	public int countCommunityAddressMappings(Long organizationId, Long communityId, Byte livingStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
-		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
-		Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId);
-		if(livingStatus != null) {
-			condition = condition.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
-		}
-		return step.where(condition).fetchOneInto(Integer.class);
+		SelectQuery<Record1<Integer>> query = context.selectCount().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS).getQuery();
+        if (organizationId != null)
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId));
+        if (communityId != null)
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
+        if(livingStatus != null)
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+		return query.fetchOneInto(Integer.class);
 	}
 
 	@Cacheable(value = "CommunityAddressMappingsList", key="#communityId")
