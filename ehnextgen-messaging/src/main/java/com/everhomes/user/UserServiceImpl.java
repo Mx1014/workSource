@@ -3370,9 +3370,9 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
+	private static String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
 		//国内电话不要拼区号，发送短信走国内通道，便宜
-		if(86 == regionCode || null == regionCode){
+		if(null == regionCode || 86 == regionCode ){
 			return identifierToken;
 		}
 		return "00" + regionCode + identifierToken;
