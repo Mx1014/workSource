@@ -130,4 +130,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 踢出设备提示 by janson 20161017
 UPDATE `eh_locale_strings` SET `text`='你的账号已在另一台设备登录，你被迫下线，若非本人操作，请立即修改密码。' WHERE `scope`='user' AND `code`='100018' AND `locale`='zh_CN';
 
+-- 爱特家迷你居 去掉新闻管理菜单
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 11200 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999988 ;
+
 
