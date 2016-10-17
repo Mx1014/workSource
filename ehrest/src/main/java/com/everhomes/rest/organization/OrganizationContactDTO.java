@@ -34,6 +34,8 @@ public class OrganizationContactDTO {
 	private Long   employeeNo;
 	private Byte   gender;
 
+	private String organizationPath;
+
 	public OrganizationContactDTO() {
     }
 	
@@ -147,6 +149,14 @@ public class OrganizationContactDTO {
 
 	public void setGender(Byte gender) {
 		this.gender = gender;
+	}
+
+	public String getOrganizationPath() {
+		return organizationPath;
+	}
+
+	public void setOrganizationPath(String organizationPath) {
+		this.organizationPath = organizationPath;
 	}
 
 	@Override
