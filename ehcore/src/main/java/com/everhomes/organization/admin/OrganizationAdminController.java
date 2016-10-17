@@ -48,7 +48,6 @@ import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
 import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.GetMemberTopDepartmentCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
