@@ -4,3 +4,78 @@ update eh_forum_posts set forum_id = 179511 where forum_id = 183102;
 
 -- 更新海岸东座管理处名字
 update eh_organizations set name = '海岸大厦东座物业服务中心' where id = 1004937 and namespace_id = 999993;
+
+-- 更新停车充值订单为月卡充值订单 
+update eh_parking_recharge_orders set recharge_type = 1;
+
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('351', 'parking.chuneng.url', 'http://113.108.41.29:8099', '储能停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('352', 'parking.chuneng.key', 'F7A0B971B199FD2A52468575', '储能停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('353', 'parking.chuneng.user', 'ktapi', '储能停车充值用户名', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('354', 'parking.chuneng.pwd', '0306C3', '储能停车充值密码', '0', NULL);
+	
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`) 
+	VALUES ('10004', 'community', '240111044331051500', '中国储能大厦停车场', 'KETUO', NULL, '1', '2', '1025', '2016-08-29 17:28:10', '1');
+
+	
+-- 储能停车充值广场	
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+	VALUES ('116318', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车充值', 'cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+	VALUES ('116319', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车充值', 'cs://1/image/aW1hZ2UvTVRwaFpXRmtZek5qTWpobE1UWTRaVE5qWlRjek4yWTFaRFU1WlRJeVlqUXlNQQ', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
+
+-- 停车充值菜单
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41000,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41300,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),41400,'', 'EhNamespaces', 999990,2);
+
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='556', `menu_id`='41100', `name`='充值项管理列表',  `discription`='查询充值项管理列表' WHERE (`id`='17');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='512', `menu_id`='41100', `name`='增加停车充值项',  `discription`='增加停车充值项' WHERE (`id`='18');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='513', `menu_id`='41100', `name`='删除停车充值项',  `discription`='删除停车充值项' WHERE (`id`='19');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='557', `menu_id`='41200', `name`='设置活动规则',  `discription`='设置活动规则' WHERE (`id`='20');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='515', `menu_id`='41400', `name`='缴费记录',  `discription`='查询缴费记录' WHERE (`id`='21');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='516', `menu_id`='41300', `name`='月卡申请记录',  `discription`='查询月卡申请记录' WHERE (`id`='22');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='514', `menu_id`='41300', `name`='设置月卡申请参数',  `discription`='设置月卡申请参数' WHERE (`id`='23');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='517', `menu_id`='41300', `name`='发放月卡',  `discription`='发放月卡' WHERE (`id`='24');
+UPDATE `eh_web_menu_privileges` SET `privilege_id`='518', `menu_id`='41300', `name`='领取月卡',  `discription`='领取月卡' WHERE (`id`='25');
+
+UPDATE `eh_web_menus` SET `name`='停车缴费' WHERE (`id`='41000');
+
+UPDATE `eh_web_menus` SET `name`='充值项管理' WHERE (`id`='41100');
+UPDATE `eh_web_menus` SET `name`='活动规则' WHERE (`id`='41200');
+UPDATE `eh_web_menus` SET `name`='月卡申请' WHERE (`id`='41300');
+UPDATE `eh_web_menus` SET `name`='缴费记录' WHERE (`id`='41400');
+
+DELETE from eh_web_menu_scopes where menu_id = 41200;
+
+UPDATE `eh_acl_privileges` SET `name`='增加停车充值项', `description`='增加停车充值项' WHERE (`id`='512');
+UPDATE `eh_acl_privileges` SET `name`='删除停车充值项', `description`='删除停车充值项' WHERE (`id`='513');
+UPDATE `eh_acl_privileges` SET `name`='设置月卡申请参数', `description`='设置月卡申请参数' WHERE (`id`='514');
+UPDATE `eh_acl_privileges` SET `name`='查询缴费记录', `description`='查询缴费记录' WHERE (`id`='515');
+UPDATE `eh_acl_privileges` SET `name`='查询月卡申请记录', `description`='查询月卡申请记录' WHERE (`id`='516');
+UPDATE `eh_acl_privileges` SET `name`='发放月卡', `description`='发放月卡' WHERE (`id`='517');
+UPDATE `eh_acl_privileges` SET `name`='领取月卡', `description`='领取月卡' WHERE (`id`='518');
+UPDATE `eh_acl_privileges` SET `name`='查询充值项管理列表', `description`='查询充值项管理列表' WHERE (`id`='556');
+UPDATE `eh_acl_privileges` SET `name`='设置活动规则', `description`='设置活动规则' WHERE (`id`='557');
+
+
+
+
+
+
+
+
+
+
+
+
