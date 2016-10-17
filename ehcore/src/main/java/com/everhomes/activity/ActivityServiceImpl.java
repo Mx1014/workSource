@@ -89,8 +89,8 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
-import com.everhomes.rest.activity.QueryActivityWarningCommand;
-import com.everhomes.rest.activity.QueryActivityWarningResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
@@ -136,6 +136,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -176,6 +177,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private ActivityProivider activityProvider;
+    
+    @Autowired
+    private WarningSettingProvider warningSettingProvider;
 
     @Autowired
     private ForumProvider forumProvider;
@@ -2593,16 +2597,41 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public void setActivityWarning(SetActivityWarningCommand cmd) {
+	public ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd) {
+		if (cmd.getNamespaceId()==null || cmd.getDays() == null || cmd.getHours() == null || cmd.getHours().intValue() == 0) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cmd="+cmd);
+		}
+		WarningSetting warningSetting = new WarningSetting();
+		warningSetting.setNamespaceId(cmd.getNamespaceId());
+		warningSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+		warningSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		warningSetting.setCreatorUid(UserContext.current().getUser().getId());
+		warningSetting.setUpdateTime(warningSetting.getCreateTime());
+		warningSetting.setOperatorUid(warningSetting.getCreatorUid());
+		warningSetting.setType(EhActivities.class.getSimpleName());
 		
+		warningSettingProvider.createWarningSetting(warningSetting);
 		
-		
-		
+		return ConvertHelper.convert(cmd, ActivityWarningResponse.class);
 	}
 
 	@Override
-	public QueryActivityWarningResponse queryActivityWarning(QueryActivityWarningCommand cmd) {
-		return null;
+	public ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd) {
+		if (cmd.getNamespaceId()==null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cmd="+cmd);
+		}
+		
+		WarningSetting warningSetting = warningSettingProvider.findWarningSettingByNamespaceAndType(cmd.getNamespaceId(), EhActivities.class.getSimpleName());
+		
+		if (warningSetting != null) {
+			Integer days = (int) (warningSetting.getTime() / 1000 / 3600 / 24);
+			Integer hours  = (int) (warningSetting.getTime() / 1000 / 3600 % 24);
+			return new ActivityWarningResponse(warningSetting.getNamespaceId(), days, hours);
+		}
+		
+		return new ActivityWarningResponse(cmd.getNamespaceId(), 0, 1);
 	}
    
    

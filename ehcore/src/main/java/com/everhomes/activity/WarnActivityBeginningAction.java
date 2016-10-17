@@ -1,0 +1,93 @@
+package com.everhomes.activity;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ActivityWarningResponse;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+
+@Service
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class WarnActivityBeginningAction implements Runnable {
+	private Long activityId;
+	
+	@Autowired
+	private ActivityProivider activityProivider;
+	
+	@Autowired
+	private ActivityService activityService;
+	
+	@Autowired
+	private MessagingService messagingService;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+	
+	public WarnActivityBeginningAction(Long activityId) {
+		super();
+		this.activityId = activityId;
+	}
+
+	@Override
+	public void run() {
+		Activity activity = activityProivider.findActivityById(activityId);
+		if (activity == null) {
+			return;
+		}
+		
+//		Integer namespaceId = activity.getNamespaceId();
+//		WarningSetting warningSetting = warningSettingProvider.findWarningSettingByNamespaceAndType(namespaceId, EhActivities.class.getSimpleName());
+//		Long time = 3600*1000L;
+//		if (warningSetting != null) {
+//			time = warningSetting.getTime();
+//		}
+		ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
+		String time = (queryActivityWarningResponse.getDays()==null||queryActivityWarningResponse.getDays()==0?"":queryActivityWarningResponse.getDays()+"天") + queryActivityWarningResponse.getHours()+"小时";
+    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+    	String scope = ActivityNotificationTemplateCode.SCOPE;
+		int code = ActivityNotificationTemplateCode.ACTIVITY_WARNING_PARTICIPANT;
+		Map<String, Object> map = new HashMap<>();
+		map.put("tag", activity.getTag());
+		map.put("title", activity.getSubject());
+		map.put("time", time);
+		final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+    	activityRosters.forEach(r->{
+    		if (r.getUid().longValue() != UserContext.current().getUser().getId().longValue()) {
+    			sendMessageToUser(r.getUid().longValue(), content, null);
+			}
+    	});
+	}
+	
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+}

@@ -46,7 +46,7 @@ import com.everhomes.util.StringHelper;
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  * <li>isVideoSupport: 为空则不开启，为 1 则开启直播 </li>
  * <li>videoUrl: TODO 需要么？</li>
- * <li>constraintQuantity: 限制人数</li>
+ * <li>maxQuantity: 限制人数</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -100,14 +100,14 @@ public class NewTopicCommand {
     
     private Byte mediaDisplayFlag;
     
-    private Integer constraintQuantity;
-    
-    public Integer getConstraintQuantity() {
-		return constraintQuantity;
+    private Integer maxQuantity;
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
 	}
 
-	public void setConstraintQuantity(Integer constraintQuantity) {
-		this.constraintQuantity = constraintQuantity;
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
 	}
 
 	public Byte getMediaDisplayFlag() {

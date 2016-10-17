@@ -34,8 +34,8 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
-import com.everhomes.rest.activity.QueryActivityWarningCommand;
-import com.everhomes.rest.activity.QueryActivityWarningResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
@@ -123,8 +123,8 @@ public interface ActivityService {
 
 	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd);
 
-	void setActivityWarning(SetActivityWarningCommand cmd);
+	ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd);
 
-	QueryActivityWarningResponse queryActivityWarning(QueryActivityWarningCommand cmd);
+	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
 
 }

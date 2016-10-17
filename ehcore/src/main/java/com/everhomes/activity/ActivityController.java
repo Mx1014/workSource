@@ -47,8 +47,8 @@ import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.QueryActivityWarningCommand;
-import com.everhomes.rest.activity.QueryActivityWarningResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.VideoSupportType;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
@@ -361,19 +361,18 @@ public class ActivityController extends ControllerBase {
      * <p>设置活动提醒</p>
      */
     @RequestMapping("setActivityWarning")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ActivityWarningResponse.class)
     public RestResponse setActivityWarning(SetActivityWarningCommand cmd){
-    	activityService.setActivityWarning(cmd);
-    	return new RestResponse();
+    	return new RestResponse(activityService.setActivityWarning(cmd));
     }
-
+    
     /**
-     * <b>URL: /activity/queryActivityWarning</b>
+     * <b>URL: /activity/getActivityWarning</b>
      * <p>查询活动提醒</p>
      */
-    @RequestMapping("queryActivityWarning")
-    @RestReturn(value=QueryActivityWarningResponse.class)
-    public RestResponse queryActivityWarning(QueryActivityWarningCommand cmd){
+    @RequestMapping("getActivityWarning")
+    @RestReturn(value=ActivityWarningResponse.class)
+    public RestResponse getActivityWarning(GetActivityWarningCommand cmd){
     	return new RestResponse(activityService.queryActivityWarning(cmd));
     }
 }

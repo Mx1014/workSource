@@ -60,7 +60,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
+//@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
 public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao2ParkingVendorHandler.class);
 	

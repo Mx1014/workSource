@@ -308,13 +308,13 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
     	//报名人数限制必须在1到10000之间，add by tt, 20161013
-    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getConstraintQuantity()!= null) {
-			if (cmd.getConstraintQuantity() < 1) {
+    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getMaxQuantity()!= null) {
+			if (cmd.getMaxQuantity() < 1) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"constraint quantity should greater than 0!");
-			}else if (cmd.getConstraintQuantity() > 10000) {
+						"max quantity should greater than 0!");
+			}else if (cmd.getMaxQuantity() > 10000) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"constraint quantity should not greater than 10000");
+						"max quantity should not greater than 10000");
 			}
 		}
         //checkForumPostPrivilege(cmd.getForumId());
@@ -799,6 +799,9 @@ public class ForumServiceImpl implements ForumService {
     //当创建者删除活动时发消息通知已报名的人
     private void sendMessageWhenCreatorDeleteActivity(Long activityId, Long userId){
     	Activity activity = activityProivider.findActivityById(activityId);
+    	if (activity == null) {
+			return ;
+		}
     	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
     	String scope = ActivityNotificationTemplateCode.SCOPE;
 		int code = ActivityNotificationTemplateCode.CREATOR_DELETE_ACTIVITY;
@@ -2583,7 +2586,7 @@ public class ForumServiceImpl implements ForumService {
 		}
         
         //添加人数限制，add by tt, 20161012
-        post.setConstraintQuantity(cmd.getConstraintQuantity());
+        post.setConstraintQuantity(cmd.getMaxQuantity());
         
         return post;
     }
