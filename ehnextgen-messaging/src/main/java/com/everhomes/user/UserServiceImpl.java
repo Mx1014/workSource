@@ -3372,7 +3372,7 @@ public class UserServiceImpl implements UserService {
 
 	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
 		//国内电话不要拼区号，发送短信走国内通道，便宜
-		if(86 == regionCode){
+		if(86 == regionCode || null == regionCode){
 			return identifierToken;
 		}
 		return "00" + regionCode + identifierToken;
