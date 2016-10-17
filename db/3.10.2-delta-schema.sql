@@ -25,3 +25,13 @@ CREATE TABLE `eh_region_codes` (
 
 -- 增加区号 by sfyan 20161012
 ALTER TABLE `eh_user_identifiers` ADD COLUMN `region_code` INTEGER DEFAULT 86 COMMENT 'region code 86 852';
+
+-- 结算增加统计笔数 by sfyan 20161017
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `alipay_paid_count` BIGINT DEFAULT 0 COMMENT '支付宝消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `alipay_refund_count` BIGINT DEFAULT 0 COMMENT '支付宝退款笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `wechat_paid_count` BIGINT DEFAULT 0 COMMENT '微信消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `wechat_refund_count` BIGINT DEFAULT 0 COMMENT '微信退款笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `payment_card_paid_count` BIGINT DEFAULT 0 COMMENT '一卡通消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `payment_card_refund_count` BIGINT DEFAULT 0 COMMENT '一卡通退款笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `total_paid_count` BIGINT DEFAULT 0 COMMENT '总消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `total_refund_count` BIGINT DEFAULT 0 COMMENT '总退款消费笔数';
