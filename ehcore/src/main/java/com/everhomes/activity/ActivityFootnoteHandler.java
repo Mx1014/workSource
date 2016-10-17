@@ -11,7 +11,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumFootnoteHandler;
-import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.search.SearchContentConstants;
 import com.everhomes.rest.ui.user.ActivityFootnote;
@@ -62,5 +61,7 @@ public class ActivityFootnoteHandler implements ForumFootnoteHandler {
 			}
 			return posterUrl;
 		}
+		
+	}
 		
 }
