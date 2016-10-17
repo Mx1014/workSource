@@ -4293,6 +4293,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         updateEnterpriseContactStatus(userId, member);
         
         sendMessageForContactLeave(member);
+        
+        // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
+        // http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        setUserDefaultCommunityByOrganization(namespaceId, userId, enterpriseId);
     }
 	
 	@Override
@@ -4776,6 +4781,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    User user = userProvider.findUserById(identifier.getOwnerUid());
 	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
 	        OrganizationMember organizationMember = null;
+	        Organization firstOrg = null; // 第一个机构
 	        for (OrganizationMember member : members) {
 	        	Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
 	            if(org.getNamespaceId() == null || !org.getNamespaceId().equals(identifier.getNamespaceId())) {
@@ -4785,6 +4791,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                        + ", userNamespaceId=" + identifier.getNamespaceId());
 	                }
 	                continue;
+	            }
+	            
+	            if(firstOrg == null) {
+	                firstOrg = org;
 	            }
 	            
 	            if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE) {
@@ -4817,6 +4827,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
                 
 	        }
+	        
+	        // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
+	        // http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
+	        if(firstOrg != null) {
+                Integer namespaceId = UserContext.getCurrentNamespaceId();
+                setUserDefaultCommunityByOrganization(namespaceId, identifier.getOwnerUid(), firstOrg.getId());
+	        }
+	        
 	        return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 		} catch(Exception e) {
 		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
@@ -7370,5 +7388,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = UserContext.current().getUser().getId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());
+	}
+	
+	private void setUserDefaultCommunityByOrganization(Integer namespaceId, Long userId, Long oranizationId) {
+        Long communityId = getOrganizationActiveCommunityId(oranizationId);
+        if(communityId != null) {
+            userService.updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
+        } else {
+            LOGGER.error("Community not found in organization, userId={}, namespaceId={}, organizationId={}", 
+                userId, namespaceId, oranizationId);
+        }
 	}
 }
