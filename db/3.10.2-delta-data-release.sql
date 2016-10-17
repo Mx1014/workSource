@@ -70,11 +70,12 @@ UPDATE `eh_acl_privileges` SET `name`='≤È—Ø≥‰÷µœÓπ‹¿Ì¡–±Ì', `description`='≤È—Ø≥
 UPDATE `eh_acl_privileges` SET `name`='…Ë÷√ªÓ∂ØπÊ‘Ú', `description`='…Ë÷√ªÓ∂ØπÊ‘Ú' WHERE (`id`='557');
 
 -- À—À˜¿‡–Õ≈‰÷√ by xiongying20161017
-SET @search_type_id = (SELECT MAX(id) FROM `eh_search_types`);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '0', '', '0', 'Õ∂∆±', 'poll', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '0', '', '0', 'ªÓ∂Ø', 'activity', '1', NULL, NULL);
-INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '0', '', '0', 'ª∞Ã‚', 'topic', '1', NULL, NULL);
 
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (1, '0', '', '0', 'Õ∂∆±', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (2, '0', '', '0', 'ªÓ∂Ø', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES (3, '0', '', '0', 'ª∞Ã‚', 'topic', '1', NULL, NULL);
+
+SET @search_type_id = (SELECT MAX(id) FROM `eh_search_types`);
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'Õ∂∆±', 'poll', '1', NULL, NULL);
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'ªÓ∂Ø', 'activity', '1', NULL, NULL);
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ((@search_type_id := @search_type_id + 1), '1000000', '', '0', 'ª∞Ã‚', 'topic', '1', NULL, NULL);
