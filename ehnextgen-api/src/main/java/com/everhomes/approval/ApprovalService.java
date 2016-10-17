@@ -3,6 +3,7 @@ package com.everhomes.approval;
 
 import java.util.List;
 
+import com.everhomes.rest.approval.ApproveApprovalRequesByScenetCommand;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
@@ -54,6 +55,8 @@ import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
 import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
+import com.everhomes.rest.approval.ListMyApprovalsBySceneCommand;
+import com.everhomes.rest.approval.RejectApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
@@ -146,5 +149,11 @@ public interface ApprovalService {
 	void getTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd);
 
 	void deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
+
+	Object listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd);
+
+	void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd);
+
+	void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd);
 
 }

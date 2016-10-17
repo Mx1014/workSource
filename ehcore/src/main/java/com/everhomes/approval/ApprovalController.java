@@ -363,7 +363,7 @@ public class ApprovalController extends ControllerBase {
 	 * <b>URL: /approval/getTargetApprovalRule</b>
 	 */
 	@RequestMapping("deleteTargetApprovalRule")
-	@RestReturn(GetTargetApprovalRuleResponse.class)
+	@RestReturn(String.class)
 	public RestResponse deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd){
 		approvalService.deleteTargetApprovalRule(cmd);
 		return new RestResponse();

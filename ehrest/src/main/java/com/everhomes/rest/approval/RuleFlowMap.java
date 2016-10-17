@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>approvalTypeName: 审批类型名称</li>
  * <li>flowId: 审批流程id</li>
  * <li>flowflowName: 审批流程名称</li>
- * <li>levelList: 审批流程</li>
+ * <li>levelList: 审批流程 {@link com.everhomes.rest.approval.ApprovalFlowLevelDTO}</li>
  * </ul>
  */
 public class RuleFlowMap {

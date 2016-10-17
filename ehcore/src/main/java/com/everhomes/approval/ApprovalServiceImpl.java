@@ -54,6 +54,7 @@ import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApprovalUserDTO;
+import com.everhomes.rest.approval.ApproveApprovalRequesByScenetCommand;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.BriefApprovalFlowDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -77,6 +78,8 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetTargetApprovalRuleCommand;
+import com.everhomes.rest.approval.GetTargetApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
@@ -107,6 +110,8 @@ import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
 import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
+import com.everhomes.rest.approval.ListMyApprovalsBySceneCommand;
+import com.everhomes.rest.approval.RejectApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.RuleFlowMap;
 import com.everhomes.rest.approval.TimeRange;
@@ -119,6 +124,7 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelCommand;
 import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
+import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -1750,6 +1756,42 @@ public class ApprovalServiceImpl implements ApprovalService {
 	@Override
 	public List<AttachmentDescriptor> listAttachmentByRequestId(Long requestId) {
 		return getAttachments(requestId);
+	}
+
+	@Override
+	public GetTargetApprovalRuleResponse getTargetApprovalRule(GetTargetApprovalRuleCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void getTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Object listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

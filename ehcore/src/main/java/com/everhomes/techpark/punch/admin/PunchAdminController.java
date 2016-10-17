@@ -21,6 +21,8 @@ import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
@@ -36,6 +38,7 @@ import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.techpark.punch.PunchService;
 @RestDoc(value = "Punch controller", site = "ehccore")
@@ -537,5 +540,52 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <p>
+	 * 查询公司某部门/某人 考勤规则 
+	 * </p>
+	 * <b>URL: /punch/getTargetPunchAllRule</b>
+	 */
+	@RequestMapping("getTargetPunchAllRule")
+	@RestReturn(value = GetTargetPunchAllRuleResponse.class)
+	public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
+		ListPunchRuleMapsResponse resp = punchService.getTargetPunchAllRule(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>
+	 * 设置公司某部门/某人 考勤规则 
+	 * </p>
+	 * <b>URL: /punch/updateTargetPunchAllRule</b>
+	 */
+	@RequestMapping("updateTargetPunchAllRule")
+	@RestReturn(value = String.class)
+	public RestResponse updateTargetPunchAllRule(@Valid UpdateTargetPunchAllRuleCommand cmd) {
+		punchService.updateTargetPunchAllRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>
+	 * 清空公司某部门/某人 考勤规则 
+	 * </p>
+	 * <b>URL: /punch/deleteTargetPunchAllRule</b>
+	 */
+	@RequestMapping("deleteTargetPunchAllRule")
+	@RestReturn(value = String.class)
+	public RestResponse deleteTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
+		punchService.deleteTargetPunchAllRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
