@@ -21,11 +21,12 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 	VALUES ('10004', 'community', '240111044331051500', '中国储能大厦停车场', 'KETUO', NULL, '1', '2', '1025', '2016-08-29 17:28:10', '1');
 
 	
--- 储能停车充值广场	
+-- 储能停车充值广场
+delete from eh_launch_pad_items where id in (10604, 10622);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
-	VALUES ('116318', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车充值', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
+	VALUES ('10604', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
-	VALUES ('116319', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车充值', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
+	VALUES ('10622', '999990', '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车', 'cs://1/image/aW1hZ2UvTVRwaVpUWTVNemc0Wm1Fd01qSTRNVEpqTmpsaU1tWTROVFExTW1FMU1qZ3paZw', '1', '1', '30', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
 
 -- 停车充值菜单
 
