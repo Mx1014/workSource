@@ -1208,8 +1208,12 @@ public class ForumServiceImpl implements ForumService {
          if(null != cmd.getEmbeddedAppId()){
         	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
         	 //如果是活动且查询官方活动，则加上官方活动条件
-        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())==OfficialFlag.YES) {
-				condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+//        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())==OfficialFlag.YES) {
+//				condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+//        	 }
+        	 // 如果officialFlag传了值，按传的值算，如果没传值则查所有，updated by tt, 20161017
+        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())!=null) {
+        		 condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
         	 }
          }
          if(null != unCateGoryCondition){
