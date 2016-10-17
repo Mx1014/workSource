@@ -127,7 +127,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
 	VALUES (112373, '1000000', '0', '4', '178945', '/home', 'Bizs', 'MEETINGROOM', '左邻会议室', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', '1', '1', '49', '{\"resourceTypeId\":50,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
 
-
-
+-- 踢出提示 by janson 20161017
+UPDATE `eh_locale_strings` SET `text`='你的账号已在另一台设备登录，你被迫下线，若非本人操作，请立即修改密码。' WHERE `scope`='user' AND `code`='100018' AND `locale`='zh_CN';
 
 
