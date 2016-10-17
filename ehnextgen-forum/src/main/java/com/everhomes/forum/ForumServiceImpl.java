@@ -2586,7 +2586,7 @@ public class ForumServiceImpl implements ForumService {
 		}
         
         //添加人数限制，add by tt, 20161012
-        post.setConstraintQuantity(cmd.getMaxQuantity());
+        post.setMaxQuantity(cmd.getMaxQuantity());
         
         return post;
     }

@@ -327,7 +327,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         //检查是否超过报名人数限制, add by tt, 20161012
         List<ActivityRoster> activityRosters = activityProvider.listRosters(cmd.getActivityId());
-        if (activityRosters.size() > activity.getConstraintQuantity().intValue()) {
+        if (activityRosters.size() > activity.getMaxQuantity().intValue()) {
         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"beyond contraint quantity!");
 		}
