@@ -141,3 +141,22 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
     VALUES ('10395', '999993', '0', '0', '0', '/home', 'Bizs', '饮用水服务', '饮用水服务', 'cs://1/image/aW1hZ2UvTVRvd01qa3lOVGcxWWpSa01qUmhOekpoWm1Gak1XUTVZVFkzWkRNM00yUXhZUQ', '1', '1', '14', '{\"url\":\"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14661537517644218191%3F_k%3Dzlbiz#sign_suffix\"}', '5', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1');
 update eh_launch_pad_items set default_order = 10 where id in(10370,10371,10372,10373,10374,10375,10376,10377) and namespace_id = 999993;
+
+-- 更新储能物业报修到2.0
+UPDATE `eh_launch_pad_items` SET `item_name`='PM_TASK', `item_label`='物业服务', `action_type`='51', `action_data`='' WHERE (`id`='10610');
+UPDATE `eh_launch_pad_items` SET `item_name`='物业服务', `item_label`='物业服务', `action_type`='14', `action_data`='http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix' WHERE (`id`='10628');
+
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 999990 AND menu_id IN (21000, 22000, 23000);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),24000,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),25000,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),26000,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),27000,'', 'EhNamespaces', 999990,2);
+	
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ('31', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999990');
+
