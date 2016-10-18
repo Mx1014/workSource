@@ -4291,7 +4291,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), userId, userId, tag);
         member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
         updateEnterpriseContactStatus(userId, member);
-        
+
+		//退出机构，要把在机构相关的角色权限删除掉 by sfyan 20161018
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+			List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), EntityType.USER.getCode(), member.getTargetId());
+			for (RoleAssignment roleAssignment : userRoles) {
+				aclProvider.deleteRoleAssignment(roleAssignment.getId());
+			}
+		}
         sendMessageForContactLeave(member);
         
         // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
