@@ -39,6 +39,7 @@ import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
@@ -174,7 +175,7 @@ public interface PunchService {
 
 	Time getEndTime(Time startTime, Time workTime);
 
-	public ListPunchRuleMapsResponse getTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
+	public GetTargetPunchAllRuleResponse getTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
 
 	public void updateTargetPunchAllRule(UpdateTargetPunchAllRuleCommand cmd);
 

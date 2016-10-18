@@ -550,7 +550,7 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("getTargetPunchAllRule")
 	@RestReturn(value = GetTargetPunchAllRuleResponse.class)
 	public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
-		ListPunchRuleMapsResponse resp = punchService.getTargetPunchAllRule(cmd);
+		GetTargetPunchAllRuleResponse resp = punchService.getTargetPunchAllRule(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
