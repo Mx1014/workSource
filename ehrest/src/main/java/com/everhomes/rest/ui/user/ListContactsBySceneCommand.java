@@ -12,6 +12,8 @@ public class ListContactsBySceneCommand {
     private String sceneToken;
     
     private Byte isSignedup;
+
+    private Long organizationId;
     
 //    private Long pageAnchor;
 //    
@@ -33,7 +35,15 @@ public class ListContactsBySceneCommand {
 		this.isSignedup = isSignedup;
 	}
 
-	@Override
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

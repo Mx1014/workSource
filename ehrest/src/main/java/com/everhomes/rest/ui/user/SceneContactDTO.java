@@ -43,6 +43,8 @@ public class SceneContactDTO {
     
     private Byte neighborhoodRelation;
 
+    private String organizationPath;
+
     public String getSceneType() {
         return sceneType;
     }
@@ -150,10 +152,16 @@ public class SceneContactDTO {
 	public void setDepartmentName(String departmentName) {
 		this.departmentName = departmentName;
 	}
-	
-	
-	
-	public Byte getNeighborhoodRelation() {
+
+    public String getOrganizationPath() {
+        return organizationPath;
+    }
+
+    public void setOrganizationPath(String organizationPath) {
+        this.organizationPath = organizationPath;
+    }
+
+    public Byte getNeighborhoodRelation() {
 		return neighborhoodRelation;
 	}
 
