@@ -479,7 +479,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 					statServiceSettlementResult.setPaymentCardRefundAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(5), "0.00").toString()));
 					statServiceSettlementResult.setTotalPaidAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(6), "0.00").toString()));
 					statServiceSettlementResult.setTotalRefundAmount(new BigDecimal(StringUtils.defaultIfNull(r.getValue(7), "0.00").toString()));
-					statServiceSettlementResult.setTotalPaidCount(Long.valueOf(StringUtils.defaultIfNull(r.getValue(4), "0").toString()));
+					statServiceSettlementResult.setTotalPaidCount(Long.valueOf(StringUtils.defaultIfNull(r.getValue(8), "0").toString()));
 					results.add(statServiceSettlementResult);
 					return null;
 				});
