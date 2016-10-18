@@ -1,6 +1,8 @@
 -- 添加人数限制字段
 ALTER TABLE `eh_forum_posts` ADD COLUMN `max_quantity` INT COMMENT 'max person quantity';
 ALTER TABLE `eh_activities` ADD COLUMN `max_quantity` INT COMMENT 'max person quantity';
+ALTER TABLE `eh_activities` ADD COLUMN `content_type` varchar(128) COMMENT 'content type, text/rich_text';
+ALTER TABLE `eh_activities` ADD COLUMN `version` varchar(128) COMMENT 'version';
 
 -- 添加消息提醒设置表
 -- DROP TABLE IF EXISTS `eh_warning_settings`;

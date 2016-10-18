@@ -5194,6 +5194,7 @@ public class ForumServiceImpl implements ForumService {
 		Post post = forumProvider.findPostById(cmd.getId());
 		if (post != null) {
 			String content = null;
+			String contentType = null;
 			Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
 			if (activity != null && activity.getDescription() != null) {
 				content = activity.getDescription();

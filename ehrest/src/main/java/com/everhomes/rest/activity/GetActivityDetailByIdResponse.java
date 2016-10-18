@@ -10,13 +10,24 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
+ * <li>contentType: 内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
  * <li>content: 活动内容</li>
+ * <li>attachments: 附件</li>
  * </ul>
  */
 public class GetActivityDetailByIdResponse {
+	private String contentType;
 	private String content;
 	@ItemType(AttachmentDTO.class)
 	private List<AttachmentDTO> attachments;
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
 
 	public GetActivityDetailByIdResponse(String content, List<AttachmentDTO> attachments) {
 		super();
