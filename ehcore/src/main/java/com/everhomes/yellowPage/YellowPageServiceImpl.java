@@ -1,20 +1,5 @@
 package com.everhomes.yellowPage;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-
-
-
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.category.CategoryProvider;
@@ -26,51 +11,26 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.techpark.company.ContactType;
-import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.AddYellowPageCommand;
-import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
-import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
-import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
-import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
-import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
-import com.everhomes.rest.yellowPage.NotifyTargetDTO;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
-import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
-import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
-import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
-import com.everhomes.rest.yellowPage.YellowPageDTO;
-import com.everhomes.rest.yellowPage.YellowPageListResponse;
-import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
-import com.everhomes.rest.yellowPage.YellowPageStatus;
-import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.rest.yellowPage.*;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.RequestTemplates;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
@@ -102,7 +62,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private UserActivityProvider userActivityProvider;
-    
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -383,13 +342,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 			category.setOwnerType(cmd.getOwnerType());
 			category.setNamespaceId(namespaceId);
 			category.setStatus((byte)2);
-//			if(null == parent) {
-//				category.setParentId(0L);
-//				category.setPath(cmd.getName());
-//			} else {
-//				category.setParentId(parent.getId());
-//				category.setPath(parent.getName() + "/" + cmd.getName());
-//			}
+            category.setDisplayMode(cmd.getDisplayMode());
+            /*if(null == parent) {
+				category.setParentId(0L);
+				category.setPath(cmd.getName());
+			} else {
+				category.setParentId(parent.getId());
+				category.setPath(parent.getName() + "/" + cmd.getName());
+			}*/
 			category.setParentId(parent.getId());
 			category.setPath(parent.getName() + "/" + cmd.getName());
 			category.setLogoUrl(cmd.getLogoUrl());
@@ -397,15 +357,44 @@ public class YellowPageServiceImpl implements YellowPageService {
 		} else {
 			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			category.setName(cmd.getName());
-//			if(null == parent) {
-//				category.setPath(cmd.getName());
-//			} else {
-//				category.setPath(parent.getName() + "/" + cmd.getName());
-//			}
+			/*if(null == parent) {
+				category.setPath(cmd.getName());
+			} else {
+				category.setPath(parent.getName() + "/" + cmd.getName());
+			}*/
 			category.setPath(parent.getName() + "/" + cmd.getName());
 			category.setLogoUrl(cmd.getLogoUrl());
-			yellowPageProvider.updateCategory(category);
-			
+            category.setDisplayMode(cmd.getDisplayMode());
+            yellowPageProvider.updateCategory(category);
+
+            if (!Objects.equals(category.getName(), cmd.getName())) {
+                //yellow page中引用该类型的记录的serviceType字段也要更新
+                List<YellowPage> yps = yellowPageProvider.getYellowPagesByCategoryId(cmd.getCategoryId());
+                if(yps != null && yps.size() > 0) {
+                    for(YellowPage yp : yps) {
+                        yp.setStringTag3(category.getName());
+                        yellowPageProvider.updateYellowPage(yp);
+                    }
+                }
+            }
+		}
+		
+		/*Category category = new Category();
+		Category parent = categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
+		if(cmd.getCategoryId() == null) {
+			category.setParentId(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
+			category.setName(cmd.getName());
+			category.setNamespaceId(namespaceId);
+			category.setStatus((byte)2);
+			category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			category.setPath(parent.getName() + "/" + cmd.getName());
+			categoryProvider.createCategory(category);
+		} else {
+			category = categoryProvider.findCategoryById(cmd.getCategoryId());
+			category.setName(cmd.getName());
+			category.setPath(parent.getName() + "/" + cmd.getName());
+			categoryProvider.updateCategory(category);
+
 			//yellow page中引用该类型的记录的serviceType字段也要更新
 			List<YellowPage> yps = yellowPageProvider.getYellowPagesByCategoryId(cmd.getCategoryId());
 			if(yps != null && yps.size() > 0) {
@@ -414,33 +403,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					yellowPageProvider.updateYellowPage(yp);
 				}
 			}
-		}
-		
-//		Category category = new Category();
-//		Category parent = categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
-//		if(cmd.getCategoryId() == null) {
-//			category.setParentId(CategoryConstants.CATEGORY_ID_YELLOW_PAGE);
-//			category.setName(cmd.getName());
-//			category.setNamespaceId(namespaceId);
-//			category.setStatus((byte)2);
-//			category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//			category.setPath(parent.getName() + "/" + cmd.getName());
-//			categoryProvider.createCategory(category);
-//		} else {
-//			category = categoryProvider.findCategoryById(cmd.getCategoryId());
-//			category.setName(cmd.getName());
-//			category.setPath(parent.getName() + "/" + cmd.getName());
-//			categoryProvider.updateCategory(category);
-//			
-//			//yellow page中引用该类型的记录的serviceType字段也要更新
-//			List<YellowPage> yps = yellowPageProvider.getYellowPagesByCategoryId(cmd.getCategoryId());
-//			if(yps != null && yps.size() > 0) {
-//				for(YellowPage yp : yps) {
-//					yp.setStringTag3(category.getName());
-//					yellowPageProvider.updateYellowPage(yp);
-//				}
-//			}
-//		}
+		}*/
 		
 	}
 
@@ -938,5 +901,20 @@ public class YellowPageServiceImpl implements YellowPageService {
  				"该手机号还未注册，请先注册");
 		}
 	}
+
+    @Override
+    public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
+                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
+        return entityResultList.stream().map(r -> {
+            ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
+            String locale = UserContext.current().getUser().getLocale();
+            String displayCategoryName = localeStringService.getLocalizedString(ServiceAllianceLocalStringCode.CATEGROY_DISPLAY_SCOPE,
+                    String.valueOf(dto.getDisplayMode()), locale, "");
+            dto.setDisplayModeName(displayCategoryName);
+            return dto;
+        }).collect(Collectors.toList());
+    }
 
 }
