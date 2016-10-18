@@ -59,7 +59,7 @@ public class WarnActivityBeginningAction implements Runnable {
 //			time = warningSetting.getTime();
 //		}
 		ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
-		String time = (queryActivityWarningResponse.getDays()==null||queryActivityWarningResponse.getDays()==0?"":queryActivityWarningResponse.getDays()+"天") + queryActivityWarningResponse.getHours()+"小时";
+		String time = (queryActivityWarningResponse.getDays()==null||queryActivityWarningResponse.getDays().intValue()==0?"":queryActivityWarningResponse.getDays()+"天") + queryActivityWarningResponse.getHours()+"小时";
     	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
     	String scope = ActivityNotificationTemplateCode.SCOPE;
 		int code = ActivityNotificationTemplateCode.ACTIVITY_WARNING_PARTICIPANT;

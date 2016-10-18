@@ -127,4 +127,6 @@ public interface ActivityService {
 
 	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
 
+	void activityWarningSchedule();
+
 }

@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import ch.hsr.geohash.GeoHash;
+import freemarker.template.SimpleDate;
+import net.greghaines.jesque.Job;
 
 import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.category.Category;
@@ -59,6 +61,8 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.OpPromotionConstant;
 import com.everhomes.promotion.OpPromotionScheduleJob;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
@@ -122,6 +126,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -179,6 +184,9 @@ public class ActivityServiceImpl implements ActivityService {
     @Autowired
     private ForumService forumService;
 
+	@Autowired
+	JesqueClientFactory jesqueClientFactory;
+	
     @Autowired
     private ActivityProivider activityProvider;
     
@@ -249,7 +257,7 @@ public class ActivityServiceImpl implements ActivityService {
     private ScheduleProvider scheduleProvider;
     
     @Autowired
-    private NamespaceProvider namespaceProvider;
+    private NamespacesProvider namespacesProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -305,6 +313,9 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setIsVideoSupport(cmd.getIsVideoSupport());
         activity.setVideoUrl(cmd.getVideoUrl());
         activity.setVideoState(VideoState.UN_READY.getCode());
+        
+        //add by tt, 添加版本号，20161018
+        activity.setVersion(UserContext.current().getVersion());
         
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
@@ -2630,7 +2641,7 @@ public class ActivityServiceImpl implements ActivityService {
 					"cmd="+cmd);
 		}
 		
-		WarningSetting warningSetting = warningSettingProvider.findWarningSettingByNamespaceAndType(cmd.getNamespaceId(), EhActivities.class.getSimpleName());
+		WarningSetting warningSetting = findWarningSetting(cmd.getNamespaceId());
 		
 		if (warningSetting != null) {
 			Integer days = (int) (warningSetting.getTime() / 1000 / 3600 / 24);
@@ -2640,18 +2651,52 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return new ActivityWarningResponse(cmd.getNamespaceId(), 0, 1);
 	}
+	
+	private WarningSetting findWarningSetting(Integer namespaceId){
+		WarningSetting warningSetting =  warningSettingProvider.findWarningSettingByNamespaceAndType(namespaceId, EhActivities.class.getSimpleName());
+		if (warningSetting == null) {
+			warningSetting = new WarningSetting();
+			warningSetting.setNamespaceId(namespaceId);
+			warningSetting.setTime(3600*1000L);
+		}
+		return warningSetting;
+	}
    
 	/**
 	 * 活动开始前的提醒，采用轮循+定时两种方式执行定时任务
 	 * 轮循时按域空间设置的活动提前时间取出相应的活动（只取当前时间+n~当前时间+n+1之间的活动），再把这些活动设置成定时的任务
 	 **/ 
     @Scheduled(cron="0 0 */1 * * ?")
+    @Override
 	public void activityWarningSchedule() {
+    	final String queueName = "activityWarning";
     	//使用tryEnter方法可以防止分布式部署时重复执行
     	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
-    		
-    		
+    		//取当前时间，只取到小时
+        	String formatString = "yyyy-MM-dd HH";
+        	SimpleDateFormat format = new SimpleDateFormat(formatString);
+        	Date now = DateHelper.parseDataString(format.format(DateHelper.currentGMTTime()), formatString);
+        	
+        	List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
+        	namespaces.add(new NamespaceInfoDTO(0,"zuolin",""));
+        	
+        	//遍历每个域空间
+        	namespaces.forEach(n->{
+        		WarningSetting warningSetting = findWarningSetting(n.getId());
+        		Timestamp queryStartTime = new Timestamp(now.getTime()+warningSetting.getTime());
+        		Timestamp queryEndTime = new Timestamp(now.getTime()+warningSetting.getTime()+3600*1000);
+        		
+        		// 对于这个域空间时间范围内的活动，再单独设置定时任务
+        		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
+        		activities.forEach(a->{
+        			final Job job1 = new Job(
+    						WarnActivityBeginningAction.class.getName(),
+    						new Object[] { String.valueOf(a.getId()) });
+    	
+    				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+    						a.getStartTime().getTime() - warningSetting.getTime());
+        		});
+        	});
     	});
-    	List<Namespace> namespaces = namespaceProvider.listNamespaces();
 	}
 }

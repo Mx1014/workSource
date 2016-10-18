@@ -34,6 +34,7 @@ import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
@@ -131,6 +132,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		try {
 			Map<String, String> userAgents = getUserAgent(request);
 			setupNamespaceIdContext(userAgents);
+			setupVersionContext(userAgents);
 			if(isProtected(handler)) {
 				LoginToken token = userService.getLoginToken(request);
 				// isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
@@ -219,6 +221,18 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //
 //		return this.userService.isValidLoginToken(token);
 //	}
+
+	private void setupVersionContext(Map<String, String> userAgents) {
+		UserContext context = UserContext.current();
+		context.setVersion("0.0.0");
+
+		userAgents.forEach((k,v)->{
+			if (VersionRealmType.fromCode(k) != null) {
+				context.setVersion(v);
+				return;
+			}
+		});
+	}
 
 	private boolean isProtected(Object handler) {
 		if(handler instanceof HandlerMethod) {

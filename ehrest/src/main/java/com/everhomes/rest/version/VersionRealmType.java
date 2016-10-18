@@ -79,6 +79,8 @@ public enum VersionRealmType {
     ANDROID_SZBAY("Android_SZbay"),
     IOS_SZBAY("iOS_SZbay"),
     ANDROID_INNOSPRING("Android_Innospring"),
+    WEB_ZUOLIN("Web_Zuolin"),
+    WEB_PARK("Web_Park"),
     IOS_INNOSPRING("iOS_Innospring");
     
     private String code;

@@ -79,8 +79,17 @@ public class ActivityDTO {
     private String contentType;
     private String content;
     private Integer maxQuantity;
+    private String version;
     
-    public ActivityDTO() {
+    public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public ActivityDTO() {
     }
 
     public String getDescription() {
