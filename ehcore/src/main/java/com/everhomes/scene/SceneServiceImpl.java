@@ -4,6 +4,7 @@ package com.everhomes.scene;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.scene.ListSceneTypesCommand;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
@@ -92,15 +93,15 @@ public class SceneServiceImpl implements SceneService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "The community id is invalid");
 		}
-		// CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+		CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
 		List<SceneTypeInfo> sceneTypeList = new ArrayList<>();
-		/*if(communityType == CommunityType.COMMERCIAL) {
+		if(communityType == CommunityType.COMMERCIAL) {
 			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PARK_TOURIST.getCode()));
 			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
 		} else if(communityType == CommunityType.RESIDENTIAL) {
-		}*/
-        sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.DEFAULT.getCode()));
-        sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
+            sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.DEFAULT.getCode()));
+            sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
+        }
 
 		List<SceneTypeInfoDTO> dtos = new ArrayList<>();
 		sceneTypeList.forEach(info -> {
