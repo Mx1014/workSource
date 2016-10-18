@@ -33,9 +33,6 @@ public class OrganizationContactDTO {
 	private String   avatar;
 	private Long   employeeNo;
 	private Byte   gender;
-
-	private String organizationPath;
-
 	private Long targetId;
 
 	private String targetType;
@@ -153,14 +150,6 @@ public class OrganizationContactDTO {
 
 	public void setGender(Byte gender) {
 		this.gender = gender;
-	}
-
-	public String getOrganizationPath() {
-		return organizationPath;
-	}
-
-	public void setOrganizationPath(String organizationPath) {
-		this.organizationPath = organizationPath;
 	}
 
 	public Long getTargetId() {

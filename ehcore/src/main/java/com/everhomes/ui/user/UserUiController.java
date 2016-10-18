@@ -122,7 +122,6 @@ public class UserUiController extends ControllerBase {
 					dto.setInitial(r.getInitial());
 					dto.setFullInitial(r.getFullInitial());
 					dto.setFullPinyin(r.getFullPinyin());
-					dto.setOrganizationPath(r.getOrganizationPath());
 					return dto;
 				}).collect(Collectors.toList());
 			}
