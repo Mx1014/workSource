@@ -13,7 +13,9 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>namespaceId:命名空间</li>
  *<li>subject:主题</li>
- *<li>description:描述</li>
+ *<li>description:描述（活动实际内容）</li>
+ *<li>contentType:内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
+ *<li>content:拼接的内容</li>
  *<li>location:位置</li>
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
@@ -37,6 +39,8 @@ public class ActivityPostCommand{
     private Integer namespaceId;
     private String subject;
     private String description;
+    private String contentType;
+    private String content;
     private String location;
     private String contactPerson;
     private String contactNumber;
@@ -65,6 +69,22 @@ public class ActivityPostCommand{
     private Byte videoState;
     
     private Integer maxQuantity;
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
 
 	public Integer getMaxQuantity() {
 		return maxQuantity;
