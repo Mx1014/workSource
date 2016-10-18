@@ -11,6 +11,9 @@ import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
+import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
@@ -47,13 +50,15 @@ public interface PmTaskService {
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
 	
-	PmTaskDTO createTaskByAdmin(CreateTaskCommand cmd);
+	PmTaskDTO createTaskByOrg(CreateTaskCommand cmd);
 	
 	void deleteTaskCategory(DeleteTaskCategoryCommand cmd);
 	
 	CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd);
 	
 	ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd);
+	
+	List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd);
 	
 	void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp);
 	
@@ -72,4 +77,6 @@ public interface PmTaskService {
 	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void createStatistics();
+	
+	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
 }

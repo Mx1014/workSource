@@ -1620,7 +1620,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
     @Override
-    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, Long pageAnchor, int pageSize) {
+    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String contact, Long pageAnchor, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         if (namespaceId != null) {
