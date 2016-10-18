@@ -429,11 +429,11 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         		 notEmbeddedAppIds[0] = 3;
         		 notEmbeddedAppIds[1] = 14;
         		 
-        		FilterBuilder nfb = FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds);
+        		FilterBuilder nfb = FilterBuilders.notFilter(FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds));
         		if(null == fb) {
-        			fb = FilterBuilders.notFilter(nfb);
+        			fb = nfb;
         		} else {
-                    fb = FilterBuilders.boolFilter().mustNot(fb, nfb);
+                    fb = FilterBuilders.boolFilter().must(fb, nfb);
                 }
                 
             } 

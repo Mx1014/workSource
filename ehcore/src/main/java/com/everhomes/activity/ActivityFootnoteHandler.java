@@ -31,16 +31,18 @@ public class ActivityFootnoteHandler implements ForumFootnoteHandler {
 	
 	@Override
 	public String renderContentFootnote(ContentBriefDTO dto, PostDTO postDto) {
-		Activity activity = activityProvider.findSnapshotByPostId(postDto.getId());
-		ActivityFootnote fn = new ActivityFootnote();
-		
-		
-		if(activity != null && activity.getCreateTime() != null) {
-			fn.setLocation(activity.getLocation());
-			fn.setStartTime(timeToStr(activity.getStartTime()));
-			dto.setPostUrl(getActivityPosterUrl(activity));
+		if(postDto != null) {
+			Activity activity = activityProvider.findSnapshotByPostId(postDto.getId());
+			ActivityFootnote fn = new ActivityFootnote();
+			
+			
+			if(activity != null && activity.getCreateTime() != null) {
+				fn.setLocation(activity.getLocation());
+				fn.setStartTime(timeToStr(activity.getStartTime()));
+				dto.setPostUrl(getActivityPosterUrl(activity));
+			}
+			dto.setFootnoteJson(StringHelper.toJsonString(fn));
 		}
-		dto.setFootnoteJson(StringHelper.toJsonString(fn));
 		return null;
 	}
 
