@@ -160,3 +160,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
 	VALUES ('31', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '999990');
 
+-- 储能安卓升级规则 by xiongying20161018
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`)
+    VALUES(123,34,'-0.1','3155970','0','3.10.2','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (77, 34, '3.10.2', 'http://apk.zuolin.com/apk/UFinePark-3.10.2.2016101719-release.apk', '${homeurl}/web/download/apk/andriod-UFinePark-3-10-2.html', '0');
+
