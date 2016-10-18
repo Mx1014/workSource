@@ -24,6 +24,7 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.local.AppVersionCommand;
 import com.everhomes.rest.local.GetAppVersion;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.user.AddAnyDayActiveCommand;
 import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.AddUserFavoriteCommand;
@@ -69,6 +70,8 @@ import com.everhomes.util.Tuple;
 @RestDoc(value = "User controller", site = "messaging")
 @RequestMapping("/user")
 public class UserActivityController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserActivityController.class);
+    
     @Autowired
     private UserProvider userProvider;
 
@@ -419,5 +422,29 @@ public class UserActivityController extends ControllerBase {
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
+    }
+    
+
+    
+    
+    /**
+     * <b>URL: /user/reportAppLogs</b>
+     * <p> 由于IOS在手机上打印的日志不能取出来，故无法定位一些与手机环境有关的问题，提供该接口供ios上报日志 </p>
+     */
+    @RequestMapping("reportAppLogs")
+    @RestReturn(value = String.class )
+    @RequireAuthentication(false)
+    public RestResponse reportAppLogs(SceneDTO scene) {
+        
+        try {
+            LOGGER.debug("App log report, log={}", scene);
+        } catch (Exception e) {
+            LOGGER.error("Failed to process app log reports", e);
+        } 
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }
