@@ -30,7 +30,7 @@ import com.everhomes.util.StringHelper;
  *<li>guest:嘉宾</li>
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
- * <li>constraintQuantity: 限制人数</li>
+ * <li>maxQuantity: 限制人数</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -64,14 +64,14 @@ public class ActivityPostCommand{
     private String videoUrl;
     private Byte videoState;
     
-    private Integer constraintQuantity;
-    
-    public Integer getConstraintQuantity() {
-		return constraintQuantity;
+    private Integer maxQuantity;
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
 	}
 
-	public void setConstraintQuantity(Integer constraintQuantity) {
-		this.constraintQuantity = constraintQuantity;
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
 	}
 
 	public Byte getOfficialFlag() {

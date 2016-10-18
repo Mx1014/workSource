@@ -112,7 +112,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
-            cmd.setConstraintQuantity(post.getMaxQuantity());
+            cmd.setMaxQuantity(post.getMaxQuantity());
             if(activityService.isPostIdExist(post.getId())){
             	activityService.updatePost(cmd, post.getId());
             }
