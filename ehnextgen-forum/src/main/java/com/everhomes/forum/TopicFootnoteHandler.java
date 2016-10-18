@@ -18,8 +18,10 @@ public class TopicFootnoteHandler implements ForumFootnoteHandler {
 	public String renderContentFootnote(ContentBriefDTO dto, PostDTO postDto) {
 
 		TopicFootnote fn = new TopicFootnote();
-		fn.setCreateTime(timeToStr(postDto.getCreateTime()));
-		fn.setCreatorNickName(postDto.getCreatorNickName());
+		if(postDto != null && postDto.getCreateTime() != null) {
+			fn.setCreateTime(timeToStr(postDto.getCreateTime()));
+			fn.setCreatorNickName(postDto.getCreatorNickName());
+		}
 		
 		dto.setFootnoteJson(StringHelper.toJsonString(fn));
 		return null;

@@ -2,13 +2,13 @@
 update eh_parking_recharge_orders set recharge_type = 1;
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('351', 'parking.chuneng.url', 'http://220.160.111.114:9099', '储能停车充值key', '0', NULL);
+	VALUES ('351', 'parking.chuneng.url', 'http://113.108.41.29:8099', '储能停车充值key', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('352', 'parking.chuneng.key', 'F7A0B971B199FD2A1017CEC5', '储能停车充值key', '0', NULL);
+	VALUES ('352', 'parking.chuneng.key', 'F7A0B971B199FD2A52468575', '储能停车充值key', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('353', 'parking.chuneng.user', 'ktapi', '储能停车充值用户名', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('354', 'parking.chuneng.pwd', '0306A9', '储能停车充值密码', '0', NULL);
+	VALUES ('354', 'parking.chuneng.pwd', '0306C3', '储能停车充值密码', '0', NULL);
 	
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`) 
 	VALUES ('10004', 'community', '240111044331051500', '中国储能大厦停车场', 'KETUO', NULL, '1', '2', '1025', '2016-08-29 17:28:10', '1');

@@ -963,13 +963,18 @@ public class UserProviderImpl implements UserProvider {
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() > 0) {
                         onQuery = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
                         cond = cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
-                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())));
+                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))
+                                .and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()))
+                                .and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1))
+                                );
                     }
                 
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() <= 0) {
                     SelectQuery<Record1<Long>> subQuery = context.select(Tables.EH_USERS.ID).from(Tables.EH_DOOR_AUTH).join(Tables.EH_USERS).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID))
                     .where(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
-                            .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))).getQuery();
+                            .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))
+                            .and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1))
+                            ).getQuery();
                     
                     cond = cond.and(Tables.EH_USERS.ID.notIn(subQuery));
                 }
