@@ -49,6 +49,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
@@ -244,6 +247,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private ScheduleProvider scheduleProvider;
+    
+    @Autowired
+    private NamespaceProvider namespaceProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -2635,8 +2641,17 @@ public class ActivityServiceImpl implements ActivityService {
 		return new ActivityWarningResponse(cmd.getNamespaceId(), 0, 1);
 	}
    
+	/**
+	 * 活动开始前的提醒，采用轮循+定时两种方式执行定时任务
+	 * 轮循时按域空间设置的活动提前时间取出相应的活动（只取当前时间+n~当前时间+n+1之间的活动），再把这些活动设置成定时的任务
+	 **/ 
     @Scheduled(cron="0 0 */1 * * ?")
 	public void activityWarningSchedule() {
-		
+    	//使用tryEnter方法可以防止分布式部署时重复执行
+    	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
+    		
+    		
+    	});
+    	List<Namespace> namespaces = namespaceProvider.listNamespaces();
 	}
 }

@@ -29,8 +29,9 @@ public class GetActivityDetailByIdResponse {
 		this.contentType = contentType;
 	}
 
-	public GetActivityDetailByIdResponse(String content, List<AttachmentDTO> attachments) {
+	public GetActivityDetailByIdResponse(String contentType, String content, List<AttachmentDTO> attachments) {
 		super();
+		this.contentType = contentType;
 		this.content = content;
 		this.attachments = attachments;
 	}

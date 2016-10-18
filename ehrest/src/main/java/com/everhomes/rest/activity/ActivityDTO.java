@@ -74,11 +74,48 @@ public class ActivityDTO {
     private String manufacturerType;
     private String videoUrl;    //yzb://[vid]
     private Byte videoState;
+
+    private String description;
+    private String contentType;
+    private String content;
+    private Integer maxQuantity;
     
     public ActivityDTO() {
     }
 
-    public Long getActivityId() {
+    public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Long getActivityId() {
         return activityId;
     }
 

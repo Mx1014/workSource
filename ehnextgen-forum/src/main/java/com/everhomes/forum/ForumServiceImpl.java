@@ -5198,15 +5198,16 @@ public class ForumServiceImpl implements ForumService {
 			Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
 			if (activity != null && activity.getDescription() != null) {
 				content = activity.getDescription();
+				contentType = activity.getContentType();
 			}else {
 				content = post.getContent();
+				contentType = post.getContentType();
 			}
 			forumProvider.populatePostAttachments(post);
 			populatePostAttachements(UserContext.current().getUser().getId(), post, post.getAttachments());
 			
-			return new GetActivityDetailByIdResponse(content, post.getAttachments().stream().map(a->ConvertHelper.convert(a, AttachmentDTO.class)).collect(Collectors.toList()));
+			return new GetActivityDetailByIdResponse(contentType, content, post.getAttachments().stream().map(a->ConvertHelper.convert(a, AttachmentDTO.class)).collect(Collectors.toList()));
 		}
-		
 		
 		return null;
 	}
