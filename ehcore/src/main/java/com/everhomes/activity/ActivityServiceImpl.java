@@ -2689,12 +2689,14 @@ public class ActivityServiceImpl implements ActivityService {
         		// 对于这个域空间时间范围内的活动，再单独设置定时任务
         		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
         		activities.forEach(a->{
-        			final Job job1 = new Job(
-    						WarnActivityBeginningAction.class.getName(),
-    						new Object[] { String.valueOf(a.getId()) });
-    	
-    				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-    						a.getStartTime().getTime() - warningSetting.getTime());
+        			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0) {
+        				final Job job1 = new Job(
+        						WarnActivityBeginningAction.class.getName(),
+        						new Object[] { String.valueOf(a.getId()) });
+        	
+        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+        						a.getStartTime().getTime() - warningSetting.getTime());
+					}
         		});
         	});
     	});
