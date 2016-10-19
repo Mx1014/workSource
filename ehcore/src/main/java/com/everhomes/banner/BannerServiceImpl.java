@@ -1059,7 +1059,7 @@ public class BannerServiceImpl implements BannerService {
         	setUpdateDataToBanner(cmd, banner);
             bannerProvider.updateBanner(banner);
         }
-	}
+    }
 
 	private void setUpdateDataToBanner(UpdateBannerByOwnerCommand cmd, Banner banner) {
 		if(cmd.getActionType() != null)
@@ -1078,6 +1078,12 @@ public class BannerServiceImpl implements BannerService {
         	banner.setScopeCode(cmd.getScope().getScopeCode());
         if(cmd.getName() != null)
         	banner.setName(cmd.getName());
+        if (cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
+            // 设置最大的order值
+            List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    cmd.getScope(), null, null, null, ApplyPolicy.CUSTOMIZED);
+            bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+        }
 	}
 
 	private void checkUserNotInOrg(String ownerType, Long ownerId) {
