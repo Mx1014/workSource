@@ -76,7 +76,7 @@ public class WarnActivityBeginningAction implements Runnable {
 		map.put("tag", activity.getTag());
 		map.put("title", activity.getSubject());
 		map.put("time", time);
-		final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		final String content = localeTemplateService.getLocaleTemplateString(scope, code, "zh_CN", map, "");
     	activityRosters.forEach(r->{
     		if (r.getUid().longValue() != activity.getCreatorUid().longValue()) {
     			sendMessageToUser(r.getUid().longValue(), content, null);
