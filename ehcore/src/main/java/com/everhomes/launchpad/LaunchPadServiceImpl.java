@@ -1443,7 +1443,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 
 		User user = UserContext.current().getUser();
-		Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId(); 
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		// 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景，
 		// 由于该接口客户端并没有传小区信息过来，只能通过域空间配置的资源类型来定 by lqs 20160601
 		// String sceneType = cmd.getCurrentSceneType();

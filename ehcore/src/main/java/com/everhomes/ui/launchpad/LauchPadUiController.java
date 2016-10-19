@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.launchpad.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,6 @@ import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
-import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
 import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
 import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
 import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
@@ -143,6 +140,20 @@ public class LauchPadUiController extends ControllerBase {
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
     	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
     	RestResponse resp =  new RestResponse(commandResponse);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /ui/launchpad/getAllCategryItemsByScene</b>
+     * <p>根据位置、layout组、指定场景和相应的实体对象以及类别获取全部的item</p>
+     */
+    @RequestMapping("getAllCategryItemsByScene")
+    @RestReturn(value=CategryItemDTO.class)
+    @RequireAuthentication(false)
+    public RestResponse getAllCategryItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        RestResponse resp =  new RestResponse();
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
