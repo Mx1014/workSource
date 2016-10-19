@@ -981,6 +981,11 @@ public class BannerServiceImpl implements BannerService {
                  banner.setScopeCode(cmd.getScope().getScopeCode());
                  banner.setScopeId(cmd.getScope().getScopeId());
                  banner.setOrder(cmd.getDefaultOrder());
+                 // 设置最大的order值
+                 List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                         cmd.getScope(), sceneStr, null, null, ApplyPolicy.CUSTOMIZED);
+                 bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+
                  banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
                  banner.setSceneType(sceneType.getCode());
                  
