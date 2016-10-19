@@ -344,8 +344,7 @@ public class ActivityServiceImpl implements ActivityService {
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
         //检查是否超过报名人数限制, add by tt, 20161012
-        List<ActivityRoster> activityRosters = activityProvider.listRosters(cmd.getActivityId());
-        if (activity.getMaxQuantity() != null && activityRosters.size() > activity.getMaxQuantity().intValue()) {
+        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"beyond contraint quantity!");
 		}
