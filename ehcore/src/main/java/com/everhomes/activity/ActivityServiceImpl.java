@@ -2620,16 +2620,25 @@ public class ActivityServiceImpl implements ActivityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"cmd="+cmd);
 		}
-		WarningSetting warningSetting = new WarningSetting();
-		warningSetting.setNamespaceId(cmd.getNamespaceId());
-		warningSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
-		warningSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		warningSetting.setCreatorUid(UserContext.current().getUser().getId());
-		warningSetting.setUpdateTime(warningSetting.getCreateTime());
-		warningSetting.setOperatorUid(warningSetting.getCreatorUid());
-		warningSetting.setType(EhActivities.class.getSimpleName());
-		
-		warningSettingProvider.createWarningSetting(warningSetting);
+		WarningSetting warningSetting = findWarningSetting(cmd.getNamespaceId());
+		if (warningSetting != null && warningSetting.getId() != null) {
+			warningSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+			warningSetting.setUpdateTime(warningSetting.getCreateTime());
+			warningSetting.setOperatorUid(warningSetting.getCreatorUid());
+			
+			warningSettingProvider.updateWarningSetting(warningSetting);
+		}else {
+			warningSetting = new WarningSetting();
+			warningSetting.setNamespaceId(cmd.getNamespaceId());
+			warningSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+			warningSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			warningSetting.setCreatorUid(UserContext.current().getUser().getId());
+			warningSetting.setUpdateTime(warningSetting.getCreateTime());
+			warningSetting.setOperatorUid(warningSetting.getCreatorUid());
+			warningSetting.setType(EhActivities.class.getSimpleName());
+			
+			warningSettingProvider.createWarningSetting(warningSetting);
+		}
 		
 		return ConvertHelper.convert(cmd, ActivityWarningResponse.class);
 	}
@@ -2666,7 +2675,7 @@ public class ActivityServiceImpl implements ActivityService {
 	 * 活动开始前的提醒，采用轮循+定时两种方式执行定时任务
 	 * 轮循时按域空间设置的活动提前时间取出相应的活动（只取当前时间+n~当前时间+n+1之间的活动），再把这些活动设置成定时的任务
 	 **/ 
-    @Scheduled(cron="0 0 */1 * * ?")
+    @Scheduled(cron="0 0 * * * ?")
     @Override
 	public void activityWarningSchedule() {
     	final String queueName = "activityWarning";

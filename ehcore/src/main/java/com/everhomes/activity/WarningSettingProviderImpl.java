@@ -4,6 +4,7 @@ package com.everhomes.activity;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,10 +58,14 @@ public class WarningSettingProviderImpl implements WarningSettingProvider {
 	
 	@Override
 	public WarningSetting findWarningSettingByNamespaceAndType(Integer namespaceId, String type) {
-		return getReadOnlyContext().select().from(Tables.EH_WARNING_SETTINGS)
+		Record record = getReadOnlyContext().select().from(Tables.EH_WARNING_SETTINGS)
 				.where(Tables.EH_WARNING_SETTINGS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_WARNING_SETTINGS.TYPE.eq(type))
-				.fetchOne().map(r -> ConvertHelper.convert(r, WarningSetting.class));
+				.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, WarningSetting.class);
+		}
+		return null;
 	}
 
 	private EhWarningSettingsDao getReadWriteDao() {
