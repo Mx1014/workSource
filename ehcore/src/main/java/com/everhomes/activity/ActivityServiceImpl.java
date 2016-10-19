@@ -2684,8 +2684,16 @@ public class ActivityServiceImpl implements ActivityService {
     		//取当前时间，只取到小时
         	String formatString = "yyyy-MM-dd HH";
         	SimpleDateFormat format = new SimpleDateFormat(formatString);
-        	Date now = DateHelper.parseDataString(format.format(DateHelper.currentGMTTime()), formatString);
+        	// 不要用这个方法来转时间，会错位
+//        	Date now = DateHelper.parseDataString(format.format(DateHelper.currentGMTTime()), formatString);
+        	Date nowDate = null;
+        	try {
+				nowDate = format.parse(format.format(DateHelper.currentGMTTime()));
+			} catch (Exception e) {
+				nowDate = new Date();
+			}
         	
+        	final Date now = nowDate;
         	List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
         	namespaces.add(new NamespaceInfoDTO(0,"zuolin",""));
         	
@@ -2698,7 +2706,7 @@ public class ActivityServiceImpl implements ActivityService {
         		// 对于这个域空间时间范围内的活动，再单独设置定时任务
         		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
         		activities.forEach(a->{
-        			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0) {
+        			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
         				final Job job1 = new Job(
         						WarnActivityBeginningAction.class.getName(),
         						new Object[] { String.valueOf(a.getId()) });
