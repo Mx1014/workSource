@@ -564,6 +564,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					dto.setButtonTitle(template.getButtonTitle());
 				}
 			}
+			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
 
@@ -571,7 +572,13 @@ public class YellowPageServiceImpl implements YellowPageService {
         return response;
 	}
 
-	@Override
+    private void processDetailUrl(ServiceAllianceDTO dto) {
+        String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
+        String url = String.format(detailUrl, dto.getId(), dto.getName(), dto.getId());
+        dto.setDetailUrl(url);
+    }
+
+    @Override
 	public void updateServiceAlliance(UpdateServiceAllianceCommand cmd) {
 		ServiceAlliances sa = null;
 		
@@ -910,7 +917,7 @@ public class YellowPageServiceImpl implements YellowPageService {
         return entityResultList.stream().map(r -> {
             ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
             String locale = UserContext.current().getUser().getLocale();
-            String displayCategoryName = localeStringService.getLocalizedString(ServiceAllianceLocalStringCode.CATEGROY_DISPLAY_SCOPE,
+            String displayCategoryName = localeStringService.getLocalizedString(ServiceAllianceLocalStringCode.CATEGORY_DISPLAY_SCOPE,
                     String.valueOf(dto.getDisplayMode()), locale, "");
             dto.setDisplayModeName(displayCategoryName);
             return dto;
