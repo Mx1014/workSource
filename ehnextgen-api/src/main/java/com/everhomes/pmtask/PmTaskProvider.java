@@ -6,6 +6,11 @@ import java.util.List;
 import com.everhomes.namespace.Namespace;
 
 public interface PmTaskProvider {
+	
+	void createTaskTarget(PmTaskTarget pmTaskTarget);
+	
+	void updateTaskTarget(PmTaskTarget pmTaskTarget);
+	
 	void createTask(PmTask pmTask);
 	
 	PmTask findTaskById(Long id);
@@ -37,4 +42,8 @@ public interface PmTaskProvider {
 			Long pageAnchor, Integer pageSize);
 	
 	Integer countTaskStatistics(Long ownerId, Long categoryId, Timestamp dateStr);
+	
+	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize);
+	
+	PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId);
 }

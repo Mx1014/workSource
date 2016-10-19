@@ -12,13 +12,13 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>taskCategoryId: 父类型id</li>
- * <li>taskCategoryName: 父类型名称</li>	
- * <li>categoryId: 子类型id</li>
- * <li>categoryName: 子类型名称</li>
+ * <li>taskCategoryId: 服务类型id</li>
+ * <li>taskCategoryName: 服务类型名称</li>	
+ * <li>categoryId: 分类id</li>
+ * <li>categoryName: 分类名称</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
- * <li>status: 状态 1: 未处理  2: 处理中 3: 已完成  4: 已关闭{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
+ * <li>status: 状态 1: 未处理  2: 处理中 3: 已完成  4: 已关闭  5:已回访{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
  * <li>star: 评价分数</li>
  * <li>unprocessedTime: 未处理</li>
  * <li>processingTime: 处理中时间</li>
@@ -34,6 +34,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 机构id</li>
  * <li>addressId: 门牌id</li>
  * <li>revisitContent: 回访内容</li>
+ * <li>revisitTime: 回访时间</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -64,6 +65,7 @@ public class PmTaskDTO {
 	private Long organizationId;
 	private Long addressId;
 	private String revisitContent;
+	private Timestamp revisitTime;
 	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
@@ -246,5 +248,11 @@ public class PmTaskDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Timestamp getRevisitTime() {
+		return revisitTime;
+	}
+	public void setRevisitTime(Timestamp revisitTime) {
+		this.revisitTime = revisitTime;
 	}
 }

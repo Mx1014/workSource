@@ -4342,6 +4342,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
+	public List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org) {
+		return this.convertDTO(organizationMembers, org);
+	}
+	
+	@Override
 	public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd){
 		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 		command.setOrganizationId(cmd.getOrganizationId());

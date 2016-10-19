@@ -20,6 +20,8 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
+import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
@@ -39,6 +41,7 @@ import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
+import com.everhomes.rest.pmtask.RevisitCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -99,6 +102,35 @@ public class PmTaskController extends ControllerBase {
           response.setErrorDescription("OK");
           return response;
       }
+      
+      /**
+       * <b>URL: /pmtask/createTaskOperatePerson</b>
+       * <p>新增任务人员</p>
+       */
+      @RequestMapping("createTaskOperatePerson")
+      @RestReturn(value=String.class)
+      public RestResponse createTaskOperatePerson(CreateTaskOperatePersonCommand cmd) {
+    	  pmTaskService.createTaskOperatePerson(cmd);
+          RestResponse response = new RestResponse();
+          response.setErrorCode(ErrorCodes.SUCCESS);
+          response.setErrorDescription("OK");
+          return response;
+      }
+      
+      /**
+       * <b>URL: /pmtask/deleteTaskOperatePerson</b>
+       * <p>删除任务人员</p>
+       */
+      @RequestMapping("deleteTaskOperatePerson")
+      @RestReturn(value=String.class)
+      public RestResponse deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd) {
+    	  pmTaskService.deleteTaskOperatePerson(cmd);
+          RestResponse response = new RestResponse();
+          response.setErrorCode(ErrorCodes.SUCCESS);
+          response.setErrorDescription("OK");
+          return response;
+      }
+      
       
       /**
        * <b>URL: /pmtask/createTaskCategory</b>
@@ -220,6 +252,20 @@ public class PmTaskController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse cancelTask(CancelTaskCommand cmd) {
 		pmTaskService.cancelTask(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pmtask/revisit</b>
+	 * <p>取消任务</p>
+	 */
+	@RequestMapping("revisit")
+	@RestReturn(value=String.class)
+	public RestResponse revisit(RevisitCommand cmd) {
+		pmTaskService.revisit(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

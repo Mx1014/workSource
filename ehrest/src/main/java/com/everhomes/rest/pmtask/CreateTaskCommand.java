@@ -1,6 +1,5 @@
 package com.everhomes.rest.pmtask;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;

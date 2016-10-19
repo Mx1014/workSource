@@ -54,9 +54,13 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
@@ -64,12 +68,15 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
+import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.EvaluateScoreDTO;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
@@ -94,11 +101,15 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
+import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskPrivilege;
 import com.everhomes.rest.pmtask.PmTaskRevisitStatus;
+import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.pmtask.PmTaskTargetStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
+import com.everhomes.rest.pmtask.RevisitCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -156,6 +167,8 @@ public class PmTaskServiceImpl implements PmTaskService {
     private DbProvider dbProvider;
 	@Autowired
     private CoordinationProvider coordinationProvider;
+	@Autowired
+	private OrganizationService organizationService;
 	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -319,7 +332,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 		}
 			
-		if(status.equals(PmTaskStatus.OTHER.getCode())){
+		if(status.equals(PmTaskStatus.CLOSED.getCode())){
 			task.setClosedTime(now);
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.CLOSETASK)){
@@ -370,7 +383,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(user.getId(), text);
 		}
-		if(status.equals(PmTaskStatus.OTHER.getCode())){
+		if(status.equals(PmTaskStatus.CLOSED.getCode())){
 			int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 			String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(task.getCreatorUid(), text);
@@ -412,6 +425,40 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
+	public void revisit(RevisitCommand cmd) {
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		if(task.getStatus() != PmTaskStatus.PROCESSED.getCode() ){
+			LOGGER.error("Task cannot be completed. cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be completed.");
+		}
+		
+		User user = UserContext.current().getUser();
+		long time = System.currentTimeMillis();
+		Timestamp now = new Timestamp(time);
+		task.setStatus(PmTaskRevisitStatus.REVISITED.getCode());
+		task.setRevisitTime(now);
+		 
+		pmTaskProvider.updateTask(task);
+		
+		PmTaskLog pmTaskLog = new PmTaskLog();
+		pmTaskLog.setNamespaceId(task.getNamespaceId());
+		pmTaskLog.setOperatorTime(now);
+		pmTaskLog.setOperatorUid(user.getId());
+		pmTaskLog.setContent(cmd.getContent());
+		pmTaskLog.setOwnerId(task.getOwnerId());
+		pmTaskLog.setOwnerType(task.getOwnerType());
+		pmTaskLog.setStatus(task.getStatus());
+		pmTaskLog.setTaskId(task.getId());
+		pmTaskProvider.createTaskLog(pmTaskLog);
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
+	}
+	
+	@Override
 	public void closeTask(CloseTaskCommand cmd) {
 		checkId(cmd.getId());
 		
@@ -422,7 +469,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Task cannot be closed.");
 		}
 		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
-				null, PmTaskStatus.OTHER.getCode());
+				null, PmTaskStatus.CLOSED.getCode());
 		
 	}
 	
@@ -581,27 +628,29 @@ public class PmTaskServiceImpl implements PmTaskService {
 			PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
 			
 			Map<String, Object> map = new HashMap<String, Object>();
-			if(null == task.getOrganizationId()){
-				User user = userProvider.findUserById(task.getCreatorUid());
-    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-    			map.put("operatorName", user.getNickName());
-			    map.put("operatorPhone", userIdentifier.getIdentifierToken());
-			}else{
-				map.put("operatorName", task.getRequestorName());
-			    map.put("operatorPhone", task.getRequestorPhone());
-			}
 			
 		    String scope = PmTaskNotificationTemplateCode.SCOPE;
 		    String locale = PmTaskNotificationTemplateCode.LOCALE;
 		    
 			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
 			    
+				if(null == task.getOrganizationId()){
+					setParam(map, task.getCreatorUid());
+//					User user = userProvider.findUserById(task.getCreatorUid());
+//	    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//	    			map.put("operatorName", user.getNickName());
+//				    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+				}else{
+					map.put("operatorName", task.getRequestorName());
+				    map.put("operatorPhone", task.getRequestorPhone());
+				}
+				
 				int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
-				
+				setParam(map, r.getOperatorUid());
 				User target = userProvider.findUserById(r.getTargetId());
 				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
 				map.put("targetName", target.getNickName());
@@ -612,7 +661,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				pmTaskLogDTO.setText(text);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-				
+				setParam(map, r.getOperatorUid());
 				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
@@ -626,8 +675,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}).collect(Collectors.toList());
 				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
-			}else{
+			}else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
+				setParam(map, r.getOperatorUid());
 				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+			}else {
+				setParam(map, r.getOperatorUid());
+				int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 			}
@@ -637,12 +692,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return taskLogDtos;
 	}
 	
+	private void setParam(Map<String, Object> map, Long userId) {
+		User user = userProvider.findUserById(userId);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		map.put("operatorName", user.getNickName());
+	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+	}
+	
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-
+		cmd.setSourceType(PmTaskSourceType.APP.getCode());
 		return createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
 	}
 	
@@ -713,7 +775,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 				task.setReserveTime(new Timestamp(cmd.getReserveTime()));
 			task.setPriority(cmd.getPriority());
 			task.setSourceType(cmd.getSourceType());
-			task.setRevisitStatus(PmTaskRevisitStatus.NOT.getCode());
 			task.setAddressId(cmd.getAddressId());
 			pmTaskProvider.createTask(task);
 			//图片
@@ -1227,7 +1288,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 							Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), category.getId(), null, startDate, endDate);
 							Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), category.getId(), null, startDate, endDate);
 							Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), category.getId(), null, startDate, endDate);
-							Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.OTHER.getCode(), category.getId(), null, startDate, endDate);
+							Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), category.getId(), null, startDate, endDate);
 							
 							Integer star1 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)1, startDate, endDate);
 							Integer star2 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)2, startDate, endDate);
@@ -1618,8 +1679,140 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getOperateType()) {
+        	LOGGER.error("OperateType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OperateType cannot be null.");
+        }
+		if(null == cmd.getOrganizationId()) {
+        	LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+        }
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(null == org) {
+        	LOGGER.error("OrganizationId not found.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId not found.");
+        }
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Long roleId = null;
+		if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
+			roleId = RoleConstants.PM_TASK_EXECUTOR;
+		else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
+			roleId = RoleConstants.PM_TASK_REPAIRMEN;
+		List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(), roleId, 
+				cmd.getPageAnchor(), cmd.getPageSize());
+		
+		ListOperatePersonnelsResponse response = new ListOperatePersonnelsResponse();
+
+		List<OrganizationMember> organizationMembers = new ArrayList<OrganizationMember>();
+		for(PmTaskTarget t: targets) {
+			OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(t.getTargetId(), cmd.getOrganizationId());
+			organizationMembers.add(m);
+		}
+		
+		if(targets.size() > 0){
+			response.setMembers(organizationService.convertOrganizationMemberDTO(organizationMembers, org));
+    		if(targets.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(targets.get(targets.size()-1).getId());
+        	}
+    	}
+		
+		return response;
 	}
+
+	@Override
+	public void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getOperateType()) {
+        	LOGGER.error("OperateType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OperateType cannot be null.");
+        }
+		if(null == cmd.getOrganizationId()) {
+        	LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+        }
+		Long roleId = null;
+		if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
+			roleId = RoleConstants.PM_TASK_EXECUTOR;
+		else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
+			roleId = RoleConstants.PM_TASK_REPAIRMEN;
+		PmTaskTarget target = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+				cmd.getTargetType(), cmd.getTargetId());
+		if(null != target) {
+			LOGGER.error("Target have already been exist.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Target have already been exist.");
+		}
+		PmTaskTarget pmTaskTarget = new PmTaskTarget();
+		pmTaskTarget.setRoleId(roleId);
+		dbProvider.execute((TransactionStatus status) -> {
+			
+			pmTaskTarget.setOwnerId(cmd.getOwnerId());
+			pmTaskTarget.setOwnerType(cmd.getOwnerType());
+			pmTaskTarget.setStatus(PmTaskTargetStatus.ACTIVE.getCode());
+			pmTaskTarget.setTargetType(cmd.getTargetType());
+			pmTaskTarget.setTargetId(cmd.getTargetId());
+			
+			pmTaskProvider.createTaskTarget(pmTaskTarget);
+			
+			RoleAssignment roleAssignment = new RoleAssignment();
+			roleAssignment.setRoleId(pmTaskTarget.getRoleId());
+			roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			roleAssignment.setOwnerId(cmd.getOrganizationId());
+			roleAssignment.setTargetType(cmd.getTargetType());
+			roleAssignment.setTargetId(cmd.getTargetId());
+			roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+			aclProvider.createRoleAssignment(roleAssignment);
+		return null;
+		});
+		
+	}
+
+	@Override
+	public void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getOperateType()) {
+        	LOGGER.error("OperateType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OperateType cannot be null.");
+        }
+		if(null == cmd.getOrganizationId()) {
+        	LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+        }
+		dbProvider.execute((TransactionStatus status) -> {
+			Long roleId = null;
+			if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
+				roleId = RoleConstants.PM_TASK_EXECUTOR;
+			else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
+				roleId = RoleConstants.PM_TASK_REPAIRMEN;
+			PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+					cmd.getTargetType(), cmd.getTargetId());
+			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
+			
+			pmTaskProvider.updateTaskTarget(pmTaskTarget);
+			
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(),
+					cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+			for(RoleAssignment r: roleAssignments) {
+				if(r.getRoleId().equals(roleId)) {
+					aclProvider.deleteRoleAssignment(r);
+				}
+			}
+		return null;
+		});
+		
+	}
+
 
 }

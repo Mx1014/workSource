@@ -6,18 +6,19 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>organizationId: 机构ID</li>
- * <li>operateType: 类型</li>
+ * <li>operateType: 人员类型</li>
+ * <li>organizationId: 机构id</li>
+ * <li>targetType: 类型 {@link com.everhomes.entity.EntityType  EhUsers }</li>
+ * <li>targetId: id</li>
  * </ul>
  */
-public class ListOperatePersonnelsCommand {
+public class DeleteTaskOperatePersonCommand {
 	private String ownerType;
 	private Long ownerId;
 	private Long organizationId;
 	private Byte operateType;
-	private Long pageAnchor;
-	private Integer pageSize;
-	
+	private String targetType;
+	private Long targetId;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -30,33 +31,33 @@ public class ListOperatePersonnelsCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
 	public Byte getOperateType() {
 		return operateType;
 	}
 	public void setOperateType(Byte operateType) {
 		this.operateType = operateType;
 	}
+	public String getTargetType() {
+		return targetType;
+	}
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+	public Long getTargetId() {
+		return targetId;
+	}
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
 	
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-	public Integer getPageSize() {
-		return pageSize;
-	}
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

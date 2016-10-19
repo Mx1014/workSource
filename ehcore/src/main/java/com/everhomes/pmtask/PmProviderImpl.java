@@ -31,13 +31,16 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTaskLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTaskStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhPmTaskTargetsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskTargets;
 import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
+import com.everhomes.server.schema.tables.records.EhPmTaskTargetsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTasksRecord;
 import com.everhomes.util.ConvertHelper;
 
@@ -60,6 +63,61 @@ public class PmProviderImpl implements PmTaskProvider{
     	pmTask.setId(id);
     	dao.insert(pmTask);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTasks.class, null);
+    }
+	
+	@Override
+    public void createTaskTarget(PmTaskTarget pmTaskTarget){
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmTaskTargets.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhPmTaskTargetsDao dao = new EhPmTaskTargetsDao(context.configuration());
+    	pmTaskTarget.setId(id);
+    	dao.insert(pmTaskTarget);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskTargets.class, null);
+    }
+	
+	@Override
+    public List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
+
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_ID.eq(ownerId));
+        if(null != roleId)
+        	query.addConditions(Tables.EH_PM_TASK_TARGETS.ROLE_ID.eq(roleId));
+        if(null != pageAnchor && pageAnchor != 0)
+        	query.addConditions(Tables.EH_PM_TASK_TARGETS.ID.gt(pageAnchor));
+        if(null != pageSize)
+        	query.addLimit(pageSize);
+        query.addOrderBy(Tables.EH_PM_TASK_TARGETS.ID.asc());
+        
+        List<PmTaskTarget> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskTarget.class))
+        		.collect(Collectors.toList());
+        
+        return result;
+    }
+	
+	@Override
+    public PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
+
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.ROLE_ID.eq(roleId));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_TYPE.eq(targetType));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_ID.eq(targetId));
+        
+        PmTaskTarget result = ConvertHelper.convert(query.fetchOne(), PmTaskTarget.class);
+        return result;
+    }
+	
+	@Override
+    public void updateTaskTarget(PmTaskTarget pmTaskTarget){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhPmTaskTargetsDao dao = new EhPmTaskTargetsDao(context.configuration());
+    	dao.update(pmTaskTarget);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskTargets.class, null);
     }
 	
 //	@Caching(evict = { 
@@ -162,7 +220,7 @@ public class PmProviderImpl implements PmTaskProvider{
     		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
     				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
-    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.OTHER.getCode())));
+    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
     		query.groupBy(Tables.EH_PM_TASKS.ID);
 
     	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){

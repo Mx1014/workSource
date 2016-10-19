@@ -3,15 +3,13 @@ package com.everhomes.rest.pmtask;
 
 /**
  * <ul>
- * <li>1: 执行人员</li>
- * <li>2: 维修人员</li>
  * </ul>
  */
-public enum PmTaskOperateType {
-	EXECUTOR((byte)1), REPAIR((byte)2);
+public enum PmTaskTargetStatus {
+	INACTIVE((byte)0), ACTIVE((byte)2);
     
     private byte code;
-    private PmTaskOperateType(byte code) {
+    private PmTaskTargetStatus(byte code) {
         this.code = code;
     }
     
@@ -19,10 +17,10 @@ public enum PmTaskOperateType {
         return this.code;
     }
     
-    public static PmTaskOperateType fromCode(Byte code) {
+    public static PmTaskTargetStatus fromCode(Byte code) {
         if(code != null) {
-            PmTaskOperateType[] values = PmTaskOperateType.values();
-            for(PmTaskOperateType value : values) {
+            PmTaskTargetStatus[] values = PmTaskTargetStatus.values();
+            for(PmTaskTargetStatus value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }
