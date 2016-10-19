@@ -11,6 +11,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -22,6 +24,9 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupService;
+import com.everhomes.group.GroupServiceImpl;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
@@ -33,6 +38,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 
 public class PushMessageTest extends LoginAuthTestCase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PushMessageTest.class);
+    
     private PushMessage pushMessage;
     
     @Autowired
@@ -40,6 +47,9 @@ public class PushMessageTest extends LoginAuthTestCase {
     
     @Autowired
     private PushMessageResultProvider pushMessageResultProvider;
+    
+    @Autowired
+    private GroupService groupService;
     
     @Configuration
     @ComponentScan(basePackages = {
@@ -56,17 +66,17 @@ public class PushMessageTest extends LoginAuthTestCase {
     public void setUp() throws Exception {
         super.setUp();
         
-        pushMessage = new PushMessage();
-        pushMessage.setMessageType(PushMessageType.NORMAL.getCode());
-        pushMessage.setTitle("title of push message");
-        pushMessage.setContent("test for push message");
-        pushMessage.setAppVersion("3.0.x");
-        pushMessage.setDeviceTag("sunsung");
-        pushMessage.setDeviceType("iOS");
-        pushMessage.setTargetId(1025l);
-        pushMessage.setTargetType(PushMessageTargetType.USER.getCode());
-        
-        pushMessageService.createPushMessage(pushMessage);
+//        pushMessage = new PushMessage();
+//        pushMessage.setMessageType(PushMessageType.NORMAL.getCode());
+//        pushMessage.setTitle("title of push message");
+//        pushMessage.setContent("test for push message");
+//        pushMessage.setAppVersion("3.0.x");
+//        pushMessage.setDeviceTag("sunsung");
+//        pushMessage.setDeviceType("iOS");
+//        pushMessage.setTargetId(1025l);
+//        pushMessage.setTargetType(PushMessageTargetType.USER.getCode());
+//        
+//        pushMessageService.createPushMessage(pushMessage);
     }
     
     @After
@@ -74,6 +84,30 @@ public class PushMessageTest extends LoginAuthTestCase {
 //        if(this.pushMessage != null && this.pushMessage.getId() > 0) {
 //            pushMessageService.deleteByPushMesageId(pushMessage.getId());
 //        }
+    }
+    
+    @Test
+    public void testGroupCache() {
+        ListingLocator locator = new ListingLocator();
+        locator.setEntityId(100023l);
+        List<GroupMember> members = groupService.listMessageGroupMembers(locator, 20);
+        
+        members = groupService.listMessageGroupMembers(locator, 20);
+        
+        members = groupService.listMessageGroupMembers(locator, 20);
+        
+        members = groupService.listMessageGroupMembers(locator, 20);
+        
+        try {
+            Thread.sleep(11 * 1000l);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        members = groupService.listMessageGroupMembers(locator, 20);
+        LOGGER.info("members=" + members);
+        
     }
     
     @Test

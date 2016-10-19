@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.everhomes.rest.organization.VisibleFlag;
+
 import org.jooq.Condition;
 
+import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -219,4 +221,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId);
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus,
 			Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize);
+	
+    GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
+    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
 }

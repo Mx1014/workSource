@@ -70,7 +70,8 @@ public class GroupProviderImpl implements GroupProvider {
     
     @Autowired
     private SequenceProvider sequenceProvider;
-    
+
+    @Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
     @Override
     public void createGroup(Group group) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
@@ -88,6 +89,7 @@ public class GroupProviderImpl implements GroupProvider {
 
     @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
             @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
     public void updateGroup(Group group) {
@@ -103,6 +105,7 @@ public class GroupProviderImpl implements GroupProvider {
 
     @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
         @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+        @CacheEvict(value="listGroupMessageMembers", allEntries=true),
         @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
     public void deleteGroup(Group group) {
@@ -290,6 +293,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
     
     @Caching(evict={ @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId")})
     public void createGroupMember(final GroupMember groupMember) {
         assert(groupMember.getGroupId() != null);
@@ -334,6 +338,7 @@ public class GroupProviderImpl implements GroupProvider {
     @Caching(evict={ @CacheEvict(value="GroupMember", key="#id"),
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupMemberByUuid", key="#groupMember.uuid")})
     public void updateGroupMember(GroupMember groupMember) {
         assert(groupMember.getId() != null);
@@ -349,6 +354,7 @@ public class GroupProviderImpl implements GroupProvider {
     @Caching(evict={ @CacheEvict(value="GroupMember", key="#id"),
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupMemberByUuid", key="#groupMember.uuid")})
     public void deleteGroupMember(final GroupMember groupMember) {
         assert(groupMember.getId() != null);
@@ -629,6 +635,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
 
     @Caching(evict = { @CacheEvict(value="findGroupOpRequestById", key="#request.id"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="findGroupOpRequestByRequestor", key="{#request.groupId, #request.requestorUid}")})
     @Override
     public void updateGroupOpRequest(GroupOpRequest request) {
@@ -645,6 +652,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
 
     @Caching(evict = { @CacheEvict(value="findGroupOpRequestById", key="#request.id"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="findGroupOpRequestByRequestor", key="{#request.groupId, #request.requestorUid}")})
     @Override
     public void deleteGroupOpRequest(GroupOpRequest request) {
@@ -838,5 +846,24 @@ public class GroupProviderImpl implements GroupProvider {
     	}catch(NullPointerException e){
     		return null;
     	}
+    }
+    
+    @Cacheable(value="listGroupMessageMembers", key="{#namespaceId, #locator, #pageSize}", unless="#result.getSize() == 0")
+    @Override
+    public GroupMemberCaches listGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize) {
+        List<GroupMember> members = listGroupMembers(locator, pageSize);
+//        List<GroupMember> members = new ArrayList<GroupMember>();
+//        members.add(new GroupMember());
+        
+        GroupMemberCaches caches = new GroupMemberCaches();
+        caches.setMembers(members);
+        caches.setTick(System.currentTimeMillis());
+        
+        return caches;
+    }
+    
+    @Caching(evict={@CacheEvict(value="listGroupMessageMembers", key="{#namespaceId, #locator, #pageSize}")})
+    @Override
+    public void evictGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize) {
     }
 }
