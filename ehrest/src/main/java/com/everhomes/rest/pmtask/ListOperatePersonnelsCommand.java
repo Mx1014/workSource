@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>organizationId: 机构ID</li>
  * <li>operateType: 类型</li>
+ * <li>pageAnchor: 瞄</li>
+ * <li>pageSize: 每页条数</li>
  * </ul>
  */
 public class ListOperatePersonnelsCommand {

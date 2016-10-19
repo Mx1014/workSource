@@ -260,7 +260,7 @@ public class PmTaskController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /pmtask/revisit</b>
-	 * <p>取消任务</p>
+	 * <p>回访</p>
 	 */
 	@RequestMapping("revisit")
 	@RestReturn(value=String.class)
