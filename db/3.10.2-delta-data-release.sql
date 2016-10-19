@@ -165,3 +165,7 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
     VALUES(123,34,'-0.1','3155970','0','3.10.2','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES (77, 34, '3.10.2', 'http://apk.zuolin.com/apk/UFinePark-3.10.2.2016101719-release.apk', '${homeurl}/web/download/apk/andriod-UFinePark-3-10-2.html', '0');
 
+--
+-- 更新场景显示名称 add by xq.tian  2016/10/19
+--
+UPDATE `eh_scene_types` SET `display_name`='普通用户场景' WHERE (`name`='park_tourist');
