@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.slf4j.Logger;
@@ -62,6 +64,7 @@ import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.OpPromotionConstant;
 import com.everhomes.promotion.OpPromotionScheduleJob;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
@@ -258,6 +261,16 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private NamespacesProvider namespacesProvider;
+
+    @Autowired
+    WorkerPoolFactory workerPoolFactory;
+    
+	final String queueName = "activityWarning";
+    
+    @PostConstruct
+    public void setup() {
+        workerPoolFactory.getWorkerPool().addQueue(queueName);
+    }
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -2678,7 +2691,6 @@ public class ActivityServiceImpl implements ActivityService {
     @Scheduled(cron="0 0 * * * ?")
     @Override
 	public void activityWarningSchedule() {
-    	final String queueName = "activityWarning";
     	//使用tryEnter方法可以防止分布式部署时重复执行
     	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
     		//取当前时间，只取到小时
@@ -2710,9 +2722,12 @@ public class ActivityServiceImpl implements ActivityService {
         				final Job job1 = new Job(
         						WarnActivityBeginningAction.class.getName(),
         						new Object[] { String.valueOf(a.getId()) });
-        	
+        				
+//        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+//        						new Date().getTime()+10000);
         				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
         						a.getStartTime().getTime() - warningSetting.getTime());
+        				LOGGER.debug("设置了一个活动提醒："+a.getId());
 					}
         		});
         	});

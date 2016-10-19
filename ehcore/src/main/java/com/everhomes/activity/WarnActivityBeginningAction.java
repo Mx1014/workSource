@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.activity.ActivityWarningResponse;
@@ -26,6 +29,9 @@ import com.everhomes.user.UserContext;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class WarnActivityBeginningAction implements Runnable {
+	
+	private static final Logger  LOGGER = LoggerFactory.getLogger(WarnActivityBeginningAction.class);
+	
 	private Long activityId;
 	
 	@Autowired
@@ -40,13 +46,16 @@ public class WarnActivityBeginningAction implements Runnable {
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	
-	public WarnActivityBeginningAction(Long activityId) {
+	public WarnActivityBeginningAction(String id) {
 		super();
-		this.activityId = activityId;
+		this.activityId = Long.valueOf(id);
+		LOGGER.debug("创建了一个活动提醒");
 	}
 
 	@Override
 	public void run() {
+		LOGGER.debug("活动提醒开始："+activityId);
+		
 		Activity activity = activityProivider.findActivityById(activityId);
 		if (activity == null) {
 			return;
@@ -71,8 +80,11 @@ public class WarnActivityBeginningAction implements Runnable {
     	activityRosters.forEach(r->{
     		if (r.getUid().longValue() != activity.getCreatorUid().longValue()) {
     			sendMessageToUser(r.getUid().longValue(), content, null);
+    			LOGGER.debug("活动提醒——给用户发了消息，userId："+r.getUid());
 			}
     	});
+
+		LOGGER.debug("活动提醒结束："+activityId);
 	}
 	
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
