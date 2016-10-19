@@ -345,7 +345,8 @@ public class ActivityServiceImpl implements ActivityService {
         }
         //检查是否超过报名人数限制, add by tt, 20161012
         if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
-        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
 					"beyond contraint quantity!");
 		}
         

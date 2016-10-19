@@ -16,4 +16,6 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_VIDEO_SERVER_ERROR=10010;
     static final int ERROR_VIDEO_PARAM_ERROR=10011;
     static final int ERROR_VIDEO_DEVICE_RESTART=10012;
+    static final int ERROR_BEYOND_CONTRAINT_QUANTITY=10013;  //活动报名人数已满，感谢关注
+    
 }
