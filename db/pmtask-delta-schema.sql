@@ -15,7 +15,7 @@ CREATE TABLE `eh_pm_task_targets` (
   `owner_id` bigint(20) DEFAULT NULL,
   `target_type` varchar(64) NOT NULL COMMENT 'target object(user/group) type',
   `target_id` bigint(20) DEFAULT NULL COMMENT 'target object(user/group) id',
-
+  `role_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
