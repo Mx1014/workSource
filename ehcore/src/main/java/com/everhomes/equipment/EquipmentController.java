@@ -21,6 +21,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
@@ -43,6 +45,7 @@ import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.SearchEquipmentsResponse;
+import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
@@ -769,5 +772,51 @@ public class EquipmentController extends ControllerBase {
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
+    }
+    
+    /**
+	 * <b>URL: /equipment/updateEquipmentCategory</b>
+	 * <p>修改设备类型</p>
+	 */
+	@RequestMapping("updateEquipmentCategory")
+	@RestReturn(value = String.class)
+	public RestResponse updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd) {
+		
+		equipmentService.updateEquipmentCategory(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <b>URL: /equipment/createEquipmentCategory</b>
+     * <p>新建设备类型</p>
+     */
+    @RequestMapping("createEquipmentCategory")
+    @RestReturn(value=String.class)
+    public RestResponse createEquipmentCategory(CreateEquipmentCategoryCommand cmd) {
+  	  
+    	equipmentService.createEquipmentCategory(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pmtask/deleteEquipmentCategory</b>
+     * <p>删除设备类型</p>
+     */
+    @RequestMapping("deleteEquipmentCategory")
+    @RestReturn(value=String.class)
+    public RestResponse deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd) {
+    	  
+    	equipmentService.deleteEquipmentCategory(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

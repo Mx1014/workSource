@@ -8,7 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
+import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
@@ -30,6 +32,7 @@ import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
@@ -81,4 +84,8 @@ public interface EquipmentService {
 	ListEquipmentTasksResponse listTasksByEquipmentId(ListTasksByEquipmentIdCommand cmd);
 	EquipmentAccessoriesDTO findEquipmentAccessoriesById(DeleteEquipmentAccessoriesCommand cmd);
 	EquipmentTaskDTO listTaskById(ListTaskByIdCommand cmd);
+	
+	void createEquipmentCategory(CreateEquipmentCategoryCommand cmd);
+	void updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd);
+	void deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd);
 }

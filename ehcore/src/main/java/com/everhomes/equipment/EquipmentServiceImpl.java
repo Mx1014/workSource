@@ -145,7 +145,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -412,6 +414,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -451,7 +454,9 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
+import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
@@ -499,6 +504,7 @@ import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
 import com.everhomes.rest.equipment.StandardType;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
+import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
@@ -2697,6 +2703,24 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
 		
 		return dto;
+	}
+
+	@Override
+	public void createEquipmentCategory(CreateEquipmentCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
