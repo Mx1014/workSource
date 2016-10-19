@@ -16,6 +16,10 @@ public class ActivityWarningResponse {
 	private Integer days;
 	private Integer hours;
 	
+	public ActivityWarningResponse() {
+		super();
+	}
+	
 	public ActivityWarningResponse(Integer namespaceId, Integer days, Integer hours) {
 		super();
 		this.namespaceId = namespaceId;

@@ -11,6 +11,10 @@ import com.everhomes.util.StringHelper;
  */
 public class GetActivityWarningCommand {
 	private Integer namespaceId;
+	
+	public GetActivityWarningCommand() {
+		super();
+	}
 
 	public GetActivityWarningCommand(Integer namespaceId) {
 		super();
