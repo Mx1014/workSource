@@ -303,6 +303,22 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 				}
 			}
 		}
+		
+		String xAgent = request.getHeader("X-Agent");
+		if (xAgent == null || xAgent.isEmpty()) {
+			xAgent = request.getHeader("x-agent");
+		}
+		if (xAgent != null && xAgent.trim().length() > 0) {
+			String[] segments = xAgent.trim().split(" ");
+			for(String segment : segments) {
+				if(segment != null && segment.trim().length() > 0) {
+					String[] values = segment.split("/");
+					if(values.length == 2) {
+						map.put(values[0].trim(), values[1].trim());
+					}
+				}
+			}
+		}
 
 		return map;
 	}
