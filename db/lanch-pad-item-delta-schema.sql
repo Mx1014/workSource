@@ -36,14 +36,15 @@ ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `payment_card_refund
 ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `total_paid_count` BIGINT DEFAULT 0 COMMENT '总消费笔数';
 ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `total_refund_count` BIGINT DEFAULT 0 COMMENT '总退款消费笔数';
 
--- DROP TABLE IF EXISTS `eh_item_service_types`;
+DROP TABLE IF EXISTS `eh_item_service_categries`;
 CREATE TABLE `eh_item_service_categries` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `name` VARCHAR(64) NOT NULL COMMENT 'service categry name',
   `icon_uri` VARCHAR(1024) COMMENT 'service categry icon uri',
   `order` INTEGER COMMENT 'order ',
   `align` TINYINT DEFAULT '0' COMMENT '0: left, 1: center',
-  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
+  `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0: inactive, 1: active',
+  `namespace_id` INTEGER,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
