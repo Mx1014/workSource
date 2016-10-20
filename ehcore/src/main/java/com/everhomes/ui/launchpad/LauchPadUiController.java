@@ -150,7 +150,7 @@ public class LauchPadUiController extends ControllerBase {
      * <p>根据位置、layout组、指定场景和相应的实体对象以及类别获取全部的item</p>
      */
     @RequestMapping("getAllCategryItemsByScene")
-    @RestReturn(value=CategryItemDTO.class)
+    @RestReturn(value=CategryItemDTO.class, collection = true)
     @RequireAuthentication(false)
     public RestResponse getAllCategryItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         RestResponse resp =  new RestResponse();
