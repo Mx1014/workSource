@@ -68,7 +68,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
@@ -1740,38 +1739,49 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"OrganizationId cannot be null.");
         }
-		Long roleId = null;
+		Long tempRoleId = null;
 		if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
-			roleId = RoleConstants.PM_TASK_EXECUTOR;
+			tempRoleId = RoleConstants.PM_TASK_EXECUTOR;
 		else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
-			roleId = RoleConstants.PM_TASK_REPAIRMEN;
-		PmTaskTarget target = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
-				cmd.getTargetType(), cmd.getTargetId());
-		if(null != target) {
-			LOGGER.error("Target have already been exist.");
+			tempRoleId = RoleConstants.PM_TASK_REPAIRMEN;
+//		PmTaskTarget target = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+//				cmd.getTargetType(), cmd.getTargetId());
+		List<Long> targetIds = cmd.getTargetIds();
+		if(null == targetIds || targetIds.isEmpty()) {
+			LOGGER.error("TargetIds cannot be null or empty.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Target have already been exist.");
+    				"TargetIds cannot be null or empty.");
 		}
-		PmTaskTarget pmTaskTarget = new PmTaskTarget();
-		pmTaskTarget.setRoleId(roleId);
+		
+		final Long roleId = tempRoleId;
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			pmTaskTarget.setOwnerId(cmd.getOwnerId());
-			pmTaskTarget.setOwnerType(cmd.getOwnerType());
-			pmTaskTarget.setStatus(PmTaskTargetStatus.ACTIVE.getCode());
-			pmTaskTarget.setTargetType(cmd.getTargetType());
-			pmTaskTarget.setTargetId(cmd.getTargetId());
+			for(int i=0,l=targetIds.size(); i<l;i++ ) {
+				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+						EntityType.USER.getCode(), targetIds.get(i));
+				if(null == pmTaskTarget) {
+					pmTaskTarget = new PmTaskTarget();
+					pmTaskTarget.setRoleId(roleId);
+					pmTaskTarget.setOwnerId(cmd.getOwnerId());
+					pmTaskTarget.setOwnerType(cmd.getOwnerType());
+					pmTaskTarget.setStatus(PmTaskTargetStatus.ACTIVE.getCode());
+					pmTaskTarget.setTargetType(EntityType.USER.getCode());
+					pmTaskTarget.setTargetId(targetIds.get(i));
+					
+					pmTaskProvider.createTaskTarget(pmTaskTarget);
+					
+					RoleAssignment roleAssignment = new RoleAssignment();
+					roleAssignment.setRoleId(pmTaskTarget.getRoleId());
+					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+					roleAssignment.setOwnerId(cmd.getOrganizationId());
+					roleAssignment.setTargetType(EntityType.USER.getCode());
+					roleAssignment.setTargetId(targetIds.get(i));
+					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+					aclProvider.createRoleAssignment(roleAssignment);
+				}
+				
+			}
 			
-			pmTaskProvider.createTaskTarget(pmTaskTarget);
-			
-			RoleAssignment roleAssignment = new RoleAssignment();
-			roleAssignment.setRoleId(pmTaskTarget.getRoleId());
-			roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-			roleAssignment.setOwnerId(cmd.getOrganizationId());
-			roleAssignment.setTargetType(cmd.getTargetType());
-			roleAssignment.setTargetId(cmd.getTargetId());
-			roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-			aclProvider.createRoleAssignment(roleAssignment);
 		return null;
 		});
 		

@@ -288,7 +288,7 @@ public interface PropertyMgrProvider {
      */
     void updateOrganizationOwnerCar(OrganizationOwnerCar car);
 
-    List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String contact, Long pageAnchor, int pageSize);
+    List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String contact, Long pageAnchor, Integer pageSize);
 
     /**
      * 创建车辆附件记录

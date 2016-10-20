@@ -5019,7 +5019,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 
                 List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(r.getNamespaceId(), r.getId());
-                dto.setAddresses(addresses.stream().map(r2 -> ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class))
+                dto.setAddresses(addresses.stream().map(r2 -> {
+                	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
+                	Address address = addressProvider.findAddressById(r2.getAddressId());
+                	d.setAddress(address.getAddress());
+                	d.setApartment(address.getApartmentName());
+                	d.setBuilding(address.getBuildingName());
+                	return d;
+                })
                 		.collect(Collectors.toList()));
                 return dto;
             }).collect(Collectors.toList());
@@ -5045,7 +5052,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 
                 List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(organizationOwner.getNamespaceId(), organizationOwner.getId());
-                dto.setAddresses(addresses.stream().map(r2 -> ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class))
+                dto.setAddresses(addresses.stream().map(r2 -> {
+                	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
+                	Address address = addressProvider.findAddressById(r2.getAddressId());
+                	d.setAddress(address.getAddress());
+                	d.setApartment(address.getApartmentName());
+                	d.setBuilding(address.getBuildingName());
+                	return d;
+                })
                 		.collect(Collectors.toList()));
                 return dto;
             }).collect(Collectors.toList());

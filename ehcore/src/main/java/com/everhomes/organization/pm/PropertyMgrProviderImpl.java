@@ -1620,7 +1620,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
     @Override
-    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String contact, Long pageAnchor, int pageSize) {
+    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String contact, Long pageAnchor, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         if (namespaceId != null) {
@@ -1636,7 +1636,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.ge(pageAnchor));
         }
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
-        query.addLimit(pageSize);
+        if(null != pageSize)
+        	query.addLimit(pageSize);
         return query.fetchInto(CommunityPmOwner.class);
     }
 

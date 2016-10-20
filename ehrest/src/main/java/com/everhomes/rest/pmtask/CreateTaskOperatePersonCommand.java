@@ -1,5 +1,8 @@
 package com.everhomes.rest.pmtask;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,8 +20,11 @@ public class CreateTaskOperatePersonCommand {
 	private Long ownerId;
 	private Byte operateType;
 	private Long organizationId;
-	private String targetType;
-	private Long targetId;
+	
+//	@ItemType(String.class)
+//	private List<String> targetTypes;
+	@ItemType(Long.class)
+	private List<Long> targetIds;
 	
 	public String getOwnerType() {
 		return ownerType;
@@ -38,19 +44,19 @@ public class CreateTaskOperatePersonCommand {
 	public void setOperateType(Byte operateType) {
 		this.operateType = operateType;
 	}
-	public String getTargetType() {
-		return targetType;
-	}
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-	public Long getTargetId() {
-		return targetId;
-	}
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
 	
+//	public List<String> getTargetTypes() {
+//		return targetTypes;
+//	}
+//	public void setTargetTypes(List<String> targetTypes) {
+//		this.targetTypes = targetTypes;
+//	}
+	public List<Long> getTargetIds() {
+		return targetIds;
+	}
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
