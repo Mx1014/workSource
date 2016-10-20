@@ -1,9 +1,9 @@
 package com.everhomes.rest.messaging;
 
 public enum MessagingPriorityConstants {
-    HIGH(100),
+    HIGH(1),
     MEDIUM(10),
-    LOW(1);
+    LOW(100);
     
     private int code;
     private MessagingPriorityConstants(int code) {

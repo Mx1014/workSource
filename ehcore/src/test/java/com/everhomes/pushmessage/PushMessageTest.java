@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -30,12 +31,14 @@ import com.everhomes.group.GroupServiceImpl;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.pusher.PriorityApnsNotification;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+import com.notnoop.apns.EnhancedApnsNotification;
 
 public class PushMessageTest extends LoginAuthTestCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(PushMessageTest.class);
@@ -84,6 +87,43 @@ public class PushMessageTest extends LoginAuthTestCase {
 //        if(this.pushMessage != null && this.pushMessage.getId() > 0) {
 //            pushMessageService.deleteByPushMesageId(pushMessage.getId());
 //        }
+    }
+    
+    @Test
+    public void testPriority() {
+        int now = (int)System.currentTimeMillis();
+        PriorityApnsNotification n1 = new PriorityApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                now + 60 * 60 /* Expire in one hour */,
+                "" /* Device Token */,
+                "",
+                1);
+        PriorityApnsNotification n3 = new PriorityApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                now + 60 * 60 /* Expire in one hour */,
+                "" /* Device Token */,
+                "",
+                3);
+        PriorityApnsNotification n2 = new PriorityApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                now + 60 * 60 /* Expire in one hour */,
+                "" /* Device Token */,
+                "",
+                2);
+        
+        PriorityBlockingQueue<PriorityApnsNotification> queue = new PriorityBlockingQueue<PriorityApnsNotification>();
+        queue.add(n1);
+        queue.add(n3);
+        queue.add(n2);
+        
+        try {
+            PriorityApnsNotification n = queue.take();
+            LOGGER.info("priority=" + n.getPriority());
+            n = queue.take();
+            LOGGER.info("priority=" + n.getPriority());
+            n = queue.take();
+            LOGGER.info("priority=" + n.getPriority());
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     @Test
