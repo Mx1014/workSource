@@ -95,5 +95,7 @@ public interface UserActivityService {
 	ListActiveStatResponse listActiveStat(ListActiveStatCommand cmd);
 
 	void addAnyDayActive(Date statDate, Integer namespaceId);
+
+	String getBizUrl();
  
 }

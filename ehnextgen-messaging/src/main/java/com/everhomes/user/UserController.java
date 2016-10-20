@@ -19,7 +19,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.common.recycler.Recycler.V;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.device.DeviceProvider;
@@ -71,6 +69,7 @@ import com.everhomes.rest.user.GetAppAgreementCommand;
 import com.everhomes.rest.user.GetFamilyMemberInfoCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserSnapshotInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.LogonByTokenCommand;
 import com.everhomes.rest.user.LogonCommand;
@@ -1084,6 +1083,20 @@ public class UserController extends ControllerBase {
     public RestResponse getVideoPermisionByUserId() {
         GetVideoPermissionInfoCommand cmd = new GetVideoPermissionInfoCommand(); 
         RestResponse resp = new RestResponse(activityService.GetVideoPermisionInfo(cmd));
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
+     * <b>URL: /user/findInitBizInfo</b>
+     * <p>获取初始化电商信息</p>
+     */
+    @RequestMapping("findInitBizInfo")
+    @RestReturn(value = InitBizInfoDTO.class)
+    public RestResponse findInitBizInfo() {
+    	InitBizInfoDTO response = userService.findInitBizInfo();
+        RestResponse resp = new RestResponse(response);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
