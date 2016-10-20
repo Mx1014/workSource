@@ -800,8 +800,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	            	organizationId = orgs.get(0).getOrganizationId();
 	            }
 			}
-	    	List<Long> ids = getOrganizationMembers(organizationId);
-	    	int size = ids.size();
+	    	
+	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(), RoleConstants.PM_TASK_EXECUTOR, 
+					null, null);
+	    	int size = targets.size();
 	    	if(LOGGER.isDebugEnabled())
 	    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
 	    	if(size > 0){
@@ -810,8 +812,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	        	//消息推送
 	        	String scope = PmTaskNotificationTemplateCode.SCOPE;
 	    	    String locale = PmTaskNotificationTemplateCode.LOCALE;
-	        	for(Long id: ids) {
-	            	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(id, IdentifierType.MOBILE.getCode());
+	        	for(PmTaskTarget p: targets) {
+	            	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(p.getTargetId(), IdentifierType.MOBILE.getCode());
 	            	phones.add(sender.getIdentifierToken());
 	            	//消息推送
 	            	Map<String, Object> map = new HashMap<String, Object>();
@@ -819,7 +821,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	        	    map.put("creatorPhone", requestorPhone);
 	        		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
 	        		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-	        		sendMessageToUser(id, text);
+	        		sendMessageToUser(p.getTargetId(), text);
 	        	}
 	        	int num = phones.size();
 	        	if(num > 0) {
@@ -839,39 +841,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
-	private List<Long> getOrganizationMembers(Long organizationId){
-		List<Long> result = new ArrayList<>();
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), organizationId);
-		List<Long> roleIds = new ArrayList<Long>();
-		outer:
-		for(Role r: roles) {
-			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, r.getId());
-			for(Acl acl: acls) {
-				if(acl.getPrivilegeId().equals(PrivilegeConstants.ASSIGNTASK) ||
-						acl.getPrivilegeId().equals(PrivilegeConstants.COMPLETETASK) ||
-						acl.getPrivilegeId().equals(PrivilegeConstants.CLOSETASK)) {
-					roleIds.add(r.getId());
-					continue outer;
-				}
-			}
-		}
-		
-		if(roleIds.isEmpty())
-			return result;
-		
-		List<RoleAssignment> roleAssgnments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
-		for(RoleAssignment ra: roleAssgnments){
-			if(EntityType.USER.getCode().equals(ra.getTargetType()) &&
-					roleIds.contains(ra.getRoleId())) {
-				result.add(ra.getTargetId());
-			}
-		}
-		return result;
-	}
-	
 	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
 		if(!CollectionUtils.isEmpty(list)){
 			for(AttachmentDescriptor ad: list){
