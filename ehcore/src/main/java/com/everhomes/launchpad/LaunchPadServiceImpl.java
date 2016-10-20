@@ -183,6 +183,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	
 	@Override
 	public List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
+		Long userId = UserContext.current().getUser().getId();
+
 		if(cmd.getItemLocation() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid itemLocation paramter,itemLocation is null");
@@ -198,7 +200,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
 			categryItemDTO.setCategryName(categry.getName());
-			categryItemDTO.setCategryIconUrl(categry.getIconUri());
+			categryItemDTO.setCategryIconUrl(parserUri(categry.getIconUri(),EntityType.USER.getCode(),userId));
 			categryItemDTO.setCategryAlign(categry.getAlign());
 			cmd.setCategryId(categry.getId());
 			List<LaunchPadItemDTO> result = getItemsByCommunity(cmd, request, null);
@@ -213,6 +215,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request){
+		Long userId = UserContext.current().getUser().getId();
 		if(cmd.getItemLocation() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid itemLocation paramter,itemLocation is null");
@@ -228,7 +231,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
 			categryItemDTO.setCategryName(categry.getName());
-			categryItemDTO.setCategryIconUrl(categry.getIconUri());
+			categryItemDTO.setCategryIconUrl(parserUri(categry.getIconUri(),EntityType.USER.getCode(),userId));
 			categryItemDTO.setCategryAlign(categry.getAlign());
 			cmd.setCategryId(categry.getId());
 			List<LaunchPadItemDTO> result = getItemsByOrg(cmd, request, null);
