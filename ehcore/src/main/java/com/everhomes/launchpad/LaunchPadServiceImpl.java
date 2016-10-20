@@ -761,7 +761,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 			// 根据类别过滤出item by sfyan 20161020
 			if(null != cmd.getCategryId()){
-				allItems = allItems.stream().filter(r -> r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
+				allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
 			}
 		}
 
@@ -887,7 +887,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 				// 根据类别过滤出item by sfyan 20161020
 				if(null != cmd.getCategryId()){
-					allItems = allItems.stream().filter(r -> r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
+					allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
 				}
             }
             	
