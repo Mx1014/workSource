@@ -3415,6 +3415,9 @@ public class UserServiceImpl implements UserService {
 			identifier.setOwnerUid(user.getId());
 			identifier.setRegionCode(86);
 			userProvider.createIdentifier(identifier);
+		} else {
+			identifier.setIdentifierToken(identifierToken);
+			userProvider.updateIdentifier(identifier);
 		}
 		return identifier;
 	}
@@ -3445,6 +3448,11 @@ public class UserServiceImpl implements UserService {
 			user.setNamespaceUserToken(cmd.getLabel());;
 			user.setAvatar(cmd.getDescription());
 			userProvider.createUser(user);
+		} else {
+			user.setNickName(cmd.getDetail()==null?"":cmd.getDetail());
+			user.setNamespaceId(cmd.getNamespaceId());
+			user.setAvatar(cmd.getDescription());
+			userProvider.updateUser(user);
 		}
 		return user;
 	}
