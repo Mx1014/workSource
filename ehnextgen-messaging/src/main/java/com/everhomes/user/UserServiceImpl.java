@@ -3381,6 +3381,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd) {
 	    ListRegisterUsersResponse resp = new ListRegisterUsersResponse();
+	    if(cmd.getNamespaceId() == null) {
+	        cmd.setNamespaceId(0);
+	    }
 	    
 	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 	    CrossShardListingLocator locator = new CrossShardListingLocator();
