@@ -981,6 +981,11 @@ public class BannerServiceImpl implements BannerService {
                  banner.setScopeCode(cmd.getScope().getScopeCode());
                  banner.setScopeId(cmd.getScope().getScopeId());
                  banner.setOrder(cmd.getDefaultOrder());
+                 // 设置最大的order值
+                 List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                         cmd.getScope(), sceneStr, null, null, ApplyPolicy.CUSTOMIZED);
+                 bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+
                  banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
                  banner.setSceneType(sceneType.getCode());
                  
@@ -1017,7 +1022,7 @@ public class BannerServiceImpl implements BannerService {
 		
 		if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id parameter.");
         }
 		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
          	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1054,7 +1059,7 @@ public class BannerServiceImpl implements BannerService {
         	setUpdateDataToBanner(cmd, banner);
             bannerProvider.updateBanner(banner);
         }
-	}
+    }
 
 	private void setUpdateDataToBanner(UpdateBannerByOwnerCommand cmd, Banner banner) {
 		if(cmd.getActionType() != null)
@@ -1073,6 +1078,12 @@ public class BannerServiceImpl implements BannerService {
         	banner.setScopeCode(cmd.getScope().getScopeCode());
         if(cmd.getName() != null)
         	banner.setName(cmd.getName());
+        if (cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
+            // 设置最大的order值
+            List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    cmd.getScope(), banner.getSceneType(), null, null, ApplyPolicy.CUSTOMIZED);
+            bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+        }
 	}
 
 	private void checkUserNotInOrg(String ownerType, Long ownerId) {

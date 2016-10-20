@@ -17,10 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.rest.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.common.recycler.Recycler.V;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +34,6 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.device.DeviceProvider;
@@ -58,6 +55,41 @@ import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.user.AppIdStatusCommand;
+import com.everhomes.rest.user.AppIdStatusResponse;
+import com.everhomes.rest.user.AppServiceAccessCommand;
+import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.BorderListResponse;
+import com.everhomes.rest.user.CheckVerifyCodeCommand;
+import com.everhomes.rest.user.DeleteUserIdentifierCommand;
+import com.everhomes.rest.user.FetchMessageCommandResponse;
+import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
+import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
+import com.everhomes.rest.user.FindTokenByUserIdCommand;
+import com.everhomes.rest.user.GetAppAgreementCommand;
+import com.everhomes.rest.user.GetFamilyMemberInfoCommand;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
+import com.everhomes.rest.user.GetUserSnapshotInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.LogonByTokenCommand;
+import com.everhomes.rest.user.LogonCommand;
+import com.everhomes.rest.user.LogonCommandResponse;
+import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
+import com.everhomes.rest.user.ResendVerificationCodeCommand;
+import com.everhomes.rest.user.ResetPasswordCommand;
+import com.everhomes.rest.user.SendMessageCommand;
+import com.everhomes.rest.user.SetCurrentCommunityCommand;
+import com.everhomes.rest.user.SetPasswordCommand;
+import com.everhomes.rest.user.SetUserAccountInfoCommand;
+import com.everhomes.rest.user.SetUserInfoCommand;
+import com.everhomes.rest.user.SignupCommand;
+import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
+import com.everhomes.rest.user.VerifyAndLogonCommand;
+import com.everhomes.rest.user.VerifyAndResetPasswordCommand;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.DateHelper;
@@ -1059,7 +1091,19 @@ public class UserController extends ControllerBase {
         return resp;
     }
 
-
+    /**
+     * <b>URL: /user/findInitBizInfo</b>
+     * <p>获取初始化电商信息</p>
+     */
+    @RequestMapping("findInitBizInfo")
+    @RestReturn(value = InitBizInfoDTO.class)
+    public RestResponse findInitBizInfo() {
+    	InitBizInfoDTO response = userService.findInitBizInfo();
+        RestResponse resp = new RestResponse(response);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 
 	/**
 	 * <b>URL: /user/checkVerifyCode</b>

@@ -1,10 +1,14 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -27,7 +31,9 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,6 +258,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
 	@Override
 	public void createOrganizationMember(OrganizationMember organizationMember) {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -272,7 +279,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 	}
 
-
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
 	@Override
 	public void updateOrganizationMember(OrganizationMember departmentMember){
 		assert(departmentMember.getId() == null);
@@ -283,6 +290,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
 	}
 
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
 	@Override
 	public void deleteOrganizationMemberById(Long id){
 
@@ -2435,4 +2443,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
 	}
+	
+	   // by Janson
+    @Cacheable(value="listGroupMessageMembers", key="{#namespaceId, #groupId, #pageSize}", unless="#result.getSize() == 0")
+    @Override
+    public GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize) {
+        List<GroupMember> members = new ArrayList<GroupMember>();
+        Organization organization = findOrganizationByGroupId(groupId);
+        if(null != organization){
+            List<OrganizationMember> organizationMember = listOrganizationMembersByOrgId(organization.getId());
+            for (OrganizationMember member : organizationMember) {
+                if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE && OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+                    GroupMember groupMember = new GroupMember();
+                    groupMember.setMemberId(member.getTargetId());
+                    groupMember.setMemberType(EntityType.USER.getCode());
+                    members.add(groupMember);
+                }
+            }
+        }
+        
+        GroupMemberCaches caches = new GroupMemberCaches();
+        caches.setMembers(members);
+        caches.setTick(System.currentTimeMillis());
+        
+        return caches;
+    }
+    
+    @Caching(evict={@CacheEvict(value="listGroupMessageMembers", key="{#namespaceId, #groupId, #pageSize}")})
+    @Override
+    public void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize) {
+    }
 }

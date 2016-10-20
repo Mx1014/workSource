@@ -30,6 +30,8 @@ import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.InitBizInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
 import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.LoginToken;
@@ -189,4 +191,6 @@ public interface UserService {
      * @return
      */
     ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd);
+	UserLogin reSynThridUser(InitBizInfoCommand cmd);
+	InitBizInfoDTO findInitBizInfo();
 }

@@ -48,6 +48,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
@@ -2007,6 +2008,7 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	private ListActivitiesReponse listCommunityNearbyActivities(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, 
 	        int geoCharCount, Long communityId) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    if(communityId != null) {
     	    ListActivitiesByTagCommand execCmd = new ListActivitiesByTagCommand();
             execCmd.setCommunity_id(communityId);
@@ -2014,7 +2016,9 @@ public class ActivityServiceImpl implements ActivityService {
             execCmd.setPageSize(cmd.getPageSize());
             execCmd.setTag(cmd.getTag());
             execCmd.setRange(geoCharCount);
-            execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
+            if(999987L == namespaceId){
+            	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
+            }
             return listActivitiesByTag(execCmd);
 	    } else {
 	        LOGGER.error("Community not found to query nearby activities, sceneTokenDto={}, communityId={}", sceneTokenDto, communityId);
@@ -2024,6 +2028,7 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
     public ListActivitiesReponse listOrgNearbyActivities(ListOrgNearbyActivitiesCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<GeoLocation> geoLocationList = new ArrayList<GeoLocation>();
 	    OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 	    if(orgDetail != null && orgDetail.getLatitude() != null && orgDetail.getLongitude() != null) {
@@ -2066,7 +2071,9 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setTag(cmd.getTag());
         execCmd.setPageSize(cmd.getPageSize());
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
+        if(999987L == namespaceId){
+        	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
+        }
         return listActivitiesByLocation(execCmd);
    }
 
