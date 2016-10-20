@@ -6,19 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.everhomes.rest.common.ScopeType;
-import com.everhomes.rest.launchpad.DeleteLaunchPadByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsByOrgCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.LaunchPadItemDTO;
-import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
-import com.everhomes.rest.launchpad.ListLaunchPadLayoutCommandResponse;
-import com.everhomes.rest.launchpad.UserDefinedLaunchPadCommand;
-import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
+import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.rest.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.rest.launchpad.admin.DeleteLaunchPadItemAdminCommand;
@@ -66,5 +54,28 @@ public interface LaunchPadService {
 	void reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd, ItemDisplayFlag itemDisplayFlag);
 	UserLaunchPadItemDTO deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd);
 	UserLaunchPadItemDTO addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd);
-    
+
+    /**
+     * 获取全部类型的item
+     * @param cmd
+     * @param request
+     * @return
+     */
+    List<CategryItemDTO> getAllCategryItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request);
+
+    /**
+     * 根据园区获取全部类型的item
+     * @param cmd
+     * @param request
+     * @return
+     */
+    List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request);
+
+    /**
+     * 根据机构获取全部类型的item
+     * @param cmd
+     * @param request
+     * @return
+     */
+    List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request);
 }

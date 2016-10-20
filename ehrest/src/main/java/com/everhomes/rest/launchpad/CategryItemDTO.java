@@ -26,7 +26,7 @@ public class CategryItemDTO {
 
     private String categryIconUrl;
 
-    private String categryAlign;
+    private Byte categryAlign;
 
     @ItemType(LaunchPadItemDTO.class)
     private List<LaunchPadItemDTO> launchPadItems;
@@ -65,11 +65,11 @@ public class CategryItemDTO {
         this.categryIconUrl = categryIconUrl;
     }
 
-    public String getCategryAlign() {
+    public Byte getCategryAlign() {
         return categryAlign;
     }
 
-    public void setCategryAlign(String categryAlign) {
+    public void setCategryAlign(Byte categryAlign) {
         this.categryAlign = categryAlign;
     }
 

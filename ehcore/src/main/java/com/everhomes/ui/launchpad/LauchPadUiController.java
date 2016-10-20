@@ -153,7 +153,7 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=CategryItemDTO.class, collection = true)
     @RequireAuthentication(false)
     public RestResponse getAllCategryItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        RestResponse resp =  new RestResponse();
+        RestResponse resp =  new RestResponse(launchPadService.getAllCategryItemsByScene(cmd, request));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
