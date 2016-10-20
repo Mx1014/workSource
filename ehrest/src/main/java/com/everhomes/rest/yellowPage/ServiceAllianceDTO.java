@@ -35,6 +35,7 @@ import java.util.List;
  *  <li>templateName: 模板名称</li>
  *  <li>buttonTitle: 按钮名称</li>
  *  <li>email: 邮箱地址</li>
+ *  <li>detailUrl: 服务详情页面URL</li>
  * </ul>
  */
 public class ServiceAllianceDTO {

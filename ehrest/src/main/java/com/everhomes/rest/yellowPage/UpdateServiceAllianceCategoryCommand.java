@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li> ownerId: 拥有者ID</li>
  *  <li> parentId: 父id</li>
  *  <li> logoUrl: 类型logo的url地址</li>
- *  <li> displayMode: 显示类型 {@link ServiceAllianceCategoryDisplayMode}</li>
+ *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>
  * </ul>
  */
 public class UpdateServiceAllianceCategoryCommand {
