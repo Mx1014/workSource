@@ -137,16 +137,14 @@ public class LaunchPadController extends ControllerBase {
         return response;
     }
 
-
-
     /**
      * <b>URL: /launchpad/listItemServiceCategries</b>
      * <p>item服务类别</p>
      */
     @RequestMapping("listItemServiceCategries")
-    @RestReturn(value=ItemServiceCategryDTO.class)
+    @RestReturn(value=ItemServiceCategryDTO.class, collection = true)
     public RestResponse listItemServiceCategries() {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(launchPadService.listItemServiceCategries());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

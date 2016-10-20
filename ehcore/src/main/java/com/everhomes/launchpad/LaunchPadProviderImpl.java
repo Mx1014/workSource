@@ -434,11 +434,12 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
 	}
 
-	public List<ItemServiceCategry> listItemServiceCategries(){
+	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		List<ItemServiceCategry> result = new ArrayList<ItemServiceCategry>();
 		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.NAMESPACE_ID.eq(namespaceId));
 		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER);
 		query.fetch().map(r -> {
 			result.add(ConvertHelper.convert(r, ItemServiceCategry.class));

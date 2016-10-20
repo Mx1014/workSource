@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Convert;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -184,7 +185,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Override
 	public List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
 		Long userId = UserContext.current().getUser().getId();
-
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(cmd.getItemLocation() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid itemLocation paramter,itemLocation is null");
@@ -195,7 +196,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		long startTime = System.currentTimeMillis();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries();
+		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId);
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
@@ -216,6 +217,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Override
 	public List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request){
 		Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(cmd.getItemLocation() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid itemLocation paramter,itemLocation is null");
@@ -226,7 +228,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		long startTime = System.currentTimeMillis();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries();
+		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId);
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
@@ -2082,7 +2084,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	       
 	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
 	}
-	
+
+	@Override
+	public List<ItemServiceCategryDTO> listItemServiceCategries(){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+		List<ItemServiceCategry> itemServiceCategries = launchPadProvider.listItemServiceCategries(namespaceId);
+		return itemServiceCategries.stream().map( r -> {
+			ItemServiceCategryDTO dto = ConvertHelper.convert(r, ItemServiceCategryDTO.class);
+			dto.setIconUrl(parserUri(r.getIconUri(), EntityType.USER.getCode(), userId));
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
 	private Integer maxOrder(List<LaunchPadItemDTO> launchPadItemDTOs){
 		Integer order = 0;
 		if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){

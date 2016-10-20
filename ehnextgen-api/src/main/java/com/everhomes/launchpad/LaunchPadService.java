@@ -78,4 +78,6 @@ public interface LaunchPadService {
      * @return
      */
     List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request);
+
+    List<ItemServiceCategryDTO> listItemServiceCategries();
 }
