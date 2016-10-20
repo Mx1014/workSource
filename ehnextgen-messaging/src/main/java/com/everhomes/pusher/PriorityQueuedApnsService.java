@@ -68,7 +68,7 @@ public class PriorityQueuedApnsService implements ApnsService {
                         PriorityApnsNotification msg = queue.take();
                         service.push(msg);
                         long sub = System.currentTimeMillis() - msg.getStartTick();
-                        logger.info("startTick=" + msg.getStartTick() + ", sub=" + sub + ", priority=" + msg.getPriority());
+                        logger.info("Pushing message startTick=" + msg.getStartTick() + ", sub=" + sub + ", priority=" + msg.getPriority());
                     } catch (InterruptedException e) {
                         // ignore
                     } catch (NetworkIOException e) {
