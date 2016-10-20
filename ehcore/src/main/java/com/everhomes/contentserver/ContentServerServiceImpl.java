@@ -1,7 +1,5 @@
 package com.everhomes.contentserver;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +11,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -32,7 +29,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.entity.EntityType;
 import com.everhomes.rest.contentserver.AddConfigItemCommand;
 import com.everhomes.rest.contentserver.AddContentServerCommand;
 import com.everhomes.rest.contentserver.ContentServerDTO;
@@ -47,7 +43,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
-import com.google.gson.Gson;
 
 @Component
 public class ContentServerServiceImpl implements ContentServerService {

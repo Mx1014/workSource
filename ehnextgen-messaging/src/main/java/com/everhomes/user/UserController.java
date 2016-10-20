@@ -391,7 +391,6 @@ public class UserController extends ControllerBase {
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
 		cmdResponse.setContentServer(contentServerService.getContentServer());
-		
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Logon success, elapse=" + (endTime - startTime) + ", loginElapse=" + (loginEndTime - loginStartTime)

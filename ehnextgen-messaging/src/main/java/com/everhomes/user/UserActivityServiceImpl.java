@@ -1321,13 +1321,23 @@ public class UserActivityServiceImpl implements UserActivityService {
 			afterBizUrl = "";
 		}
 		
-		String homeUrl = getHomeUrl();
+		String oauthServer = getoAuthServer();
 		String realm = getBusinessRealm();
 		String bizVersionUrl = getVersionUrl(realm);
-		String format = "%s&OAuth=%s&realm=%s&target=%s";
+		String format = "%s&oAuthServer=%s&realm=%s&target=%s";
 		
-		String url = String.format(format, preBizUrl, URLEncoder.encode(homeUrl), realm, URLEncoder.encode(bizVersionUrl));
+		String url = String.format(format, preBizUrl, URLEncoder.encode(oauthServer), realm, URLEncoder.encode(bizVersionUrl));
 		return url + afterBizUrl;
+	}
+
+	private String getoAuthServer() {
+		String oauthServer = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.OAUTH_SERVER, "");
+		if(oauthServer.length() == 0) {
+            LOGGER.error("Invalid oauth server path, oauthServer=" + oauthServer);
+            return null;
+        } else {
+            return oauthServer;
+        }
 	}
 
 	private String getVersionUrl(String realm) {

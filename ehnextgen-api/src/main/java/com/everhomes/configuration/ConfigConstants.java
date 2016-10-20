@@ -70,5 +70,7 @@ public interface ConfigConstants {
 	
 	public static final String SYNCH_USER_APP_KEY = "synch.user.app.key"; 
 	public static final String SYNCH_USER_SECRET_KEY = "synch.user.secret.key"; 
+	public static final String OAUTH_SERVER = "oauth.server";
+	public static final String PAY_SERVER = "pay.server";
      
 }
