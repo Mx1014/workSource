@@ -1785,7 +1785,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskProvider.updateTaskTarget(pmTaskTarget);
 			
 			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(),
-					cmd.getOrganizationId(), cmd.getTargetType(), cmd.getTargetId());
+					cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getTargetId());
 			for(RoleAssignment r: roleAssignments) {
 				if(r.getRoleId().equals(roleId)) {
 					aclProvider.deleteRoleAssignment(r);
