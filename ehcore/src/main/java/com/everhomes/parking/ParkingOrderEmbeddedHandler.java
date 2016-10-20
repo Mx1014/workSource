@@ -127,7 +127,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		this.checkVendorTypeFormat(cmd.getVendorType());
 		
 		if(order.getStatus().byteValue() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
-			order.setPrice(payAmount);
+//			order.setPrice(payAmount);
 			order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
 			order.setPaidTime(payTimeStamp);
 			order.setPaidType(cmd.getVendorType());

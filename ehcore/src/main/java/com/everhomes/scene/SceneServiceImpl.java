@@ -1,23 +1,10 @@
 // @formatter:off
 package com.everhomes.scene;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.scene.ListSceneTypesCommand;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
@@ -25,6 +12,14 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -104,10 +99,10 @@ public class SceneServiceImpl implements SceneService {
 			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PARK_TOURIST.getCode()));
 			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
 		} else if(communityType == CommunityType.RESIDENTIAL) {
-			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.DEFAULT.getCode()));
-			sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
-		}
-		
+            sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.DEFAULT.getCode()));
+            sceneTypeList.addAll(sceneProvider.findSceneTypeByName(0, SceneType.PM_ADMIN.getCode()));
+        }
+
 		List<SceneTypeInfoDTO> dtos = new ArrayList<>();
 		sceneTypeList.forEach(info -> {
 			SceneTypeInfoDTO dto = new SceneTypeInfoDTO();

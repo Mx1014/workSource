@@ -228,4 +228,8 @@ public class MessageDTO implements Cloneable {
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

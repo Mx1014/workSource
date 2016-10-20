@@ -362,7 +362,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(identifierToken);
-		Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
 		if(existingClaimedIdentifier != null && !overrideExisting) {
 			LOGGER.error("User identifier token has already been claimed, cmd=" + cmd + ", identifierId=" + existingClaimedIdentifier.getId() 
@@ -410,12 +410,13 @@ public class UserServiceImpl implements UserService {
 			newIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
 			newIdentifier.setVerificationCode(verificationCode);
 			newIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			newIdentifier.setRegionCode(cmd.getRegionCode());
 			userProvider.createIdentifier(newIdentifier);
 
 			LOGGER.info("Send verfication code: " + verificationCode + " for new user: " + identifierToken);
 			//            String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 			//            smsProvider.sendSms(identifierToken, verificationCode,templateId);
-			sendVerificationCodeSms(newIdentifier.getNamespaceId(), identifierToken, verificationCode);
+			sendVerificationCodeSms(newIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(identifierToken, cmd.getRegionCode()), verificationCode);
 			return newIdentifier;
 		});
 
@@ -492,7 +493,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken) {
+	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode) {
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
 			LOGGER.error("User identifier not found in db, signupToken=" + signupToken);
@@ -509,17 +510,19 @@ public class UserServiceImpl implements UserService {
 				LOGGER.debug("Send notification code " + verificationCode + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), verificationCode, templateId);
-				sendVerificationCodeSms(namespaceId, identifier.getIdentifierToken(), verificationCode);
+				//增加区号发送短信 by sfyan 20161012
+				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
 			} else {
 
 				// TODO
 				LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
 				//                String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 				//                smmProvider.sendSms( identifier.getIdentifierToken(), identifier.getVerificationCode(),templateId);
-				sendVerificationCodeSms(namespaceId, identifier.getIdentifierToken(), identifier.getVerificationCode());
+				sendVerificationCodeSms(namespaceId, this.getYzxRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
 			}
 
 			identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			identifier.setRegionCode(regionCode);
 			this.userProvider.updateIdentifier(identifier);
 		} else {
 			LOGGER.error("Token status is not claiming or verifying, signupToken=" + signupToken + ", identifierId=" + identifier.getId() 
@@ -1578,7 +1581,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
 		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
-		sendVerificationCodeSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(),verificationCode);
+		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
 		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		this.userProvider.updateIdentifier(userIdentifier);
 	}
@@ -2333,19 +2336,18 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void sendUserTestSms(SendUserTestSmsCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId(); 
-		String phoneNumber = cmd.getPhoneNumber();
-		if(phoneNumber == null || phoneNumber.trim().length() == 0) {
-			LOGGER.error("Phone number should not be empty, namespaceId=" + namespaceId + ", phoneNumber=" + phoneNumber);
-			return;
-		}
-
-		namespaceId = (namespaceId == null) ? Namespace.DEFAULT_NAMESPACE : namespaceId;
-		String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
-		if("true".equalsIgnoreCase(value)) {
-			String verificationCode = RandomGenerator.getRandomDigitalString(6);
-			sendVerificationCodeSms(namespaceId, phoneNumber, verificationCode);
-		}
+	    Integer namespaceId = cmd.getNamespaceId(); 
+	    String phoneNumber = cmd.getPhoneNumber();
+	    if(phoneNumber == null || phoneNumber.trim().length() == 0) {
+	        LOGGER.error("Phone number should not be empty, namespaceId=" + namespaceId + ", phoneNumber=" + phoneNumber);
+	        return;
+	    }
+	    namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+	    String value = configurationProvider.getValue(namespaceId, "sms.vcodetest.flag", "false");
+	    if("true".equalsIgnoreCase(value)) {
+	        String verificationCode = RandomGenerator.getRandomDigitalString(6);
+	        sendVerificationCodeSms(namespaceId,this.getYzxRegionPhoneNumber(phoneNumber, cmd.getRegionCode()), verificationCode);
+	    }
 	}
 
 	/**
@@ -2864,225 +2866,225 @@ public class UserServiceImpl implements UserService {
 		return sceneDto;
 	}
 
-	/**
-	 * 判断是否是小区版场景（相对于园区版）
-	 * @param userId 用户ID
-	 * @param namespaceId 用户所在的域空间ID
-	 * @return 如果是小区
-	 */
-	private boolean isCommunityScene(Long userId, Integer namespaceId) {
-		if(namespaceId == null) {
-			return false;
-		} else {
-			NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
-			if(namespaceDetail != null) {
-				NamespaceCommunityType communityType = NamespaceCommunityType.fromCode(namespaceDetail.getResourceType());
-				if(communityType != null) {
-					switch(communityType) {
-					case COMMUNITY_RESIDENTIAL:
-					case COMMUNITY_MIX:
-						return true;
-					case COMMUNITY_COMMERCIAL:
-						return false;
-					}
-				}
-			}
+    /**
+     * 判断是否是小区版场景（相对于园区版）
+     * @param userId 用户ID
+     * @param namespaceId 用户所在的域空间ID
+     * @return 如果是小区
+     */
+    private boolean isCommunityScene(Long userId, Integer namespaceId) {
+        if(namespaceId == null) {
+            return false;
+        } else {
+            NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
+            if(namespaceDetail != null) {
+                NamespaceCommunityType communityType = NamespaceCommunityType.fromCode(namespaceDetail.getResourceType());
+                if(communityType != null) {
+                    switch(communityType) {
+                    case COMMUNITY_RESIDENTIAL:
+                    case COMMUNITY_MIX:
+                        return true;
+                    case COMMUNITY_COMMERCIAL:
+                        return false;
+                    }
+                }
+            }
+            
+            // 在没有配置时，默认使用域空间ID来判断
+            return (Namespace.DEFAULT_NAMESPACE == namespaceId.intValue());
+        }
+    }
+    
+    /**
+     * 用户实时状态信息
+     */
+    @Override
+    public UserLoginResponse listLoginsByPhone(ListLoginByPhoneCommand cmd) {
+        User user = null;
+        try {
+            if(cmd.getPhone() != null && cmd.getPhone().length() < 9) {
+                Long id = Long.valueOf(cmd.getPhone());
+                user = this.userProvider.findUserById(id);
+            }    
+        } catch(Exception ex) {
+         LOGGER.info("try userId not found");   
+        }
+        
+        if(user == null) {
+            user = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getPhone());    
+        }
+        
+        if(user == null) {
+            //throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "User not found!");
+            return new UserLoginResponse();
+        }
+        
+        Map<String, Long> deviceMap = new HashMap<String, Long>();
+        List<UserLogin> logins = this.listUserLogins(user.getId());
+        List<UserLoginDTO> dtos = logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList());
+        
+        for(UserLoginDTO dto : dtos) {
+            if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
+                Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
+                
+                if(device != null) {
+                    deviceMap.put(device.getDeviceId(), 0l);
+                    dto.setDeviceType(device.getPlatform());
+                }
+            }
+            
+            dto.setLastPushPing(0l);
+            if(dto.getDeviceType() == null) {
+                dto.setDeviceType("other");
+            }
+            
+            if(dto.getLoginBorderId() != null) {
+                dto.setIsOnline((byte)1);
+                BorderConnection conn = borderConnectionProvider.getBorderConnection(dto.getLoginBorderId());
+                if(conn != null) {
+                    dto.setBorderStatus(conn.getConnectionState());
+                    }
+            } else {
+            dto.setIsOnline((byte)0);    
+            }
+        }
+        
+        deviceMap = pusherService.requestDevices(deviceMap);
+        for(UserLoginDTO dto : dtos) {
+            if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
+                Long last = deviceMap.get(dto.getDeviceIdentifier());
+                if(last != null) {
+                    dto.setLastPushPing(last);
+                }
+            }
+        }
+        
+        UserLoginResponse resp = new UserLoginResponse();
+        resp.setLogins(dtos);
+        
+        return resp;
+    }
+    
+    private void sendMessageToUser(Long userId, String body, MessagingConstants flag) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
+                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(body);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
-			// 在没有配置时，默认使用域空间ID来判断
-			return (Namespace.DEFAULT_NAMESPACE == namespaceId.intValue());
-		}
-	}
-
-	/**
-	 * 用户实时状态信息
-	 */
-	@Override
-	public UserLoginResponse listLoginsByPhone(ListLoginByPhoneCommand cmd) {
-		User user = null;
-		try {
-			if(cmd.getPhone() != null && cmd.getPhone().length() < 9) {
-				Long id = Long.valueOf(cmd.getPhone());
-				user = this.userProvider.findUserById(id);
-			}    
-		} catch(Exception ex) {
-			LOGGER.info("try userId not found");   
-		}
-
-		if(user == null) {
-			user = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getPhone());    
-		}
-
-		if(user == null) {
-			//throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "User not found!");
-			return new UserLoginResponse();
-		}
-
-		Map<String, Long> deviceMap = new HashMap<String, Long>();
-		List<UserLogin> logins = this.listUserLogins(user.getId());
-		List<UserLoginDTO> dtos = logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList());
-
-		for(UserLoginDTO dto : dtos) {
-			if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
-				Device device = deviceProvider.findDeviceByDeviceId(dto.getDeviceIdentifier());
-
-				if(device != null) {
-					deviceMap.put(device.getDeviceId(), 0l);
-					dto.setDeviceType(device.getPlatform());
-				}
-			}
-
-			dto.setLastPushPing(0l);
-			if(dto.getDeviceType() == null) {
-				dto.setDeviceType("other");
-			}
-
-			if(dto.getLoginBorderId() != null) {
-				dto.setIsOnline((byte)1);
-				BorderConnection conn = borderConnectionProvider.getBorderConnection(dto.getLoginBorderId());
-				if(conn != null) {
-					dto.setBorderStatus(conn.getConnectionState());
-				}
-			} else {
-				dto.setIsOnline((byte)0);    
-			}
-		}
-
-		deviceMap = pusherService.requestDevices(deviceMap);
-		for(UserLoginDTO dto : dtos) {
-			if(dto.getDeviceIdentifier() != null && !dto.getDeviceIdentifier().isEmpty()) {
-				Long last = deviceMap.get(dto.getDeviceIdentifier());
-				if(last != null) {
-					dto.setLastPushPing(last);
-				}
-			}
-		}
-
-		UserLoginResponse resp = new UserLoginResponse();
-		resp.setLogins(dtos);
-
-		return resp;
-	}
-
-	private void sendMessageToUser(Long userId, String body, MessagingConstants flag) {
-		MessageDTO messageDto = new MessageDTO();
-		messageDto.setAppId(AppConstants.APPID_MESSAGING);
-		messageDto.setSenderUid(User.SYSTEM_UID);
-		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
-				new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-		messageDto.setBody(body);
-		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-				userId.toString(), messageDto, flag.getCode());        
-	}
-
-	@Override
-	public String sendMessageTest(SendMessageTestCommand cmd) {
-		String body = "test message " + Double.valueOf(Math.random());
-		sendMessageToUser(cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
-		return body;
-	}
-
-	@Override
-	public String pushMessageTest(SendMessageTestCommand cmd) {
-		Message msg = new Message();
-		msg.setAppId(AppConstants.APPID_MESSAGING);
-		msg.setSenderUid(User.SYSTEM_UID);
-		msg.setChannelToken(cmd.getUserId().toString());
-		msg.setChannelType(MessageChannelType.USER.toString());
-		msg.setContent("test push " + Double.valueOf(Math.random()));
-		msg.setMetaAppId(AppConstants.APPID_MESSAGING);
-		msg.setCreateTime(System.currentTimeMillis());
-		Integer namespaceId = cmd.getNamespaceId();
-		if(namespaceId == null) {
-			namespaceId = 0;
-		}
-		msg.setNamespaceId(namespaceId);
-
-		Map<String, String> meta = new HashMap<String, String>();
-		meta.put("bodyType", "TEXT");
-		msg.setMeta(meta);
-
-		List<UserLogin> logins = this.listUserLogins(cmd.getUserId());
-		for(UserLogin login : logins) {
-			if(cmd.getLoginId().equals(login.getLoginId())) {
-				this.pusherService.pushMessage(User.SYSTEM_USER_LOGIN, login, 0, msg);
-			}
-		}
-
-		return msg.getContent();
-	}
-
-	@Override
-	public BorderListResponse listBorders() {
-		BorderListResponse resp = new BorderListResponse();
-		List<String> strs = new ArrayList<String>();
-		List<Border> borders = this.borderProvider.listAllBorders();
-		for(Border border : borders) {
-			strs.add(String.format("%s:%d", border.getPublicAddress(), border.getPublicPort()));
-		}
-
-		resp.setBorders(strs);
-
-		return resp;
-	}
-
-	@Override
-	public UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd) {
-		User owner = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getOwnerPhone());
-		User target = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getTargetPhone());
-		if(owner == null || target == null) {
-			return null;
-		}
-		UserImpersonation obj = new UserImpersonation();
-		obj.setDescription(cmd.getDescription());
-		obj.setNamespaceId(cmd.getNamespaceId());
-		obj.setOwnerId(owner.getId());
-		obj.setTargetId(target.getId());
-		obj.setOwnerType(EntityType.USER.getCode());
-		obj.setTargetType(EntityType.USER.getCode());
-		obj.setStatus(UserStatus.ACTIVE.getCode());
-		this.userImpersonationProvider.createUserImpersonation(obj);
-
-		return ConvertHelper.convert(obj, UserImpersonationDTO.class);
-	}
-
-	@Override
-	public void deleteUserImpersonation(DeleteUserImpersonationCommand cmd) {
-		UserImpersonation obj = new UserImpersonation();
-		obj.setId(cmd.getUserImpersonationId());
-		this.userImpersonationProvider.deleteUserImpersonation(obj);
-	}
-
-	@Override
-	public SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd) {
-		SearchUserImpersonationResponse resp = new SearchUserImpersonationResponse();
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getAnchor());
-		int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getPhone(), cmd.getImperOnly(), locator, count);
-		for(UserImperInfo info : impers) {
-			if(info.getOwnerId() != null && info.getTargetId() != null) {
-				UserInfo u1 = this.getUserInfo(info.getOwnerId());
-				UserInfo u2 = this.getUserInfo(info.getTargetId());
-				if(u1 != null && u2 != null) {
-					if(u1.getId().equals(info.getId())) {
-						//ownerId match
-						info.setPhone(u1.getPhones().get(0));
-						info.setTargetPhone(u2.getPhones().get(0));
-					} else {
-						//target match
-						info.setPhone(u2.getPhones().get(0));
-						info.setTargetPhone(u1.getPhones().get(0));
-					}
-				}
-			}
-		}
-		resp.setImpersonations(impers);
-		resp.setNextPageAnchor(locator.getAnchor());
-		return resp;
-	}
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                userId.toString(), messageDto, flag.getCode());        
+    }
+    
+    @Override
+    public String sendMessageTest(SendMessageTestCommand cmd) {
+        String body = "test message " + Double.valueOf(Math.random());
+        sendMessageToUser(cmd.getUserId(), body, MessagingConstants.MSG_FLAG_STORED);
+        return body;
+    }
+    
+    @Override
+    public String pushMessageTest(SendMessageTestCommand cmd) {
+        Message msg = new Message();
+        msg.setAppId(AppConstants.APPID_MESSAGING);
+        msg.setSenderUid(User.SYSTEM_UID);
+        msg.setChannelToken(cmd.getUserId().toString());
+        msg.setChannelType(MessageChannelType.USER.toString());
+        msg.setContent("test push " + Double.valueOf(Math.random()));
+        msg.setMetaAppId(AppConstants.APPID_MESSAGING);
+        msg.setCreateTime(System.currentTimeMillis());
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = 0;
+        }
+        msg.setNamespaceId(namespaceId);
+        
+        Map<String, String> meta = new HashMap<String, String>();
+        meta.put("bodyType", "TEXT");
+        msg.setMeta(meta);
+        
+        List<UserLogin> logins = this.listUserLogins(cmd.getUserId());
+        for(UserLogin login : logins) {
+            if(cmd.getLoginId().equals(login.getLoginId())) {
+                this.pusherService.pushMessage(User.SYSTEM_USER_LOGIN, login, 0, msg);
+            }
+        }
+        
+        return msg.getContent();
+    }
+    
+    @Override
+    public BorderListResponse listBorders() {
+        BorderListResponse resp = new BorderListResponse();
+        List<String> strs = new ArrayList<String>();
+        List<Border> borders = this.borderProvider.listAllBorders();
+        for(Border border : borders) {
+            strs.add(String.format("%s:%d", border.getPublicAddress(), border.getPublicPort()));
+        }
+        
+        resp.setBorders(strs);
+        
+        return resp;
+    }
+    
+    @Override
+    public UserImpersonationDTO createUserImpersonation(CreateUserImpersonationCommand cmd) {
+        User owner = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getOwnerPhone());
+        User target = this.findUserByIndentifier(cmd.getNamespaceId(), cmd.getTargetPhone());
+        if(owner == null || target == null) {
+            return null;
+        }
+        UserImpersonation obj = new UserImpersonation();
+        obj.setDescription(cmd.getDescription());
+        obj.setNamespaceId(cmd.getNamespaceId());
+        obj.setOwnerId(owner.getId());
+        obj.setTargetId(target.getId());
+        obj.setOwnerType(EntityType.USER.getCode());
+        obj.setTargetType(EntityType.USER.getCode());
+        obj.setStatus(UserStatus.ACTIVE.getCode());
+        this.userImpersonationProvider.createUserImpersonation(obj);
+        
+        return ConvertHelper.convert(obj, UserImpersonationDTO.class);
+    }
+    
+    @Override
+    public void deleteUserImpersonation(DeleteUserImpersonationCommand cmd) {
+        UserImpersonation obj = new UserImpersonation();
+        obj.setId(cmd.getUserImpersonationId());
+        this.userImpersonationProvider.deleteUserImpersonation(obj);
+    }
+    
+    @Override
+    public SearchUserImpersonationResponse listUserImpersons(SearchUserImpersonationCommand cmd) {
+        SearchUserImpersonationResponse resp = new SearchUserImpersonationResponse();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getAnchor());
+        int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<UserImperInfo> impers = this.userImpersonationProvider.searchUserByPhone(cmd.getNamespaceId(), cmd.getPhone(), cmd.getImperOnly(), locator, count);
+        for(UserImperInfo info : impers) {
+            if(info.getOwnerId() != null && info.getTargetId() != null) {
+                UserInfo u1 = this.getUserBasicInfo(info.getOwnerId(), false);
+                UserInfo u2 = this.getUserBasicInfo(info.getTargetId(), false);
+                if(u1 != null && u2 != null) {
+                    if(u1.getId().equals(info.getId())) {
+                        //ownerId match
+                        info.setPhone(u1.getPhones().get(0));
+                        info.setTargetPhone(u2.getPhones().get(0));
+                    } else {
+                        //target match
+                        info.setPhone(u2.getPhones().get(0));
+                        info.setTargetPhone(u1.getPhones().get(0));
+                    }
+                }
+            }
+        }
+        resp.setImpersonations(impers);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
+    }
 
 	@Override
 	public SearchContentsBySceneReponse searchContentsByScene(
@@ -3374,26 +3376,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd) {
-		ListRegisterUsersResponse resp = new ListRegisterUsersResponse();
-
-		int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getAnchor());
-		List<User> users = this.userProvider.listUserByKeyword(cmd.getKeyword(), cmd.getNamespaceId(), locator, count);
-		resp.setNextPageAnchor(locator.getAnchor());
-		resp.setValues(new ArrayList<UserInfo>());
-		for(User u : users) {
-			UserInfo ui = getUserBasicInfoByQueryUser(u, false);
-			if(ui != null) {
-				resp.getValues().add(ui);
-			}
-		}
-
-		return resp;
-	}
-
-	@Override
 	public UserLogin reSynThridUser(InitBizInfoCommand cmd) {
 		validateInitBizInfoCommand(cmd);
 
@@ -3522,5 +3504,36 @@ public class UserServiceImpl implements UserService {
 			sign = URLEncoder.encode(sign);
 		}
 		return sign;
+	}
+
+	private String getYzxRegionPhoneNumber(String identifierToken, Integer regionCode){
+		//国内电话不要拼区号，发送短信走国内通道，便宜
+		if(null == regionCode || 86 == regionCode ){
+			return identifierToken;
+		}
+		return "00" + regionCode + identifierToken;
+	}
+
+	@Override
+	public ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd) {
+	    ListRegisterUsersResponse resp = new ListRegisterUsersResponse();
+	    if(cmd.getNamespaceId() == null) {
+	        cmd.setNamespaceId(0);
+	    }
+	    
+	    int count = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    CrossShardListingLocator locator = new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getAnchor());
+	    List<User> users = this.userProvider.listUserByNamespace(cmd.getKeyword(), cmd.getNamespaceId(), locator, count);
+	    resp.setNextPageAnchor(locator.getAnchor());
+	    resp.setValues(new ArrayList<UserInfo>());
+	    for(User u : users) {
+	        UserInfo ui = getUserBasicInfoByQueryUser(u, false);
+	        if(ui != null) {
+	            resp.getValues().add(ui);
+	        }
+	    }
+	    
+	    return resp;
 	}
 }

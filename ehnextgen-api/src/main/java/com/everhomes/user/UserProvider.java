@@ -96,4 +96,5 @@ public interface UserProvider {
      * @return
      */
     List<User> findThirdparkUserByTokenAndType(Integer namespaceId, String userType, String userToken);
+    List<User> listUserByNamespace(String keyword, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 }

@@ -1,0 +1,22 @@
+{
+  "eh_region_codes": [
+    {
+      "id": "1",
+      "name": "中国大陆",
+      "code": "86",
+      "pinyin": "zhong guo da lu",
+      "first_letter": "Z",
+      "status": "1",
+      "hot_flag": "1"
+    },
+    {
+      "id": "2",
+      "name": "香港",
+      "code": "852",
+      "pinyin": "xiang gang",
+      "first_letter": "X",
+      "status": "1",
+      "hot_flag": "0"
+    }
+  ]
+}

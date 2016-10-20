@@ -21,7 +21,6 @@ import com.everhomes.util.StringHelper;
  * <li>rateName: 费率名称</li>
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
- * <li>expiredTime: 有效期</li>
  * </ul>
  */
 public class CreateParkingRechargeOrderCommand {
@@ -37,27 +36,22 @@ public class CreateParkingRechargeOrderCommand {
     private String plateOwnerPhone;
 	@NotNull
     private Long payerEnterpriseId;
-    private String vendorName;
-    @NotNull
-    private String cardNumber;
-    @NotNull
-    private String rateToken;
-    @NotNull
-    private String rateName;
-    @NotNull
-    private Integer monthCount;
-    @NotNull
-    private BigDecimal price;
-    @NotNull
-	private Long expiredTime; 
+//    private String vendorName;
     
-	public Long getExpiredTime() {
-		return expiredTime;
-	}
-
-	public void setExpiredTime(Long expiredTime) {
-		this.expiredTime = expiredTime;
-	}
+    private String cardNumber;
+    private String rateToken;
+    private String rateName;
+    private Integer monthCount;
+    private BigDecimal price;
+//	private Long expiredTime;
+    
+//	public Long getExpiredTime() {
+//		return expiredTime;
+//	}
+//
+//	public void setExpiredTime(Long expiredTime) {
+//		this.expiredTime = expiredTime;
+//	}
 
 	public CreateParkingRechargeOrderCommand() {
     }
@@ -118,13 +112,13 @@ public class CreateParkingRechargeOrderCommand {
         this.payerEnterpriseId = payerEnterpriseId;
     }
 
-    public String getVendorName() {
-        return vendorName;
-    }
-
-    public void setVendorName(String vendorName) {
-        this.vendorName = vendorName;
-    }
+//    public String getVendorName() {
+//        return vendorName;
+//    }
+//
+//    public void setVendorName(String vendorName) {
+//        this.vendorName = vendorName;
+//    }
 
     public String getCardNumber() {
         return cardNumber;
@@ -170,4 +164,5 @@ public class CreateParkingRechargeOrderCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

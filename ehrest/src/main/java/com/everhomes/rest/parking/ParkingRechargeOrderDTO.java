@@ -31,6 +31,7 @@ import com.everhomes.util.StringHelper;
  * <li>rechargeStatus: 充值状态， {@link com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus}</li>
  * <li>rechargeTime: 充值时间</li>
  * <li>createTime: 订单创建时间</li>
+ * <li>rechargeType: 订单类型， {@link com.everhomes.rest.parking.ParkingRechargeType}}</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
@@ -57,6 +58,7 @@ public class ParkingRechargeOrderDTO {
     private Byte rechargeStatus;
     private Timestamp rechargeTime;
     private Timestamp createTime;
+    private Byte rechargeType;
     
     public ParkingRechargeOrderDTO() {
     }
@@ -248,5 +250,13 @@ public class ParkingRechargeOrderDTO {
 
 	public void setPaidType(String paidType) {
 		this.paidType = paidType;
+	}
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
 	}
 }

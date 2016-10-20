@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,9 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.parking.etcp.ETCPCar;
 import com.everhomes.parking.etcp.ETCPJsonRsult;
-import com.everhomes.parking.etcp.ETCPLocation;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
@@ -28,9 +25,8 @@ import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.RequestParkingCardCommand;
+import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -166,11 +162,6 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 			String payStatus) {
 		
 	}
-
-	@Override
-	public void refreshParkingRechargeOrderStatus() {
-		
-	}
 	
 	private Timestamp strToTimeStamp(String s){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -184,33 +175,20 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	@Override
-	public ParkingCardRequestDTO getRequestParkingCard(
-			RequestParkingCardCommand cmd) {
-		
-		
-		User user = UserContext.current().getUser();
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		String mobile = userIdentifier.getIdentifierToken();
-		Long parkId = cmd.getParkingLotId();
-		String realName = user.getNickName();
-		ETCPCar car = new ETCPCar();
-		car.setPlateNumber(cmd.getPlateNumber());
-		String cars = GsonUtil.toJson(Collections.singletonList(car));
-		ETCPLocation location = new ETCPLocation();
-		//location.setAreaId(areaId);
-		String locations = "";
-		
-		return null;
-	}
-
-	@Override
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd, ParkingLot parkingLot) {
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
+			Long parkingLotId, String plateNumber) {
 		// TODO Auto-generated method stub
 		return null;
 	}

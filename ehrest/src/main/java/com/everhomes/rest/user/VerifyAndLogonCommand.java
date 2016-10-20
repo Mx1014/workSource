@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *<li>invitationCode:邀请码</li>
  *<li>namespaceId:名字空间</li>
  *<li>nickName:昵称</li>
+ * <li>regionCode:区号</li>
  *</ul>
  */
 public class VerifyAndLogonCommand {
@@ -36,6 +37,8 @@ public class VerifyAndLogonCommand {
     private Integer namespaceId;
     
     private String pusherIdentify;
+
+    private Integer regionCode;
     
     public VerifyAndLogonCommand() {
     }
@@ -104,6 +107,14 @@ public class VerifyAndLogonCommand {
 
     public void setPusherIdentify(String pusherIdentify) {
         this.pusherIdentify = pusherIdentify;
+    }
+
+    public Integer getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(Integer regionCode) {
+        this.regionCode = regionCode;
     }
 
     @Override
