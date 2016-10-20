@@ -25,6 +25,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -45,6 +46,9 @@ public class WarnActivityBeginningAction implements Runnable {
 	
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private UserProvider userProvider;
 	
 	public WarnActivityBeginningAction(String id) {
 		super();
@@ -72,11 +76,16 @@ public class WarnActivityBeginningAction implements Runnable {
     	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
     	String scope = ActivityNotificationTemplateCode.SCOPE;
 		int code = ActivityNotificationTemplateCode.ACTIVITY_WARNING_PARTICIPANT;
+		String locale = "zh_CN";
+		User user = userProvider.findUserById(activity.getCreatorUid());
+		if (user != null) {
+			locale = user.getLocale();
+		}
 		Map<String, Object> map = new HashMap<>();
 		map.put("tag", activity.getTag());
 		map.put("title", activity.getSubject());
 		map.put("time", time);
-		final String content = localeTemplateService.getLocaleTemplateString(scope, code, "zh_CN", map, "");
+		final String content = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
     	activityRosters.forEach(r->{
     		if (r.getUid().longValue() != activity.getCreatorUid().longValue()) {
     			sendMessageToUser(r.getUid().longValue(), content, null);
