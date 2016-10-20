@@ -106,6 +106,10 @@ public class UserUiController extends ControllerBase {
  	    List<SceneContactDTO> dtos = null;
 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+			//兼容老版本的app by sfyan 20161020
+			if(null == cmd.getOrganizationId()){
+				cmd.setOrganizationId(sceneToken.getEntityId());
+			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(100000);
 			command.setIsSignedup(cmd.getIsSignedup());
