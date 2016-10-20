@@ -241,9 +241,11 @@ public class PmTaskServiceImpl implements PmTaskService {
         			dto.setRequestorName(user.getNickName());
         			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
     			}
-    			Category category = checkCategory(r.getCategoryId());
+//    			Category category = checkCategory(r.getCategoryId());
+    			Category category = categoryProvider.findCategoryById(r.getCategoryId());
     			Category taskCategory = checkCategory(r.getTaskCategoryId());
-    	    	dto.setCategoryName(category.getName());
+    			if(null != category)
+    				dto.setCategoryName(category.getName());
     	    	dto.setTaskCategoryName(taskCategory.getName());
     			
     			return dto;
@@ -598,9 +600,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask task = checkPmTask(cmd.getId());
 		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 		//查询服务类型
-		Category category = checkCategory(task.getCategoryId());
+		Category category = categoryProvider.findCategoryById(task.getCategoryId());
 		Category taskCategory = checkCategory(task.getTaskCategoryId());
-    	dto.setCategoryName(category.getName());
+		if(null != category)
+			dto.setCategoryName(category.getName());
     	dto.setTaskCategoryName(taskCategory.getName());
 		
 		//查询图片
