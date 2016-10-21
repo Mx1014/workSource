@@ -183,6 +183,12 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 			post.setOfficialFlag(cmd.getOfficialFlag());
 		}
         
+        //安卓如果没获取到经纬度会传过来非常小的数字，然后IOS解析不出来，add by tt, 20161021
+        if (cmd.getLatitude() != null && cmd.getLongitude() != null && cmd.getLatitude().doubleValue() < 0.0000001 && cmd.getLongitude().doubleValue() < 0.0000001) {
+			cmd.setLatitude(null);
+			cmd.setLongitude(null);
+		}
+        
         cmd.setVideoState(VideoState.UN_READY.getCode());
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         

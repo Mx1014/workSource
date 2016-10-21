@@ -2744,7 +2744,8 @@ public class ForumServiceImpl implements ForumService {
     private void processPostLocation(long userId, NewTopicCommand cmd, Post post) {
         Double longitude = cmd.getLongitude();
         Double latitude = cmd.getLatitude();
-        if(latitude != null && latitude != null) {
+        //安卓如果没获取到经纬度会传过来非常小的数字，然后IOS解析不出来，update by tt, 20161021
+        if(longitude != null && latitude != null && longitude.doubleValue() > 0.0000001 && latitude.doubleValue() > 0.0000001) {
             post.setLongitude(longitude);
             post.setLatitude(latitude);
             String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
