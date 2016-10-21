@@ -151,6 +151,41 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	}
 
 	@Override
+	public List<ApprovalRequest> listApprovalRequestByEffectiveDateAndCreateUid(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Date effectiveDate,Long createUid,List<Byte> approvalStatus) {
+		
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+				
+		if (effectiveDate != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.eq(effectiveDate));
+		}
+		
+		if (createUid != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.ge(createUid));
+		}
+		if(null == approvalStatus){
+			approvalStatus= new ArrayList<Byte>();
+			approvalStatus.add(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+			approvalStatus.add(ApprovalStatus.AGREEMENT.getCode());
+		}
+		step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(approvalStatus));
+		  
+		
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
+		}
+		
+		return new ArrayList<ApprovalRequest>();
+	}
+
+	@Override
 	public List<ApprovalRequest> listApprovalRequestApproved(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userIds, Long pageAnchor, int pageSize) {

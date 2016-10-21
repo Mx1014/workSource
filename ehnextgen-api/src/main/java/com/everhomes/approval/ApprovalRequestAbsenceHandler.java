@@ -15,22 +15,20 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.rest.approval.AbsenceBasicDescription;
-import com.everhomes.rest.approval.AbsenceRequestDTO;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.server.schema.tables.pojos.EhApprovalDayActualTime;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.techpark.punch.PunchTimeRule;
@@ -79,7 +77,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
 		
-		AbsenceBasicDescription description = new AbsenceBasicDescription();
+		BasicDescriptionDTO description = new BasicDescriptionDTO();
 		
 		//1. 获取类别名称
 		ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
@@ -96,7 +94,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			description.setTimeRangeList(timeRangeList);
 		}
 		
-		approvalBasicInfo.setDescriptionJson(JSON.toJSONString(description));
+		approvalBasicInfo.setDescriptionJson(description);
 		return approvalBasicInfo;
 	}
 
@@ -616,9 +614,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 
 	@Override
-	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
-		List<AbsenceRequestDTO> resultList = approvalRequestList.stream().map(a->{
-			AbsenceRequestDTO absenceRequest = new AbsenceRequestDTO();
+	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		List<RequestDTO> resultList = approvalRequestList.stream().map(a->{
+			RequestDTO absenceRequest = new RequestDTO();
 			absenceRequest.setRequestId(a.getId());
 			absenceRequest.setReason(a.getReason());
 			absenceRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
@@ -640,7 +638,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			return absenceRequest;
 		}).collect(Collectors.toList());
 		
-		return JSON.toJSONString(resultList);
+		return resultList;
 	}
 
 

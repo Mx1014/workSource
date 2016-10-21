@@ -6,6 +6,7 @@ import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.RequestDTO;
 
 public interface ApprovalRequestHandler {
 	static final String APPROVAL_REQUEST_OBJECT_PREFIX = "ApprovalRequestHandler_";
@@ -22,7 +23,7 @@ public interface ApprovalRequestHandler {
 
 	void processFinalApprove(ApprovalRequest approvalRequest);
 
-	String processListApprovalRequest(List<ApprovalRequest> approvalRequestList);
+	List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList);
 
 	String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason);
 

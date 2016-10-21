@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
  * <li>attachmentList: 附件列表，参考{@link com.everhomes.rest.news.AttachmentDescriptor}</li>
  * <li>approvalStatus: 审批状态0-待审批 1-审批 2-驳回，参考{@link com.everhomes.rest.approval.ApprovalStatus}</li>
  * <li>title: 申请title内容比如谁申请,反馈等</li>
- * <li>content: 申请body内容 比如 反馈信息</li>
+ * <li>remark: 申请body内容 比如 反馈信息</li>
+ * <li>currentFlag: 是否为当前节点，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ApprovalLogAndFlowOfRequestDTO {
@@ -31,9 +32,10 @@ public class ApprovalLogAndFlowOfRequestDTO {
 	private String categoryName;
 	private Byte approvalStatus;
 	private String title;
-	private String content;
+	private String remark;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachmentList;
+	private Byte currentFlag;
 
 	public Timestamp getCreateTime() {
 		return createTime;
@@ -74,14 +76,7 @@ public class ApprovalLogAndFlowOfRequestDTO {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
+ 
 
 	public List<AttachmentDescriptor> getAttachmentList() {
 		return attachmentList;
@@ -110,5 +105,21 @@ public class ApprovalLogAndFlowOfRequestDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public Byte getCurrentFlag() {
+		return currentFlag;
+	}
+
+	public void setCurrentFlag(Byte currentFlag) {
+		this.currentFlag = currentFlag;
 	}
 }

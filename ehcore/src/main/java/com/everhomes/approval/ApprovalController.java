@@ -353,7 +353,7 @@ public class ApprovalController extends ControllerBase {
 	@RequestMapping("updateTargetApprovalRule")
 	@RestReturn(String.class)
 	public RestResponse updateTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd){
-		approvalService.getTargetApprovalRule(cmd);
+		approvalService.updateTargetApprovalRule(cmd);
 		return new RestResponse();
 	}
 	

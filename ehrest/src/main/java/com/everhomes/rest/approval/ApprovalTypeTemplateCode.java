@@ -5,4 +5,5 @@ public interface ApprovalTypeTemplateCode {
 	
 	static final int ABSENCE = 1;
 	static final int EXCEPTION = 2;
+	static final int OVERTIME = 3;
 }

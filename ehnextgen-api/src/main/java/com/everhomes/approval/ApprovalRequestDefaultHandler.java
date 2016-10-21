@@ -1,5 +1,6 @@
 package com.everhomes.approval;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
@@ -77,6 +79,9 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 
 	private ApprovalRequest generateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, CreateApprovalRequestBySceneCommand cmd) {
 		ApprovalRequest approvalRequest = new ApprovalRequest();
+		if(null != cmd.getEffectiveDate())
+			approvalRequest.setEffectiveDate(new Date(cmd.getEffectiveDate()));
+		approvalRequest.setHourLength(cmd.getHourLength());
 		approvalRequest.setNamespaceId(ownerInfo.getNamespaceId());
 		approvalRequest.setOwnerType(ownerInfo.getOwnerType());
 		approvalRequest.setOwnerId(ownerInfo.getOwnerId());
@@ -107,7 +112,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	}
 
 	@Override
-	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
 		return null;
 	}
 

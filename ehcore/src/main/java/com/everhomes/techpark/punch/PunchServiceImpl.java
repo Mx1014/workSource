@@ -4454,7 +4454,7 @@ public class PunchServiceImpl implements PunchService {
 		GetTargetPunchAllRuleResponse resp = new GetTargetPunchAllRuleResponse();
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getTargetType(), cmd.getTargetId());
-		if(null == map){
+		if(null == map || map.getPunchRuleId() == null ){
 			return null;
 		}
 		PunchRule pr = this.punchProvider.getPunchRuleById(map.getPunchRuleId());
@@ -4639,12 +4639,30 @@ public class PunchServiceImpl implements PunchService {
 				cmd.getTargetType(), cmd.getTargetId());
 
 		if(null != map){
+			// 删除规则
+			deletePunchRules(cmd.getOwnerType(), cmd.getOwnerId(),map.getPunchRuleId());
 			map.setPunchRuleId(null);
 			map.setCreatorUid(UserContext.current().getUser().getId());
 			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime())); 
 			this.punchProvider.updatePunchRuleOwnerMap(map);
 		}
+	}
+	private void deletePunchRules(String ownerType, Long ownerId, Long punchRuleId) {
+		 
+		if(null == punchRuleId)
+			return;
+		PunchRule pr = this.punchProvider.getPunchRuleById(punchRuleId);
+		if(null == pr)
+			return;
+		this.punchProvider.deletePunchTimeRuleByOwnerAndId(ownerType , ownerId, pr.getTimeRuleId()); 
+		this.punchProvider.deletePunchLocationRuleByOwnerAndId(ownerType, ownerId, pr.getLocationRuleId());  
+		this.punchProvider.deletePunchGeopointsByRuleId( pr.getLocationRuleId());
+		this.punchProvider.deletePunchWifiRuleByOwnerAndId(ownerType, ownerId, pr.getWifiRuleId());  
+		this.punchProvider.deletePunchWifisByRuleId(pr.getWifiRuleId()); 
+		this.punchProvider.deletePunchWorkdayRuleByOwnerAndId(ownerType, ownerId, pr.getWorkdayRuleId());  
+		this.punchProvider.deletePunchHolidayByRuleId(pr.getWorkdayRuleId()); 
+		this.punchProvider.deletePunchRule(pr);
 	}
 	
 }

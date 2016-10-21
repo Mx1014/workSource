@@ -146,7 +146,7 @@ public interface ApprovalService {
 
 	GetTargetApprovalRuleResponse getTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
 
-	void getTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd);
+	void updateTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd);
 
 	void deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
 

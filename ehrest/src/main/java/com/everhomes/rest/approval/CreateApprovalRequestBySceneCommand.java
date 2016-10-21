@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>timeRangeList: 时间列表，参考{@link com.everhomes.rest.approval.TimeRange}</li>
  * <li>attachmentList: 附件列表，参考{@link com.everhomes.rest.news.AttachmentDescriptor}</li>
  * <li>contentJson: 内容json，请假暂无，异常申请参考{@link com.everhomes.rest.approval.ApprovalExceptionContent}</li>
+ * <li>effectiveDate: 申请的生效日期(作用日期)</li>
+ * <li>hourLength: 时长(多少个小时)</li>
  * </ul>
  */
 public class CreateApprovalRequestBySceneCommand {
@@ -30,7 +32,8 @@ public class CreateApprovalRequestBySceneCommand {
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachmentList;
 	private String contentJson;
-
+    private Long effectiveDate;
+    private Double hourLength;
 	public String getSceneToken() {
 		return sceneToken;
 	}
@@ -90,5 +93,21 @@ public class CreateApprovalRequestBySceneCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getEffectiveDate() {
+		return effectiveDate;
+	}
+
+	public void setEffectiveDate(Long effectiveDate) {
+		this.effectiveDate = effectiveDate;
+	}
+
+	public Double getHourLength() {
+		return hourLength;
+	}
+
+	public void setHourLength(Double hourLength) {
+		this.hourLength = hourLength;
 	}
 }

@@ -25,11 +25,13 @@ import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -70,14 +72,14 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
-		ExceptionRequestBasicDescription description = new ExceptionRequestBasicDescription();
+		BasicDescriptionDTO description = new BasicDescriptionDTO();
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		description.setPunchDate(new Timestamp(content.getPunchDate()));
 		description.setExceptionRequestType(content.getExceptionRequestType());
 		description.setPunchDetail(content.getPunchDetail());
 		description.setPunchStatusName(content.getPunchStatusName());
 		
-		approvalBasicInfo.setDescriptionJson(JSON.toJSONString(description));
+		approvalBasicInfo.setDescriptionJson(description);
 		return approvalBasicInfo;
 	}
 
@@ -113,12 +115,13 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		return approvalRequest;
 	}
-
+	
 	@Override
 	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
 		//处理考勤
+		//插入一条记录.让用户查看考勤的时候 看到的是查看异常申请而不是添加异常申请
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {
 			punchExceptionRequest.setDescription(approvalRequest.getReason());
@@ -222,9 +225,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	}
 
 	@Override
-	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
-		List<ExceptionRequestDTO> resultList = approvalRequestList.stream().map(a->{
-			ExceptionRequestDTO exceptionRequest = new ExceptionRequestDTO();
+	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		List<RequestDTO> resultList = approvalRequestList.stream().map(a->{
+			RequestDTO exceptionRequest = new RequestDTO();
 			ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
 			exceptionRequest.setRequestId(a.getId());
 			exceptionRequest.setPunchDate(new Timestamp(approvalExceptionContent.getPunchDate()));
@@ -236,7 +239,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}).collect(Collectors.toList());
 		
 		
-		return JSON.toJSONString(resultList);
+		return resultList;
 	}
 
 	@Override
