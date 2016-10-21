@@ -76,6 +76,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
 import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
@@ -311,10 +312,10 @@ public class ForumServiceImpl implements ForumService {
     	//报名人数限制必须在1到10000之间，add by tt, 20161013
     	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getMaxQuantity()!= null) {
 			if (cmd.getMaxQuantity() < 1) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_GREATER_THAN_ZERO,
 						"max quantity should greater than 0!");
 			}else if (cmd.getMaxQuantity() > 10000) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_NOT_GREATER_THAN_10000,
 						"max quantity should not greater than 10000");
 			}
 		}
