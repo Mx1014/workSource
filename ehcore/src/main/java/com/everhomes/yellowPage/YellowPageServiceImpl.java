@@ -19,6 +19,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -574,7 +575,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
         String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
-        String url = String.format(detailUrl, dto.getId(), dto.getName(), dto.getId());
+        String url = String.format(detailUrl, dto.getId(), dto.getId(), RandomStringUtils.random(4));
         dto.setDetailUrl(url);
     }
 
