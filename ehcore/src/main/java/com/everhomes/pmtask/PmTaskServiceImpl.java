@@ -1779,7 +1779,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
 				roleId = RoleConstants.PM_TASK_REPAIRMEN;
 			PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
-					cmd.getTargetType(), cmd.getTargetId());
+					EntityType.USER.getCode(), cmd.getTargetId());
 			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
 			
 			pmTaskProvider.updateTaskTarget(pmTaskTarget);

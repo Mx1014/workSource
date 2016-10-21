@@ -24,6 +24,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.pmtask.PmTaskTargetStatus;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
@@ -83,6 +84,7 @@ public class PmProviderImpl implements PmTaskProvider{
 
         query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_PM_TASK_TARGETS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.STATUS.eq(PmTaskTargetStatus.ACTIVE.getCode()));
         if(null != roleId)
         	query.addConditions(Tables.EH_PM_TASK_TARGETS.ROLE_ID.eq(roleId));
         if(null != pageAnchor && pageAnchor != 0)
