@@ -61,7 +61,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     public String renderEmbeddedObjectSnapshot(Post post) {
         try{
             ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
+            
             populateActivityVersion(result, post);
+            processLocation(result);
             if(result!=null) 
                 return StringHelper.toJsonString(result);
         }catch(Exception e){
@@ -77,6 +79,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             ActivityListResponse result = activityService.findActivityDetailsByPostId(post);
             if(result!=null){
             	populateActivityVersion(result.getActivity(), post);
+            	processLocation(result.getActivity());
                 return StringHelper.toJsonString(result);
             }
         }catch(Exception e){
@@ -86,6 +89,15 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         return null;
     }
 
+    private void processLocation(ActivityDTO activityDTO){
+    	// 如果安卓没获取到经纬度会传特别小的数字过来，IOS无法解析出来，add by tt, 20161021
+    	if (activityDTO != null && activityDTO.getLatitude() != null && activityDTO.getLongitude() != null
+    			&& Math.abs(activityDTO.getLatitude().doubleValue()) < 0.000000001 && Math.abs(activityDTO.getLongitude().doubleValue()) < 0.000000001) {
+			activityDTO.setLatitude(null);
+			activityDTO.setLongitude(null);
+		}
+    }
+    
     private void populateActivityVersion(ActivityDTO activityDTO, Post post){
     	if (activityDTO == null || post == null) {
 			return;
@@ -181,12 +193,6 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 			post.setOfficialFlag(OfficialFlag.NO.getCode());
 		}else {
 			post.setOfficialFlag(cmd.getOfficialFlag());
-		}
-        
-        //安卓如果没获取到经纬度会传过来非常小的数字，然后IOS解析不出来，add by tt, 20161021
-        if (cmd.getLatitude() != null && cmd.getLongitude() != null && cmd.getLatitude().doubleValue() < 0.0000001 && cmd.getLongitude().doubleValue() < 0.0000001) {
-			cmd.setLatitude(null);
-			cmd.setLongitude(null);
 		}
         
         cmd.setVideoState(VideoState.UN_READY.getCode());

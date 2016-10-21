@@ -74,6 +74,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
@@ -2744,8 +2745,8 @@ public class ForumServiceImpl implements ForumService {
     private void processPostLocation(long userId, NewTopicCommand cmd, Post post) {
         Double longitude = cmd.getLongitude();
         Double latitude = cmd.getLatitude();
-        //安卓如果没获取到经纬度会传过来非常小的数字，然后IOS解析不出来，update by tt, 20161021
-        if(longitude != null && latitude != null && longitude.doubleValue() > 0.0000001 && latitude.doubleValue() > 0.0000001) {
+        
+        if(longitude != null && latitude != null) {
             post.setLongitude(longitude);
             post.setLatitude(latitude);
             String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
@@ -3319,6 +3320,8 @@ public class ForumServiceImpl implements ForumService {
                 
                 populatePostForumNameInfo(userId, post);
                 
+                processLocation(post);
+                
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
@@ -3346,6 +3349,15 @@ public class ForumServiceImpl implements ForumService {
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Populate post, userId=" + userId + ", postId=" + post.getId() + ", elapse=" + (endTime - startTime));
         }
+    }
+
+    private void processLocation(Post post){
+    	// 如果安卓没获取到经纬度会传特别小的数字过来，IOS无法解析出来，add by tt, 20161021
+    	if (post != null && post.getLatitude() != null && post.getLongitude() != null
+    			&& Math.abs(post.getLatitude().doubleValue()) < 0.000000001 && Math.abs(post.getLongitude().doubleValue()) < 0.000000001) {
+			post.setLatitude(null);
+			post.setLongitude(null);
+		}
     }
     
 //    private void populatePostCreatorInfo(long userId, Post post) {
