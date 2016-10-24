@@ -8,6 +8,7 @@ ALTER TABLE eh_pm_tasks ADD COLUMN `requestor_phone` VARCHAR(64) COMMENT 'the ph
 ALTER TABLE eh_pm_tasks ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address id';
 ALTER TABLE eh_pm_tasks ADD COLUMN `revisit_content` TEXT COMMENT 'revisit content';
 ALTER TABLE eh_pm_tasks ADD COLUMN `revisit_time` DATETIME;
+ALTER TABLE eh_pm_task_statistics ADD COLUMN `task_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'task category id';
 
 CREATE TABLE `eh_pm_task_targets` (
   `id` bigint(20) NOT NULL,
