@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +140,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + activityDTO.getStartTime()+"\n"
     				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + activityDTO.getStopTime()+"\n"
     				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
-    				(activityDTO.getGuest()!=null?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+    				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
     }
     
     private boolean isOld(String versionString){
