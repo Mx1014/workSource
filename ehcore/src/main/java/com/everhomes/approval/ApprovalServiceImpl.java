@@ -1670,8 +1670,23 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	// 每新增一种申请就要加一个handler 这种设计真的好蠢
+	/**
+	 * 后台查询当前用户可以审批和已审批的所有approval
+	 * */
 	@Override
 	public ListApprovalRequestResponse listApprovalRequest(ListApprovalRequestCommand cmd) {
+		List<ApprovalRequest> resultList = new ArrayList<ApprovalRequest>();
+		Long nextPageAnchor = listApprovalRequest(resultList,cmd);
+		if(null == resultList || resultList.size() == 0)
+			return new ListApprovalRequestResponse();
+		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
+		List<RequestDTO> listJson = handler.processListApprovalRequest(resultList);
+
+		return new ListApprovalRequestResponse(nextPageAnchor, listJson);
+	}
+
+	private Long listApprovalRequest(List<ApprovalRequest> resultList, ListApprovalRequestCommand cmd) {
+
 		if (ApprovalQueryType.fromCode(cmd.getQueryType()) == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"query type error, query type=" + cmd.getQueryType());
@@ -1688,7 +1703,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (StringUtils.isNotBlank(cmd.getNickName())) {
 			userIdList = getMatchedUser(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getNickName());
 			if (ListUtils.isEmpty(userIdList)) {
-				return new ListApprovalRequestResponse();
+				return null;
 			}
 		}
 
@@ -1696,13 +1711,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevelByTarget(cmd.getNamespaceId(),
 				cmd.getOwnerType(), cmd.getOwnerId(), ApprovalTargetType.USER.getCode(), userId);
 		if (ListUtils.isEmpty(approvalFlowLevelList)) {
-			return new ListApprovalRequestResponse();
+			return null;
 		}
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		Long nextPageAnchor = null;
-		List<ApprovalRequest> resultList = null;
 		// 查询待审批的，根据当前用户拥有的流程及级别来查申请表中nextLevel与之相同的记录
 		if (cmd.getQueryType().byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
 			resultList = approvalRequestProvider.listApprovalRequestWaitingForApproving(cmd.getNamespaceId(), cmd.getOwnerType(),
@@ -1726,11 +1740,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 				nextPageAnchor = (cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor()) + 1;
 			}
 		}
-
-		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
-		List<RequestDTO> listJson = handler.processListApprovalRequest(resultList);
-
-		return new ListApprovalRequestResponse(nextPageAnchor, listJson);
+		return nextPageAnchor;
 	}
 
 	@Override
@@ -2019,21 +2029,52 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public Object listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public ListApprovalRequestBySceneResponse listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd) { 
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		ListApprovalRequestCommand cmd2 = ConvertHelper.convert(cmd, ListApprovalRequestCommand.class);
+		cmd2.setNamespaceId(ownerInfo.getNamespaceId());
+		cmd2.setOwnerId(ownerInfo.getOwnerId());
+		cmd2.setOwnerType(ownerInfo.getOwnerType()); 
+		List<ApprovalRequest> resultList = new ArrayList<ApprovalRequest>();
+		Long nextPageAnchor = listApprovalRequest(resultList,cmd2);
+		if(null == resultList || resultList.size() == 0)
+			return null; 
+
+		return new ListApprovalRequestBySceneResponse(nextPageAnchor, resultList.stream().map(a -> {
+			ApprovalRequestHandler handler = getApprovalRequestHandler(a.getApprovalType());
+			BriefApprovalRequestDTO briefApprovalRequestDTO = handler.processBriefApprovalRequest(a);
+			return briefApprovalRequestDTO;
+		}).collect(Collectors.toList()));
+		  
 	}
 
 	@Override
-	public void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd) {
-		// TODO Auto-generated method stub
-
+	public void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd) { 
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		ApproveApprovalRequestCommand cmd2 = ConvertHelper.convert(ownerInfo, ApproveApprovalRequestCommand.class);
+		List<Long> requestIdList = new ArrayList<Long>();
+		requestIdList.add(getRequestIdFromToken(cmd.getRequestToken()));
+		cmd2.setRequestIdList(requestIdList);
+		this.approveApprovalRequest(cmd2);
+		
 	}
 
 	@Override
-	public void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd) {
-		// TODO Auto-generated method stub
-
+	public void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd) {  
+		final Long userId = getUserId();
+		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
+		checkPrivilege(userId, ownerInfo);
+		RejectApprovalRequestCommand cmd2 = ConvertHelper.convert(ownerInfo, RejectApprovalRequestCommand.class);
+		List<Long> requestIdList = new ArrayList<Long>();
+		requestIdList.add(getRequestIdFromToken(cmd.getRequestToken()));
+		cmd2.setRequestIdList(requestIdList);
+		cmd2.setReason(cmd.getReason());
+		this.rejectApprovalRequest(cmd2);
+		
 	}
 
 }

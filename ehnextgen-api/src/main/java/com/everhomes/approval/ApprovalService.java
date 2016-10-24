@@ -150,7 +150,7 @@ public interface ApprovalService {
 
 	void deleteTargetApprovalRule(GetTargetApprovalRuleCommand cmd);
 
-	Object listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd);
+	ListApprovalRequestBySceneResponse listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd);
 
 	void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd);
 
