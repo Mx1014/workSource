@@ -27,6 +27,9 @@ import com.everhomes.util.StringHelper;
  *  <li>updateTime: 更新该标准的时间</li>
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
+ *  <li>templateId: 巡检项模板id</li>
+ *  <li>templateName: 巡检项模板名称</li>
+ *  <li>checkReviewTimeLimit: 审批过期时间限制（天）</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -69,6 +72,12 @@ public class EquipmentStandardsDTO {
 	private Long deleterUid;
 	
 	private Timestamp deleteTime;
+
+	private Long templateId;
+	
+	private String templateName;
+	
+	private Integer checkReviewTimeLimit;
 	
 	public Long getId() {
 		return id;
@@ -220,6 +229,30 @@ public class EquipmentStandardsDTO {
 
 	public void setDeleteTime(Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
+	public Integer getCheckReviewTimeLimit() {
+		return checkReviewTimeLimit;
+	}
+
+	public void setCheckReviewTimeLimit(Integer checkReviewTimeLimit) {
+		this.checkReviewTimeLimit = checkReviewTimeLimit;
 	}
 
 	@Override

@@ -22,13 +22,19 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
+import com.everhomes.rest.equipment.InspectionItemDTO;
+import com.everhomes.rest.equipment.InspectionTemplateDTO;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
+import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
@@ -59,7 +65,9 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentsCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -643,12 +651,12 @@ public class EquipmentController extends ControllerBase {
 	 * <p>扫一扫验证二维码和经纬度</p>
 	 */
 	@RequestMapping("verifyEquipmentLocation")
-	@RestReturn(value = String.class)
+	@RestReturn(value = VerifyEquipmentLocationResponse.class)
 	public RestResponse verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd) {
 		
-		equipmentService.verifyEquipmentLocation(cmd);
+		VerifyEquipmentLocationResponse resp = equipmentService.verifyEquipmentLocation(cmd);
 		
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -819,4 +827,96 @@ public class EquipmentController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+	 * <b>URL: /equipment/listParametersByStandardId</b>
+	 * <p>查看设备所需记录的参数</p>
+	 */
+	@RequestMapping("listParametersByStandardId")
+	@RestReturn(value = InspectionItemDTO.class, collection = true)
+	public RestResponse listParametersByStandardId(ListParametersByStandardIdCommand cmd) {
+		
+		List<InspectionItemDTO> paras = equipmentService.listParametersByStandardId(cmd);
+		
+		RestResponse response = new RestResponse(paras);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+     * <b>URL: /equipment/createInspectionTemplate</b>
+     * <p>新建巡检模板</p>
+     */
+    @RequestMapping("createInspectionTemplate")
+    @RestReturn(value=String.class)
+    public RestResponse createInspectionTemplate(CreateInspectionTemplateCommand cmd) {
+  	  
+    	equipmentService.createInspectionTemplate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /equipment/updateInspectionTemplate</b>
+     * <p>修改巡检模板</p>
+     */
+    @RequestMapping("updateInspectionTemplate")
+    @RestReturn(value=String.class)
+    public RestResponse updateInspectionTemplate(UpdateInspectionTemplateCommand cmd) {
+  	  
+    	equipmentService.updateInspectionTemplate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /equipment/deleteInspectionTemplate</b>
+     * <p>删除巡检模板</p>
+     */
+    @RequestMapping("deleteInspectionTemplate")
+    @RestReturn(value=String.class)
+    public RestResponse deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+  	  
+    	equipmentService.deleteInspectionTemplate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /equipment/findInspectionTemplate</b>
+     * <p>查询巡检模板</p>
+     */
+    @RequestMapping("findInspectionTemplate")
+    @RestReturn(value=InspectionTemplateDTO.class)
+    public RestResponse findInspectionTemplate(DeleteInspectionTemplateCommand cmd) {
+  	  
+    	InspectionTemplateDTO dto = equipmentService.findInspectionTemplate(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /equipment/listInspectionTemplates</b>
+     * <p>列出巡检模板</p>
+     */
+    @RequestMapping("listInspectionTemplates")
+    @RestReturn(value=InspectionTemplateDTO.class, collection = true)
+    public RestResponse listInspectionTemplates(ListInspectionTemplatesCommand cmd) {
+  	  
+    	List<InspectionTemplateDTO> dto = equipmentService.listInspectionTemplates(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

@@ -146,7 +146,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -415,6 +419,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -451,6 +457,7 @@ import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
@@ -508,6 +515,7 @@ import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -1969,7 +1977,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public void verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd) {
+	public VerifyEquipmentLocationResponse verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd) {
 
 		WebTokenGenerator webToken = WebTokenGenerator.getInstance();
 		EquipmentQrCodeTokenDTO qrCodeToken = webToken.fromWebToken(cmd.getQrCodeToken(), EquipmentQrCodeTokenDTO.class);
@@ -2707,20 +2715,60 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void createEquipmentCategory(CreateEquipmentCategoryCommand cmd) {
-		// TODO Auto-generated method stub
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long parentId = cmd.getParentId();
+		String path = "";
+		Category category = getEquipmentCategory(parentId);
+		path = category.getPath() + "/" + cmd.getName();
+		
+		category = categoryProvider.findCategoryByPath(namespaceId, path);
+		if(category != null) {
+			LOGGER.error("equipment category have been in existing");
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE, EquipmentServiceErrorCode.ERROR_CATEGORY_EXIST,
+					"equipment category have been in existing");
+		}
+		
+		
+		category = new Category();
+		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		category.setDefaultOrder(0);
+		category.setName(cmd.getName());
+		category.setNamespaceId(namespaceId);
+		category.setPath(path);
+		category.setParentId(parentId);
+		category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
+		categoryProvider.createCategory(category);
+		
 		
 	}
 
 	@Override
 	public void updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd) {
-		// TODO Auto-generated method stub
+		Category category = getEquipmentCategory(cmd.getId());
+		category.setName(cmd.getName());
 		
+		Category parent = getEquipmentCategory(category.getParentId());
+		String path = parent.getPath() + "/" + cmd.getName();
+		category.setPath(path);
+		categoryProvider.updateCategory(category);
 	}
 
 	@Override
 	public void deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		Category category = getEquipmentCategory(cmd.getId());
+		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
+		categoryProvider.updateCategory(category);
+	}
+	
+	private Category getEquipmentCategory(Long categoryId) {
+		Category category = categoryProvider.findCategoryById(categoryId);
+		if(category == null) {
+			LOGGER.error("equipment category not found, categoryId={}", categoryId);
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE, EquipmentServiceErrorCode.ERROR_EQUIPMENT_CATEGORY_NULL,
+					"equipment category not found");
+		}
+		return category;
 	}
 
 }

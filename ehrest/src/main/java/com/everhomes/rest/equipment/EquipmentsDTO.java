@@ -15,30 +15,31 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 设备所属管理处id</li>
  *  <li>targetType: 设备所属管理处类型</li>
- *  <li>targetType: 设备所属管理处名称</li>
+ *  <li>targetName: 设备所属管理处名称</li>
  *  <li>name: 设备名称</li>
  *  <li>manufacturer: 生产厂商</li>
  *  <li>equipmentModel: 设备型号</li>
  *  <li>categoryId: 设备类型id</li>
  *  <li>categoryPath: 设备类型路径</li>
+ *  <li>qrCodeToken: 设备二维码token</li>
+ *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
  *  <li>location: 设备位置</li>
  *  <li>longitude: 设备经度</li>
  *  <li>latitude: 设备纬度</li>
- *  <li>qrCodeToken: 设备二维码token</li>
- *  <li>qrCodeFlag: 二维码状态 0: inactive, 1: active</li>
- *  <li>status: 设备状态 参考{@link com.everhomes.rest.equipment.EquipmentStatus}</li>
+ *  <li>status: 设备状态</li>
  *  <li>installationTime: 安装时间</li>
  *  <li>repairTime: 保修时间</li>
  *  <li>initialAssetValue: 资产原值</li>
- *  <li>manager: 负责人</li>
- *  <li>standardId: 标准id</li>
- *  <li>standardName: 标准名称</li>
+ *  <li>customNumber: 自编号</li>
+ *  <li>parameter: 参数</li>
+ *  <li>quantity: 数量</li>
+ *  <li>sequenceNo: 编号</li>
+ *  <li>versionNo: 版号</li>
+ *  <li>responsiblePersonNo: 责任人编号</li>
  *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
- *  <li>eqParameter: 设备参数 参考{@link com.everhomes.rest.equipment.EquipmentParameterDTO}</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
- *  <li>reviewStatus: 审批状态 参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
- *  <li>reviewResult: 审批结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
+ *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
  * </ul>
  */
 public class EquipmentsDTO {
@@ -68,15 +69,15 @@ public class EquipmentsDTO {
 	
 	private String categoryPath;
 	
+	private String qrCodeToken;
+
+	private Byte qrCodeFlag;
+	
 	private String location;
 	
 	private Double longitude;
 	
     private Double latitude;
-    
-    private String qrCodeToken;
-    
-    private Byte qrCodeFlag;
     
     private Byte status;
     
@@ -85,25 +86,27 @@ public class EquipmentsDTO {
     private Long repairTime;
     
     private String initialAssetValue;
+
+    private String customNumber;
     
-    private String manager;
+    private String parameter;
     
-    private Long standardId;
+    private Long quantity;
     
-    private String standardName;
+    private String sequenceNo;
+    
+    private String versionNo;
+    
+    private String responsiblePersonNo;
     
     @ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
-    @ItemType(EquipmentParameterDTO.class)
-    private List<EquipmentParameterDTO> eqParameter;
     @ItemType(EquipmentAccessoryMapDTO.class)
     private List<EquipmentAccessoryMapDTO> eqAccessoryMap;
+    @ItemType(EquipmentStandardMapDTO.class)
+    private List<EquipmentStandardMapDTO> eqStandardMap;
     
     private String remarks;
-	
-	private Byte reviewStatus;
-	
-	private Byte reviewResult;
     
     public Long getId() {
 		return id;
@@ -193,6 +196,22 @@ public class EquipmentsDTO {
 		this.categoryPath = categoryPath;
 	}
 
+	public String getQrCodeToken() {
+		return qrCodeToken;
+	}
+
+	public void setQrCodeToken(String qrCodeToken) {
+		this.qrCodeToken = qrCodeToken;
+	}
+
+	public Byte getQrCodeFlag() {
+		return qrCodeFlag;
+	}
+
+	public void setQrCodeFlag(Byte qrCodeFlag) {
+		this.qrCodeFlag = qrCodeFlag;
+	}
+
 	public String getLocation() {
 		return location;
 	}
@@ -215,22 +234,6 @@ public class EquipmentsDTO {
 
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
-	}
-
-	public String getQrCodeToken() {
-		return qrCodeToken;
-	}
-
-	public void setQrCodeToken(String qrCodeToken) {
-		this.qrCodeToken = qrCodeToken;
-	}
-
-	public Byte getQrCodeFlag() {
-		return qrCodeFlag;
-	}
-
-	public void setQrCodeFlag(Byte qrCodeFlag) {
-		this.qrCodeFlag = qrCodeFlag;
 	}
 
 	public Byte getStatus() {
@@ -265,28 +268,52 @@ public class EquipmentsDTO {
 		this.initialAssetValue = initialAssetValue;
 	}
 
-	public String getManager() {
-		return manager;
+	public String getCustomNumber() {
+		return customNumber;
 	}
 
-	public void setManager(String manager) {
-		this.manager = manager;
+	public void setCustomNumber(String customNumber) {
+		this.customNumber = customNumber;
 	}
 
-	public Long getStandardId() {
-		return standardId;
+	public String getParameter() {
+		return parameter;
 	}
 
-	public void setStandardId(Long standardId) {
-		this.standardId = standardId;
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
 	}
 
-	public String getStandardName() {
-		return standardName;
+	public Long getQuantity() {
+		return quantity;
 	}
 
-	public void setStandardName(String standardName) {
-		this.standardName = standardName;
+	public void setQuantity(Long quantity) {
+		this.quantity = quantity;
+	}
+
+	public String getSequenceNo() {
+		return sequenceNo;
+	}
+
+	public void setSequenceNo(String sequenceNo) {
+		this.sequenceNo = sequenceNo;
+	}
+
+	public String getVersionNo() {
+		return versionNo;
+	}
+
+	public void setVersionNo(String versionNo) {
+		this.versionNo = versionNo;
+	}
+
+	public String getResponsiblePersonNo() {
+		return responsiblePersonNo;
+	}
+
+	public void setResponsiblePersonNo(String responsiblePersonNo) {
+		this.responsiblePersonNo = responsiblePersonNo;
 	}
 
 	public List<EquipmentAttachmentDTO> getAttachments() {
@@ -297,14 +324,6 @@ public class EquipmentsDTO {
 		this.attachments = attachments;
 	}
 
-	public List<EquipmentParameterDTO> getEqParameter() {
-		return eqParameter;
-	}
-
-	public void setEqParameter(List<EquipmentParameterDTO> eqParameter) {
-		this.eqParameter = eqParameter;
-	}
-
 	public List<EquipmentAccessoryMapDTO> getEqAccessoryMap() {
 		return eqAccessoryMap;
 	}
@@ -313,28 +332,20 @@ public class EquipmentsDTO {
 		this.eqAccessoryMap = eqAccessoryMap;
 	}
 
+	public List<EquipmentStandardMapDTO> getEqStandardMap() {
+		return eqStandardMap;
+	}
+
+	public void setEqStandardMap(List<EquipmentStandardMapDTO> eqStandardMap) {
+		this.eqStandardMap = eqStandardMap;
+	}
+
 	public String getRemarks() {
 		return remarks;
 	}
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
-	}
-
-	public Byte getReviewStatus() {
-		return reviewStatus;
-	}
-
-	public void setReviewStatus(Byte reviewStatus) {
-		this.reviewStatus = reviewStatus;
-	}
-
-	public Byte getReviewResult() {
-		return reviewResult;
-	}
-
-	public void setReviewResult(Byte reviewResult) {
-		this.reviewResult = reviewResult;
 	}
 
 	@Override

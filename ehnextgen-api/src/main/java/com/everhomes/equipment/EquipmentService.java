@@ -46,6 +46,7 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
+import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 
@@ -67,7 +68,7 @@ public interface EquipmentService {
 	EquipmentTaskDTO reportEquipmentTask(ReportEquipmentTaskCommand cmd);
 	void reviewEquipmentTask(ReviewEquipmentTaskCommand cmd);
 	void createEquipmentTask(DeleteEquipmentsCommand equipmentId);
-	void verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd);
+	VerifyEquipmentLocationResponse verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd);
 	HttpServletResponse exportEquipmentTasks(SearchEquipmentTasksCommand cmd,HttpServletResponse response);
 	ListLogsByTaskIdResponse listLogsByTaskId(ListLogsByTaskIdCommand cmd);
 	ImportDataResponse importEquipmentStandards(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);

@@ -25,4 +25,7 @@ public interface EquipmentServiceErrorCode {
     static final int ERROR_EQUIPMENT_TASK_INACTIVE = 10018;//任务已失效
     
     static final int ERROR_EQUIPMENT_TASK_QRCODE = 10019;//二维码和任务设备不对应
+    
+    static final int ERROR_EQUIPMENT_CATEGORY_NULL = 10020;//设备类型不存在
+    static final int ERROR_CATEGORY_EXIST = 10021;//设备类型已存在
 }
