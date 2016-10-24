@@ -62,9 +62,9 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 	VALUES(1674, 999985, 'COMMUNITY', 240111044331055035, UTC_TIMESTAMP());
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(184834, UUID(), 999985, 2, 'EhGroups', 0,'华润城-华润置地大厦E座论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+	VALUES(184834, UUID(), 999985, 2, 'EhGroups', 0,'华润置地大厦E座论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(184835, UUID(), 999985, 2, 'EhGroups', 0,'华润城-华润置地大厦E座意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+	VALUES(184835, UUID(), 999985, 2, 'EhGroups', 0,'华润置地大厦E座意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES(1007016, UUID(), '华润置地', '华润置地', 1, 1, 1007144, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184836, 1, 999985); 
