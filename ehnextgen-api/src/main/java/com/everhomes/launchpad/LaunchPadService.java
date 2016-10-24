@@ -16,13 +16,7 @@ import com.everhomes.rest.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommand
 import com.everhomes.rest.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.rest.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.rest.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
-import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
-import com.everhomes.rest.ui.launchpad.ReorderLaunchPadItemBySceneCommand;
+import com.everhomes.rest.ui.launchpad.*;
 
 
 public interface LaunchPadService {
@@ -80,4 +74,10 @@ public interface LaunchPadService {
     List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request);
 
     List<ItemServiceCategryDTO> listItemServiceCategries();
+
+    /**
+     * 编辑服务广场的item
+     * @param cmd
+     */
+    void editLaunchPadItemByScene(EditLaunchPadItemBySceneCommand cmd);
 }

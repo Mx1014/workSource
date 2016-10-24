@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +23,6 @@ import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
-import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
-import com.everhomes.rest.ui.launchpad.ReorderLaunchPadItemBySceneCommand;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -214,4 +208,19 @@ public class LauchPadUiController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /ui/launchpad/editLaunchPadItemByScene</b>
+     * <p>编辑服务广场的item，即最终点击完成时批量添加或者删除服务广场的item</p>
+     */
+    @RequestMapping("editLaunchPadItemByScene")
+    @RestReturn(value=String.class)
+    public RestResponse editLaunchPadItemByScene(EditLaunchPadItemBySceneCommand cmd) {
+        this.launchPadService.editLaunchPadItemByScene(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
