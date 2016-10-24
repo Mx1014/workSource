@@ -42,6 +42,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.RevisitCommand;
+import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -361,6 +362,20 @@ public class PmTaskController extends ControllerBase {
     @RestReturn(value=SearchTaskStatisticsResponse.class)
     public RestResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd) {
     	SearchTaskStatisticsResponse res = pmTaskService.searchTaskStatistics(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pmtask/searchTaskCategoryStatistics</b>
+     * <p>搜索分类统计列表</p>
+     */
+    @RequestMapping("searchTaskCategoryStatistics")
+    @RestReturn(value=SearchTaskCategoryStatisticsResponse.class)
+    public RestResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+    	SearchTaskCategoryStatisticsResponse res = pmTaskService.searchTaskCategoryStatistics(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

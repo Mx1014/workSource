@@ -5028,6 +5028,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(organizationOwner.getGender()),
                         UserContext.current().getUser().getLocale());
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
+                dto.setBirthday(null);
                 
                 List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(organizationOwner.getNamespaceId(), organizationOwner.getId());
                 dto.setAddresses(addresses.stream().map(r2 -> {
@@ -5051,6 +5052,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getGender()),
                         UserContext.current().getUser().getLocale());
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
+                dto.setBirthday(null);
                 
                 List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(r.getNamespaceId(), r.getId());
                 dto.setAddresses(addresses.stream().map(r2 -> {

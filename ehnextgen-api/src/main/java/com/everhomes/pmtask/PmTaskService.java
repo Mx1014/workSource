@@ -30,6 +30,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.RevisitCommand;
+import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -88,4 +89,6 @@ public interface PmTaskService {
 	void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd);
 	
 	void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd);
+	
+	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
 }

@@ -287,7 +287,7 @@ public class PmProviderImpl implements PmTaskProvider{
         		.collect(Collectors.toList());
 	}
 	@Override
-	public Integer countTask(Long ownerId, Byte status, Long categoryId, Byte star, Timestamp startDate, Timestamp endDate){
+	public Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, Byte star, Timestamp startDate, Timestamp endDate){
         //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         final Integer[] count = new Integer[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPmTasks.class), null, 
@@ -296,21 +296,20 @@ public class PmProviderImpl implements PmTaskProvider{
                 	SelectJoinStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PM_TASKS);
                 	
                 	Condition condition = Tables.EH_PM_TASKS.OWNER_ID.equal(ownerId);
-                	if(null != categoryId){
-                    	query.join(Tables.EH_CATEGORIES).on(Tables.EH_CATEGORIES.ID.eq(Tables.EH_PM_TASKS.CATEGORY_ID));
-                    	condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId).or(Tables.EH_CATEGORIES.ID.eq(categoryId)));
-                	}
                 	condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
+                	if(null != taskCategoryId)
+                    	condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
+                	if(null != categoryId)
+                    	condition = condition.and(Tables.EH_PM_TASKS.CATEGORY_ID.eq(categoryId));
                 	if(null != status)
                 		condition = condition.and(Tables.EH_PM_TASKS.STATUS.equal(status));
                     if(null != star)
                     	condition = condition.and(Tables.EH_PM_TASKS.STAR.equal(star));
-                	if(null != startDate){
+                	if(null != startDate)
                     	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.gt(startDate));
-                	}
-                	if(null != endDate){
+                	if(null != endDate)
                     	condition = condition.and(Tables.EH_PM_TASKS.CREATE_TIME.lt(endDate));
-                	}
+                	
                     count[0] = query.where(condition).fetchOneInto(Integer.class);
                     return true;
                 });

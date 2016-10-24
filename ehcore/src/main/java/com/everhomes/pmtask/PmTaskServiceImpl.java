@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
+import com.everhomes.rest.pmtask.CategoryStatisticsDTO;
 import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
@@ -107,11 +109,13 @@ import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.RevisitCommand;
+import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
+import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -125,6 +129,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -1096,6 +1101,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
+		merge(list);
+		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			TaskStatisticsDTO dto = new TaskStatisticsDTO();
@@ -1124,6 +1131,34 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 	
+	private void merge(List<PmTaskStatistics> list) {
+		
+		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
+		for(PmTaskStatistics p: list){
+			Long id = p.getCategoryId();
+			PmTaskStatistics pts = null;
+			if(tempMap.containsKey(id)){
+				pts = tempMap.get(id);
+				pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
+				pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
+				pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
+				pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
+				pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+				pts.setStar1(pts.getStar1() + p.getStar1());
+				pts.setStar2(pts.getStar2() + p.getStar2());
+				pts.setStar3(pts.getStar3() + p.getStar3());
+				pts.setStar4(pts.getStar4() + p.getStar4());
+				pts.setStar5(pts.getStar5() + p.getStar5());
+				continue;
+			}
+			tempMap.put(id, p);
+		}
+		list.clear();
+		for(PmTaskStatistics p1:tempMap.values()){
+			list.add(p1);
+		}
+	}
+	
 	private int calculateStar(PmTaskStatistics r){
 		return 1*r.getStar1()+2*r.getStar2()+3*r.getStar3()+4*r.getStar4()+5*r.getStar5();
 	}
@@ -1146,31 +1181,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 			response.setOwnerName(community.getName());
 		}else{
-			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
-			
-			for(PmTaskStatistics p: list){
-				Long id = p.getCategoryId();
-				PmTaskStatistics pts = null;
-				if(tempMap.containsKey(id)){
-					pts = tempMap.get(id);
-					pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
-					pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
-					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
-					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
-					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
-					pts.setStar1(pts.getStar1() + p.getStar1());
-					pts.setStar2(pts.getStar2() + p.getStar2());
-					pts.setStar3(pts.getStar3() + p.getStar3());
-					pts.setStar4(pts.getStar4() + p.getStar4());
-					pts.setStar5(pts.getStar5() + p.getStar5());
-					continue;
-				}
-				tempMap.put(id, p);
-			}
-			list.clear();
-			for(PmTaskStatistics p1:tempMap.values()){
-				list.add(p1);
-			}
+			merge(list);
 		}
 		
 		int totalCount = 0;
@@ -1237,53 +1248,54 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			if(ancestor != null){
 				//防止定时任务重复执行
-				
-					List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
-							null, 10);
-					if(list.size() != 0)
-						break;
-				
-				
+				List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
+						null, 10);
+				if(list.size() != 0)
+					break;
 				
 				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
 				if(null != categories && !categories.isEmpty()){
 					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
 					for(Community community:communities){
-						for(Category category: categories){
+						for(Category taskCategory: categories) {
 							
-							PmTaskStatistics statistics = new PmTaskStatistics();
-							Integer totalCount = pmTaskProvider.countTask(community.getId(), null, category.getId(), null, startDate, endDate);
-							Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), category.getId(), null, startDate, endDate);
-							Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), category.getId(), null, startDate, endDate);
-							Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), category.getId(), null, startDate, endDate);
-							Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), category.getId(), null, startDate, endDate);
+							List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
+							for(Category category: tempCategories) {
+								PmTaskStatistics statistics = new PmTaskStatistics();
+								Integer totalCount = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								
+								Integer star1 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)1, startDate, endDate);
+								Integer star2 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)2, startDate, endDate);
+								Integer star3 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)3, startDate, endDate);
+								Integer star4 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)4, startDate, endDate);
+								Integer star5 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)5, startDate, endDate);
+								
+								statistics.setTaskCategoryId(taskCategory.getId());
+								statistics.setCategoryId(category.getId());
+								statistics.setCreateTime(new Timestamp(now));
+								statistics.setDateStr(startDate);
+								statistics.setNamespaceId(n.getId());
+								statistics.setOwnerId(community.getId());
+								statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+								
+								statistics.setTotalCount(totalCount);
+								statistics.setUnprocessCount(unprocessCount);
+								statistics.setProcessedCount(processedCount);
+								statistics.setProcessingCount(processingCount);
+								statistics.setCloseCount(closeCount);
+								
+								statistics.setStar1(star1);
+								statistics.setStar2(star2);
+								statistics.setStar3(star3);
+								statistics.setStar4(star4);
+								statistics.setStar5(star5);
+								pmTaskProvider.createTaskStatistics(statistics);
+							}
 							
-							Integer star1 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)1, startDate, endDate);
-							Integer star2 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)2, startDate, endDate);
-							Integer star3 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)3, startDate, endDate);
-							Integer star4 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)4, startDate, endDate);
-							Integer star5 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)5, startDate, endDate);
-							
-							
-							statistics.setCategoryId(category.getId());
-							statistics.setCreateTime(new Timestamp(now));
-							statistics.setDateStr(startDate);
-							statistics.setNamespaceId(n.getId());
-							statistics.setOwnerId(community.getId());
-							statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-							
-							statistics.setTotalCount(totalCount);
-							statistics.setUnprocessCount(unprocessCount);
-							statistics.setProcessedCount(processedCount);
-							statistics.setProcessingCount(processingCount);
-							statistics.setCloseCount(closeCount);
-							
-							statistics.setStar1(star1);
-							statistics.setStar2(star2);
-							statistics.setStar3(star3);
-							statistics.setStar4(star4);
-							statistics.setStar5(star5);
-							pmTaskProvider.createTaskStatistics(statistics);
 						}
 					}
 					
@@ -1374,12 +1386,6 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Content cannot be null.");
         }
     	checkCategory(taskCategoryId);
-//    	Category parent = checkCategory(child.getParentId());
-//    	if(parent.getParentId().equals(0)){
-//    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"CategoryId is not correctly.");
-//    	}
     }
 	
 	private Category checkCategory(Long id){
@@ -1793,5 +1799,58 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 	}
 
+	@Override
+	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<PmTaskStatistics> temp = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
+				cmd.getPageAnchor(), cmd.getPageSize());
+		List<TaskCategoryStatisticsDTO> list = new ArrayList<TaskCategoryStatisticsDTO>();
+		outer:
+		for(PmTaskStatistics pts: temp) {
+			
+			for(TaskCategoryStatisticsDTO d: list) {
+				if(pts.getOwnerId().equals(d.getOwnerId())) {
+					CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
+					categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
+					Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+					categoryStatisticsDTO.setCategoryName(category.getName());
+					categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+					d.getRequests().add(categoryStatisticsDTO);
+					continue outer;
+				}
+			}
+			TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
+			
+			Community community = communityProvider.findCommunityById(pts.getOwnerId());
+			Category taskCategory = categoryProvider.findCategoryById(pts.getTaskCategoryId());
+			Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+
+			dto.setTaskCategoryId(pts.getTaskCategoryId());
+			dto.setTaskCategoryName(taskCategory.getName());
+			dto.setOwnerId(pts.getOwnerId());
+			dto.setOwnerName(community.getName());
+			CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
+			categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
+			categoryStatisticsDTO.setCategoryName(category.getName());
+			categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+			
+			List<CategoryStatisticsDTO> list2 = new ArrayList<CategoryStatisticsDTO>();
+			list2.add(categoryStatisticsDTO);
+			dto.setRequests(list2);
+			
+			list.add(dto);
+		}
+		
+		if(list.size() > 0){
+    		response.setRequests(list);
+        	response.setNextPageAnchor(null);
+    	}
+		
+		return response;
+	}
 
 }
