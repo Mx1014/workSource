@@ -81,7 +81,7 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 	
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(240111044331055035, UUID(), 15303, '深圳市',  15304, '南山区', '华润城-华润置地大厦E座', '华润置地大厦E座', '深圳市南山区大冲一路18号', NULL, '华润置地大厦，以“中国首个城市人文综合体”华润城为依托，坐拥280万m2人文综合体多元配套——“创新升级版万象城”万象天地、城市高端住宅润府、精品公寓、五星级酒店、综合书店、人文剧场…更拥有山、海、河、公园、高尔夫五大稀缺景观资源。华润置地大厦E座，作为深圳高新园片区、深南大道唯一可售的地铁上盖写字楼，备受明星企业追捧。其中，全球通讯科技企业龙头、台湾上市公司--联发科技及全国著名商贸物流中心开发商、香港上市公司--毅德国际，合共布局商务空间超15000m2，对其他企业的入驻有一呼百应的典范作用。企业入驻属于“深南大道地标级写字楼群落”的华润置地大厦E座，无需科技园入园认证，即可与IT巨头为邻。',
-	NULL, NULL, NULL, NULL, NULL, NULL,NULL, 167, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 184834, 184835, UTC_TIMESTAMP(), 999985);
+	NULL, NULL, NULL, NULL, NULL, NULL,NULL, 168, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 184834, 184835, UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331051438, 240111044331055035, '', 113.960095, 22.547367, 'ws1030x5ytve');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
@@ -113,15 +113,15 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387127713,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-8F','华润置地大厦E座','8F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127714,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-9','华润置地大厦E座','9','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127714,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-9F','华润置地大厦E座','9F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127715,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-10','华润置地大厦E座','10','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127715,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-10F','华润置地大厦E座','10F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127716,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-11','华润置地大厦E座','11','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127716,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-11F','华润置地大厦E座','11F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127717,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-12','华润置地大厦E座','12','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127717,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-12F','华润置地大厦E座','12F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127718,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-13','华润置地大厦E座','13','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127718,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-13F','华润置地大厦E座','13F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387127719,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-14A','华润置地大厦E座','14A','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
@@ -407,23 +407,25 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387127860,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-38D','华润置地大厦E座','38D','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127861,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-39','华润置地大厦E座','39','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127861,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-39F','华润置地大厦E座','39F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127862,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-40','华润置地大厦E座','40','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127862,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-40F','华润置地大厦E座','40F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127863,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-41','华润置地大厦E座','41','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127863,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-41F','华润置地大厦E座','41F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127864,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-42','华润置地大厦E座','42','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127864,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-42F','华润置地大厦E座','42F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127865,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-43','华润置地大厦E座','43','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127865,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-43F','华润置地大厦E座','43F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127866,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-44','华润置地大厦E座','44','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127866,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-44F','华润置地大厦E座','44F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127867,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-46','华润置地大厦E座','46','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127867,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-45F','华润置地大厦E座','45F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127868,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-47','华润置地大厦E座','47','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127868,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-46F','华润置地大厦E座','46F','2','0',UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387127869,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-48','华润置地大厦E座','48','2','0',UTC_TIMESTAMP(), 999985);
+	VALUES(239825274387127869,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-47F','华润置地大厦E座','47F','2','0',UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387127870,UUID(),240111044331055035, 15303, '深圳市',  15304, '南山区' ,'华润置地大厦E座-48F','华润置地大厦E座','48F','2','0',UTC_TIMESTAMP(), 999985);
 
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (26153, 1007144, 240111044331055035, 239825274387127703, '华润置地大厦E座-3F', '0');
@@ -448,15 +450,15 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (26163, 1007144, 240111044331055035, 239825274387127713, '华润置地大厦E座-8F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26164, 1007144, 240111044331055035, 239825274387127714, '华润置地大厦E座-9', '0');
+	VALUES (26164, 1007144, 240111044331055035, 239825274387127714, '华润置地大厦E座-9F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26165, 1007144, 240111044331055035, 239825274387127715, '华润置地大厦E座-10', '0');
+	VALUES (26165, 1007144, 240111044331055035, 239825274387127715, '华润置地大厦E座-10F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26166, 1007144, 240111044331055035, 239825274387127716, '华润置地大厦E座-11', '0');
+	VALUES (26166, 1007144, 240111044331055035, 239825274387127716, '华润置地大厦E座-11F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26167, 1007144, 240111044331055035, 239825274387127717, '华润置地大厦E座-12', '0');
+	VALUES (26167, 1007144, 240111044331055035, 239825274387127717, '华润置地大厦E座-12F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26168, 1007144, 240111044331055035, 239825274387127718, '华润置地大厦E座-13', '0');
+	VALUES (26168, 1007144, 240111044331055035, 239825274387127718, '华润置地大厦E座-13F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (26169, 1007144, 240111044331055035, 239825274387127719, '华润置地大厦E座-14A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
@@ -742,23 +744,26 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (26310, 1007144, 240111044331055035, 239825274387127860, '华润置地大厦E座-38D', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26311, 1007144, 240111044331055035, 239825274387127861, '华润置地大厦E座-39', '0');
+	VALUES (26311, 1007144, 240111044331055035, 239825274387127861, '华润置地大厦E座-39F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26312, 1007144, 240111044331055035, 239825274387127862, '华润置地大厦E座-40', '0');
+	VALUES (26312, 1007144, 240111044331055035, 239825274387127862, '华润置地大厦E座-40F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26313, 1007144, 240111044331055035, 239825274387127863, '华润置地大厦E座-41', '0');
+	VALUES (26313, 1007144, 240111044331055035, 239825274387127863, '华润置地大厦E座-41F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26314, 1007144, 240111044331055035, 239825274387127864, '华润置地大厦E座-42', '0');
+	VALUES (26314, 1007144, 240111044331055035, 239825274387127864, '华润置地大厦E座-42F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26315, 1007144, 240111044331055035, 239825274387127865, '华润置地大厦E座-43', '0');
+	VALUES (26315, 1007144, 240111044331055035, 239825274387127865, '华润置地大厦E座-43F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26316, 1007144, 240111044331055035, 239825274387127866, '华润置地大厦E座-44', '0');
+	VALUES (26316, 1007144, 240111044331055035, 239825274387127866, '华润置地大厦E座-44F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26317, 1007144, 240111044331055035, 239825274387127867, '华润置地大厦E座-46', '0');
+	VALUES (26317, 1007144, 240111044331055035, 239825274387127867, '华润置地大厦E座-45F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26318, 1007144, 240111044331055035, 239825274387127868, '华润置地大厦E座-47', '0');
+	VALUES (26318, 1007144, 240111044331055035, 239825274387127868, '华润置地大厦E座-46F', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (26319, 1007144, 240111044331055035, 239825274387127869, '华润置地大厦E座-48', '0');
+	VALUES (26319, 1007144, 240111044331055035, 239825274387127869, '华润置地大厦E座-47F', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES (26320, 1007144, 240111044331055035, 239825274387127870, '华润置地大厦E座-48F', '0');
+
 
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES (1007018, UUID(), '华润（深圳）有限公司', '华润（深圳）有限公司', 1, 1, 1007146, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 184838, 1, 999985);
@@ -1426,11 +1431,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11200,'', 'EhNamespaces', 999985,2);
 
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),12000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),24000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),25000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),26000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),27000,'', 'EhNamespaces', 999985,2);
+
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),30000,'', 'EhNamespaces', 999985,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),30500,'', 'EhNamespaces', 999985,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),31000,'', 'EhNamespaces', 999985,2);
@@ -1498,36 +1499,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),56210,'', 'EhNamespaces', 999985,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),56220,'', 'EhNamespaces', 999985,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),56230,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58100,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58110,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58111,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58112,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58113,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58120,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58121,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58122,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58123,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58130,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58131,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58132,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58140,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58200,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58210,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58211,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58212,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58220,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58221,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58222,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58230,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),58231,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59000,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59100,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59150,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59160,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59200,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59300,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),59400,'', 'EhNamespaces', 999985,2);
 
 
 -- 物业报修
