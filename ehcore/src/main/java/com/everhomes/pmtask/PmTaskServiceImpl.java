@@ -719,21 +719,12 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"RequestorPhone cannot be null.");
 		}
-		if(StringUtils.isBlank(requestorPhone)){
+		if(StringUtils.isBlank(requestorName)){
 			LOGGER.error("RequestorName cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"RequestorName cannot be null.");
 		}
-		if(StringUtils.isBlank(cmd.getSourceType())){
-			LOGGER.error("RequestorName cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"RequestorName cannot be null.");
-		}
-		if(null == cmd.getPriority()){
-			LOGGER.error("RequestorName cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"RequestorName cannot be null.");
-		}
+		
 		if(null == cmd.getOrganizationId()){
 			LOGGER.error("OrganizationId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
