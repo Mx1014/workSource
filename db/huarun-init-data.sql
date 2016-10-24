@@ -26,17 +26,17 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-华润', '30896', '999985');
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (238560  , UUID(), '9202216', '闫杨', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999985);
+	VALUES (238716  , UUID(), '9202216', '闫杨', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (233076 , 238560  ,  '0',  '18664367996',  '221616',  3, UTC_TIMESTAMP(), 999985);
+	VALUES (233212 , 238716  ,  '0',  '18664367996',  '221616',  3, UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (238561  , UUID(), '9202217', '姜华盛', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999985);
+	VALUES (238717  , UUID(), '9202217', '姜华盛', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (233077 , 238561  ,  '0',  '18601155930',  '221616',  3, UTC_TIMESTAMP(), 999985);
+	VALUES (233213 , 238717  ,  '0',  '18601155930',  '221616',  3, UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (238562  , UUID(), '9202218', '姜璐', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999985);
+	VALUES (238718  , UUID(), '9202218', '姜璐', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999985);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (233078 , 238562  ,  '0',  '13924632771',  '221616',  3, UTC_TIMESTAMP(), 999985);
+	VALUES (233214 , 238718  ,  '0',  '13924632771',  '221616',  3, UTC_TIMESTAMP(), 999985);
 
 	
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
@@ -45,17 +45,17 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 	VALUES(1115951, 240111044331055035, 'organization', 1007144, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2114977, 1007144, 'USER', 238560  , 'manager', '闫杨', 0, '18664367996', 3, 999985);	
+	VALUES(2114977, 1007144, 'USER', 238716  , 'manager', '闫杨', 0, '18664367996', 3, 999985);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(12501, 'EhOrganizations', 1007144, 'EhUsers', 238560  , 1001, 1, UTC_TIMESTAMP());
+	VALUES(12501, 'EhOrganizations', 1007144, 'EhUsers', 238716  , 1001, 1, UTC_TIMESTAMP());
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2114978, 1007144, 'USER', 238561  , 'manager', '姜华盛', 0, '18601155930', 3, 999985);	
+	VALUES(2114978, 1007144, 'USER', 238717  , 'manager', '姜华盛', 0, '18601155930', 3, 999985);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(12502, 'EhOrganizations', 1007144, 'EhUsers', 238561  , 1001, 1, UTC_TIMESTAMP());
+	VALUES(12502, 'EhOrganizations', 1007144, 'EhUsers', 238717  , 1001, 1, UTC_TIMESTAMP());
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2114979, 1007144, 'USER', 238562  , 'manager', '姜璐', 0, '13924632771', 3, 999985);	
+	VALUES(2114979, 1007144, 'USER', 238718  , 'manager', '姜璐', 0, '13924632771', 3, 999985);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(12503, 'EhOrganizations', 1007144, 'EhUsers', 238562  , 1001, 1, UTC_TIMESTAMP());
+	VALUES(12503, 'EhOrganizations', 1007144, 'EhUsers', 238718  , 1001, 1, UTC_TIMESTAMP());
 
 	
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
