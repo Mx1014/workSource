@@ -4,7 +4,7 @@ INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `crea
 	VALUES(1120, 999985, 'community_commercial', '2016-10-21 18:07:50'); 
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES (806, 'app.agreements.url', 'http://officeasy.zuolin.com/mobile/static/app_agreements/officeasy_aggreements.html', 'the relative path for huarun app agreements', '999985', NULL);
+	VALUES (806, 'app.agreements.url', 'http://officeasy.zuolin.com/mobile/static/app_agreements/officeasy_agreements.html', 'the relative path for huarun app agreements', '999985', NULL);
 
 INSERT INTO `eh_version_realm` VALUES ('70', 'Android_Huarun', null, UTC_TIMESTAMP(), '999985');
 INSERT INTO `eh_version_realm` VALUES ('71', 'iOS_Huarun', null, UTC_TIMESTAMP(), '999985');
@@ -1347,9 +1347,9 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
-    VALUES (11982, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRveFkySmxZamRrWTJFeE0yVTFOV0V4WTJOaFlURTBaakV4TUdFek9UZ3dOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
+    VALUES (11982, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRwa1pEYzBOVEJtT1RFNVpqYzJPVGswTm1NMk4ySmxOelJtWlRaaU9EZ3pZdw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
-    VALUES (11983, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRveFkySmxZamRrWTJFeE0yVTFOV0V4WTJOaFlURTBaakV4TUdFek9UZ3dOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
+    VALUES (11983, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRwa1pEYzBOVEJtT1RFNVpqYzJPVGswTm1NMk4ySmxOelJtWlRaaU9EZ3pZdw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('10096','会议室预定','0',NULL,'0','999985');
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
