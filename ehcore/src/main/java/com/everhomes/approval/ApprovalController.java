@@ -360,7 +360,7 @@ public class ApprovalController extends ControllerBase {
 	/**
 	 * 
 	 * <p>27. 删除具体某机构/人 的审批规则</p>
-	 * <b>URL: /approval/getTargetApprovalRule</b>
+	 * <b>URL: /approval/deleteTargetApprovalRule</b>
 	 */
 	@RequestMapping("deleteTargetApprovalRule")
 	@RestReturn(String.class)

@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetTargetPunchAllRuleResponse {
 	
-	private PunchTimeRuleDTO TimeRule;
+	private PunchTimeRuleDTO timeRule;
 	
 	private PunchLocationRuleDTO locationRule;
 	
@@ -27,17 +27,7 @@ public class GetTargetPunchAllRuleResponse {
 		return StringHelper.toJsonString(this);
 	}
 
-
-	public PunchTimeRuleDTO getTimeRule() {
-		return TimeRule;
-	}
-
-
-	public void setTimeRule(PunchTimeRuleDTO timeRule) {
-		TimeRule = timeRule;
-	}
-
-
+ 
 	public PunchLocationRuleDTO getLocationRule() {
 		return locationRule;
 	}
@@ -65,6 +55,16 @@ public class GetTargetPunchAllRuleResponse {
 
 	public void setWorkdayRule(PunchWorkdayRuleDTO workdayRule) {
 		this.workdayRule = workdayRule;
+	}
+
+
+	public PunchTimeRuleDTO getTimeRule() {
+		return timeRule;
+	}
+
+
+	public void setTimeRule(PunchTimeRuleDTO timeRule) {
+		this.timeRule = timeRule;
 	}
 
 	

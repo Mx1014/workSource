@@ -4502,6 +4502,8 @@ public class PunchServiceImpl implements PunchService {
 		
 		//建立所有规则
 		PunchRule pr = new PunchRule();
+		pr.setOwnerId(cmd.getOwnerId());
+		pr.setOwnerType(cmd.getOwnerType());
 		pr.setName(cmd.getTargetId()+"rule");
 		pr.setCreatorUid(UserContext.current().getUser().getId());
 		pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -4509,12 +4511,16 @@ public class PunchServiceImpl implements PunchService {
 		//time rule
 		if(null != cmd.getTimeRule()){
 			PunchTimeRule ptr = convertPunchTimeRule(cmd.getTimeRule());
+			ptr.setOwnerId(cmd.getOwnerId());
+			ptr.setOwnerType(cmd.getOwnerType());
 			this.punchProvider.createPunchTimeRule(ptr);
 			pr.setTimeRuleId(ptr.getId());
 		}
 		//location rule 
 		if(null != cmd.getLocationRule()){
 			PunchLocationRule obj = ConvertHelper.convert( cmd.getLocationRule(), PunchLocationRule.class);
+			obj.setOwnerId(cmd.getOwnerId());
+			obj.setOwnerType(cmd.getOwnerType());
 			obj.setName(cmd.getTargetId()+"rule");
 			obj.setCreatorUid(UserContext.current().getUser().getId());
 			obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -4538,6 +4544,8 @@ public class PunchServiceImpl implements PunchService {
 		//wifi rule 
 		if(null != cmd.getWifiRule()){
 			PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
+			obj.setOwnerId(cmd.getOwnerId());
+			obj.setOwnerType(cmd.getOwnerType());
 			obj.setName(cmd.getTargetId()+"rule");
 			obj.setCreatorUid(UserContext.current().getUser().getId());
 			obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -4559,6 +4567,8 @@ public class PunchServiceImpl implements PunchService {
 		//workday rule 
 		if(null != cmd.getWorkdayRule()){
 			PunchWorkdayRule obj = converDTO2WorkdayRule( cmd.getWorkdayRule());
+			obj.setOwnerId(cmd.getOwnerId());
+			obj.setOwnerType(cmd.getOwnerType());
 			obj.setName(cmd.getTargetId()+"rule");
 			this.punchProvider.createPunchWorkdayRule(obj); 
 			if(null !=  cmd.getWorkdayRule().getWorkdays()) {
@@ -4596,7 +4606,7 @@ public class PunchServiceImpl implements PunchService {
 				cmd.getTargetType(), cmd.getTargetId());
 
 		if(null == map ){
-			map = new PunchRuleOwnerMap();
+			map = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
 			map.setCreatorUid(UserContext.current().getUser().getId());
 			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));

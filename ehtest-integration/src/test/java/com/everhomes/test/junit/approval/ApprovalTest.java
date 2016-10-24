@@ -91,6 +91,7 @@ import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleRestResponse;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
+import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.RuleFlowMap;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TimeRangeType;
@@ -193,6 +194,21 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	//32. 列出审批类别（客户端）
 	private static final String LIST_APPROVAL_CATEGORY_BY_SCENE_URL = "/ui/approval/listApprovalCategoryByScene";
 
+	
+	//33. 列出我的审批列表（客户端）
+	private static final String LIST_MY_APPROVALS_URL = "/ui/approval/listMyApprovalsByScene";
+	//34. 同意申请（客户端）
+	private static final String APPROVE_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/approveApprovalRequestByScene";
+	//35. 驳回申请（客户端）
+	private static final String REJECT_APPROVAL_REQUEST_BY_SCENE_URL = "/ui/approval/rejectApprovalRequestByScene";
+
+	//36. 查询具体某机构/人 的审批规则
+	private static final String GET_TARGET_APPROVAL_RULE_URL = "/approval/getTargetApprovalRule";
+	//37. 更新具体某机构/人 的审批规则
+	private static final String UPDATE_TARGET_APPROVAL_RULE_URL = "/approval/updateTargetApprovalRule";
+	//38. 删除具体某机构/人 的审批规则
+	private static final String DELETE_TARGET_APPROVAL_RULE_URL = "/approval/deleteTargetApprovalRule";
+	
 	//1. 增加审批类别，如请假的公出、事假等（完成）
 	@Test
 	public void testCreateApprovalCategory() {
@@ -983,9 +999,8 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 
 		ListApprovalRequestResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-		String listJson = myResponse.getListJson();
-		JSONArray list = JSONArray.parseArray(listJson);
-		assertEquals(2, list.size());
+		List<RequestDTO> listJson = myResponse.getListJson(); 
+		assertEquals(2, listJson.size());
 
 	}
 
