@@ -2663,7 +2663,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		map.put("orderNo", cmd.getOrderNo());
 		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
 		map.put("orderType",cmd.getOrderType() );
-		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
+//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		map.put("refundAmount", cmd.getRefundAmount().toString());
 		map.put("refundMsg", cmd.getRefundMsg()); 
 		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
 		cmd.setSignature(signature);
