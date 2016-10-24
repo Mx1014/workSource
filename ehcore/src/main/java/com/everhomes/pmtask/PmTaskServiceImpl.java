@@ -35,9 +35,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.acl.Acl;
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.category.Category;
@@ -302,6 +300,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.CLOSETASK)
 				result.add(PmTaskPrivilege.CLOSETASK.getCode());
+			else if(p.longValue() == PrivilegeConstants.REVISITTASK)
+				result.add(PmTaskPrivilege.REVISITTASK.getCode());
 		}
 		dto.setPrivileges(result);
 		return dto;
@@ -767,7 +767,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(null != cmd.getReserveTime())
 				task.setReserveTime(new Timestamp(cmd.getReserveTime()));
 			task.setPriority(cmd.getPriority());
-			task.setSourceType(cmd.getSourceType());
+			task.setSourceType(cmd.getSourceType()==null?PmTaskSourceType.APP.getCode():cmd.getSourceType());
 			task.setAddressId(cmd.getAddressId());
 			pmTaskProvider.createTask(task);
 			//图片
@@ -946,8 +946,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
 		if(list.size() > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CategoryDTO.class))
-    				.collect(Collectors.toList()));
+    		response.setRequests(list.stream().map(r -> {
+    			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
+    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId, null, r.getPath(),
+    					null, null);
+    			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
+    					.collect(Collectors.toList()), dto);
+    			return dto;
+    		}).collect(Collectors.toList()));
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
