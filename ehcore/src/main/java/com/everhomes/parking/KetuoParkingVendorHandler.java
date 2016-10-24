@@ -568,7 +568,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		KetuoTemoFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
-		if(null == tempFee || tempFee.getPayable().intValue() == 0)
+		if(null == tempFee)
 			return dto;
 		dto.setPlateNumber(plateNumber);
 		dto.setEntryTime(strToLong(tempFee.getEntryTime()));
