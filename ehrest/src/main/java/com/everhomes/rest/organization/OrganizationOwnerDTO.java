@@ -37,7 +37,7 @@ public class OrganizationOwnerDTO {
     private String contactToken;
     private String orgOwnerType;
     private String gender;
-    private Date   birthday;
+    private Long   birthday;
     private String maritalStatus;
     private String job;
     private String company;
@@ -101,11 +101,11 @@ public class OrganizationOwnerDTO {
         this.gender = gender;
     }
 
-    public Date getBirthday() {
+    public Long getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(Long birthday) {
         this.birthday = birthday;
     }
 
