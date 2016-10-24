@@ -38,6 +38,12 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (233078 , 238562  ,  '0',  '13924632771',  '221616',  3, UTC_TIMESTAMP(), 999985);
 
+	
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
+	VALUES(1007144, 0, 'PM', '华润置地', 0, '', '/1007144', 1, 2, 'ENTERPRISE', 999985);
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
+	VALUES(1115951, 240111044331055035, 'organization', 1007144, 3, 0, UTC_TIMESTAMP());
+
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
 	VALUES(2114977, 1007144, 'USER', 238560  , 'manager', '闫杨', 0, '18664367996', 3, 999985);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
@@ -50,11 +56,7 @@ INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_i
 	VALUES(2114979, 1007144, 'USER', 238562  , 'manager', '姜璐', 0, '13924632771', 3, 999985);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(12503, 'EhOrganizations', 1007144, 'EhUsers', 238562  , 1001, 1, UTC_TIMESTAMP());
-	
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
-	VALUES(1007144, 0, 'PM', '华润置地', 0, '', '/1007144', 1, 2, 'ENTERPRISE', 999985);
-INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
-	VALUES(1115951, 240111044331055035, 'organization', 1007144, 3, 0, UTC_TIMESTAMP());
+
 	
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1674, 999985, 'COMMUNITY', 240111044331055035, UTC_TIMESTAMP());
@@ -1345,9 +1347,9 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
-    VALUES (11797, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRveFkySmxZamRrWTJFeE0yVTFOV0V4WTJOaFlURTBaakV4TUdFek9UZ3dOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
+    VALUES (11982, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRveFkySmxZamRrWTJFeE0yVTFOV0V4WTJOaFlURTBaakV4TUdFek9UZ3dOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
-    VALUES (11798, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRveFkySmxZamRrWTJFeE0yVTFOV0V4WTJOaFlURTBaakV4TUdFek9UZ3dOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
+    VALUES (11983, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRveFkySmxZamRrWTJFeE0yVTFOV0V4WTJOaFlURTBaakV4TUdFek9UZ3dOZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('10096','会议室预定','0',NULL,'0','999985');
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
