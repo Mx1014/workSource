@@ -1,9 +1,11 @@
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <ul>
@@ -18,6 +20,7 @@ import javax.validation.constraints.Size;
  *     <li>color: 颜色</li>
  *     <li>contentUri: 图片的URI</li>
  *     <li>contentUrl: 图片的URL</li>
+ *     <li>carAttachments: 附件列表</li>
  * </ul>
  */
 public class CreateOrganizationOwnerCarCommand {
@@ -39,6 +42,9 @@ public class CreateOrganizationOwnerCarCommand {
     private String color;
     @Size(max = 1024)
     private String contentUri;
+
+    @ItemType(UploadOrganizationOwnerCarAttachmentCommand.class)
+    private List<UploadOrganizationOwnerCarAttachmentCommand> carAttachments;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -90,6 +96,14 @@ public class CreateOrganizationOwnerCarCommand {
 
     public String getContacts() {
         return contacts;
+    }
+
+    public List<UploadOrganizationOwnerCarAttachmentCommand> getCarAttachments() {
+        return carAttachments;
+    }
+
+    public void setCarAttachments(List<UploadOrganizationOwnerCarAttachmentCommand> carAttachments) {
+        this.carAttachments = carAttachments;
     }
 
     public void setContacts(String contacts) {
