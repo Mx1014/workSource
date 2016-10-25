@@ -18,6 +18,7 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `location` VARCHAR(1024),
   `longitude` DOUBLE DEFAULT NULL,
   `latitude` DOUBLE DEFAULT NULL,
+  `geohash` VARCHAR(64) DEFAULT NULL,
   `equipment_model` VARCHAR(1024),
   `category_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'reference to the id of eh_categories',
   `category_path` VARCHAR(128) DEFAULT NULL COMMENT 'reference to the path of eh_categories',  
