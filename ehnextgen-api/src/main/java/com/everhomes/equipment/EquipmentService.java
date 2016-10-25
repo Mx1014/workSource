@@ -9,15 +9,21 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
+import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
+import com.everhomes.rest.equipment.InspectionItemDTO;
+import com.everhomes.rest.equipment.InspectionTemplateDTO;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
+import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
+import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
@@ -45,6 +51,7 @@ import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
+import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
 import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -89,4 +96,12 @@ public interface EquipmentService {
 	void createEquipmentCategory(CreateEquipmentCategoryCommand cmd);
 	void updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd);
 	void deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd);
+	
+	List<InspectionItemDTO> listParametersByStandardId(ListParametersByStandardIdCommand cmd);
+	void createInspectionTemplate(CreateInspectionTemplateCommand cmd);
+	void updateInspectionTemplate(UpdateInspectionTemplateCommand cmd);
+	void deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd);
+	InspectionTemplateDTO findInspectionTemplate(DeleteInspectionTemplateCommand cmd);
+	List<InspectionTemplateDTO> listInspectionTemplates(ListInspectionTemplatesCommand cmd);
+	
 }

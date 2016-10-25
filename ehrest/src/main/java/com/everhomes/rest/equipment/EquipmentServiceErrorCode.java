@@ -28,4 +28,6 @@ public interface EquipmentServiceErrorCode {
     
     static final int ERROR_EQUIPMENT_CATEGORY_NULL = 10020;//设备类型不存在
     static final int ERROR_CATEGORY_EXIST = 10021;//设备类型已存在
+    static final int ERROR_TEMPLATE_NOT_EXIST = 10022;//模板不存在
+    static final int ERROR_EQUIPMENT_STANDARD_MAP_NOT_EXIST = 10023;//设备-标准关联不存在
 }

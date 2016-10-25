@@ -30,6 +30,7 @@ import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -38,29 +39,40 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesD
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoryMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentParametersDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentStandardMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskLogsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTasksDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplateItemMapDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplatesDao;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentParameters;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentStandardMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplateItemMap;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplates;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentStandardMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplateItemMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplatesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -301,17 +313,37 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionEquipments> findEquipmentByStandardId(
+	public List<EquipmentStandardMap> findByStandardId(
 			Long standardId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STANDARD_ID.eq(standardId));
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId));
 		
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STATUS.ne(EquipmentStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
 		 
-		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
 		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, EquipmentInspectionEquipments.class));
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
+	}
+	
+	@Override
+	public List<EquipmentStandardMap> findByTarget(Long targetId, String targetType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_TYPE.eq(targetType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_ID.eq(targetId));
+		
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
+		 
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
 			return null;
 		});
 		if(result.size()==0)
@@ -752,9 +784,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STATUS.eq(EquipmentStatus.IN_USE.getCode()));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STANDARD_ID.ne(0L));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.STANDARD_ID.ne(0L));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
 		 
 		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
 		query.fetch().map((r) -> {
@@ -887,6 +919,301 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, EquipmentInspectionTasksLogs.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
+	}
+
+	@Override
+	public Long createEquipmentInspectionTemplates(
+			EquipmentInspectionTemplates template) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionTemplates.class));
+		
+		template.setId(id);
+		template.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		template.setStatus(Status.ACTIVE.getCode());
+        
+		LOGGER.info("createEquipmentInspectionTemplates: " + template);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplates.class, id));
+		EhEquipmentInspectionTemplatesDao dao = new EhEquipmentInspectionTemplatesDao(context.configuration());
+        dao.insert(template);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTemplates.class, null);
+		return id;
+	}
+
+	@Override
+	public void updateEquipmentInspectionTemplates(
+			EquipmentInspectionTemplates template) {
+		assert(template.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplates.class, template.getId()));
+        EhEquipmentInspectionTemplatesDao dao = new EhEquipmentInspectionTemplatesDao(context.configuration());
+        dao.update(template);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTemplates.class, template.getId());	
+		
+	}
+	
+	@Override
+	public EquipmentInspectionTemplates findEquipmentInspectionTemplate(
+			Long id, Long ownerId, String ownerType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.ID.eq(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_ID.eq(ownerId));
+		 
+		List<EquipmentInspectionTemplates> result = new ArrayList<EquipmentInspectionTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTemplates.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
+	}
+
+	@Override
+	public Long createEquipmentInspectionItems(EquipmentInspectionItems item) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionItems.class));
+		
+		item.setId(id);
+        
+		LOGGER.info("createEquipmentInspectionItems: " + item);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItems.class, id));
+		EhEquipmentInspectionItemsDao dao = new EhEquipmentInspectionItemsDao(context.configuration());
+        dao.insert(item);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionItems.class, null);
+		return id;
+	}
+
+	@Override
+	public Long updateEquipmentInspectionItems(EquipmentInspectionItems item) {
+		assert(item.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItems.class, item.getId()));
+        EhEquipmentInspectionItemsDao dao = new EhEquipmentInspectionItemsDao(context.configuration());
+        dao.update(item);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionItems.class, item.getId());
+		
+        return item.getId();
+	}
+
+	@Override
+	public void createEquipmentInspectionTemplateItemMap(
+			EquipmentInspectionTemplateItemMap map) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionTemplateItemMap.class));
+		
+		map.setId(id);
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+		LOGGER.info("createEquipmentInspectionTemplateItemMap: " + map);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplateItemMap.class, id));
+		EhEquipmentInspectionTemplateItemMapDao dao = new EhEquipmentInspectionTemplateItemMapDao(context.configuration());
+        dao.insert(map);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionTemplateItemMap.class, null);
+		
+	}
+
+	@Override
+	public void deleteEquipmentInspectionTemplateItemMap(Long id) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionTemplateItemMap.class));
+		EhEquipmentInspectionTemplateItemMapDao dao = new EhEquipmentInspectionTemplateItemMapDao(context.configuration());
+		dao.deleteById(id);
+		
+	}
+
+	@Override
+	public List<EquipmentInspectionTemplateItemMap> listEquipmentInspectionTemplateItemMap(Long templateId) {
+		List<EquipmentInspectionTemplateItemMap> maps = new ArrayList<EquipmentInspectionTemplateItemMap>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTemplateItemMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.TEMPLATE_ID.eq(templateId));
+		 
+		query.fetch().map((r) -> {
+			maps.add(ConvertHelper.convert(r, EquipmentInspectionTemplateItemMap.class));
+			return null;
+		});
+		if(maps.size()==0)
+			return null;
+		
+		return maps;
+	}
+
+	@Override
+	public EquipmentInspectionTemplateItemMap findEquipmentInspectionTemplateItemMap(
+			Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionTemplateItemMapDao dao = new EhEquipmentInspectionTemplateItemMapDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), EquipmentInspectionTemplateItemMap.class);
+	}
+
+	@Override
+	public EquipmentInspectionItems findEquipmentInspectionItem(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEquipmentInspectionItemsDao dao = new EhEquipmentInspectionItemsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), EquipmentInspectionItems.class);
+	}
+
+	@Override
+	public List<EquipmentInspectionTemplates> listInspectionTemplates(
+			Long ownerId, String ownerType, String name) {
+		List<EquipmentInspectionTemplates> templates = new ArrayList<EquipmentInspectionTemplates>();
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_TYPE.eq(ownerType));
+		
+		if(!StringUtils.isNullOrEmpty(name)) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAME.like("%"+name+"%"));
+		}
+		 
+		query.fetch().map((r) -> {
+			templates.add(ConvertHelper.convert(r, EquipmentInspectionTemplates.class));
+			return null;
+		});
+		if(templates.size()==0)
+			return null;
+		
+		return templates;
+	}
+
+	@Override
+	public List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(
+			Long templateId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionStandardsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARDS.TEMPLATE_ID.eq(templateId));
+		 
+		List<EquipmentInspectionStandards> result = new ArrayList<EquipmentInspectionStandards>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionStandards.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
+	}
+
+	@Override
+	public void createEquipmentStandardMap(EquipmentStandardMap map) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionEquipmentStandardMap.class));
+		
+		map.setId(id);
+		map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		map.setStatus(Status.ACTIVE.getCode());
+        
+		LOGGER.info("createEquipmentStandardMap: " + map);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentStandardMap.class, id));
+		EhEquipmentInspectionEquipmentStandardMapDao dao = new EhEquipmentInspectionEquipmentStandardMapDao(context.configuration());
+        dao.insert(map);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionEquipmentStandardMap.class, null);
+		
+	}
+
+	@Override
+	public void updateEquipmentStandardMap(EquipmentStandardMap map) {
+		assert(map.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionEquipmentStandardMap.class, map.getId()));
+        EhEquipmentInspectionEquipmentStandardMapDao dao = new EhEquipmentInspectionEquipmentStandardMapDao(context.configuration());
+        dao.update(map);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionEquipmentStandardMap.class, map.getId());
+	}
+
+	@Override
+	public List<EquipmentInspectionTasks> listTasksByStandardId(
+			Long standardId, CrossShardListingLocator locator, Integer pageSize) {
+		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+            
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+            	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+            }
+            
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardId));
+            
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+            query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
+            query.addLimit(pageSize - tasks.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
+                return null;
+            });
+
+            if (tasks.size() >= pageSize) {
+                locator.setAnchor(tasks.get(tasks.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return tasks;
+	}
+
+	@Override
+	public EquipmentStandardMap findEquipmentStandardMapById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.eq(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
+		 
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
+	}
+
+	@Override
+	public EquipmentStandardMap findEquipmentStandardMap(Long id,
+			Long standardId, Long targetId, String targetType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.eq(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_ID.eq(targetId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_TYPE.eq(targetType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
+		 
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
 			return null;
 		});
 		if(result.size()==0)

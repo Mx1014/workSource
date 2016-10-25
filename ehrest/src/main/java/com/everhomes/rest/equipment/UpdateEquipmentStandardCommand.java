@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>repeat: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
  *  <li>templateId: 巡检项模板id</li>
- *  <li>checkReviewTimeLimit: 审批过期时间限制（天）</li>
+ *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -47,7 +47,7 @@ public class UpdateEquipmentStandardCommand {
 	
 	private Long templateId;
 	
-	private Integer checkReviewTimeLimit;
+	private Integer reviewExpiredDays;
 	
 	public Long getId() {
 		return id;
@@ -137,12 +137,12 @@ public class UpdateEquipmentStandardCommand {
 		this.templateId = templateId;
 	}
 
-	public Integer getCheckReviewTimeLimit() {
-		return checkReviewTimeLimit;
+	public Integer getReviewExpiredDays() {
+		return reviewExpiredDays;
 	}
 
-	public void setCheckReviewTimeLimit(Integer checkReviewTimeLimit) {
-		this.checkReviewTimeLimit = checkReviewTimeLimit;
+	public void setReviewExpiredDays(Integer reviewExpiredDays) {
+		this.reviewExpiredDays = reviewExpiredDays;
 	}
 
 	@Override

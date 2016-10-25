@@ -35,7 +35,7 @@ import com.everhomes.util.StringHelper;
  *  <li>quantity: 数量</li>
  *  <li>sequenceNo: 编号</li>
  *  <li>versionNo: 版号</li>
- *  <li>responsiblePersonNo: 责任人编号</li>
+ *  <li>manager: 责任人编号</li>
  *  <li>attachments: 操作图示&说明书 参考{@link com.everhomes.rest.equipment.EquipmentAttachmentDTO}</li>
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
@@ -97,7 +97,7 @@ public class EquipmentsDTO {
     
     private String versionNo;
     
-    private String responsiblePersonNo;
+    private String manager;
     
     @ItemType(EquipmentAttachmentDTO.class)
     private List<EquipmentAttachmentDTO> attachments;
@@ -308,12 +308,12 @@ public class EquipmentsDTO {
 		this.versionNo = versionNo;
 	}
 
-	public String getResponsiblePersonNo() {
-		return responsiblePersonNo;
+	public String getManager() {
+		return manager;
 	}
 
-	public void setResponsiblePersonNo(String responsiblePersonNo) {
-		this.responsiblePersonNo = responsiblePersonNo;
+	public void setManager(String manager) {
+		this.manager = manager;
 	}
 
 	public List<EquipmentAttachmentDTO> getAttachments() {

@@ -29,7 +29,7 @@ import com.everhomes.util.StringHelper;
  *  <li>deleteTime: 删除该标准的时间</li>
  *  <li>templateId: 巡检项模板id</li>
  *  <li>templateName: 巡检项模板名称</li>
- *  <li>checkReviewTimeLimit: 审批过期时间限制（天）</li>
+ *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -77,7 +77,7 @@ public class EquipmentStandardsDTO {
 	
 	private String templateName;
 	
-	private Integer checkReviewTimeLimit;
+	private Integer reviewExpiredDays;
 	
 	public Long getId() {
 		return id;
@@ -247,12 +247,12 @@ public class EquipmentStandardsDTO {
 		this.templateName = templateName;
 	}
 
-	public Integer getCheckReviewTimeLimit() {
-		return checkReviewTimeLimit;
+	public Integer getReviewExpiredDays() {
+		return reviewExpiredDays;
 	}
 
-	public void setCheckReviewTimeLimit(Integer checkReviewTimeLimit) {
-		this.checkReviewTimeLimit = checkReviewTimeLimit;
+	public void setReviewExpiredDays(Integer reviewExpiredDays) {
+		this.reviewExpiredDays = reviewExpiredDays;
 	}
 
 	@Override
