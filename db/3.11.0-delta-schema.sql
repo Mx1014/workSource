@@ -24,10 +24,6 @@ CREATE TABLE `eh_pm_task_targets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-	VALUES ('313', 'pmtask.notification', '8', 'zh_CN', '任务操作模版', '${operatorName} ${operatorPhone} 已回访该任务', '0');
-
-
 -- merge from customer-manage-1.1-delta-schema.sql 20161025 by lqs
 --
 -- 车辆停车类型     add by xq.tian 2016/10/11
