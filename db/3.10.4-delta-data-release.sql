@@ -10,3 +10,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 --
 SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'serviceAlliance.serviceDetail.url', 'http://core.zuolin.com/service-alliance/index.html#/service_detail/%s/%s?_k=%s', '服务联盟详情页面URL', '0', NULL);
+
+-- 储能停车充值 add by sunwen 20161025
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES ('400', 'parking', '10010', 'zh_CN', '费用已过期，请重新查询费用');
+
