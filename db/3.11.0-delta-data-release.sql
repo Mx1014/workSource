@@ -40,6 +40,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@locale_string_id := @locale_string_id + 1), 'pm', '18001', 'zh_CN', '该记录已经处于未认证状态');
   
 -- 物业报修2.5 by sunwen 20161025
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
+	VALUES ('920', '0', '完成回访', '任务管理 完成回访', NULL);
+
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ('313', 'pmtask.notification', '8', 'zh_CN', '任务操作模版', '${operatorName} ${operatorPhone} 已回访该任务', '0');
 

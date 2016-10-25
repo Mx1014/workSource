@@ -46,3 +46,40 @@ UPDATE `eh_launch_pad_items` SET service_categry_id = 1 WHERE namespace_id = 0;
 UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016102403","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://10.1.10.135:5000/image/aW1hZ2UvTVRvMlkyUmtNVEppTUdFellqVXpOR1JtTXpSa05XTmtPRFUyTlRneE1tWmhNQQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 0 AND scene_type = 'default';
 UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016102403","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://10.1.10.135:5000/image/aW1hZ2UvTVRvMlkyUmtNVEppTUdFellqVXpOR1JtTXpSa05XTmtPRFUyTlRneE1tWmhNQQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 0 AND scene_type = 'park_tourist';
 UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016102403","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://10.1.10.135:5000/image/aW1hZ2UvTVRvMlkyUmtNVEppTUdFellqVXpOR1JtTXpSa05XTmtPRFUyTlRneE1tWmhNQQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 0 AND scene_type = 'pm_admin';
+
+-- 物业报修2.5 by sunwen 20161025
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('313', 'pmtask.notification', '8', 'zh_CN', '任务操作模版', '${operatorName} ${operatorPhone} 已回访该任务', '0');
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (28000,'服务录入',20000,NULL,'task_management_service_entry',0,2,'/20000/28000','park',456);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+  VALUES (29000,'执行人员设置',20000,NULL,'executive_setting',0,2,'/20000/29000','park',458);
+
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (936,0,'服务录入','任务管理 服务录入 全部权限',NULL);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (937,0,'执行人员设置','任务管理 执行人员设置 全部权限',NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),936,28000,'服务录入',1,1,'分类设置 服务录入',605);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+  VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),937,29000,'执行人员设置',1,1,'统计 执行人员设置',606);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '936', 1001,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '936', 1002,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '937', 1001,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '937', 1002,0,1,now());	
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),28000,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),29000,'', 'EhNamespaces', 999992,2);
