@@ -113,9 +113,10 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
-				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 				
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		if(null!= approvalType)
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType));
 		if (categoryId != null) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
 		}

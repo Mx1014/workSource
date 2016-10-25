@@ -1693,7 +1693,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		final Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalType(cmd.getApprovalType());
+//		checkApprovalType(cmd.getApprovalType());
 		if (cmd.getCategoryId() != null) {
 			checkCategoryExist(cmd.getCategoryId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
 		}
@@ -1719,9 +1719,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		Long nextPageAnchor = null;
 		// 查询待审批的，根据当前用户拥有的流程及级别来查申请表中nextLevel与之相同的记录
 		if (cmd.getQueryType().byteValue() == ApprovalQueryType.WAITING_FOR_APPROVE.getCode()) {
-			resultList = approvalRequestProvider.listApprovalRequestWaitingForApproving(cmd.getNamespaceId(), cmd.getOwnerType(),
+			resultList.addAll( approvalRequestProvider.listApprovalRequestWaitingForApproving(cmd.getNamespaceId(), cmd.getOwnerType(),
 					cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(),
-					approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize + 1);
+					approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize + 1));
 
 			if (ListUtils.isNotEmpty(resultList) && resultList.size() > pageSize) {
 				resultList.remove(resultList.size() - 1);
@@ -1730,9 +1730,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 			}
 		} else if (cmd.getQueryType().byteValue() == ApprovalQueryType.APPROVED.getCode()) {
 			// 查询已审批的，已审批的需要把我所在的流程中其他人审批的也查出来，只能从日志表中查询了
-			resultList = approvalRequestProvider.listApprovalRequestApproved(cmd.getNamespaceId(), cmd.getOwnerType(),
+			resultList.addAll(approvalRequestProvider.listApprovalRequestApproved(cmd.getNamespaceId(), cmd.getOwnerType(),
 					cmd.getOwnerId(), cmd.getApprovalType(), cmd.getCategoryId(), cmd.getFromDate(), cmd.getEndDate(),
-					approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize + 1);
+					approvalFlowLevelList, userIdList, cmd.getPageAnchor(), pageSize + 1));
 
 			if (ListUtils.isNotEmpty(resultList) && resultList.size() > pageSize) {
 				resultList.remove(resultList.size() - 1);
@@ -1942,6 +1942,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return resp;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.everhomes.approval.ApprovalService#updateTargetApprovalRule(com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand)
+	 */
 	@Override
 	public void updateTargetApprovalRule(UpdateTargetApprovalRuleCommand cmd) {
 
@@ -1971,6 +1974,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 			map.setReviewRuleId(approvalRule.getId());
 			map.setOwnerId(cmd.getOwnerId());
 			map.setOwnerType(cmd.getOwnerType());
+			map.setTargetId(cmd.getTargetId());
+			map.setTargetType(cmd.getTargetType());
 			map.setCreatorUid(UserContext.current().getUser().getId());
 			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
