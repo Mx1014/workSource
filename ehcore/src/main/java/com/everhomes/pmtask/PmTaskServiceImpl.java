@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
+
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,11 +42,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.acl.Acl;
+
+
+
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.address.AddressService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -54,9 +65,13 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
@@ -68,12 +83,18 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
+import com.everhomes.rest.pmtask.CategoryStatisticsDTO;
 import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
+import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.EvaluateScoreDTO;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
+import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -91,22 +112,28 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
+import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskPrivilege;
+import com.everhomes.rest.pmtask.PmTaskRevisitStatus;
+import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.pmtask.PmTaskTargetStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
+import com.everhomes.rest.pmtask.RevisitCommand;
+import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
+import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.statistics.transaction.StatTaskLog;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -114,6 +141,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -133,8 +161,6 @@ public class PmTaskServiceImpl implements PmTaskService {
     private ContentServerService contentServerService;
 	@Autowired
 	private UserProvider userProvider;
-//	@Autowired
-//	private LocaleStringService localeStringService;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
@@ -155,6 +181,10 @@ public class PmTaskServiceImpl implements PmTaskService {
     private DbProvider dbProvider;
 	@Autowired
     private CoordinationProvider coordinationProvider;
+	@Autowired
+	private OrganizationService organizationService;
+	@Autowired
+	private AddressProvider addressProvider;
 	
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -162,20 +192,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), pageSize);
 		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-//    			User user = userProvider.findUserById(r.getCreatorUid());
-//    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//    			dto.setNickName(user.getNickName());
-//    			dto.setMobile(userIdentifier.getIdentifierToken());
     			
-    			Category parentCategory = checkCategory(r.getCategoryId());
-    			dto.setParentCategoryId(parentCategory.getId());
-    			dto.setParentCategoryName(parentCategory.getName());
+    			Category category = checkCategory(r.getTaskCategoryId());
+    			dto.setTaskCategoryId(category.getId());
+    			dto.setTaskCategoryName(category.getName());
+    			if(null != r.getAddressId()) {
+    				Address address = addressProvider.findAddressById(r.getAddressId());
+    				dto.setAddress(address.getAddress());
+    			}
     			
     			return dto;
     		}).collect(Collectors.toList()));
@@ -226,31 +256,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-				List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(r.getId(), PmTaskStatus.UNPROCESSED.getCode());
-				PmTaskLog log = logs.get(0);
-    			if(0L == log.getOperatorUid()){
-    				dto.setNickName(log.getOperatorName());
-        			dto.setMobile(log.getOperatorPhone());
-    			}else{
-    				User user = userProvider.findUserById(log.getOperatorUid());
+    			if(null == r.getOrganizationId()){
+    				User user = userProvider.findUserById(r.getCreatorUid());
         			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-        			dto.setNickName(user.getNickName());
-        			dto.setMobile(userIdentifier.getIdentifierToken());
+        			dto.setRequestorName(user.getNickName());
+        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
     			}
+//    			Category category = checkCategory(r.getCategoryId());
+    			Category category = categoryProvider.findCategoryById(r.getCategoryId());
+    			Category taskCategory = checkCategory(r.getTaskCategoryId());
+    			if(null != category)
+    				dto.setCategoryName(category.getName());
+    	    	dto.setTaskCategoryName(taskCategory.getName());
     			
-    			Category category = checkCategory(r.getCategoryId());
-    			Category parentCategory = checkCategory(category.getParentId());
-    			if(parentCategory.getParentId().equals(0L)){
-    	    		dto.setCategoryId(null);
-    	    		dto.setCategoryName(null);
-    	    		dto.setParentCategoryId(category.getId());
-    	    		dto.setParentCategoryName(category.getName());
-    	    	}else{
-    	    		dto.setCategoryName(category.getName());
-    	    		dto.setParentCategoryId(parentCategory.getId());
-    	    		dto.setParentCategoryName(parentCategory.getName());
-    	    	}
-    			
+    	    	if(null != r.getAddressId()) {
+    				Address address = addressProvider.findAddressById(r.getAddressId());
+    				dto.setAddress(address.getAddress());
+    			}
+    	    	
     			return dto;
     		}).collect(Collectors.toList()));
     		if(pageSize != null && list.size() != pageSize){
@@ -305,6 +328,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.CLOSETASK)
 				result.add(PmTaskPrivilege.CLOSETASK.getCode());
+			else if(p.longValue() == PrivilegeConstants.REVISITTASK)
+				result.add(PmTaskPrivilege.REVISITTASK.getCode());
 		}
 		dto.setPrivileges(result);
 		return dto;
@@ -336,7 +361,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 		}
 			
-		if(status.equals(PmTaskStatus.OTHER.getCode())){
+		if(status.equals(PmTaskStatus.CLOSED.getCode())){
 			task.setClosedTime(now);
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.CLOSETASK)){
@@ -387,24 +412,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 			text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(user.getId(), text);
 		}
-		if(status.equals(PmTaskStatus.OTHER.getCode())){
+		if(status.equals(PmTaskStatus.CLOSED.getCode())){
 			int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 			String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(task.getCreatorUid(), text);
 		}
 		
 		//elasticsearch更新
-		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
-		PmTaskLog log = logs.get(0);
-		if(0L == log.getOperatorUid()){
-			task.setNickName(log.getOperatorName());
-			task.setMobile(log.getOperatorPhone());
-		}else{
-			User creator = userProvider.findUserById(log.getOperatorUid());
-			UserIdentifier creatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(creator.getId(), IdentifierType.MOBILE.getCode());
-			task.setNickName(creator.getNickName());
-			task.setMobile(creatorIdentifier.getIdentifierToken());
-		}
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
 	}
@@ -440,6 +454,40 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
+	public void revisit(RevisitCommand cmd) {
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		if(task.getStatus() != PmTaskStatus.PROCESSED.getCode() ){
+			LOGGER.error("Task cannot be completed. cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be completed.");
+		}
+		
+		User user = UserContext.current().getUser();
+		long time = System.currentTimeMillis();
+		Timestamp now = new Timestamp(time);
+		task.setStatus(PmTaskRevisitStatus.REVISITED.getCode());
+		task.setRevisitTime(now);
+		 
+		pmTaskProvider.updateTask(task);
+		
+		PmTaskLog pmTaskLog = new PmTaskLog();
+		pmTaskLog.setNamespaceId(task.getNamespaceId());
+		pmTaskLog.setOperatorTime(now);
+		pmTaskLog.setOperatorUid(user.getId());
+		pmTaskLog.setContent(cmd.getContent());
+		pmTaskLog.setOwnerId(task.getOwnerId());
+		pmTaskLog.setOwnerType(task.getOwnerType());
+		pmTaskLog.setStatus(task.getStatus());
+		pmTaskLog.setTaskId(task.getId());
+		pmTaskProvider.createTaskLog(pmTaskLog);
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
+	}
+	
+	@Override
 	public void closeTask(CloseTaskCommand cmd) {
 		checkId(cmd.getId());
 		
@@ -450,7 +498,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"Task cannot be closed.");
 		}
 		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
-				null, PmTaskStatus.OTHER.getCode());
+				null, PmTaskStatus.CLOSED.getCode());
 		
 	}
 	
@@ -563,17 +611,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
 
 		//elasticsearch更新
-		List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.UNPROCESSED.getCode());
-		PmTaskLog log = logs.get(0);
-		if(0L == log.getOperatorUid()){
-			task.setNickName(log.getOperatorName());
-			task.setMobile(log.getOperatorPhone());
-		}else{
-			User creator = userProvider.findUserById(log.getOperatorUid());
-			UserIdentifier creatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(creator.getId(), IdentifierType.MOBILE.getCode());
-			task.setNickName(creator.getNickName());
-			task.setMobile(creatorIdentifier.getIdentifierToken());
-		}
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
 	}
@@ -591,18 +628,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask task = checkPmTask(cmd.getId());
 		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 		//查询服务类型
-		Category category = checkCategory(task.getCategoryId());
-		Category parentCategory = checkCategory(category.getParentId());
-		if(parentCategory.getParentId().equals(0L)){
-    		dto.setCategoryId(null);
-    		dto.setCategoryName(null);
-    		dto.setParentCategoryId(category.getId());
-    		dto.setParentCategoryName(category.getName());
-    	}else{
-    		dto.setCategoryName(category.getName());
-    		dto.setParentCategoryId(parentCategory.getId());
-    		dto.setParentCategoryName(parentCategory.getName());
-    	}
+		Category category = categoryProvider.findCategoryById(task.getCategoryId());
+		Category taskCategory = checkCategory(task.getTaskCategoryId());
+		if(null != category)
+			dto.setCategoryName(category.getName());
+    	dto.setTaskCategoryName(taskCategory.getName());
 		
 		//查询图片
 		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
@@ -618,11 +648,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
 		dto.setTaskLogs(taskLogDtos);
 		
-//		User user = userProvider.findUserById(task.getCreatorUid());
-//		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//		dto.setNickName(user.getNickName());
-//		dto.setMobile(userIdentifier.getIdentifierToken());
-		
 		return dto;
 	}
 
@@ -633,34 +658,29 @@ public class PmTaskServiceImpl implements PmTaskService {
 			PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
 			
 			Map<String, Object> map = new HashMap<String, Object>();
-			if(0L != r.getOperatorUid()){
-				User user = userProvider.findUserById(r.getOperatorUid());
-				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-				pmTaskLogDTO.setOperatorName(user.getNickName());
-				task.setNickName(user.getNickName());
-				task.setMobile(userIdentifier.getIdentifierToken());
-				
-			    map.put("operatorName", user.getNickName());
-			    map.put("operatorPhone", userIdentifier.getIdentifierToken());
-			}else{
-				pmTaskLogDTO.setOperatorName(r.getOperatorName());
-				pmTaskLogDTO.setOperatorPhone(r.getOperatorPhone());
-				task.setNickName(r.getOperatorName());
-				task.setMobile(r.getOperatorPhone());
-				map.put("operatorName", r.getOperatorName());
-			    map.put("operatorPhone", r.getOperatorPhone());
-			}
+			
 		    String scope = PmTaskNotificationTemplateCode.SCOPE;
 		    String locale = PmTaskNotificationTemplateCode.LOCALE;
 		    
 			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
 			    
+				if(null == task.getOrganizationId()){
+					setParam(map, task.getCreatorUid());
+//					User user = userProvider.findUserById(task.getCreatorUid());
+//	    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//	    			map.put("operatorName", user.getNickName());
+//				    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+				}else{
+					map.put("operatorName", task.getRequestorName());
+				    map.put("operatorPhone", task.getRequestorPhone());
+				}
+				
 				int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
-				
+				setParam(map, r.getOperatorUid());
 				User target = userProvider.findUserById(r.getTargetId());
 				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
 				map.put("targetName", target.getNickName());
@@ -671,7 +691,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				pmTaskLogDTO.setText(text);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-				
+				setParam(map, r.getOperatorUid());
 				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
@@ -685,8 +705,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}).collect(Collectors.toList());
 				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
-			}else{
+			}else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
+				setParam(map, r.getOperatorUid());
 				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+			}else {
+				setParam(map, r.getOperatorUid());
+				int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 			}
@@ -696,57 +722,98 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return taskLogDtos;
 	}
 	
-	private PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String nickName, String mobile){
+	private void setParam(Map<String, Object> map, Long userId) {
+		User user = userProvider.findUserById(userId);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		map.put("operatorName", user.getNickName());
+	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+	}
+	
+	@Override
+	public PmTaskDTO createTask(CreateTaskCommand cmd) {
+		
+		User user = UserContext.current().getUser();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		cmd.setSourceType(PmTaskSourceType.APP.getCode());
+		return createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
+	}
+	
+	@Override
+	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
+		String requestorPhone = cmd.getRequestorPhone();
+		String requestorName = cmd.getRequestorName();
+		if(StringUtils.isBlank(requestorPhone)){
+			LOGGER.error("RequestorPhone cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"RequestorPhone cannot be null.");
+		}
+		if(StringUtils.isBlank(requestorName)){
+			LOGGER.error("RequestorName cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"RequestorName cannot be null.");
+		}
+		
+		if(null == cmd.getOrganizationId()){
+			LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+		}
+		
+		return createTask(cmd, null, requestorName, requestorPhone);
+	}
+	
+	private PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
-		Long categoryId = cmd.getCategoryId();
+		Long taskCategoryId = cmd.getTaskCategoryId();
 		String content = cmd.getContent();
-		checkCreateTaskParam(ownerType, ownerId, categoryId, content);
+		checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
 		
 		PmTask task = new PmTask();
 		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp now = new Timestamp(System.currentTimeMillis());
+			User user = UserContext.current().getUser();
 
 			task.setAddress(cmd.getAddress());
-			task.setCategoryId(categoryId);
+			task.setTaskCategoryId(taskCategoryId);
+			task.setCategoryId(cmd.getCategoryId());
 			task.setContent(content);
 			task.setCreateTime(now);
-			User user = UserContext.current().getUser();
+			
+			if(null != cmd.getOrganizationId()) {
+				task.setOrganizationId(cmd.getOrganizationId());
+				task.setRequestorName(requestorName);
+				task.setRequestorPhone(requestorPhone);
+			}
 			task.setCreatorUid(user.getId());
 			task.setNamespaceId(user.getNamespaceId());
 			task.setOwnerId(ownerId);
 			task.setOwnerType(ownerType);
 			task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
 			task.setUnprocessedTime(now);
+			
+			if(null != cmd.getReserveTime())
+				task.setReserveTime(new Timestamp(cmd.getReserveTime()));
+			task.setPriority(cmd.getPriority());
+			task.setSourceType(cmd.getSourceType()==null?PmTaskSourceType.APP.getCode():cmd.getSourceType());
+			task.setAddressId(cmd.getAddressId());
 			pmTaskProvider.createTask(task);
+			//图片
 			addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
 			
 			PmTaskLog pmTaskLog = new PmTaskLog();
 			pmTaskLog.setNamespaceId(task.getNamespaceId());
 			pmTaskLog.setOperatorTime(now);
 			pmTaskLog.setOperatorUid(userId);
-			//
-			pmTaskLog.setOperatorName(nickName);
-			pmTaskLog.setOperatorPhone(mobile);
 			pmTaskLog.setOwnerId(task.getOwnerId());
 			pmTaskLog.setOwnerType(task.getOwnerType());
 			pmTaskLog.setStatus(task.getStatus());
 			pmTaskLog.setTaskId(task.getId());
 			pmTaskProvider.createTaskLog(pmTaskLog);
 			
-			//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
-			task.setNickName(nickName);
-			task.setMobile(mobile);
 			pmTaskSearch.feedDoc(task);
 			
-			Category category = categoryProvider.findCategoryById(task.getCategoryId());
-	        Category parent = categoryProvider.findCategoryById(category.getParentId());
-	        String categoryName = "";
-	    	if(parent.getParentId().equals(0L)){
-	    		categoryName = category.getName();
-	    	}else{
-	    		categoryName = parent.getName();
-	    	}
+			Category category = categoryProvider.findCategoryById(taskCategoryId);
 	    	
 	    	Long organizationId = cmd.getOrganizationId();
 	    	if(null == organizationId) {
@@ -755,8 +822,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	            	organizationId = orgs.get(0).getOrganizationId();
 	            }
 			}
-	    	List<Long> ids = getOrganizationMembers(organizationId);
-	    	int size = ids.size();
+	    	
+	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(), RoleConstants.PM_TASK_EXECUTOR, 
+					null, null);
+	    	int size = targets.size();
 	    	if(LOGGER.isDebugEnabled())
 	    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
 	    	if(size > 0){
@@ -765,103 +834,35 @@ public class PmTaskServiceImpl implements PmTaskService {
 	        	//消息推送
 	        	String scope = PmTaskNotificationTemplateCode.SCOPE;
 	    	    String locale = PmTaskNotificationTemplateCode.LOCALE;
-	        	for(Long id: ids) {
-	            	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(id, IdentifierType.MOBILE.getCode());
+	        	for(PmTaskTarget p: targets) {
+	            	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(p.getTargetId(), IdentifierType.MOBILE.getCode());
 	            	phones.add(sender.getIdentifierToken());
 	            	//消息推送
 	            	Map<String, Object> map = new HashMap<String, Object>();
-	        	    map.put("creatorName", nickName);
-	        	    map.put("creatorPhone", mobile);
+	        	    map.put("creatorName", requestorName);
+	        	    map.put("creatorPhone", requestorPhone);
 	        		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
 	        		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-	        		sendMessageToUser(id, text);
+	        		sendMessageToUser(p.getTargetId(), text);
 	        	}
 	        	int num = phones.size();
 	        	if(num > 0) {
 	        		String[] s = new String[num];
 	            	phones.toArray(s);
-	        		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", nickName);
-	        		smsProvider.addToTupleList(variables, "operatorPhone", mobile);
-	        		smsProvider.addToTupleList(variables, "categoryName", categoryName);
+	        		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", requestorName);
+	        		smsProvider.addToTupleList(variables, "operatorPhone", requestorPhone);
+	        		smsProvider.addToTupleList(variables, "categoryName", category.getName());
 	        		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
 	        				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
 	        	}
 	        	
 	    	}
 			return null;
-		} );
+		});
     	
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
-	private List<Long> getOrganizationMembers(Long organizationId){
-		List<Long> result = new ArrayList<>();
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), organizationId);
-		List<Long> roleIds = new ArrayList<Long>();
-		outer:
-		for(Role r: roles) {
-			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, r.getId());
-			for(Acl acl: acls) {
-				if(acl.getPrivilegeId().equals(PrivilegeConstants.ASSIGNTASK) ||
-						acl.getPrivilegeId().equals(PrivilegeConstants.COMPLETETASK) ||
-						acl.getPrivilegeId().equals(PrivilegeConstants.CLOSETASK)) {
-					roleIds.add(r.getId());
-					continue outer;
-				}
-			}
-		}
-		
-		if(roleIds.isEmpty())
-			return result;
-		
-		List<RoleAssignment> roleAssgnments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
-		for(RoleAssignment ra: roleAssgnments){
-			if(EntityType.USER.getCode().equals(ra.getTargetType()) &&
-					roleIds.contains(ra.getRoleId())) {
-				result.add(ra.getTargetId());
-			}
-		}
-		return result;
-	}
-	
-	@Override
-	public PmTaskDTO createTask(CreateTaskCommand cmd) {
-		
-		User user = UserContext.current().getUser();
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-
-		return createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
-	}
-	
-	@Override
-	public PmTaskDTO createTaskByAdmin(CreateTaskCommand cmd) {
-		if(StringUtils.isBlank(cmd.getMobile())){
-			LOGGER.error("Mobile cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Mobile cannot be null.");
-		}
-		if(cmd.getMobile().length() != 11){
-			LOGGER.error("Mobile is not correctly.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Mobile is not correctly.");
-		}
-		
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.current().getUser().getNamespaceId(), cmd.getMobile());
-		if(null != userIdentifier){
-			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-			if(null == user){
-				LOGGER.error("User not found.");
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-	    				"User not found.");
-			}
-			return createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
-		}
-		return createTask(cmd, null, cmd.getNickName(), cmd.getMobile());
-	}
-	
 	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
 		if(!CollectionUtils.isEmpty(list)){
 			for(AttachmentDescriptor ad: list){
@@ -881,9 +882,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public void deleteTaskCategory(DeleteTaskCategoryCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId();
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		Long id = cmd.getId();
-		checkNamespaceId(namespaceId);
 		checkId(id);
 		
 		Category category = categoryProvider.findCategoryById(id);
@@ -893,9 +893,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"PmTask category not found");
 		}
 		if(!category.getNamespaceId().equals(namespaceId)){
-			LOGGER.error("NamespaceId is not correctly, cmd={}", cmd);
+			LOGGER.error("Current User have no legal power, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-					"NamespaceId is not correctly");
+					"Current User have no legal power");
 		}
 		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
 		categoryProvider.updateCategory(category);
@@ -903,16 +903,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId();
-		checkNamespaceId(namespaceId);
+		
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+//		checkNamespaceId(namespaceId);
 		//防止插入重复
 		Long parentId = cmd.getParentId();
 		String path = "";
 		Category category = null;
 		if(null == parentId){
 			
-			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
-			Category ancestor = categoryProvider.findCategoryByPath(namespaceId, defaultName);
+//			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
+			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			parentId = ancestor.getId();
 			path = ancestor.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 			
@@ -951,27 +953,35 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		return ConvertHelper.convert(category, CategoryDTO.class);
 	}
-
+	
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
-		
-		checkNamespaceId(cmd.getNamespaceId());
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
 		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Integer pageSize = cmd.getPageSize();
 		Long parentId = cmd.getParentId();
 		if(null == parentId){
-			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
-			Category ancestor = categoryProvider.findCategoryByPath(cmd.getNamespaceId(), defaultName);
+//			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
+//			Category ancestor = categoryProvider.findCategoryByPath(cmd.getNamespaceId(), defaultName);
+			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			parentId = ancestor.getId();
 		}
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
-		List<Category> list = categoryProvider.listTaskCategories(cmd.getNamespaceId(), parentId, cmd.getKeyword(),
+		List<Category> list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
 		if(list.size() > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CategoryDTO.class))
-    				.collect(Collectors.toList()));
+    		response.setRequests(list.stream().map(r -> {
+    			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
+    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId, null, r.getPath(),
+    					null, null);
+    			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
+    					.collect(Collectors.toList()), dto);
+    			return dto;
+    		}).collect(Collectors.toList()));
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
@@ -983,12 +993,48 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
+	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+//		Category ancestor = categoryProvider.findCategoryById(defaultId);
+		
+		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null,
+				null, null);
+		
+		List<CategoryDTO> dtos = categories.stream().map(r -> ConvertHelper.convert(r, CategoryDTO.class))
+				.collect(Collectors.toList());
+		List<CategoryDTO> result = new ArrayList<CategoryDTO>();
+		for(CategoryDTO c: dtos) {
+			if(defaultId.equals(c.getParentId())) {
+				result.add(getChildCategories(dtos, c));
+			}
+		}
+		
+		return result;
+	}
+	
+	private CategoryDTO getChildCategories(List<CategoryDTO> categories, CategoryDTO dto){
+		
+		List<CategoryDTO> children = new ArrayList<CategoryDTO>();
+		
+		for (CategoryDTO categoryDTO : categories) {
+			if(dto.getId().equals(categoryDTO.getParentId())){
+				children.add(getChildCategories(categories, categoryDTO));
+			}
+		}
+		dto.setChildrens(children);
+		
+		return dto;
+	}
+	
+	@Override
 	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		if(null == cmd.getPageSize())
 			cmd.setPageSize(100000);
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCategoryId(), 
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), cmd.getPageSize());
 		
 		Workbook wb = new XSSFWorkbook();
@@ -1012,12 +1058,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PmTaskDTO task = list.get(i);
-			Category category = checkCategory(task.getCategoryId());
+			Category category = checkCategory(task.getTaskCategoryId());
 			tempRow.createCell(0).setCellValue(category.getName());
 			tempRow.createCell(1).setCellValue(task.getContent());
-			User user = userProvider.findUserById(task.getCreatorUid());
-			tempRow.createCell(2).setCellValue(user.getNickName());
-			tempRow.createCell(3).setCellValue(task.getMobile());
+			tempRow.createCell(2).setCellValue(task.getRequestorName());
+			tempRow.createCell(3).setCellValue(task.getRequestorPhone());
 			tempRow.createCell(4).setCellValue(datetimeSF.format(task.getCreateTime()));
 			tempRow.createCell(5).setCellValue(convertStatus(task.getStatus()));
 			
@@ -1076,8 +1121,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		SearchTaskStatisticsResponse response = new SearchTaskStatisticsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
+		
+		list = mergeTaskOwnerList(list);
 		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -1092,7 +1139,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     			dto.setClosePercent(r.getTotalCount()!=null&&!r.getTotalCount().equals(0)?(float)r.getCloseCount()/r.getTotalCount():0);
     			float avgStar = calculatePerson(r)!=0?(float) (calculateStar(r)) / (calculatePerson(r)):0;
     			dto.setAvgStar((float)Math.round(avgStar * 10)/10);
-    			Integer totalCount = pmTaskProvider.countTaskStatistics(r.getOwnerId(), r.getCategoryId(), null);
+    			Integer totalCount = pmTaskProvider.countTaskStatistics(r.getOwnerId(), r.getTaskCategoryId(), null);
     			dto.setTotalCount(totalCount);
     			
     			return dto;
@@ -1105,6 +1152,59 @@ public class PmTaskServiceImpl implements PmTaskService {
     	}
 		
 		return response;
+	}
+	
+	private void mergeTaskCategoryList(List<PmTaskStatistics> list) {
+		
+		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
+		for(PmTaskStatistics p: list){
+			Long id = p.getTaskCategoryId();
+			PmTaskStatistics pts = null;
+			if(tempMap.containsKey(id)){
+				pts = tempMap.get(id);
+				pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
+				pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
+				pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
+				pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
+				pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+				pts.setStar1(pts.getStar1() + p.getStar1());
+				pts.setStar2(pts.getStar2() + p.getStar2());
+				pts.setStar3(pts.getStar3() + p.getStar3());
+				pts.setStar4(pts.getStar4() + p.getStar4());
+				pts.setStar5(pts.getStar5() + p.getStar5());
+				continue;
+			}
+			tempMap.put(id, p);
+		}
+		list.clear();
+		for(PmTaskStatistics p1:tempMap.values()){
+			list.add(p1);
+		}
+	}
+	
+	private List<PmTaskStatistics> mergeTaskOwnerList(List<PmTaskStatistics> list) {
+		
+		List<PmTaskStatistics> result = new ArrayList<PmTaskStatistics>();
+		Map<Long, List<PmTaskStatistics>> tempMap = new HashMap<>();
+		for(PmTaskStatistics p: list){
+			Long id = p.getOwnerId();
+			if(tempMap.containsKey(id)){
+				List<PmTaskStatistics> ptsList = tempMap.get(id);
+				List<PmTaskStatistics> temp = new ArrayList<PmTaskStatistics>();
+				temp.addAll(ptsList);
+				temp.add(p);
+				tempMap.put(id, temp);
+				continue;
+			}
+			p.setCategoryId(null);
+			tempMap.put(id, Collections.singletonList(p));
+		}
+		
+		for(List<PmTaskStatistics>  l:tempMap.values()){
+			mergeTaskCategoryList(l);
+			result.addAll(l);
+		}
+		return result;
 	}
 	
 	private int calculateStar(PmTaskStatistics r){
@@ -1129,31 +1229,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 			response.setOwnerName(community.getName());
 		}else{
-			Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
-			
-			for(PmTaskStatistics p: list){
-				Long id = p.getCategoryId();
-				PmTaskStatistics pts = null;
-				if(tempMap.containsKey(id)){
-					pts = tempMap.get(id);
-					pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
-					pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
-					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
-					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
-					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
-					pts.setStar1(pts.getStar1() + p.getStar1());
-					pts.setStar2(pts.getStar2() + p.getStar2());
-					pts.setStar3(pts.getStar3() + p.getStar3());
-					pts.setStar4(pts.getStar4() + p.getStar4());
-					pts.setStar5(pts.getStar5() + p.getStar5());
-					continue;
-				}
-				tempMap.put(id, p);
-			}
-			list.clear();
-			for(PmTaskStatistics p1:tempMap.values()){
-				list.add(p1);
-			}
+			list = mergeTaskOwnerList(list);
+			mergeTaskCategoryList(list);
 		}
 		
 		int totalCount = 0;
@@ -1175,9 +1252,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			stars[4] += statistics.getStar5();
 			
 			CategoryTaskStatisticsDTO dto = new CategoryTaskStatisticsDTO();
-			dto.setCategoryId(statistics.getCategoryId());
-			Category category = checkCategory(statistics.getCategoryId());
-			dto.setCategoryName(category.getName());
+			dto.setTaskCategoryId(statistics.getTaskCategoryId());
+			Category category = checkCategory(statistics.getTaskCategoryId());
+			dto.setTaskCategoryName(category.getName());
 			dto.setCloseCount(statistics.getCloseCount());
 			dto.setProcessedCount(statistics.getProcessedCount());
 			dto.setProcessingCount(statistics.getProcessingCount());
@@ -1207,7 +1284,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
 			List<Namespace> namepaces = pmTaskProvider.listNamespace();
 			long now = System.currentTimeMillis();
-			Timestamp startDate = getBeginOfMonth(now);
+			Timestamp startDate = getBeginOfMonth(now);     
 			Timestamp endDate = getEndOfMonth(now);
 			boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
 			if(isOperateByAdmin){
@@ -1215,58 +1292,59 @@ public class PmTaskServiceImpl implements PmTaskService {
 				endDate = null;
 			}
 		for(Namespace n: namepaces){
-			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
-			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), defaultName);
+			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			
 			if(ancestor != null){
 				//防止定时任务重复执行
-				
-					List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
-							null, 10);
-					if(list.size() != 0)
-						break;
-				
-				
+				List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
+						null, 10);
+				if(list.size() != 0)
+					break;
 				
 				List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
 				if(null != categories && !categories.isEmpty()){
 					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
 					for(Community community:communities){
-						for(Category category: categories){
+						for(Category taskCategory: categories) {
 							
-							PmTaskStatistics statistics = new PmTaskStatistics();
-							Integer totalCount = pmTaskProvider.countTask(community.getId(), null, category.getId(), null, startDate, endDate);
-							Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), category.getId(), null, startDate, endDate);
-							Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), category.getId(), null, startDate, endDate);
-							Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), category.getId(), null, startDate, endDate);
-							Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.OTHER.getCode(), category.getId(), null, startDate, endDate);
+							List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
+							for(Category category: tempCategories) {
+								PmTaskStatistics statistics = new PmTaskStatistics();
+								Integer totalCount = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+								
+								Integer star1 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)1, startDate, endDate);
+								Integer star2 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)2, startDate, endDate);
+								Integer star3 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)3, startDate, endDate);
+								Integer star4 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)4, startDate, endDate);
+								Integer star5 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)5, startDate, endDate);
+								
+								statistics.setTaskCategoryId(taskCategory.getId());
+								statistics.setCategoryId(category.getId());
+								statistics.setCreateTime(new Timestamp(now));
+								statistics.setDateStr(startDate);
+								statistics.setNamespaceId(n.getId());
+								statistics.setOwnerId(community.getId());
+								statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+								
+								statistics.setTotalCount(totalCount);
+								statistics.setUnprocessCount(unprocessCount);
+								statistics.setProcessedCount(processedCount);
+								statistics.setProcessingCount(processingCount);
+								statistics.setCloseCount(closeCount);
+								
+								statistics.setStar1(star1);
+								statistics.setStar2(star2);
+								statistics.setStar3(star3);
+								statistics.setStar4(star4);
+								statistics.setStar5(star5);
+								pmTaskProvider.createTaskStatistics(statistics);
+							}
 							
-							Integer star1 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)1, startDate, endDate);
-							Integer star2 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)2, startDate, endDate);
-							Integer star3 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)3, startDate, endDate);
-							Integer star4 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)4, startDate, endDate);
-							Integer star5 = pmTaskProvider.countTask(community.getId(), null, category.getId(), (byte)5, startDate, endDate);
-							
-							
-							statistics.setCategoryId(category.getId());
-							statistics.setCreateTime(new Timestamp(now));
-							statistics.setDateStr(startDate);
-							statistics.setNamespaceId(n.getId());
-							statistics.setOwnerId(community.getId());
-							statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-							
-							statistics.setTotalCount(totalCount);
-							statistics.setUnprocessCount(unprocessCount);
-							statistics.setProcessedCount(processedCount);
-							statistics.setProcessingCount(processingCount);
-							statistics.setCloseCount(closeCount);
-							
-							statistics.setStar1(star1);
-							statistics.setStar2(star2);
-							statistics.setStar3(star3);
-							statistics.setStar4(star4);
-							statistics.setStar5(star5);
-							pmTaskProvider.createTaskStatistics(statistics);
 						}
 					}
 					
@@ -1343,12 +1421,12 @@ public class PmTaskServiceImpl implements PmTaskService {
         }
 	}
 	
-	private void checkCreateTaskParam(String ownerType, Long ownerId, Long categoryId, String content){
+	private void checkCreateTaskParam(String ownerType, Long ownerId, Long taskCategoryId, String content){
 		checkOwnerIdAndOwnerType(ownerType, ownerId);
-    	if(categoryId == null ) {
-        	LOGGER.error("CategoryId cannot be null.");
+    	if(null == taskCategoryId) {
+        	LOGGER.error("TaskCategoryId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"CategoryId cannot be null.");
+    				"TaskCategoryId cannot be null.");
         }
     	
     	if(StringUtils.isBlank(content)) {
@@ -1356,13 +1434,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Content cannot be null.");
         }
-    	Category child = checkCategory(categoryId);
-//    	Category parent = checkCategory(child.getParentId());
-//    	if(parent.getParentId().equals(0)){
-//    		LOGGER.error("CategoryId is not correctly, categoryId={}", categoryId);
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"CategoryId is not correctly.");
-//    	}
+    	checkCategory(taskCategoryId);
     }
 	
 	private Category checkCategory(Long id){
@@ -1568,7 +1640,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		
-		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
+		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
 		XSSFWorkbook wb = new XSSFWorkbook();
@@ -1625,6 +1697,212 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"ExportListStatistics is fail.");
 		}
 		
+	}
+
+
+	@Override
+	public ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd) {
+		
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getOperateType()) {
+        	LOGGER.error("OperateType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OperateType cannot be null.");
+        }
+		if(null == cmd.getOrganizationId()) {
+        	LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+        }
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(null == org) {
+        	LOGGER.error("OrganizationId not found.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId not found.");
+        }
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Long roleId = null;
+		if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
+			roleId = RoleConstants.PM_TASK_EXECUTOR;
+		else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
+			roleId = RoleConstants.PM_TASK_REPAIRMEN;
+		List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(), roleId, 
+				cmd.getPageAnchor(), cmd.getPageSize());
+		
+		ListOperatePersonnelsResponse response = new ListOperatePersonnelsResponse();
+
+		List<OrganizationMember> organizationMembers = new ArrayList<OrganizationMember>();
+		for(PmTaskTarget t: targets) {
+			OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(t.getTargetId(), cmd.getOrganizationId());
+			organizationMembers.add(m);
+		}
+		
+		if(targets.size() > 0){
+			response.setMembers(organizationService.convertOrganizationMemberDTO(organizationMembers, org));
+    		if(targets.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(targets.get(targets.size()-1).getId());
+        	}
+    	}
+		
+		return response;
+	}
+
+	@Override
+	public void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getOperateType()) {
+        	LOGGER.error("OperateType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OperateType cannot be null.");
+        }
+		if(null == cmd.getOrganizationId()) {
+        	LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+        }
+		Long tempRoleId = null;
+		if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
+			tempRoleId = RoleConstants.PM_TASK_EXECUTOR;
+		else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
+			tempRoleId = RoleConstants.PM_TASK_REPAIRMEN;
+//		PmTaskTarget target = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+//				cmd.getTargetType(), cmd.getTargetId());
+		List<Long> targetIds = cmd.getTargetIds();
+		if(null == targetIds || targetIds.isEmpty()) {
+			LOGGER.error("TargetIds cannot be null or empty.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"TargetIds cannot be null or empty.");
+		}
+		
+		final Long roleId = tempRoleId;
+		dbProvider.execute((TransactionStatus status) -> {
+			
+			for(int i=0,l=targetIds.size(); i<l;i++ ) {
+				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+						EntityType.USER.getCode(), targetIds.get(i));
+				if(null == pmTaskTarget) {
+					pmTaskTarget = new PmTaskTarget();
+					pmTaskTarget.setRoleId(roleId);
+					pmTaskTarget.setOwnerId(cmd.getOwnerId());
+					pmTaskTarget.setOwnerType(cmd.getOwnerType());
+					pmTaskTarget.setStatus(PmTaskTargetStatus.ACTIVE.getCode());
+					pmTaskTarget.setTargetType(EntityType.USER.getCode());
+					pmTaskTarget.setTargetId(targetIds.get(i));
+					
+					pmTaskProvider.createTaskTarget(pmTaskTarget);
+					
+					RoleAssignment roleAssignment = new RoleAssignment();
+					roleAssignment.setRoleId(pmTaskTarget.getRoleId());
+					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+					roleAssignment.setOwnerId(cmd.getOrganizationId());
+					roleAssignment.setTargetType(EntityType.USER.getCode());
+					roleAssignment.setTargetId(targetIds.get(i));
+					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+					aclProvider.createRoleAssignment(roleAssignment);
+				}
+				
+			}
+			
+		return null;
+		});
+		
+	}
+
+	@Override
+	public void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getOperateType()) {
+        	LOGGER.error("OperateType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OperateType cannot be null.");
+        }
+		if(null == cmd.getOrganizationId()) {
+        	LOGGER.error("OrganizationId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OrganizationId cannot be null.");
+        }
+		dbProvider.execute((TransactionStatus status) -> {
+			Long roleId = null;
+			if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode()))
+				roleId = RoleConstants.PM_TASK_EXECUTOR;
+			else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode()))
+				roleId = RoleConstants.PM_TASK_REPAIRMEN;
+			PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), roleId,
+					EntityType.USER.getCode(), cmd.getTargetId());
+			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
+			
+			pmTaskProvider.updateTaskTarget(pmTaskTarget);
+			
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(),
+					cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getTargetId());
+			for(RoleAssignment r: roleAssignments) {
+				if(r.getRoleId().equals(roleId)) {
+					aclProvider.deleteRoleAssignment(r);
+				}
+			}
+		return null;
+		});
+		
+	}
+
+	@Override
+	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<PmTaskStatistics> temp = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
+				cmd.getPageAnchor(), cmd.getPageSize());
+		List<TaskCategoryStatisticsDTO> list = new ArrayList<TaskCategoryStatisticsDTO>();
+		outer:
+		for(PmTaskStatistics pts: temp) {
+			Community community = communityProvider.findCommunityById(pts.getOwnerId());
+			for(TaskCategoryStatisticsDTO d: list) {
+				if(pts.getOwnerId().equals(d.getOwnerId())) {
+					CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
+					categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
+					Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+					categoryStatisticsDTO.setCategoryName(category.getName());
+					categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+					categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
+					categoryStatisticsDTO.setOwnerName(community.getName());
+					d.getRequests().add(categoryStatisticsDTO);
+					continue outer;
+				}
+			}
+			TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
+			
+			Category taskCategory = categoryProvider.findCategoryById(pts.getTaskCategoryId());
+			Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+
+			dto.setTaskCategoryId(pts.getTaskCategoryId());
+			dto.setTaskCategoryName(taskCategory.getName());
+			dto.setOwnerId(pts.getOwnerId());
+//			dto.setOwnerName(community.getName());
+			CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
+			categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
+			categoryStatisticsDTO.setCategoryName(category.getName());
+			categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+			categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
+			categoryStatisticsDTO.setOwnerName(community.getName());
+			
+			List<CategoryStatisticsDTO> list2 = new ArrayList<CategoryStatisticsDTO>();
+			list2.add(categoryStatisticsDTO);
+			dto.setRequests(list2);
+			
+			list.add(dto);
+		}
+		
+		if(list.size() > 0){
+    		response.setRequests(list);
+        	response.setNextPageAnchor(null);
+    	}
+		
+		return response;
 	}
 
 }

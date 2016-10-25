@@ -6,6 +6,7 @@ import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -287,7 +288,7 @@ public interface PropertyMgrProvider {
      */
     void updateOrganizationOwnerCar(OrganizationOwnerCar car);
 
-    List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, Long pageAnchor, int pageSize);
+    List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String keyword, Long pageAnchor, Integer pageSize);
 
     /**
      * 创建车辆附件记录

@@ -1620,7 +1620,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
     @Override
-    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, Long pageAnchor, int pageSize) {
+    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String keyword, Long pageAnchor, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         if (namespaceId != null) {
@@ -1632,11 +1632,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if (orgOwnerTypeId != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.eq(orgOwnerTypeId));
         }
+        if (StringUtils.isEmpty(keyword)) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME.like("%"+keyword+"%")
+            		.or(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.like("%"+keyword+"%")));
+        }
         if (pageAnchor != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.ge(pageAnchor));
         }
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
-        query.addLimit(pageSize);
+        if(null != pageSize)
+        	query.addLimit(pageSize);
         return query.fetchInto(CommunityPmOwner.class);
     }
 

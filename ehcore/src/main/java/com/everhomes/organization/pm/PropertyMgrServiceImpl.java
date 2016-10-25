@@ -78,7 +78,9 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import net.greghaines.jesque.Job;
+
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
@@ -99,6 +101,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -4994,6 +4997,78 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunity(cmd.getCommunityId());
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         return pmOwnerSearcher.query(cmd);
+    }
+    
+    @Override
+	public List<OrganizationOwnerDTO> searchOrganizationOwnersBycondition(SearchOrganizationOwnersByconditionCommand cmd){
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunity(cmd.getCommunityId());
+//        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        
+        int namespaceId = UserContext.current().getUser().getNamespaceId();
+        
+        List<OrganizationOwnerDTO> result = new ArrayList<OrganizationOwnerDTO>();
+        if (!StringUtils.isEmpty(cmd.getBuildingName()) && !StringUtils.isEmpty(cmd.getApartmentName())) {
+        	ListPropApartmentsByKeywordCommand listPropApartmentsByKeywordCommand = new ListPropApartmentsByKeywordCommand();
+            listPropApartmentsByKeywordCommand.setCommunityId(cmd.getCommunityId());
+            listPropApartmentsByKeywordCommand.setOrganizationId(cmd.getOrganizationId());
+            listPropApartmentsByKeywordCommand.setNamespaceId(namespaceId);
+            listPropApartmentsByKeywordCommand.setBuildingName(cmd.getBuildingName());
+            listPropApartmentsByKeywordCommand.setKeyword(cmd.getApartmentName());
+            Tuple<Integer, List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(listPropApartmentsByKeywordCommand);
+            List<ApartmentDTO> apartments = apts.second();
+            if(apartments.size() == 0)
+            	return result;
+            List<OrganizationOwnerAddress> list = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, apartments.get(0).getAddressId());
+              result = list.stream().map(r -> {
+            	  CommunityPmOwner organizationOwner = propertyMgrProvider.findPropOwnerById(r.getId());
+                OrganizationOwnerDTO dto = ConvertHelper.convert(organizationOwner, OrganizationOwnerDTO.class);
+                OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(organizationOwner.getOrgOwnerTypeId());
+                dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
+                LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(organizationOwner.getGender()),
+                        UserContext.current().getUser().getLocale());
+                dto.setGender(genderLocale != null ? genderLocale.getText() : "");
+                dto.setBirthday(null);
+                
+                List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(organizationOwner.getNamespaceId(), organizationOwner.getId());
+                dto.setAddresses(addresses.stream().map(r2 -> {
+                	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
+                	Address address = addressProvider.findAddressById(r2.getAddressId());
+                	d.setAddress(address.getAddress());
+                	d.setApartment(address.getApartmentName());
+                	d.setBuilding(address.getBuildingName());
+                	return d;
+                })
+                		.collect(Collectors.toList()));
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        if(!StringUtils.isEmpty(cmd.getContact())) {
+            List<CommunityPmOwner> list = propertyMgrProvider.listOrganizationOwners(namespaceId, cmd.getCommunityId(), null, cmd.getContact(), cmd.getPageAnchor(), cmd.getPageSize());
+            result = list.stream().map(r -> {
+                OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
+                OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
+                dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
+                LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getGender()),
+                        UserContext.current().getUser().getLocale());
+                dto.setGender(genderLocale != null ? genderLocale.getText() : "");
+                dto.setBirthday(null);
+                
+                List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(r.getNamespaceId(), r.getId());
+                dto.setAddresses(addresses.stream().map(r2 -> {
+                	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
+                	Address address = addressProvider.findAddressById(r2.getAddressId());
+                	d.setAddress(address.getAddress());
+                	d.setApartment(address.getApartmentName());
+                	d.setBuilding(address.getBuildingName());
+                	return d;
+                })
+                		.collect(Collectors.toList()));
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        
+        return result;
     }
 
     /*@Override

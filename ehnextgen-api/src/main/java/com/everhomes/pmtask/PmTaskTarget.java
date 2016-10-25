@@ -1,9 +1,9 @@
 package com.everhomes.pmtask;
 
-import com.everhomes.server.schema.tables.pojos.EhPmTasks;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskTargets;
 import com.everhomes.util.StringHelper;
 
-public class PmTask extends EhPmTasks{
+public class PmTaskTarget extends EhPmTaskTargets{
 
 	/**
 	 * 

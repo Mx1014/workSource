@@ -648,6 +648,20 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/searchOrganizationOwnersBycondition</b>
+	 * <p>搜索业主列表 用于物业报修 任务</p>
+	 */
+	@RequestMapping("searchOrganizationOwnersBycondition")
+	@RestReturn(value=OrganizationOwnerDTO.class, collection=true)
+	public RestResponse searchOrganizationOwnersBycondition(@Valid SearchOrganizationOwnersByconditionCommand cmd) {
+		List<OrganizationOwnerDTO> results = propertyMgrService.searchOrganizationOwnersBycondition(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /pm/listOrganizationOwnersByAddress</b>

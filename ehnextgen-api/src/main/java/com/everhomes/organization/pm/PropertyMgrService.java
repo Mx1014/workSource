@@ -16,10 +16,12 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.Tuple;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import java.util.List;
 
 public interface PropertyMgrService {
@@ -407,4 +409,12 @@ public interface PropertyMgrService {
      * @param authType
      */
     void updateOrganizationOwnerAddressAuthType(Long userId, Long communityId, Long addressId, OrganizationOwnerAddressAuthType authType);
+    
+    /**
+     * 根据 手机号 楼栋名称 或者门牌 搜索客户资料 
+     * @author add by sw
+     * @param cmd
+     * @return
+     */
+    List<OrganizationOwnerDTO> searchOrganizationOwnersBycondition(SearchOrganizationOwnersByconditionCommand cmd);
 }
