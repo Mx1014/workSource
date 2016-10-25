@@ -2,10 +2,12 @@
 package com.everhomes.rest.category;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.family.FamilyDTO;
 
 /**
@@ -37,6 +39,9 @@ public class CategoryDTO {
     private Timestamp createTime;
     private Timestamp deleteTime;
 
+    @ItemType(CategoryDTO.class)
+	private List<CategoryDTO> childrens;
+    
     public CategoryDTO() {
     }
 
@@ -126,6 +131,14 @@ public class CategoryDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public List<CategoryDTO> getChildrens() {
+		return childrens;
+	}
+
+	public void setChildrens(List<CategoryDTO> childrens) {
+		this.childrens = childrens;
 	}
 
 	@Override

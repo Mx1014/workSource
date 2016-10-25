@@ -30,6 +30,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pm.OrganizationOwnerAddress;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
@@ -45,6 +46,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.region.RegionScope;
@@ -141,6 +143,9 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+
+    @Autowired
+    private PropertyMgrService propertyMgrService;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -896,7 +901,7 @@ public class FamilyServiceImpl implements FamilyService {
        
         if(tuple.second()){
             // 认证organizationOwner
-            approveOrganizationOwner(cmd.getAddressId(), user.getNamespaceId(), memberUid);
+            autoApproveOrganizationOwner(cmd.getAddressId(), user.getNamespaceId(), memberUid);
 
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
@@ -925,7 +930,7 @@ public class FamilyServiceImpl implements FamilyService {
     // 认证organization owner
     // add by xq.tian   20160922
     //
-    private boolean approveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
+    private void autoApproveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
         if (addressId != null) {
             User memberUser = userProvider.findUserById(memberUid);
             UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
@@ -936,16 +941,28 @@ public class FamilyServiceImpl implements FamilyService {
                     for (CommunityPmOwner owner : pmOwners) {
                         OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
                                 namespaceId, owner.getId(), addressId);
-                        if (ownerAddress != null && ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
-                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                            propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                        if (ownerAddress != null) {
+                            if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
+                                ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                            }
+                        }
+                        // 不存在ownerAddress, 创建ownerAddress记录
+                        else {
+                            propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                                    memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
                         }
                     }
-                    return true;
+                }
+                // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
+                else {
+                    long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
+                    // 创建ownerAddress
+                    propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                            memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
                 }
             }
         }
-        return false;
     }
 
     private void sendFamilyNotificationForApproveMember(Address address, Group group, GroupMember member,long operatorId) {

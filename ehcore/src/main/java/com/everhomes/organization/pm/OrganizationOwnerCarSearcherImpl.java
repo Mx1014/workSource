@@ -1,17 +1,14 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarResponse;
 import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerLocaleStringScope;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnerCarCommand;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -130,16 +127,12 @@ public class OrganizationOwnerCarSearcherImpl extends AbstractElasticSearch impl
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
         }
-        if (ids != null && ids.size() > 0) {
+        if (ids.size() > 0) {
             List<OrganizationOwnerCar> ownerCars = propertyMgrProvider.listOrganizationOwnerCarsByIds(ids);
             ownerCarDTOList = ownerCars.stream().map(r -> {
                 OrganizationOwnerCarDTO dto = ConvertHelper.convert(r, OrganizationOwnerCarDTO.class);
-                LocaleString parkingTypeLocale = localeStringProvider.find(
-                        OrganizationOwnerLocaleStringScope.PARKING_TYPE_SCOPE, String.valueOf(r.getParkingType()),
-                        UserContext.current().getUser().getLocale());
-                if (parkingTypeLocale != null) {
-                    dto.setParkingType(parkingTypeLocale.getText());
-                }
+                ParkingCardCategory category = propertyMgrProvider.findParkingCardCategory(r.getParkingType());
+                dto.setParkingType(category != null ? category.getCategoryName() : "");
                 return dto;
             }).collect(Collectors.toList());
         }

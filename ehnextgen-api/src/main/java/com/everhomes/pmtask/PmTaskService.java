@@ -8,9 +8,14 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
+import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
+import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
@@ -24,6 +29,8 @@ import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
+import com.everhomes.rest.pmtask.RevisitCommand;
+import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -47,13 +54,15 @@ public interface PmTaskService {
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
 	
-	PmTaskDTO createTaskByAdmin(CreateTaskCommand cmd);
+	PmTaskDTO createTaskByOrg(CreateTaskCommand cmd);
 	
 	void deleteTaskCategory(DeleteTaskCategoryCommand cmd);
 	
 	CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd);
 	
 	ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd);
+	
+	List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd);
 	
 	void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp);
 	
@@ -72,4 +81,14 @@ public interface PmTaskService {
 	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void createStatistics();
+	
+	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
+	
+	void revisit(RevisitCommand cmd);
+	
+	void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd);
+	
+	void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd);
+	
+	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
 }

@@ -4,7 +4,9 @@ import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerRestResponse;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.records.EhOrganizationOwnerAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import org.junit.Test;
@@ -49,6 +51,13 @@ public class CreateOrganizationOwnerTest2 extends BaseLoginAuthTestCase {
         addressCommand.setLivingStatus((byte)0);
         cmd.setAddresses(Collections.singletonList(addressCommand));
 
+        UploadOrganizationOwnerAttachmentCommand attachmentCommand = new UploadOrganizationOwnerAttachmentCommand();
+        String attachmentName = "pic.jpeg";
+        attachmentCommand.setAttachmentName(attachmentName);
+        String contentUri = "cs://turfyugogjp[28409324eelkjgne";
+        attachmentCommand.setContentUri(contentUri);
+        cmd.setOwnerAttachments(Collections.singletonList(attachmentCommand));
+
         CreateOrganizationOwnerRestResponse response = httpClientService.restPost(api, cmd, CreateOrganizationOwnerRestResponse.class);
 
         assertNotNull("The createOrganizationOwner response should be not null.", response);
@@ -70,6 +79,13 @@ public class CreateOrganizationOwnerTest2 extends BaseLoginAuthTestCase {
         assertEquals("The created organizationOwner contactToken should be equal.", contactToken, record.getContactToken());
         assertEquals("The created organizationOwner communityId should be equal.", communityId, record.getCommunityId());
         assertEquals("The created organizationOwner orgOwnerTypeId should be equal.", orgOwnerTypeId, record.getOrgOwnerTypeId());
+
+        EhOrganizationOwnerAttachmentsRecord attachment = dbProvider.getDslContext().selectFrom(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.ATTACHMENT_NAME.eq(attachmentName))
+                .and(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.CONTENT_URI.eq(contentUri))
+                .fetchOne();
+
+        assertNotNull("The attachment should not be null", attachment);
     }
 
     private void logon() {
@@ -83,6 +99,9 @@ public class CreateOrganizationOwnerTest2 extends BaseLoginAuthTestCase {
     protected void initCustomData() {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);
+        userInfoFilePath = "data/json/customer-manage-owner-type-data.txt";
+        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }
 }

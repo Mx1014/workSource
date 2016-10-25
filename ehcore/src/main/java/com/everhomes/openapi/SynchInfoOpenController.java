@@ -36,7 +36,7 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 
-@RestDoc(value="Synch Info Controller", site="core")
+@RestDoc(value="Synch Info Controller", site="synchInfo")
 @RestController
 @RequestMapping("/openapi")
 public class SynchInfoOpenController extends ControllerBase {

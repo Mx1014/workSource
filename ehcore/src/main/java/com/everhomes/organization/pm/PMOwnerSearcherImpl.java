@@ -1,8 +1,11 @@
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.AddressService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
@@ -30,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +50,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 
     @Autowired
     private LocaleStringProvider localeStringProvider;
+
+    @Autowired
+    private AddressService addressService;
 
 	@Override
 	public void deleteById(Long id) {
@@ -89,8 +95,35 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 
 	@Override
 	public ListOrganizationOwnersResponse query(SearchOrganizationOwnersCommand cmd) {
-		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-		QueryBuilder qb;
+        ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
+        if (cmd.getPageSize() != null) {
+            List<OrganizationOwnerDTO> ownerDTOList = new ArrayList<>();
+            Long anchor = buildOrganizationOwnerDTOList(cmd, ownerDTOList);
+
+            if (ownerDTOList.size() - cmd.getPageSize() > 1) {
+                response.setNextPageAnchor(anchor + cmd.getPageSize() - (ownerDTOList.size() - cmd.getPageSize()));
+            } else if (ownerDTOList.size() - cmd.getPageSize() == 1) {
+                response.setNextPageAnchor(anchor + cmd.getPageSize());
+            } else if (ownerDTOList.size() == cmd.getPageSize()){
+                response.setNextPageAnchor(anchor + cmd.getPageSize());
+            }
+            ownerDTOList = ownerDTOList.stream().limit(cmd.getPageSize()).collect(Collectors.toList());
+            response.setOwners(ownerDTOList);
+        }
+        return response;
+    }
+
+    private Long getAnchor(SearchOrganizationOwnersCommand cmd) {
+        Long anchor = 0L;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        return anchor;
+    }
+
+    private List<Long> getMatchOwnerIds(SearchOrganizationOwnersCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
@@ -109,30 +142,41 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("orgOwnerTypeId", cmd.getOrgOwnerTypeId()));
         }
 
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0L;
-        if(cmd.getPageAnchor() != null) {
-            anchor = cmd.getPageAnchor();
-        }
-        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = getAnchor(cmd);
+
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setFrom(anchor.intValue() * pageSize)
+                .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
                 .setQuery(qb);
 
         SearchResponse rsp = builder.execute().actionGet();
+        return getIds(rsp);
+    }
 
-        ListOrganizationOwnersResponse response = new ListOrganizationOwnersResponse();
-        List<OrganizationOwnerDTO> ownerDTOList = Collections.emptyList();
-        List<Long> ids = getIds(rsp);
-        if(ids.size() > pageSize) {
-            response.setNextPageAnchor(anchor + 1);
-            ids.remove(ids.size() - 1);
-        }
-        if (ids != null && ids.size() > 0) {
+    private Long buildOrganizationOwnerDTOList(SearchOrganizationOwnersCommand cmd, List<OrganizationOwnerDTO> ownerDTOList) {
+        List<Long> ids = getMatchOwnerIds(cmd);
+        if (ids.size() > 0) {
             List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwners(ids);
-            ownerDTOList = pmOwners.stream().map(r -> {
+            // 如果有楼栋地址等信息的话, 过滤不符合条件的对象
+            List<Long> addressIds = new ArrayList<>();
+            if (cmd.getAddressId() != null) {
+                addressIds.add(cmd.getAddressId());
+                pmOwners = processCommunityPmOwners(pmOwners, addressIds);
+            } else if (cmd.getBuildingName() != null && !cmd.getBuildingName().isEmpty()) {
+                ListApartmentByBuildingNameCommand listBuildingNameCmd = new ListApartmentByBuildingNameCommand();
+                listBuildingNameCmd.setBuildingName(cmd.getBuildingName());
+                listBuildingNameCmd.setCommunityId(cmd.getCommunityId());
+
+                List<AddressDTO> addressDTOList = addressService.listAddressByBuildingName(listBuildingNameCmd);
+                if (addressDTOList != null && !addressDTOList.isEmpty()) {
+                    addressIds = addressDTOList.stream().map(AddressDTO::getId).collect(Collectors.toList());
+                }
+                pmOwners = processCommunityPmOwners(pmOwners, addressIds);
+            }
+
+            ownerDTOList.addAll(pmOwners.stream().map(r -> {
                 OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                 OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(r.getOrgOwnerTypeId());
                 dto.setOrgOwnerType(ownerType == null ? "" : ownerType.getDisplayName());
@@ -140,11 +184,24 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                         UserContext.current().getUser().getLocale());
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 return dto;
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toList()));
+
+            Long anchor = getAnchor(cmd);
+            if (ownerDTOList.size() < cmd.getPageSize() && ids.size() > cmd.getPageSize()) {
+                cmd.setPageAnchor(anchor + cmd.getPageSize() + 1);
+                return buildOrganizationOwnerDTOList(cmd, ownerDTOList);
+            }
+            return anchor;
         }
-        response.setOwners(ownerDTOList);
-        return response;
-	}
+        return 0L;
+    }
+
+    private List<CommunityPmOwner> processCommunityPmOwners(List<CommunityPmOwner> pmOwners, List<Long> addressIds) {
+        List<OrganizationOwnerAddress> ownerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByAddressIds(UserContext.getCurrentNamespaceId(), addressIds);
+        List<Long> organizationOwnerIds = ownerAddresses.stream().map(OrganizationOwnerAddress::getOrganizationOwnerId).distinct().collect(Collectors.toList());
+        pmOwners = pmOwners.stream().filter(r -> organizationOwnerIds.contains(r.getId())).collect(Collectors.toList());
+        return pmOwners;
+    }
 
     @Override
 	public String getIndexType() {

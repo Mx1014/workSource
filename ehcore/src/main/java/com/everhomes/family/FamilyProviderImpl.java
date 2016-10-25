@@ -519,12 +519,15 @@ public class FamilyProviderImpl implements FamilyProvider {
 		final Integer[] count = new Integer[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
 				null, (DSLContext context, Object reducingContext) -> {
-					Integer c = context.selectCount().from(Tables.EH_USER_GROUPS)
-							.where(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
-							.and(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
-							.and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
-							.and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
-							.fetchOne(0,Integer.class);
+                    SelectQuery<Record1<Long>> query = context.select(Tables.EH_USER_GROUPS.OWNER_UID)
+                            .from(Tables.EH_USER_GROUPS)
+                            .where(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
+                            .and(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
+                            .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                            .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+                            .groupBy(Tables.EH_USER_GROUPS.OWNER_UID).getQuery();
+
+                    Integer c = context.selectCount().from(query).fetchOneInto(Integer.class);
 					count[0] = c;
 					return true;
 				});
