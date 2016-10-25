@@ -43,7 +43,7 @@ CREATE TABLE `eh_parking_card_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;	
 
 -- item 类别 by sfyan 20161025
---DROP TABLE IF EXISTS `eh_item_service_categries`;
+-- DROP TABLE IF EXISTS `eh_item_service_categries`;
 CREATE TABLE `eh_item_service_categries` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `name` VARCHAR(64) NOT NULL COMMENT 'service categry name',
