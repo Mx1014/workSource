@@ -626,7 +626,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
+		
 		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
+		
+		if(null != task.getAddressId()) {
+			Address address = addressProvider.findAddressById(task.getAddressId());
+			dto.setAddress(address.getAddress());
+		}
+		
 		//查询服务类型
 		Category category = categoryProvider.findCategoryById(task.getCategoryId());
 		Category taskCategory = checkCategory(task.getTaskCategoryId());
