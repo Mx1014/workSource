@@ -2043,7 +2043,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         uuid = uuid.substring(0, 5);
         
         DoorAuth auth = new DoorAuth();
-        auth.setApplyUserName(cmd.getUserName());
+        auth.setApplyUserName(user.getNickName());
         auth.setApproveUserId(user.getId());
         auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
         auth.setDescription(cmd.getDescription());
@@ -2237,9 +2237,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             resp.setDoorName(doorAccess.getName());
         }
         
+        resp.setPhone(auth.getPhone());
+        if(auth.getValidEndMs() > System.currentTimeMillis()) {
+            resp.setIsValid((byte)1);    
+        } else {
+            resp.setIsValid((byte)0);
+        }
+        resp.setDescription(auth.getDescription());
+        resp.setValidDay(1l);
+        resp.setOrganization(auth.getOrganization());
+        resp.setUserName(auth.getNickname());
+        
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
-            resp.setUserName(user.getNickName());
+            resp.setApproveName(user.getNickName());
         }
         
         resp.setCreateTime(auth.getCreateTime().getTime());
@@ -2261,14 +2272,25 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             resp.setDoorName(doorAccess.getName());
         }
         
+        resp.setPhone(auth.getPhone());
+        if(auth.getValidEndMs() > System.currentTimeMillis()) {
+            resp.setIsValid((byte)1);    
+        } else {
+            resp.setIsValid((byte)0);
+        }
+        resp.setDescription(auth.getDescription());
+        resp.setValidDay(1l);
+        resp.setOrganization(auth.getOrganization());
+        resp.setUserName(auth.getNickname());
+        
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
-            resp.setUserName(user.getNickName());
+            resp.setApproveName(user.getNickName());
         }
         
         //https://core.zuolin.com/evh/aclink/phv?id=10ae5-15016
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
-        String url = homeUrl + "evh/aclink/phv?id=" + cmd.getId();
+        String url = homeUrl + "/evh/aclink/phv?id=" + cmd.getId();
         
         resp.setCreateTime(auth.getCreateTime().getTime());
         resp.setQr(Base64.encodeBase64String(url.getBytes()));
@@ -2289,17 +2311,23 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             resp.setDoorName(doorAccess.getName());
         }
         
+        resp.setPhone(auth.getPhone());
+        if(auth.getValidEndMs() > System.currentTimeMillis()) {
+            resp.setIsValid((byte)1);    
+        } else {
+            resp.setIsValid((byte)0);
+        }
+        resp.setDescription(auth.getDescription());
+        resp.setValidDay(1l);
+        resp.setOrganization(auth.getOrganization());
+        resp.setUserName(auth.getNickname());
+        
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
-            resp.setUserName(user.getNickName());
+            resp.setApproveName(user.getNickName());
         }
         
-        //https://core.zuolin.com/evh/aclink/phv?id=10ae5-15016
-        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
-        String url = homeUrl + "evh/aclink/phv?id=" + cmd.getId();
-        
         resp.setCreateTime(auth.getCreateTime().getTime());
-        resp.setQr(Base64.encodeBase64String(url.getBytes()));
       
         return resp;
     }
