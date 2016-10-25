@@ -3118,24 +3118,36 @@ public class UserServiceImpl implements UserService {
 			List<ContentBriefDTO> dtos = new ArrayList<ContentBriefDTO>();
 			response.setDtos(dtos);
 
-			if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
-					&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
-				response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
+			if(searchType != null) {
+				if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
+						&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
+					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+				}
 			}
 
-			if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
-					&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
-				response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.POLL.getCode());
+			if(searchType != null) {
+				if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
+						&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
+					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
+				}
+			}
+			
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.TOPIC.getCode());
+			if(searchType != null) {
+				if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
+						&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
+					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+				}
 			}
 
-			if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
-					&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
-				response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
-			}
-
-			if(newsService.searchNewsByScene(cmd) != null 
-					&& newsService.searchNewsByScene(cmd).getDtos() != null) {
-				response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
+			if(searchType != null) {
+				if(newsService.searchNewsByScene(cmd) != null 
+						&& newsService.searchNewsByScene(cmd).getDtos() != null) {
+					response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+				}
 			}
 
 			break;
