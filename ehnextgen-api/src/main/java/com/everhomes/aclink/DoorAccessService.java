@@ -141,4 +141,10 @@ public interface DoorAccessService {
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
 
     void test();
+
+    DoorAuth getLinglingDoorAuthByUuid(String uuid);
+
+    GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd);
+
+    GetVisitorResponse checkVisitor(GetVisitorCommand cmd);
 }
