@@ -74,6 +74,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             if(null != task.getAddressId())
             b.field("address", task.getAddress());
+            b.field("addressId", task.getAddressId());
             b.field("namespaceId", task.getNamespaceId());
             b.field("ownerId", task.getOwnerId());
             b.field("ownerType", task.getOwnerType());
@@ -239,6 +240,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	PmTaskDTO doc = new PmTaskDTO();
             doc.setId(Long.parseLong(idAsStr));
             doc.setAddress((String)source.get("address"));
+            doc.setAddressId(SearchUtils.getLongField(source.get("addressId")));
             doc.setOwnerId(SearchUtils.getLongField(source.get("ownerId")));
             doc.setOwnerType((String)source.get("ownerType"));
             doc.setContent((String)source.get("content"));
