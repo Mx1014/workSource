@@ -5209,6 +5209,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 		Long ownerId = orgId;
+
+		OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
 	    
 		return organizationMembers.stream().map((c) ->{
 			Long organizationId = ownerId;
@@ -5217,12 +5219,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
-			
+
+
 			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
-				dto.setDepartments(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
+					departments.add(orgDTO);
+				}
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				dto.setDepartments(departments);
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
-				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
+				groups.add(orgDTO);
+				groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				dto.setGroups(groups);
 			}
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
