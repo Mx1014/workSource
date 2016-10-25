@@ -1101,7 +1101,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
 		
-		merge(list);
+		list = mergeTaskOwnerList(list);
 		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -1116,7 +1116,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     			dto.setClosePercent(r.getTotalCount()!=null&&!r.getTotalCount().equals(0)?(float)r.getCloseCount()/r.getTotalCount():0);
     			float avgStar = calculatePerson(r)!=0?(float) (calculateStar(r)) / (calculatePerson(r)):0;
     			dto.setAvgStar((float)Math.round(avgStar * 10)/10);
-    			Integer totalCount = pmTaskProvider.countTaskStatistics(r.getOwnerId(), r.getCategoryId(), null);
+    			Integer totalCount = pmTaskProvider.countTaskStatistics(r.getOwnerId(), r.getTaskCategoryId(), null);
     			dto.setTotalCount(totalCount);
     			
     			return dto;
@@ -1131,11 +1131,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 	
-	private void merge(List<PmTaskStatistics> list) {
+	private void mergeTaskCategoryList(List<PmTaskStatistics> list) {
 		
 		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 		for(PmTaskStatistics p: list){
-			Long id = p.getCategoryId();
+			Long id = p.getTaskCategoryId();
 			PmTaskStatistics pts = null;
 			if(tempMap.containsKey(id)){
 				pts = tempMap.get(id);
@@ -1157,6 +1157,31 @@ public class PmTaskServiceImpl implements PmTaskService {
 		for(PmTaskStatistics p1:tempMap.values()){
 			list.add(p1);
 		}
+	}
+	
+	private List<PmTaskStatistics> mergeTaskOwnerList(List<PmTaskStatistics> list) {
+		
+		List<PmTaskStatistics> result = new ArrayList<PmTaskStatistics>();
+		Map<Long, List<PmTaskStatistics>> tempMap = new HashMap<>();
+		for(PmTaskStatistics p: list){
+			Long id = p.getOwnerId();
+			if(tempMap.containsKey(id)){
+				List<PmTaskStatistics> ptsList = tempMap.get(id);
+				List<PmTaskStatistics> temp = new ArrayList<PmTaskStatistics>();
+				temp.addAll(ptsList);
+				temp.add(p);
+				tempMap.put(id, temp);
+				continue;
+			}
+			p.setCategoryId(null);
+			tempMap.put(id, Collections.singletonList(p));
+		}
+		
+		for(List<PmTaskStatistics>  l:tempMap.values()){
+			mergeTaskCategoryList(l);
+			result.addAll(l);
+		}
+		return result;
 	}
 	
 	private int calculateStar(PmTaskStatistics r){
@@ -1181,7 +1206,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 			response.setOwnerName(community.getName());
 		}else{
-			merge(list);
+			list = mergeTaskOwnerList(list);
+			mergeTaskCategoryList(list);
 		}
 		
 		int totalCount = 0;
@@ -1203,9 +1229,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			stars[4] += statistics.getStar5();
 			
 			CategoryTaskStatisticsDTO dto = new CategoryTaskStatisticsDTO();
-			dto.setCategoryId(statistics.getCategoryId());
-			Category category = checkCategory(statistics.getCategoryId());
-			dto.setCategoryName(category.getName());
+			dto.setTaskCategoryId(statistics.getTaskCategoryId());
+			Category category = checkCategory(statistics.getTaskCategoryId());
+			dto.setTaskCategoryName(category.getName());
 			dto.setCloseCount(statistics.getCloseCount());
 			dto.setProcessedCount(statistics.getProcessedCount());
 			dto.setProcessingCount(statistics.getProcessingCount());
@@ -1243,8 +1269,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				endDate = null;
 			}
 		for(Namespace n: namepaces){
-			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
-			Category ancestor = categoryProvider.findCategoryByPath(n.getId(), defaultName);
+			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			
 			if(ancestor != null){
 				//防止定时任务重复执行
@@ -1811,7 +1837,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<TaskCategoryStatisticsDTO> list = new ArrayList<TaskCategoryStatisticsDTO>();
 		outer:
 		for(PmTaskStatistics pts: temp) {
-			
+			Community community = communityProvider.findCommunityById(pts.getOwnerId());
 			for(TaskCategoryStatisticsDTO d: list) {
 				if(pts.getOwnerId().equals(d.getOwnerId())) {
 					CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
@@ -1819,24 +1845,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 					Category category = categoryProvider.findCategoryById(pts.getCategoryId());
 					categoryStatisticsDTO.setCategoryName(category.getName());
 					categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+					categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
+					categoryStatisticsDTO.setOwnerName(community.getName());
 					d.getRequests().add(categoryStatisticsDTO);
 					continue outer;
 				}
 			}
 			TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
 			
-			Community community = communityProvider.findCommunityById(pts.getOwnerId());
 			Category taskCategory = categoryProvider.findCategoryById(pts.getTaskCategoryId());
 			Category category = categoryProvider.findCategoryById(pts.getCategoryId());
 
 			dto.setTaskCategoryId(pts.getTaskCategoryId());
 			dto.setTaskCategoryName(taskCategory.getName());
 			dto.setOwnerId(pts.getOwnerId());
-			dto.setOwnerName(community.getName());
+//			dto.setOwnerName(community.getName());
 			CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
 			categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
 			categoryStatisticsDTO.setCategoryName(category.getName());
 			categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+			categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
+			categoryStatisticsDTO.setOwnerName(community.getName());
 			
 			List<CategoryStatisticsDTO> list2 = new ArrayList<CategoryStatisticsDTO>();
 			list2.add(categoryStatisticsDTO);

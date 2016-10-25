@@ -38,10 +38,10 @@ public interface PmTaskProvider {
 	
 	void createTaskStatistics(PmTaskStatistics statistics);
 	
-	List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Timestamp dateStr,
+	List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, String keyword, Timestamp dateStr,
 			Long pageAnchor, Integer pageSize);
 	
-	Integer countTaskStatistics(Long ownerId, Long categoryId, Timestamp dateStr);
+	Integer countTaskStatistics(Long ownerId, Long taskCategoryId, Timestamp dateStr);
 	
 	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize);
 	

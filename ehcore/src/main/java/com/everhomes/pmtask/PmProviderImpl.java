@@ -328,15 +328,15 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-	public List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long categoryId, String keyword, Timestamp dateStr,
+	public List<PmTaskStatistics> searchTaskStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, String keyword, Timestamp dateStr,
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskStatistics.class));
         
         SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASK_STATISTICS.fields()).from(Tables.EH_PM_TASK_STATISTICS);
         Condition condition = Tables.EH_PM_TASK_STATISTICS.NAMESPACE_ID.eq(namespaceId);
         
-        if(null != categoryId)
-        	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.CATEGORY_ID.eq(categoryId));
+        if(null != taskCategoryId)
+        	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.TASK_CATEGORY_ID.eq(taskCategoryId));
         if(null != ownerId)
         	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.OWNER_ID.eq(ownerId));
         if(null != dateStr)
@@ -355,7 +355,7 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public Integer countTaskStatistics(Long ownerId, Long categoryId, Timestamp dateStr){
+	public Integer countTaskStatistics(Long ownerId, Long taskCategoryId, Timestamp dateStr){
         //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         final Integer[] count = new Integer[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPmTasks.class), null, 
@@ -364,8 +364,8 @@ public class PmProviderImpl implements PmTaskProvider{
                 	SelectJoinStep<Record1<BigDecimal>> query = context.select(Tables.EH_PM_TASK_STATISTICS.TOTAL_COUNT.sum()).from(Tables.EH_PM_TASK_STATISTICS);
                 	
                 	Condition condition = Tables.EH_PM_TASK_STATISTICS.OWNER_ID.equal(ownerId);
-                	if(null != categoryId)
-                    	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.CATEGORY_ID.eq(categoryId));
+                	if(null != taskCategoryId)
+                    	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.TASK_CATEGORY_ID.eq(taskCategoryId));
                 	if(null != dateStr)
                     	condition = condition.and(Tables.EH_PM_TASK_STATISTICS.DATE_STR.eq(dateStr));
 

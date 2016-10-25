@@ -142,34 +142,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	tasks = pmTaskProvider.listPmTask(null, null, null, nextPageAnchor, pageSize);
         	
         	if(tasks.size() > 0){
-//        		tasks = tasks.stream().map(r -> {
-//        			
-//        			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(r.getId(), PmTaskStatus.UNPROCESSED.getCode());
-//    				PmTaskLog log = logs.get(0);
-//        			if(0L == log.getOperatorUid()){
-//        				r.setNickName(log.getOperatorName());
-//            			r.setMobile(log.getOperatorPhone());
-//        			}else{
-//        				User user = userProvider.findUserById(log.getOperatorUid());
-//            			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//            			r.setNickName(user.getNickName());
-//            			r.setMobile(userIdentifier.getIdentifierToken());
-//        			}
-//        			if(null == r.getOrganizationId()){
-//        				User user = userProvider.findUserById(r.getCreatorUid());
-//            			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//            			dto.setRequestorName(user.getNickName());
-//            			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
-//        			}
-//        			
-//        			return r;
-//        		}).collect(Collectors.toList());
 
         		if(tasks.size() == pageSize){
             		nextPageAnchor = tasks.get(tasks.size()-1).getCreateTime().getTime();
             	}
         	}
-        	
  	        
  	       this.bulkUpdate(tasks);
  	       
