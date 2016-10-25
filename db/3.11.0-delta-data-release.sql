@@ -40,6 +40,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@locale_string_id := @locale_string_id + 1), 'pm', '18001', 'zh_CN', '该记录已经处于未认证状态');
   
 -- 物业报修2.5 by sunwen 20161025
+delete from eh_categories where id = 6;
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ('6', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0');
+
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES ('920', '0', '完成回访', '任务管理 完成回访', NULL);
 
