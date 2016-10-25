@@ -131,7 +131,7 @@ import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
-public class ApprovalTest extends BaseLoginAuthTestCase {
+public class ApprovalTest2 extends BaseLoginAuthTestCase {
 	//1. 增加审批类别，如请假的公出、事假等
 	private static final String CREATE_APPROVAL_CATEGORY_URL = "/approval/createApprovalCategory";
 	//2. 更新审批类别
@@ -213,7 +213,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	private static final String DELETE_TARGET_APPROVAL_RULE_URL = "/approval/deleteTargetApprovalRule";
 	
 	//1. 增加审批类别，如请假的公出、事假等（完成）
-	@Test
+//	//@Test
 	public void testCreateApprovalCategory() {
 		String url = CREATE_APPROVAL_CATEGORY_URL;
 		logon();
@@ -253,7 +253,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	//2. 更新审批类别（完成）
-	@Test
+	//@Test
 	public void testUpdateApprovalCategory() {
 		String url = UPDATE_APPROVAL_CATEGORY_URL;
 		logon();
@@ -290,7 +290,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//3. 列出审批类别（完成）
-	@Test
+	//@Test
 	public void testListApprovalCategory() {
 		String url = LIST_APPROVAL_CATEGORY_URL;
 		logon();
@@ -316,7 +316,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//4. 删除审批类别（完成）
-	@Test
+	//@Test
 	public void testDeleteApprovalCategory() {
 		String url = DELETE_APPROVAL_CATEGORY_URL;
 		logon();
@@ -338,7 +338,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//5. 设置审批流程信息（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalFlowInfo() {
 		String url = CREATE_APPROVAL_FLOW_INFO_URL;
 		logon();
@@ -375,7 +375,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	//6. 更新审批流程信息（完成）
-	@Test
+	//@Test
 	public void testUpdateApprovalFlowInfo() {
 		String url = UPDATE_APPROVAL_FLOW_INFO_URL;
 		logon();
@@ -410,7 +410,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//7. 设置审批流程级别（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalFlowLevel() {
 		String url = CREATE_APPROVAL_FLOW_LEVEL_URL;
 		logon();
@@ -476,7 +476,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//8. 更新审批流程级别（完成）
-	@Test
+	//@Test
 	public void testUpdateApprovalFlowLevel() {
 		String url = UPDATE_APPROVAL_FLOW_LEVEL_URL;
 		logon();
@@ -510,7 +510,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//9. 审批流程列表（完成）
-	@Test
+	//@Test
 	public void testListApprovalFlow() {
 		String url = LIST_APPROVAL_FLOW_URL;
 		logon();
@@ -545,7 +545,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//10. 审批流程简短列表（完成）
-	@Test
+	//@Test
 	public void testListBriefApprovalFlow() {
 		String url = LIST_BRIEF_APPROVAL_FLOW_URL;
 		logon();
@@ -568,7 +568,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//11. 删除审批流程（完成）
-	@Test
+	//@Test
 	public void testDeleteApprovalFlow() {
 		String url = DELETE_APPROVAL_FLOW_URL;
 		logon();
@@ -591,7 +591,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//12. 增加审批规则（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalRule() {
 		String url = CREATE_APPROVAL_RULE_URL;
 		logon();
@@ -628,7 +628,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//13. 更新审批规则（完成）
-	@Test
+	//@Test
 	public void testUpdateApprovalRule() {
 		String url = UPDATE_APPROVAL_RULE_URL;
 		logon();
@@ -666,7 +666,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//14. 删除审批规则（完成）
-	@Test
+	//@Test
 	public void testDeleteApprovalRule() {
 		String url = DELETE_APPROVAL_RULE_URL;
 		logon();
@@ -695,7 +695,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//15. 审批规则列表（完成）
-	@Test
+	//@Test
 	public void testListApprovalRule() {
 		String url = LIST_APPROVAL_RULE_URL;
 		logon();
@@ -730,7 +730,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//16. 审批规则简短列表（完成）
-	@Test
+	//@Test
 	public void testListBriefApprovalRule() {
 		String url = LIST_BRIEF_APPROVAL_RULE_URL;
 		logon();
@@ -753,7 +753,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//17. 同意申请（完成）
-	@Test
+	//@Test
 	public void testApproveApprovalRequest() {
 		String url = APPROVE_APPROVAL_REQUEST_URL;
 		logon();
@@ -782,7 +782,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	//18. 驳回申请（完成）
-	@Test
+	//@Test
 	public void testRejectApprovalRequest() {
 		String url = REJECT_APPROVAL_REQUEST_URL;
 		logon();
@@ -813,7 +813,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	//19. 获取申请的审批基本信息（完成）
-	@Test
+	//@Test
 	public void testGetApprovalBasicInfoOfRequest() {
 		String url = GET_APPROVAL_BASIC_INFO_OF_REQUEST_URL;
 		logon();
@@ -856,7 +856,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//20. 获取申请的审批日志与审批流程列表（完成）
-	@Test
+	//@Test
 	public void testListApprovalLogAndFlowOfRequest() {
 		String url = LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_URL;
 		logon();
@@ -887,7 +887,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//21. 获取申请的审批日志列表（完成）
-	@Test
+	//@Test
 	public void testListApprovalLogOfRequest() {
 		String url = LIST_APPROVAL_LOG_OF_REQUEST_URL;
 		logon();
@@ -917,7 +917,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//22. 获取申请的审批流程列表（完成）
-	@Test
+	//@Test
 	public void testListApprovalFlowOfRequest() {
 		String url = LIST_APPROVAL_FLOW_OF_REQUEST_URL;
 		logon();
@@ -946,7 +946,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//23. 人员列表，可按部门、姓名筛选（完成）
-	@Test
+	//@Test
 	public void testListApprovalUser() {
 		String url = LIST_APPROVAL_USER_URL;
 		logon();
@@ -975,7 +975,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//24. 查询申请列表（完成）
-	@Test
+	//@Test
 	public void testListApprovalRequest() {
 		String url = LIST_APPROVAL_REQUEST_URL;
 		logon();
@@ -1008,7 +1008,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//25. 个人申请列表（客户端）（完成）
-	@Test
+	//@Test
 	public void testListApprovalRequestByScene() {
 		String url = LIST_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1035,7 +1035,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//26. 获取申请的审批基本信息（客户端）（完成）
-	@Test
+	//@Test
 	public void testGetApprovalBasicInfoOfRequestByScene() {
 		String url = GET_APPROVAL_BASIC_INFO_OF_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1073,7 +1073,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//27. 获取申请的审批日志与审批流程列表（客户端）（完成）
-	@Test
+	//@Test
 	public void testListApprovalLogAndFlowOfRequestByScene() {
 		String url = LIST_APPROVAL_LOG_AND_FLOW_OF_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1100,7 +1100,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//28. 获取申请的审批日志列表（客户端）（完成）1
-	@Test
+	//@Test
 	public void testListApprovalLogOfRequestByScene() {
 		String url = LIST_APPROVAL_LOG_OF_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1125,7 +1125,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//29. 获取申请的审批流程列表（客户端）（完成）
-	@Test
+	//@Test
 	public void testListApprovalFlowOfRequestByScene() {
 		String url = LIST_APPROVAL_FLOW_OF_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1149,7 +1149,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//30. 创建请假申请（客户端），跨天上下午（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalRequestBySceneAbsence1() {
 		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1195,7 +1195,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	//30. 创建请假申请（客户端），跨天包含周末（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalRequestBySceneAbsence2() {
 		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1241,7 +1241,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//30. 创建请假申请（客户端），不跨天（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalRequestBySceneAbsence3() {
 		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1281,7 +1281,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//30. 创建请假申请（客户端），跨天同上午（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalRequestBySceneAbsence4() {
 		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1321,7 +1321,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//30. 创建异常申请（客户端）（完成）
-	@Test
+	//@Test
 	public void testCreateApprovalRequestBySceneException1() {
 		String url = CREATE_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1364,7 +1364,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	//31. 取消申请（客户端）（完成）
-	@Test
+	//@Test
 	public void testCancelApprovalRequestByScene() {
 		String url = CANCEL_APPROVAL_REQUEST_BY_SCENE_URL;
 		logon();
@@ -1386,7 +1386,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 
 	//32. 列出审批类别（客户端）（完成）
-	@Test
+	//@Test
 	public void testListApprovalCategoryByScene() {
 		String url = LIST_APPROVAL_CATEGORY_BY_SCENE_URL;
 		logon();
@@ -1452,11 +1452,11 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 	}
 	
 	@Test
-	private void testTargetApprovalRule(){
+	public void testTargetApprovalRule(){
 		
-		String url = ApprovalTest.UPDATE_TARGET_APPROVAL_RULE_URL;
+		String url = ApprovalTest2.UPDATE_TARGET_APPROVAL_RULE_URL;
 		logon();
-		initListData();
+//		initListData();
 		 
 		UpdateTargetApprovalRuleCommand cmd = new UpdateTargetApprovalRuleCommand();
 		
@@ -1471,10 +1471,7 @@ public class ApprovalTest extends BaseLoginAuthTestCase {
 		ApprovalUser approvalUser2 = new ApprovalUser();
 		approvalUser2.setTargetType(ApprovalTargetType.USER.getCode());
 		approvalUser2.setTargetId(2L);
-		approvalUserList2.add(approvalUser2);
-		
-		
-		
+		approvalUserList2.add(approvalUser2); 
 		ApprovalFlowLevelDTO fldto2= new ApprovalFlowLevelDTO((byte)2, approvalUserList2);
 		cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
 		cmd.setOwnerId(1L);

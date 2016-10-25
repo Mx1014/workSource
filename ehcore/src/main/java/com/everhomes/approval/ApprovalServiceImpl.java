@@ -390,11 +390,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void checkApprovalFlowNameDuplication(Integer namespaceId, String ownerType, Long ownerId, String name, Long id) {
-		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowByName(namespaceId, ownerType, ownerId, name);
-		if (approvalFlow != null && (id == null || id.longValue() != approvalFlow.getId().longValue())) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_NAME,
-					"exist name, name=" + name);
-		}
+//		ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowByName(namespaceId, ownerType, ownerId, name);
+//		if (approvalFlow != null && (id == null || id.longValue() != approvalFlow.getId().longValue())) {
+//			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_FLOW_EXIST_NAME,
+//					"exist name, name=" + name);
+//		}
 	}
 
 	@Override
@@ -1961,30 +1961,51 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getTargetType(), cmd.getTargetId());
-		if (null == map) {
-			map = new PunchRuleOwnerMap();
-			map.setCreatorUid(UserContext.current().getUser().getId());
-			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-			this.punchProvider.createPunchRuleOwnerMap(map);
-		}
-
 		ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
-		// 如果没有规则建立规则,有就使用原本规则
-		if (map.getReviewRuleId() == null || null == this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId())) {
+		if (null == map) {
 			approvalRule.setName(cmd.getTargetId() + "approval rule");
 			approvalRule.setNamespaceId(namespaceId);
 			this.createApprovalRule(userId, approvalRule);
+			
+			map = new PunchRuleOwnerMap();
 			map.setReviewRuleId(approvalRule.getId());
-			this.punchProvider.updatePunchRuleOwnerMap(map);
-		} else {
-			approvalRule = this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
+			map.setOwnerId(cmd.getOwnerId());
+			map.setOwnerType(cmd.getOwnerType());
+			map.setCreatorUid(UserContext.current().getUser().getId());
+			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			
+			this.punchProvider.createPunchRuleOwnerMap(map);
 		}
+		else{
+			approvalRule = this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
+			
+		}
+		 
 		// 删除之前的审批流程
 		deleteApprovalRuleFlowMap(approvalRule.getId());
 		// 创建新审批流程
-		createApprovalRuleFlowMap(approvalRule.getId(), cmd.getRuleFlowMapList());
-
+		 for ( RuleFlowMap r : cmd.getRuleFlowMapList()){
+			if (ApprovalType.fromCode(r.getApprovalType()) == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"not exist approval type: approvalType=" + r.getApprovalType() + ", flowId=" + r.getFlowId());
+			}
+			
+			ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class); 
+			approvalFlow.setName(cmd.getOwnerId()+" approval rule");
+			approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
+			approvalFlow.setCreatorUid(userId);
+			approvalFlow.setOperatorUid(userId);
+			approvalFlow.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			approvalFlow.setUpdateTime(approvalFlow.getCreateTime());
+			approvalFlowProvider.createApprovalFlow(approvalFlow);
+			
+			ApprovalRuleFlowMap approvalRuleFlowMap = new ApprovalRuleFlowMap();
+			approvalRuleFlowMap.setRuleId(approvalRule.getId());
+			approvalRuleFlowMap.setApprovalType(r.getApprovalType());
+			approvalRuleFlowMap.setFlowId(approvalFlow.getId());
+			approvalRuleFlowMap.setStatus(CommonStatus.ACTIVE.getCode());
+			approvalRuleFlowMapProvider.createApprovalRuleFlowMap(approvalRuleFlowMap);
+		}
 	}
 
 	@Override
