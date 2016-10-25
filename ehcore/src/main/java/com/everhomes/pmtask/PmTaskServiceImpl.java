@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -115,6 +118,7 @@ import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskPrivilege;
+import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskRevisitStatus;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
@@ -227,29 +231,29 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Byte status = cmd.getStatus();
 		List<PmTask> list = new ArrayList<>();
-//		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
-//				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-//			
-//			if(null == cmd.getOrganizationId()){
-//				LOGGER.error("OrganizationId cannot be null.");
-//	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//	    				"OrganizationId cannot be null.");
-//			}
-//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
-//	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
-//	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
-//						, cmd.getPageAnchor(), cmd.getPageSize());
-//			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
-//				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
-//						, cmd.getPageAnchor(), cmd.getPageSize());
-//			}else{
-//				returnNoPrivileged(privileges, current);
-//			}
-//	    	
-//		}else{
+		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+			
+			if(null == cmd.getOrganizationId()){
+				LOGGER.error("OrganizationId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"OrganizationId cannot be null.");
+			}
+			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
+						, cmd.getPageAnchor(), cmd.getPageSize());
+			}else{
+				returnNoPrivileged(privileges, current);
+			}
+	    	
+		}else{
 			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
 					, cmd.getPageAnchor(), cmd.getPageSize());
-//		}
+		}
 		
 		ListUserTasksResponse response = new ListUserTasksResponse();
 		
