@@ -35,7 +35,7 @@ INSERT INTO `eh_parking_card_categories` (`id`, `namespace_id`, `owner_type`, `o
 INSERT INTO `eh_organization_owner_type` (`id`, `namespace_id`, `name`, `display_name`, `status`, `create_time`, `update_time`, `update_uid`)
   VALUES ('8', '0', 'none', '无', '1', NULL, NULL, NULL);
 
-SET @locale_string_id = (SELECT MAX (id) FROM `eh_locale_strings`);
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@locale_string_id := @locale_string_id + 1), 'pm', '18001', 'zh_CN', '该记录已经处于未认证状态');
   
