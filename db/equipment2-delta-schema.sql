@@ -1,7 +1,7 @@
 ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `review_expired_days` INTEGER NOT NULL DEFAULT '0';
 ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of eh_inspection_template';
 
-
+ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `review_expired_date` DATETIME;
 -- 设备表
 DROP TABLE IF EXISTS `eh_equipment_inspection_equipments`;
 CREATE TABLE `eh_equipment_inspection_equipments` (
