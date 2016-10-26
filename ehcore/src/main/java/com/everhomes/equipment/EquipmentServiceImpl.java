@@ -815,6 +815,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipmentStandardSearcher.feedDoc(standard);
 		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
 		
+		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(dto.getTemplateId(), dto.getOwnerId(), dto.getOwnerType());
+		if(template != null) {
+			dto.setTemplateName(template.getName());
+		}
+		
 		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
 		dto.setRepeat(rs);
 		return dto;
@@ -1870,6 +1875,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			dto.setStandardDescription(standard.getDescription());
 			dto.setStandardName(standard.getName());
             dto.setTaskType(standard.getStandardType());
+            
+            EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(), standard.getOwnerId(), standard.getOwnerType());
+    		if(template != null) {
+    			dto.setTemplateId(template.getId());
+    			dto.setTemplateName(template.getName());
+    		}
 		} 
     	
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId(), task.getOwnerType(), task.getOwnerId());

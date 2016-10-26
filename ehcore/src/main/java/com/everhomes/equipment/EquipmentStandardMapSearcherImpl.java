@@ -1,24 +1,40 @@
 package com.everhomes.equipment;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.equipment.EquipmentReviewStatus;
+import com.everhomes.rest.equipment.EquipmentStandardRelationDTO;
 import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
+import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.mysql.jdbc.StringUtils;
 
 @Component
 public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch implements
@@ -28,6 +44,13 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	
 	@Autowired
 	private EquipmentProvider equipmentProvider;
+	
+	@Autowired
+	private ConfigurationProvider configProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
@@ -90,8 +113,83 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	@Override
 	public SearchEquipmentStandardRelationsResponse query(
 			SearchEquipmentStandardRelationsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+		QueryBuilder qb = null;
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+            		.field("name", 1.2f)
+                    .field("standardNumber", 1.0f);
+            
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("name").addHighlightedField("standardNumber");
+        }
+
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
+    	fb = FilterBuilders.notFilter(nfb);
+    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        if(cmd.getTargetId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
+        
+        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        
+        if(cmd.getReviewStatus() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        
+        SearchResponse rsp = builder.execute().actionGet();
+
+        List<Long> ids = getIds(rsp);
+        
+        SearchEquipmentStandardRelationsResponse response = new SearchEquipmentStandardRelationsResponse();
+        if(ids.size() > pageSize) {
+        	response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+         } 
+        
+        List<EquipmentStandardRelationDTO> dtos = new ArrayList<EquipmentStandardRelationDTO>();
+        for(Long id : ids) {
+        	EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMapById(id);
+        	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
+        	EquipmentStandardRelationDTO dto = new EquipmentStandardRelationDTO();
+        	dto.setEquipmentId(equipment.getId());
+        	dto.setTargetId(equipment.getTargetId());
+        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+    		if(group != null)
+    			dto.setTargetName(group.getName());
+    		
+    		dto.setEquipmentName(equipment.getName());
+    		dto.setEquipmentModel(equipment.getEquipmentModel());
+    		dto.setStatus(equipment.getStatus());
+    		dto.setStandardId(map.getStandardId());
+    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+            if(standard != null) {
+            	dto.setStandardName(standard.getName());
+            }
+            
+            dto.setReviewResult(map.getReviewResult());
+            dto.setReviewStatus(map.getReviewStatus());
+
+    		dtos.add(dto);
+        }
+        
+        response.setRelations(dtos);
+        return response;
 	}
 
 	@Override
