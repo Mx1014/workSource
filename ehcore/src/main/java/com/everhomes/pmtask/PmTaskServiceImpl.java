@@ -1652,6 +1652,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
+		list = mergeTaskOwnerList(list);
 		
 		XSSFWorkbook wb = new XSSFWorkbook();
 		
