@@ -119,7 +119,6 @@ import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.rest.pmtask.PmTaskPrivilege;
 import com.everhomes.rest.pmtask.PmTaskProcessStatus;
-import com.everhomes.rest.pmtask.PmTaskRevisitStatus;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetStatus;
@@ -206,7 +205,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     			Category category = checkCategory(r.getTaskCategoryId());
     			dto.setTaskCategoryId(category.getId());
     			dto.setTaskCategoryName(category.getName());
-    			if(null != r.getAddressId()) {
+    			if(null != r.getAddressId() && r.getAddressId() != 0) {
     				Address address = addressProvider.findAddressById(r.getAddressId());
     				dto.setAddress(address.getAddress());
     			}
@@ -273,7 +272,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				dto.setCategoryName(category.getName());
     	    	dto.setTaskCategoryName(taskCategory.getName());
     			
-    	    	if(null != r.getAddressId()) {
+    	    	if(null != r.getAddressId() && r.getAddressId() != 0) {
     				Address address = addressProvider.findAddressById(r.getAddressId());
     				dto.setAddress(address.getAddress());
     			}
@@ -470,7 +469,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User user = UserContext.current().getUser();
 		long time = System.currentTimeMillis();
 		Timestamp now = new Timestamp(time);
-		task.setStatus(PmTaskRevisitStatus.REVISITED.getCode());
+		task.setStatus(PmTaskStatus.REVISITED.getCode());
 		task.setRevisitTime(now);
 		 
 		pmTaskProvider.updateTask(task);
@@ -633,7 +632,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 		
-		if(null != task.getAddressId()) {
+		if(null != task.getAddressId() && task.getAddressId() != 0) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
 			dto.setAddress(address.getAddress());
 		}
