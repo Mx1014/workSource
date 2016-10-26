@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页大小</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>addressId: 地址id</li>
+ * <li>apartmentName: 门牌名称</li>
  * </ul>
  */
 public class SearchOrganizationOwnersCommand {
@@ -24,6 +25,7 @@ public class SearchOrganizationOwnersCommand {
     private Integer pageSize;
     private String buildingName;
     private Long addressId;
+    private String apartmentName;
 
     public Long getCommunityId() {
         return communityId;
@@ -89,8 +91,17 @@ public class SearchOrganizationOwnersCommand {
         this.organizationId = organizationId;
     }
 
-    @Override
+    public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

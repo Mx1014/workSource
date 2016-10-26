@@ -5,7 +5,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
@@ -16,6 +18,9 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
+
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -165,15 +170,30 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 addressIds.add(cmd.getAddressId());
                 pmOwners = processCommunityPmOwners(pmOwners, addressIds);
             } else if (cmd.getBuildingName() != null && !cmd.getBuildingName().isEmpty()) {
-                ListApartmentByBuildingNameCommand listBuildingNameCmd = new ListApartmentByBuildingNameCommand();
-                listBuildingNameCmd.setBuildingName(cmd.getBuildingName());
-                listBuildingNameCmd.setCommunityId(cmd.getCommunityId());
+            	//添加门牌地址的过滤
+            	if(StringUtils.isNotBlank(cmd.getApartmentName())) {
+            		ListPropApartmentsByKeywordCommand listPropApartmentsByKeywordCommand = new ListPropApartmentsByKeywordCommand();
+                    listPropApartmentsByKeywordCommand.setCommunityId(cmd.getCommunityId());
+                    listPropApartmentsByKeywordCommand.setOrganizationId(cmd.getOrganizationId());
+                    listPropApartmentsByKeywordCommand.setNamespaceId(UserContext.current().getUser().getNamespaceId());
+                    listPropApartmentsByKeywordCommand.setBuildingName(cmd.getBuildingName());
+                    listPropApartmentsByKeywordCommand.setKeyword(cmd.getApartmentName());
+                    Tuple<Integer, List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(listPropApartmentsByKeywordCommand);
+                    List<ApartmentDTO> apartments = apts.second();
+                    if(apartments.size() != 0)
+                        addressIds = apartments.stream().map(ApartmentDTO::getAddressId).collect(Collectors.toList());
 
-                List<AddressDTO> addressDTOList = addressService.listAddressByBuildingName(listBuildingNameCmd);
-                if (addressDTOList != null && !addressDTOList.isEmpty()) {
-                    addressIds = addressDTOList.stream().map(AddressDTO::getId).collect(Collectors.toList());
+                } else {
+                	ListApartmentByBuildingNameCommand listBuildingNameCmd = new ListApartmentByBuildingNameCommand();
+                    listBuildingNameCmd.setBuildingName(cmd.getBuildingName());
+                    listBuildingNameCmd.setCommunityId(cmd.getCommunityId());
+
+                    List<AddressDTO> addressDTOList = addressService.listAddressByBuildingName(listBuildingNameCmd);
+                    if (addressDTOList != null && !addressDTOList.isEmpty()) {
+                        addressIds = addressDTOList.stream().map(AddressDTO::getId).collect(Collectors.toList());
+                    }
+                    pmOwners = processCommunityPmOwners(pmOwners, addressIds);
                 }
-                pmOwners = processCommunityPmOwners(pmOwners, addressIds);
             }
 
             ownerDTOList.addAll(pmOwners.stream().map(r -> {
