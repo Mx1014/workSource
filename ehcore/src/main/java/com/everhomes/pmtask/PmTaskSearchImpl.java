@@ -202,7 +202,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         }
 
         if(null != categoryId){
-        	QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("categoryId");
+        	QueryStringQueryBuilder sb = QueryBuilders.queryString(categoryId.toString()).field("taskCategoryId");
             qb = qb.must(sb);	
         }
         
