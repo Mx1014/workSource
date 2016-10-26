@@ -49,5 +49,5 @@ public interface YellowPageService {
      * @param cmd
      * @return
      */
-    List<ServiceAllianceCategories> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd);
+    List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd);
 }

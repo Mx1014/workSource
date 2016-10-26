@@ -146,7 +146,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
 	 * <b>URL: /yellowPage/getParentServiceAllianceCategory</b>
-	 * <p> 获取顶级的服务联盟分类 </p>
+	 * <p> 获取顶级的服务联盟父分类 </p>
 	 */
     @RequireAuthentication(false)
 	@RequestMapping("getParentServiceAllianceCategory")
