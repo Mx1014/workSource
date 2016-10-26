@@ -1747,26 +1747,29 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public ListApprovalUserResponse listApprovalUser(ListApprovalUserCommand cmd) {
 		final Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		if (cmd.getFlowId() == null || cmd.getLevel() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"invalid parameters, cmd=" + cmd);
-		}
-		checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		List<ApprovalFlowLevel> approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(cmd.getFlowId(),
-				cmd.getLevel());
-		List<ApprovalUserDTO> checkedUser = approvalFlowLevelList.stream().map(a -> {
-			String nickName = getTargetName(a.getTargetType(), a.getTargetId(), cmd.getOwnerType(), cmd.getOwnerId());
-			if (StringUtils.isNotBlank(cmd.getKeyword()) && !nickName.contains(cmd.getKeyword())) {
-				return null;
+		List<ApprovalUserDTO> checkedUser = new ArrayList<ApprovalUserDTO>();
+		List<ApprovalFlowLevel> approvalFlowLevelList = new ArrayList<ApprovalFlowLevel>();
+		if(cmd.getFlowId() != null ){
+			if ( cmd.getLevel() == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"invalid parameters, cmd=" + cmd);
 			}
-			ApprovalUserDTO approvalUserDTO = new ApprovalUserDTO();
-			approvalUserDTO.setCheckedFlag(TrueOrFalseFlag.TRUE.getCode());
-			approvalUserDTO.setDepartmentName(getDepartmentNames(a.getTargetId(), cmd.getOwnerId()));
-			approvalUserDTO.setNickName(nickName);
-			approvalUserDTO.setUserId(a.getTargetId());
-			return approvalUserDTO;
-		}).filter(au -> au != null).collect(Collectors.toList());
-
+			checkApprovalFlowExist(cmd.getFlowId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+			approvalFlowLevelList = approvalFlowLevelProvider.listApprovalFlowLevel(cmd.getFlowId(),
+					cmd.getLevel());
+			checkedUser = approvalFlowLevelList.stream().map(a -> {
+				String nickName = getTargetName(a.getTargetType(), a.getTargetId(), cmd.getOwnerType(), cmd.getOwnerId());
+				if (StringUtils.isNotBlank(cmd.getKeyword()) && !nickName.contains(cmd.getKeyword())) {
+					return null;
+				}
+				ApprovalUserDTO approvalUserDTO = new ApprovalUserDTO();
+				approvalUserDTO.setCheckedFlag(TrueOrFalseFlag.TRUE.getCode());
+				approvalUserDTO.setDepartmentName(getDepartmentNames(a.getTargetId(), cmd.getOwnerId()));
+				approvalUserDTO.setNickName(nickName);
+				approvalUserDTO.setUserId(a.getTargetId());
+				return approvalUserDTO;
+			}).filter(au -> au != null).collect(Collectors.toList());
+		}
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
@@ -1828,6 +1831,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private boolean checkUserInCheckedUser(OrganizationMember organizationMember, List<ApprovalFlowLevel> approvalFlowLevelList) {
+		if (approvalFlowLevelList == null || approvalFlowLevelList.size() == 0 )
+			return false;
 		for (ApprovalFlowLevel approvalFlowLevel : approvalFlowLevelList) {
 			if (organizationMember.getTargetId().longValue() == approvalFlowLevel.getTargetId().longValue()) {
 				return true;

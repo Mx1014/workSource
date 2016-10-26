@@ -1388,7 +1388,7 @@ public class ApprovalTest2 extends BaseLoginAuthTestCase {
 	}
 
 	// 测试设置查看和删除规则
-//	@Test
+	@Test
 	public void testTargetApprovalRule() {
 
 		String url = ApprovalTest2.UPDATE_TARGET_APPROVAL_RULE_URL;
@@ -1463,7 +1463,7 @@ public class ApprovalTest2 extends BaseLoginAuthTestCase {
 	}
 
 	//   查看我的审批（客户端）（完成）
-	@Test
+//	@Test
 	public void testListMyApprovalsByScene() {
 		String url = LIST_MY_APPROVALS_URL;
 		logon();
