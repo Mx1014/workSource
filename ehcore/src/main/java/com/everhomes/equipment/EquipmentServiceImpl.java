@@ -178,7 +178,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -350,6 +352,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -3188,6 +3191,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		template.setStatus(Status.INACTIVE.getCode());
+		template.setDeleteUid(UserContext.current().getUser().getId());
+		template.setDeleteTime(new Timestamp(System.currentTimeMillis()));
 		equipmentProvider.updateEquipmentInspectionTemplates(template);
 		
 		List<EquipmentInspectionStandards> standards = equipmentProvider.listEquipmentInspectionStandardsByTemplateId(template.getId());

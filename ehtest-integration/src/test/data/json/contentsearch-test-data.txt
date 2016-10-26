@@ -1,0 +1,33 @@
+{
+  "eh_search_types": [
+    {
+		"id":1,
+		"namespace_id":0,
+		"name":"快讯",
+		"content_type":"news",
+		"status":1,
+		"create_time":"2016-09-08 10:08:57"
+	},{
+		"id":2,
+		"namespace_id":0,
+		"name":"活动",
+		"content_type":"activity",
+		"status":1,
+		"create_time":"2016-09-08 10:08:57"
+	},{
+		"id":3,
+		"namespace_id":0,
+		"name":"话题",
+		"content_type":"topic",
+		"status":1,
+		"create_time":"2016-09-08 10:08:57"
+	},{
+		"id":4,
+		"namespace_id":0,
+		"name":"投票",
+		"content_type":"poll",
+		"status":1,
+		"create_time":"2016-09-08 10:08:57"
+	}
+  ]
+}
