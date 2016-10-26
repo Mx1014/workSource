@@ -7255,6 +7255,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
+		if(OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			organization = this.checkOrganization(organization.getDirectlyEnterpriseId());
+		}
+
 		VisibleFlag visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
 
 		if(null == visibleFlag){
@@ -7270,10 +7274,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<Long> organizationIds = new ArrayList<Long>();
 		organizationIds.add(organization.getId());
 		for (Organization org : organizations) {
-			if(org.getDirectlyEnterpriseId().equals(organization.getId())){
-				organizationIds.add(organization.getId());
-			}
-
+			organizationIds.add(org.getId());
 		}
 
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(cmd.getContactToken(), organizationIds);
