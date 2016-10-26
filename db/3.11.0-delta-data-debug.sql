@@ -49,10 +49,10 @@ UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016102403","v
 UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016102403","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://alpha.lab.everhomes.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 0 AND scene_type = 'pm_admin';
 
 -- 物业报修2.5 by sunwen 20161025
-
+delete from eh_categories where id = 6;
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 	VALUES ('6', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0');
-
+update eh_configurations set value = 6 where id = 122;
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 	VALUES ('920', '0', '完成回访', '任务管理 完成回访', NULL);
