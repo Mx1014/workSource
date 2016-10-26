@@ -2,6 +2,7 @@ package com.everhomes.rest.openapi.techpark;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class CustomerRental {
@@ -12,6 +13,7 @@ public class CustomerRental {
     private String number;
     
     /** 客户合同，多个 */
+    @ItemType(CustomerContract.class)
     private List<CustomerContract> contracts;
 
     public String getName() {
