@@ -1970,7 +1970,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getTargetType(), cmd.getTargetId());
 		ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
-		if (null == map) {
+		if (null != map && approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId()) != null) {
+			approvalRule = this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
+		}
+		else{
 			approvalRule.setName(cmd.getTargetId() + "approval rule");
 			approvalRule.setNamespaceId(namespaceId);
 			this.createApprovalRule(userId, approvalRule);
@@ -1985,10 +1988,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
 			this.punchProvider.createPunchRuleOwnerMap(map);
-		}
-		else{
-			approvalRule = this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
-			
 		}
 		 
 		// 删除之前的审批流程
