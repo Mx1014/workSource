@@ -2018,14 +2018,18 @@ public class ApprovalServiceImpl implements ApprovalService {
 			approvalRuleFlowMap.setFlowId(approvalFlow.getId());
 			approvalRuleFlowMap.setStatus(CommonStatus.ACTIVE.getCode());
 			approvalRuleFlowMapProvider.createApprovalRuleFlowMap(approvalRuleFlowMap);
-			for(ApprovalFlowLevelDTO fl : r.getLevelList()){
-				ApprovalFlowLevel ap = new ApprovalFlowLevel();
-				ap.setFlowId(approvalFlow.getId());
-				ap.setLevel(fl.getLevel());
-				for(ApprovalUser a : fl.getApprovalUserList()){
-					ap.setTargetType(a.getTargetType());
-					ap.setTargetId(a.getTargetId());
-					approvalFlowLevelProvider.createApprovalFlowLevel(ap);
+			if(null !=  r.getLevelList()){
+				for(ApprovalFlowLevelDTO fl : r.getLevelList()){
+					if (fl.getApprovalUserList() == null)
+						continue;
+					ApprovalFlowLevel ap = new ApprovalFlowLevel();
+					ap.setFlowId(approvalFlow.getId());
+					ap.setLevel(fl.getLevel());
+					for(ApprovalUser a : fl.getApprovalUserList()){
+						ap.setTargetType(a.getTargetType());
+						ap.setTargetId(a.getTargetId());
+						approvalFlowLevelProvider.createApprovalFlowLevel(ap);
+					}
 				}
 			}
 		}
