@@ -41,6 +41,7 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAtt
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentParametersDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentStandardMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemResultsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskAttachmentsDao;
@@ -54,6 +55,7 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAt
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentParameters;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentStandardMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItemResults;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachments;
@@ -67,6 +69,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipment
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentStandardMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionItemResultsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
@@ -1220,6 +1223,101 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		
 		return result.get(0);
+	}
+
+	@Override
+	public void createEquipmentInspectionItemResults(
+			EquipmentInspectionItemResults result) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionItemResults.class));
+		
+		result.setId(id);
+        
+		LOGGER.info("createEquipmentInspectionItemResults: " + result);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionItemResults.class, id));
+		EhEquipmentInspectionItemResultsDao dao = new EhEquipmentInspectionItemResultsDao(context.configuration());
+        dao.insert(result);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionItemResults.class, null);
+	}
+
+	@Override
+	public List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(
+			Long logId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionItemResultsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.TASK_LOG_ID.eq(logId));
+		 
+		List<EquipmentInspectionItemResults> result = new ArrayList<EquipmentInspectionItemResults>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionItemResults.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
+	}
+
+	@Override
+	public List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(String targetType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
+		
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
+		 
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result;
+	}
+
+	@Override
+	public List<EquipmentStandardMap> listEquipmentStandardMap(
+			CrossShardListingLocator locator, Integer pageSize) {
+
+		List<EquipmentStandardMap> maps = new ArrayList<EquipmentStandardMap>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEquipmentInspectionEquipmentStandardMap.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+            
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+            	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.lt(locator.getAnchor()));
+            }
+            
+            query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.desc());
+            query.addLimit(pageSize - maps.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	maps.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
+                return null;
+            });
+
+            if (maps.size() >= pageSize) {
+                locator.setAnchor(maps.get(maps.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return maps;
 	}
 
 }

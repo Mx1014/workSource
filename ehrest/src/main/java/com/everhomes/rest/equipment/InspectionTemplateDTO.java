@@ -1,5 +1,6 @@
 package com.everhomes.rest.equipment;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -28,7 +29,7 @@ public class InspectionTemplateDTO {
 	
 	private String name;
 	
-	private Long createTime;
+	private Timestamp createTime;
 	
 	@ItemType(InspectionItemDTO.class)
 	private List<InspectionItemDTO> items;
@@ -65,11 +66,11 @@ public class InspectionTemplateDTO {
 		this.name = name;
 	}
 
-	public Long getCreateTime() {
+	public Timestamp getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Long createTime) {
+	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
 

@@ -143,12 +143,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
-        
-        if(cmd.getReviewResult() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
-        
-        if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
+//        
+//        if(cmd.getReviewResult() != null)
+//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
+//        
+//        if(cmd.getReviewStatus() != null)
+//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -179,11 +179,6 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
     		if(group != null)
     			dto.setTargetName(group.getName());
 
-//    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-//            if(standard != null) {
-//            	dto.setStandardName(standard.getName());
-//            }
-            
     		dtos.add(dto);
         }
         

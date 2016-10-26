@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>ownerId: 巡检项所属组织等的id</li>
  *  <li>ownerType: 巡检项所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>taskId: 任务id</li>
+ *  <li>taskLogId: 任务操作记录id</li>
  *  <li>targetType: 对象类型 如equipment</li>
  *  <li>targetId: 对象id</li>
  *  <li>itemId: 巡检项id</li>
@@ -18,12 +20,16 @@ import com.everhomes.util.StringHelper;
  *  <li>normalFlag: 是否正常</li>
  * </ul>
  */
-public class InspectionItemLog {
+public class InspectionItemResult {
 	@NotNull
 	private Long ownerId;
 	
 	@NotNull
 	private String ownerType;
+	
+	private Long taskId;
+	
+	private Long taskLogId;
 	
 	private String targetType;
 	
@@ -55,6 +61,22 @@ public class InspectionItemLog {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Long getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
+
+	public Long getTaskLogId() {
+		return taskLogId;
+	}
+
+	public void setTaskLogId(Long taskLogId) {
+		this.taskLogId = taskLogId;
 	}
 
 	public Long getItemId() {

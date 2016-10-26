@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  *  <li>processEndTime: 操作截止时间</li>
  *  <li>processResult: 操作结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskProcessResult}</li>
  *  <li>processMessage: 操作内容</li>
- *  <li>itemLogs: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemLog}</li>
+ *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  *  <li>createTime: 创建时间</li>
  *  <li>attachments: 附件， 参考{@link com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO}</li>
  *  <li>reviewResult: 对巡检完成、维修完成、需维修三种需要审阅的记录补充审阅记录 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
@@ -55,8 +55,8 @@ public class EquipmentTaskLogsDTO {
 	
 	private String processMessage;
 
-	@ItemType(InspectionItemLog.class)
-    private List<InspectionItemLog> itemLogs; 
+	@ItemType(InspectionItemResult.class)
+    private List<InspectionItemResult> itemResults; 
 	
 	private Timestamp createTime;
 	
@@ -169,12 +169,12 @@ public class EquipmentTaskLogsDTO {
 		this.processMessage = processMessage;
 	}
 
-	public List<InspectionItemLog> getItemLogs() {
-		return itemLogs;
+	public List<InspectionItemResult> getItemResults() {
+		return itemResults;
 	}
 
-	public void setItemLogs(List<InspectionItemLog> itemLogs) {
-		this.itemLogs = itemLogs;
+	public void setItemResults(List<InspectionItemResult> itemResults) {
+		this.itemResults = itemResults;
 	}
 
 	public Timestamp getCreateTime() {

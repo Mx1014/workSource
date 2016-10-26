@@ -73,6 +73,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentSearcher;
+import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.user.User;
@@ -101,6 +102,9 @@ public class EquipmentController extends ControllerBase {
 	
 	@Autowired
 	private EquipmentTasksSearcher equipmentTasksSearcher;
+	
+	@Autowired
+	private EquipmentStandardMapSearcher equipmentStandardMapSearcher;
 	
 //	/**
 //	 * <b>URL: /equipment/creatEquipmentStandard</b>
@@ -224,7 +228,7 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = SearchEquipmentStandardRelationsResponse.class)
 	public RestResponse searchEquipmentStandardRelations(SearchEquipmentStandardRelationsCommand cmd) {
 		
-		SearchEquipmentStandardRelationsResponse relations = equipmentSearcher.queryEquipmentStandardRelations(cmd);
+		SearchEquipmentStandardRelationsResponse relations = equipmentStandardMapSearcher.query(cmd);
 		
 		RestResponse response = new RestResponse(relations);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -378,7 +382,7 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("importEquipments")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+    public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "_attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){

@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>verificationResult: 上报结果  参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>attachments: 上报内容图片</li>
  *  <li>message: 上报内容文字</li>
- *  <li>itemLogs: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemLog}</li>
+ *  <li>itemResults: 设备参数 参考{@link com.everhomes.rest.equipment.InspectionItemResult}</li>
  *  <li>ownerId: 设备所属的主体id</li>
  *  <li>ownerType: 设备所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  * </ul>
@@ -38,8 +38,8 @@ public class ReportEquipmentTaskCommand {
 	
 	private String message;
 	
-	@ItemType(InspectionItemLog.class)
-    private List<InspectionItemLog> itemLogs; 
+	@ItemType(InspectionItemResult.class)
+    private List<InspectionItemResult> itemResults; 
 	
 	public Long getTaskId() {
 		return taskId;
@@ -73,12 +73,12 @@ public class ReportEquipmentTaskCommand {
 		this.message = message;
 	}
 
-	public List<InspectionItemLog> getItemLogs() {
-		return itemLogs;
+	public List<InspectionItemResult> getItemResults() {
+		return itemResults;
 	}
 
-	public void setItemLogs(List<InspectionItemLog> itemLogs) {
-		this.itemLogs = itemLogs;
+	public void setItemResults(List<InspectionItemResult> itemResults) {
+		this.itemResults = itemResults;
 	}
 
 	public Long getOwnerId() {
