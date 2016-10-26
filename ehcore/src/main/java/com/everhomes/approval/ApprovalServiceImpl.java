@@ -1977,17 +1977,21 @@ public class ApprovalServiceImpl implements ApprovalService {
 			approvalRule.setName(cmd.getTargetId() + "approval rule");
 			approvalRule.setNamespaceId(namespaceId);
 			this.createApprovalRule(userId, approvalRule);
-			
-			map = new PunchRuleOwnerMap();
-			map.setReviewRuleId(approvalRule.getId());
-			map.setOwnerId(cmd.getOwnerId());
-			map.setOwnerType(cmd.getOwnerType());
-			map.setTargetId(cmd.getTargetId());
-			map.setTargetType(cmd.getTargetType());
-			map.setCreatorUid(UserContext.current().getUser().getId());
-			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			
-			this.punchProvider.createPunchRuleOwnerMap(map);
+			if(null == map ){
+				map = new PunchRuleOwnerMap();
+				map.setReviewRuleId(approvalRule.getId());
+				map.setOwnerId(cmd.getOwnerId());
+				map.setOwnerType(cmd.getOwnerType());
+				map.setTargetId(cmd.getTargetId());
+				map.setTargetType(cmd.getTargetType());
+				map.setCreatorUid(UserContext.current().getUser().getId());
+				map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				this.punchProvider.createPunchRuleOwnerMap(map);
+			}
+			else{
+				map.setReviewRuleId(approvalRule.getId());
+				this.punchProvider.updatePunchRuleOwnerMap(map);
+			}
 		}
 		 
 		// 删除之前的审批流程
