@@ -1,0 +1,166 @@
+package com.everhomes.energy;
+
+import com.everhomes.rest.energy.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+/**
+ * 能耗管理的service
+ * Created by xq.tian on 2016/10/25.
+ */
+public interface EnergyConsumptionService {
+
+    /**
+     * 创建能耗表记(水表, 电表)
+     * @param cmd   cmd
+     * @return  返回创建好的表记DTO
+     */
+    EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd);
+
+    /**
+     * 换表
+     * @param cmd   cmd
+     */
+    void changeEnergyMeter(ChangeEnergyMeterCommand cmd);
+
+    /**
+     * 修改表记
+     * @param cmd   cmd
+     * @return  返回表记DTO
+     */
+    EnergyMeterDTO updateEnergyMeter(UpdateEnergyMeterCommand cmd);
+
+    /**
+     * 搜索表记
+     * @param cmd   cmd
+     * @return  SearchEnergyMeterResponse
+     */
+    SearchEnergyMeterResponse searchEnergyMeter(SearchEnergyMeterCommand cmd);
+
+    /**
+     * 更新表记的状态
+     * @param cmd   cmd
+     */
+    void updateEnergyMeterStatus(UpdateEnergyMeterStatusCommand cmd);
+
+    /**
+     * 读表
+     * @param cmd   cmd
+     * @return  返回读表记录DTO
+     */
+    EnergyMeterReadingLogDTO readEnergyMeter(ReadEnergyMeterCommand cmd);
+
+    /**
+     * 批量修改表记的属性(单价, 倍率, 用量计算公式, 费用计算公式)
+     * @param cmd   cmd
+     */
+    void batchUpdateEnergyMeterSettings(BatchUpdateEnergyMeterSettingsCommand cmd);
+
+    /**
+     * 搜索读表记录
+     * @param cmd   cmd
+     * @return SearchEnergyMeterReadingLogsResponse
+     */
+    SearchEnergyMeterReadingLogsResponse searchEnergyMeterReadingLogs(SearchEnergyMeterReadingLogsCommand cmd);
+
+    /**
+     * 删除读表记录(只能删除当天的记录)
+     * @param cmd   cmd
+     */
+    void deleteEnergyMeterReadingLog(DeleteEnergyMeterReadingLogCommand cmd);
+
+    /**
+     * 修改默认的表记属性
+     * (默认单价, 默认倍率, 默认计算公式等)
+     * @param cmd   cmd
+     * @return  EnergyMeterSettingLogDTO
+     */
+    EnergyMeterSettingLogDTO updateEnergyMeterDefaultSetting(UpdateEnergyMeterDefaultSettingCommand cmd);
+
+    /**
+     * 创建计算公式
+     * @param cmd   cmd
+     * @return  EnergyMeterFormulaDTO
+     */
+    EnergyMeterFormulaDTO createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd);
+
+    /**
+     * 新建表记的分类(项目, 性质)
+     * @param cmd   cmd
+     * @return  EnergyMeterCategoryDTO
+     */
+    EnergyMeterCategoryDTO createEnergyMeterCategory(CreateEnergyMeterCategoryCommand cmd);
+
+    /**
+     * 修改表记分类
+     * @param cmd   cmd
+     * @return  EnergyMeterCategoryDTO
+     */
+    EnergyMeterCategoryDTO updateEnergyMeterCategory(UpdateEnergyMeterCategoryCommand cmd);
+
+    /**
+     * 删除表记的分类(项目, 性质)
+     * @param cmd   cmd
+     */
+    void deleteEnergyMeterCategory(DeleteEnergyMeterCategoryCommand cmd);
+
+    /**
+     * 导入表记
+     * @param cmd   cmd
+     * @param file  Excel文件
+     */
+    void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file);
+
+    /**
+     * 水电能耗每日报表
+     * @param cmd   cmd
+     * @return  EnergyStatDTO
+     */
+    EnergyStatDTO getEnergyStatByDay(EnergyStatCommand cmd);
+
+    /**
+     * 水电能耗每月报表
+     * @param cmd   cmd
+     * @return  EnergyStatDTO
+     */
+    EnergyStatDTO getEnergyStatByMonth(EnergyStatCommand cmd);
+
+    /**
+     * 年度水电用量收支对比表
+     * @param cmd   cmd
+     */
+    List<EnergyStatByYearDTO> getEnergyStatisticByYear(EnergyStatCommand cmd);
+
+    /**
+     * 各项目月水电能耗情况（与去年同期相比)
+     * @param cmd   cmd
+     */
+    List<EnergyStatByYearDTO> getEnergyStatisticByYoy(EnergyStatCommand cmd);
+
+    /**
+     * 换表记录列表
+     */
+    List<EnergyMeterChangeLogDTO> listEnergyMeterChangeLogs(ListMeterChangeLogCommand cmd);
+
+    /**
+     * 获取能耗的计算公式列表
+     * @param cmd   公式类型参数, {@link com.everhomes.rest.energy.EnergyFormulaType}
+     */
+    List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyFormulasCommand cmd);
+
+    /**
+     * 获取默认设置属性
+     */
+    EnergyMeterDefaultSettingDTO listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd);
+
+    /**
+     * 公式变量列表
+     */
+    List<EnergyFormulaVariableDTO> listEnergyFormulaVariables();
+
+    /**
+     * 获取表记分类列表
+     */
+    List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListMeterCategoriesCommand cmd);
+}

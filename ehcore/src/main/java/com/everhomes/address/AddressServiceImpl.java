@@ -137,7 +137,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
-        // TODO monitor change notifications for cache invalidation
+        // TODO monitor changeEnergyMeter notifications for cache invalidation
         return Action.none;
     }
     
