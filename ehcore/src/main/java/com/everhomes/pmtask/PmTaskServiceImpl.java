@@ -1562,7 +1562,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //				stars[3] += statistics.getStar4();
 //				stars[4] += statistics.getStar5();
 				
-				Category category = checkCategory(statistics.getCategoryId());
+				Category category = checkCategory(statistics.getTaskCategoryId());
 				Row tempRow = sheet.createRow(i);
 				
 				tempRow.createCell(0);
@@ -1677,12 +1677,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PmTaskStatistics pts = list.get(i);
-			Category category = checkCategory(pts.getCategoryId());
+			Category category = checkCategory(pts.getTaskCategoryId());
 			Community community = communityProvider.findCommunityById(pts.getOwnerId());
 			tempRow.createCell(0).setCellValue(community.getName());
 			tempRow.createCell(1).setCellValue(category.getName());
 			tempRow.createCell(2).setCellValue(pts.getTotalCount());
-			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getCategoryId(), null);
+			Integer totalCount = pmTaskProvider.countTaskStatistics(pts.getOwnerId(), pts.getTaskCategoryId(), null);
 			tempRow.createCell(3).setCellValue(totalCount);
 			tempRow.createCell(4).setCellValue(pts.getUnprocessCount());
 			CellStyle cellStyle = wb.createCellStyle();
