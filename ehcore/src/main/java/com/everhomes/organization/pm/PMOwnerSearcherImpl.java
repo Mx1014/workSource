@@ -182,6 +182,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                     List<ApartmentDTO> apartments = apts.second();
                     if(apartments.size() != 0)
                         addressIds = apartments.stream().map(ApartmentDTO::getAddressId).collect(Collectors.toList());
+                    pmOwners = processCommunityPmOwners(pmOwners, addressIds);
 
                 } else {
                 	ListApartmentByBuildingNameCommand listBuildingNameCmd = new ListApartmentByBuildingNameCommand();
