@@ -211,7 +211,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                         UserContext.current().getUser().getLocale());
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
                 
-                dto.setBirthday(r.getBirthday().getTime());
+                dto.setBirthday(null!=r.getBirthday()?r.getBirthday().getTime():null);
                 //添加门牌
                 List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(r.getNamespaceId(), r.getId());
                 dto.setAddresses(addresses.stream().map(r2 -> {
