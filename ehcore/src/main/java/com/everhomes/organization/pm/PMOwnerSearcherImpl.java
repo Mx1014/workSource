@@ -1,5 +1,7 @@
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleString;
@@ -10,6 +12,7 @@ import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
 import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
 import com.everhomes.rest.user.UserLocalStringCode;
 import com.everhomes.search.AbstractElasticSearch;
@@ -58,6 +61,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 
     @Autowired
     private AddressService addressService;
+    
+    @Autowired
+	private AddressProvider addressProvider;
 
 	@Override
 	public void deleteById(Long id) {
@@ -204,6 +210,20 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 LocaleString genderLocale = localeStringProvider.find(UserLocalStringCode.SCOPE, String.valueOf(r.getGender()),
                         UserContext.current().getUser().getLocale());
                 dto.setGender(genderLocale != null ? genderLocale.getText() : "");
+                
+                dto.setBirthday(r.getBirthday().getTime());
+                //添加门牌
+                List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(r.getNamespaceId(), r.getId());
+                dto.setAddresses(addresses.stream().map(r2 -> {
+                	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
+                	Address address = addressProvider.findAddressById(r2.getAddressId());
+                	d.setAddressId(address.getId());
+                	d.setAddress(address.getAddress());
+                	d.setApartment(address.getApartmentName());
+                	d.setBuilding(address.getBuildingName());
+                	return d;
+                }).collect(Collectors.toList()));
+                
                 return dto;
             }).collect(Collectors.toList()));
 
