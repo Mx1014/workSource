@@ -1938,7 +1938,21 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ruleIdList.add(approvalRule.getId());
 		List<ApprovalRuleFlowMap> ruleList = approvalRuleFlowMapProvider.listApprovalRuleFlowMapByRuleIds(ruleIdList);
 
-		List<RuleFlowMap> ruleFlowMapList = ruleList.stream().map(v -> ConvertHelper.convert(v, RuleFlowMap.class))
+		List<RuleFlowMap> ruleFlowMapList = ruleList.stream().map(v -> {
+			
+			RuleFlowMap result = ConvertHelper.convert(v, RuleFlowMap.class);
+
+			ApprovalFlow approvalFlow = approvalFlowProvider.findApprovalFlowById(v.getFlowId());
+			if (approvalFlow == null || approvalFlow.getStatus().byteValue() == CommonStatus.INACTIVE.getCode()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"not exist approval flow");
+			}
+			List<ApprovalFlow> approvalFlowList  = new ArrayList<ApprovalFlow>();
+			approvalFlowList.add(approvalFlow); 
+			List<ApprovalFlowDTO> afDTO = processApprovalFlowLevelList(approvalFlowList,cmd.getOwnerType(), cmd.getOwnerId());
+			result.setLevelList(afDTO.get(0).getLevelList());
+			return result;
+			})
 				.collect(Collectors.toList());
 		processApprovalTypeName(ruleFlowMapList);
 		processFlowName(ruleFlowMapList);
