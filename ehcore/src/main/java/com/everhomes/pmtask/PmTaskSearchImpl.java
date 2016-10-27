@@ -182,7 +182,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         qb = QueryBuilders.boolQuery();
         
         if(StringUtils.isNotBlank(queryString)){
-        	MultiMatchQueryBuilder mb = QueryBuilders.multiMatchQuery(queryString,"mobile","nickName","content");
+        	MultiMatchQueryBuilder mb = QueryBuilders.multiMatchQuery(queryString,"requestorName","requestorPhone","content");
             qb = qb.must(mb);	
         }
         

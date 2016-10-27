@@ -259,7 +259,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
     			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-    			if(null == r.getOrganizationId()){
+    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
     				User user = userProvider.findUserById(r.getCreatorUid());
         			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
         			dto.setRequestorName(user.getNickName());
@@ -635,6 +635,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null != task.getAddressId() && task.getAddressId() != 0) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
 			dto.setAddress(address.getAddress());
+		}
+		
+		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
+			User user = userProvider.findUserById(task.getCreatorUid());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			dto.setRequestorName(user.getNickName());
+			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
 		}
 		
 		//查询服务类型
@@ -1749,7 +1756,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<OrganizationMember> organizationMembers = new ArrayList<OrganizationMember>();
 		for(PmTaskTarget t: targets) {
 			OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(t.getTargetId(), cmd.getOrganizationId());
-			organizationMembers.add(m);
+			if(null != m)
+				organizationMembers.add(m);
 		}
 		
 		if(targets.size() > 0){
