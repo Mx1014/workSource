@@ -1164,8 +1164,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 	
-	private void mergeTaskCategoryList(List<PmTaskStatistics> list) {
-		
+	private List<PmTaskStatistics> mergeTaskCategoryList(List<PmTaskStatistics> list) {
+		List<PmTaskStatistics> result = new ArrayList<PmTaskStatistics>();
 		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 		for(PmTaskStatistics p: list){
 			Long id = p.getTaskCategoryId();
@@ -1186,10 +1186,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 			tempMap.put(id, p);
 		}
-		list.clear();
+	
 		for(PmTaskStatistics p1:tempMap.values()){
-			list.add(p1);
+			result.add(p1);
 		}
+		
+		return result;
 	}
 	
 	private List<PmTaskStatistics> mergeTaskOwnerList(List<PmTaskStatistics> list) {
@@ -1211,7 +1213,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		
 		for(List<PmTaskStatistics>  l:tempMap.values()){
-			mergeTaskCategoryList(l);
+			l = mergeTaskCategoryList(l);
 			result.addAll(l);
 		}
 		return result;
@@ -1237,11 +1239,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		if(null != cmd.getOwnerId()){
 			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
-			mergeTaskCategoryList(list);
+			list = mergeTaskCategoryList(list);
 			response.setOwnerName(community.getName());
 		}else{
 			list = mergeTaskOwnerList(list);
-			mergeTaskCategoryList(list);
+			list = mergeTaskCategoryList(list);
 		}
 		
 		int totalCount = 0;
