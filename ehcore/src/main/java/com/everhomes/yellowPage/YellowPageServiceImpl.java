@@ -20,6 +20,7 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -574,9 +576,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
-        String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
-        String url = String.format(detailUrl, dto.getId(), dto.getId(), RandomStringUtils.random(4));
-        dto.setDetailUrl(url);
+        try {
+            String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
+            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt(2));
+            dto.setDetailUrl(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
