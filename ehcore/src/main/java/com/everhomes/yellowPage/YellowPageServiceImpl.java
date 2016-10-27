@@ -19,7 +19,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -28,12 +28,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.c;
 
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
@@ -928,6 +931,21 @@ public class YellowPageServiceImpl implements YellowPageService {
                     String.valueOf(dto.getDisplayMode()), locale, "");
             dto.setDisplayModeName(displayCategoryName);
             return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
+                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
+        return entityResultList.stream().map(r -> {
+            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(namespaceId,
+                    r.getId(), CategoryAdminStatus.ACTIVE);
+            if (childCategories != null && childCategories.size() > 0) {
+                r.setDisplayMode(childCategories.get(0).getDisplayMode());
+            }
+            return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
         }).collect(Collectors.toList());
     }
 

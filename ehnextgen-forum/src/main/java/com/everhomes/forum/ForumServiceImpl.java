@@ -32,6 +32,9 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.activity.Activity;
+import com.everhomes.activity.ActivityProivider;
+import com.everhomes.activity.ActivityRoster;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -71,7 +74,12 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -133,6 +141,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -201,6 +210,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private AclProvider aclProvider;
+    
+    @Autowired
+    private ActivityProivider activityProivider;
     
     @Autowired
     private DbProvider dbProvider;
@@ -297,6 +309,16 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+    	//报名人数限制必须在1到10000之间，add by tt, 20161013
+    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getMaxQuantity()!= null) {
+			if (cmd.getMaxQuantity() < 1) {
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_GREATER_THAN_ZERO,
+						"max quantity should greater than 0!");
+			}else if (cmd.getMaxQuantity() > 10000) {
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_NOT_GREATER_THAN_10000,
+						"max quantity should not greater than 10000");
+			}
+		}
         //checkForumPostPrivilege(cmd.getForumId());
         long startTime = System.currentTimeMillis();
         
@@ -545,6 +567,11 @@ public class ForumServiceImpl implements ForumService {
                     + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
             }
             
+            // 如果是活动，返回活动内容的链接，add by tt, 20161013
+            if (postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
+				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
+			}
+            
             return postDto;
 //            post = this.forumProvider.findPostById(postId);
 //            this.forumProvider.populatePostAttachments(post);
@@ -557,6 +584,18 @@ public class ForumServiceImpl implements ForumService {
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
+    }
+    
+    private String getActivityContentUrl(Long id){
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	String homeUrl = configProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+		String contentUrl = configProvider.getValue(namespaceId, ConfigConstants.ACTIVITY_CONTENT_URL, "");
+		if (homeUrl.length() == 0 || contentUrl.length() == 0) {
+			LOGGER.error("Invalid home url or content url, homeUrl=" + homeUrl + ", contentUrl=" + contentUrl);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid home url or content url");
+		} else {
+			return homeUrl + contentUrl + "?id=" + id;
+		}
     }
     
     public List<PostDTO> getTopicById(List<Long> topicIds, Long communityId, boolean isDetail) {
@@ -712,6 +751,10 @@ public class ForumServiceImpl implements ForumService {
                     		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
                     	}
                     }
+                    //如果是活动创建者删除活动，通知到已报名的人，add by tt, 20161012
+                    if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
+					}
                    return null;
                 });
                 
@@ -739,6 +782,10 @@ public class ForumServiceImpl implements ForumService {
                             		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
                             	}
                             }
+                            //如果是活动创建者删除活动，通知到已报名的人，add by tt, 20161012
+                            if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+        						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
+        					}
                         return null;
                         });
                 } catch(Exception e) {
@@ -749,6 +796,26 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
         }
+    }
+    
+    //当创建者删除活动时发消息通知已报名的人
+    private void sendMessageWhenCreatorDeleteActivity(Long activityId, Long userId){
+    	Activity activity = activityProivider.findActivityById(activityId);
+    	if (activity == null) {
+			return ;
+		}
+    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+    	String scope = ActivityNotificationTemplateCode.SCOPE;
+		int code = ActivityNotificationTemplateCode.CREATOR_DELETE_ACTIVITY;
+		Map<String, Object> map = new HashMap<>();
+		map.put("tag", activity.getTag());
+		map.put("title", activity.getSubject());
+		final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+    	activityRosters.forEach(r->{
+    		if (r.getUid().longValue() != userId.longValue()) {
+    			sendMessageToUser(r.getUid().longValue(), content, null);
+			}
+    	});
     }
     
     @Override
@@ -2524,6 +2591,9 @@ public class ForumServiceImpl implements ForumService {
 			post.setMediaDisplayFlag(cmd.getMediaDisplayFlag());
 		}
         
+        //添加人数限制，add by tt, 20161012
+        post.setMaxQuantity(cmd.getMaxQuantity());
+        
         return post;
     }
     
@@ -2680,7 +2750,8 @@ public class ForumServiceImpl implements ForumService {
     private void processPostLocation(long userId, NewTopicCommand cmd, Post post) {
         Double longitude = cmd.getLongitude();
         Double latitude = cmd.getLatitude();
-        if(latitude != null && latitude != null) {
+        
+        if(longitude != null && latitude != null) {
             post.setLongitude(longitude);
             post.setLatitude(latitude);
             String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
@@ -3254,6 +3325,8 @@ public class ForumServiceImpl implements ForumService {
                 
                 populatePostForumNameInfo(userId, post);
                 
+                processLocation(post);
+                
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
@@ -3281,6 +3354,15 @@ public class ForumServiceImpl implements ForumService {
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Populate post, userId=" + userId + ", postId=" + post.getId() + ", elapse=" + (endTime - startTime));
         }
+    }
+
+    private void processLocation(Post post){
+    	// 如果安卓没获取到经纬度会传特别小的数字过来，IOS无法解析出来，add by tt, 20161021
+    	if (post != null && post.getLatitude() != null && post.getLongitude() != null
+    			&& Math.abs(post.getLatitude().doubleValue()) < 0.000000001 && Math.abs(post.getLongitude().doubleValue()) < 0.000000001) {
+			post.setLatitude(null);
+			post.setLongitude(null);
+		}
     }
     
 //    private void populatePostCreatorInfo(long userId, Post post) {
@@ -5122,6 +5204,34 @@ public class ForumServiceImpl implements ForumService {
                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
         }   
         return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+	}
+
+	@Override
+	public GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id cannot be empty");
+		}
+		
+		Post post = forumProvider.findPostById(cmd.getId());
+		if (post != null) {
+			String content = null;
+			String contentType = null;
+			Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+			if (activity != null && activity.getDescription() != null) {
+				content = activity.getDescription();
+				contentType = activity.getContentType();
+			}else {
+				content = post.getContent();
+				contentType = post.getContentType();
+			}
+			forumProvider.populatePostAttachments(post);
+			populatePostAttachements(UserContext.current().getUser().getId(), post, post.getAttachments());
+			
+			return new GetActivityDetailByIdResponse(contentType, content, post.getAttachments().stream().map(a->ConvertHelper.convert(a, AttachmentDTO.class)).collect(Collectors.toList()));
+		}
+		
+		return null;
 	}
     
 }

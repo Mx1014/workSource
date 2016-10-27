@@ -3,6 +3,8 @@ package com.everhomes.forum;
 
 import java.util.List;
 
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
 import com.everhomes.rest.forum.AssignedScopeDTO;
@@ -111,5 +113,6 @@ public interface ForumService {
     ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd);
     
     SearchContentsBySceneReponse searchContents(SearchContentsBySceneCommand cmd, SearchContentType contentType);
-	ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd); 
+	ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
+	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd); 
 }

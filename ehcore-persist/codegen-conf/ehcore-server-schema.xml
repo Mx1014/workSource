@@ -112,6 +112,7 @@
         eh_request_templates | eh_request_templates_namespace_mapping | eh_request_attachments | eh_service_alliance_requests | eh_service_alliance_notify_targets | eh_settle_requests |
 		eh_region_codes | eh_stat_active_users | eh_item_service_categries |
 		eh_pm_task_targets | eh_parking_card_categories |
+		eh_warning_settings | eh_service_alliance_reservation_requests |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
