@@ -220,9 +220,10 @@ public class PmProviderImpl implements PmTaskProvider{
     		
     		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
     		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
-    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
-    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
-    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
+//    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode())
+//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
+//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
+    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode()));
     		query.groupBy(Tables.EH_PM_TASKS.ID);
 
     	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){
