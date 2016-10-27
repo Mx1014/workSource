@@ -5252,7 +5252,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(c.getIntegralTag4() != null && c.getIntegralTag4() == 1){
 				dto.setContactToken(null);
 			}
-			
+
+			if(null == VisibleFlag.fromCode(c.getVisibleFlag())){
+				dto.setVisibleFlag(VisibleFlag.SHOW.getCode());
+			}
+
 			/**
 			 * 补充用户角色
 			 */
@@ -7403,6 +7407,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(!StringUtils.isEmpty(r.getInitial())){
 				dto.setInitial(r.getInitial().replace("~", "#"));
 			}
+
 			return dto;
 		}).collect(Collectors.toList());
 
