@@ -21,6 +21,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -700,6 +701,62 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             query.fetch().map((r) -> {
             	
             	requests.add(ConvertHelper.convert(r, SettleRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
+	}
+
+
+	@Override
+	public void createReservationRequests(ReservationRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceReservationRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceReservationRequestsDao dao = new EhServiceAllianceReservationRequestsDao(context.configuration());
+        dao.insert(request);
+	}
+
+
+	@Override
+	public ReservationRequests findReservationRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceReservationRequestsDao dao = new EhServiceAllianceReservationRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ReservationRequests.class);
+	}
+
+
+	@Override
+	public List<ReservationRequests> listReservationRequests(
+			CrossShardListingLocator locator, int pageSize) {
+		List<ReservationRequests> requests = new ArrayList<ReservationRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceReservationRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceReservationRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, ReservationRequests.class));
                 return null;
             });
 
