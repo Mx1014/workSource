@@ -1,6 +1,7 @@
 package com.everhomes.test.junit.approval;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.jooq.Record;
@@ -1388,7 +1389,7 @@ public class ApprovalTest2 extends BaseLoginAuthTestCase {
 	}
 
 	// 测试设置查看和删除规则
-	@Test
+//	@Test
 	public void testTargetApprovalRule() {
 
 		String url = ApprovalTest2.UPDATE_TARGET_APPROVAL_RULE_URL;
@@ -1487,6 +1488,56 @@ public class ApprovalTest2 extends BaseLoginAuthTestCase {
 		assertNotNull(myResponse);
 		List<BriefApprovalRequestDTO> list = myResponse.getApprovalRequestList();
 		assertEquals(2, list.size());
+
+	} 
+	private String createApprovalRequestBySceneOvertime(String url) {
+		// 创建请假申请
+		CreateApprovalRequestBySceneCommand cmd = new CreateApprovalRequestBySceneCommand();
+		cmd.setSceneToken(getSceneToken());
+		cmd.setApprovalType(ApprovalType.OVERTIME.getCode());
+//		cmd.setCategoryId(1L);
+		cmd.setReason("加班原因");
+		cmd.setEffectiveDate(new Date().getTime());
+		cmd.setHourLength(8.0);
+//		List<TimeRange> timeRangeList = new ArrayList<>();
+//		TimeRange timeRange = new TimeRange();
+//		timeRange.setType(TimeRangeType.ALL_DAY.getCode());
+//		timeRange.setFromTime(1474247173000L);
+//		timeRange.setEndTime(1474527973000L);
+//		timeRangeList.add(timeRange);
+//		cmd.setTimeRangeList(timeRangeList);
+		List<AttachmentDescriptor> attachmentDescriptorList = new ArrayList<>();
+		AttachmentDescriptor attachmentDescriptor = new AttachmentDescriptor();
+		attachmentDescriptor.setContentType(NewsCommentContentType.IMAGE.getCode());
+		attachmentDescriptor
+				.setContentUri("http://content-1.zuolin.com:80/image/aW1hZ2UvTVRvMlpUTmhNVGRqTVRrNE0yUXpNR0k0WWpJM1pEUmhPVEUxWmpKbFpqaG1OQQ?token=K08C4RsCo8wl-S31M4wo3qLhkYBhpF-aHW_fjc7OyRj-Z_1EKEsaBTRVOtWeH8tXje_LMI7geEo_B_IYnzhwyiOMG_n3k_V9yKwJCnjtj-W-4LZsOnC4krMFe1l3OD8u");
+		attachmentDescriptorList.add(attachmentDescriptor);
+		AttachmentDescriptor attachmentDescriptor2 = new AttachmentDescriptor();
+		attachmentDescriptor2.setContentType(NewsCommentContentType.IMAGE.getCode());
+		attachmentDescriptor2
+				.setContentUri("http://content-1.zuolin.com:80/image/aW1hZ2UvTVRvMlpUTmhNVGRqTVRrNE0yUXpNR0k0WWpJM1pEUmhPVEUxWmpKbFpqaG1OQQ?token=K08C4RsCo8wl-S31M4wo3qLhkYBhpF-aHW_fjc7OyRj-Z_1EKEsaBTRVOtWeH8tXje_LMI7geEo_B_IYnzhwyiOMG_n3k_V9yKwJCnjtj-W-4LZsOnC4krMFe1l3OD8u");
+		attachmentDescriptorList.add(attachmentDescriptor2);
+		cmd.setAttachmentList(attachmentDescriptorList);
+
+		ApprovalCreateApprovalRequestBySceneRestResponse response = httpClientService.restPost(url, cmd,
+				ApprovalCreateApprovalRequestBySceneRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+		CreateApprovalRequestBySceneResponse myResponse = response.getResponse();
+		assertNotNull(myResponse);
+//		assertEquals("3.3.21", myResponse.getApprovalRequest().getDescription());
+
+		return myResponse.getApprovalRequest().getRequestToken();
+	}
+
+	// 加一个加班申请
+	 @Test
+	public void testaddOverTimeApprovalRequest() {
+		 
+		logon();
+		initListData();
+		createApprovalRequestBySceneOvertime(CREATE_APPROVAL_REQUEST_BY_SCENE_URL); 
 
 	}
 }

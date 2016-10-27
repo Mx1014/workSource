@@ -124,6 +124,8 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 	}
 	private String processPunchDetail(PunchDayLog pdl) {
 		String punchDetail = null;
+		if(null == pdl )
+			return "无";
 		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay())){
 			if(null != pdl.getArriveTime() ){
 				punchDetail = minSecSF.format(pdl.getArriveTime());
