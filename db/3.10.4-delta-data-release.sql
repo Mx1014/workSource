@@ -63,3 +63,5 @@ INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `tem
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (3, '999985', '5');
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (4, '999985', '6');
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (5, '999985', '7');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (6, '999987', '1');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (7, '999987', '2');
