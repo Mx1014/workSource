@@ -349,4 +349,6 @@ public interface OrganizationService {
 	 * @return
      */
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
+	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
+	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd);
 }

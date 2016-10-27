@@ -377,6 +377,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		org.setDisplayName(organization.getName());
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setEmailDomain(org.getEmailDomain());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
@@ -525,6 +526,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			organization.setGroupId(group.getId());
+			organization.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.createOrganization(organization);
 			
 			OrganizationDetail enterprise = new OrganizationDetail();
@@ -540,6 +542,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setDisplayName(cmd.getDisplayName());
 			enterprise.setPostUri(cmd.getPostUri());
 			enterprise.setMemberCount(cmd.getMemberCount());
+			enterprise.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
 			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
@@ -632,6 +635,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setId(cmd.getId());
 			organization.setName(cmd.getName());
 			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organization.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.updateOrganization(organization);
 			
 			OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -641,6 +645,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setCreateTime(organization.getCreateTime());
 				organizationDetail.setAddress(cmd.getAddress());
 				organizationDetail.setDescription(cmd.getDescription());
+				organizationDetail.setEmailDomain(cmd.getEmailDomain());
 				organizationDetail.setAvatar(cmd.getAvatar());
 				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
 					organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
@@ -7409,6 +7414,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.error("Community not found in organization, userId={}, namespaceId={}, organizationId={}", 
                 userId, namespaceId, oranizationId);
         }
+	}
+
+	@Override
+	public List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd) {
+		// TODO Auto-generated method stub
+		//通过namespace和email 找企业
+		return null;
+	}
+
+	@Override
+	public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

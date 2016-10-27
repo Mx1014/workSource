@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.organization.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
@@ -46,6 +48,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
 @RestController
@@ -614,6 +617,24 @@ public class OrganizationAdminController extends ControllerBase {
          return res;
     }
     
+
+    /**
+     * <b>URL: /admin/org/verifyEnterpriseContact</b>
+     * <p>通过点击邮箱认证通过认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("verifyEnterpriseContact")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd) {
+//    	this.organizationService.verifyEnterpriseContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
     /**
      * <b>URL: /admin/org/batchApproveForEnterpriseContact</b>
      * <p>批量审批通过认证申请</p>
@@ -821,7 +842,7 @@ public class OrganizationAdminController extends ControllerBase {
     
     
     /**
-     * <b>URL: /org/listEnterpriseByCommunityId</b>
+     * <b>URL: /admin/org/listEnterpriseByCommunityId</b>
      * <p>后台管理 企业列表 和对于的管理员信息</p>
      */
     @RequestMapping("listEnterpriseByCommunityId")
@@ -836,7 +857,7 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/listAclRoleByUserId</b>
+     * <b>URL: /admin/org/listAclRoleByUserId</b>
      * <p>获取角色列表</p>
      */
     @RequestMapping("listAclRoleByUserId")
