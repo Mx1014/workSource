@@ -83,7 +83,9 @@ public enum VersionRealmType {
     ANDROID_INNOSPRING("Android_Innospring"),
     IOS_INNOSPRING("iOS_Innospring"),
     ANDROID_HUARUN("Android_Huarun"),
-    IOS_HUARUN("iOS_Huarun");
+    IOS_HUARUN("iOS_Huarun"),
+    WEB_ZUOLIN("Web_Zuolin"),
+    WEB_PARK("Web_Park");
     
     private String code;
     private VersionRealmType(String code) {

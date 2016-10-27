@@ -19,7 +19,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;

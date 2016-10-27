@@ -48,6 +48,7 @@ import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
+import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 
 @RestDoc(value="Pmtask controller", site="pmtask")
 @RestController
@@ -383,17 +384,35 @@ public class PmTaskController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /pmtask/exportTaskCategoryStatistics</b>
+     * <p>导出分类统计列表</p>
+     */
+    @RequestMapping("exportTaskCategoryStatistics")
+    public void exportTaskCategoryStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+    	pmTaskService.exportTaskCategoryStatistics(cmd, resp);
+    }
+    
+    /**
+     * <b>URL: /pmtask/getTaskCategoryStatistics</b>
+     * <p>获取所有项目分类统计</p>
+     */
+    @RequestMapping("getTaskCategoryStatistics")
+    @RestReturn(value=TaskCategoryStatisticsDTO.class)
+    public RestResponse getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+    	TaskCategoryStatisticsDTO res = pmTaskService.getTaskCategoryStatistics(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /pmtask/exportListStatistics</b>
      * <p>导出统计列表</p>
      */
     @RequestMapping("exportListStatistics")
-    @RestReturn(value=SearchTaskStatisticsResponse.class)
-    public RestResponse exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+    public void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
     	pmTaskService.exportListStatistics(cmd, resp);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
     }
     
     /**

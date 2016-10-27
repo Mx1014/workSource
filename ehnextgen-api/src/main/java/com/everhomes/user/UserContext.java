@@ -11,6 +11,7 @@ public class UserContext {
     private UserLogin login;
     private App callerApp;
     private Integer namespaceId;
+    private String version;
     
     public UserContext() {
     }
@@ -60,6 +61,14 @@ public class UserContext {
 		this.namespaceId = namespaceId;
 	}
 	
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
 	public static Integer getCurrentNamespaceId() {
 	    return getCurrentNamespaceId(null);
 	}
