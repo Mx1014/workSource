@@ -576,8 +576,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
-        String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
         try {
+            String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
             String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt());
             dto.setDetailUrl(url);
         } catch (UnsupportedEncodingException e) {
@@ -930,5 +930,4 @@ public class YellowPageServiceImpl implements YellowPageService {
             return dto;
         }).collect(Collectors.toList());
     }
-
 }
