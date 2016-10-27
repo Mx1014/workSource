@@ -29,6 +29,8 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetVideoCapabilityCommand;
@@ -42,8 +44,11 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.VideoSupportType;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
@@ -338,5 +343,36 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=ListOfficialActivityByNamespaceResponse.class)
     public RestResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
     	return new RestResponse(activityService.listOfficialActivityByNamespace(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/getActivityDetailById</b>
+     * <p>查询活动详情里面的内容</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityDetailById")
+    @RestReturn(value=GetActivityDetailByIdResponse.class)
+    public RestResponse getActivityDetailById(GetActivityDetailByIdCommand cmd){
+    	return new RestResponse(activityService.getActivityDetailById(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/setActivityWarning</b>
+     * <p>设置活动提醒</p>
+     */
+    @RequestMapping("setActivityWarning")
+    @RestReturn(value=ActivityWarningResponse.class)
+    public RestResponse setActivityWarning(SetActivityWarningCommand cmd){
+    	return new RestResponse(activityService.setActivityWarning(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getActivityWarning</b>
+     * <p>查询活动提醒</p>
+     */
+    @RequestMapping("getActivityWarning")
+    @RestReturn(value=ActivityWarningResponse.class)
+    public RestResponse getActivityWarning(GetActivityWarningCommand cmd){
+    	return new RestResponse(activityService.queryActivityWarning(cmd));
     }
 }

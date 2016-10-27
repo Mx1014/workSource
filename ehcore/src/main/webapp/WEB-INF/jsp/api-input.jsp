@@ -32,7 +32,7 @@
         </td>
         <!-- <td><input style="width:99%;" name="${p.paramName}" /></td> -->
         <c:choose>
-	        <c:when test="${fn:contains(p.paramName,'attachment')}">
+	        <c:when test="${fn:contains(p.paramName,'attachment_')}">
 	        	<td><input style="width:99%;" type="file" name="${p.paramName}" /></td>
 	        </c:when>
 	        <c:otherwise>

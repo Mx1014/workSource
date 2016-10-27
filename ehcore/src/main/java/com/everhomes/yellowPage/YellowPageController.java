@@ -143,7 +143,7 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
 	}
-    
+
     /**
    	 * <b>URL: /yellowPage/getServiceAllianceEnterpriseDetail</b>
    	 * <p> 服务联盟企业详情 </p>

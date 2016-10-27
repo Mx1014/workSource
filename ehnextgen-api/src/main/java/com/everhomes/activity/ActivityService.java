@@ -18,6 +18,8 @@ import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetVideoCapabilityCommand;
@@ -32,7 +34,10 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
@@ -115,5 +120,13 @@ public interface ActivityService {
     void onVideoDeviceChange(YzbVideoDeviceChangeCommand cmd);
 
     VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd);
+
+	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd);
+
+	ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd);
+
+	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
+
+	void activityWarningSchedule();
 
 }
