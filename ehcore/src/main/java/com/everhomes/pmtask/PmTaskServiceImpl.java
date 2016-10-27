@@ -53,7 +53,6 @@ import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -144,7 +143,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -599,15 +597,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		sendMessageToUser(task.getCreatorUid(), text);
 		
-		Category category = categoryProvider.findCategoryById(task.getCategoryId());
+		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
         
-        Category parent = categoryProvider.findCategoryById(category.getParentId());
-        String categoryName = "";
-    	if(parent.getParentId().equals(0L)){
-    		categoryName = category.getName();
-    	}else{
-    		categoryName = parent.getName();
-    	}
+        String categoryName = category.getName();
+    	
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
 		smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
 		smsProvider.addToTupleList(variables, "categoryName", categoryName);
