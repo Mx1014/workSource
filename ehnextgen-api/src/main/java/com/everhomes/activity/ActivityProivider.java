@@ -43,4 +43,6 @@ public interface ActivityProivider {
     
     List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition);
 
+	List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime);
+
 }
