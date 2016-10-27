@@ -633,7 +633,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 				List<ApprovalUser> approvalPersonList = v2.stream().map(a -> {
 					ApprovalUser approvalPerson = new ApprovalUser();
 					approvalPerson.setTargetType(a.getTargetType());
-					approvalPerson.setTargetId(a.getId());
+					approvalPerson.setTargetId(a.getTargetId());
 					approvalPerson.setTargetName(getTargetName(a.getTargetType(), a.getTargetId(), ownerType, ownerId));
 					return approvalPerson;
 				}).collect(Collectors.toList());
