@@ -200,8 +200,6 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	private XContentBuilder createDoc(EquipmentStandardMap map){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-//            keyword: 查询关键字 
-            
            
             b.field("reviewStatus", map.getReviewStatus());
             b.field("status", map.getStatus());
