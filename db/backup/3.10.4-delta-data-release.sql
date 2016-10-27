@@ -58,9 +58,8 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
 INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`)
     VALUES ('7', 'ReserveSocial', '企业社交', '我要预约', '1', '1', '{"fields":[{"fieldName":"reserveType","fieldDisplayName":"预约类型","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入类型为主题酒会或圈层社交","requiredFlag":"1"},{"fieldName":"reserveOrganization","fieldDisplayName":"预约机构","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入公司名称","requiredFlag":"1"},{"fieldName":"reserveTime","fieldDisplayName":"预约时间","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入预约时间段","requiredFlag":"1"},{"fieldName":"contact","fieldDisplayName":"联系人","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入联系人姓名","requiredFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"联系电话","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入联系电话","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"选填，若还有其他要求，可在此填写","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP());
 
-SET @request_templates_id := (SELECT MAX(id) FROM `eh_request_templates_namespace_mapping`);  
-INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (@request_templates_id:=@request_templates_id+1, '999985', '3');
-INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (@request_templates_id:=@request_templates_id+1, '999985', '4');
-INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (@request_templates_id:=@request_templates_id+1, '999985', '5');
-INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (@request_templates_id:=@request_templates_id+1, '999985', '6');
-INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (@request_templates_id:=@request_templates_id+1, '999985', '7');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (1, '999985', '3');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (2, '999985', '4');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (3, '999985', '5');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (4, '999985', '6');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (5, '999985', '7');
