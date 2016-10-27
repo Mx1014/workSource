@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>count: 天数</li>
  * </ul>
  */
-public class SetParkingCardReserveDaysCommand {
+public class SetParkingLotConfigCommand {
 	@NotNull
     private String ownerType;
 	@NotNull
@@ -21,9 +21,10 @@ public class SetParkingCardReserveDaysCommand {
 	@NotNull
     private Long parkingLotId;
 	@NotNull
-    private Integer count;
+    private Integer reserveDay;
+	private Integer requestNum;
     
-    public SetParkingCardReserveDaysCommand() {
+    public SetParkingLotConfigCommand() {
     }
     
     public String getOwnerType() {
@@ -50,15 +51,23 @@ public class SetParkingCardReserveDaysCommand {
         this.parkingLotId = parkingLotId;
     }
 
-    public Integer getCount() {
-        return count;
-    }
+    public Integer getReserveDay() {
+		return reserveDay;
+	}
 
-    public void setCount(Integer count) {
-        this.count = count;
-    }
+	public void setReserveDay(Integer reserveDay) {
+		this.reserveDay = reserveDay;
+	}
 
-    @Override
+	public Integer getRequestNum() {
+		return requestNum;
+	}
+
+	public void setRequestNum(Integer requestNum) {
+		this.requestNum = requestNum;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

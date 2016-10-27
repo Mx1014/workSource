@@ -2,7 +2,7 @@ package com.bosigao2.rest;
 
 import com.everhomes.util.StringHelper;
 
-public class RechargeCommand {
+public class Bosigao2RechargeCommand {
 	private String clientID;
 	private String cardCode;
 	private String plateNo;

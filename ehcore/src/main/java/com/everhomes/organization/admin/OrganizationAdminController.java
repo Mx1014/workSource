@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.organization.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,61 +25,13 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
-import com.everhomes.rest.organization.AddOrgAddressCommand;
-import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.AddPersonnelsToGroup;
-import com.everhomes.rest.organization.CreateDepartmentCommand;
-import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
-import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
-import com.everhomes.rest.organization.CreateOrganizationContactCommand;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
-import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
-import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.GetMemberTopDepartmentCommand;
-import com.everhomes.rest.organization.GetUserResourcePrivilege;
-import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
-import com.everhomes.rest.organization.ImportOwnerDataCommand;
-import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
-import com.everhomes.rest.organization.ListAllChildOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
-import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
-import com.everhomes.rest.organization.PmManagementCommunityDTO;
-import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
-import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdateOrganizationsCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
@@ -660,7 +613,23 @@ public class OrganizationAdminController extends ControllerBase {
          
          return res;
     }
-
+    
+    /**
+     * <b>URL: /admin/org/batchApproveForEnterpriseContact</b>
+     * <p>批量审批通过认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("batchApproveForEnterpriseContact")
+    @RestReturn(value=String.class)
+    public RestResponse batchApproveForEnterpriseContact(@Valid BatchApproveContactCommand cmd) {
+    	this.organizationService.batchApproveForEnterpriseContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
     /**
      * <b>URL: /admin/org/rejectForEnterpriseContact</b>
      * <p>审批拒绝认证申请</p>
@@ -670,6 +639,23 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse rejectForEnterpriseContact(@Valid RejectContactCommand cmd) {
     	this.organizationService.rejectForEnterpriseContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
+
+    /**
+     * <b>URL: /admin/org/batchRejectForEnterpriseContact</b>
+     * <p>批量审批拒绝认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("batchRejectForEnterpriseContact")
+    @RestReturn(value=String.class)
+    public RestResponse batchRejectForEnterpriseContact(@Valid BatchRejectContactCommand cmd) {
+    	this.organizationService.batchRejectForEnterpriseContact(cmd);
     	 RestResponse res = new RestResponse();
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");

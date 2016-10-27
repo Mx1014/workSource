@@ -2,6 +2,7 @@
 package com.everhomes.family;
 
 import ch.hsr.geohash.GeoHash;
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -57,6 +58,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -2118,4 +2120,26 @@ public class FamilyServiceImpl implements FamilyService {
             this.userGroupHistoryProvider.deleteUserGroupHistory(history);
         }
     }
+
+	@Override
+	public void adminBatchApproveMember(BatchApproveMemberCommand cmd) {
+		if(cmd.getMembers() == null )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "invalid parameter members is null ");
+		for(ApproveMemberCommand member : cmd.getMembers()){
+			this.adminApproveMember(member);
+		}
+	}
+
+	@Override
+	public void batchRejectMember(BatchRejectMemberCommand cmd) {
+		if(cmd.getMembers() == null )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "invalid parameter members is null ");
+		for(RejectMemberCommand member : cmd.getMembers()){
+			member.setOperatorRole(Role.SystemAdmin);
+			this.rejectMember(member);
+		}
+        
+	}
 }

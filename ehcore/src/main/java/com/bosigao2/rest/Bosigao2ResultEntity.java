@@ -1,6 +1,6 @@
 package com.bosigao2.rest;
 
-public class ResultEntity {
+public class Bosigao2ResultEntity {
 	private String errorCode;
 	private String errorMsg;
 	private Object result;

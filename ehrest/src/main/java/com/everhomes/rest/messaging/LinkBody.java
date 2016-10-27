@@ -1,5 +1,7 @@
 package com.everhomes.rest.messaging;
 
+import com.everhomes.util.StringHelper;
+
 public class LinkBody {
     String title;
     String coverUrl;
@@ -29,5 +31,9 @@ public class LinkBody {
     }
     public void setActionUrl(String actionUrl) {
         this.actionUrl = actionUrl;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

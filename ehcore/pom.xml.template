@@ -258,16 +258,6 @@
             <version>${ehcodegen.version}</version>
         </dependency>
 		<dependency>
-			<groupId>xmlbeans</groupId>
-			<artifactId>xbean</artifactId>
-			<version>${xbean.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>xmlbeans</groupId>
-			<artifactId>xbean_xpath</artifactId>
-			<version>${xbean_xpath.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
 			<version>${dom4j.version}</version>

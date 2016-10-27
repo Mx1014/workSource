@@ -3753,15 +3753,33 @@ public class GroupServiceImpl implements GroupService {
 	//Add by Janson, Adapter for group members
 	@Override
 	public List<GroupMember> listMessageGroupMembers(ListingLocator locator, int pageSize) {
+	    final long TIMEOUT = 1000*60*10;//10 minute
+	    GroupMemberCaches cache = null;
+	    
+	    Integer namespaceId = UserContext.current().getNamespaceId();
 	    Group group = this.groupProvider.findGroupById(locator.getEntityId());
 	    if(null == group) {
 	        //Check if group is null, then return empty
 	        return new ArrayList<GroupMember>();
 	    //modify by sfyan, 20160429
 	    } else if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.ENTERPRISE) {
-	        return this.organizationService.listMessageGroupMembers(group.getId());
+	        cache = this.organizationProvider.listGroupMessageMembers(namespaceId, group.getId(), pageSize);
+	        long now = System.currentTimeMillis() - TIMEOUT;
+	        if(cache.getSize() > 0 && now > cache.getTick()) {
+	            //timeout
+	            this.organizationProvider.evictGroupMessageMembers(namespaceId, group.getId(), pageSize);
+	            cache = this.organizationProvider.listGroupMessageMembers(namespaceId, group.getId(), pageSize);
+	        }
+	        return cache.getMembers();
 	    } else {
-	        return this.groupProvider.listGroupMembers(locator, pageSize);    
+	        cache = this.groupProvider.listGroupMessageMembers(namespaceId, locator, pageSize);
+	        long now = System.currentTimeMillis() - TIMEOUT;
+	        if(cache.getSize() > 0 && now > cache.getTick()) {
+                //timeout
+                this.groupProvider.evictGroupMessageMembers(namespaceId, locator, pageSize);
+                cache = this.groupProvider.listGroupMessageMembers(namespaceId, locator, pageSize);
+            }
+            return cache.getMembers();
 	    }
 	    
 	}

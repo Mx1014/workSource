@@ -59,6 +59,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("biz.serverUrl", "http://biz.zuolin.com/zl-ec")
             .withProperty("biz.appKey", "39628d1c-0646-4ff6-9691-2c327b03f9c4")
             .withProperty("biz.secretKey", "PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+Y6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==")
+            .withProperty("elastic.nodes.httpports", "9200")
             );
     }
 }

@@ -19,7 +19,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.common.recycler.Recycler.V;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.device.DeviceProvider;
@@ -62,6 +60,7 @@ import com.everhomes.rest.user.AppIdStatusResponse;
 import com.everhomes.rest.user.AppServiceAccessCommand;
 import com.everhomes.rest.user.AssumePortalRoleCommand;
 import com.everhomes.rest.user.BorderListResponse;
+import com.everhomes.rest.user.CheckVerifyCodeCommand;
 import com.everhomes.rest.user.DeleteUserIdentifierCommand;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
@@ -71,12 +70,14 @@ import com.everhomes.rest.user.GetAppAgreementCommand;
 import com.everhomes.rest.user.GetFamilyMemberInfoCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserSnapshotInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.LogonByTokenCommand;
 import com.everhomes.rest.user.LogonCommand;
 import com.everhomes.rest.user.LogonCommandResponse;
 import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
 import com.everhomes.rest.user.ResendVerificationCodeCommand;
+import com.everhomes.rest.user.ResetPasswordCommand;
 import com.everhomes.rest.user.SendMessageCommand;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.SetPasswordCommand;
@@ -292,9 +293,9 @@ public class UserController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
 		}
-		
-        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-		this.userService.resendVerficationCode(namespaceId, token);
+
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode());
 		return new RestResponse("OK");
 	}
 
@@ -390,7 +391,6 @@ public class UserController extends ControllerBase {
 		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
 		cmdResponse.setContentServer(contentServerService.getContentServer());
-		
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Logon success, elapse=" + (endTime - startTime) + ", loginElapse=" + (loginEndTime - loginStartTime)
@@ -474,7 +474,7 @@ public class UserController extends ControllerBase {
 	/**
 	 * <b>URL: /user/deleteUserIdentifier</b>
 	 * <p>删除用户标识</p>
-	 * @param userIdentifierId 用户标识ID<手机号或者邮箱>
+	 * @param cmd 用户标识ID<手机号或者邮箱>
 	 * @return
 	 */
 	@RequestMapping("deleteUserIdentifier")
@@ -532,7 +532,7 @@ public class UserController extends ControllerBase {
 	/**
 	 * <b>URL: /user/setCurrentCommunity</b>
 	 * <p>设置当前小区</p>
-	 * @param communityId 小区ID
+	 * @param cmd 小区ID
 	 * @return OK
 	 */
 	@RequestMapping("setCurrentCommunity")
@@ -699,6 +699,7 @@ public class UserController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
 		}
+		userIdentifier.setRegionCode(cmd.getRegionCode());
 		userService.resendVerficationCode(userIdentifier);
 		return new RestResponse("OK");
 	}
@@ -1088,4 +1089,75 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+    /**
+     * <b>URL: /user/findInitBizInfo</b>
+     * <p>获取初始化电商信息</p>
+     */
+    @RequestMapping("findInitBizInfo")
+    @RestReturn(value = InitBizInfoDTO.class)
+    public RestResponse findInitBizInfo() {
+    	InitBizInfoDTO response = userService.findInitBizInfo();
+        RestResponse resp = new RestResponse(response);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+	/**
+	 * <b>URL: /user/checkVerifyCode</b>
+	 * <p>忘记密码，核实验证码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCode")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCode(@Valid CheckVerifyCodeCommand cmd) {
+		assert StringUtils.isNotEmpty(cmd.getVerifyCode());
+		assert StringUtils.isNotEmpty(cmd.getIdentifierToken());
+		UserIdentifier identifier = userProvider.findIdentifierByVerifyCode(cmd.getVerifyCode(),
+				cmd.getIdentifierToken());
+		if (null == identifier) {
+			LOGGER.error("invalid operation,can not find verify information");
+
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+					"invalid params");
+
+		}
+		// check the expire time
+		if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
+			LOGGER.error("the verifycode is invalid with timeout");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+		}
+
+		return new RestResponse("OK");
+	}
+
+	/**
+	 * <b>URL: /user/resetPassword</b>
+	 * <p>设置密码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "resetPassword")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse resetPassword(@Valid ResetPasswordCommand cmd) {
+		assert StringUtils.isNotEmpty(cmd.getNewPassword());
+		assert StringUtils.isNotEmpty(cmd.getIdentifierToken());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifierToken());
+		if (null == identifier) {
+			LOGGER.error("identifier token on-existent. token = {}", cmd.getIdentifierToken());
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS,
+					"Invalid token status");
+
+		}
+
+		// find user by uid
+		User user = userProvider.findUserById(identifier.getOwnerUid());
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
+		userProvider.updateUser(user);
+		return new RestResponse("OK");
+	}
 }

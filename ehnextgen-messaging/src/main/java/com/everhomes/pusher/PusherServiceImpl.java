@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,6 +61,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.DeviceMessages;
+import com.everhomes.rest.messaging.MessagingPriorityConstants;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.rpc.server.DeviceRequestPdu;
@@ -144,13 +146,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             if(cert != null) {
                 ByteArrayInputStream bis = new ByteArrayInputStream(cert.getData());
                 //.withCert("/home/janson/projects/pys/apns/apns_develop.p12", "123456")
-                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5).asQueued();
+                ApnsServiceBuilder builder = APNS.newService().withCert(bis, cert.getCertPass().trim()).asPool(5);
                 if(partner.indexOf("develop") >= 0) {
                     builder = builder.withSandboxDestination();
                 } else {
                     builder = builder.withProductionDestination();
                         }
-                service = builder.build();
+                ApnsService innerService = builder.build();
+                if(innerService == null) {
+                    LOGGER.warn("start apns server error");
+                    return null;
+                }
+                service = new PriorityQueuedApnsService(innerService, Executors.defaultThreadFactory());
+                service.start();
+                
                 ApnsService tmp = this.certMaps.putIfAbsent(partner, service);
                 if(tmp != null) {
                     try{
@@ -276,12 +285,14 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         //use queue to notify
         
             int now =  (int)(new Date().getTime()/1000);
+            boolean error = false;
 
             try {
-                    EnhancedApnsNotification notification = new EnhancedApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
+                PriorityApnsNotification notification = new PriorityApnsNotification(EnhancedApnsNotification.INCREMENT_ID() /* Next ID */,
                                 now + 60 * 60 /* Expire in one hour */,
                                 identify /* Device Token */,
-                                payload);
+                                payload,
+                                devMessage.getPriorigy());
                     ApnsService tempService = getApnsService(partner);
                     if(tempService != null) {
                             tempService.push(notification);   
@@ -293,10 +304,20 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                          LOGGER.warn("Pushing apnsServer not found");
                      }
             } catch (NetworkIOException e) {
+                error = true;
                 LOGGER.warn("apns error and stop it", e);
-                stopApnsServiceByName(partner);
             } catch(Exception ex) {
+                error = true;
                 LOGGER.warn("apns error deviceId not correct", ex);
+            }
+            
+            if(error) {
+                try {
+                    stopApnsServiceByName(partner);
+                } catch(Exception ex) {
+                    LOGGER.warn("stop apns service error", ex);
+                }
+                
             }
             
     }

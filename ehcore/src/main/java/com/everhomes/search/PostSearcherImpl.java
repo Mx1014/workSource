@@ -22,6 +22,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -317,6 +318,16 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                     FilterBuilder comForum = FilterBuilders.termFilter("forumId", forumId);
                     comFilter = FilterBuilders.boolFilter().must(comIn, comType, comForum);
                 }
+                
+                //覆盖当前小区的所有机构（含各级上级机构），不管是发给这些机构的帖还是这些机构发的帖都满足要求 by xiongying 20161019
+                List<Long> organizationIdList = organizationService.getOrganizationIdsTreeUpToRoot(cmd.getCommunityId());
+                if(organizationIdList.size() > 0) {
+                	FilterBuilder orgIn = boolInFilter("visibleRegionId", organizationIdList);
+                	FilterBuilder orgType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.REGION.getCode());
+                	FilterBuilder orgForum = FilterBuilders.termFilter("forumId", forumId);
+                	FilterBuilder orgFilter = FilterBuilders.boolFilter().must(orgIn, orgType, orgForum);
+                	comFilter = FilterBuilders.boolFilter().should(comFilter, orgFilter);
+                }
             }
             
             List<GroupDTO> groups = groupService.listUserRelatedGroups();
@@ -429,11 +440,11 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         		 notEmbeddedAppIds[0] = 3;
         		 notEmbeddedAppIds[1] = 14;
         		 
-        		FilterBuilder nfb = FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds);
+        		FilterBuilder nfb = FilterBuilders.notFilter(FilterBuilders.termsFilter("embeddedAppId", notEmbeddedAppIds));
         		if(null == fb) {
-        			fb = FilterBuilders.notFilter(nfb);
+        			fb = nfb;
         		} else {
-                    fb = FilterBuilders.boolFilter().mustNot(fb, nfb);
+                    fb = FilterBuilders.boolFilter().must(fb, nfb);
                 }
                 
             } 
