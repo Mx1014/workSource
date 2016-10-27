@@ -26,6 +26,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -39,6 +40,7 @@ import com.everhomes.search.ReserveRequestInfoSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 
+@Component
 public class ReserveRequestInfoSearcherImpl extends AbstractElasticSearch implements
 		ReserveRequestInfoSearcher {
 
