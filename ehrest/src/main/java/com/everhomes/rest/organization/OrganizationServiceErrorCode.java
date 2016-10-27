@@ -41,5 +41,9 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
     static final int ERROR_MOBILE_NUM = 500003; //手机号错误
 
+    static final int ERROR_VERIFY_OVER_TIME= 600002; //认证超时
+
+	static final int ERROR_EMAIL_NOT_EXISTS = 600001; //email 错误
+
    
 }

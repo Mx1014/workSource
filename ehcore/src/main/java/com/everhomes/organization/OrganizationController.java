@@ -859,7 +859,7 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
     public RestResponse verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd) {
-//    	this.organizationService.verifyEnterpriseContact(cmd);
+    	this.organizationService.verifyEnterpriseContact(cmd);
     	 RestResponse res = new RestResponse();
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");

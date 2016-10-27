@@ -26,6 +26,7 @@ import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
@@ -351,4 +352,5 @@ public interface OrganizationService {
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
 	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
 	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd);
+	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
 }
