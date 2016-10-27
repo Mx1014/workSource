@@ -41,7 +41,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     private static final Logger LOGGER=LoggerFactory.getLogger(ActivityEmbeddedHandler.class);
     
     //版本分界线，对于活动来说，此版本之前为旧版本，按旧版本处理，之后为新版本
-    private static final String SEPERATE_VERSION = "3.11.0";
+    private static final String SEPERATE_VERSION = "3.10.4";
     
     @Autowired
     private ActivityService activityService;
