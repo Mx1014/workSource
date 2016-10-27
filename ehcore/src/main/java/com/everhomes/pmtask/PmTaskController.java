@@ -48,6 +48,7 @@ import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
+import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 
 @RestDoc(value="Pmtask controller", site="pmtask")
 @RestController
@@ -396,9 +397,9 @@ public class PmTaskController extends ControllerBase {
      * <p>获取所有项目分类统计</p>
      */
     @RequestMapping("getTaskCategoryStatistics")
-    @RestReturn(value=SearchTaskCategoryStatisticsResponse.class)
+    @RestReturn(value=TaskCategoryStatisticsDTO.class)
     public RestResponse getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
-    	SearchTaskCategoryStatisticsResponse res = pmTaskService.getTaskCategoryStatistics(cmd);
+    	TaskCategoryStatisticsDTO res = pmTaskService.getTaskCategoryStatistics(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1972,8 +1972,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public SearchTaskCategoryStatisticsResponse getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
-		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
+	public TaskCategoryStatisticsDTO getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
 
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
@@ -1993,13 +1993,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cd.setOwnerName(null);
 			}
 		}
-		
-		if(list.size() > 0){
-    		response.setRequests(list);
-        	response.setNextPageAnchor(null);
-    	}
-		
-		return response;
+		if(list.size() != 0)
+			dto = list.get(0);
+		return dto;
 	}
 
 	private void mergeCategoryList(List<PmTaskStatistics> list) {
