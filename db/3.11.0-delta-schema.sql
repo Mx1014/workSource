@@ -65,7 +65,7 @@ ALTER TABLE `eh_launch_pad_items` ADD COLUMN `service_categry_id` BIGINT COMMENT
 --
 -- 服务联盟category添加显示类型字段   add by xq.tian  2016/10/18
 --
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_mode` TINYINT DEFAULT 1;
+-- ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_mode` TINYINT DEFAULT 1;
 
 
 -- 服务联盟添加新的预约表 add by xiongying20161027
