@@ -1861,13 +1861,30 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
+
+		List<TaskCategoryStatisticsDTO> list = queryTaskCategoryStatistics(cmd);
+		if(list.size() > 0){
+    		response.setRequests(list);
+        	response.setNextPageAnchor(null);
+    	}
+		
+		return response;
+	}
+
+	private List<TaskCategoryStatisticsDTO> queryTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
-		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<PmTaskStatistics> temp = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
 				cmd.getPageAnchor(), cmd.getPageSize());
+		List<TaskCategoryStatisticsDTO> list = handleTaskCategoryStatistics(temp);
+		
+		return list;
+	}
+	
+	private List<TaskCategoryStatisticsDTO> handleTaskCategoryStatistics(List<PmTaskStatistics> temp) {
 		List<TaskCategoryStatisticsDTO> list = new ArrayList<TaskCategoryStatisticsDTO>();
 		outer:
 		for(PmTaskStatistics pts: temp) {
@@ -1908,6 +1925,75 @@ public class PmTaskServiceImpl implements PmTaskService {
 			list.add(dto);
 		}
 		
+		return list;
+	}
+	
+	@Override
+	public void exportTaskCategoryStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+		
+		List<TaskCategoryStatisticsDTO> list = queryTaskCategoryStatistics(cmd);
+		XSSFWorkbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("task");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row firstRow = sheet.createRow(0);
+		firstRow.createCell(0).setCellValue("项目名称");
+		
+		for(int i=0,l=list.size();i<l;i++){
+			Row tempRow = sheet.createRow(i + 1);
+			TaskCategoryStatisticsDTO dto = list.get(i);
+			Category category = checkCategory(dto.getTaskCategoryId());
+			Community community = communityProvider.findCommunityById(dto.getOwnerId());
+			tempRow.createCell(0).setCellValue(community.getName());
+			for(int j=0,l2=dto.getRequests().size();j<l2;j++ ) {
+				firstRow.createCell(j+1).setCellValue(dto.getRequests().get(j).getCategoryName());
+				tempRow.createCell(j+1).setCellValue(dto.getRequests().get(j).getTotalCount());
+			}
+			
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			download(out, resp);
+		} catch (IOException e) {
+			LOGGER.error("ExportListStatistics is fail, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ExportListStatistics is fail.");
+		}
+		
+	}
+
+	@Override
+	public SearchTaskCategoryStatisticsResponse getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
+
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<PmTaskStatistics> temp = pmTaskProvider.searchTaskStatistics(namespaceId, null, cmd.getTaskCategoryId(), cmd.getKeyword(), new Timestamp(cmd.getDateStr()),
+				cmd.getPageAnchor(), cmd.getPageSize());
+		
+		mergeCategoryList(temp);
+		List<TaskCategoryStatisticsDTO> list = handleTaskCategoryStatistics(temp);
+		
+		for(TaskCategoryStatisticsDTO d: list) {
+			d.setOwnerId(null);
+			d.setOwnerName(null);
+			for(CategoryStatisticsDTO cd: d.getRequests()) {
+				cd.setOwnerId(null);
+				cd.setOwnerName(null);
+			}
+		}
+		
 		if(list.size() > 0){
     		response.setRequests(list);
         	response.setNextPageAnchor(null);
@@ -1916,4 +2002,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 
+	private void mergeCategoryList(List<PmTaskStatistics> list) {
+		
+		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
+		for(PmTaskStatistics p: list){
+			Long id = p.getCategoryId();
+			PmTaskStatistics pts = null;
+			if(null != id) {
+				if(tempMap.containsKey(id)){
+					pts = tempMap.get(id);
+					pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
+					pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
+					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
+					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
+					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+					pts.setStar1(pts.getStar1() + p.getStar1());
+					pts.setStar2(pts.getStar2() + p.getStar2());
+					pts.setStar3(pts.getStar3() + p.getStar3());
+					pts.setStar4(pts.getStar4() + p.getStar4());
+					pts.setStar5(pts.getStar5() + p.getStar5());
+					continue;
+				}
+				tempMap.put(id, p);
+			}
+		}
+		list.clear();
+		for(PmTaskStatistics p1:tempMap.values()){
+			list.add(p1);
+		}
+	}
 }

@@ -91,4 +91,8 @@ public interface PmTaskService {
 	void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd);
 	
 	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
+	
+	void exportTaskCategoryStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
+	
+	SearchTaskCategoryStatisticsResponse getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
 }
