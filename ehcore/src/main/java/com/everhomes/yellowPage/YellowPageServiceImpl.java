@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.c;
+
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageServiceImpl.class);
@@ -928,6 +930,21 @@ public class YellowPageServiceImpl implements YellowPageService {
                     String.valueOf(dto.getDisplayMode()), locale, "");
             dto.setDisplayModeName(displayCategoryName);
             return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
+                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
+        return entityResultList.stream().map(r -> {
+            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(namespaceId,
+                    r.getId(), CategoryAdminStatus.ACTIVE);
+            if (childCategories != null && childCategories.size() > 0) {
+                r.setDisplayMode(childCategories.get(0).getDisplayMode());
+            }
+            return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
         }).collect(Collectors.toList());
     }
 
