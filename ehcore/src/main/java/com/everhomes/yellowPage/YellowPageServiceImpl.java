@@ -924,23 +924,4 @@ public class YellowPageServiceImpl implements YellowPageService {
             return dto;
         }).collect(Collectors.toList());
     }
-
-    @Override
-    public List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
-                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
-        if (entityResultList != null && entityResultList.size() > 0) {
-            return entityResultList.stream().map(r -> {
-                List<ServiceAllianceCategories> childCategoryList = yellowPageProvider.listChildCategories(namespaceId, r.getId(),
-                        CategoryAdminStatus.ACTIVE);
-                if (childCategoryList != null && childCategoryList.size() > 0) {
-                    r.setDisplayMode(childCategoryList.get(0).getDisplayMode());
-                }
-                return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
-            }).collect(Collectors.toList());
-        }
-        return null;
-    }
-
 }
