@@ -1237,6 +1237,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		if(null != cmd.getOwnerId()){
 			Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+			mergeTaskCategoryList(list);
 			response.setOwnerName(community.getName());
 		}else{
 			list = mergeTaskOwnerList(list);
