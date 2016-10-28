@@ -203,10 +203,10 @@ public class PmTaskServiceImpl implements PmTaskService {
     			Category category = checkCategory(r.getTaskCategoryId());
     			dto.setTaskCategoryId(category.getId());
     			dto.setTaskCategoryName(category.getName());
-    			if(null != r.getAddressId() && r.getAddressId() != 0) {
-    				Address address = addressProvider.findAddressById(r.getAddressId());
+    			
+    			Address address = addressProvider.findAddressById(r.getAddressId());
+    			if(null != address) 
     				dto.setAddress(address.getAddress());
-    			}
     			
     			return dto;
     		}).collect(Collectors.toList()));
@@ -270,10 +270,9 @@ public class PmTaskServiceImpl implements PmTaskService {
     				dto.setCategoryName(category.getName());
     	    	dto.setTaskCategoryName(taskCategory.getName());
     			
-    	    	if(null != r.getAddressId() && r.getAddressId() != 0) {
     				Address address = addressProvider.findAddressById(r.getAddressId());
+    				if(null != address) 
     				dto.setAddress(address.getAddress());
-    			}
     	    	
     			return dto;
     		}).collect(Collectors.toList()));
@@ -625,10 +624,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 		
-		if(null != task.getAddressId() && task.getAddressId() != 0) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
+			if(null != address) 
 			dto.setAddress(address.getAddress());
-		}
 		
 		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
 			User user = userProvider.findUserById(task.getCreatorUid());
