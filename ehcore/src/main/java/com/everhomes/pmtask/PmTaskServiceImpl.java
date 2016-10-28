@@ -673,7 +673,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
 			    
 				if(null == task.getOrganizationId()){
-					setParam(map, task.getCreatorUid());
+					setParam(map, task.getCreatorUid(), pmTaskLogDTO);
 //					User user = userProvider.findUserById(task.getCreatorUid());
 //	    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 //	    			map.put("operatorName", user.getNickName());
@@ -688,7 +688,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				pmTaskLogDTO.setText(text);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
-				setParam(map, r.getOperatorUid());
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
 				User target = userProvider.findUserById(r.getTargetId());
 				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
 				map.put("targetName", target.getNickName());
@@ -699,7 +699,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				pmTaskLogDTO.setText(text);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-				setParam(map, r.getOperatorUid());
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
 				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
@@ -714,12 +714,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 				pmTaskLogDTO.setAttachments(attachmentDtos);
 				
 			}else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
-				setParam(map, r.getOperatorUid());
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
 				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
 			}else {
-				setParam(map, r.getOperatorUid());
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
 				int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
 				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 				pmTaskLogDTO.setText(text);
@@ -730,11 +730,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return taskLogDtos;
 	}
 	
-	private void setParam(Map<String, Object> map, Long userId) {
+	private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
 		User user = userProvider.findUserById(userId);
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		map.put("operatorName", user.getNickName());
 	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+	    dto.setOperatorName(user.getNickName());
+	    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
 	}
 	
 	@Override
