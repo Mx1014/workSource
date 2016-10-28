@@ -263,7 +263,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public void createOrganizationMember(OrganizationMember organizationMember) {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		
+
+		if(null == VisibleFlag.fromCode(organizationMember.getVisibleFlag())){
+			organizationMember.setVisibleFlag(VisibleFlag.SHOW.getCode());
+		}
 		if (organizationMember.getNamespaceId() == null) {
 			Integer namespaceId = UserContext.getCurrentNamespaceId(null);
 			organizationMember.setNamespaceId(namespaceId);
