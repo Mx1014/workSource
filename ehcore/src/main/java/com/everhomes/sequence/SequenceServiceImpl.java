@@ -916,6 +916,22 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhStatActiveUsers.class, Tables.EH_STAT_ACTIVE_USERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_STAT_ACTIVE_USERS.ID.max()).from(Tables.EH_STAT_ACTIVE_USERS).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhEquipmentInspectionEquipmentStandardMap.class, Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionTemplates.class, Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionTemplateItemMap.class, Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATE_ITEM_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionItems.class, Tables.EH_EQUIPMENT_INSPECTION_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_ITEMS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionItemResults.class, Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
