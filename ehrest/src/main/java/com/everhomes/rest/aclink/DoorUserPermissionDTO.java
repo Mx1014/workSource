@@ -1,6 +1,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
+
 import java.sql.Timestamp;
 
 public class DoorUserPermissionDTO {
@@ -12,6 +13,8 @@ public class DoorUserPermissionDTO {
     private Timestamp     createTime;
     private Integer     namespaceId;
     private Long     approveUserId;
+    private Long     ownerId;
+    private Byte     ownerType;
 
 
     public Long getId() {
@@ -91,6 +94,26 @@ public class DoorUserPermissionDTO {
 
     public void setApproveUserId(Long approveUserId) {
         this.approveUserId = approveUserId;
+    }
+
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+
+    public Byte getOwnerType() {
+        return ownerType;
+    }
+
+
+    public void setOwnerType(Byte ownerType) {
+        this.ownerType = ownerType;
     }
 
 
