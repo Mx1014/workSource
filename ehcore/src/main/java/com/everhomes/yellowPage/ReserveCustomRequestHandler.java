@@ -95,7 +95,10 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		
 		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
 		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
-		String categoryName = (category.getName() == null) ? "" : category.getName();
+		String categoryName = "";
+		if(category != null) {
+			categoryName = (category.getName() == null) ? "" : category.getName();
+		} 
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
