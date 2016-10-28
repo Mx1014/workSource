@@ -36,8 +36,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 	private static final String APPLY_CONTACT_BY_MAIL_URI = "/org/applyForEnterpriseContactByEmail";
 	private static final String VERIFY_ENTERPRISE_CONTACT_URI = "/org/verifyEnterpriseContact";  
 	Integer namespaceId = 0;
-	String userIdentifier = "10001";
-	String userIdentifier2 = "10002";
+	String userIdentifier = "root"; 
 	String plainTexPassword = "123456";
 	String ownerType = PunchOwnerType.ORGANIZATION.getCode();
 	Long ownerId = 100600L;
@@ -58,14 +57,14 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		assertEquals(orgId.longValue(), id.longValue());
 		applyContact(id);
 	}
- 
- 
+
 	@Override
 	protected void initCustomData() {
-
-		String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
-		String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
-		dbProvider.loadJsonFileToDatabase(filePath, false);
+		String jsonFilePath = "data/json/3.4.x-test-data-news-organization-160627.txt";
+		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+		jsonFilePath = "/data/json/1.0.0-email-auth-test-data-161028.txt";
+		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 	}
 
 	@After
@@ -96,9 +95,9 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		List<EhOrganizations> orgs = new ArrayList<EhOrganizations>();
 		dslContext
 				.select()
-				.from(Tables.EH_ORGANIZATIONS)
+				.from(Tables.EH_ORGANIZATIONS).orderBy(Tables.EH_ORGANIZATIONS.CREATE_TIME.desc())
 //				.where(Tables.EH_ORGANIZATIONS.ID.eq(cmd.getRentalSiteId()))
-				.fetch()
+				.fetch() 
 				.map((r) -> {
 					orgs.add(ConvertHelper.convert(r,
 							EhOrganizations.class));
@@ -128,7 +127,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		List<EhOrganizations> orgs = new ArrayList<EhOrganizations>();
 		dslContext
 				.select()
-				.from(Tables.EH_ORGANIZATIONS)
+				.from(Tables.EH_ORGANIZATIONS).orderBy(Tables.EH_ORGANIZATIONS.CREATE_TIME.desc())
 //				.where(Tables.EH_ORGANIZATIONS.ID.eq(cmd.getRentalSiteId()))
 				.fetch()
 				.map((r) -> {
