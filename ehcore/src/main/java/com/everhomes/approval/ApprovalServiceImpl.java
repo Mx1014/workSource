@@ -2020,6 +2020,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class); 
 			approvalFlow.setName(cmd.getOwnerId()+" approval rule");
 			approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
+			approvalFlow.setNamespaceId(namespaceId);
 			approvalFlow.setCreatorUid(userId);
 			approvalFlow.setOperatorUid(userId);
 			approvalFlow.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
