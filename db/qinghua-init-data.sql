@@ -1918,16 +1918,6 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 
 -- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 --	VALUES ('805', 'video.official.support', '2', 'offical video support', '999984', NULL);
-	
--- INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
---	VALUES ((@search_type_id := @search_type_id + 1), '999984', '', '0', '投票', 'poll', '1', NULL, NULL);
--- INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
---	VALUES ((@search_type_id := @search_type_id + 1), '999984', '', '0', '活动', 'activity', '1', NULL, NULL);
--- INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
---	VALUES ((@search_type_id := @search_type_id + 1), '999984', '', '0', '话题', 'topic', '1', NULL, NULL);
--- INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
---	VALUES ((@search_type_id := @search_type_id + 1), '999984', '', '0', '快讯', 'news', '1', NULL, NULL);	
-
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
     VALUES (12005, 999984, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRwaE1tTmxNV05sT1RFeFpEWmtZbUl3TkdZMVlXTmpaRFprT0dZd01qWXpZZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
@@ -2015,4 +2005,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112921, 999984, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvMk1HUTVNamt3TldKak1tSTRNemxoTjJZMVl6azBOVEl5WmpRMU1tUXlZZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
+	VALUES ((@search_type_id := @search_type_id + 1), '999984', '', '0', '活动', 'activity', '1', NULL, NULL);
+
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
+	VALUES ((@search_type_id := @search_type_id + 1), '999984', '', '0', '快讯', 'news', '1', NULL, NULL);	
+	
 
