@@ -12,14 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
 import com.everhomes.rest.organization.ListOrganizationsByEmailCommand;
+import com.everhomes.rest.organization.ListOrganizationsByEmailRestResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.UserListUserRelatedScenesRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.test.core.search.SearchProvider;
-import com.everhomes.test.junit.news.UserListUserRelatedScenesRestResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
@@ -49,6 +53,10 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 	public void testCreateNews() {
 		Long id = createEnterprise(CREATE_ENTERPRISE_URI);
 		updateEnterprise(id);
+		listOrgsByEmailWrongEmail();
+		Long orgId=listOrgsByEmailSuccess();
+		assertEquals(orgId.longValue(), id.longValue());
+		applyContact(id);
 	}
  
  
@@ -152,27 +160,48 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		
 		ListOrganizationsByEmailCommand cmd = new ListOrganizationsByEmailCommand();
 		cmd.setEmail("abc@acc.com");
-		RestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, RestResponse.class, context);
+		cmd.setSceneToken(getSceneToken());
+		
+		ListOrganizationsByEmailRestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, ListOrganizationsByEmailRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+//		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+//		List<OrganizationDTO> orgs  = response.getResponse();
+		assertEquals(OrganizationServiceErrorCode.ERROR_EMAIL_NOT_EXISTS, response.getErrorCode().intValue());
+		
+	}
+
+	private Long listOrgsByEmailSuccess(){
+
+		logon(null, userIdentifier, plainTexPassword);
+		
+		ListOrganizationsByEmailCommand cmd = new ListOrganizationsByEmailCommand();
+		cmd.setEmail("han.wu@zuolin.com");
+		cmd.setSceneToken(getSceneToken());
+		
+		ListOrganizationsByEmailRestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, ListOrganizationsByEmailRestResponse.class, context);
 
 		assertNotNull("The reponse of may not be null", response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-
-		DSLContext dslContext = dbProvider.getDslContext(); 
+		List<OrganizationDTO> orgs  = response.getResponse();
+		assertEquals(1, orgs.get(0));
 		
-		List<EhOrganizations> orgs = new ArrayList<EhOrganizations>();
-		dslContext
-				.select()
-				.from(Tables.EH_ORGANIZATIONS)
-//				.where(Tables.EH_ORGANIZATIONS.ID.eq(cmd.getRentalSiteId()))
-				.fetch()
-				.map((r) -> {
-					orgs.add(ConvertHelper.convert(r,
-							EhOrganizations.class));
-					return null;
-				});
-		assertEquals(cmd.getName(), orgs.get(0).getName());
-		assertEquals(cmd.getEmailDomain(), orgs.get(0).getStringTag1()); 
+		return orgs.get(0).getId();
 	}
 	
+	private void applyContact(Long id ){
+
+		logon(null, userIdentifier, plainTexPassword);
+		
+		ApplyForEnterpriseContactByEmailCommand cmd = new ApplyForEnterpriseContactByEmailCommand();
+		cmd.setEmail("han.wu@zuolin.com");
+		cmd.setOrganizationId(id);
+		cmd.setSceneToken(getSceneToken());
+		
+		RestResponse response = httpClientService.restGet(UPDATE_ENTERPRISE_URI, cmd, RestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+	}
 	
 }
