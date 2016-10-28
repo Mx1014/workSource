@@ -1368,7 +1368,8 @@ public class FamilyServiceImpl implements FamilyService {
                     return true;
                 });
         List<Long> neighborUserIds = new ArrayList<Long>();
-        
+
+        LOGGER.debug("family list = {}", familyList);
         familyList.stream().forEach((f) ->{
             if(f == null) return;
             
@@ -1378,7 +1379,7 @@ public class FamilyServiceImpl implements FamilyService {
                 List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
                 if(members != null && !members.isEmpty()){
                     for(GroupMember m : members){
-                        
+                        LOGGER.debug("group member = {}", m);
                         if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
                                 && m.getMemberType().equals(EntityType.USER.getCode())
                                         && m.getMemberId().longValue() != user.getId().longValue()){
