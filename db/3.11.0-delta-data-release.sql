@@ -50,6 +50,20 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `names
 INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
 	VALUES ('1018', '32', '维修人员', '任务管理 维修人员', NULL, '0', NULL, NULL);
 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '331', 1017,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '332', 1017,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '333', 1017,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '904', 1017,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '805', 1018,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '332', 1018,0,1,now());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 	VALUES ('920', '0', '完成回访', '任务管理 完成回访', NULL);

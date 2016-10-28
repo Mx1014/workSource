@@ -15,13 +15,13 @@ insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 	values(165,73,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999984, 'sms.default.yzx', 1, 'zh_CN', '验证码-清华信息港', '30888');
+	VALUES(999984, 'sms.default.yzx', 1, 'zh_CN', '验证码-清华信息港', '31143');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999984, 'sms.default.yzx', 4, 'zh_CN', '派单-清华信息港', '30889');
+	VALUES(999984, 'sms.default.yzx', 4, 'zh_CN', '派单-清华信息港', '31144');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999984, 'sms.default.yzx', 6, 'zh_CN', '任务2-清华信息港', '30891');
+	VALUES(999984, 'sms.default.yzx', 6, 'zh_CN', '任务2-清华信息港', '31146');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-清华信息港', '30895', '999984');
+	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-清华信息港', '31157', '999984');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-清华信息港', '30896', '999984');
 
@@ -1998,14 +1998,14 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (112913, 999984, 0, 0, 0, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwa05ERTJaRGN4TXpZME5USXdNR0V4TlRkbU1HRTNaR1U0TVdZNVpHUTFOdw', '1', '1', '23', '', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (112914, 999984, '0', '0', '0', '/home', 'Bizs', '物业报修', '物业报修', 'cs://1/image/aW1hZ2UvTVRwa05XWmhOell4WVdFMVpUUTRaamRoWVRWa1pqazBZMlUwWm1VMll6RmtaQQ', '1', '1', '{"url":"{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}"}', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+	VALUES (112914, 999984, '0', '0', '0', '/home', 'Bizs', '物业报修', '物业报修', 'cs://1/image/aW1hZ2UvTVRwa05XWmhOell4WVdFMVpUUTRaamRoWVRWa1pqazBZMlUwWm1VMll6RmtaQQ', '1', '1', '{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (112915, 999984, '0', '0', '0', '/home', 'Bizs', '绿植租摆', '绿植租摆', 'cs://1/image/aW1hZ2UvTVRwall6ZGxZVFUxWVRNNE1HWTBabUkzWlRrMk9UZGlOek13WldWbFl6ZGhZUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (112916, 999984, '0', '0', '0', '/home', 'Bizs', '服务维修', '服务维修', 'cs://1/image/aW1hZ2UvTVRvM01UUXlNRGhrTVdFeU5UWXdZMlZrTWpBNE1EUXlZVGt5TkRZMU4yWXdNdw', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES (112917, 999984, '0', '0', '0', '/home', 'Bizs', '保洁服务', '保洁服务', 'cs://1/image/aW1hZ2UvTVRwa1lqZzJNRFkyTmpBeE5EVXlNR0V4TXpJM05ERTRNV1EzTVRSallqZzJZdw', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+	VALUES (112917, 999984, '0', '0', '0', '/home', 'Bizs', '保洁服务', '保洁服务', 'cs://1/image/aW1hZ2UvTVRwa1lqZzJNRFkyTmpBeE5EVXlNR0V4TXpJM05ERTRNV1EzTVRSallqZzJZdw', '1', '1', '14', '{"url":"https://core.zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (112918, 999984, '0', '0', '0', '/home', 'Bizs', '科技申报', '科技申报', 'cs://1/image/aW1hZ2UvTVRwbE1ESTNZVFZtTTJNMU9XVXpPREExWmpjMU4yUTFZemRrT1RjNVpXVXdZZw', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
