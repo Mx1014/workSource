@@ -46,9 +46,9 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 update eh_configurations set value = 6 where id = 122;
 
 INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
-	VALUES ('1017', '32', '执行人员', '任务管理 执行人员', NULL, '0', NULL, NULL);
+	VALUES ('1017', '32', '执行人员', '任务管理 执行人员', NULL, '0', 'EhOrganizations', NULL);
 INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
-	VALUES ('1018', '32', '维修人员', '任务管理 维修人员', NULL, '0', NULL, NULL);
+	VALUES ('1018', '32', '维修人员', '任务管理 维修人员', NULL, '0', 'EhOrganizations', NULL);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 
