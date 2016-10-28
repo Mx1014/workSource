@@ -165,3 +165,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (178, 'activity.content.url', '/web/lib/html/activity_text_review.html', 'activity content url', 0, NULL);
 
 -- 以上为3.10.4合过来的脚本--------
+
+-- 更新创源 group_id add by sunwen 20161028
+UPDATE eh_organizations r INNER JOIN eh_groups g ON r.id = g.visible_region_id
+SET r.group_id = g.id where r.namespace_id = 999986 and g.visible_region_type = 1;
