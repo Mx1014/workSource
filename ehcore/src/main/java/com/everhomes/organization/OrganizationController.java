@@ -840,7 +840,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/applyForEnterpriseContactByEmail</b>
      * <p>通过email域名搜索企业 </p>
      */
-    @RequestMapping("listOrganizationsByEmail")
+    @RequestMapping("applyForEnterpriseContactByEmail")
     @RestReturn(value=String.class)
     public RestResponse applyForEnterpriseContactByEmail(@Valid ApplyForEnterpriseContactByEmailCommand cmd) {
     	organizationService.applyForEnterpriseContactByEmail(cmd);
