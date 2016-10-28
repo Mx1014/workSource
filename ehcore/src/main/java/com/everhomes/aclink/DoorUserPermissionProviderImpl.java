@@ -117,7 +117,7 @@ public class DoorUserPermissionProviderImpl implements DoorUserPermissionProvide
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_DOOR_USER_PERMISSION.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_USER_PERMISSION.AUTH_TYPE.eq((byte)0));
-                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.STATUS.eq((byte)0));
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.STATUS.eq((byte)1));
                 
                 if(namespaceId != null) {
                     query.addConditions(Tables.EH_DOOR_USER_PERMISSION.NAMESPACE_ID.eq(namespaceId));    
@@ -151,7 +151,7 @@ public class DoorUserPermissionProviderImpl implements DoorUserPermissionProvide
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_DOOR_USER_PERMISSION.AUTH_TYPE.eq((byte)0));
-                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.STATUS.eq((byte)0));
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.STATUS.eq((byte)1));
                 if(ownerId != null) {
                     query.addConditions(Tables.EH_DOOR_USER_PERMISSION.OWNER_ID.eq(ownerId));                    
                 }
