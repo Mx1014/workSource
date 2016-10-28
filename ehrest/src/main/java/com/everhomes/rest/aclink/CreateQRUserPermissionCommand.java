@@ -37,6 +37,19 @@ public class CreateQRUserPermissionCommand {
     public void setApproveUserId(Long approveUserId) {
         this.approveUserId = approveUserId;
     }
+
+    public Byte getOwnerType() {
+        return ownerType;
+    }
+    public void setOwnerType(Byte ownerType) {
+        this.ownerType = ownerType;
+    }
+    public Long getOwnerId() {
+        return ownerId;
+    }
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

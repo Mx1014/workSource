@@ -28,6 +28,7 @@ public class GetVisitorResponse {
     String organization;
     String description;
     String approveName;
+    Byte permissionDeny;
     
     public String getUserName() {
         return userName;
@@ -88,6 +89,13 @@ public class GetVisitorResponse {
     }
     public void setApproveName(String approveName) {
         this.approveName = approveName;
+    }
+
+    public Byte getPermissionDeny() {
+        return permissionDeny;
+    }
+    public void setPermissionDeny(Byte permissionDeny) {
+        this.permissionDeny = permissionDeny;
     }
     @Override
     public String toString() {
