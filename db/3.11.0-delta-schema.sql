@@ -38,9 +38,9 @@ CREATE TABLE `eh_parking_card_categories` (
   `status` TINYINT NOT NULL COMMENT '1: normal, 0: delete',
   `creator_uid` BIGINT DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
-  
+
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- item 类别 by sfyan 20161025
 -- DROP TABLE IF EXISTS `eh_item_service_categries`;
@@ -88,7 +88,7 @@ CREATE TABLE `eh_service_alliance_reservation_requests` (
   `mobile` varchar(128) DEFAULT NULL,
   `remarks` varchar(1024) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -114,3 +114,30 @@ CREATE TABLE `eh_warning_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 以上为3.10.4合过来的脚本-------------
+
+-- global table. 添加门禁特殊权限相关用户类型 add by Janson 20161028
+-- DROP TABLE IF EXISTS `eh_door_user_permission`;
+CREATE TABLE `eh_door_user_permission` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INT NOT NULL DEFAULT '0',
+    `user_id` BIGINT NOT NULL,
+    `approve_user_id` BIGINT NOT NULL,
+    `auth_type` TINYINT NOT NULL COMMENT '0: Door Guard',
+    `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family, 3: user',
+    `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+    `integral_tag1` BIGINT DEFAULT 0 NOT NULL,
+    `integral_tag2` BIGINT DEFAULT 0 NOT NULL,
+    `integral_tag3` BIGINT DEFAULT 0 NOT NULL,
+    `integral_tag4` BIGINT DEFAULT 0 NOT NULL,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+
+    `description` VARCHAR(1024),
+
+    `create_time` DATETIME,
+    `status` TINYINT NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

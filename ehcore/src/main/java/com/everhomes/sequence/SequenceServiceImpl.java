@@ -922,6 +922,11 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhWarningSettings.class, Tables.EH_WARNING_SETTINGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_WARNING_SETTINGS.ID.max()).from(Tables.EH_WARNING_SETTINGS).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhDoorUserPermission.class, Tables.EH_DOOR_USER_PERMISSION.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DOOR_USER_PERMISSION.ID.max()).from(Tables.EH_DOOR_USER_PERMISSION).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")
