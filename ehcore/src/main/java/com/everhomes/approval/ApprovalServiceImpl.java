@@ -859,7 +859,17 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return new UpdateApprovalRuleResponse(approvalRuleDTO);
 	}
 
+	private void deleteApprovalRuleFlowMapAndFlowAndLevel(Long ruleId) {
+		List<ApprovalRuleFlowMap> maps =  approvalRuleFlowMapProvider.listRuleFlowMapsByRuleId(ruleId);
+		List<Long> flowIds = maps.stream().map(r -> {
+			return r.getFlowId();
+		}).collect(Collectors.toList());
+		approvalFlowLevelProvider.deleteApprovalLevels(flowIds);
+		approvalFlowProvider.deleteApprovalFlows(flowIds);
+		approvalRuleFlowMapProvider.deleteRuleFlowMapByRuleId(ruleId);
+	}
 	private void deleteApprovalRuleFlowMap(Long ruleId) {
+		
 		approvalRuleFlowMapProvider.deleteRuleFlowMapByRuleId(ruleId);
 	}
 
