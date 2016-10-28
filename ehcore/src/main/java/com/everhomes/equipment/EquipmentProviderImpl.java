@@ -25,12 +25,16 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.quality.QualityInspectionTasks;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
+import com.everhomes.rest.equipment.EquipmentTaskResult;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
+import com.everhomes.rest.quality.QualityInspectionTaskResult;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -49,6 +53,7 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskLogsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTasksDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplateItemMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
@@ -63,6 +68,7 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplateItemMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplates;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentAttachmentsRecord;
@@ -76,6 +82,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsR
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplateItemMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -1319,6 +1326,101 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         });
 
         return maps;
+	}
+
+	@Override
+	public void closeDelayTasks() {
+		Timestamp current = new Timestamp(System.currentTimeMillis());
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
+			
+			Condition conExecutive = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current);
+			conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+			
+			Condition conMaintenance = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current);
+			conMaintenance.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
+			
+			conExecutive = conExecutive.or(conMaintenance);
+			query.addConditions(conExecutive);
+			
+			query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.asc());
+			
+			query.fetch().map((r) -> {
+				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
+				closeTask(task);
+				return null;
+			});
+			return AfterAction.next;
+		});
+	}
+
+	@Override
+	public void closeExpiredReviewTasks() {
+		Timestamp current = new Timestamp(System.currentTimeMillis());
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhEquipmentInspectionTasks.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
+			
+			
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.NEED_MAINTENANCE.getCode()));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_EXPIRED_DATE.lt(current));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
+			query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.asc());
+			
+			query.fetch().map((r) -> {
+				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
+				closeReviewTasks(task);
+				return null;
+			});
+			return AfterAction.next;
+		});	
+		
+	}
+	
+	@Override
+	public void closeTask(EquipmentInspectionTasks task) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		if(task.getStatus().equals(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
+			task.setResult(EquipmentTaskResult.COMPLETE_DELAY.getCode());
+		if(task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
+			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
+		
+		task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
+		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
+		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
+        dao.update(t);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
+		
+	}
+
+	@Override
+	public void closeReviewTasks(EquipmentInspectionTasks task) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		task.setReviewResult(ReviewResult.REVIEW_DELAY.getCode());
+		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
+		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
+		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
+        dao.update(t);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
 	}
 
 }

@@ -47,28 +47,16 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
+		closeDelayTasks();
+		createTask();
 		
+	}
+	
+	private void createTask() {
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
+		}
 		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-		
-//		if(equipments != null && equipments.size() > 0) {
-//			for(EquipmentInspectionEquipments equipment : equipments) {
-//				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId());
-//				if(standard == null || standard.getStatus() == null
-//						|| EquipmentStandardStatus.fromStatus(standard.getStatus()) != EquipmentStandardStatus.ACTIVE) {
-//					LOGGER.info("EquipmentInspectionScheduleJob standard is not exist or active! standardId = " + equipment.getStandardId());
-//					continue;
-//				} else {
-//					boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
-//					LOGGER.info("EquipmentInspectionScheduleJob: standard id = " + standard.getId() 
-//							+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
-//					if(isRepeat) {
-//						this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-//							equipmentService.creatTaskByStandard(equipment, standard);
-//						});
-//					}
-//				}
-//			}
-//		}
 		
 		if(maps != null && maps.size() > 0) {
 			for(EquipmentStandardMap map : maps) {
@@ -94,6 +82,14 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 				}
 			}
 		}
+	}
+	
+	private void closeDelayTasks() {
+		LOGGER.info("EquipmentInspectionScheduleJob: close delay tasks.");
+		equipmentProvider.closeDelayTasks();
+		
+		LOGGER.info("EquipmentInspectionScheduleJob: close expired review tasks.");
+		equipmentProvider.closeExpiredReviewTasks();
 	}
 
 }

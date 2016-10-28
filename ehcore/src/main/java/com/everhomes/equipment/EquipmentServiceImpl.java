@@ -1737,13 +1737,27 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
+		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+				 && task.getExecutiveExpireTime() != null && task.getExecutiveExpireTime().before(now)) {
+			equipmentProvider.closeTask(task);
+		} else if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+				 && task.getProcessExpireTime() != null && task.getProcessExpireTime().before(now)) {
+			equipmentProvider.closeTask(task);
+		}
+		
+		if(EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+			LOGGER.error("task is closed");
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_CLOSE,
+ 				"该任务已关闭");
+		}
+		
 		if(EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
 			LOGGER.error("task is inactive");
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_INACTIVE,
  				"该任务已失效");
 		}
-		
 		
 		//process_time operator_type operator_id
 		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus())) 
@@ -1999,7 +2013,31 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void reviewEquipmentTask(ReviewEquipmentTaskCommand cmd) {
 		User user = UserContext.current().getUser();
+		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+				 || EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) 
+				 && task.getReviewExpiredDate() != null && task.getReviewExpiredDate().before(now)) {
+			equipmentProvider.closeReviewTasks(task);
+		} 
+		
+		
+		if((EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+				 || EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) 
+				&& ReviewResult.REVIEW_DELAY.equals(EquipmentTaskResult.fromStatus(task.getReviewResult()))) {
+			LOGGER.error("task is closed");
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_CLOSE,
+				"该任务已关闭");
+		}
+		
+		if(EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+			LOGGER.error("task is inactive");
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_INACTIVE,
+				"该任务已失效");
+		}
 		
 		EquipmentInspectionTasksLogs log = new EquipmentInspectionTasksLogs();
 		log.setTaskId(task.getId());

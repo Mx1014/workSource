@@ -88,4 +88,9 @@ public interface EquipmentProvider {
 	
 	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(String targetType);
 	List<EquipmentStandardMap> listEquipmentStandardMap(CrossShardListingLocator locator, Integer pageSize);
+	
+	void closeDelayTasks();
+	void closeExpiredReviewTasks();
+	void closeReviewTasks(EquipmentInspectionTasks task);
+	void closeTask(EquipmentInspectionTasks task);
 }
