@@ -1,27 +1,4 @@
-{
-    "eh_locale_strings": [
-        {
-            "id": 1284,
-            "scope": "verify.mail",
-            "code": "subject",
-            "locale": "zh_CN",
-            "text": "加入企业验证邮件"
-        },
-        {
-            "id": 1285,
-            "scope": "organization",
-            "code": "600001",
-            "locale": "zh_CN",
-            "text": "没有此邮箱域名"
-        },
-        {
-            "id": 1286,
-            "scope": "organization",
-            "code": "600002",
-            "locale": "zh_CN",
-            "text": "已经过了验证时间(有效期30分钟)"
-        }
-    ],
+{ 
     "eh_locale_templates": [
         {
             "id": 1201,

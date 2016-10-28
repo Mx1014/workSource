@@ -7545,6 +7545,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = UserContext.current().getUser().getId();
 		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
+		dto.setUserId(userId);
 		dto.setEnterpriseId(cmd.getOrganizationId());
 		// 添加联系人
 		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
@@ -7556,7 +7557,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dto.setEndTime(DateHelper.currentGMTTime().getTime()+30*60*1000L);
 		String verifyToken = WebTokenGenerator.getInstance().toWebToken(dto);
 		String host =  configurationProvider.getValue(sceneToken.getNamespaceId(), "home.url", "");
-		String verifyUrl = host + "/evh/org/applyForEnterpriseContactByEmail?verifyToken="+verifyToken;
+		String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
 
