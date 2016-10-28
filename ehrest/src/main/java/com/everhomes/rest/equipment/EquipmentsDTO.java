@@ -1,5 +1,6 @@
 package com.everhomes.rest.equipment;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -81,9 +82,9 @@ public class EquipmentsDTO {
     
     private Byte status;
     
-    private Long installationTime;
+    private Timestamp installationTime;
     
-    private Long repairTime;
+    private Timestamp repairTime;
     
     private String initialAssetValue;
 
@@ -244,19 +245,19 @@ public class EquipmentsDTO {
 		this.status = status;
 	}
 
-	public Long getInstallationTime() {
+	public Timestamp getInstallationTime() {
 		return installationTime;
 	}
 
-	public void setInstallationTime(Long installationTime) {
+	public void setInstallationTime(Timestamp installationTime) {
 		this.installationTime = installationTime;
 	}
 
-	public Long getRepairTime() {
+	public Timestamp getRepairTime() {
 		return repairTime;
 	}
 
-	public void setRepairTime(Long repairTime) {
+	public void setRepairTime(Timestamp repairTime) {
 		this.repairTime = repairTime;
 	}
 

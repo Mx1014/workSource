@@ -1188,6 +1188,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			String geohash=GeoHashUtils.encode(equipment.getLatitude(), equipment.getLongitude());
 			
+			if(cmd.getInstallationTime() != null)
+				equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
+			
+			if(cmd.getRepairTime() != null)
+				equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
+			
 			equipment.setGeohash(geohash);
 			equipment.setCreatorUid(user.getId());
 			equipment.setOperatorUid(user.getId());
@@ -1213,6 +1219,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
+			
+			if(cmd.getInstallationTime() != null)
+				equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
+			
+			if(cmd.getRepairTime() != null)
+				equipment.setRepairTime(new Timestamp(cmd.getRepairTime()));
+			
 			
 			if(exist.getLatitude() != null && equipment.getLongitude() != null) {
 				if(!exist.getLatitude().equals(equipment.getLatitude()) || !equipment.getLongitude().equals(exist.getLongitude()) ) {
@@ -1355,7 +1368,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						mapdto.setReviewerName(member.getContactName());
 					}
 				}
-				
+				equipmentStandardMap.add(mapdto);
 				
 			}
 		}
