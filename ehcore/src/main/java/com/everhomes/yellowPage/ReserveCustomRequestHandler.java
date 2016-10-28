@@ -126,7 +126,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
 			}
 			
-			sendEmail(serviceOrg.getEmail(), category.getName(), notifyTextForOrg);
+			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
 			
 		}
 		
@@ -153,7 +153,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
-					sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin);
+					sendEmail(email.getContactToken(), categoryName, notifyTextForAdmin);
 				}
 			}
 		}
