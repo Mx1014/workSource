@@ -40,7 +40,7 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 	VALUES(1118025, 240111044331055835, 'organization', 1008218, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2118979, 1008218, 'USER', 248953  , 'manager', '闫杨', 0, '18664367996', 3, 999984);	
+	VALUES(2118979, 1008218, 'USER', 248953  , 'manager', '李叶', 0, '13600161256', 3, 999984);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(13003, 'EhOrganizations', 1008218, 'EhUsers', 248953  , 1001, 1, UTC_TIMESTAMP());
 
