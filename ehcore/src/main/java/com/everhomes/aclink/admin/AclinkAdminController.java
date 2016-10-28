@@ -41,11 +41,13 @@ import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
+import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DeleteDoorAccessById;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
 import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.DoorUserPermissionDTO;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetShortMessageCommand;
@@ -57,6 +59,8 @@ import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
+import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.rest.aclink.SearchDoorAuthCommand;
@@ -412,5 +416,33 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }        
+    }       
+    
+    /**
+     * <b>URL: /admin/aclink/createQRUserPermission</b>
+     * <p>创建保安二维码授权</p>
+     * @return 授权详情
+     */
+    @RequestMapping("createQRUserPermission")
+    @RestReturn(value=DoorUserPermissionDTO.class)
+    public RestResponse createQRUserPermission(@Valid CreateQRUserPermissionCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }       
+    
+    /**
+     * <b>URL: /admin/aclink/listQRUserPermission</b>
+     * <p>创建保安二维码授权</p>
+     * @return 授权详情
+     */
+    @RequestMapping("listQRUserPermission")
+    @RestReturn(value=ListQRUserPermissionResponse.class)
+    public RestResponse listQRUserPermission(@Valid ListQRUserPermissionCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }       
 }

@@ -123,6 +123,8 @@ CREATE TABLE `eh_door_user_permission` (
     `user_id` BIGINT NOT NULL,
     `approve_user_id` BIGINT NOT NULL,
     `auth_type` TINYINT NOT NULL COMMENT '0: Door Guard',
+    `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family, 3: user',
+    `owner_id` BIGINT NOT NULL DEFAULT 0,
 
     `integral_tag1` BIGINT DEFAULT 0 NOT NULL,
     `integral_tag2` BIGINT DEFAULT 0 NOT NULL,
