@@ -1360,7 +1360,7 @@ public class FamilyServiceImpl implements FamilyService {
                         .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
                             //排除自己家庭
-                            if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != group.getIntegralTag1())
+                            if(!r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1).equals(group.getIntegralTag1()))
                                 familyList.add(ConvertHelper.convert(r,Family.class));
                             return null;
                         });
@@ -1369,23 +1369,21 @@ public class FamilyServiceImpl implements FamilyService {
                 });
         List<Long> neighborUserIds = new ArrayList<Long>();
 
-        LOGGER.debug("family list = {}", familyList);
         familyList.stream().forEach((f) ->{
             if(f == null) return;
             
             Address address = this.addressProvider.findAddressById(f.getAddressId());
             if(address != null){
                 
-                List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
+                    List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
                 if(members != null && !members.isEmpty()){
                     for(GroupMember m : members){
-                        LOGGER.debug("group member = {}", m);
-                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
+                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()
                                 && m.getMemberType().equals(EntityType.USER.getCode())
                                         && m.getMemberId().longValue() != user.getId().longValue()){
                             //去重
                             if(neighborUserIds.contains(m.getMemberId())) 
-                                return;
+                                continue;
                             neighborUserIds.add(m.getMemberId());
                             NeighborUserDetailDTO n = new NeighborUserDetailDTO();
                             User u = this.userProvider.findUserById(m.getMemberId());
