@@ -2201,7 +2201,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
 		task.setOwnerType(equipment.getOwnerType());
 		task.setOwnerId(equipment.getOwnerId());
-		task.setStandardId(standard.getStandardId());
+		task.setStandardId(standard.getId());
 		task.setEquipmentId(equipment.getId());
 		task.setTaskNumber(standard.getStandardNumber());
 		task.setStandardType(standard.getStandardType());
