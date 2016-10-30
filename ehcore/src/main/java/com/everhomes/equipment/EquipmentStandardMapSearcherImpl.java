@@ -165,27 +165,29 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         List<EquipmentStandardRelationDTO> dtos = new ArrayList<EquipmentStandardRelationDTO>();
         for(Long id : ids) {
         	EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMapById(id);
-        	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
-        	EquipmentStandardRelationDTO dto = new EquipmentStandardRelationDTO();
-        	dto.setEquipmentId(equipment.getId());
-        	dto.setTargetId(equipment.getTargetId());
-        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-    		if(group != null)
-    			dto.setTargetName(group.getName());
-    		
-    		dto.setEquipmentName(equipment.getName());
-    		dto.setEquipmentModel(equipment.getEquipmentModel());
-    		dto.setStatus(equipment.getStatus());
-    		dto.setStandardId(map.getStandardId());
-    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(standard != null) {
-            	dto.setStandardName(standard.getName());
-            }
-            
-            dto.setReviewResult(map.getReviewResult());
-            dto.setReviewStatus(map.getReviewStatus());
-
-    		dtos.add(dto);
+        	if(map != null) {
+	        	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
+	        	EquipmentStandardRelationDTO dto = new EquipmentStandardRelationDTO();
+	        	dto.setEquipmentId(equipment.getId());
+	        	dto.setTargetId(equipment.getTargetId());
+	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+	    		if(group != null)
+	    			dto.setTargetName(group.getName());
+	    		
+	    		dto.setEquipmentName(equipment.getName());
+	    		dto.setEquipmentModel(equipment.getEquipmentModel());
+	    		dto.setStatus(equipment.getStatus());
+	    		dto.setStandardId(map.getStandardId());
+	    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+	            if(standard != null) {
+	            	dto.setStandardName(standard.getName());
+	            }
+	            
+	            dto.setReviewResult(map.getReviewResult());
+	            dto.setReviewStatus(map.getReviewStatus());
+	
+	    		dtos.add(dto);
+        	}
         }
         
         response.setRelations(dtos);

@@ -787,6 +787,24 @@ public class EquipmentController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /equipment/syncEquipmentStandardMapIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncEquipmentStandardMapIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncEquipmentStandardMapIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        equipmentStandardMapSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
 	 * <b>URL: /equipment/updateEquipmentCategory</b>
 	 * <p>修改设备类型</p>
 	 */
