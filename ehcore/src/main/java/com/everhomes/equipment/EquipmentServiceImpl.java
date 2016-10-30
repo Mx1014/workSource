@@ -179,7 +179,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -352,6 +354,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -1212,6 +1215,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					map.setCreatorUid(user.getId());
 					
 					equipmentProvider.createEquipmentStandardMap(map);
+					equipmentStandardMapSearcher.feedDoc(map);
 				}
 			}
 			
@@ -1267,6 +1271,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						map.setCreatorUid(user.getId());
 						
 						equipmentProvider.createEquipmentStandardMap(map);
+						equipmentStandardMapSearcher.feedDoc(map);
 					} else {
 						EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
 								 dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
@@ -1281,6 +1286,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 							map.setCreatorUid(user.getId());
 							
 							equipmentProvider.createEquipmentStandardMap(map);
+							equipmentStandardMapSearcher.feedDoc(map);
 						}
 						
 						updateStandardIds.add(map.getStandardId());
@@ -1294,6 +1300,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						map.setDeleterUid(user.getId());
 						map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						equipmentProvider.updateEquipmentStandardMap(map);
+						equipmentStandardMapSearcher.feedDoc(map);
 						
 						inactiveTasks(equipment.getId(), map.getStandardId());
 					}
@@ -2150,38 +2157,35 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void createEquipmentTask(DeleteEquipmentsCommand cmd) {
-		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
-		if(equipment == null) {
-			if(LOGGER.isInfoEnabled()) {
-				LOGGER.info("createEquipmentTask：equipment not exist. equipmentId = " + cmd.getEquipmentId());
+
+		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+		
+		if(maps != null && maps.size() > 0) {
+			for(EquipmentStandardMap map : maps) {
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
+				if(standard == null || standard.getStatus() == null
+						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
+					LOGGER.info("EquipmentInspectionScheduleJob standard is not exist or active! standardId = " + map.getStandardId());
+					continue;
+				} else if(equipment == null || !EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
+						LOGGER.info("EquipmentInspectionScheduleJob equipment is not exist or active! equipmentId = " + map.getTargetId());
+						continue;
+					
+				} else {
+					boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+					LOGGER.info("EquipmentInspectionScheduleJob: standard id = " + standard.getId() 
+							+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+					if(isRepeat) {
+						this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+							creatTaskByStandard(equipment, standard);
+						});
+					}
+				}
 			}
-			
-			return ;
 		}
-		if(EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
-//			if(equipment.getStandardId() != null && equipment.getStandardId() != 0 &&
-//					ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(equipment.getReviewResult()))) {
-//				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), cmd.getOwnerType(), cmd.getOwnerId());
-//				if(standard == null || standard.getStatus() == null
-//						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-//					if(LOGGER.isInfoEnabled()) {
-//						LOGGER.info("createEquipmentTask：standard is not exist or active. standardId = " + equipment.getStandardId());
-//					}
-//					
-//					return ;
-//				}
-//				this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-//					creatTaskByStandard(equipment, standard);
-//				});
-//			} else {
-//				if(LOGGER.isInfoEnabled()) {
-//					LOGGER.info("createEquipmentTask：equipment not related with standard. equipmentId = " + cmd.getEquipmentId());
-//				}
-//				
-//				return ;
-//			}
 			
-		} else {
+		 else {
 			if(LOGGER.isInfoEnabled()) {
 				LOGGER.info("createEquipmentTask：equipment not in use. equipmentId = " + cmd.getEquipmentId());
 			}
@@ -2197,7 +2201,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
 		task.setOwnerType(equipment.getOwnerType());
 		task.setOwnerId(equipment.getOwnerId());
-//		task.setStandardId(equipment.getStandardId());
+		task.setStandardId(standard.getStandardId());
 		task.setEquipmentId(equipment.getId());
 		task.setTaskNumber(standard.getStandardNumber());
 		task.setStandardType(standard.getStandardType());
