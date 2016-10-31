@@ -4,7 +4,7 @@ INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `crea
 	VALUES(1122, 999984, 'community_commercial', '2016-10-21 18:07:50'); 
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES (804, 'app.agreements.url', 'http://officeasy.zuolin.com/mobile/static/app_agreements/officeasy_agreements.html', 'the relative path for qinghua app agreements', '999984', NULL);
+	VALUES (804, 'app.agreements.url', 'http://core.zuolin.com/mobile/static/app_agreements/qh_aggreements.html', 'the relative path for qinghua app agreements', '999984', NULL);
 
 INSERT INTO `eh_version_realm` VALUES ('72', 'Android_Qinghua', null, UTC_TIMESTAMP(), '999984');
 INSERT INTO `eh_version_realm` VALUES ('73', 'iOS_Qinghua', null, UTC_TIMESTAMP(), '999984');
