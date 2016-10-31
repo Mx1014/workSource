@@ -150,7 +150,7 @@ ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `template_id` BIGINT 
 ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `review_expired_date` DATETIME;
 
 -- 设备表
--- DROP TABLE IF EXISTS `eh_equipment_inspection_equipments`;
+DROP TABLE IF EXISTS `eh_equipment_inspection_equipments`;
 CREATE TABLE `eh_equipment_inspection_equipments` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the equipment, enterprise, etc',
