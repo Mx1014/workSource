@@ -172,6 +172,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
+import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -3913,7 +3914,7 @@ public class GroupServiceImpl implements GroupService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		Long groupId = cmd.getGroupId();
-		GroupMember gm = checkQuitAndTransferPrivilegeParameters(userId, groupId);
+		GroupMember gm = checkTransferPrivilegeParameters(userId, groupId);
 		
 		//检查如果当前群只有创建者一个人了，则退出并转移权限时直接解散该群
 		if (checkIfOnlyOneGroupMember(userId, groupId)) {
@@ -3984,6 +3985,8 @@ public class GroupServiceImpl implements GroupService {
 	private GroupMember transferPrivilege(Long userId, Long groupId) {
 		GroupMember gm = groupProvider.findGroupMemberTopOne(groupId);
 		gm.setMemberRole(RoleConstants.ResourceCreator);
+		gm.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		gm.setOperatorUid(userId);
 		groupProvider.updateGroupMember(gm);
 		return gm;
 	}
@@ -3994,7 +3997,7 @@ public class GroupServiceImpl implements GroupService {
         deleteUserGroupOpRequest(gm.getGroupId(), gm.getMemberId(), userId, "leave group");
 	}
 
-	private GroupMember checkQuitAndTransferPrivilegeParameters(Long userId, Long groupId) {
+	private GroupMember checkTransferPrivilegeParameters(Long userId, Long groupId) {
 		//1.groupId不能为空
 		if (groupId == null) {
 			LOGGER.error("Invalid parameters, userId = "+userId+", groupId"+groupId);
@@ -4021,18 +4024,63 @@ public class GroupServiceImpl implements GroupService {
     
 	
 	
-
+	
 	@Override
 	public ListUserGroupPostResponse listUserGroupPost(ListUserGroupPostCommand cmd) {
-	
-		return new ListUserGroupPostResponse();
+		User user = UserContext.current().getUser();
+		if (user == null || user.getId() == null || user.getId().longValue() == 0L) {
+			return new ListUserGroupPostResponse();
+		}
+		
+		List<GroupDTO> groupList = listUserRelatedGroups();
+		List<Long> forumIdList = groupList.stream().map(g->g.getOwningForumId()).collect(Collectors.toList());
+		
+		ListUserGroupPostResponse response = forumService.listUserGroupPost(VisibilityScope.COMMUNITY, 0L, forumIdList, user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
+		
+		return response;
 	}
 
 	@Override
 	public void transferCreatorPrivilege(TransferCreatorPrivilegeCommand cmd) {
-	
-
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		Long groupId = cmd.getGroupId();
+		GroupMember oldCreator = checkTransferPrivilegeParameters(userId, groupId);
+		
+		dbProvider.execute(t->{
+			//转移权限
+			GroupMember newCreator = transferPrivilegeToUser(oldCreator, cmd.getUserId(), groupId);
+			//发消息
+			sendNotificationToOldCreator(oldCreator, user);
+			sendNotificationToNewCreator(newCreator, user.getLocale());
+			
+			return null;
+		});
 	}
+
+	private GroupMember transferPrivilegeToUser(GroupMember fromUser, Long toUserId, Long groupId) {
+		//把创建者自己变成普通用户
+		fromUser.setMemberRole(RoleConstants.ResourceUser);
+		fromUser.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		fromUser.setOperatorUid(fromUser.getMemberId());
+		groupProvider.updateGroupMember(fromUser);
+		
+		//修改group的创建者为新创建者
+		Group group = groupProvider.findGroupById(groupId);
+		group.setCreatorUid(toUserId);
+		group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		groupProvider.updateGroup(group);
+		
+		//修改原普通成员为创建者
+		GroupMember newCreator = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), toUserId);
+		newCreator.setMemberRole(RoleConstants.ResourceCreator);
+		newCreator.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		newCreator.setOperatorUid(fromUser.getMemberId());
+		groupProvider.updateGroupMember(newCreator);
+		
+		return newCreator;
+	}
+	
 
 	@Override
 	public CreateBroadcastResponse createBroadcast(CreateBroadcastCommand cmd) {

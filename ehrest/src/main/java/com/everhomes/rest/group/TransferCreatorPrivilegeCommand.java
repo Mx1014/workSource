@@ -7,11 +7,14 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>groupId: 圈id</li>
+ * <li>userId: 转移给谁</li>
  * </ul>
  */
 public class TransferCreatorPrivilegeCommand {
 
 	private Long groupId;
+	
+	private Long userId;
 
 	public TransferCreatorPrivilegeCommand() {
 
@@ -20,6 +23,14 @@ public class TransferCreatorPrivilegeCommand {
 	public TransferCreatorPrivilegeCommand(Long groupId) {
 		super();
 		this.groupId = groupId;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	public Long getGroupId() {
