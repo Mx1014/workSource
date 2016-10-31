@@ -3,11 +3,15 @@ package com.everhomes.aclink;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +59,7 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetPhoneVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
@@ -482,10 +487,29 @@ public class AclinkController extends ControllerBase {
      */
     @RequestMapping("phv")
     @RequireAuthentication(false)
-    public Object doorPhoneVisitor(GetVisitorCommand cmd) {
+    public Object doorPhoneVisitor(GetPhoneVisitorCommand cmd, HttpServletRequest request) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        try {  
-              httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrAdminCode.html?id=" + cmd.getId()));
+        String originUrl = "/mobile/static/qr_access/qrAdminCode.html?";
+        Map<String, String[]> maps = request.getParameterMap();
+        int i = 0;
+        for(Entry<String, String[]> m : maps.entrySet()) {
+         
+            String[] mv = m.getValue();
+            String vv = "";
+            if(mv.length > 0) {
+                vv = mv[0];
+            }
+            
+            if(i == 0) {
+                originUrl += m.getKey() + "=" + URLEncoder.encode(vv);
+            } else {
+                originUrl += "&" + m.getKey() + "=" + URLEncoder.encode(vv);
+            }
+            i++;
+        }
+        
+        try {
+                httpHeaders.setLocation(new URI(originUrl));
         } catch (URISyntaxException e) {
         }
         return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
