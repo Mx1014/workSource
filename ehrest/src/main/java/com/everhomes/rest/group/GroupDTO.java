@@ -33,6 +33,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
+ * <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
  * </ul>
  */
 public class GroupDTO {
@@ -71,7 +72,17 @@ public class GroupDTO {
     
     private String discriminator;
     
-    public String getCreatorName() {
+    private Byte approvalStatus;
+    
+    public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public String getCreatorName() {
 		return creatorName;
 	}
 

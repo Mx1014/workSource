@@ -53,6 +53,10 @@ import com.everhomes.util.StringHelper;
  * <li>endTime:结束时间</li>
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
+ * <li>maxQuantity: 限制人数</li>
+ * <li>contentUrl: 内容链接</li>
+ * <li>groupId: 俱乐部id</li>
+ * <li>groupName: 俱乐部名称</li>
  * </ul>
  */
 public class PostDTO {
@@ -145,8 +149,48 @@ public class PostDTO {
     private Long endTime;
     
     private Byte mediaDisplayFlag;
+
+    private Integer maxQuantity;
     
-    public Byte getMediaDisplayFlag() {
+    private String contentUrl;
+    
+    private Long groupId;
+    
+    private String groupName;
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getContentUrl() {
+		return contentUrl;
+	}
+
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
+	}
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Byte getMediaDisplayFlag() {
 		return mediaDisplayFlag;
 	}
 

@@ -22,14 +22,23 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.group.AcceptJoinGroupInvitation;
+import com.everhomes.rest.group.ApprovalGroupRequestCommand;
 import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
 import com.everhomes.rest.group.CommandResult;
+import com.everhomes.rest.group.CreateBroadcastCommand;
+import com.everhomes.rest.group.CreateBroadcastResponse;
+import com.everhomes.rest.group.CreateGroupCategoryCommand;
+import com.everhomes.rest.group.CreateGroupCategoryResponse;
 import com.everhomes.rest.group.CreateGroupCommand;
 import com.everhomes.rest.group.DeleteGroupByIdCommand;
+import com.everhomes.rest.group.DeleteGroupCategoryCommand;
 import com.everhomes.rest.group.GetAdminRoleStatusCommand;
+import com.everhomes.rest.group.GetBroadcastByTokenCommand;
+import com.everhomes.rest.group.GetBroadcastByTokenResponse;
 import com.everhomes.rest.group.GetGroupCommand;
 import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
+import com.everhomes.rest.group.GetGroupParametersCommand;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberSnapshotDTO;
@@ -40,10 +49,16 @@ import com.everhomes.rest.group.InviteToJoinGroupCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.ListAdminOpRequestCommand;
 import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
+import com.everhomes.rest.group.ListBroadcastsCommand;
+import com.everhomes.rest.group.ListBroadcastsResponse;
 import com.everhomes.rest.group.ListGroupByTagCommand;
+import com.everhomes.rest.group.ListGroupCategoriesCommand;
+import com.everhomes.rest.group.ListGroupCategoriesResponse;
 import com.everhomes.rest.group.ListGroupCommandResponse;
 import com.everhomes.rest.group.ListGroupWaitingApprovalsCommand;
 import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
+import com.everhomes.rest.group.ListGroupsByApprovalStatusCommand;
+import com.everhomes.rest.group.ListGroupsByApprovalStatusResponse;
 import com.everhomes.rest.group.ListGroupsByNamespaceIdCommand;
 import com.everhomes.rest.group.ListMemberCommandResponse;
 import com.everhomes.rest.group.ListMemberInRoleCommand;
@@ -51,8 +66,11 @@ import com.everhomes.rest.group.ListMemberInStatusCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.ListUserGroupPostCommand;
+import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
 import com.everhomes.rest.group.RejectAdminRoleCommand;
+import com.everhomes.rest.group.RejectGroupRequestCommand;
 import com.everhomes.rest.group.RejectJoinGroupInvitation;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestAdminRoleCommand;
@@ -61,6 +79,11 @@ import com.everhomes.rest.group.ResignAdminRoleCommand;
 import com.everhomes.rest.group.RevokeAdminRoleCommand;
 import com.everhomes.rest.group.RevokeGroupMemberCommand;
 import com.everhomes.rest.group.SearchGroupCommand;
+import com.everhomes.rest.group.SetGroupParametersCommand;
+import com.everhomes.rest.group.SetGroupParametersResponse;
+import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
+import com.everhomes.rest.group.UpdateGroupCategoryCommand;
+import com.everhomes.rest.group.UpdateGroupCategoryResponse;
 import com.everhomes.rest.group.UpdateGroupCommand;
 import com.everhomes.rest.group.UpdateGroupMemberCommand;
 import com.everhomes.util.EtagHelper;
@@ -712,4 +735,151 @@ public class GroupController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    
+	/**
+	 * <p>1.查询我加入的俱乐部发的贴子</p>
+	 * <b>URL: /group/listUserGroupPost</b>
+	 */
+	@RequestMapping("listUserGroupPost")
+	@RestReturn(ListUserGroupPostResponse.class)
+	public RestResponse listUserGroupPost(ListUserGroupPostCommand cmd){
+		return new RestResponse(groupService.listUserGroupPost(cmd));
+	}
+
+	/**
+	 * <p>2.转移创建者权限</p>
+	 * <b>URL: /group/transferCreatorPrivilege</b>
+	 */
+	@RequestMapping("transferCreatorPrivilege")
+	@RestReturn(String.class)
+	public RestResponse transferCreatorPrivilege(TransferCreatorPrivilegeCommand cmd){
+		groupService.transferCreatorPrivilege(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>3.创建广播消息</p>
+	 * <b>URL: /group/createBroadcast</b>
+	 */
+	@RequestMapping("createBroadcast")
+	@RestReturn(CreateBroadcastResponse.class)
+	public RestResponse createBroadcast(CreateBroadcastCommand cmd){
+		return new RestResponse(groupService.createBroadcast(cmd));
+	}
+
+	/**
+	 * <p>4.获取广播详情</p>
+	 * <b>URL: /group/getBroadcastByToken</b>
+	 */
+	@RequestMapping("getBroadcastByToken")
+	@RestReturn(GetBroadcastByTokenResponse.class)
+	public RestResponse getBroadcastByToken(GetBroadcastByTokenCommand cmd){
+		return new RestResponse(groupService.getBroadcastByToken(cmd));
+	}
+
+	/**
+	 * <p>5.列出广播消息</p>
+	 * <b>URL: /group/listBroadcasts</b>
+	 */
+	@RequestMapping("listBroadcasts")
+	@RestReturn(ListBroadcastsResponse.class)
+	public RestResponse listBroadcasts(ListBroadcastsCommand cmd){
+		return new RestResponse(groupService.listBroadcasts(cmd));
+	}
+
+	/**
+	 * <p>6.设置俱乐部参数</p>
+	 * <b>URL: /group/setGroupParameters</b>
+	 */
+	@RequestMapping("setGroupParameters")
+	@RestReturn(SetGroupParametersResponse.class)
+	public RestResponse setGroupParameters(SetGroupParametersCommand cmd){
+		return new RestResponse(groupService.setGroupParameters(cmd));
+	}
+
+	/**
+	 * <p>7.获取俱乐部参数</p>
+	 * <b>URL: /group/getGroupParameters</b>
+	 */
+	@RequestMapping("getGroupParameters")
+	@RestReturn(String.class)
+	public RestResponse getGroupParameters(GetGroupParametersCommand cmd){
+		groupService.getGroupParameters(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>8.按审核状态查询圈</p>
+	 * <b>URL: /group/listGroupsByApprovalStatus</b>
+	 */
+	@RequestMapping("listGroupsByApprovalStatus")
+	@RestReturn(ListGroupsByApprovalStatusResponse.class)
+	public RestResponse listGroupsByApprovalStatus(ListGroupsByApprovalStatusCommand cmd){
+		return new RestResponse(groupService.listGroupsByApprovalStatus(cmd));
+	}
+
+	/**
+	 * <p>9.审核通过俱乐部申请</p>
+	 * <b>URL: /group/approvalGroupRequest</b>
+	 */
+	@RequestMapping("approvalGroupRequest")
+	@RestReturn(String.class)
+	public RestResponse approvalGroupRequest(ApprovalGroupRequestCommand cmd){
+		groupService.approvalGroupRequest(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>10.拒绝俱乐部申请</p>
+	 * <b>URL: /group/rejectGroupRequest</b>
+	 */
+	@RequestMapping("rejectGroupRequest")
+	@RestReturn(String.class)
+	public RestResponse rejectGroupRequest(RejectGroupRequestCommand cmd){
+		groupService.rejectGroupRequest(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>11.创建圈分类</p>
+	 * <b>URL: /group/createGroupCategory</b>
+	 */
+	@RequestMapping("createGroupCategory")
+	@RestReturn(CreateGroupCategoryResponse.class)
+	public RestResponse createGroupCategory(CreateGroupCategoryCommand cmd){
+		return new RestResponse(groupService.createGroupCategory(cmd));
+	}
+
+	/**
+	 * <p>12.更新圈分类</p>
+	 * <b>URL: /group/updateGroupCategory</b>
+	 */
+	@RequestMapping("updateGroupCategory")
+	@RestReturn(UpdateGroupCategoryResponse.class)
+	public RestResponse updateGroupCategory(UpdateGroupCategoryCommand cmd){
+		return new RestResponse(groupService.updateGroupCategory(cmd));
+	}
+
+	/**
+	 * <p>13.删除圈分类</p>
+	 * <b>URL: /group/deleteGroupCategory</b>
+	 */
+	@RequestMapping("deleteGroupCategory")
+	@RestReturn(String.class)
+	public RestResponse deleteGroupCategory(DeleteGroupCategoryCommand cmd){
+		groupService.deleteGroupCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>14.列出圈分类</p>
+	 * <b>URL: /group/listGroupCategories</b>
+	 */
+	@RequestMapping("listGroupCategories")
+	@RestReturn(ListGroupCategoriesResponse.class)
+	public RestResponse listGroupCategories(ListGroupCategoriesCommand cmd){
+		return new RestResponse(groupService.listGroupCategories(cmd));
+	}
+
 }

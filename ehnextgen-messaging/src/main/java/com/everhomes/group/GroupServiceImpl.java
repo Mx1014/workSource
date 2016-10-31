@@ -69,13 +69,22 @@ import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.AcceptJoinGroupInvitation;
+import com.everhomes.rest.group.ApprovalGroupRequestCommand;
 import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
 import com.everhomes.rest.group.CommandResult;
+import com.everhomes.rest.group.CreateBroadcastCommand;
+import com.everhomes.rest.group.CreateBroadcastResponse;
+import com.everhomes.rest.group.CreateGroupCategoryCommand;
+import com.everhomes.rest.group.CreateGroupCategoryResponse;
 import com.everhomes.rest.group.CreateGroupCommand;
+import com.everhomes.rest.group.DeleteGroupCategoryCommand;
 import com.everhomes.rest.group.GetAdminRoleStatusCommand;
+import com.everhomes.rest.group.GetBroadcastByTokenCommand;
+import com.everhomes.rest.group.GetBroadcastByTokenResponse;
 import com.everhomes.rest.group.GetGroupCommand;
 import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
+import com.everhomes.rest.group.GetGroupParametersCommand;
 import com.everhomes.rest.group.GroupAdminNotificationTemplateCode;
 import com.everhomes.rest.group.GroupCardDTO;
 import com.everhomes.rest.group.GroupDTO;
@@ -99,11 +108,17 @@ import com.everhomes.rest.group.InviteToJoinGroupCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.ListAdminOpRequestCommand;
 import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
+import com.everhomes.rest.group.ListBroadcastsCommand;
+import com.everhomes.rest.group.ListBroadcastsResponse;
 import com.everhomes.rest.group.ListGroupByTagCommand;
+import com.everhomes.rest.group.ListGroupCategoriesCommand;
+import com.everhomes.rest.group.ListGroupCategoriesResponse;
 import com.everhomes.rest.group.ListGroupCommand;
 import com.everhomes.rest.group.ListGroupCommandResponse;
 import com.everhomes.rest.group.ListGroupWaitingApprovalsCommand;
 import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
+import com.everhomes.rest.group.ListGroupsByApprovalStatusCommand;
+import com.everhomes.rest.group.ListGroupsByApprovalStatusResponse;
 import com.everhomes.rest.group.ListGroupsByNamespaceIdCommand;
 import com.everhomes.rest.group.ListMemberCommandResponse;
 import com.everhomes.rest.group.ListMemberInRoleCommand;
@@ -111,8 +126,11 @@ import com.everhomes.rest.group.ListMemberInStatusCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.ListUserGroupPostCommand;
+import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
 import com.everhomes.rest.group.RejectAdminRoleCommand;
+import com.everhomes.rest.group.RejectGroupRequestCommand;
 import com.everhomes.rest.group.RejectJoinGroupInvitation;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestAdminRoleCommand;
@@ -122,6 +140,11 @@ import com.everhomes.rest.group.RevokeAdminRoleCommand;
 import com.everhomes.rest.group.RevokeGroupMemberCommand;
 import com.everhomes.rest.group.SearchGroupCommand;
 import com.everhomes.rest.group.SearchGroupTopicAdminCommand;
+import com.everhomes.rest.group.SetGroupParametersCommand;
+import com.everhomes.rest.group.SetGroupParametersResponse;
+import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
+import com.everhomes.rest.group.UpdateGroupCategoryCommand;
+import com.everhomes.rest.group.UpdateGroupCategoryResponse;
 import com.everhomes.rest.group.UpdateGroupCommand;
 import com.everhomes.rest.group.UpdateGroupMemberCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -3996,4 +4019,90 @@ public class GroupServiceImpl implements GroupService {
 		return gm;
 	}
     
+	
+	
+
+	@Override
+	public ListUserGroupPostResponse listUserGroupPost(ListUserGroupPostCommand cmd) {
+	
+		return new ListUserGroupPostResponse();
+	}
+
+	@Override
+	public void transferCreatorPrivilege(TransferCreatorPrivilegeCommand cmd) {
+	
+
+	}
+
+	@Override
+	public CreateBroadcastResponse createBroadcast(CreateBroadcastCommand cmd) {
+	
+		return new CreateBroadcastResponse();
+	}
+
+	@Override
+	public GetBroadcastByTokenResponse getBroadcastByToken(GetBroadcastByTokenCommand cmd) {
+	
+		return new GetBroadcastByTokenResponse();
+	}
+
+	@Override
+	public ListBroadcastsResponse listBroadcasts(ListBroadcastsCommand cmd) {
+	
+		return new ListBroadcastsResponse();
+	}
+
+	@Override
+	public SetGroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd) {
+	
+		return new SetGroupParametersResponse();
+	}
+
+	@Override
+	public void getGroupParameters(GetGroupParametersCommand cmd) {
+	
+
+	}
+
+	@Override
+	public ListGroupsByApprovalStatusResponse listGroupsByApprovalStatus(ListGroupsByApprovalStatusCommand cmd) {
+	
+		return new ListGroupsByApprovalStatusResponse();
+	}
+
+	@Override
+	public void approvalGroupRequest(ApprovalGroupRequestCommand cmd) {
+	
+
+	}
+
+	@Override
+	public void rejectGroupRequest(RejectGroupRequestCommand cmd) {
+	
+
+	}
+
+	@Override
+	public CreateGroupCategoryResponse createGroupCategory(CreateGroupCategoryCommand cmd) {
+	
+		return new CreateGroupCategoryResponse();
+	}
+
+	@Override
+	public UpdateGroupCategoryResponse updateGroupCategory(UpdateGroupCategoryCommand cmd) {
+	
+		return new UpdateGroupCategoryResponse();
+	}
+
+	@Override
+	public void deleteGroupCategory(DeleteGroupCategoryCommand cmd) {
+	
+
+	}
+
+	@Override
+	public ListGroupCategoriesResponse listGroupCategories(ListGroupCategoriesCommand cmd) {
+	
+		return new ListGroupCategoriesResponse();
+	}
 }
