@@ -33,6 +33,8 @@ public enum CoordinationLocks {
 
     UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
     UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update"),
+    
+    WARNING_ACTIVITY_SCHEDULE("warning.activity.schedule"),
 
     PMTASK_STATISTICS("pmtask.statistics");
 

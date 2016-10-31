@@ -6,8 +6,10 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>id: id</li>
+ * <li>forumId: 论坛id</li>
  * <li>searchTypeId: 内容类型id</li>
  * <li>searchTypeName: 内容类型名称</li>
+ * <li>contentType: 内容类型</li>
  * <li>subject: 主题</li>
  * <li>content: 内容</li>
  * <li>postUrl: 图片url（活动封面或帖子的第一张图）</li>
@@ -18,9 +20,13 @@ public class ContentBriefDTO {
 	
 	private Long id;
 	
+	private Long forumId;
+	
 	private Long searchTypeId;
 	
 	private String searchTypeName;
+	
+	private String contentType;
 	
 	private String subject;
 	
@@ -29,6 +35,8 @@ public class ContentBriefDTO {
 	private String postUrl;
 	
 	private String footnoteJson;
+	
+	private String newsToken;
 
 	public Long getId() {
 		return id;
@@ -36,6 +44,14 @@ public class ContentBriefDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getForumId() {
+		return forumId;
+	}
+
+	public void setForumId(Long forumId) {
+		this.forumId = forumId;
 	}
 
 	public Long getSearchTypeId() {
@@ -52,6 +68,14 @@ public class ContentBriefDTO {
 
 	public void setSearchTypeName(String searchTypeName) {
 		this.searchTypeName = searchTypeName;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	public String getSubject() {
@@ -76,6 +100,14 @@ public class ContentBriefDTO {
 
 	public void setFootnoteJson(String footnoteJson) {
 		this.footnoteJson = footnoteJson;
+	}
+
+	public String getNewsToken() {
+		return newsToken;
+	}
+
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
 	public String getPostUrl() {

@@ -76,4 +76,6 @@ public interface GroupProvider {
     
     List<Group> listGroupByCommunityId(Long communityId, ListingQueryBuilderCallback queryBuilderCallback);
 	GroupMember findGroupMemberTopOne(Long groupId);
+    GroupMemberCaches listGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize);
+    void evictGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize);
 }

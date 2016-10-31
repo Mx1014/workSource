@@ -1,6 +1,7 @@
 package com.everhomes.user;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,6 +112,8 @@ import com.everhomes.rest.user.SyncUserContactCommand;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.version.VersionRequestCommand;
+import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
@@ -118,6 +121,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StatusChecker;
 import com.everhomes.util.Tuple;
+import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -181,8 +185,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private NamespacesService namespacesService;
+    
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private VersionService versionService;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -1295,5 +1303,60 @@ public class UserActivityServiceImpl implements UserActivityService {
 			
 			this.userActivityProvider.createStatActiveUser(stat);
 		}
+	}
+
+	@Override
+	public String getBizUrl() {
+		final String SIGN_SUFFIX = "#sign_suffix";
+		
+		String bizUrl = getBusinessUrl();
+		
+		String preBizUrl = "";
+		String afterBizUrl = "";
+		if(bizUrl.indexOf(SIGN_SUFFIX) > 0) {
+			preBizUrl = bizUrl.substring(0, bizUrl.indexOf(SIGN_SUFFIX));
+			afterBizUrl = bizUrl.substring(bizUrl.indexOf(SIGN_SUFFIX), bizUrl.length());
+		} else {
+			preBizUrl = bizUrl;
+			afterBizUrl = "";
+		}
+		
+		String oauthServer = getoAuthServer();
+		String realm = getBusinessRealm();
+		String bizVersionUrl = getVersionUrl(realm);
+		String format = "%s&oAuthServer=%s&realm=%s&target=%s";
+		
+		String url = String.format(format, preBizUrl, URLEncoder.encode(oauthServer), realm, URLEncoder.encode(bizVersionUrl));
+		return url + afterBizUrl;
+	}
+
+	private String getoAuthServer() {
+		String oauthServer = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.OAUTH_SERVER, "");
+		if(oauthServer.length() == 0) {
+            LOGGER.error("Invalid oauth server path, oauthServer=" + oauthServer);
+            return null;
+        } else {
+            return oauthServer;
+        }
+	}
+
+	private String getVersionUrl(String realm) {
+		VersionRequestCommand cmd = new VersionRequestCommand();
+		cmd.setRealm(realm);
+		VersionUrlResponse versionUrl = versionService.getVersionUrls(cmd);
+		if(versionUrl != null) {
+			return versionUrl.getDownloadUrl();
+		}
+		return null;
+	}
+
+	private String getHomeUrl() {
+		String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+		if(homeUrl.length() == 0) {
+            LOGGER.error("Invalid home url path, homeUrl=" + homeUrl);
+            return null;
+        } else {
+            return homeUrl;
+        }
 	}
 }

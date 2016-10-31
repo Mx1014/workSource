@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
 public class ListOrganizationContactCommandResponse {
 	
 	private Integer nextPageOffset;
+
+	private Long nextPageAnchor;
 	
 	@ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> members;
@@ -35,6 +37,14 @@ public class ListOrganizationContactCommandResponse {
 
 	public void setMembers(List<OrganizationContactDTO> members) {
 		this.members = members;
+	}
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	@Override

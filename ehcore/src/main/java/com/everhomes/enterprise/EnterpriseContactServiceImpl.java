@@ -1921,7 +1921,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		orgCommoand.setStatus(GroupMemberStatus.ACTIVE.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, null,null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -1951,7 +1951,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		orgCommoand.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null,null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;

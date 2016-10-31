@@ -66,6 +66,13 @@ public interface ConfigConstants {
     public static final String UPGRADE_URL = "upgrade.url"; 
     public static final String SCHEDULE_EQUIPMENT_TASK_TIME = "equipment.task.schedule.time";
 
-	public static final String NEWS_PAGE_URL = "news.url"; 
+	public static final String NEWS_PAGE_URL = "news.url";
+	
+	public static final String SYNCH_USER_APP_KEY = "synch.user.app.key"; 
+	public static final String SYNCH_USER_SECRET_KEY = "synch.user.secret.key"; 
+	public static final String OAUTH_SERVER = "oauth.server";
+	public static final String PAY_SERVER = "pay.server";
+	
+	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
      
 }

@@ -1,57 +1,21 @@
 package com.everhomes.yellowPage;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.yellowPage.*;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.search.SettleRequestInfoSearcher;
+import com.everhomes.user.CustomRequestConstants;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.AddYellowPageCommand;
-import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
-import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
-import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
-import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
-import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
-import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
-import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
-import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.YellowPageDTO;
-import com.everhomes.rest.yellowPage.YellowPageListResponse;
-import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.search.SettleRequestInfoSearcher;
-import com.everhomes.user.CustomRequestConstants;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.Tuple;
+import javax.validation.Valid;
  
 
 @RestController
@@ -177,18 +141,20 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategories")
 	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
-
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId, 
-				cmd.getParentId(), CategoryAdminStatus.ACTIVE);
-
-		List<ServiceAllianceCategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
-			return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
-		}).collect(Collectors.toList());
-
-		return new RestResponse(dtoResultList);
+		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
 	}
-    
+
+    /**
+	 * <b>URL: /yellowPage/getParentServiceAllianceCategory</b>
+	 * <p> 获取服务联盟父分类 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("getParentServiceAllianceCategory")
+	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
+	public RestResponse getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
+		return new RestResponse(yellowPageService.getParentServiceAllianceCategory(cmd));
+	}
+
     /**
    	 * <b>URL: /yellowPage/getServiceAllianceEnterpriseDetail</b>
    	 * <p> 服务联盟企业详情 </p>

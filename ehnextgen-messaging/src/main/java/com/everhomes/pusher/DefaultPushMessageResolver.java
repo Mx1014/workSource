@@ -16,6 +16,7 @@ import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessagingLocalStringCode;
+import com.everhomes.rest.messaging.MessagingPriorityConstants;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 
@@ -48,6 +49,12 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         
         deviceMessage.setAppId(msg.getAppId());
         deviceMessage.setAudio("doorRing.caf");
+        
+        if(senderLogin.getUserId() < 10) {
+            deviceMessage.setPriorigy(MessagingPriorityConstants.LOW.getCode());
+        } else {
+            deviceMessage.setPriorigy(MessagingPriorityConstants.MEDIUM.getCode());
+        }
         
         String bodyType = msg.getMeta().get("bodyType");
         if(null == bodyType) {

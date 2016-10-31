@@ -3,6 +3,7 @@ package com.everhomes.launchpad.admin;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.launchpad.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +17,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.launchpad.CreateLaunchPadItemCommand;
-import com.everhomes.rest.launchpad.CreateLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.DeleteLaunchPadItemCommand;
-import com.everhomes.rest.launchpad.DeleteLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsByKeywordCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.LaunchPadItemDTO;
-import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
-import com.everhomes.rest.launchpad.ListLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.ListLaunchPadLayoutCommandResponse;
-import com.everhomes.rest.launchpad.UpdateLaunchPadItemCommand;
-import com.everhomes.rest.launchpad.UpdateLaunchPadLayoutCommand;
 import com.everhomes.rest.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.rest.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.rest.launchpad.admin.DeleteLaunchPadItemAdminCommand;
@@ -223,6 +211,19 @@ public class LaunchPadAdminController extends ControllerBase {
         
     	ListLaunchPadLayoutCommandResponse result = this.launchPadService.listLaunchPadLayoutByKeyword(cmd);
         RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpad/createItemServiceCategry</b>
+     * <p>添加服务类别</p>
+     */
+    @RequestMapping("createItemServiceCategry")
+    @RestReturn(value=String.class)
+    public RestResponse createItemServiceCategry(CreateItemServiceCategryCommand cmd) {
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
