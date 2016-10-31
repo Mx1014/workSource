@@ -84,59 +84,6 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
 	
-	@Test @Ignore
-	public void testReviewRelation() {
-		logon(999992, userIdentifier, plainTexPassword);
-		
-		Long equipmentId = 2L;
-		EquipmentsDTO dto = findEquipment(equipmentId);
-		assertEquals(EquipmentReviewStatus.WAITING_FOR_APPROVAL, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		
-		ReviewEquipmentStandardRelationsCommand cmd = new ReviewEquipmentStandardRelationsCommand();
-		cmd.setEquipmentId(equipmentId);
-		cmd.setOwnerId(ownerId);
-		cmd.setOwnerType(ownerType);
-		cmd.setReviewResult(ReviewResult.QUALIFIED.getCode());
-		
-		httpClientService.restPost(REVIEW_RELATION_URI, cmd, StringRestResponse.class);
-		
-		dto = findEquipment(equipmentId);
-		assertEquals(EquipmentReviewStatus.REVIEWED, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		assertEquals(ReviewResult.QUALIFIED, ReviewResult.fromStatus(dto.getReviewResult()));
-		
-	}
-	
-	@Test @Ignore
-	public void testDeleteRelation() {
-		logon(999992, userIdentifier, plainTexPassword);
-		
-		Long equipmentId = 2L;
-		EquipmentsDTO dto = findEquipment(equipmentId);
-		assertEquals(EquipmentReviewStatus.WAITING_FOR_APPROVAL, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		
-		DeleteEquipmentStandardRelationsCommand command = new DeleteEquipmentStandardRelationsCommand();
-		command.setEquipmentId(equipmentId);
-		command.setOwnerId(ownerId);
-		command.setOwnerType(ownerType);
-		
-		StringRestResponse response = httpClientService.restPost(DELETE_RELATION_URI, command, StringRestResponse.class);
-		
-		assertEquals(EquipmentServiceErrorCode.ERROR_EQUIPMENT_REVIEW_STATUS_ONLY_INACTIVE_CAN_DELETE, response.getErrorCode().intValue());
-		
-		DeleteEquipmentsCommand cmd = new DeleteEquipmentsCommand();
-		cmd.setEquipmentId(equipmentId);
-		cmd.setOwnerId(ownerId);
-		cmd.setOwnerType(ownerType);
-		
-		httpClientService.restPost(DELETE_EQUIPMENT_URI, cmd, StringRestResponse.class);
-		
-		httpClientService.restPost(DELETE_RELATION_URI, command, StringRestResponse.class);
-		dto = findEquipment(equipmentId);
-		
-		assertEquals(EquipmentReviewStatus.DELETE, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		assertEquals(ReviewResult.NONE, ReviewResult.fromStatus(dto.getReviewResult()));
-		
-	}
 	
 	@Test @Ignore
 	public void testDeleteEquipment() {
@@ -155,7 +102,6 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
 		
 		dto = findEquipment(equipmentId);
 		assertEquals(EquipmentStatus.INACTIVE, EquipmentStatus.fromStatus(dto.getStatus()));
-		assertEquals(EquipmentReviewStatus.INACTIVE, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
 		
 	}
 	
@@ -242,8 +188,6 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
 	    	cmd.setRepairTime(1465192800000L);
 	    	cmd.setInitialAssetValue("121000");
 	    	cmd.setManager("大闸蟹");
-	    	cmd.setStandardId(1L);
-	    	cmd.setEqParameter(eqParameter);
 	    	
 	    	UpdateEquipmentsRestResponse response = httpClientService.restGet(UPDATE_EQUIPMENT_URI, cmd, 
 	    			UpdateEquipmentsRestResponse.class, context);
