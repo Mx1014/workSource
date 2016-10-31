@@ -461,10 +461,12 @@ public class AclinkController extends ControllerBase {
             //https://core.zuolin.com/mobile/static/qr_access/qrCode.html?id=10ae5-15016
             //getVisitor
             DoorAuth auth = doorAccessService.getLinglingDoorAuthByUuid(cmd.getId());
-            if(auth.getDriver().equals(DoorAccessDriverType.ZUOLIN.getCode())) {
-                httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrCode.html?id=" + cmd.getId()));    
-            } else if(auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
+            if(auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
                 httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrPhoneCode.html?id=" + cmd.getId()));
+                
+            } else {
+                //if(auth.getDriver().equals(DoorAccessDriverType.ZUOLIN.getCode()))
+                httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrCode.html?id=" + cmd.getId()));    
             }
             
         } catch (URISyntaxException e) {
