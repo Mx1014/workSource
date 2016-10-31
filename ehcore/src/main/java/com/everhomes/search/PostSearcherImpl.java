@@ -768,14 +768,15 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             communityIdList.add(community.getId());
         }
         
-        if(LOGGER.isDebugEnabled())
-        	LOGGER.info("getGlobalPostByOrganizationIdQuery: communityIdList = " + communityIdList + ", forumIdList = " + forumIdList + ", organizationList = " + organizationList);
 
         SearchByMultiForumAndCmntyCommand orgTopicCmd = ConvertHelper.convert(cmd, SearchByMultiForumAndCmntyCommand.class);
         orgTopicCmd.setCommunityIds(communityIdList);
         orgTopicCmd.setForumIds(forumIdList);
         orgTopicCmd.setRegionIds(organizationList);
         orgTopicCmd.setSearchContentType(cmd.getSearchContentType());
+        
+        if(LOGGER.isDebugEnabled())
+        	LOGGER.info("getGlobalPostByOrganizationIdQuery: orgTopicCmd = {}", orgTopicCmd);
         
         return orgTopicCmd;
     }
@@ -906,6 +907,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             }
         }
         
+        fb = FilterBuilders.boolFilter().should(fb, resultFilter);
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
