@@ -238,11 +238,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
 	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
-	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status
-						, cmd.getPageAnchor(), cmd.getPageSize());
-			}else if(!privileges.contains(PrivilegeConstants.LISTUSERTASK)){
-				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode()
-						, cmd.getPageAnchor(), cmd.getPageSize());
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
+	    				cmd.getPageAnchor(), cmd.getPageSize());
+			}else if(privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
+						cmd.getPageAnchor(), cmd.getPageSize());
 			}else{
 				returnNoPrivileged(privileges, current);
 			}
