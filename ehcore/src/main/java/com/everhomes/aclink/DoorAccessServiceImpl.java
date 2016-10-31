@@ -2301,7 +2301,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String url = homeUrl + "/evh/aclink/phv?id=" + cmd.getId() + "#sign_suffix";
         
         resp.setCreateTime(auth.getCreateTime().getTime());
-        resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        //resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        resp.setQr(url);
       
         return resp;
     }
