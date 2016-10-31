@@ -109,6 +109,7 @@ public class PmProviderImpl implements PmTaskProvider{
         query.addConditions(Tables.EH_PM_TASK_TARGETS.ROLE_ID.eq(roleId));
         query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_TYPE.eq(targetType));
         query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.STATUS.eq(PmTaskTargetStatus.ACTIVE.getCode()));
         
         PmTaskTarget result = ConvertHelper.convert(query.fetchOne(), PmTaskTarget.class);
         return result;
