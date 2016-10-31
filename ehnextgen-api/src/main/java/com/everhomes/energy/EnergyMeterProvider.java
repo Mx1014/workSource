@@ -9,10 +9,10 @@ public interface EnergyMeterProvider {
      * 创建表记
      * @return  返回id
      */
-    long createMeter(Meter meter);
+    long createMeter(EnergyMeter meter);
 
     /**
      * 根据id查询
      */
-    Meter findById(Integer namespaceId, Long meterId);
+    EnergyMeter findById(Integer namespaceId, Long meterId);
 }

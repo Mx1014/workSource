@@ -35,24 +35,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterProvider energyMeterProvider;
 
-    @Autowired
-    private MeterPropertyProvider meterPropertyProvider;
-
-    @Autowired
-    private MeterCategoryProvider meterCategoryProvider;
-
-    @Autowired
-    private MeterFormulaProvider meterFormulaProvider;
-
-    @Autowired
-    private MeterChangeRecordProvider meterChangeRecordProvider;
-
-    @Autowired
-    private MeterReadingRecordProvider meterReadingRecordProvider;
-
-    @Autowired
-    private MeterDefaultPropertyProvider meterDefaultPropertyProvider;
-
+    // @Autowired
+    // private EnergyMeterCategoryProvider energyMeterCategoryProvider;
+    //
+    // @Autowired
+    // private EnergyMeterFormulaProvider meterFormulaProvider;
+    //
+    // @Autowired
+    // private EnergyMeterChangeLogProvider meterChangeRecordProvider;
+    //
+    // @Autowired
+    // private EnergyMeterDefaultSettingProvider meterDefaultPropertyProvider;
+    //
     @Autowired
     private OrganizationProvider organizationProvider;
 
@@ -60,7 +54,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        Meter meter = ConvertHelper.convert(cmd, Meter.class);
+        EnergyMeter meter = ConvertHelper.convert(cmd, EnergyMeter.class);
         meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
         energyMeterProvider.createMeter(meter);
         return ConvertHelper.convert(meter, EnergyMeterDTO.class);
@@ -70,12 +64,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterDTO updateEnergyMeter(UpdateEnergyMeterCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        Meter meter = this.findMeterById(cmd.getMeterId());
+        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
         if (cmd.getName() != null) {
             meter.setName(cmd.getName());
         }
         if (cmd.getMeterNumber() != null) {
-            meter.setNumber(cmd.getMeterNumber());
+            meter.setMeterNumber(cmd.getMeterNumber());
         }
         if (cmd.getPrice() != null) {
             meter.setPrice(cmd.getPrice());
@@ -85,8 +79,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void insertMeterProperty(EnergyMeterSettingType propertyType, UpdateEnergyMeterCommand cmd) {
-        MeterProperty property = new MeterProperty();
-        // property.setStatus();
     }
 
     @Override
@@ -239,12 +231,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return UserContext.getCurrentNamespaceId();
     }
 
-    private Meter findMeterById(Long id) {
-        Meter meter = energyMeterProvider.findById(currentNamespaceId(), id);
+    private EnergyMeter findMeterById(Long id) {
+        EnergyMeter meter = energyMeterProvider.findById(currentNamespaceId(), id);
         if (meter != null) {
             return meter;
         }
-        LOGGER.error("Meter not exist, id = {}", id);
+        LOGGER.error("EnergyMeter not exist, id = {}", id);
         throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", id);
     }
 }
