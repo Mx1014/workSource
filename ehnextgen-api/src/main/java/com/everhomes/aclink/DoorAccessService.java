@@ -25,6 +25,8 @@ import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
+import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
+import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -33,6 +35,7 @@ import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.DoorUserPermissionDTO;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetShortMessageCommand;
@@ -47,6 +50,8 @@ import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
+import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
@@ -147,4 +152,10 @@ public interface DoorAccessService {
     GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd);
 
     GetVisitorResponse checkVisitor(GetVisitorCommand cmd);
+
+    DoorUserPermissionDTO createQRUserPermission(CreateQRUserPermissionCommand cmd);
+
+    DoorUserPermissionDTO deleteQRUserPermission(DeleteQRUserPermissionCommand cmd);
+
+    ListQRUserPermissionResponse listQRUserPermissions(ListQRUserPermissionCommand cmd);
 }

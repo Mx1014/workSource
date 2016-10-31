@@ -7,13 +7,16 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.DoorUserPermissionDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorUserPermissionDao;
@@ -102,6 +105,74 @@ public class DoorUserPermissionProviderImpl implements DoorUserPermissionProvide
         }
 
         return objs;
+    }
+    
+    @Override
+    public DoorUserPermission checkPermission(Integer namespaceId, Long userId, Long ownerId, Byte ownerType) {
+        ListingLocator locator = new ListingLocator();
+        List<DoorUserPermission> users = this.queryDoorUserPermissions(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.AUTH_TYPE.eq((byte)0));
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.STATUS.eq((byte)1));
+                
+                if(namespaceId != null) {
+                    query.addConditions(Tables.EH_DOOR_USER_PERMISSION.NAMESPACE_ID.eq(namespaceId));    
+                }
+                
+                if(ownerId != null) {
+                    query.addConditions(Tables.EH_DOOR_USER_PERMISSION.OWNER_ID.eq(ownerId));                    
+                }
+                
+                if(ownerType != null) {
+                    query.addConditions(Tables.EH_DOOR_USER_PERMISSION.OWNER_TYPE.eq(ownerType));     
+                }
+               
+                return query;
+            }
+            
+        });
+        
+        if(users == null || users.size() == 0) {
+            return null;
+        }
+        
+        return users.get(0);
+    }
+    
+    @Override
+    public List<DoorUserPermissionDTO> listDoorUserPermissions(Integer namespaceId, Long ownerId, Byte ownerType, ListingLocator locator, int count) {
+        List<DoorUserPermission> users = this.queryDoorUserPermissions(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.AUTH_TYPE.eq((byte)0));
+                query.addConditions(Tables.EH_DOOR_USER_PERMISSION.STATUS.eq((byte)1));
+                if(ownerId != null) {
+                    query.addConditions(Tables.EH_DOOR_USER_PERMISSION.OWNER_ID.eq(ownerId));                    
+                }
+                
+                if(ownerType != null) {
+                    query.addConditions(Tables.EH_DOOR_USER_PERMISSION.OWNER_TYPE.eq(ownerType));     
+                }
+               
+                return query;
+            }
+            
+        });
+        List<DoorUserPermissionDTO> perms = new ArrayList<DoorUserPermissionDTO>();
+        if(null != users) {
+            for(DoorUserPermission p : users) {
+                DoorUserPermissionDTO dto = ConvertHelper.convert(p, DoorUserPermissionDTO.class);
+                perms.add(dto);
+            }
+        }
+        
+        return perms;
     }
 
     private void prepareObj(DoorUserPermission obj) {

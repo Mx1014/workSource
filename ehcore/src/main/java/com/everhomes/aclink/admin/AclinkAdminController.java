@@ -43,6 +43,7 @@ import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DeleteDoorAccessById;
+import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
 import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
 import com.everhomes.rest.aclink.DoorAccessDTO;
@@ -426,11 +427,25 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("createQRUserPermission")
     @RestReturn(value=DoorUserPermissionDTO.class)
     public RestResponse createQRUserPermission(@Valid CreateQRUserPermissionCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.createQRUserPermission(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }       
+    }   
+    
+    /**
+     * <b>URL: /admin/aclink/deleteQRUserPermission</b>
+     * <p>创建保安二维码授权</p>
+     * @return 授权详情
+     */
+    @RequestMapping("deleteQRUserPermission")
+    @RestReturn(value=DoorUserPermissionDTO.class)
+    public RestResponse deleteQRUserPermission(@Valid DeleteQRUserPermissionCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.deleteQRUserPermission(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }   
     
     /**
      * <b>URL: /admin/aclink/listQRUserPermission</b>
@@ -440,7 +455,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("listQRUserPermission")
     @RestReturn(value=ListQRUserPermissionResponse.class)
     public RestResponse listQRUserPermission(@Valid ListQRUserPermissionCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.listQRUserPermissions(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
