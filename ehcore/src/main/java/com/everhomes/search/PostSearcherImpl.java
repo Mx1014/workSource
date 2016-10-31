@@ -907,7 +907,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             }
         }
         
-        fb = FilterBuilders.boolFilter().should(fb, resultFilter);
+        fb = FilterBuilders.boolFilter().must(fb, resultFilter);
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
