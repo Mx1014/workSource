@@ -1404,6 +1404,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 		
 		task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+		task.setResult(EquipmentTaskResult.NONE.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
