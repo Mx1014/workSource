@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
+ * <li>namespaceId: 域空间id</li>
  * <li>createFlag: 是否允许创建，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>verifyFlag: 创建是否需要审核，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>memberPostFlag: 是否允许成员发帖，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
@@ -14,8 +15,10 @@ import com.everhomes.util.StringHelper;
  * <li>broadcastCount: 每天可发广播数</li>
  * </ul>
  */
-public class SetGroupParametersResponse {
+public class GroupParametersResponse {
 
+	private Integer namespaceId;
+	
 	private Byte createFlag;
 
 	private Byte verifyFlag;
@@ -28,18 +31,28 @@ public class SetGroupParametersResponse {
 
 	private Integer broadcastCount;
 
-	public SetGroupParametersResponse() {
+	public GroupParametersResponse() {
 
 	}
 
-	public SetGroupParametersResponse(Byte createFlag, Byte verifyFlag, Byte memberPostFlag, Byte memberCommentFlag, Byte adminBroadcastFlag, Integer broadcastCount) {
+	public GroupParametersResponse(Integer namespaceId, Byte createFlag, Byte verifyFlag, Byte memberPostFlag,
+			Byte memberCommentFlag, Byte adminBroadcastFlag, Integer broadcastCount) {
 		super();
+		this.namespaceId = namespaceId;
 		this.createFlag = createFlag;
 		this.verifyFlag = verifyFlag;
 		this.memberPostFlag = memberPostFlag;
 		this.memberCommentFlag = memberCommentFlag;
 		this.adminBroadcastFlag = adminBroadcastFlag;
 		this.broadcastCount = broadcastCount;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public Byte getCreateFlag() {

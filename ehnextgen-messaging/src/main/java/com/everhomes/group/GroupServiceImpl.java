@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.hibernate.jpa.criteria.ValueHandlerFactory.LongValueHandler;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -26,6 +27,8 @@ import com.everhomes.acl.Role;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.broadcast.Broadcast;
+import com.everhomes.broadcast.BroadcastProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -57,6 +60,9 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.ApprovalServiceErrorCode;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.ForumServiceErrorCode;
@@ -72,6 +78,9 @@ import com.everhomes.rest.group.AcceptJoinGroupInvitation;
 import com.everhomes.rest.group.ApprovalGroupRequestCommand;
 import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
+import com.everhomes.rest.group.BroadcastDTO;
+import com.everhomes.rest.group.BroadcastOwnerType;
+import com.everhomes.rest.group.CategoryDTO;
 import com.everhomes.rest.group.CommandResult;
 import com.everhomes.rest.group.CreateBroadcastCommand;
 import com.everhomes.rest.group.CreateBroadcastResponse;
@@ -87,6 +96,7 @@ import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
 import com.everhomes.rest.group.GetGroupParametersCommand;
 import com.everhomes.rest.group.GroupAdminNotificationTemplateCode;
 import com.everhomes.rest.group.GroupCardDTO;
+import com.everhomes.rest.group.GroupCategoryOwnerType;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
@@ -141,7 +151,7 @@ import com.everhomes.rest.group.RevokeGroupMemberCommand;
 import com.everhomes.rest.group.SearchGroupCommand;
 import com.everhomes.rest.group.SearchGroupTopicAdminCommand;
 import com.everhomes.rest.group.SetGroupParametersCommand;
-import com.everhomes.rest.group.SetGroupParametersResponse;
+import com.everhomes.rest.group.GroupParametersResponse;
 import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryResponse;
@@ -183,7 +193,10 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 import com.google.gson.Gson;
 
 @Component
@@ -251,6 +264,12 @@ public class GroupServiceImpl implements GroupService {
     
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private BroadcastProvider broadcastProvider;
+    
+    @Autowired
+    private GroupSettingProvider groupSettingProvider;
         
     @Override
     public GroupDTO createGroup(CreateGroupCommand cmd) {
@@ -4051,11 +4070,49 @@ public class GroupServiceImpl implements GroupService {
 			//转移权限
 			GroupMember newCreator = transferPrivilegeToUser(oldCreator, cmd.getUserId(), groupId);
 			//发消息
-			sendNotificationToOldCreator(oldCreator, user);
-			sendNotificationToNewCreator(newCreator, user.getLocale());
+			sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
+			sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
 			
 			return null;
 		});
+	}
+
+	//发给除了新创建者以外的所有成员
+	private void sendNotificationToOthersWhenTransferCreator(Long groupId, GroupMember newCreator, String locale) {
+		Group group = groupProvider.findGroupById(groupId);
+		String nickname = newCreator.getMemberNickName();
+		if (StringUtils.isEmpty(nickname)) {
+			User user = userProvider.findUserById(newCreator.getMemberId());
+			nickname = user.getNickName();
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+        map.put("newCreator", nickname);
+       
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_TRANSFER_CREATOR_TO_OTHERS;  //${newCreator}已成为“${groupName}”的创建者
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        
+        List<GroupMember> groupMemberList = listMessageGroupMembers(new ListingLocator(groupId), 10000);
+        groupMemberList.forEach(gm->{
+			if(gm.getMemberId().longValue() != newCreator.getMemberId().longValue()){
+				sendMessageToUser(gm.getMemberId(), notifyTextForApplicant, null);
+			}
+        });
+	}
+
+	//发给新创建者
+	private void sendNotificationToNewCreatorWhenTransferCreator(GroupMember newCreator, String locale) {
+		Group group = groupProvider.findGroupById(newCreator.getGroupId());
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+       
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_TRANSFER_CREATOR_TO_NEW_CREATOR;  //你已成为“${groupName}”的创建者
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
 	}
 
 	private GroupMember transferPrivilegeToUser(GroupMember fromUser, Long toUserId, Long groupId) {
@@ -4081,40 +4138,230 @@ public class GroupServiceImpl implements GroupService {
 		return newCreator;
 	}
 	
-
 	@Override
 	public CreateBroadcastResponse createBroadcast(CreateBroadcastCommand cmd) {
-	
-		return new CreateBroadcastResponse();
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		checkCreateBroadcastParameters(userId, cmd);
+		checkCreateBroadcastPrivilege(userId, cmd.getOwnerType(), cmd.getOwnerId());
+		
+		Broadcast broadcast = new Broadcast();
+		broadcast.setNamespaceId(UserContext.getCurrentNamespaceId());
+		broadcast.setOwnerType(cmd.getOwnerType());
+		broadcast.setOwnerId(cmd.getOwnerId());
+		broadcast.setTitle(cmd.getTitle());
+		broadcast.setContentType(cmd.getContentType());
+		broadcast.setContent(cmd.getContent());
+		broadcast.setContentAbstract(cmd.getContentAbstract());
+		broadcast.setCreatorUid(userId);
+		broadcast.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		broadcast.setUpdateTime(broadcast.getCreateTime());
+		broadcast.setOperatorUid(userId);
+		broadcastProvider.createBroadcast(broadcast);
+		
+		return new CreateBroadcastResponse(toBroadcastDTO(broadcast));
+	}
+
+	private void checkCreateBroadcastPrivilege(Long userId, String ownerType, Long ownerId) {
+		
+	}
+
+	private void checkCreateBroadcastParameters(Long userId, CreateBroadcastCommand cmd) {
+		if (cmd.getOwnerId() == null || BroadcastOwnerType.fromCode(cmd.getOwnerType()) == null || StringUtils.isEmpty(cmd.getTitle()) 
+				|| StringUtils.isEmpty(cmd.getContent()) || StringUtils.isEmpty(cmd.getContentType())) {
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
 	}
 
 	@Override
 	public GetBroadcastByTokenResponse getBroadcastByToken(GetBroadcastByTokenCommand cmd) {
-	
-		return new GetBroadcastByTokenResponse();
+		if (StringUtils.isEmpty(cmd.getBroadcastToken())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		Long id = WebTokenGenerator.getInstance().fromWebToken(cmd.getBroadcastToken(), Long.class);
+		
+		Broadcast broadcast = broadcastProvider.findBroadcastById(id);
+		
+		return new GetBroadcastByTokenResponse(toBroadcastDTO(broadcast));
 	}
 
+	private String getUserName(Long userId) {
+		if (userId != null) {
+			User user = userProvider.findUserById(userId);
+			if (user != null) {
+				return user.getNickName();
+			}
+		}
+		return "";
+	}
+	
 	@Override
 	public ListBroadcastsResponse listBroadcasts(ListBroadcastsCommand cmd) {
+		if (BroadcastOwnerType.fromCode(cmd.getOwnerType()) == null || cmd.getOwnerId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		
+		List<Broadcast> broadcastList = broadcastProvider.listBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<BroadcastDTO> resultList = broadcastList.stream().map(b->{
+			return toBroadcastDTO(b);
+		}).collect(Collectors.toList());
+		
+		return new ListBroadcastsResponse(resultList);
+	}
 	
-		return new ListBroadcastsResponse();
+	private BroadcastDTO toBroadcastDTO(Broadcast broadcast){
+		BroadcastDTO result = ConvertHelper.convert(broadcast, BroadcastDTO.class);
+		result.setBroadcastToken(WebTokenGenerator.getInstance().toWebToken(broadcast.getId()));
+		result.setCreatorName(getUserName(broadcast.getCreatorUid()));
+		return result;
 	}
 
 	@Override
-	public SetGroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd) {
-	
-		return new SetGroupParametersResponse();
+	public GroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd) {
+		if (cmd.getNamespaceId() == null || TrueOrFalseFlag.fromCode(cmd.getCreateFlag()) == null || TrueOrFalseFlag.fromCode(cmd.getVerifyFlag()) == null
+				|| TrueOrFalseFlag.fromCode(cmd.getMemberPostFlag()) == null || TrueOrFalseFlag.fromCode(cmd.getMemberCommentFlag()) == null
+				|| TrueOrFalseFlag.fromCode(cmd.getAdminBroadcastFlag()) == null || cmd.getBroadcastCount() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		
+		GroupSetting groupSetting = ConvertHelper.convert(cmd, GroupSetting.class);
+		groupSetting.setNamespaceId(cmd.getNamespaceId());
+		groupSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		groupSetting.setCreatorUid(UserContext.current().getUser().getId());
+		groupSetting.setUpdateTime(groupSetting.getCreateTime());
+		groupSetting.setOperatorUid(groupSetting.getCreatorUid());
+		groupSettingProvider.createGroupSetting(groupSetting);
+		
+		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
 
 	@Override
-	public void getGroupParameters(GetGroupParametersCommand cmd) {
-	
+	public GroupParametersResponse getGroupParameters(GetGroupParametersCommand cmd) {
+		if (cmd.getNamespaceId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		GroupSetting groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(cmd.getNamespaceId());
+		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
+	}
 
+	@Override
+	public CreateGroupCategoryResponse createGroupCategory(CreateGroupCategoryCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		checkGroupCategoryParameters(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryName());
+		checkDuplicationGroupCategoryName(cmd.getNamespaceId(), cmd.getCategoryName(), null);
+		
+		Category parentCategory = categoryProvider.findCategoryById(2L);
+		String prefix = "";
+		if (parentCategory != null) {
+			prefix = parentCategory.getName()+"/";
+		}
+		Category category = new Category();
+		category.setParentId(2L);
+		category.setLinkId(0L);
+		category.setName(cmd.getCategoryName());
+		category.setPath(prefix+cmd.getCategoryName());
+		category.setDefaultOrder(0);
+		category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
+		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		category.setNamespaceId(cmd.getNamespaceId());
+		categoryProvider.createCategory(category);
+		
+		return new CreateGroupCategoryResponse(toCategoryDTO(category));
+	}
+
+	private CategoryDTO toCategoryDTO(Category category) {
+		CategoryDTO result = new CategoryDTO();
+		result.setCategoryId(category.getId());
+		result.setCategoryName(category.getName());
+		result.setNamespaceId(category.getNamespaceId());
+		return result;
+	}
+
+	private Category checkDuplicationGroupCategoryName(Integer namespaceId, String categoryName, Long id) {
+		Category category = categoryProvider.findCategoryByNamespaceAndName(2L, namespaceId, categoryName);
+		if (category != null && (id == null || id.longValue() != category.getId().longValue())) {
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_CATEGORY_NAME_EXIST,
+					"exist name, name="+categoryName);
+		}
+		return category;
+	}
+
+	private void checkGroupCategoryParameters(Long userId, Integer namespaceId, String ownerType, Long ownerId,
+			String categoryName) {
+		if (namespaceId == null || GroupCategoryOwnerType.fromCode(ownerType) == null || ownerId == null
+				|| StringUtils.isEmpty(categoryName)) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+	}
+
+	@Override
+	public UpdateGroupCategoryResponse updateGroupCategory(UpdateGroupCategoryCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		checkGroupCategoryParameters(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryName());
+		Category category = checkDuplicationGroupCategoryName(cmd.getNamespaceId(), cmd.getCategoryName(), cmd.getCategoryId());
+		if (category == null || category.getId().longValue() != cmd.getCategoryId().longValue()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist category");
+		}
+		
+		Category parentCategory = categoryProvider.findCategoryById(category.getParentId());
+		String prefix = "";
+		if (parentCategory != null) {
+			prefix = parentCategory.getName()+"/";
+		}
+		category.setName(cmd.getCategoryName());
+		category.setPath(prefix+cmd.getCategoryName());
+		categoryProvider.updateCategory(category);
+		
+		return new UpdateGroupCategoryResponse(toCategoryDTO(category));
+	}
+
+	@Override
+	public void deleteGroupCategory(DeleteGroupCategoryCommand cmd) {
+		if (cmd.getNamespaceId() == null || GroupCategoryOwnerType.fromCode(cmd.getOwnerType()) == null || cmd.getOwnerId() == null
+				|| cmd.getCategoryId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		
+		Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
+		if (category == null || category.getStatus().byteValue() != CategoryAdminStatus.ACTIVE.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist category");
+		}
+		
+		categoryProvider.deleteCategory(category);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ListGroupCategoriesResponse listGroupCategories(ListGroupCategoriesCommand cmd) {
+		if (cmd.getNamespaceId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		
+		List<Category> categoryList = categoryProvider.listChildCategories(cmd.getNamespaceId(), 2L, CategoryAdminStatus.ACTIVE
+				, new Tuple<String, SortOrder>("id", SortOrder.ASC));
+		
+		List<CategoryDTO> resultList = categoryList.stream().map(c->toCategoryDTO(c)).collect(Collectors.toList());
+		 
+		return new ListGroupCategoriesResponse(resultList);
 	}
 
 	@Override
 	public ListGroupsByApprovalStatusResponse listGroupsByApprovalStatus(ListGroupsByApprovalStatusCommand cmd) {
-	
+		
 		return new ListGroupsByApprovalStatusResponse();
 	}
 
@@ -4130,27 +4377,4 @@ public class GroupServiceImpl implements GroupService {
 
 	}
 
-	@Override
-	public CreateGroupCategoryResponse createGroupCategory(CreateGroupCategoryCommand cmd) {
-	
-		return new CreateGroupCategoryResponse();
-	}
-
-	@Override
-	public UpdateGroupCategoryResponse updateGroupCategory(UpdateGroupCategoryCommand cmd) {
-	
-		return new UpdateGroupCategoryResponse();
-	}
-
-	@Override
-	public void deleteGroupCategory(DeleteGroupCategoryCommand cmd) {
-	
-
-	}
-
-	@Override
-	public ListGroupCategoriesResponse listGroupCategories(ListGroupCategoriesCommand cmd) {
-	
-		return new ListGroupCategoriesResponse();
-	}
 }

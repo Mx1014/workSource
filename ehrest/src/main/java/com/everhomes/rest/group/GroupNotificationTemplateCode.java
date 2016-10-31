@@ -42,4 +42,12 @@ public interface GroupNotificationTemplateCode {
     
     static final int GROUP_MEMBER_DELETED_CLUB_ADMIN = 34;  
     static final int GROUP_MEMBER_DELETED_CLUB_OPERATOR = 35;
+    
+    
+    static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_OTHERS = 36;  //${newCreator}已成为“${groupName}”的创建者
+
+    static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_NEW_CREATOR = 37;  //你已成为“${groupName}”的创建者
+    
+    
+    
 }

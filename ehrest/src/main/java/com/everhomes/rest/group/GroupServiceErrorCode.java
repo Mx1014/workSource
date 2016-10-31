@@ -34,4 +34,7 @@ public interface GroupServiceErrorCode {
     static final int ERROR_GROUP_CLUB_INVALID_ROLE_STATUS = 10028; // 俱乐部成员状态异常
     static final int ERROR_USER_NO_IN_GROUP_CLUB = 10029; // 用户未加入俱乐部
     static final int ERROR_GROUP_MEMBER_IS_NOT_CREATOR = 10030; // 非创建者
+    
+    
+    static final int ERROR_GROUP_CATEGORY_NAME_EXIST = 10031; // 分类已存在
 }

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.group;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>contentType: 内容类型</li>
  * <li>content: 内容</li>
  * <li>contentAbstract: 摘要，暂无</li>
+ * <li>creatorName: 创建者</li>
+ * <li>createTime: 创建时间</li>
  * </ul>
  */
 public class BroadcastDTO {
@@ -30,20 +34,29 @@ public class BroadcastDTO {
 	private String content;
 
 	private String contentAbstract;
+	
+	private String creatorName;
+	
+	private Timestamp createTime;
 
 	public BroadcastDTO() {
 
 	}
 
-	public BroadcastDTO(String broadcastToken, String ownerType, Long ownerId, String title, String contentType, String content, String contentAbstract) {
-		super();
-		this.broadcastToken = broadcastToken;
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.title = title;
-		this.contentType = contentType;
-		this.content = content;
-		this.contentAbstract = contentAbstract;
+	public String getCreatorName() {
+		return creatorName;
+	}
+
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	public String getBroadcastToken() {

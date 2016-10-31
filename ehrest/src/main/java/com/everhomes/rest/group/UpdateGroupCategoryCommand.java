@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属者，参考{@link com.everhomes.rest.group.GroupCategoryOwnerType}</li>
+ * <li>ownerId: 所属者id</li>
  * <li>categoryId: 分类id</li>
  * <li>categoryName: 分类名称</li>
  * </ul>
@@ -18,6 +19,8 @@ public class UpdateGroupCategoryCommand {
 
 	private String ownerType;
 
+	private Long ownerId;
+	
 	private Long categoryId;
 
 	private String categoryName;
@@ -26,12 +29,22 @@ public class UpdateGroupCategoryCommand {
 
 	}
 
-	public UpdateGroupCategoryCommand(Integer namespaceId, String ownerType, Long categoryId, String categoryName) {
+	public UpdateGroupCategoryCommand(Integer namespaceId, String ownerType, Long ownerId, Long categoryId,
+			String categoryName) {
 		super();
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
+		this.ownerId = ownerId;
 		this.categoryId = categoryId;
 		this.categoryName = categoryName;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public Integer getNamespaceId() {

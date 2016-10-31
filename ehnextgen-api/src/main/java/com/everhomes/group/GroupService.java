@@ -66,7 +66,7 @@ import com.everhomes.rest.group.RevokeGroupMemberCommand;
 import com.everhomes.rest.group.SearchGroupCommand;
 import com.everhomes.rest.group.SearchGroupTopicAdminCommand;
 import com.everhomes.rest.group.SetGroupParametersCommand;
-import com.everhomes.rest.group.SetGroupParametersResponse;
+import com.everhomes.rest.group.GroupParametersResponse;
 import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryResponse;
@@ -191,10 +191,10 @@ public interface GroupService {
 	public ListBroadcastsResponse listBroadcasts(ListBroadcastsCommand cmd);
 
 
-	public SetGroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd);
+	public GroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd);
 
 
-	public void getGroupParameters(GetGroupParametersCommand cmd);
+	public GroupParametersResponse getGroupParameters(GetGroupParametersCommand cmd);
 
 
 	public ListGroupsByApprovalStatusResponse listGroupsByApprovalStatus(ListGroupsByApprovalStatusCommand cmd);

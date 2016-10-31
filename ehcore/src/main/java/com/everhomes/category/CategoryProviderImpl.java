@@ -399,4 +399,25 @@ public class CategoryProviderImpl implements CategoryProvider {
         query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         return ConvertHelper.convert(query.fetchOne(), Category.class);
 	}
+
+	@Override
+	public Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+		
+		Record record = context.select()
+				.from(Tables.EH_CATEGORIES)
+				.where(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CATEGORIES.NAME.eq(categoryName))
+				.and(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId))
+				.and(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()))
+				.fetchAny();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, Category.class);
+		}
+		
+		return null;
+	}
+    
+    
 }

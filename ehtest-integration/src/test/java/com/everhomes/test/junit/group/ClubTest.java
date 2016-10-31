@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
 import com.everhomes.rest.ui.group.CreateGroupCategoryCommand;
 import com.everhomes.rest.ui.group.CreateGroupCategoryResponse;
 import com.everhomes.rest.ui.group.DeleteGroupCategoryCommand;
@@ -31,7 +32,7 @@ public class ClubTest extends BaseLoginAuthTestCase {
 	//1. 查询我加入的俱乐部发的贴子
 	private static final String LIST_POST_OF_MY_GROUP_URL = "/group/listPostOfMyGroup";
 	//2. 转移创建者权限
-	private static final String TRANSFER_PRIVILEGE_URL = "/group/transferPrivilege";
+	private static final String TRANSFER_PRIVILEGE_URL = "/group/transferCreatorPrivilege";
 	//3. 设置俱乐部参数
 	private static final String SET_GROUP_PARAMETERS_URL = "/group/setGroupParameters";
 	//4. 获取俱乐部参数
@@ -73,7 +74,7 @@ public class ClubTest extends BaseLoginAuthTestCase {
 	public void testTransferPrivilege() {
 		String url = TRANSFER_PRIVILEGE_URL;
 		logon();
-		TransferPrivilegeCommand cmd = new TransferPrivilegeCommand();
+		TransferCreatorPrivilegeCommand cmd = new TransferCreatorPrivilegeCommand();
 		cmd.setGroupId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);

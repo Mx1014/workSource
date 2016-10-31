@@ -80,13 +80,14 @@ import com.everhomes.rest.group.RevokeAdminRoleCommand;
 import com.everhomes.rest.group.RevokeGroupMemberCommand;
 import com.everhomes.rest.group.SearchGroupCommand;
 import com.everhomes.rest.group.SetGroupParametersCommand;
-import com.everhomes.rest.group.SetGroupParametersResponse;
+import com.everhomes.rest.group.GroupParametersResponse;
 import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryResponse;
 import com.everhomes.rest.group.UpdateGroupCommand;
 import com.everhomes.rest.group.UpdateGroupMemberCommand;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * <ul>圈管理：
@@ -772,6 +773,7 @@ public class GroupController extends ControllerBase {
 	 * <p>4.获取广播详情</p>
 	 * <b>URL: /group/getBroadcastByToken</b>
 	 */
+	@RequireAuthentication(false)
 	@RequestMapping("getBroadcastByToken")
 	@RestReturn(GetBroadcastByTokenResponse.class)
 	public RestResponse getBroadcastByToken(GetBroadcastByTokenCommand cmd){
@@ -793,7 +795,7 @@ public class GroupController extends ControllerBase {
 	 * <b>URL: /group/setGroupParameters</b>
 	 */
 	@RequestMapping("setGroupParameters")
-	@RestReturn(SetGroupParametersResponse.class)
+	@RestReturn(GroupParametersResponse.class)
 	public RestResponse setGroupParameters(SetGroupParametersCommand cmd){
 		return new RestResponse(groupService.setGroupParameters(cmd));
 	}
@@ -805,8 +807,7 @@ public class GroupController extends ControllerBase {
 	@RequestMapping("getGroupParameters")
 	@RestReturn(String.class)
 	public RestResponse getGroupParameters(GetGroupParametersCommand cmd){
-		groupService.getGroupParameters(cmd);
-		return new RestResponse();
+		return new RestResponse(groupService.getGroupParameters(cmd));
 	}
 
 	/**

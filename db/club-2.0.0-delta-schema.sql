@@ -11,7 +11,7 @@ CREATE TABLE `eh_group_settings` (
   `member_post_flag` TINYINT COMMENT 'whether allow members create post',
   `member_comment_flag` TINYINT COMMENT 'whether allow members comment on the post',
   `admin_broadcast_flag` TINYINT COMMENT 'whether allow admin broadcast',
-  `broadcast_count` TINYINT COMMENT 'how many broadcasts can be created per day',
+  `broadcast_count` INTEGER COMMENT 'how many broadcasts can be created per day',
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'news creator uid',
   `create_time` DATETIME COMMENT 'create time',
   `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'operator uid',
