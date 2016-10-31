@@ -43,7 +43,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 delete from eh_categories where id = 6;
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
 	VALUES ('6', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0');
-update eh_configurations set value = 6 where id = 122;
+UPDATE `eh_configurations` SET `value`='6' WHERE `name`='pmtask.category.ancestor';
 
 INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
 	VALUES ('1017', '32', '执行人员', '任务管理 执行人员', NULL, '0', 'EhOrganizations', NULL);
