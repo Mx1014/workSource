@@ -43,7 +43,7 @@ CREATE TABLE `eh_broadcasts` (
 
 
 
---- 以下从3.11.0合并过来
+-- 以下从3.11.0合并过来
 -- merge from pmtask-delta-schema.sql
 ALTER TABLE eh_pm_tasks ADD COLUMN `task_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'task category id';
 ALTER TABLE eh_pm_tasks ADD COLUMN `reserve_time` DATETIME;
