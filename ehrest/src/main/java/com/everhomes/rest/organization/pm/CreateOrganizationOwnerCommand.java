@@ -24,6 +24,7 @@ import java.util.List;
  * <li>registeredResidence: 户籍</li>
  * <li>avatar: 头像URI地址</li>
  * <li>addresses: 地址列表</li>
+ * <li>ownerAttachments: 附件列表</li>
  * </ul>
  */
 public class CreateOrganizationOwnerCommand {
@@ -55,6 +56,9 @@ public class CreateOrganizationOwnerCommand {
     @NotNull
     @ItemType(OrganizationOwnerAddressCommand.class)
     @Valid private List<OrganizationOwnerAddressCommand> addresses;
+
+    @ItemType(UploadOrganizationOwnerAttachmentCommand.class)
+    private List<UploadOrganizationOwnerAttachmentCommand> ownerAttachments;
 
     public Long getCommunityId() {
         return communityId;
@@ -94,6 +98,14 @@ public class CreateOrganizationOwnerCommand {
 
     public void setGender(Byte gender) {
         this.gender = gender;
+    }
+
+    public List<UploadOrganizationOwnerAttachmentCommand> getOwnerAttachments() {
+        return ownerAttachments;
+    }
+
+    public void setOwnerAttachments(List<UploadOrganizationOwnerAttachmentCommand> ownerAttachments) {
+        this.ownerAttachments = ownerAttachments;
     }
 
     public Long getOrganizationId() {

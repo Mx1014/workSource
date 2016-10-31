@@ -6163,6 +6163,8 @@ CREATE TABLE `eh_service_alliance_categories` (
   `delete_time` DATETIME,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `logo_url` VARCHAR(1024) COMMENT 'the logo url of the category',
+  `display_mode` TINYINT DEFAULT 1,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

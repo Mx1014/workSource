@@ -46,7 +46,8 @@ public enum ActionType {
       MAKERZONE((byte)32),SERVICEALLIANCE((byte)33),PARKENTERPRISE((byte)34), USER_GROUPS((byte)35), LIST_GROUPS((byte)36), SERVICE_ORDER((byte)37),
       ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NEARBY_ACTIVITIES((byte)41),NEARBY_PUBLIC_CYCLE((byte)42),
       NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
-      WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52);
+      WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52),
+      ALL_BUTTON((byte)53);
     private byte code;
     
     private ActionType(byte code) {

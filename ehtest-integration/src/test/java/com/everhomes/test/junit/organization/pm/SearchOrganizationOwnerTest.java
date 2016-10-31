@@ -30,6 +30,7 @@ public class SearchOrganizationOwnerTest extends BaseLoginAuthTestCase {
         cmd.setOrgOwnerTypeId(1L);
         cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(24206890946790405L);
+        cmd.setPageSize(10);
         cmd.setKeyword("王五");
 
         SearchOrganizationOwnersRestResponse resp = httpClientService.restPost(api, cmd, SearchOrganizationOwnersRestResponse.class);
@@ -40,6 +41,45 @@ public class SearchOrganizationOwnerTest extends BaseLoginAuthTestCase {
         assertEquals(1, resp.getResponse().getOwners().size());
 
         assertEquals(cmd.getKeyword(), resp.getResponse().getOwners().get(0).getContactName());
+    }
+
+    // 传入地址id搜索客户资料
+    @Test
+    public void testSearchOrganizationOwnerByAddress() {
+        bulkData();
+        logon();
+        String api = "/pm/searchOrganizationOwners";
+        SearchOrganizationOwnersCommand cmd = new SearchOrganizationOwnersCommand();
+        cmd.setOrgOwnerTypeId(1L);
+        cmd.setOrganizationId(1000001L);
+        cmd.setCommunityId(24206890946790405L);
+        cmd.setAddressId(1L);
+        cmd.setPageSize(10);
+        SearchOrganizationOwnersRestResponse resp = httpClientService.restPost(api, cmd, SearchOrganizationOwnersRestResponse.class);
+
+        assertNotNull(resp);
+        assertNotNull(resp.getResponse());
+        assertNotNull(resp.getResponse().getOwners());
+        assertEquals(2, resp.getResponse().getOwners().size());
+    }
+
+    // 根据楼栋名称模糊搜索客户资料
+    @Test
+    public void testSearchOrganizationOwnerByBuildingName() {
+        bulkData();
+        logon();
+        String api = "/pm/searchOrganizationOwners";
+        SearchOrganizationOwnersCommand cmd = new SearchOrganizationOwnersCommand();
+        cmd.setOrgOwnerTypeId(1L);
+        cmd.setOrganizationId(1000001L);
+        cmd.setCommunityId(24206890946790405L);
+        cmd.setBuildingName("101");
+        SearchOrganizationOwnersRestResponse resp = httpClientService.restPost(api, cmd, SearchOrganizationOwnersRestResponse.class);
+
+        assertNotNull(resp);
+        assertNotNull(resp.getResponse());
+        assertNotNull(resp.getResponse().getOwners());
+        assertEquals(2, resp.getResponse().getOwners().size());
     }
 
     @Test
