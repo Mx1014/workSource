@@ -233,9 +233,11 @@ public class PmProviderImpl implements PmTaskProvider{
 //        					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
 //        	query.groupBy(Tables.EH_PM_TASKS.ID);   
     		
-    		query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.TASK_ID,Tables.EH_PM_TASK_LOGS.ID.max())
+    		query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.TASK_ID)
     				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.eq(PmTaskStatus.PROCESSING.getCode()))
-    				.groupBy(Tables.EH_PM_TASK_LOGS.ID).asTable(Tables.EH_PM_TASK_LOGS.getName()))
+    				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
+    	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.ID)))
+    				.asTable(Tables.EH_PM_TASK_LOGS.getName()))
     		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
         	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
