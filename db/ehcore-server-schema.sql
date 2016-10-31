@@ -271,6 +271,9 @@ CREATE TABLE `eh_activities` (
   `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
   `video_url` VARCHAR(128) COMMENT 'url of video support',
   `is_video_support` TINYINT NOT NULL DEFAULT 0 COMMENT 'is video support',
+  `max_quantity` INTEGER COMMENT 'max person quantity',
+  `content_type` VARCHAR(128) COMMENT 'content type, text/rich_text',
+  `version` VARCHAR(128) COMMENT 'version',
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
@@ -2464,6 +2467,7 @@ CREATE TABLE `eh_forum_posts` (
   `end_time` DATETIME COMMENT 'publish end time',
   `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
   `media_display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'whether display image',
+  `max_quantity` INTEGER COMMENT 'max person quantity',
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
@@ -6163,6 +6167,8 @@ CREATE TABLE `eh_service_alliance_categories` (
   `delete_time` DATETIME,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `logo_url` VARCHAR(1024) COMMENT 'the logo url of the category',
+  `display_mode` TINYINT DEFAULT 1,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6211,7 +6217,33 @@ CREATE TABLE `eh_service_alliance_requests` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_service_alliance_reservation_requests`;
+CREATE TABLE `eh_service_alliance_reservation_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `template_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'i.e. EhServiceAllianceApplies type',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `type` BIGINT NOT NULL DEFAULT 0,
+  `category_id` BIGINT NOT NULL DEFAULT 0,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+  `creator_name` VARCHAR(128),
+  `creator_mobile` VARCHAR(128),
+  `creator_organization_id` BIGINT NOT NULL DEFAULT 0,
+  `service_alliance_id` BIGINT NOT NULL DEFAULT 0,
+  `reserve_type` VARCHAR(128),
+  `reserve_organization` VARCHAR(128),
+  `reserve_time` VARCHAR(128),
+  `contact` VARCHAR(128),
+  `mobile` VARCHAR(128),
+  `remarks` VARCHAR(1024),
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_service_alliances`;
@@ -7190,6 +7222,22 @@ CREATE TABLE `eh_warning_contacts` (
 
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_warning_settings`;
+CREATE TABLE `eh_warning_settings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL COMMENT 'namespace id',
+  `type` varchar(64) COMMENT 'type',
+  `time` BIGINT COMMENT 'millisecond',
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 --
 -- the relationship between web menus and privileges
