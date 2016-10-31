@@ -166,14 +166,14 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 
 -- beta环境 清华信息港 服务市场类别 by sfyan 20161029
-UPDATE `eh_launch_pad_items` SET service_categry_id = 1 WHERE namespace_id = 999984;
+UPDATE `eh_launch_pad_items` SET service_categry_id = 2 WHERE namespace_id = 999984;
 
 SET @launch_pad_item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,delete_flag,scene_type,scale_type) VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 53,'{"itemLocation":"/home","itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL,1,'default',1);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,delete_flag,scene_type,scale_type) VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 53,'{"itemLocation":"/home","itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL,1,'park_tourist',1);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,delete_flag,scene_type,scale_type) VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 53,'{"itemLocation":"/home","itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL,1,'pm_admin',1);
 
-INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`) VALUES(1, '基本服务', 'cs://1/image/aW1hZ2UvTVRvek1XVTFNRFppT1RVMVlXTXhPRFExWkRnMllqYzBPVFZtTmpreU5HRXlOQQ', 1, 0, 1, 999989);
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`) VALUES(2, '基本服务', 'cs://1/image/aW1hZ2UvTVRvek1XVTFNRFppT1RVMVlXTXhPRFExWkRnMllqYzBPVFZtTmpreU5HRXlOQQ', 1, 0, 1, 999984);
 
 DELETE FROM `eh_launch_pad_items` WHERE namespace_id = 0 AND action_type IN (1);
 UPDATE `eh_launch_pad_items` SET service_categry_id = null, default_order=100000  WHERE namespace_id = 999984 AND action_type IN (53);
