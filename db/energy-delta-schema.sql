@@ -159,15 +159,14 @@ CREATE TABLE `eh_energy_meter_formula_variables` (
 );
 
 --
--- 每日每月水电报表
+-- 每日水电报表
 --
 CREATE TABLE `eh_energy_date_statistics` (
   `id`                  BIGINT  NOT NULL,
   `namespace_id`        INTEGER NOT NULL DEFAULT 0,
   `community_id`        BIGINT,
   `meter_type`          TINYINT COMMENT '1:WATER, 2: ELECTRIC',
-  `date_type`           TINYINT COMMENT '1:day, 2:month',
-  `date_str`            VARCHAR(20),
+  `stat_date`            date COMMENT '改成用日期存,方便过滤和计算',
   `bill_category_id`    BIGINT COMMENT 'eh_energy_meter_categories id',
   `service_category_id` BIGINT COMMENT 'eh_energy_meter_categories id',
   `formula_id`          TINYINT COMMENT 'eh_energy_meter_formulas id',
@@ -191,6 +190,37 @@ CREATE TABLE `eh_energy_date_statistics` (
   PRIMARY KEY (`id`)
 );
 
+--
+--  每月水电报表
+--
+CREATE TABLE `eh_energy_date_statistics` (
+  `id`                  BIGINT  NOT NULL,
+  `namespace_id`        INTEGER NOT NULL DEFAULT 0,
+  `community_id`        BIGINT,
+  `meter_type`          TINYINT COMMENT '1:WATER, 2: ELECTRIC',
+  `date_str`            VARCHAR(20)COMMENT  'YYYMM 例如 201608' ,
+  `bill_category_id`    BIGINT COMMENT 'eh_energy_meter_categories id',
+  `service_category_id` BIGINT COMMENT 'eh_energy_meter_categories id',
+  `formula_id`          TINYINT COMMENT 'eh_energy_meter_formulas id',
+  `meter_name`          VARCHAR(255),
+  `meter_number`        VARCHAR(255),
+  `meter_bill`          VARCHAR(255) COMMENT 'meter bill category name',
+  `meter_service`       VARCHAR(255) COMMENT 'meter service category name',
+  `meter_rate`          DECIMAL(10, 2),
+  `meter_price`         DECIMAL(10, 2),
+  `last_reading`        DECIMAL(10, 1),
+  `current_reading`     DECIMAL(10, 1),
+  `current_amount`      DECIMAL(10, 1),
+  `current_cost`        DECIMAL(10, 1),
+  `reset_meter_flag`    TINYINT COMMENT '0: normal, 1: reset',
+  `change_meter_flag`   TINYINT COMMENT '0: normal, 1: change',
+  `status`              TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid`         BIGINT,
+  `create_time`         DATETIME,
+  `update_uid`          BIGINT,
+  `update_time`         DATETIME,
+  PRIMARY KEY (`id`)
+);
 --
 -- 总量记录表
 --
@@ -224,12 +254,12 @@ CREATE TABLE `eh_energy_year_statistics` (
   `community_id`      BIGINT,
   `meter_type`        TINYINT COMMENT '1:WATER, 2: ELECTRIC',
   `date_str`          VARCHAR(20),
-  `receivable_amount` DECIMAL(10, 1),
-  `receivable_cost`   DECIMAL(10, 1),
-  `payable_amount`    DECIMAL(10, 1),
-  `payable_cost`      DECIMAL(10, 1),
-  `burden_amount`     DECIMAL(10, 1),
-  `burden_cost`       DECIMAL(10, 1),
+  `receivable_amount` DECIMAL(10, 1) COMMENT'应收用量',
+  `receivable_cost`   DECIMAL(10, 1) COMMENT'应收费用',
+  `payable_amount`    DECIMAL(10, 1) COMMENT'应付用量',
+  `payable_cost`      DECIMAL(10, 1) COMMENT'应付费用',
+  `burden_amount`     DECIMAL(10, 1) COMMENT'负担公共用量',
+  `burden_cost`       DECIMAL(10, 1) COMMENT'负担公共费用',
   `area_size`         DOUBLE COMMENT 'Community area size',
   `average_amount`    DECIMAL(10, 1),
   `status`            TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
