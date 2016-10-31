@@ -4665,6 +4665,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
 		orgs.add(organization);
+		if(LOGGER.isDebugEnabled())
+        	LOGGER.info("orgs:" + orgs);
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
 		
 		for (Organization org : orgs) {
@@ -4674,6 +4676,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null == community){
 					continue;
 				}
+				
+				if(LOGGER.isDebugEnabled())
+		        	LOGGER.info("community:" + community);
+				
 				if(community.getNamespaceId().equals(namespaceId)){
 					dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
 				}

@@ -767,6 +767,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         for(CommunityDTO community : communities) {
             communityIdList.add(community.getId());
         }
+        
+        if(LOGGER.isDebugEnabled())
+        	LOGGER.info("getGlobalPostByOrganizationIdQuery: communityIdList = " + communityIdList + ", forumIdList = " + forumIdList + ", organizationList = " + organizationList);
 
         SearchByMultiForumAndCmntyCommand orgTopicCmd = ConvertHelper.convert(cmd, SearchByMultiForumAndCmntyCommand.class);
         orgTopicCmd.setCommunityIds(communityIdList);
