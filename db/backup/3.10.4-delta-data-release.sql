@@ -69,3 +69,5 @@ INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `tem
 -- 去掉创源的物业菜单 by sfyan 20161027
 DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` IN (SELECT id FROM `eh_web_menus` WHERE `path` like '/50000/58000%') AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999986;
 
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (6, '999987', '1');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (7, '999987', '2');
