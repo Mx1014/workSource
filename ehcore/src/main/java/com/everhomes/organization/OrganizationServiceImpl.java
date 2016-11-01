@@ -7348,7 +7348,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
 
-		Organization org =  this.checkOrganization(cmd.getOrganizationId());
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null) {
+			return new OrganizationTreeDTO();
+		}
 		List<Organization> organizations = new ArrayList<Organization>();
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
