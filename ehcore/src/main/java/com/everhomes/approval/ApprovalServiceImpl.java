@@ -1204,8 +1204,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 			approvalLog.setRemark(approvalOpRequest.getProcessMessage());
 			approvalLog.setApprovalStatus(approvalOpRequest.getApprovalStatus());
 
+			approvalLog.setApprovalType(approvalRequest.getApprovalType());
 			if (i == 0) {
-				approvalLog.setApprovalType(approvalRequest.getApprovalType());
 				if (approvalRequest.getCategoryId() != null) {
 					ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(approvalRequest
 							.getCategoryId());
