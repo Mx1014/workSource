@@ -31,6 +31,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
     @RequestMapping("/api/**")
     @RequireAuthentication(false)
     public String apiDiscover(HttpServletRequest request, HttpServletResponse response, Model model) {
+/*        
         response.addHeader("Content-Type", "text/html; charset=utf-8");
         String uri = request.getRequestURI().toString();
         
@@ -58,6 +59,8 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             model.addAttribute("contextPath", contextPath);            
             return "api-input";
         }
+*/
+        return "api-react";
     }
     
     @SuppressDiscover
