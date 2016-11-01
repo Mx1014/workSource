@@ -596,8 +596,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         familyService.leave(leaveCmd, null);
 
         // 修改用户对应的客户资料认证状态  add by xq.tian  20160923
-        propertyMgrService.updateOrganizationOwnerAddressAuthType(UserContext.current().getUser().getId(), family.getCommunityId(),
-                family.getAddressId(), OrganizationOwnerAddressAuthType.INACTIVE);
+        propertyMgrService.updateOrganizationOwnerAddressAuthType(null, family.getCommunityId(), family.getAddressId(),
+                OrganizationOwnerAddressAuthType.INACTIVE);
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
@@ -1700,4 +1700,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         
         return resp;
 	}
+
+    @Override
+    public List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        return addressProvider.listAddressByBuildingName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), cmd.getBuildingName());
+    }
 }

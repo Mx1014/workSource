@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>startDate: 开始日期</li>
  * <li>endDate: 结束日期</li>
- * <li>categoryId: 服务类型id</li>
+ * <li>taskCategoryId: 服务类型id</li>
  * <li>status: 状态  1: 未处理  2: 处理中 3: 已完成  4: 已关闭 {@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
  * <li>keyword: 关键字</li>
  * <li>pageAnchor: 分页瞄</li>
@@ -20,11 +20,13 @@ public class SearchTasksCommand {
     private Long ownerId;
 	private Long startDate;
 	private Long endDate;
-	private Long categoryId;
+	private Long taskCategoryId;
 	private Byte status;
 	private String keyword;
 	private Long pageAnchor;
 	private Integer pageSize;
+	
+	private Long addressId;
 	
 	public Long getStartDate() {
 		return startDate;
@@ -50,11 +52,11 @@ public class SearchTasksCommand {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
-	public Long getCategoryId() {
-		return categoryId;
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
 	}
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
 	public Byte getStatus() {
 		return status;
@@ -84,5 +86,11 @@ public class SearchTasksCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 }

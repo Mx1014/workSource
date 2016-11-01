@@ -309,6 +309,15 @@ public class ParkingServiceImpl implements ParkingService {
 		String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
+    	if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
+    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
+			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
+				LOGGER.error("Overdue fees, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
+						"Overdue fees");
+			}
+		}
+    	
     	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
 		User user = UserContext.current().getUser();

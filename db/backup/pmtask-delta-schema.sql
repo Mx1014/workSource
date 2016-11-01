@@ -1,0 +1,67 @@
+ALTER TABLE eh_pm_tasks ADD COLUMN `task_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'task category id';
+ALTER TABLE eh_pm_tasks ADD COLUMN `reserve_time` DATETIME;
+ALTER TABLE eh_pm_tasks ADD COLUMN `priority` TINYINT NOT NULL DEFAULT 0 COMMENT 'task rank of request';
+ALTER TABLE eh_pm_tasks ADD COLUMN `source_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'task come from ,such as app ,email';
+ALTER TABLE eh_pm_tasks ADD COLUMN `organization_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_pm_tasks ADD COLUMN `requestor_name` VARCHAR(64) COMMENT 'the name of requestor';
+ALTER TABLE eh_pm_tasks ADD COLUMN `requestor_phone` VARCHAR(64) COMMENT 'the phone of requestor';
+ALTER TABLE eh_pm_tasks ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address id';
+ALTER TABLE eh_pm_tasks ADD COLUMN `revisit_content` TEXT COMMENT 'revisit content';
+ALTER TABLE eh_pm_tasks ADD COLUMN `revisit_time` DATETIME;
+ALTER TABLE eh_pm_task_statistics ADD COLUMN `task_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'task category id';
+
+CREATE TABLE `eh_pm_task_targets` (
+  `id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `owner_id` bigint(20) DEFAULT NULL,
+  `target_type` varchar(64) NOT NULL COMMENT 'target object(user/group) type',
+  `target_id` bigint(20) DEFAULT NULL COMMENT 'target object(user/group) id',
+  `role_id` BIGINT NOT NULL DEFAULT 0,
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('313', 'pmtask.notification', '8', 'zh_CN', '任务操作模版', '${operatorName} ${operatorPhone} 已回访该任务', '0');
+
+
+
+ALTER TABLE eh_parking_lots ADD COLUMN `max_request_num` INTEGER NOT NULL DEFAULT 1 COMMENT 'the max num of the request card';
+
+ALTER TABLE eh_parking_lots ADD COLUMN `tempfee_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'is support temp fee';
+
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN `recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: monthly, 2: temporary';
+
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN `order_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'it may be from 3rd system';
+
+ALTER TABLE eh_parking_lots ADD COLUMN `rate_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'is support add or delete rate';
+
+-- 通讯录增加 隐藏 显示字段 by sfyan 20161010
+ALTER TABLE `eh_organization_members` ADD COLUMN `visible_flag` TINYINT(4) DEFAULT 0 COMMENT '0 show 1 hide';
+
+-- DROP TABLE IF EXISTS `eh_region_codes`;
+CREATE TABLE `eh_region_codes` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `name` VARCHAR(64) NOT NULL COMMENT 'region name',
+  `code` INTEGER NOT NULL COMMENT 'region code',
+  `pinyin` VARCHAR(256) NOT NULL COMMENT 'region name pinyin',
+  `first_letter` CHAR(2) NOT NULL COMMENT 'region name pinyin first letter',
+  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active', 
+  `hot_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes', 
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 增加区号 by sfyan 20161012
+ALTER TABLE `eh_user_identifiers` ADD COLUMN `region_code` INTEGER DEFAULT 86 COMMENT 'region code 86 852';
+
+-- 结算增加统计笔数 by sfyan 20161017
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `alipay_paid_count` BIGINT DEFAULT 0 COMMENT '支付宝消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `alipay_refund_count` BIGINT DEFAULT 0 COMMENT '支付宝退款笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `wechat_paid_count` BIGINT DEFAULT 0 COMMENT '微信消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `wechat_refund_count` BIGINT DEFAULT 0 COMMENT '微信退款笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `payment_card_paid_count` BIGINT DEFAULT 0 COMMENT '一卡通消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `payment_card_refund_count` BIGINT DEFAULT 0 COMMENT '一卡通退款笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `total_paid_count` BIGINT DEFAULT 0 COMMENT '总消费笔数';
+ALTER TABLE `eh_stat_service_settlement_results` ADD COLUMN `total_refund_count` BIGINT DEFAULT 0 COMMENT '总退款消费笔数';

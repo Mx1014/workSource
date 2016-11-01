@@ -1,30 +1,9 @@
 package com.everhomes.yellowPage;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.elasticsearch.common.lang3.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.SortField;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.category.Category;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContactEntry;
-import com.everhomes.equipment.EquipmentInspectionEquipments;
-import com.everhomes.jooq.JooqHelper;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -34,49 +13,28 @@ import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseContactEntriesDao;
-import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceAllianceCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhServiceAllianceNotifyTargetsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceAllianceRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceAlliancesDao;
-import com.everhomes.server.schema.tables.daos.EhSettleRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhYellowPageAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhYellowPagesDao;
-import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhConfReservations;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentAttachments;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
-import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
-import com.everhomes.server.schema.tables.pojos.EhSettleRequests;
-import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
-import com.everhomes.server.schema.tables.pojos.EhYellowPages;
-import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
-import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhServiceAllianceNotifyTargetsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceAllianceRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
-import com.everhomes.server.schema.tables.records.EhSettleRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhYellowPagesRecord;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.Tuple;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-import com.everhomes.videoconf.ConfAccounts;
+
+import org.elasticsearch.common.lang3.StringUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -511,7 +469,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         Condition condition = null;
         
         if(parentId != null)
-            condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(parentId.longValue());
+            condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(parentId);
         else
             condition = Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.isNull().or(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.eq(0L));
             
@@ -743,6 +701,62 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             query.fetch().map((r) -> {
             	
             	requests.add(ConvertHelper.convert(r, SettleRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
+	}
+
+
+	@Override
+	public void createReservationRequests(ReservationRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceReservationRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceReservationRequestsDao dao = new EhServiceAllianceReservationRequestsDao(context.configuration());
+        dao.insert(request);
+	}
+
+
+	@Override
+	public ReservationRequests findReservationRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceReservationRequestsDao dao = new EhServiceAllianceReservationRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ReservationRequests.class);
+	}
+
+
+	@Override
+	public List<ReservationRequests> listReservationRequests(
+			CrossShardListingLocator locator, int pageSize) {
+		List<ReservationRequests> requests = new ArrayList<ReservationRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceReservationRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceReservationRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, ReservationRequests.class));
                 return null;
             });
 

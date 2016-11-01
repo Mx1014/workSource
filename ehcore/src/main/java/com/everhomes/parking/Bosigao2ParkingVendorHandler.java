@@ -1,21 +1,6 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSONObject;
 import com.bosigao2.ParkWebService;
 import com.bosigao2.ParkWebServiceSoap;
@@ -29,25 +14,34 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardType;
-import com.everhomes.rest.parking.ParkingLotVendor;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateStatus;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
+import com.everhomes.rest.parking.*;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.parking.*;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
 public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {

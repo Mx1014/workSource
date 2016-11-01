@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * <ul>
@@ -34,7 +37,7 @@ public class OrganizationOwnerDTO {
     private String contactToken;
     private String orgOwnerType;
     private String gender;
-    private Date   birthday;
+    private Long   birthday;
     private String maritalStatus;
     private String job;
     private String company;
@@ -48,6 +51,8 @@ public class OrganizationOwnerDTO {
 
     private String primaryFlag;
 
+    @ItemType(OrganizationOwnerAddressDTO.class)
+    private List<OrganizationOwnerAddressDTO> addresses;
     public Long getId() {
         return id;
     }
@@ -96,11 +101,11 @@ public class OrganizationOwnerDTO {
         this.gender = gender;
     }
 
-    public Date getBirthday() {
+    public Long getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(Long birthday) {
         this.birthday = birthday;
     }
 
@@ -188,4 +193,12 @@ public class OrganizationOwnerDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public List<OrganizationOwnerAddressDTO> getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(List<OrganizationOwnerAddressDTO> addresses) {
+		this.addresses = addresses;
+	}
 }

@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.elasticsearch.common.geo.GeoHashUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,6 @@ import com.everhomes.util.RuntimeErrorException;
 @RestDoc(value="Haian controller", site="haian")
 @RestController
 @RequestMapping("/haian")
-@RequireAuthentication(false)
 public class HaianThirdController extends ControllerBase {
     
     @Autowired
@@ -57,7 +57,6 @@ public class HaianThirdController extends ControllerBase {
     	
     	resp.sendRedirect(sb.toString());
     }
-    
 	/**
 	 * 获取加密后的字符串
 	 * @param input
