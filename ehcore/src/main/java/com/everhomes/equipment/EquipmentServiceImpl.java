@@ -1272,6 +1272,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 						
 						equipmentProvider.createEquipmentStandardMap(map);
 						equipmentStandardMapSearcher.feedDoc(map);
+						
+						updateStandardIds.add(map.getStandardId());
 					} else {
 						EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
 								 dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
@@ -1442,6 +1444,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipment.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 		
 		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
+		equipmentSearcher.feedDoc(equipment);
 		
 		List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 		if(maps != null && maps.size() > 0) {
@@ -2939,6 +2942,12 @@ public class EquipmentServiceImpl implements EquipmentService {
         dto.setEqAccessoryMap(eqAccessoryMap);
         
         populateEquipmentStandards(dto);
+        
+        ListAttachmentsByEquipmentIdCommand command = new ListAttachmentsByEquipmentIdCommand();
+        command.setEquipmentId(dto.getId());
+        command.setAttachmentType((byte) 1);
+        List<EquipmentAttachmentDTO> attachments = listAttachmentsByEquipmentId(command);
+        dto.setAttachments(attachments);
 		
 		return dto;
 	}
