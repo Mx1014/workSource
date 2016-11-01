@@ -5,6 +5,7 @@ export const API_LIST_SUCCESS = "Api.LIST_SUCCESS"
 export const API_LIST_FAILURE = "Api.LIST_FAILURE"
 
 export const SANDBOX_SET_CURRENT = "SandBox.SET_CURRENT"
+export const SANDBOX_SET_APIFILTER = "SandBox.SET_APIFILTER"
 
 export const CONSOLE_APPEND = "Console.APPEND"
 export const CONSOLE_CLEAR = "Console.CLEAR"
@@ -67,6 +68,13 @@ export function setSandboxCurrentApi(uri) {
     return {
         type: SANDBOX_SET_CURRENT,
         uri
+    }
+}
+
+export function setApiFilter(filter) {
+    return {
+        type: SANDBOX_SET_APIFILTER,
+        filter
     }
 }
 
