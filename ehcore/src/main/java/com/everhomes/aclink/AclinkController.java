@@ -423,10 +423,13 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("getVisitorPhone")
     @RequireAuthentication(false)
     @RestReturn(value=GetVisitorResponse.class)
-    public RestResponse getDoorVisitorAuthPhoneByUuid(GetVisitorCommand cmd) {
+    public RestResponse getDoorVisitorAuthPhoneByUuid(GetPhoneVisitorCommand cmd) {
         RestResponse response = new RestResponse();
         
-        response.setResponseObject(doorAccessService.getVisitorPhone(cmd));
+        GetVisitorCommand cmd2 = new GetVisitorCommand();
+        cmd2.setId(cmd.getPhvid());
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        response.setResponseObject(doorAccessService.getVisitorPhone(cmd2));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
