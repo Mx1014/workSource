@@ -30,6 +30,14 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
                 .fetchOneInto(EnergyMeterFormula.class);
     }
 
+    @Override
+    public EnergyMeterFormula findByName(Integer namespaceId, String name) {
+        return context().selectFrom(EH_ENERGY_METER_FORMULAS)
+                .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_FORMULAS.NAME.eq(name))
+                .fetchAnyInto(EnergyMeterFormula.class);
+    }
+
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
     }

@@ -14,6 +14,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -242,9 +244,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
+        List<EnergyMeter> meterList = new ArrayList<>();
         ArrayList list = processorExcel(file);
-        for (Object o : list) {
-            RowResult result = (RowResult) o;
+        for (int i = 2; i < list.size(); i++) {
+            RowResult result = (RowResult) list.get(i);
             if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getF()).anyMatch(StringUtils::isEmpty)) {
                 continue;
             }
@@ -266,8 +270,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if (category != null) {
                 meter.setServiceCategoryId(category.getId());
             }
-            // if (NumberUtils.)
+            if (NumberUtils.isNumber(result.getF())) {
+                meter.setMaxReading(new BigDecimal(result.getF()));
+            }
+            if (NumberUtils.isNumber(result.getG())) {
+                meter.setStartReading(new BigDecimal(result.getG()));
+            }
+            if (NumberUtils.isNumber(result.getH())) {
+                meter.setPrice(new BigDecimal(result.getH()));
+            }
+            if (NumberUtils.isNumber(result.getI())) {
+                meter.setRate(new BigDecimal(result.getI()));
+            }
+            EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), result.getJ());
+            if (formula != null) {
+                meter.setAmountFormulaId(formula.getId());
+            }
+            formula = meterFormulaProvider.findByName(currNamespaceId(), result.getK());
+            if (formula != null) {
+                meter.setCostFormulaId(formula.getId());
+            }
+            dbProvider.execute(r -> {
+                meterProvider.createEnergyMeter(meter);
+                // 创建setting log 记录
+                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
+                updateCmd.setPrice(meter.getPrice());
+                updateCmd.setRate(meter.getRate());
+                updateCmd.setCostFormulaId(meter.getCostFormulaId());
+                updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
+                updateCmd.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                updateCmd.setMeterId(meter.getId());
+                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+                return true;
+            });
+            meterList.add(meter);
         }
+        meterSearcher.bulkUpdate(meterList);
     }
 
     private String currLocale() {
@@ -278,7 +319,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         MySheetContentsHandler sheetContenthandler = new MySheetContentsHandler();
         try {
             SAXHandlerEventUserModel userModel = new SAXHandlerEventUserModel(sheetContenthandler);
-            userModel.processASheets(file.getInputStream(), 2);
+            userModel.processASheets(file.getInputStream(), 0);
         } catch (Exception e) {
             LOGGER.error("Process excel error.", e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
