@@ -229,8 +229,11 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.ORGANIZATION.getCode(), communityId, sceneTypeStr);
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
