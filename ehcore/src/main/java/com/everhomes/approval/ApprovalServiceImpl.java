@@ -312,8 +312,17 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 		return new UpdateApprovalCategoryResponse(ConvertHelper.convert(tuple.first(), ApprovalCategoryDTO.class));
 	}
-
+	@Override
+	public ApprovalCategory findApprovalCategoryById(Long id){
+		if(id.equals(defaultCategory.getId()))
+			return ConvertHelper.convert(defaultCategory, ApprovalCategory.class);
+		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
+		return category;
+		
+	}
 	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId, Byte approvalType) {
+		if(id.equals(defaultCategory.getId()))
+			return ConvertHelper.convert(defaultCategory, ApprovalCategory.class);
 		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
 		if (category == null || category.getNamespaceId().intValue() != namespaceId.intValue()
 				|| !ownerType.equals(category.getOwnerType()) || category.getOwnerId().longValue() != ownerId.longValue()

@@ -16,6 +16,13 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
  
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.title', 1, 'zh_CN', '提交申请', '${nickName}提交了${approvalType}申请', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.title', 2, 'zh_CN', '提交申请', '等待${nickNames}审批', 0);
+ 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.title', 3, 'zh_CN', '加班申请列表', '${nickName}申请${date}加班${hour}小时', 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.title', 4, 'zh_CN', '请假申请列表', '${nickName}申请${category}(共${day}天${hour}小时${min}分钟)\n${beginDate}到${endDate}', 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'approval.title', 5, 'zh_CN', '异常申请列表', '${nickName}对${date}提交异常申请', 0); 
+  
+  
+
 
 -- 审批错误提示，added by wh ,2016-10-20 
 SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);

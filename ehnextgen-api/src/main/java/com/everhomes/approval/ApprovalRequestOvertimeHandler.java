@@ -3,8 +3,10 @@ package com.everhomes.approval;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,15 +18,18 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BasicDescriptionDTO;
+import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -97,7 +102,9 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 			exceptionRequest.setRequestId(a.getId());  
 			exceptionRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
 			exceptionRequest.setReason(a.getReason()); 
-			exceptionRequest.setRequestInfo(processRequestInfo(a.getEffectiveDate(),a.getHourLength()));
+			exceptionRequest.setRequestInfo(processRequestDate(a.getEffectiveDate())+
+					localeStringProvider.find(ApprovalTypeTemplateCode.SCOPE, a.getApprovalType().toString(), UserContext.current()
+							.getUser().getLocale())+ a.getHourLength()+"小时");
 			PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
 			
 			String punchDetail = processPunchDetail(pdl);
@@ -157,11 +164,27 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		return punchDetail;
 	}
 
-	private String processRequestInfo(Date effectiveDate, Double hourLength) {
-		return mmDDSF.format(effectiveDate)+"("+weekdaySF.format(effectiveDate)+") "+hourLength+"小时";
+	@Override
+	public BriefApprovalRequestDTO processBriefApprovalRequest(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		  
+		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest  ));
+		return briefApprovalRequestDTO;
 	}
- 
-
-	
+	private String processBriefRequestTitle(ApprovalRequest a  ) {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new HashMap<>();
+		 
+		// 初次提交
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.OVERTIME_TITLE;
+		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
+		map.put("date",processRequestDate(a.getEffectiveDate()));
+		map.put("hour",a.getHourLength());
+		 
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
 	
 }

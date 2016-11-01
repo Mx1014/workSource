@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
@@ -68,7 +70,10 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
-	
+
+	@Autowired
+	private LocaleStringProvider localeStringProvider;
+
 	@Autowired
 	private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
 	
@@ -110,9 +115,30 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			}
 		}
 		briefApprovalRequestDTO.setDescription(timeTotal);
-		
+		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest ,timeTotal));
 		return briefApprovalRequestDTO;
 	}
+	private String processBriefRequestTitle(ApprovalRequest a , String timeTotal) {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new HashMap<>();
+		 
+		// 初次提交
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.ABSENCE_TITLE;
+		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
+		map.put("category",
+				approvalService.findApprovalCategoryById(a.getCategoryId()));
+		String[] times = timeTotal.split("\\.");
+		map.put("day", times[0]);
+		map.put("hour", times[1]);
+		map.put("min", times[2]);
+		
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+
+ 
 
 	private String calculateTimeTotal(String timeTotal, String actualResult) {
 		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点

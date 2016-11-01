@@ -2,11 +2,15 @@ package com.everhomes.approval;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalStatus;
@@ -35,7 +39,13 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	
 	@Autowired
 	private ApprovalService approvalService;
+	
 
+	@Autowired
+	LocaleTemplateService localeTemplateService;
+
+	@Autowired
+	LocaleStringProvider localeStringProvider;
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		return new ApprovalBasicInfoOfRequestDTO(approvalRequest.getApprovalType(), approvalRequest.getApprovalStatus());
@@ -101,6 +111,15 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		approvalRequest.setNextLevel((byte) 1);
 		return approvalRequest;
 	}
+
+	public static final SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd");
+	
+	public static final SimpleDateFormat weekdaySF =  new SimpleDateFormat("EEEE",Locale.CHINA);
+	 
+	public String processRequestDate(Date effectiveDate ) {
+		return mmDDSF.format(effectiveDate)+"("+weekdaySF.format(effectiveDate)+") ";
+	}
+ 
 
 	@Override
 	public void processCancelApprovalRequest(ApprovalRequest approvalRequest) {

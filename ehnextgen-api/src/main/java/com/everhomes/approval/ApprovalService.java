@@ -156,4 +156,6 @@ public interface ApprovalService {
 
 	void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd);
 
+	ApprovalCategory findApprovalCategoryById(Long id);
+
 }

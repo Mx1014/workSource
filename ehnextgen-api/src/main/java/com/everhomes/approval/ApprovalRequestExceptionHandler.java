@@ -20,18 +20,22 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
+import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BasicDescriptionDTO;
+import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.approval.RequestDTO;
+import com.everhomes.rest.approval.TimeRange;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -287,5 +291,26 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 	}
-	
+
+	@Override
+	public BriefApprovalRequestDTO processBriefApprovalRequest(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		  
+		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest  ));
+		return briefApprovalRequestDTO;
+	}
+	private String processBriefRequestTitle(ApprovalRequest a  ) {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new HashMap<>();
+		 
+		// 初次提交
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.EXCEPTION_TITLE;
+		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
+		map.put("date",processRequestDate(a.getEffectiveDate()));
+		 
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
 }
