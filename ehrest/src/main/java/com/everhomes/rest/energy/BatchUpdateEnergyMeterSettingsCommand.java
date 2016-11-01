@@ -5,7 +5,6 @@ import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -38,17 +37,17 @@ public class BatchUpdateEnergyMeterSettingsCommand {
     private Long costFormulaId;
     private Long amountFormulaId;
 
-    private Timestamp priceStart;
-    private Timestamp priceEnd;
+    private Long priceStart;
+    private Long priceEnd;
 
-    private Timestamp rateStart;
-    private Timestamp rateEnd;
+    private Long rateStart;
+    private Long rateEnd;
 
-    private Timestamp costFormulaStart;
-    private Timestamp costFormulaEnd;
+    private Long costFormulaStart;
+    private Long costFormulaEnd;
 
-    private Timestamp amountFormulaStart;
-    private Timestamp amountFormulaEnd;
+    private Long amountFormulaStart;
+    private Long amountFormulaEnd;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -98,67 +97,67 @@ public class BatchUpdateEnergyMeterSettingsCommand {
         this.amountFormulaId = amountFormulaId;
     }
 
-    public Timestamp getPriceStart() {
+    public Long getPriceStart() {
         return priceStart;
     }
 
-    public void setPriceStart(Timestamp priceStart) {
+    public void setPriceStart(Long priceStart) {
         this.priceStart = priceStart;
     }
 
-    public Timestamp getPriceEnd() {
+    public Long getPriceEnd() {
         return priceEnd;
     }
 
-    public void setPriceEnd(Timestamp priceEnd) {
+    public void setPriceEnd(Long priceEnd) {
         this.priceEnd = priceEnd;
     }
 
-    public Timestamp getRateStart() {
+    public Long getRateStart() {
         return rateStart;
     }
 
-    public void setRateStart(Timestamp rateStart) {
+    public void setRateStart(Long rateStart) {
         this.rateStart = rateStart;
     }
 
-    public Timestamp getRateEnd() {
+    public Long getRateEnd() {
         return rateEnd;
     }
 
-    public void setRateEnd(Timestamp rateEnd) {
+    public void setRateEnd(Long rateEnd) {
         this.rateEnd = rateEnd;
     }
 
-    public Timestamp getCostFormulaStart() {
+    public Long getCostFormulaStart() {
         return costFormulaStart;
     }
 
-    public void setCostFormulaStart(Timestamp costFormulaStart) {
+    public void setCostFormulaStart(Long costFormulaStart) {
         this.costFormulaStart = costFormulaStart;
     }
 
-    public Timestamp getCostFormulaEnd() {
+    public Long getCostFormulaEnd() {
         return costFormulaEnd;
     }
 
-    public void setCostFormulaEnd(Timestamp costFormulaEnd) {
+    public void setCostFormulaEnd(Long costFormulaEnd) {
         this.costFormulaEnd = costFormulaEnd;
     }
 
-    public Timestamp getAmountFormulaStart() {
+    public Long getAmountFormulaStart() {
         return amountFormulaStart;
     }
 
-    public void setAmountFormulaStart(Timestamp amountFormulaStart) {
+    public void setAmountFormulaStart(Long amountFormulaStart) {
         this.amountFormulaStart = amountFormulaStart;
     }
 
-    public Timestamp getAmountFormulaEnd() {
+    public Long getAmountFormulaEnd() {
         return amountFormulaEnd;
     }
 
-    public void setAmountFormulaEnd(Timestamp amountFormulaEnd) {
+    public void setAmountFormulaEnd(Long amountFormulaEnd) {
         this.amountFormulaEnd = amountFormulaEnd;
     }
 

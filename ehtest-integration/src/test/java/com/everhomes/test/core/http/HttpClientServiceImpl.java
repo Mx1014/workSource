@@ -70,7 +70,6 @@ public class HttpClientServiceImpl implements HttpClientService {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Date.class, new GsonJacksonDateAdapter());
         builder.registerTypeAdapter(Timestamp.class, new GsonJacksonTimestampAdapter());
-        builder.registerTypeAdapter(Date.class, new GsonHelper.DateAdapter()).setDateFormat("yyyy-MM-dd");
         gson = builder.create();
     }
 
