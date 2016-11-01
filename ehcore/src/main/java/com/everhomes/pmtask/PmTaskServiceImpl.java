@@ -172,8 +172,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private CommunityProvider communityProvider;
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
+//	@Autowired
+//	private RolePrivilegeService rolePrivilegeService;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	@Autowired
@@ -373,9 +373,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Timestamp now = new Timestamp(time);
 		task.setStatus(status);
 		 
+		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+		
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(ownerId, user.getId());
+		privileges.addAll(organizationPrivileges);
 		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.COMPLETETASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
@@ -383,7 +387,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 		if(status.equals(PmTaskStatus.CLOSED.getCode())){
 			task.setClosedTime(now);
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.CLOSETASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
@@ -566,8 +570,11 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetUser not found");
 		}
 		
-		
-    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId());
+
+		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		privileges.addAll(organizationPrivileges);
+//    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
     	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
     		returnNoPrivileged(privileges, user);
 		}
