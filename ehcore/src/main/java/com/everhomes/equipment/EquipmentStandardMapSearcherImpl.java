@@ -168,6 +168,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         	if(map != null) {
 	        	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
 	        	EquipmentStandardRelationDTO dto = new EquipmentStandardRelationDTO();
+	        	dto.setId(map.getId());
 	        	dto.setEquipmentId(equipment.getId());
 	        	dto.setTargetId(equipment.getTargetId());
 	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
