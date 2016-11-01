@@ -350,12 +350,12 @@ public interface OrganizationService {
 	 * @return
      */
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
-<<<<<<< HEAD
+ 
 	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
 	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd);
 	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
-=======
+ 
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
->>>>>>> 3.11.0
+ 
 }
