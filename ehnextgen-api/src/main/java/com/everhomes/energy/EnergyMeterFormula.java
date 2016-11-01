@@ -1,6 +1,6 @@
 package com.everhomes.energy;
 
-import com.everhomes.server.schema.tables.EhEnergyMeterFormulas;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
 import com.everhomes.util.StringHelper;
 
 /**

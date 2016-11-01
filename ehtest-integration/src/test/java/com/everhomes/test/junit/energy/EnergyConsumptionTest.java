@@ -1,5 +1,6 @@
 package com.everhomes.test.junit.energy;
 
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.energy.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
@@ -7,10 +8,13 @@ import com.everhomes.server.schema.tables.records.EhEnergyMetersRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -144,18 +148,19 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
     //3. 搜索表记
     @Test
-    public void testSearchEnergyMeter() {
+    public void testSearchEnergyMeter() throws IOException {
+        testImportEnergyMeter();
         logon();
         SearchEnergyMeterCommand cmd = new SearchEnergyMeterCommand();
         cmd.setOrganizationId(1L);
         cmd.setCommunityId(1L);
-        cmd.setKeyword("");
-        cmd.setBillCategoryId(1L);
+        // cmd.setKeyword("");
+        cmd.setBillCategoryId(4L);
         cmd.setServiceCategoryId(1L);
         cmd.setMeterType((byte)1);
-        cmd.setStatus(1L);
+        cmd.setStatus(2L);
         cmd.setPageAnchor(0L);
-        cmd.setPageSize(0);
+        cmd.setPageSize(10);
 
         SearchEnergyMeterRestResponse response = httpClientService.restPost(SEARCH_ENERGY_METER_URL, cmd, SearchEnergyMeterRestResponse.class);
         assertNotNull(response);
@@ -163,6 +168,24 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
         SearchEnergyMeterResponse myResponse = response.getResponse();
         assertNotNull(myResponse);
+        assertNotNull(myResponse.getMeters());
+        assertTrue(myResponse.getMeters().size() > 0);
+    }
+
+    //14. 导入表记(Excel)
+    @Test
+    public void testImportEnergyMeter() throws IOException {
+        logon();
+        ImportEnergyMeterCommand cmd = new ImportEnergyMeterCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setCommunityId(1L);
+        String filePath = new File("").getCanonicalPath()+"\\src\\test\\data\\excel\\energy_meter_template.xlsx";
+        RestResponseBase response = httpClientService.postFile(IMPORT_ENERGY_METER_URL, cmd, new File(filePath), RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        Result<EhEnergyMetersRecord> result = context().selectFrom(EH_ENERGY_METERS).fetch();
+        assertTrue(result.size() == 3);
     }
 
     private DSLContext context() {
