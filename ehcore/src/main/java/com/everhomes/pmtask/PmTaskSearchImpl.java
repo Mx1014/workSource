@@ -83,7 +83,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	b.field("taskCategoryId", task.getTaskCategoryId());
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
-            if(null == task.getOrganizationId()){
+            if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
 				User user = userProvider.findUserById(task.getCreatorUid());
     			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
     			b.field("requestorName", user.getNickName());
@@ -166,8 +166,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     }
 
     @Override
-    public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
-    		Long pageAnchor, Integer pageSize) {
+    public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
+    		Long endDate, Long addressId, Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         
@@ -182,7 +182,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         qb = QueryBuilders.boolQuery();
         
         if(StringUtils.isNotBlank(queryString)){
-        	MultiMatchQueryBuilder mb = QueryBuilders.multiMatchQuery(queryString,"mobile","nickName","content");
+        	MultiMatchQueryBuilder mb = QueryBuilders.multiMatchQuery(queryString,"requestorName","requestorPhone","content");
             qb = qb.must(mb);	
         }
         
@@ -208,6 +208,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         if(null != status){
         	QueryStringQueryBuilder sb = QueryBuilders.queryString(status.toString()).field("status");
+            qb = qb.must(sb);	
+        }
+        
+        if(null != addressId){
+        	QueryStringQueryBuilder sb = QueryBuilders.queryString(addressId.toString()).field("addressId");
             qb = qb.must(sb);	
         }
         

@@ -4,7 +4,8 @@ import com.everhomes.util.StringHelper;
 
 public class GetPrivilegesCommand {
 	private Long organizationId;
-
+	private Long communityId; 
+	
 	public Long getOrganizationId() {
 		return organizationId;
 	}
@@ -16,5 +17,13 @@ public class GetPrivilegesCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 }

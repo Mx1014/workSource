@@ -94,7 +94,9 @@ import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
+import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -112,6 +114,7 @@ import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
+import com.everhomes.rest.aclink.DoorUserPermissionDTO;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetShortMessageCommand;
@@ -126,6 +129,8 @@ import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
+import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
@@ -249,6 +254,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private AclinkLogProvider aclinkLogProvider;
+    
+    @Autowired
+    private DoorUserPermissionProvider doorUserPermissionProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -2290,10 +2298,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //https://core.zuolin.com/evh/aclink/phv?id=10ae5-15016
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
-        String url = homeUrl + "/evh/aclink/phv?id=" + cmd.getId();
+        String url = homeUrl + "/evh/aclink/phv?phvid=" + cmd.getId() + "#sign_suffix";
         
         resp.setCreateTime(auth.getCreateTime().getTime());
-        resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        //resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        resp.setQr(url);
       
         return resp;
     }
@@ -2304,6 +2313,18 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
         if(auth == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
+        }
+        
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        DoorUserPermission dp = doorUserPermissionProvider.checkPermission(namespaceId, UserContext.current().getUser().getId()
+                , auth.getOwnerId(), auth.getOwnerType());
+        if(dp == null) {
+            resp.setPermissionDeny((byte)1);
+        } else {
+            resp.setPermissionDeny((byte)0);
         }
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
@@ -2633,6 +2654,54 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
         return doorAuthProvider.getLinglingDoorAuthByUuid(uuid);
+    }
+    
+    @Override
+    public DoorUserPermissionDTO createQRUserPermission(CreateQRUserPermissionCommand cmd) {
+        if(cmd.getNamespaceId() == null) {
+            cmd.setNamespaceId(0);
+        }
+        
+        User u = UserContext.current().getUser();
+        DoorUserPermission dp = new DoorUserPermission();
+        dp.setApproveUserId(u.getId());
+        dp.setAuthType((byte)0);
+        dp.setDescription(cmd.getDescription());
+        dp.setUserId(cmd.getUserId());
+        dp.setOwnerId(cmd.getOwnerId());
+        dp.setOwnerType(cmd.getOwnerType());
+        dp.setNamespaceId(cmd.getNamespaceId());
+        dp.setStatus((byte)1);
+        doorUserPermissionProvider.createDoorUserPermission(dp);
+        
+        return ConvertHelper.convert(dp, DoorUserPermissionDTO.class);
+    }
+    
+    @Override
+    public DoorUserPermissionDTO deleteQRUserPermission(DeleteQRUserPermissionCommand cmd) {
+        DoorUserPermission obj = doorUserPermissionProvider.getDoorUserPermissionById(cmd.getId());
+        if(obj != null) {
+            doorUserPermissionProvider.deleteDoorUserPermission(obj);
+            return ConvertHelper.convert(obj, DoorUserPermissionDTO.class);
+        }
+        
+        return null;
+        
+    }
+    
+    @Override
+    public ListQRUserPermissionResponse listQRUserPermissions(ListQRUserPermissionCommand cmd) {
+        ListQRUserPermissionResponse resp = new ListQRUserPermissionResponse();
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<DoorUserPermissionDTO> dtos = doorUserPermissionProvider.listDoorUserPermissions(cmd.getNamespaceId()
+                , cmd.getOwnerId()
+                , cmd.getOwnerType()
+                , locator, count);
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
     }
     
     @Override

@@ -109,6 +109,7 @@ public class PmProviderImpl implements PmTaskProvider{
         query.addConditions(Tables.EH_PM_TASK_TARGETS.ROLE_ID.eq(roleId));
         query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_TYPE.eq(targetType));
         query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_PM_TASK_TARGETS.STATUS.eq(PmTaskTargetStatus.ACTIVE.getCode()));
         
         PmTaskTarget result = ConvertHelper.convert(query.fetchOne(), PmTaskTarget.class);
         return result;
@@ -202,7 +203,7 @@ public class PmProviderImpl implements PmTaskProvider{
 	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
-        SelectJoinStep<Record> query = context.select().from(Tables.EH_PM_TASKS);
+        SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASKS.fields()).from(Tables.EH_PM_TASKS);
         Condition condition = Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType);
         condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
         
@@ -220,16 +221,27 @@ public class PmProviderImpl implements PmTaskProvider{
     		
     		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
     		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
-    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
-    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
-    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
+//    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode())
+//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
+//    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
+    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode()));
     		query.groupBy(Tables.EH_PM_TASKS.ID);
 
     	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){
-        	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+//        	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+//        	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
+//        					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
+//        	query.groupBy(Tables.EH_PM_TASKS.ID);   
+    		
+    		query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.TASK_ID)
+    				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.eq(PmTaskStatus.PROCESSING.getCode()))
+    				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
+    	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.TASK_ID)))
+    				.asTable(Tables.EH_PM_TASK_LOGS.getName()))
+    		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
         	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
-        	query.groupBy(Tables.EH_PM_TASKS.ID);
+        	
         	
     	}else{
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));

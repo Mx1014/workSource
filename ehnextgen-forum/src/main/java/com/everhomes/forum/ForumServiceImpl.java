@@ -35,6 +35,8 @@ import com.everhomes.acl.Role;
 import com.everhomes.activity.Activity;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityRoster;
+import com.everhomes.activity.ActivityService;
+import com.everhomes.activity.WarnActivityBeginningAction;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -71,6 +73,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.OrganizationTaskTarget;
 import com.everhomes.point.UserPointService;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -78,8 +81,10 @@ import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
 import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -199,10 +204,13 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+
+import net.greghaines.jesque.Job;
 
 @Component
 public class ForumServiceImpl implements ForumService {
@@ -213,6 +221,12 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private ActivityProivider activityProivider;
+
+	@Autowired
+	JesqueClientFactory jesqueClientFactory;
+    
+    @Autowired
+    private ActivityService activityService;
     
     @Autowired
     private DbProvider dbProvider;
@@ -370,6 +384,11 @@ public class ForumServiceImpl implements ForumService {
         	
         }
         
+        // 发活动的时候判断要不要设置定时任务
+        if (null != cmd.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == cmd.getEmbeddedAppId().longValue()) {
+			setActivitySchedule(post.getEmbeddedId());
+		}
+        
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
         
         long endTime = System.currentTimeMillis();
@@ -381,7 +400,25 @@ public class ForumServiceImpl implements ForumService {
         return postDto;
     }
     
-    private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
+    private void setActivitySchedule(Long activityId) {
+    	Activity activity = activityProivider.findActivityById(activityId);
+    	if (activity == null) {
+			return;
+		}
+    	ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
+    	//判断如果提醒时间大于当前时间并且要落在使用轮循+定时的方式无法找到区间内才设置提醒
+    	if (activity.getStartTime().getTime() - queryActivityWarningResponse.getTime() > new Date().getTime() 
+    			&& DateUtils.getCurrentHour().getTime() == DateUtils.formatHour(new Date(activity.getStartTime().getTime() - queryActivityWarningResponse.getTime())).getTime()) {
+    		final Job job1 = new Job(
+					WarnActivityBeginningAction.class.getName(),
+					new Object[] { String.valueOf(activity.getId()) });
+			jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
+					activity.getStartTime().getTime() - queryActivityWarningResponse.getTime());
+			LOGGER.debug("设置了一个活动提醒："+activity.getId());
+		}
+	}
+
+	private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
 		if(contentCategoryId != null) {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
 				return OrganizationTaskType.NOTICE;
@@ -568,7 +605,7 @@ public class ForumServiceImpl implements ForumService {
             }
             
             // 如果是活动，返回活动内容的链接，add by tt, 20161013
-            if (postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
+            if (postDto.getEmbeddedAppId() != null && postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
 				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
 			}
             

@@ -1349,7 +1349,9 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 	VALUES(1007218, 0, 'ENTERPRISE', '毅德控股', 0, '', '/1007218', 1, 2, 'ENTERPRISE', 999985);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES(1116025, 240111044331055035, 'organization', 1007218, 3, 0, UTC_TIMESTAMP());
-
+-- 更新公司 group_id
+UPDATE eh_organizations r INNER JOIN eh_groups g ON r.id = g.visible_region_id
+SET r.group_id = g.id where r.namespace_id = 999985 and g.visible_region_type = 1;
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
     VALUES (11982, 999985, 0, '/home', 'Default', '0', '0', 'innospring', 'innospring', 'cs://1/image/aW1hZ2UvTVRwa1pEYzBOVEJtT1RFNVpqYzJPVGswTm1NMk4ySmxOelJtWlRaaU9EZ3pZdw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
@@ -1367,14 +1369,16 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 
 -- 园区管理员场景
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
-	VALUES (417, 999985, 'ServiceMarketLayout', '{"versionCode":"2016102501","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":3},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016102501', '0', '2', '2016-10-24 09:02:30', 'pm_admin');	
+	VALUES (417, 999985, 'ServiceMarketLayout', '{"versionCode":"2016102701","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016102701', '0', '2', '2016-10-24 09:02:30', 'pm_admin');	
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112573, 999985, '0', '0', '0', '/home', 'GovAgencies', 'LIST_GROUPS', '白领社团', 'cs://1/image/aW1hZ2UvTVRveFl6VTFaVEl5TURFelkySXlNVGhoTURreU9XTTRaRE0xWlRVM00yRmlZZw', '1', '1', 36,'{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+    VALUES (112573, 999985, '0', '0', '0', '/home', 'GovAgencies', 'LIST_GROUPS', '白领社团', 'cs://1/image/aW1hZ2UvTVRveFl6VTFaVEl5TURFelkySXlNVGhoTURreU9XTTRaRE0xWlRVM00yRmlZZw', '1', '1', 36,'{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112574, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OFFICIAL_ACTIVITY', 'OE大讲堂', 'cs://1/image/aW1hZ2UvTVRvM1l6UTFPRE00TnpGaU5XTm1ZMkkwTkRjek5URm1PVE0wTkRObE0yUmlPUQ', '1', '1', 50,'', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+    VALUES (112795, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OE图书馆', 'OE图书馆', 'cs://1/image/aW1hZ2UvTVRwbE1qVTNabUkzWVdGaE9XTTNNamc0TUdGaVpqbGtaV05sTnpNeU56TXhNdw', '1', '1', 14,'{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112575, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OE微商城', 'OE微商城', 'cs://1/image/aW1hZ2UvTVRveE5qZGlOREUwT0RCaFkyUTFNakl4Wm1ReU4yTmxNV1F6WkRNeVpEVXlZdw', '1', '1', 14,'{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14772951464964816937%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+    VALUES (112574, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OFFICIAL_ACTIVITY', 'OE大讲堂', 'cs://1/image/aW1hZ2UvTVRvM1l6UTFPRE00TnpGaU5XTm1ZMkkwTkRjek5URm1PVE0wTkRObE0yUmlPUQ', '1', '1', 50,'', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112575, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OE微商城', 'OE微商城', 'cs://1/image/aW1hZ2UvTVRveE5qZGlOREUwT0RCaFkyUTFNakl4Wm1ReU4yTmxNV1F6WkRNeVpEVXlZdw', '1', '1', 14,'{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14772951464964816937%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 
 INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (112576, 999985, 0, 0, 0, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwa05ERTJaRGN4TXpZME5USXdNR0V4TlRkbU1HRTNaR1U0TVdZNVpHUTFOdw', '1', '1', '23', '', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'pm_admin');
@@ -1391,19 +1395,30 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
     VALUES (112582, 999985, 0, 0, 0, '/home', 'Bizs', '服务联盟', '服务联盟', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', 1, 1, 33, '{"type":150,"parentId":150,"displayType": "grid"}', 0, 0, 1, 1,'','0',NULL,NULL,NULL, '1', 'pm_admin');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112797, 999985, '0', '0', '0', '/home', 'Bizs', '资产管理', '资产管理', 'cs://1/image/aW1hZ2UvTVRveU9EZzJZV1F6TldFeFpESTVObUptTkRWaU5tTmpOVEptWW1Rd00ySXpOZw', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112798, 999985, '0', '0', '0', '/home', 'Bizs', 'OE跑团', 'OE跑团', 'cs://1/image/aW1hZ2UvTVRwa1pUUmpNMkZrTkRGa05EWXdaVGd6TjJWbU9UZzVPVEZrT0dKaVlUbG1PUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112799, 999985, '0', '0', '0', '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRvek5UQmlNRGd4TkRRNVpXUTROV1poWTJRMk5qVXlZVE5tWm1JMFl6QTROUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112800, 999985, '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车缴费', 'cs://1/image/aW1hZ2UvTVRvM056QXhZMk01TURneFl6YzVZMk0xTXpZME5ETXdNVFJsTldGaFl6SmtZUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112583, 999985, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRwaVpqRmxPRE5sWTJJMU9USXhaVFJoWVdZME1UbGhNakl3TVdWak5USmpNUQ', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 
 
 -- 园区游客场景    
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
-	VALUES (418, 999985, 'ServiceMarketLayout', '{"versionCode":"2016102501","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":3},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016102501', '0', '2', '2016-10-24 09:02:30', 'park_tourist');	
+	VALUES (418, 999985, 'ServiceMarketLayout', '{"versionCode":"2016102701","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016102701', '0', '2', '2016-10-24 09:02:30', 'park_tourist');	
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112584, 999985, '0', '0', '0', '/home', 'GovAgencies', 'LIST_GROUPS', '白领社团', 'cs://1/image/aW1hZ2UvTVRveFl6VTFaVEl5TURFelkySXlNVGhoTURreU9XTTRaRE0xWlRVM00yRmlZZw', '1', '1', 36,'{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+    VALUES (112584, 999985, '0', '0', '0', '/home', 'GovAgencies', 'LIST_GROUPS', '白领社团', 'cs://1/image/aW1hZ2UvTVRveFl6VTFaVEl5TURFelkySXlNVGhoTURreU9XTTRaRE0xWlRVM00yRmlZZw', '1', '1', 36,'{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112585, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OFFICIAL_ACTIVITY', 'OE大讲堂', 'cs://1/image/aW1hZ2UvTVRvM1l6UTFPRE00TnpGaU5XTm1ZMkkwTkRjek5URm1PVE0wTkRObE0yUmlPUQ', '1', '1', 50,'', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+    VALUES (112796, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OE图书馆', 'OE图书馆', 'cs://1/image/aW1hZ2UvTVRwbE1qVTNabUkzWVdGaE9XTTNNamc0TUdGaVpqbGtaV05sTnpNeU56TXhNdw', '1', '1', 14,'{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112586, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OE微商城', 'OE微商城', 'cs://1/image/aW1hZ2UvTVRveE5qZGlOREUwT0RCaFkyUTFNakl4Wm1ReU4yTmxNV1F6WkRNeVpEVXlZdw', '1', '1', 14,'{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14772951464964816937%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+    VALUES (112585, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OFFICIAL_ACTIVITY', 'OE大讲堂', 'cs://1/image/aW1hZ2UvTVRvM1l6UTFPRE00TnpGaU5XTm1ZMkkwTkRjek5URm1PVE0wTkRObE0yUmlPUQ', '1', '1', 50,'', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112586, 999985, '0', '0', '0', '/home', 'GovAgencies', 'OE微商城', 'OE微商城', 'cs://1/image/aW1hZ2UvTVRveE5qZGlOREUwT0RCaFkyUTFNakl4Wm1ReU4yTmxNV1F6WkRNeVpEVXlZdw', '1', '1', 14,'{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14772951464964816937%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 
 INSERT INTO `eh_launch_pad_items`(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (112587, 999985, 0, 0, 0, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwa05ERTJaRGN4TXpZME5USXdNR0V4TlRkbU1HRTNaR1U0TVdZNVpHUTFOdw', '1', '1', '23', '', 0, 0, 1, 1, '', '0', NULL, NULL, NULL, '1', 'park_tourist');
@@ -1420,6 +1435,15 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
     VALUES (112593, 999985, 0, 0, 0, '/home', 'Bizs', '服务联盟', '服务联盟', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', 1, 1, 33, '{"type":150,"parentId":150,"displayType": "grid"}', 0, 0, 1, 1,'','0',NULL,NULL,NULL, '1', 'park_tourist');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112801, 999985, '0', '0', '0', '/home', 'Bizs', '资产管理', '资产管理', 'cs://1/image/aW1hZ2UvTVRveU9EZzJZV1F6TldFeFpESTVObUptTkRWaU5tTmpOVEptWW1Rd00ySXpOZw', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112802, 999985, '0', '0', '0', '/home', 'Bizs', 'OE跑团', 'OE跑团', 'cs://1/image/aW1hZ2UvTVRwa1pUUmpNMkZrTkRGa05EWXdaVGd6TjJWbU9UZzVPVEZrT0dKaVlUbG1PUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112803, 999985, '0', '0', '0', '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRvek5UQmlNRGd4TkRRNVpXUTROV1poWTJRMk5qVXlZVE5tWm1JMFl6QTROUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112804, 999985, '0', '0', '0', '/home', 'Bizs', 'PARKING_RECHARGE', '停车缴费', 'cs://1/image/aW1hZ2UvTVRvM056QXhZMk01TURneFl6YzVZMk0xTXpZME5ETXdNVFJsTldGaFl6SmtZUQ', '1', '1', '14', '{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112594, 999985, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRwaVpqRmxPRE5sWTJJMU9USXhaVFJoWVdZME1UbGhNakl3TVdWak5USmpNUQ', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 
 	
@@ -1428,7 +1452,6 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10000,'', 'EhNamespaces', 999985,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11000,'', 'EhNamespaces', 999985,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11100,'', 'EhNamespaces', 999985,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11200,'', 'EhNamespaces', 999985,2);
 
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),12000,'', 'EhNamespaces', 999985,2);
 
@@ -1507,13 +1530,61 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 -- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 --	VALUES ('600', 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdefault%3Fpos%3D1%26_k%3Dzlbiz#sign_suffix', 'business url', '999985', NULL);
 
--- 更新公司 group_id
-UPDATE eh_organizations r INNER JOIN eh_groups g ON r.id = g.visible_region_id
-SET r.group_id = g.id where r.namespace_id = 999985 and g.visible_region_type = 1;
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('805', 'video.official.support', '2', 'offical video support', '999985', NULL);
 
+-- 更新
+delete from eh_launch_pad_layouts where id in (417, 418);
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
+	VALUES (417, 999985, 'ServiceMarketLayout', '{"versionCode":"2016102701","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016102701', '0', '2', '2016-10-24 09:02:30', 'pm_admin');	
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
+	VALUES (418, 999985, 'ServiceMarketLayout', '{"versionCode":"2016102701","versionName":"3.10.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016102701', '0', '2', '2016-10-24 09:02:30', 'park_tourist');	
 
+update eh_launch_pad_items set default_order = 1 where id >=112795 and id <=112804 ;
 
+update eh_launch_pad_items set default_order = 2 where id in (112574, 112575, 112585, 112586);
+	
 
-
-
-
+	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202136, 2, 0, '运动与音乐', '兴趣/运动与音乐', 10, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202137, 2, 0, '旅游摄影', '兴趣/旅游摄影', 20, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202138, 2, 0, '亲子与教育', '兴趣/亲子与教育', 30, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202139, 2, 0, '美食与厨艺', '兴趣/美食与厨艺', 40, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202140, 2, 0, '家庭装饰', '兴趣/家庭装饰', 50, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202141, 2, 0, '美容化妆', '兴趣/美容化妆', 60, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202142, 2, 0, '宠物会', '兴趣/宠物会', 70, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202143, 2, 0, '名牌汇', '兴趣/名牌汇', 80, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202144, 2, 0, '同事群', '兴趣/同事群', 90, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202145, 2, 0, '老乡群', '兴趣/老乡群', 100, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202146, 2, 0, '同学群', '兴趣/同学群', 110, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202147, 2, 0, '拼车', '兴趣/拼车', 120, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202148, 2, 0, '其他', '兴趣/其他', 200, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202149, 2001, 0, '亲子', '兴趣/亲子与教育/亲子', 0, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202150, 2001, 0, '教育', '兴趣/亲子与教育/教育', 0, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202151, 2002, 0, '运动', '兴趣/运动与音乐/运动', 0, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202152, 2002, 0, '音乐', '兴趣/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202153, 2008, 0, '旅游', '兴趣/旅游摄影/旅游', 0, 2, UTC_TIMESTAMP(), 999985);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(202154, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP(), 999985);
+	
+	
+	
+	

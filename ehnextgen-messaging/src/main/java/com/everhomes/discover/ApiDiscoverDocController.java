@@ -45,7 +45,7 @@ public class ApiDiscoverDocController extends ControllerBase {
 	private static Map<String, MyMethod> MAP_MY_METHOD;
 	
 	// 工程源码的路径，例如，E:/workspace/ehnextgen
-	@Value("${src.path}")
+	@Value("${src.path:E:/workspace/ehnextgen}")
 	private String srcPath;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApiDiscoverDocController.class);

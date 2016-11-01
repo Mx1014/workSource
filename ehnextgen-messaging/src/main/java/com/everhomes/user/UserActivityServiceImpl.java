@@ -1217,6 +1217,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         if(!StringUtils.isEmpty(templateType)) {
             String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
+            if(templateType.length() > 7 && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(templateType.substring(0, 7))) {
+            	templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+            }
             handler = PlatformContext.getComponent(handlerPrefix + templateType);
         }
         
