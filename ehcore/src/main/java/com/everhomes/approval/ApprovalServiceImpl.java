@@ -59,7 +59,7 @@ import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.ApprovalUser;
 import com.everhomes.rest.approval.ApprovalUserDTO;
-import com.everhomes.rest.approval.ApproveApprovalRequesByScenetCommand;
+import com.everhomes.rest.approval.ApproveApprovalRequesBySceneCommand;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.BriefApprovalFlowDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -2154,7 +2154,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd) { 
+	public void approveApprovalRequest(ApproveApprovalRequesBySceneCommand cmd) { 
 		final Long userId = getUserId();
 		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
 		checkPrivilege(userId, ownerInfo);

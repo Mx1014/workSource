@@ -3,7 +3,7 @@ package com.everhomes.approval;
 
 import java.util.List;
 
-import com.everhomes.rest.approval.ApproveApprovalRequesByScenetCommand;
+import com.everhomes.rest.approval.ApproveApprovalRequesBySceneCommand;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
@@ -152,7 +152,7 @@ public interface ApprovalService {
 
 	ListApprovalRequestBySceneResponse listMyApprovalsByScene(ListMyApprovalsBySceneCommand cmd);
 
-	void approveApprovalRequest(ApproveApprovalRequesByScenetCommand cmd);
+	void approveApprovalRequest(ApproveApprovalRequesBySceneCommand cmd);
 
 	void rejectApprovalRequest(RejectApprovalRequestBySceneCommand cmd);
 

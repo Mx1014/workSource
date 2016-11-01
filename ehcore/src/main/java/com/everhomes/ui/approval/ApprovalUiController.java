@@ -10,7 +10,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.approval.ApproveApprovalRequesByScenetCommand;
+import com.everhomes.rest.approval.ApproveApprovalRequesBySceneCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneResponse;
@@ -151,7 +151,7 @@ public class ApprovalUiController extends ControllerBase {
 	 */
 	@RequestMapping("approveApprovalRequestByScene")
 	@RestReturn(String.class)
-	public RestResponse approveApprovalRequestByScene(ApproveApprovalRequesByScenetCommand cmd){
+	public RestResponse approveApprovalRequestByScene(ApproveApprovalRequesBySceneCommand cmd){
 		approvalService.approveApprovalRequest(cmd);
 		return new RestResponse();
 	}
