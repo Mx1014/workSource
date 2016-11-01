@@ -283,11 +283,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	            
 	            // 获取父亲公司所入驻的园区，由于创建子公司时在界面上没有指定其所在园区，会导致服务市场上拿不到数据，
 	            // 故需要补充其所在园区 by lqs 20161101
-	            Long communityId = getOrganizationActiveCommunityId(parOrg.getDirectlyEnterpriseId());
+	            Long communityId = getOrganizationActiveCommunityId(cmd.getParentId());
 	            if(communityId != null) {
 	                createActiveOrganizationCommunityRequest(user.getId(), organization.getId(), communityId);
 	            } else {
-	                LOGGER.error("Community not found, organizationId={}, parentOrgId={}", organization.getId(), parOrg.getDirectlyEnterpriseId());
+	                LOGGER.error("Community not found, organizationId={}, parentOrgId={}", organization.getId(), cmd.getParentId());
 	            }
 			}else{
 				organizationProvider.createOrganization(organization);
@@ -7348,7 +7348,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
 
-		Organization org =  this.checkOrganization(cmd.getOrganizationId());
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null) {
+			return new OrganizationTreeDTO();
+		}
 		List<Organization> organizations = new ArrayList<Organization>();
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
