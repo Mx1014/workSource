@@ -34,6 +34,7 @@ package com.everhomes.rest.launchpad;
  * <li>RENTAL(49): 预订2.0</li>
  * <li>OFFICIAL_ACTIVITY(50): 官方活动</li>
  * <li>PM_TASK(51): 物业报修</li>
+ * <li>MY_APPROVAL(54): 我的审批</li>
  * </ul>
  */
 public enum ActionType {
@@ -47,7 +48,7 @@ public enum ActionType {
       ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NEARBY_ACTIVITIES((byte)41),NEARBY_PUBLIC_CYCLE((byte)42),
       NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
       WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52),
-      ALL_BUTTON((byte)53);
+      ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54);
     private byte code;
     
     private ActionType(byte code) {
