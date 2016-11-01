@@ -233,11 +233,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	@Autowired
 	private MessagingService messagingService;
-
+	
+	public static ApprovalCategoryDTO defaultCategory = new ApprovalCategoryDTO(0L,ApprovalType.ABSENCE.getCode(),"事假");
 	@Override
 	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
-		if (StringUtils.isBlank(cmd.getCategoryName()) || cmd.getApprovalType() == null) {
+		if (StringUtils.isBlank(cmd.getCategoryName()) || cmd.getApprovalType() == null || cmd.getCategoryName().equals(defaultCategory.getCategoryName())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME,
 					"Invalid parameters: cmd=" + cmd);
 		}
@@ -283,11 +284,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 	@Override
 	public UpdateApprovalCategoryResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd) {
 		Long userId = getUserId();
-		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())) {
+		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())|| cmd.getId().equals(defaultCategory.getId())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id and categoryName cannot be empty");
 		}
-		if (cmd.getCategoryName().length() > 8) {
+		if (cmd.getCategoryName().length() > 8 || cmd.getCategoryName().equals(defaultCategory.getCategoryName())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE,
 					ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
 					"length of name cannot be greater than 8 words, name=" + cmd.getCategoryName());
@@ -338,8 +339,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(cmd.getNamespaceId(), cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getApprovalType());
 
-		return new ListApprovalCategoryResponse(categoryList.stream().map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class))
-				.collect(Collectors.toList()));
+		ListApprovalCategoryResponse resp =  new ListApprovalCategoryResponse(categoryList.stream().map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class))
+				.collect(Collectors.toList()) );
+		resp.getCategoryList().add(defaultCategory);
+		return resp;
 	}
 
 	@Override
@@ -1497,8 +1500,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(ownerInfo.getNamespaceId(),
 				ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), cmd.getApprovalType());
 
-		return new ListApprovalCategoryBySceneResponse(categoryList.stream()
+		ListApprovalCategoryBySceneResponse resp = new ListApprovalCategoryBySceneResponse(categoryList.stream()
 				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
+		resp.getCategoryList().add(defaultCategory);
+		return resp;
 	}
 
 	@Override
