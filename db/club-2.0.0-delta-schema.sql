@@ -1,5 +1,6 @@
 -- 圈添加审核状态，add by tt, 20161028
 ALTER TABLE `eh_groups` ADD COLUMN `approval_status` TINYINT COMMENT 'approval status';
+ALTER TABLE `eh_groups` ADD COLUMN `operator_uid` BIGINT;
 
 -- 设置圈（俱乐部）参数，add by tt, 20161028
 -- DROP TABLE IF EXISTS `eh_group_settings`;

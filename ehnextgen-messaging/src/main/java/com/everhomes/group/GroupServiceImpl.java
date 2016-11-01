@@ -61,6 +61,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.family.FamilyDTO;
@@ -76,6 +77,7 @@ import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.AcceptJoinGroupInvitation;
 import com.everhomes.rest.group.ApprovalGroupRequestCommand;
+import com.everhomes.rest.group.ApprovalStatus;
 import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
 import com.everhomes.rest.group.BroadcastDTO;
@@ -4367,13 +4369,67 @@ public class GroupServiceImpl implements GroupService {
 
 	@Override
 	public void approvalGroupRequest(ApprovalGroupRequestCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		Group group = checkGroupExists(userId, cmd.getGroupId());
+		
+		dbProvider.execute((s)->{
+			group.setStatus(GroupAdminStatus.ACTIVE.getCode());
+			group.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+			group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			groupProvider.updateGroup(group);
+			
+			sendNotificationToCreatorWhenApproval(group, user.getLocale(), GroupNotificationTemplateCode.GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL);  //你申请创建的“${groupName}”已通过
+			return null;
+		});
+	}
 	
+	private void sendNotificationToCreatorWhenApproval(Group group, String locale, int code) {
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+       
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(group.getCreatorUid(), notifyTextForApplicant, null);
+	}
 
+	private Group checkGroupExists(Long userId, Long groupId) {
+		//1.groupId不能为空
+		if (groupId == null) {
+			LOGGER.error("Invalid parameters, userId = "+userId+", groupId"+groupId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, userId = "+userId+", groupId"+groupId);
+		}
+		
+		Group group = groupProvider.findGroupById(groupId);
+		if (group == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "not exist group, userId = "+userId+", groupId"+groupId);
+		}
+		
+		if (group.getStatus().byteValue() != GroupAdminStatus.INACTIVE.getCode() || group.getApprovalStatus() == null || group.getApprovalStatus().byteValue() != ApprovalStatus.WAITING_FOR_APPROVING.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "group status error, userId = "+userId+", groupId"+groupId);
+		}
+		
+		return group;
 	}
 
 	@Override
 	public void rejectGroupRequest(RejectGroupRequestCommand cmd) {
-	
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		Group group = checkGroupExists(userId, cmd.getGroupId());
+		
+		dbProvider.execute((s)->{
+			group.setStatus(GroupAdminStatus.INACTIVE.getCode());
+			group.setApprovalStatus(ApprovalStatus.REJECTION.getCode());
+			group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			groupProvider.updateGroup(group);
+			
+			//sendNotificationToCreatorWhenApproval(group, user.getLocale());
+			return null;
+		});
 
 	}
 

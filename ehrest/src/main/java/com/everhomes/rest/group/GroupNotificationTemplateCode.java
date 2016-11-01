@@ -45,8 +45,8 @@ public interface GroupNotificationTemplateCode {
     
     
     static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_OTHERS = 36;  //${newCreator}已成为“${groupName}”的创建者
-
     static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_NEW_CREATOR = 37;  //你已成为“${groupName}”的创建者
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL = 38;  //你申请创建的“${groupName}”已通过
     
     
     
