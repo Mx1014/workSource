@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -43,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -321,21 +325,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId());
 
-//		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		privileges.addAll(organizationPrivileges);
+		
 		List<String> result = new ArrayList<String>();
+		Set<String> set = new HashSet<String>();
 		for(Long p:privileges){
 			if(p.longValue() == PrivilegeConstants.LISTALLTASK)
-				result.add(PmTaskPrivilege.LISTALLTASK.getCode());
+				set.add(PmTaskPrivilege.LISTALLTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.LISTUSERTASK)
-				result.add(PmTaskPrivilege.LISTUSERTASK.getCode());
+				set.add(PmTaskPrivilege.LISTUSERTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
-				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
+				set.add(PmTaskPrivilege.ASSIGNTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.COMPLETETASK)
-				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
+				set.add(PmTaskPrivilege.COMPLETETASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.CLOSETASK)
-				result.add(PmTaskPrivilege.CLOSETASK.getCode());
+				set.add(PmTaskPrivilege.CLOSETASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.REVISITTASK)
-				result.add(PmTaskPrivilege.REVISITTASK.getCode());
+				set.add(PmTaskPrivilege.REVISITTASK.getCode());
+		}
+		for(String s: set) {
+			result.add(s);
 		}
 		dto.setPrivileges(result);
 		return dto;
