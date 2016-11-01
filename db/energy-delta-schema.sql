@@ -166,7 +166,7 @@ CREATE TABLE `eh_energy_date_statistics` (
   `namespace_id`        INTEGER NOT NULL DEFAULT 0,
   `community_id`        BIGINT,
   `meter_type`          TINYINT COMMENT '1:WATER, 2: ELECTRIC',
-  `stat_date`            date COMMENT '改成用日期存,方便过滤和计算',
+  `stat_date`            DATE COMMENT '改成用日期存,方便过滤和计算',
   `bill_category_id`    BIGINT COMMENT 'eh_energy_meter_categories id',
   `service_category_id` BIGINT COMMENT 'eh_energy_meter_categories id',
   `formula_id`          TINYINT COMMENT 'eh_energy_meter_formulas id',
@@ -193,7 +193,7 @@ CREATE TABLE `eh_energy_date_statistics` (
 --
 --  每月水电报表
 --
-CREATE TABLE `eh_energy_date_statistics` (
+CREATE TABLE `eh_energy_month_statistics` (
   `id`                  BIGINT  NOT NULL,
   `namespace_id`        INTEGER NOT NULL DEFAULT 0,
   `community_id`        BIGINT,
