@@ -224,7 +224,7 @@ public class PunchServiceImpl implements PunchService {
 	 * <li>NORMAL(0): 正常</li>
 	 * </ul>
 	 */
-
+	@Override
 	public String statusToString (Byte status){
 		if(null == status){
 			return "";

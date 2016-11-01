@@ -120,29 +120,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest ,timeTotal,fromTime,endTime));
 		return briefApprovalRequestDTO;
 	}
-	private String processBriefRequestTitle(ApprovalRequest a , String timeTotal ,Long fromTime ,Long endTime) {
-		// TODO Auto-generated method stub
-		Map<String, Object> map = new HashMap<>();
-		 
-		// 初次提交
-		String scope = ApprovalLogTitleTemplateCode.SCOPE;
-		int code = ApprovalLogTitleTemplateCode.ABSENCE_TITLE;
-		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
-		map.put("category",
-				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
-		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0]);
-		map.put("hour", times[1]);
-		map.put("min", times[2]);
-		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
-		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
-		map.put("endDate", mmDDSF.format(new Date(endTime)));
-		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
-		
-		return result;
-	}
-
- 
+	
 
 	private String calculateTimeTotal(String timeTotal, String actualResult) {
 		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点
@@ -720,5 +698,64 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 	}
-	
+	private String processBriefRequestTitle(ApprovalRequest a , String timeTotal ,Long fromTime ,Long endTime) {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new HashMap<>();
+		 
+		// 初次提交
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.ABSENCE_TITLE;
+		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
+		map.put("category",
+				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
+		String[] times = timeTotal.split("\\.");
+		map.put("day", times[0]);
+		map.put("hour", times[1]);
+		map.put("min", times[2]);
+		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
+		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
+		map.put("endDate", mmDDSF.format(new Date(endTime)));
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+
+ 
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest a) { 
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(a);
+		String timeTotal = null;
+
+		Long fromTime = null;
+		Long endTime =null ;
+		if (a.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+			List<TimeRange> timeRangeList = briefApprovalRequestDTO.getTimeRangeList();
+			for (TimeRange timeRange : timeRangeList) {
+				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+				if(null == fromTime || fromTime > timeRange.getFromTime())
+					fromTime = timeRange.getFromTime();
+				if(null == endTime || endTime < timeRange.getEndTime())
+					endTime = timeRange.getEndTime();
+			}
+		}
+		Map<String, Object> map = new HashMap<>();
+		 
+		 
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.ABSENCE_MAIN_TITLE;
+		map.put("category",
+				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
+		String[] times = timeTotal.split("\\.");
+		map.put("day", times[0]);
+		map.put("hour", times[1]);
+		map.put("min", times[2]);
+		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
+		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
+		map.put("endDate", mmDDSF.format(new Date(endTime)));
+		
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
 }

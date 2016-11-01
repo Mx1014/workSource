@@ -19,6 +19,8 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
+import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.WebTokenGenerator;
@@ -144,6 +146,49 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
 		return null;
 	}
-	
+
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest approvalRequest) { 
+		return null;
+	} 
+
+	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("mm:ss");
+	 
+
+	protected String processPunchDetail(PunchDayLog pdl) {
+		String punchDetail = null;
+		if(null == pdl )
+			return "无";
+		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay())){
+			if(null != pdl.getArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getArriveTime());
+				if(null != pdl.getLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+			}else{
+				punchDetail = "无";
+			}
+			
+		}
+		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay())){
+			if(null != pdl.getArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getArriveTime());
+				if(null != pdl.getNoonLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getNoonLeaveTime());
+				}
+			else
+				punchDetail = "无";
+			punchDetail += "|";
+			if(null != pdl.getAfternoonArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getAfternoonArriveTime());
+				if(null != pdl.getLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+				}
+			else
+				punchDetail = "无";
+			
+		}
+		return punchDetail;
+	}
 	
 }

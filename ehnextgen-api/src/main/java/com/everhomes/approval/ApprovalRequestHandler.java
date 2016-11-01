@@ -28,5 +28,8 @@ public interface ApprovalRequestHandler {
 	String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason);
 
 	String processMessageToNextLevelBody(ApprovalRequest approvalRequest);
+
+	String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest approvalRequest);
 	
 }

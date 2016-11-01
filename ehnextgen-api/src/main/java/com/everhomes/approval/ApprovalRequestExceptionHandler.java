@@ -46,6 +46,7 @@ import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -62,7 +63,11 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Autowired
+	private PunchService punchService;
+
+	@Autowired
 	private PunchProvider punchProvider;
+	
 	
 	@Autowired
 	private AttachmentProvider attachmentProvider;
@@ -299,16 +304,34 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest  ));
 		return briefApprovalRequestDTO;
 	}
-	private String processBriefRequestTitle(ApprovalRequest a  ) {
-		// TODO Auto-generated method stub
+	private String processBriefRequestTitle(ApprovalRequest a  ) { 
 		Map<String, Object> map = new HashMap<>();
 		 
-		// 初次提交
+		 
 		String scope = ApprovalLogTitleTemplateCode.SCOPE;
 		int code = ApprovalLogTitleTemplateCode.EXCEPTION_TITLE;
 		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
 		map.put("date",processRequestDate(a.getEffectiveDate()));
 		 
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest a) { 
+		Map<String, Object> map = new HashMap<>();
+		 
+		 
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.EXCEPTION_MAIN_TITLE; 
+		map.put("date",processRequestDate(a.getEffectiveDate()));
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
+		map.put("punchLog",processPunchDetail(pdl)) ;
+		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay()))
+			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
+		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay()))
+			map.put("punchStatus", punchService.statusToString(pdl.getMorningStatus())+"/"+punchService.statusToString(pdl.getAfternoonStatus()));
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		
 		return result;

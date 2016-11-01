@@ -45,11 +45,6 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 
 	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 
-	private static final SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd");
-
-	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("mm:ss");
-	
-	private static final SimpleDateFormat weekdaySF =  new SimpleDateFormat("EEEE",Locale.CHINA);
 	 
 	@Autowired
 	private PunchProvider punchProvider;
@@ -131,40 +126,6 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		approvalBasicInfo.setDescriptionJson(dto);
 		return approvalBasicInfo;
 	}
-	private String processPunchDetail(PunchDayLog pdl) {
-		String punchDetail = null;
-		if(null == pdl )
-			return "无";
-		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay())){
-			if(null != pdl.getArriveTime() ){
-				punchDetail = minSecSF.format(pdl.getArriveTime());
-				if(null != pdl.getLeaveTime() )
-					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
-			}else{
-				punchDetail = "无";
-			}
-			
-		}
-		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay())){
-			if(null != pdl.getArriveTime() ){
-				punchDetail = minSecSF.format(pdl.getArriveTime());
-				if(null != pdl.getNoonLeaveTime() )
-					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getNoonLeaveTime());
-				}
-			else
-				punchDetail = "无";
-			punchDetail += "|";
-			if(null != pdl.getAfternoonArriveTime() ){
-				punchDetail = minSecSF.format(pdl.getAfternoonArriveTime());
-				if(null != pdl.getLeaveTime() )
-					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
-				}
-			else
-				punchDetail = "无";
-			
-		}
-		return punchDetail;
-	}
 
 	@Override
 	public BriefApprovalRequestDTO processBriefApprovalRequest(ApprovalRequest approvalRequest) {
@@ -226,5 +187,23 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
+	
+
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest a) { 
+		Map<String, Object> map = new HashMap<>();
+		 
+		 
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.OVERTIME_MAIN_TITLE ; 
+		map.put("date",processRequestDate(a.getEffectiveDate()));
+		map.put("hour",a.getHourLength());
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
+		map.put("punchLog",processPunchDetail(pdl)) ;
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
 	}
 }

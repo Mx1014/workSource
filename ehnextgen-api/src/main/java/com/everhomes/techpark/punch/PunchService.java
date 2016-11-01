@@ -181,4 +181,6 @@ public interface PunchService {
 
 	public void deleteTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
 
+	String statusToString(Byte status);
+
 }
