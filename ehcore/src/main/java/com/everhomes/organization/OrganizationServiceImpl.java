@@ -7425,6 +7425,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd) {
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null){
+			return new OrganizationDTO();
+		}
 		Long userId = UserContext.current().getUser().getId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());
