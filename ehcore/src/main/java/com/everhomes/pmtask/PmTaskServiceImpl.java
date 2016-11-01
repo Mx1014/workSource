@@ -319,7 +319,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetPrivilegesDTO dto = new GetPrivilegesDTO();
 		User user = UserContext.current().getUser();
 
-		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId());
+
+//		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<String> result = new ArrayList<String>();
 		for(Long p:privileges){
 			if(p.longValue() == PrivilegeConstants.LISTALLTASK)
@@ -1813,14 +1815,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 					
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
 					
-					RoleAssignment roleAssignment = new RoleAssignment();
-					roleAssignment.setRoleId(pmTaskTarget.getRoleId());
-					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-					roleAssignment.setOwnerId(cmd.getOrganizationId());
-					roleAssignment.setTargetType(EntityType.USER.getCode());
-					roleAssignment.setTargetId(targetIds.get(i));
-					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-					aclProvider.createRoleAssignment(roleAssignment);
+					List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), EntityType.USER.getCode(), targetIds.get(i));
+					
+					if(null == roleAssignments || roleAssignments.size() == 0) {
+						RoleAssignment roleAssignment = new RoleAssignment();
+						roleAssignment.setRoleId(pmTaskTarget.getRoleId());
+						roleAssignment.setOwnerType(EntityType.COMMUNITY.getCode());
+						roleAssignment.setOwnerId(cmd.getOwnerId());
+						roleAssignment.setTargetType(EntityType.USER.getCode());
+						roleAssignment.setTargetId(targetIds.get(i));
+						roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+						aclProvider.createRoleAssignment(roleAssignment);
+					}
 				}
 				
 			}
@@ -1855,8 +1862,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			pmTaskProvider.updateTaskTarget(pmTaskTarget);
 			
-			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(),
-					cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getTargetId());
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getTargetId());
 			for(RoleAssignment r: roleAssignments) {
 				if(r.getRoleId().equals(roleId)) {
 					aclProvider.deleteRoleAssignment(r);
