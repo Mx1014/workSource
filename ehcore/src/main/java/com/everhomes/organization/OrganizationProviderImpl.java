@@ -2476,7 +2476,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize) {
     }
-
+ 
 	@Override
 	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Integer namespaceId) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2494,5 +2494,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(organizations ==null || organizations.size()==0)
 			return null;
 		return organizations;
+	}
+	
+	@Override
+	public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId) {
+		List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
+			return null;
+		});
+		return results;
+ 
 	}
 }

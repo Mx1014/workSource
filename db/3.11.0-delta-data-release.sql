@@ -45,9 +45,9 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 	VALUES ('6', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0');
 UPDATE `eh_configurations` SET `value`='6' WHERE `name`='pmtask.category.ancestor';
 
-INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`)
 	VALUES ('1017', '32', '执行人员', '任务管理 执行人员', NULL, '0', 'EhOrganizations', NULL);
-INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`)
 	VALUES ('1018', '32', '维修人员', '任务管理 维修人员', NULL, '0', 'EhOrganizations', NULL);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
@@ -131,7 +131,7 @@ SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'serviceAlliance.serviceDetail.url', 'http://core.zuolin.com/service-alliance/index.html#/service_detail/%s/%s?_k=%s', '服务联盟详情页面URL', '0', NULL);
 
 -- 储能停车充值 add by sunwen 20161025
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ('400', 'parking', '10010', 'zh_CN', '费用已过期，请重新查询费用');
 
 -- 华润OE配search type add by xiongying 20161026
@@ -169,3 +169,6 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- 更新创源 group_id add by sunwen 20161028
 UPDATE eh_organizations r INNER JOIN eh_groups g ON r.id = g.visible_region_id
 SET r.group_id = g.id where r.namespace_id = 999986 and g.visible_region_type = 1;
+
+-- by Janson add qr driver support
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999992, 'aclink.qr_driver_ext', 'phone_visit', 'the driver extend of this namespace.(zuolin/phone_visit)');

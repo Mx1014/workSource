@@ -26,6 +26,8 @@ public class SearchTasksCommand {
 	private Long pageAnchor;
 	private Integer pageSize;
 	
+	private Long addressId;
+	
 	public Long getStartDate() {
 		return startDate;
 	}
@@ -84,5 +86,11 @@ public class SearchTasksCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 }

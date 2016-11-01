@@ -13,10 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.activity.ActivityWarningResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -24,7 +23,6 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 
 @Service
@@ -32,6 +30,8 @@ import com.everhomes.user.UserProvider;
 public class WarnActivityBeginningAction implements Runnable {
 	
 	private static final Logger  LOGGER = LoggerFactory.getLogger(WarnActivityBeginningAction.class);
+
+	public static final String QUEUE_NAME = "activityWarning";
 	
 	private Long activityId;
 	

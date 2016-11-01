@@ -2298,10 +2298,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //https://core.zuolin.com/evh/aclink/phv?id=10ae5-15016
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
-        String url = homeUrl + "/evh/aclink/phv?id=" + cmd.getId() + "#sign_suffix";
+        String url = homeUrl + "/evh/aclink/phv?phvid=" + cmd.getId() + "#sign_suffix";
         
         resp.setCreateTime(auth.getCreateTime().getTime());
-        resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        //resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        resp.setQr(url);
       
         return resp;
     }

@@ -193,8 +193,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), pageSize);
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), pageSize);
 		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -241,8 +241,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
 	    				cmd.getPageAnchor(), cmd.getPageSize());
 			}else if(privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
 				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
 						cmd.getPageAnchor(), cmd.getPageSize());
+				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
+					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
+							cmd.getPageAnchor(), cmd.getPageSize());
 			}else{
 				returnNoPrivileged(privileges, current);
 			}
@@ -1045,7 +1049,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null == cmd.getPageSize())
 			cmd.setPageSize(100000);
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), cmd.getPageSize());
 		
 		Workbook wb = new XSSFWorkbook();
 		

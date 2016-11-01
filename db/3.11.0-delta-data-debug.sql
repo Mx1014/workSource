@@ -56,9 +56,9 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 	VALUES ('6', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0');
 update eh_configurations set value = 6 where id = 122;
 
-INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`)
 	VALUES ('1017', '32', '执行人员', '任务管理 执行人员', NULL, '0', NULL, NULL);
-INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`)
 	VALUES ('1018', '32', '维修人员', '任务管理 维修人员', NULL, '0', NULL, NULL);
 
 
@@ -127,7 +127,7 @@ SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'serviceAlliance.serviceDetail.url', 'http://core.zuolin.com/service-alliance/index.html#/service_detail/%s/%s?_k=%s', '服务联盟详情页面URL', '0', NULL);
 
 -- 储能停车充值 add by sunwen 20161025
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ('400', 'parking', '10010', 'zh_CN', '费用已过期，请重新查询费用');
 
 -- 华润OE配search type add by xiongying 20161026
@@ -165,23 +165,22 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 
 
-
 -- beta环境 清华信息港 服务市场类别 by sfyan 20161029
-UPDATE `eh_launch_pad_items` SET service_categry_id = 1 WHERE namespace_id = 999984;
+UPDATE `eh_launch_pad_items` SET service_categry_id = 2 WHERE namespace_id = 999984;
 
 SET @launch_pad_item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,delete_flag,scene_type,scale_type) VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 53,'{"itemLocation":"/home","itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL,1,'default',1);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,delete_flag,scene_type,scale_type) VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 53,'{"itemLocation":"/home","itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL,1,'park_tourist',1);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,delete_flag,scene_type,scale_type) VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 53,'{"itemLocation":"/home","itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL,1,'pm_admin',1);
 
-INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`) VALUES(1, '基本服务', 'cs://1/image/aW1hZ2UvTVRvek1XVTFNRFppT1RVMVlXTXhPRFExWkRnMllqYzBPVFZtTmpreU5HRXlOQQ', 1, 0, 1, 999989);
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`) VALUES(2, '基本服务', 'cs://1/image/aW1hZ2UvTVRvek1XVTFNRFppT1RVMVlXTXhPRFExWkRnMllqYzBPVFZtTmpreU5HRXlOQQ', 1, 0, 1, 999984);
 
-DELETE FROM `eh_launch_pad_items` WHERE namespace_id = 0 AND action_type IN (1);
+DELETE FROM `eh_launch_pad_items` WHERE namespace_id = 999984 AND action_type IN (1);
 UPDATE `eh_launch_pad_items` SET service_categry_id = null, default_order=100000  WHERE namespace_id = 999984 AND action_type IN (53);
 
-UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016103101","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":http://beta.zuolin.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 999984 AND scene_type = 'default';
-UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016103101","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://beta.zuolin.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 999984 AND scene_type = 'park_tourist';
-UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016103101","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://beta.zuolin.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 999984 AND scene_type = 'pm_admin';
+UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016103102","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":http://beta-cs.zuolin.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 999984 AND scene_type = 'default';
+UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016103102","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://beta-cs.zuolin.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 999984 AND scene_type = 'park_tourist';
+UPDATE `eh_launch_pad_layouts` SET layout_json = '{"versionCode":"2016103102","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"园区服务","widget":"Navigator","instanceConfig":{"itemGroup":"CmntyServices"},"style":"Gallery","defaultOrder":3,"separatorFlag":1,"separatorHeight":21,"columnCount":8},{"groupName":"滚动广告","widget":"Bulletins","instanceConfig":{"itemGroup":""},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0,"editFlag":1,"title":"我的应用","iconUrl":"http://beta-cs.zuolin.com:5000/image/aW1hZ2UvTVRwbE5qY3hNalZqTVRFeU1XUmtZelV5TURrMk9HTmxabUZsWVRreE1qWm1aUQ?token=bzW84VuKXgx7wfxYp1WmnWG5fyPOB2PeKoHm04UwN-Cs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVnY3dNQ1phDeXcyD_Y3YAJM","align":"0"}]}' WHERE name = 'ServiceMarketLayout' AND namespace_id = 999984 AND scene_type = 'pm_admin';
 
 
 -- 内部门禁 菜单 by sfyan 20161031
@@ -193,15 +192,17 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
   VALUES (731,0,'公共 门禁日志','公共门禁日志 全部权限',NULL);
-  
+
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
   VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),731,47400,'门禁日志',1,1,'公共 门禁日志',348);
-  
+
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 731, 1001,0,1,now());
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 731, 1002,0,1,now());
-	
-	
+
+-- by Janson add qr driver support
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999992, 'aclink.qr_driver_ext', 'phone_visit', 'the driver extend of this namespace.(zuolin/phone_visit)');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999990, 'aclink.qr_driver_ext', 'phone_visit', 'the driver extend of this namespace.(zuolin/phone_visit)');
