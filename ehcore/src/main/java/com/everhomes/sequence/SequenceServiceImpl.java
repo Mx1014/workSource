@@ -926,6 +926,14 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhDoorUserPermission.class, Tables.EH_DOOR_USER_PERMISSION.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOOR_USER_PERMISSION.ID.max()).from(Tables.EH_DOOR_USER_PERMISSION).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhGroupSettings.class, Tables.EH_GROUP_SETTINGS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_GROUP_SETTINGS.ID.max()).from(Tables.EH_GROUP_SETTINGS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhBroadcasts.class, Tables.EH_BROADCASTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_BROADCASTS.ID.max()).from(Tables.EH_BROADCASTS).fetchOne().value1();
+        });
 
     }
 

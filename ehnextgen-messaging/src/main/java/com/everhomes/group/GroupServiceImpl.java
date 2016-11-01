@@ -628,6 +628,7 @@ public class GroupServiceImpl implements GroupService {
     	
         User user = UserContext.current().getUser();
         long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         
         List<GroupDTO> groupDtoList = new ArrayList<GroupDTO>();
         
@@ -646,6 +647,10 @@ public class GroupServiceImpl implements GroupService {
         	        continue;
         	    }
         		tmpGroup = groupProvider.findGroupById(userGroup.getGroupId());
+        	    //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
+        	    if (tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+					continue;
+				}
         		if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
         		    groupDtoList.add(toGroupDTO(userId, tmpGroup));
         		} else {
@@ -4323,8 +4328,9 @@ public class GroupServiceImpl implements GroupService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		checkGroupCategoryParameters(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryName());
-		Category category = checkDuplicationGroupCategoryName(cmd.getNamespaceId(), cmd.getCategoryName(), cmd.getCategoryId());
-		if (category == null || category.getId().longValue() != cmd.getCategoryId().longValue()) {
+		checkDuplicationGroupCategoryName(cmd.getNamespaceId(), cmd.getCategoryName(), cmd.getCategoryId());
+		Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
+		if (category == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"not exist category");
 		}
