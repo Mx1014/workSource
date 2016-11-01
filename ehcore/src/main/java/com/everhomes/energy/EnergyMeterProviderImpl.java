@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METERS;
 
@@ -29,12 +30,11 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public long createMeter(EnergyMeter meter) {
+    public long createEnergyMeter(EnergyMeter meter) {
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeters.class));
         meter.setId(id);
         meter.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        meter.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        meter.setUpdateUid(UserContext.current().getUser().getId());
+        meter.setCreatorUid(UserContext.current().getUser().getId());
         rwDao().insert(meter);
         return id;
     }
@@ -44,6 +44,29 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
         return context().selectFrom(EH_ENERGY_METERS)
                 .where(EH_ENERGY_METERS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METERS.ID.eq(meterId)).fetchOneInto(EnergyMeter.class);
+    }
+
+    @Override
+    public void updateEnergyMeter(EnergyMeter meter) {
+        meter.setUpdateUid(UserContext.current().getUser().getId());
+        meter.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rwDao().update(meter);
+    }
+
+    @Override
+    public List<EnergyMeter> listByIds(Integer namespaceId, List<Long> ids) {
+        return context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METERS.ID.in(ids))
+                .fetchInto(EnergyMeter.class);
+    }
+
+    @Override
+    public List<EnergyMeter> listEnergyMeters(Long pageAnchor, Integer pageSize) {
+        return context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.CREATE_TIME.le(new Timestamp(pageAnchor)))
+                .orderBy(EH_ENERGY_METERS.CREATE_TIME.desc())
+                .limit(pageSize).fetchInto(EnergyMeter.class);
     }
 
     private DSLContext context() {

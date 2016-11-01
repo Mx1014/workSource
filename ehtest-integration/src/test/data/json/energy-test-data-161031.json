@@ -1,0 +1,30 @@
+{
+  "eh_energy_meter_formulas": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "name": "公式1",
+      "expression": "[[price]]+1",
+      "formula_type": 1,
+      "status": 2
+    }
+  ],
+  "eh_energy_meter_categories": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "name": "居民",
+      "status": 2,
+      "category_type": 2,
+      "delete_flag": 1
+    },
+    {
+      "id": 2,
+      "namespace_id": 0,
+      "name": "应收",
+      "status": 2,
+      "category_type": 1,
+      "delete_flag": 1
+    }
+  ]
+}

@@ -5,4 +5,8 @@ package com.everhomes.energy;
  */
 public interface EnergyMeterFormulaProvider {
 
+    /**
+     * 根据id查找
+     */
+    EnergyMeterFormula findById(Integer namespaceId, Long id);
 }

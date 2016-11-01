@@ -26,18 +26,18 @@ public class SearchEnergyMeterCommand {
     private Long serviceCategoryId;
     private Byte meterType;
     private Long status;
-    private Integer pageAnchor;
+    private Long pageAnchor;
     private Integer pageSize;
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public Integer getPageAnchor() {
+    public Long getPageAnchor() {
         return pageAnchor;
     }
 
-    public void setPageAnchor(Integer pageAnchor) {
+    public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
 
