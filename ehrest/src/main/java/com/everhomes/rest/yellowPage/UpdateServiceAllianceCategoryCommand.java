@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li> ownerId: 拥有者ID</li>
  *  <li> parentId: 父id</li>
  *  <li> logoUrl: 类型logo的url地址</li>
+ *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>
  * </ul>
  */
 public class UpdateServiceAllianceCategoryCommand {
@@ -25,6 +26,8 @@ public class UpdateServiceAllianceCategoryCommand {
 	private Long parentId;
 	
 	private String logoUrl;
+
+    private Byte displayMode;
 	
 	public Long getCategoryId() {
 		return categoryId;
@@ -46,7 +49,15 @@ public class UpdateServiceAllianceCategoryCommand {
 		return ownerType;
 	}
 
-	public void setOwnerType(String ownerType) {
+    public Byte getDisplayMode() {
+        return displayMode;
+    }
+
+    public void setDisplayMode(Byte displayMode) {
+        this.displayMode = displayMode;
+    }
+
+    public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
 

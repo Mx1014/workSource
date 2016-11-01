@@ -3,6 +3,7 @@ package com.everhomes.address;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 
 import java.util.List;
@@ -35,4 +36,6 @@ public interface AddressProvider {
      * @return
      */
     List<Address> listAddressByIds(Integer namespaceId, List<Long> ids);
+
+    List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
 }

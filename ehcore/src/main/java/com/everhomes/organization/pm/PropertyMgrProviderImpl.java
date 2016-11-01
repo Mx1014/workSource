@@ -311,16 +311,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public int countCommunityAddressMappings(long organizationId,Byte livingStatus) {
-
+	public int countCommunityAddressMappings(Long organizationId, Long communityId, Byte livingStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
-		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
-		Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId);
-		if(livingStatus != null) {
-			condition = condition.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
-		}
-		return step.where(condition).fetchOneInto(Integer.class);
+		SelectQuery<Record1<Integer>> query = context.selectCount().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS).getQuery();
+        if (organizationId != null)
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId));
+        if (communityId != null)
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
+        if(livingStatus != null)
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+		return query.fetchOneInto(Integer.class);
 	}
 
 	@Cacheable(value = "CommunityAddressMappingsList", key="#communityId")
@@ -512,7 +512,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, id);
 	}
 
-	@Cacheable(value="CommunityPmOwner", key="#id")
+	// @Cacheable(value="CommunityPmOwner", key="#id")
 	@Override
 	public CommunityPmOwner findPropOwnerById(long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1620,7 +1620,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
     @Override
-    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, Long pageAnchor, int pageSize) {
+    public List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String keyword, Long pageAnchor, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         if (namespaceId != null) {
@@ -1632,11 +1632,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if (orgOwnerTypeId != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.eq(orgOwnerTypeId));
         }
+        if (StringUtils.isEmpty(keyword)) {
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME.like("%"+keyword+"%")
+            		.or(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.like("%"+keyword+"%")));
+        }
         if (pageAnchor != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.ge(pageAnchor));
         }
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
-        query.addLimit(pageSize);
+        if(null != pageSize)
+        	query.addLimit(pageSize);
         return query.fetchInto(CommunityPmOwner.class);
     }
 
@@ -1918,6 +1923,30 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
                 .fetchOneInto(CommunityPmOwner.class);
+    }
+
+    @Override
+    public List<EhParkingCardCategories> listParkingCardCategories() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhParkingCardCategoriesDao dao = new EhParkingCardCategoriesDao(context.configuration());
+        return dao.findAll();
+    }
+
+    @Override
+    public List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressIds(Integer namespaceId, List<Long> addressIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+                .where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
+                .fetchInto(OrganizationOwnerAddress.class);
+    }
+
+    @Override
+    public ParkingCardCategory findParkingCardCategory(Byte cardType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)
+                .where(Tables.EH_PARKING_CARD_CATEGORIES.CARD_TYPE.eq(cardType))
+                .fetchOneInto(ParkingCardCategory.class);
     }
 
     @Override

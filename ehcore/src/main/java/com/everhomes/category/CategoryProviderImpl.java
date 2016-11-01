@@ -375,7 +375,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         if(null != parentId)
         	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
         if(StringUtils.isNotBlank(keyword))
-        	query.addConditions(Tables.EH_CATEGORIES.NAME.like("%" + keyword + "%"));
+        	query.addConditions(Tables.EH_CATEGORIES.PATH.like("%" + keyword + "%"));
         if(null != pageAnchor && pageAnchor != 0)
         	query.addConditions(Tables.EH_CATEGORIES.ID.gt(pageAnchor));
         query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));

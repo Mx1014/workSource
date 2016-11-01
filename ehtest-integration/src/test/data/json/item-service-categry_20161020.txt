@@ -1,0 +1,36 @@
+{
+  "eh_item_service_categries": [
+    {
+      "id": "1",
+      "name": "物业服务",
+      "icon_uri": "",
+      "order": "0",
+      "align": "0",
+      "status": "1"
+    },
+    {
+      "id": "2",
+      "name": "园区服务",
+      "icon_uri": "",
+      "order": "0",
+      "align": "0",
+      "status": "1"
+    },
+    {
+      "id": "3",
+      "name": "公司服务",
+      "icon_uri": "",
+      "order": "0",
+      "align": "0",
+      "status": "1"
+    },
+    {
+      "id": "4",
+      "name": "其他服务",
+      "icon_uri": "",
+      "order": "0",
+      "align": "0",
+      "status": "1"
+    }
+  ]
+}

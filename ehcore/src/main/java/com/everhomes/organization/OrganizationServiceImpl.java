@@ -4451,6 +4451,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
+	public List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org) {
+		return this.convertDTO(organizationMembers, org);
+	}
+	
+	@Override
 	public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd){
 		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 		command.setOrganizationId(cmd.getOrganizationId());
@@ -4765,6 +4770,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
 		orgs.add(organization);
+		if(LOGGER.isDebugEnabled())
+        	LOGGER.info("orgs:" + orgs);
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
 		
 		for (Organization org : orgs) {
@@ -4774,6 +4781,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null == community){
 					continue;
 				}
+				
+				if(LOGGER.isDebugEnabled())
+		        	LOGGER.info("community:" + community);
+				
 				if(community.getNamespaceId().equals(namespaceId)){
 					dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
 				}
@@ -5314,6 +5325,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 		Long ownerId = orgId;
+
+		OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
 	    
 		return organizationMembers.stream().map((c) ->{
 			Long organizationId = ownerId;
@@ -5322,12 +5335,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
-			
+
+
 			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
-				dto.setDepartments(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
+					departments.add(orgDTO);
+				}
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				dto.setDepartments(departments);
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
-				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
+				groups.add(orgDTO);
+				groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				dto.setGroups(groups);
 			}
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
@@ -5341,7 +5363,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(c.getIntegralTag4() != null && c.getIntegralTag4() == 1){
 				dto.setContactToken(null);
 			}
-			
+
+			if(null == VisibleFlag.fromCode(c.getVisibleFlag())){
+				dto.setVisibleFlag(VisibleFlag.SHOW.getCode());
+			}
+
 			/**
 			 * 补充用户角色
 			 */
@@ -7344,6 +7370,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
+		if(OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			organization = this.checkOrganization(organization.getDirectlyEnterpriseId());
+		}
+
 		VisibleFlag visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
 
 		if(null == visibleFlag){
@@ -7353,16 +7383,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 
 		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypeList);
 
 		List<Long> organizationIds = new ArrayList<Long>();
 		organizationIds.add(organization.getId());
 		for (Organization org : organizations) {
-			if(org.getDirectlyEnterpriseId().equals(organization.getId())){
-				organizationIds.add(organization.getId());
-			}
-
+			organizationIds.add(org.getId());
 		}
 
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(cmd.getContactToken(), organizationIds);
@@ -7491,6 +7519,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(!StringUtils.isEmpty(r.getInitial())){
 				dto.setInitial(r.getInitial().replace("~", "#"));
 			}
+
 			return dto;
 		}).collect(Collectors.toList());
 

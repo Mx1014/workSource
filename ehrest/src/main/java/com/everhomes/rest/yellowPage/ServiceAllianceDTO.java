@@ -1,11 +1,10 @@
 package com.everhomes.rest.yellowPage;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -36,6 +35,7 @@ import com.everhomes.util.StringHelper;
  *  <li>templateName: 模板名称</li>
  *  <li>buttonTitle: 按钮名称</li>
  *  <li>email: 邮箱地址</li>
+ *  <li>detailUrl: 服务详情页面URL</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -95,6 +95,8 @@ public class ServiceAllianceDTO {
 	private String buttonTitle;
 	
 	private String email;
+
+    private String detailUrl;
 	
 	public Long getId() {
 		return id;
@@ -199,8 +201,16 @@ public class ServiceAllianceDTO {
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
-	
-	public String getServiceType() {
+
+    public String getDetailUrl() {
+        return detailUrl;
+    }
+
+    public void setDetailUrl(String detailUrl) {
+        this.detailUrl = detailUrl;
+    }
+
+    public String getServiceType() {
 		return serviceType;
 	}
 	public void setServiceType(String serviceType) {
