@@ -172,8 +172,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private CommunityProvider communityProvider;
-//	@Autowired
-//	private RolePrivilegeService rolePrivilegeService;
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	@Autowired
@@ -570,7 +570,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetUser not found");
 		}
 		
-		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId());
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getOwnerId(), user.getId());
 
 		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		privileges.addAll(organizationPrivileges);
