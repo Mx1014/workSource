@@ -1442,6 +1442,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		equipment.setStatus(EquipmentStandardStatus.INACTIVE.getCode());
 		
 		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
+		equipmentSearcher.feedDoc(equipment);
 		
 		List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 		if(maps != null && maps.size() > 0) {

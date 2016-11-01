@@ -143,12 +143,6 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
-//        
-//        if(cmd.getReviewResult() != null)
-//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
-//        
-//        if(cmd.getReviewStatus() != null)
-//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -160,6 +154,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("EquipmentSearcherImpl query builder ："+builder);
         
         SearchResponse rsp = builder.execute().actionGet();
 

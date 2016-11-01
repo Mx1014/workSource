@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  */
 public class EquipmentStandardRelationDTO {
 
+	private Long id;
+	
 	private Long equipmentId;
 	
 	private Long targetId;
@@ -41,6 +43,14 @@ public class EquipmentStandardRelationDTO {
 	
 	private Byte reviewResult;
 	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public Long getEquipmentId() {
 		return equipmentId;
 	}
