@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>broadcasts: 广播消息列表</li>
+ * <li>nextPageAnchor:下页锚点</li>
  * </ul>
  */
 public class ListBroadcastsResponse {

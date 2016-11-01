@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属者，参考{@link com.everhomes.rest.group.BroadcastOwnerType}</li>
  * <li>ownerId: 所属者id</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListBroadcastsCommand {
