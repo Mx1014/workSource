@@ -1124,6 +1124,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			return "已完成";
 		else if(status.byteValue() == 4)
 			return "已关闭";
+		else if(status.byteValue() == 5)
+			return "已回访";
 		else
 			return "";
 	}
