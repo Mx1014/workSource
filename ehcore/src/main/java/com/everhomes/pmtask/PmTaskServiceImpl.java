@@ -241,8 +241,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
 	    				cmd.getPageAnchor(), cmd.getPageSize());
 			}else if(privileges.contains(PrivilegeConstants.LISTUSERTASK)){
+				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
 				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
 						cmd.getPageAnchor(), cmd.getPageSize());
+				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
+					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
+							cmd.getPageAnchor(), cmd.getPageSize());
 			}else{
 				returnNoPrivileged(privileges, current);
 			}
