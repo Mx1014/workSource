@@ -19,8 +19,10 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
+import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
+import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -186,5 +188,43 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		
 		return result;
 	}
-	
+
+	@Override
+	public String processMessageToCreatorBody(ApprovalRequest approvalRequest, String reason) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("date",processRequestDate(approvalRequest.getEffectiveDate()));
+		map.put("hour",approvalRequest.getHourLength());
+		if (approvalRequest.getApprovalStatus().byteValue() == ApprovalStatus.AGREEMENT.getCode()) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.OVERTIME_APPROVED;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.OVERTIME_REJECTED;
+			map.put("reason", StringUtils.isBlank(reason)?approvalRequest.getReason():reason);
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
+
+	@Override
+	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
+		String scope = null;
+		int code = 0;
+		Map<String, Object> map = new HashMap<>();
+		map.put("creatorName", approvalService.getUserName(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId()));
+		map.put("date",processRequestDate(approvalRequest.getEffectiveDate()));
+		map.put("hour",approvalRequest.getHourLength());
+		//当前级别为0表示用户刚提交
+		if (approvalRequest.getCurrentLevel().byteValue() == (byte)0) {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.OVERTIME_COMMIT_REQUEST;
+		}else {
+			scope = ApprovalNotificationTemplateCode.SCOPE;
+			code = ApprovalNotificationTemplateCode.OVERTIME_TO_NEXT_LEVEL;
+			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
+		}
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
 }
