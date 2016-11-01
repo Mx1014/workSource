@@ -60,6 +60,12 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             return "api-input";
         }
 */
+        String uri = request.getRequestURI().toString();
+        int pos = uri.indexOf("/api");
+        if(uri.substring(pos + 4).length() > 0) {
+            return "redirect:/api";
+        }
+        
         return "api-react";
     }
     

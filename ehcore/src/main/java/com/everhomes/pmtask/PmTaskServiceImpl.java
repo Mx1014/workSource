@@ -240,7 +240,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 	    				"OrganizationId cannot be null.");
 			}
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+			List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+			
+			List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getOwnerId(), current.getId());
+			privileges.addAll(organizationPrivileges);
+			
 	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
 	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
 	    				cmd.getPageAnchor(), cmd.getPageSize());
