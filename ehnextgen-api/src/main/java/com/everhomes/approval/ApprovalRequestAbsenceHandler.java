@@ -68,11 +68,6 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	@Autowired
 	private PunchService punchService;
 	
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-
-	@Autowired
-	private LocaleStringProvider localeStringProvider;
 
 	@Autowired
 	private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
@@ -108,17 +103,24 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	public BriefApprovalRequestDTO processBriefApprovalRequest(ApprovalRequest approvalRequest) {
 		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
 		String timeTotal = null;
+
+		Long fromTime = null;
+		Long endTime =null ;
 		if (approvalRequest.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
 			List<TimeRange> timeRangeList = briefApprovalRequestDTO.getTimeRangeList();
 			for (TimeRange timeRange : timeRangeList) {
 				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+				if(null == fromTime || fromTime > timeRange.getFromTime())
+					fromTime = timeRange.getFromTime();
+				if(null == endTime || endTime < timeRange.getEndTime())
+					endTime = timeRange.getEndTime();
 			}
 		}
 		briefApprovalRequestDTO.setDescription(timeTotal);
-		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest ,timeTotal));
+		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest ,timeTotal,fromTime,endTime));
 		return briefApprovalRequestDTO;
 	}
-	private String processBriefRequestTitle(ApprovalRequest a , String timeTotal) {
+	private String processBriefRequestTitle(ApprovalRequest a , String timeTotal ,Long fromTime ,Long endTime) {
 		// TODO Auto-generated method stub
 		Map<String, Object> map = new HashMap<>();
 		 
@@ -132,7 +134,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("day", times[0]);
 		map.put("hour", times[1]);
 		map.put("min", times[2]);
-		
+		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
+		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
+		map.put("endDate", mmDDSF.format(new Date(endTime)));
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		
 		return result;
