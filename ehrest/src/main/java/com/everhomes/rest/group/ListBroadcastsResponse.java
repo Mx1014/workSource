@@ -16,14 +16,25 @@ public class ListBroadcastsResponse {
 
 	@ItemType(BroadcastDTO.class)
 	private List<BroadcastDTO> broadcasts;
+	
+	private Long nextPageAnchor;
 
 	public ListBroadcastsResponse() {
 
 	}
 
-	public ListBroadcastsResponse(List<BroadcastDTO> broadcasts) {
+	public ListBroadcastsResponse(List<BroadcastDTO> broadcasts, Long nextPageAnchor) {
 		super();
 		this.broadcasts = broadcasts;
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	public List<BroadcastDTO> getBroadcasts() {

@@ -34,6 +34,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
  * <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
+ * <li>operatorName: 操作人</li>
  * </ul>
  */
 public class GroupDTO {
@@ -61,6 +62,7 @@ public class GroupDTO {
     private Byte postFlag;
     private String creatorName;
     private String creatorFamilyName;
+    private String operatorName;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -74,7 +76,15 @@ public class GroupDTO {
     
     private Byte approvalStatus;
     
-    public Byte getApprovalStatus() {
+    public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+
+	public Byte getApprovalStatus() {
 		return approvalStatus;
 	}
 

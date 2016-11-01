@@ -13,6 +13,6 @@ public interface BroadcastProvider {
 
 	List<Broadcast> listBroadcast();
 
-	List<Broadcast> listBroadcastByOwner(String ownerType, Long ownerId);
+	List<Broadcast> listBroadcastByOwner(String ownerType, Long ownerId, Long pageAnchor, int pageSize);
 
 }

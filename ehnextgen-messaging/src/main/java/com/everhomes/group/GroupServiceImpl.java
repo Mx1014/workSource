@@ -166,6 +166,7 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.ui.forum.PostSentScopeType;
@@ -2340,6 +2341,11 @@ public class GroupServiceImpl implements GroupService {
             if(category != null)
                 groupDto.setCategoryName(category.getName());
         }
+        
+        //添加操作者
+        if (group.getOperatorUid() != null) {
+			groupDto.setOperatorName(getUserName(group.getOperatorUid()));
+		}
         //groupDto.setBehaviorTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"),
         //    group.getBehaviorTime().getTime()));
         //groupDto.setCreatorUid(group.getCreatorUid());
@@ -4207,13 +4213,20 @@ public class GroupServiceImpl implements GroupService {
 					"Invalid parameters");
 		}
 		
-		List<Broadcast> broadcastList = broadcastProvider.listBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		
+		List<Broadcast> broadcastList = broadcastProvider.listBroadcastByOwner(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
+		Long nextPageAnchor = null;
+		if (broadcastList != null && broadcastList.size() > pageSize) {
+			broadcastList.remove(broadcastList.size()-1);
+			nextPageAnchor = broadcastList.get(broadcastList.size()-1).getId();
+		}
 		
 		List<BroadcastDTO> resultList = broadcastList.stream().map(b->{
 			return toBroadcastDTO(b);
 		}).collect(Collectors.toList());
 		
-		return new ListBroadcastsResponse(resultList);
+		return new ListBroadcastsResponse(resultList, nextPageAnchor);
 	}
 	
 	private BroadcastDTO toBroadcastDTO(Broadcast broadcast){
@@ -4363,8 +4376,44 @@ public class GroupServiceImpl implements GroupService {
 
 	@Override
 	public ListGroupsByApprovalStatusResponse listGroupsByApprovalStatus(ListGroupsByApprovalStatusCommand cmd) {
+		if (cmd.getNamespaceId() == null || ApprovalStatus.fromCode(cmd.getApprovalStatus()) == null || PrivateFlag.fromCode(cmd.getPrivateFlag()) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
 		
-		return new ListGroupsByApprovalStatusResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<Group> groups = this.groupProvider.queryGroups(locator, pageSize + 1, (loc, query)-> {
+            query.addConditions(Tables.EH_GROUPS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.GROUP.getCode()));
+           	query.addConditions(Tables.EH_GROUPS.PRIVATE_FLAG.eq(cmd.getPrivateFlag()));
+           	
+           	if (ApprovalStatus.fromCode(cmd.getApprovalStatus()) == ApprovalStatus.WAITING_FOR_APPROVING) {
+           		query.addConditions(Tables.EH_GROUPS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
+           		query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.INACTIVE.getCode()));
+			}else if (ApprovalStatus.fromCode(cmd.getApprovalStatus()) == ApprovalStatus.AGREEMENT) {
+           		query.addConditions(Tables.EH_GROUPS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+           		query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+			}else {
+				query.addConditions(Tables.EH_GROUPS.APPROVAL_STATUS.eq(ApprovalStatus.REJECTION.getCode()));
+           		query.addConditions(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.INACTIVE.getCode()));
+			}
+            
+            return query;
+        });
+        
+        ListGroupsByApprovalStatusResponse response = new ListGroupsByApprovalStatusResponse();
+        if(groups.size() > pageSize) {
+            groups.remove(groups.size() - 1);
+            response.setNextPageAnchor(groups.get(groups.size() - 1).getId());
+        }
+        response.setGroups(groups.stream().map((r)-> { 
+            return toGroupDTO(UserContext.current().getUser().getId(), r); 
+        }).collect(Collectors.toList()));
+		
+		return response;
 	}
 
 	@Override
@@ -4377,6 +4426,7 @@ public class GroupServiceImpl implements GroupService {
 			group.setStatus(GroupAdminStatus.ACTIVE.getCode());
 			group.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
 			group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			group.setOperatorUid(userId);
 			groupProvider.updateGroup(group);
 			
 			sendNotificationToCreatorWhenApproval(group, user.getLocale(), GroupNotificationTemplateCode.GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL);  //你申请创建的“${groupName}”已通过
@@ -4425,6 +4475,7 @@ public class GroupServiceImpl implements GroupService {
 			group.setStatus(GroupAdminStatus.INACTIVE.getCode());
 			group.setApprovalStatus(ApprovalStatus.REJECTION.getCode());
 			group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			group.setOperatorUid(userId);
 			groupProvider.updateGroup(group);
 			
 			//sendNotificationToCreatorWhenApproval(group, user.getLocale());

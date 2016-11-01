@@ -1,9 +1,13 @@
 // @formatter:off
 package com.everhomes.broadcast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,12 +60,22 @@ public class BroadcastProviderImpl implements BroadcastProvider {
 	}
 	
 	@Override
-	public List<Broadcast> listBroadcastByOwner(String ownerType, Long ownerId) {
-		return getReadOnlyContext().select().from(Tables.EH_BROADCASTS)
+	public List<Broadcast> listBroadcastByOwner(String ownerType, Long ownerId, Long pageAnchor, int pageSize) {
+		SelectConditionStep<Record> step  =  getReadOnlyContext().select().from(Tables.EH_BROADCASTS)
 				.where(Tables.EH_BROADCASTS.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_BROADCASTS.OWNER_ID.eq(ownerId))
-				.orderBy(Tables.EH_BROADCASTS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, Broadcast.class));
+				.and(Tables.EH_BROADCASTS.OWNER_ID.eq(ownerId));
+		
+		if (pageAnchor != null) {
+			step = step.and(Tables.EH_BROADCASTS.ID.lt(pageAnchor));
+		}
+		
+		Result<Record> result = step.orderBy(Tables.EH_BROADCASTS.ID.desc())
+				.fetch();
+		
+		if (result != null && result.size() > 0) {
+			return result.map(r->ConvertHelper.convert(r, Broadcast.class));
+		}
+		return new ArrayList<>();
 	}
 
 	private EhBroadcastsDao getReadWriteDao() {

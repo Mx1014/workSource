@@ -15,15 +15,37 @@ public class ListBroadcastsCommand {
 	private String ownerType;
 
 	private Long ownerId;
+	
+	private Long pageAnchor;
+	
+	private Integer pageSize;
 
 	public ListBroadcastsCommand() {
 
 	}
 
-	public ListBroadcastsCommand(String ownerType, Long ownerId) {
+	public ListBroadcastsCommand(String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.pageAnchor = pageAnchor;
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	public String getOwnerType() {

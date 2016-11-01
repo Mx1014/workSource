@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
+ * <li>namespaceId: 域空间id</li>
  * <li>approvalStatus: 审核状态，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
  * <li>privateFlag: 公有私有圈标记，参考{@link com.everhomes.rest.organization.PrivateFlag}</li>
  * <li>pageAnchor: 锚点</li>
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListGroupsByApprovalStatusCommand {
 
+	private Integer namespaceId;
+	
 	private Byte approvalStatus;
 
 	private Byte privateFlag;
@@ -26,12 +29,22 @@ public class ListGroupsByApprovalStatusCommand {
 
 	}
 
-	public ListGroupsByApprovalStatusCommand(Byte approvalStatus, Byte privateFlag, Long pageAnchor, Integer pageSize) {
+	public ListGroupsByApprovalStatusCommand(Integer namespaceId, Byte approvalStatus, Byte privateFlag,
+			Long pageAnchor, Integer pageSize) {
 		super();
+		this.namespaceId = namespaceId;
 		this.approvalStatus = approvalStatus;
 		this.privateFlag = privateFlag;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public Byte getApprovalStatus() {
