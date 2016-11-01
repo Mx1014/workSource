@@ -1,0 +1,29 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.fullFill {
+    width: 100%;
+    height: 100%;
+}
+
+.layoutTable {
+    margin: 0px;
+    padding: 0px;
+    border-width: 0px;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    empty-cells: show;
+    width: 100%;
+    height: 100%;
+}
+
+.layoutTable caption,tbody,tr,td,tfoot,thead {
+    margin: 0px;
+    padding: 0px;
+}

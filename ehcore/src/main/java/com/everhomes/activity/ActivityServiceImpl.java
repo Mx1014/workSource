@@ -159,6 +159,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.StatusChecker;
@@ -262,13 +263,11 @@ public class ActivityServiceImpl implements ActivityService {
     private NamespacesProvider namespacesProvider;
 
     @Autowired
-    WorkerPoolFactory workerPoolFactory;
-    
-	final String queueName = "activityWarning";
+    private WorkerPoolFactory workerPoolFactory;
     
     @PostConstruct
     public void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueName);
+        workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
     }
 
     @Override
@@ -2673,10 +2672,10 @@ public class ActivityServiceImpl implements ActivityService {
 		if (warningSetting != null) {
 			Integer days = (int) (warningSetting.getTime() / 1000 / 3600 / 24);
 			Integer hours  = (int) (warningSetting.getTime() / 1000 / 3600 % 24);
-			return new ActivityWarningResponse(warningSetting.getNamespaceId(), days, hours);
+			return new ActivityWarningResponse(warningSetting.getNamespaceId(), days, hours, warningSetting.getTime());
 		}
 		
-		return new ActivityWarningResponse(cmd.getNamespaceId(), 0, 1);
+		return new ActivityWarningResponse(cmd.getNamespaceId(), 0, 1, 3600*1000L);
 	}
 	
 	private WarningSetting findWarningSetting(Integer namespaceId){
@@ -2698,19 +2697,8 @@ public class ActivityServiceImpl implements ActivityService {
 	public void activityWarningSchedule() {
     	//使用tryEnter方法可以防止分布式部署时重复执行
     	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
-    		//取当前时间，只取到小时
-        	String formatString = "yyyy-MM-dd HH";
-        	SimpleDateFormat format = new SimpleDateFormat(formatString);
-        	// 不要用这个方法来转时间，会错位
-//        	Date now = DateHelper.parseDataString(format.format(DateHelper.currentGMTTime()), formatString);
-        	Date nowDate = null;
-        	try {
-				nowDate = format.parse(format.format(DateHelper.currentGMTTime()));
-			} catch (Exception e) {
-				nowDate = new Date();
-			}
         	
-        	final Date now = nowDate;
+        	final Date now = DateUtils.getCurrentHour();
         	List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
         	namespaces.add(new NamespaceInfoDTO(0,"zuolin",""));
         	
@@ -2730,7 +2718,7 @@ public class ActivityServiceImpl implements ActivityService {
         				
 //        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 //        						new Date().getTime()+10000);
-        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+        				jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
         						a.getStartTime().getTime() - warningSetting.getTime());
         				LOGGER.debug("设置了一个活动提醒："+a.getId());
 					}

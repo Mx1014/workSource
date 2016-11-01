@@ -143,12 +143,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
-        
-        if(cmd.getReviewResult() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
-        
-        if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
+//        
+//        if(cmd.getReviewResult() != null)
+//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
+//        
+//        if(cmd.getReviewStatus() != null)
+//        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -179,11 +179,6 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
     		if(group != null)
     			dto.setTargetName(group.getName());
 
-    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(standard != null) {
-            	dto.setStandardName(standard.getName());
-            }
-            
     		dtos.add(dto);
         }
         
@@ -257,14 +252,14 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
     		dto.setEquipmentModel(equipment.getEquipmentModel());
     		dto.setQrCodeFlag(equipment.getQrCodeFlag());
     		dto.setStatus(equipment.getStatus());
-    		dto.setStandardId(equipment.getStandardId());
-    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(standard != null) {
-            	dto.setStandardName(standard.getName());
-            }
-            
-            dto.setReviewResult(equipment.getReviewResult());
-            dto.setReviewStatus(equipment.getReviewStatus());
+//    		dto.setStandardId(equipment.getStandardId());
+//    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+//            if(standard != null) {
+//            	dto.setStandardName(standard.getName());
+//            }
+//            
+//            dto.setReviewResult(equipment.getReviewResult());
+//            dto.setReviewStatus(equipment.getReviewStatus());
 
     		dtos.add(dto);
         }
@@ -288,16 +283,16 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
             b.field("name", equipment.getName());
-            b.field("reviewResult", equipment.getReviewResult());
-            b.field("reviewStatus", equipment.getReviewStatus());
-            
-            
-            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(null != standard) {
-                b.field("standardName", standard.getName());
-            } else {
-                b.field("standardName", "");
-            }
+//            b.field("reviewResult", equipment.getReviewResult());
+//            b.field("reviewStatus", equipment.getReviewStatus());
+//            
+//            
+//            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+//            if(null != standard) {
+//                b.field("standardName", standard.getName());
+//            } else {
+//                b.field("standardName", "");
+//            }
             
             b.endObject();
             return b;
