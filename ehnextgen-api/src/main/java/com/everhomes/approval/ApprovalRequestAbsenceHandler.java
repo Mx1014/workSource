@@ -129,7 +129,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		int code = ApprovalLogTitleTemplateCode.ABSENCE_TITLE;
 		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
 		map.put("category",
-				approvalService.findApprovalCategoryById(a.getCategoryId()));
+				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
 		map.put("day", times[0]);
 		map.put("hour", times[1]);
