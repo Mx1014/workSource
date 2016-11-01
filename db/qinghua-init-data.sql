@@ -2034,7 +2034,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	VALUES (112955, 999984, '0', '0', '0', '/home', 'Bizs', '财务咨询', '财务咨询', 'cs://1/image/aW1hZ2UvTVRwaFpHRmhaR1U1TW1ZMFpXVTROMkppWTJGak4yTmhaRFEzTnpFNU9EVm1Odw', '1', '1', '33', '{"type":96,"parentId":96,"displayType": "grid"}', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 	
 	
-UPDATE eh_launch_pad_items set action_data = '{"url":"https://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14479281351428699655%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id = 999992 and id in (112909, 112895);	
+UPDATE eh_launch_pad_items set action_data = '{"url":"https://biz-beta.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz-beta.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14479281351428699655%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id = 999984 and id in (112909, 112895);	
 	
 INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`) 
 	VALUES(3, '企业服务类', 'cs://1/image/aW1hZ2UvTVRvek1XVTFNRFppT1RVMVlXTXhPRFExWkRnMllqYzBPVFZtTmpreU5HRXlOQQ', 1, 0, 1, 999984);
