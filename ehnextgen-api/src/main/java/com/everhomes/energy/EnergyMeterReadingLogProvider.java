@@ -1,11 +1,26 @@
 package com.everhomes.energy;
+ 
+import java.sql.Timestamp;
+import java.util.List;
 
-/**
- * Created by xq.tian on 2016/11/1.
- */
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+
 public interface EnergyMeterReadingLogProvider {
-    /**
-     * 读表
-     */
-    long createEnergyMeterReadingLog(EnergyMeterReadingLog log);
+
+	Long createEnergyMeterReadingLog(EnergyMeterReadingLog obj);
+
+	void updateEnergyMeterReadingLog(EnergyMeterReadingLog obj);
+
+	void deleteEnergyMeterReadingLog(EnergyMeterReadingLog obj);
+
+	EnergyMeterReadingLog getEnergyMeterReadingLogById(Long id);
+
+	List<EnergyMeterReadingLog> queryEnergyMeterReadingLogs(ListingLocator locator, int count,
+			ListingQueryBuilderCallback queryBuilderCallback);
+
+	List<EnergyMeterReadingLog> listMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin);
+
+	EnergyMeterReadingLog getLastMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin);
+ 
 }

@@ -69,6 +69,10 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
                 .limit(pageSize).fetchInto(EnergyMeter.class);
     }
 
+    @Override
+    public List<EnergyMeter> listEnergyMeters() {
+        return context().selectFrom(EH_ENERGY_METERS).fetchInto(EnergyMeter.class);
+    }
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
     }
