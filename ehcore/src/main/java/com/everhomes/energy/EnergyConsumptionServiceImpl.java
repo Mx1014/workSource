@@ -7,6 +7,7 @@ import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -660,16 +661,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);			
 			/**读表用量差*/
 			BigDecimal amount = new BigDecimal(0);
+			
+			Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
+			Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
 			//查看是否有换表,是否有归零
 			for(EnergyMeterReadingLog log : meterReadingLogs){
 				
 				//有归零 量程设置为最大值-锚点,锚点设置为0
 				if(TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
+					resetFlag = TrueOrFalseFlag.TRUE.getCode();
 					amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
 					ReadingAnchor = new BigDecimal(0);
 				}
 				//有换表 量程加上旧表读数-锚点,锚点重置为新读数
 				if(TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
+					changeFlag = TrueOrFalseFlag.TRUE.getCode();
 					EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
 					amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
 					ReadingAnchor = changeLog.getNewReading();
@@ -699,12 +705,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
 			 
 			//写数据库
-			EnergyDateStatistic dayStat = new EnergyDateStatistic();
-			dayStat.setNamespaceId(meter.getNamespaceId());
-			dayStat.setCommunityId(meter.getCommunityId());
-			dayStat.setMeterType(meter.getMeterType());
+			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ; 
 //			dayStat.set
-			
+			dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
+			dayStat.setMeterName(meter.getName()); 
+			dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
+			dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
+			dayStat.setMeterRate(rateSetting.getSettingValue());
+			dayStat.setMeterPrice(priceSetting.getSettingValue());
+			dayStat.setLastReading(dayBeforeYestLastLog.getReading());
+			dayStat.setCurrentReading(yesterdayLastLog.getReading());
+			dayStat.setCurrentAmount(realAmount);
+			dayStat.setCurrentCost(realCost);
+			dayStat.setResetMeterFlag(resetFlag);
+			dayStat.setChangeMeterFlag(changeFlag);
+			dayStat.setCreatorUid(UserContext.current().getUser().getId()); 
+			dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
 		}
 	}
 }
