@@ -923,6 +923,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEnergyMeterReadingLogs.class, Tables.EH_ENERGY_METER_READING_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_METER_READING_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_READING_LOGS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhEnergyDateStatistics.class, Tables.EH_ENERGY_DATE_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_DATE_STATISTICS.ID.max()).from(Tables.EH_ENERGY_DATE_STATISTICS).fetchOne().value1();
+        });
     
     }
 

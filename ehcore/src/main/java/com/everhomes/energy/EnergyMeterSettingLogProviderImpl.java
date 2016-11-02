@@ -52,6 +52,17 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
                 .fetchAnyInto(EnergyMeterSettingLog.class);
     }
 
+    @Override
+    public EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType ,Timestamp statDate) {
+        return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType.getCode()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.le(statDate))
+                .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(statDate))
+                .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
+                .fetchAnyInto(EnergyMeterSettingLog.class);
+    }
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
     }

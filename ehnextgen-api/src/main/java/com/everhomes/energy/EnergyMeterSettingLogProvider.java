@@ -1,5 +1,7 @@
 package com.everhomes.energy;
 
+import java.sql.Timestamp;
+
 import com.everhomes.rest.energy.EnergyMeterSettingType;
 
 /**
@@ -16,4 +18,7 @@ public interface EnergyMeterSettingLogProvider {
      * @param settingType   setting的类型
      */
     EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType);
+
+	EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType,
+			Timestamp statDate);
 }
