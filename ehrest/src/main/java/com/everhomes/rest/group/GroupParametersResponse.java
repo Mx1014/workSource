@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>verifyFlag: 创建是否需要审核，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>memberPostFlag: 是否允许成员发帖，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>memberCommentFlag: 是否允许成员回复，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>adminBroadcastFlag: 是否允许管理发广播，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>adminBroadcastFlag: 是否允许管理员发广播，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>broadcastCount: 每天可发广播数</li>
  * </ul>
  */

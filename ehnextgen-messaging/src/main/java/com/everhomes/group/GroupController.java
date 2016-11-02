@@ -804,7 +804,7 @@ public class GroupController extends ControllerBase {
 	 * <b>URL: /group/getGroupParameters</b>
 	 */
 	@RequestMapping("getGroupParameters")
-	@RestReturn(String.class)
+	@RestReturn(GroupParametersResponse.class)
 	public RestResponse getGroupParameters(GetGroupParametersCommand cmd){
 		return new RestResponse(groupService.getGroupParameters(cmd));
 	}
