@@ -1,12 +1,5 @@
 package com.everhomes.energy;
 
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
@@ -19,6 +12,12 @@ import com.everhomes.server.schema.tables.pojos.EhEnergyMeterChangeLogs;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterChangeLogsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class EnergyMeterChangeLogProviderImpl implements EnergyMeterChangeLogProvider {
@@ -97,6 +96,11 @@ public class EnergyMeterChangeLogProviderImpl implements EnergyMeterChangeLogPro
 	        return objs;
 	    }
 
-	    private void prepareObj(EnergyMeterChangeLog obj) {
+    @Override
+    public EnergyMeterChangeLog getEnergyMeterChangeLogByLogId(Long id) {
+        return null;
+    }
+
+    private void prepareObj(EnergyMeterChangeLog obj) {
 	    }
 }

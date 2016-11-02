@@ -1,12 +1,5 @@
 package com.everhomes.energy;
 
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
@@ -18,7 +11,16 @@ import com.everhomes.server.schema.tables.daos.EhEnergyMeterReadingLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterReadingLogs;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterReadingLogsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogProvider {
@@ -97,6 +99,18 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
         return objs;
     }
 
-    private void prepareObj(EnergyMeterReadingLog obj) {
+    @Override
+    public List<EnergyMeterReadingLog> listMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin) {
+        return null;
+    }
+
+    @Override
+    public EnergyMeterReadingLog getLastMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin) {
+        return null;
+    }
+
+    private void prepareObj(EnergyMeterReadingLog log) {
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        log.setCreatorUid(UserContext.current().getUser().getId());
     }
 }
