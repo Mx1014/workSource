@@ -2517,10 +2517,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public OrganizationMember getOrganizationMemberByContactToken(String email) {
+	public OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(email); 
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(currentNamespaceId));
 		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(condition);

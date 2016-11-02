@@ -230,6 +230,6 @@ public interface OrganizationProvider {
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
 	
-	OrganizationMember getOrganizationMemberByContactToken(String email);
+	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
  
 }
