@@ -7582,10 +7582,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd) { 
 		Long userId = UserContext.current().getUser().getId();
-		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		//通过namespace和email domain 找企业
 		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
-		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,sceneToken.getNamespaceId());
+		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,cmd.getCommunityId());
 		if(null == organizations || organizations.size() == 0){
 			return null;
 		}
@@ -7604,7 +7604,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
 		dto.setUserId(userId);
 		dto.setEnterpriseId(cmd.getOrganizationId());
@@ -7617,7 +7617,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//目前写死30分钟
 		dto.setEndTime(DateHelper.currentGMTTime().getTime()+30*60*1000L);
 		String verifyToken = WebTokenGenerator.getInstance().toWebToken(dto);
-		String host =  configurationProvider.getValue(sceneToken.getNamespaceId(), "home.url", "");
+		String host =  configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 		String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();

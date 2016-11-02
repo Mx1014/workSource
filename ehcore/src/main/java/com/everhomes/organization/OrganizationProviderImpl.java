@@ -2478,19 +2478,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
  
 	@Override
-	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Integer namespaceId) { 
+	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long communityId) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-		 
+		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, 
+				Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+		query.setDistinct(true);
+		if(communityId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+
 		if(emailDomain != null)
-			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
-		if(namespaceId != null)
-			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
-		List<EhOrganizationsRecord> records = query.fetch();
+			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain)); 
+		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
 			return ConvertHelper.convert(r, Organization.class);
 		}).collect(Collectors.toList());
+		 
 		if(organizations ==null || organizations.size()==0)
 			return null;
 		return organizations;
