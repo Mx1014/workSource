@@ -199,5 +199,16 @@ INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `ban
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016110101","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016110101' WHERE `id`=11 AND `namespace_id`=1000000;
 UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016110101","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016110101' WHERE `id`=111 AND `namespace_id`=1000000;
 
+-- 物业报修2.5 数据迁移 add by sunwen 20161102
+UPDATE eh_pm_tasks r1 JOIN eh_pm_tasks r2 on r1.id = r2.id join eh_pm_task_logs l on r1.id = l.task_id 
+join eh_categories c1 on r2.category_id = c1.id JOIN eh_categories c2 on c1.parent_id = c2.id
+set r1.task_category_id = r2.category_id, r1.source_type = 'app', r1.requestor_name = l.operator_name, 
+r1.requestor_phone = l.operator_phone where c2.parent_id = 0 and l.status = 1;
+
+UPDATE eh_pm_tasks r1 JOIN eh_pm_tasks r2 on r1.id = r2.id join eh_pm_task_logs l on r1.id = l.task_id 
+join eh_categories c1 on r2.category_id = c1.id JOIN eh_categories c2 on c1.parent_id = c2.id
+set r1.task_category_id = c2.id, r1.source_type = 'app', r1.requestor_name = l.operator_name, 
+r1.requestor_phone = l.operator_phone where c2.parent_id != 0 and l.status = 1;
+
 
 	
