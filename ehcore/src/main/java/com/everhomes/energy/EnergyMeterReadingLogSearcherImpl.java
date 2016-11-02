@@ -168,8 +168,6 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         FilteredQueryBuilder filteredQuery = QueryBuilders.filteredQuery(qb, fb);
         WrapperQueryBuilder query = new WrapperQueryBuilder(filteredQuery.toString());
 
-        // MatchAllQueryBuilder query = QueryBuilders.matchAllQuery();
-
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue() * pageSize)
                 .setSize(pageSize + 1)
