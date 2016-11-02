@@ -704,6 +704,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
 			realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
 			 
+			//删除昨天的记录（手工刷的时候）
+			energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(),new Date(yesterdayBegin.getTime()));
 			//写数据库
 			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ; 
 //			dayStat.set
@@ -719,9 +721,100 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			dayStat.setCurrentCost(realCost);
 			dayStat.setResetMeterFlag(resetFlag);
 			dayStat.setChangeMeterFlag(changeFlag);
+			dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
 			dayStat.setCreatorUid(UserContext.current().getUser().getId()); 
 			dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
+			energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
+		}
+	}
+	
+	/**
+	 * 每月1日  早上3点10分刷前一个月的读表
+	 * */
+	@Scheduled(cron = "0 10 3 1 * ?")
+	@Override
+    public void caculateEnergyMonthStat(){
+		//查出所有的表
+		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
+		Calendar cal = Calendar.getInstance();
+		Timestamp todayBegin = getDayBegin(cal);
+  	  	cal.add(Calendar.DAY_OF_MONTH, -1);
+  	  	Timestamp yesterdayBegin = getDayBegin(cal);
+  	  	cal.add(Calendar.DAY_OF_MONTH, -1);
+  	  	Timestamp dayBeforeYestBegin = getDayBegin(cal);
+		for(EnergyMeter meter : meters){
+			//拿前天的度数
+			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),yesterdayBegin,dayBeforeYestBegin);
+			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),todayBegin,yesterdayBegin);
+			BigDecimal ReadingAnchor = dayBeforeYestLastLog.getReading();
+			//拿出单个表前一天所有的读表记录
+			List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);			
+			/**读表用量差*/
+			BigDecimal amount = new BigDecimal(0);
+			
+			Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
+			Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
+			//查看是否有换表,是否有归零
+			for(EnergyMeterReadingLog log : meterReadingLogs){
+				
+				//有归零 量程设置为最大值-锚点,锚点设置为0
+				if(TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
+					resetFlag = TrueOrFalseFlag.TRUE.getCode();
+					amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
+					ReadingAnchor = new BigDecimal(0);
+				}
+				//有换表 量程加上旧表读数-锚点,锚点重置为新读数
+				if(TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
+					changeFlag = TrueOrFalseFlag.TRUE.getCode();
+					EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+					amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
+					ReadingAnchor = changeLog.getNewReading();
+				}
+			}
+			//计算当天走了多少字 量程+昨天最后一次读数-锚点
+			amount = amount.add(yesterdayLastLog.getReading().subtract(ReadingAnchor));
+			//获取公式,计算当天的费用
+			EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
+			EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
+			EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
+			EnergyMeterSettingLog costSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
+			String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+			String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+			
+			ScriptEngineManager manager = new ScriptEngineManager();
+			ScriptEngine engine = manager.getEngineByName("js");
+			
+			engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+			engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+			engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+			
+			BigDecimal realAmount = new BigDecimal(0);
+			BigDecimal realCost = new BigDecimal(0);
+			 
+			realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
+			realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+			 
+			//写数据库
+			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ; 
+//			dayStat.set
+			dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
+			dayStat.setMeterName(meter.getName()); 
+			dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
+			dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
+			dayStat.setMeterRate(rateSetting.getSettingValue());
+			dayStat.setMeterPrice(priceSetting.getSettingValue());
+			dayStat.setLastReading(dayBeforeYestLastLog.getReading());
+			dayStat.setCurrentReading(yesterdayLastLog.getReading());
+			dayStat.setCurrentAmount(realAmount);
+			dayStat.setCurrentCost(realCost);
+			dayStat.setResetMeterFlag(resetFlag);
+			dayStat.setChangeMeterFlag(changeFlag);
+			dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+			dayStat.setCreatorUid(UserContext.current().getUser().getId()); 
+			dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
 		}
 	}
 }

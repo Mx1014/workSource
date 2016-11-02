@@ -174,5 +174,7 @@ public interface EnergyConsumptionService {
     /**
      * 根据id获取表记信息
      */
-    EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd); 
+    EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd);
+
+	void caculateEnergyMonthStat(); 
 }

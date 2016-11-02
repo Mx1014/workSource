@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
@@ -17,5 +18,7 @@ public interface EnergyDateStatisticProvider {
 
 	List<EnergyDateStatistic> queryEnergyDateStatistics(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
+
+	void deleteEnergyDateStatisticByDate(Long meterId, Date date);
 
 }
