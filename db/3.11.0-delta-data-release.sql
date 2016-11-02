@@ -210,5 +210,17 @@ join eh_categories c1 on r2.category_id = c1.id JOIN eh_categories c2 on c1.pare
 set r1.task_category_id = c2.id, r1.source_type = 'app', r1.requestor_name = l.operator_name, 
 r1.requestor_phone = l.operator_phone where c2.parent_id != 0 and l.status = 1;
 
+-- 物业报修2.5 数据迁移 add by sunwen 20161102
+UPDATE eh_categories c1 JOIN eh_categories c2 on c1.parent_id = c2.id
+set c1.parent_id = 6 where c2.parent_id = 0 and c1.path like '任务/%';
 
-	
+select * from eh_categories c1 JOIN eh_categories c2 on c1.parent_id = c2.id
+ where c2.parent_id = 0 and c1.path like '任务/%';
+
+DELETE FROM eh_categories where name = '任务' and id != 6;
+-- 威新Link	物业报修2.5菜单 add by sunwen 20161102
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `a   pply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),28000,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),29000,'', 'EhNamespaces', 999991,2);
