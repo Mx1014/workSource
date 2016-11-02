@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
 
@@ -22,5 +23,9 @@ public interface EnergyDateStatisticProvider {
 	void deleteEnergyDateStatisticByDate(Long meterId, Date date);
 
 	EnergyDateStatistic getEnergyDateStatisticByStatDate(Date statDate);
+
+	BigDecimal getSumAmountBetweenDate(Date begin, Date end);
+
+	BigDecimal getSumCostBetweenDate(Date begin, Date end);
 
 }

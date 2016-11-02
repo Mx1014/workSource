@@ -9,6 +9,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -103,9 +104,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private final Logger LOGGER = LoggerFactory.getLogger(EnergyConsumptionServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
+	SimpleDateFormat monthSF = new SimpleDateFormat("yyyyMM");
     
     @Autowired
     private EnergyDateStatisticProvider energyDateStatisticProvider;
+
+    @Autowired
+    private EnergyMonthStatisticProvider energyMonthStatisticProvider;
     @Autowired
     private DbProvider dbProvider;
  
@@ -755,31 +760,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			
 			//取月初的上次度数和月末的当前读数
 			EnergyDateStatistic monthEndStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(new Date(monthEnd.getTime()));
+			EnergyMonthStatistic monthStat = ConvertHelper.convert(monthEndStat, EnergyMonthStatistic.class);
+			monthStat.setDateStr(monthSF.format(monthBegin));
+			EnergyDateStatistic monthBeginStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(new Date(monthBegin.getTime()));
+			monthStat.setLastReading(monthBeginStat.getLastReading());
 			//统计sum 用量和费用
-			
+			monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
+			monthStat.setCurrentCost(energyDateStatisticProvider.getSumCostBetweenDate(new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
 			//delete 
-			energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(), new Date(yesterdayBegin.getTime()));
+			energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.format(monthBegin));
 			//写数据库
-			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ; 
-//			dayStat.set
-			dayStat.setMeterId(meter.getId());
-			dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
-			dayStat.setMeterName(meter.getName()); 
-			dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
-			dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
-			dayStat.setMeterRate(rateSetting.getSettingValue());
-			dayStat.setMeterPrice(priceSetting.getSettingValue());
-			dayStat.setLastReading(dayBeforeYestLastLog.getReading());
-			dayStat.setCurrentReading(yesterdayLastLog.getReading());
-			dayStat.setCurrentAmount(realAmount);
-			dayStat.setCurrentCost(realCost);
-			dayStat.setResetMeterFlag(resetFlag);
-			dayStat.setChangeMeterFlag(changeFlag);
-			dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-			dayStat.setCreatorUid(UserContext.current().getUser().getId()); 
-			dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
+			 
+			energyMonthStatisticProvider.createEnergyMonthStatistic(monthStat);
 		}
 	}
 }
