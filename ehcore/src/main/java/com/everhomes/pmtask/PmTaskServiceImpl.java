@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -43,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -236,7 +240,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 	    				"OrganizationId cannot be null.");
 			}
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+			List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), current.getId());
+			
+			List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getOwnerId(), current.getId());
+			privileges.addAll(organizationPrivileges);
+			
 	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
 	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
 	    				cmd.getPageAnchor(), cmd.getPageSize());
@@ -319,21 +327,29 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetPrivilegesDTO dto = new GetPrivilegesDTO();
 		User user = UserContext.current().getUser();
 
-		List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId());
+
+		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		privileges.addAll(organizationPrivileges);
+		
 		List<String> result = new ArrayList<String>();
+		Set<String> set = new HashSet<String>();
 		for(Long p:privileges){
 			if(p.longValue() == PrivilegeConstants.LISTALLTASK)
-				result.add(PmTaskPrivilege.LISTALLTASK.getCode());
+				set.add(PmTaskPrivilege.LISTALLTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.LISTUSERTASK)
-				result.add(PmTaskPrivilege.LISTUSERTASK.getCode());
+				set.add(PmTaskPrivilege.LISTUSERTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.ASSIGNTASK)
-				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
+				set.add(PmTaskPrivilege.ASSIGNTASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.COMPLETETASK)
-				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
+				set.add(PmTaskPrivilege.COMPLETETASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.CLOSETASK)
-				result.add(PmTaskPrivilege.CLOSETASK.getCode());
+				set.add(PmTaskPrivilege.CLOSETASK.getCode());
 			else if(p.longValue() == PrivilegeConstants.REVISITTASK)
-				result.add(PmTaskPrivilege.REVISITTASK.getCode());
+				set.add(PmTaskPrivilege.REVISITTASK.getCode());
+		}
+		for(String s: set) {
+			result.add(s);
 		}
 		dto.setPrivileges(result);
 		return dto;
@@ -357,9 +373,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Timestamp now = new Timestamp(time);
 		task.setStatus(status);
 		 
+		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+		
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(ownerId, user.getId());
+		privileges.addAll(organizationPrivileges);
 		if(status.equals(PmTaskStatus.PROCESSED.getCode())){
 			task.setProcessedTime(now);
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.COMPLETETASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
@@ -367,7 +387,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 		if(status.equals(PmTaskStatus.CLOSED.getCode())){
 			task.setClosedTime(now);
-			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
+//			List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, organizationId, user.getId());
 	    	if(!privileges.contains(PrivilegeConstants.CLOSETASK)){
 	    		returnNoPrivileged(privileges, user);
 			}
@@ -550,8 +570,11 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetUser not found");
 		}
 		
-		
-    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getOwnerId(), user.getId());
+
+		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		privileges.addAll(organizationPrivileges);
+//    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
     	if(!privileges.contains(PrivilegeConstants.ASSIGNTASK)){
     		returnNoPrivileged(privileges, user);
 		}
@@ -1101,6 +1124,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			return "已完成";
 		else if(status.byteValue() == 4)
 			return "已关闭";
+		else if(status.byteValue() == 5)
+			return "已回访";
 		else
 			return "";
 	}
@@ -1813,14 +1838,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 					
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
 					
-					RoleAssignment roleAssignment = new RoleAssignment();
-					roleAssignment.setRoleId(pmTaskTarget.getRoleId());
-					roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-					roleAssignment.setOwnerId(cmd.getOrganizationId());
-					roleAssignment.setTargetType(EntityType.USER.getCode());
-					roleAssignment.setTargetId(targetIds.get(i));
-					roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-					aclProvider.createRoleAssignment(roleAssignment);
+					List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), EntityType.USER.getCode(), targetIds.get(i));
+					
+					if(null == roleAssignments || roleAssignments.size() == 0) {
+						RoleAssignment roleAssignment = new RoleAssignment();
+						roleAssignment.setRoleId(pmTaskTarget.getRoleId());
+						roleAssignment.setOwnerType(EntityType.COMMUNITY.getCode());
+						roleAssignment.setOwnerId(cmd.getOwnerId());
+						roleAssignment.setTargetType(EntityType.USER.getCode());
+						roleAssignment.setTargetId(targetIds.get(i));
+						roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
+						aclProvider.createRoleAssignment(roleAssignment);
+					}
 				}
 				
 			}
@@ -1855,8 +1885,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			pmTaskProvider.updateTaskTarget(pmTaskTarget);
 			
-			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(),
-					cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getTargetId());
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
+					cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getTargetId());
 			for(RoleAssignment r: roleAssignments) {
 				if(r.getRoleId().equals(roleId)) {
 					aclProvider.deleteRoleAssignment(r);
