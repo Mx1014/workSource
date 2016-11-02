@@ -224,3 +224,24 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 	VALUES((@menu_scope_id := @menu_scope_id + 1),28000,'', 'EhNamespaces', 999991,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES((@menu_scope_id := @menu_scope_id + 1),29000,'', 'EhNamespaces', 999991,2);
+
+-- 物业报修2.5增加权限 add by sunwen 20161102
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+  VALUES (805,0,'查看我的任务','任务管理 查看我的任务',NULL);
+  
+UPDATE eh_acl_privileges SET name = '查看所有任务', description = '任务管理 查看所有任务' WHERE id = 904;
+
+UPDATE eh_web_menu_privileges SET name = '查看所有任务', discription = '查看所有任务 全部权限' where privilege_id = 904 and menu_id = 24000;
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),805,24000,'查看我的任务',1,1,'查看我的任务 全部权限',603);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),920,24000,'完成回访',1,1,'完成回访 全部权限',603);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '805', 1001,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '805', 1002,0,1,now());
+	
