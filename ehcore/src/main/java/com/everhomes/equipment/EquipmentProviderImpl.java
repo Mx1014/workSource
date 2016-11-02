@@ -37,6 +37,7 @@ import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesDao;
@@ -107,6 +108,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	
 	@Autowired
     private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private EquipmentTasksSearcher equipmentTasksSearcher;
 	
 	@PostConstruct
 	public void init() {
@@ -1357,6 +1361,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			query.fetch().map((r) -> {
 				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
 				closeTask(task);
+				equipmentTasksSearcher.feedDoc(task);
 				return null;
 			});
 			return AfterAction.next;
@@ -1387,6 +1392,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			query.fetch().map((r) -> {
 				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
 				closeReviewTasks(task);
+				equipmentTasksSearcher.feedDoc(task);
 				return null;
 			});
 			return AfterAction.next;
