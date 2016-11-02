@@ -1168,7 +1168,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			map.put("nickName", l.getNickName());
 			map.put("approvalType",
 					localeStringProvider.find(ApprovalTypeTemplateCode.SCOPE, l.getApprovalType().toString(), UserContext.current()
-							.getUser().getLocale()));
+							.getUser().getLocale()).getText());
 			result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 
 		} else {
