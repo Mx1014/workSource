@@ -2452,7 +2452,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1;
 		row.createCell(++i).setCellValue(dto.getTaskName());
-		row.createCell(++i).setCellValue((StandardType.fromStatus(dto.getTaskType()).getName()));
+		if(null != dto.getTaskType()  && null != StandardType.fromStatus(dto.getTaskType()))
+			row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getTaskType()).getName());
 		row.createCell(++i).setCellValue(dto.getEquipmentName());
 		if(null != dto.getExecutiveStartTime())
 			row.createCell(++i).setCellValue(dto.getExecutiveStartTime().toString());
@@ -2464,7 +2465,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		row.createCell(++i).setCellValue(dto.getEquipmentLocation());
-		row.createCell(++i).setCellValue(EquipmentTaskStatus.fromStatus(dto.getStatus()).getName());
+		
+		if(null != dto.getStatus() && null != EquipmentTaskStatus.fromStatus(dto.getStatus()))
+			row.createCell(++i).setCellValue(EquipmentTaskStatus.fromStatus(dto.getStatus()).getName());
+		
 		if(ReviewResult.NONE.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("");
 		if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
@@ -2472,7 +2476,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(dto.getReviewResult())))
 			row.createCell(++i).setCellValue("审核不通过");
 		
-		row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
+		if(null != dto.getResult() && null != EquipmentTaskResult.fromStatus(dto.getResult()))
+			row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
 		
 		if(dto.getProcessExpireTime() != null) {
 			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
