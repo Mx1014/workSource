@@ -12,7 +12,7 @@ import java.sql.Timestamp;
  *     <li>meterName: 表记名称</li>
  *     <li>meterNumber: 表记编号</li>
  *     <li>reading: 读数</li>
- *     <li>lastReading: 上次读数(旧表读数)</li>
+ *     <li>oldReading: 旧表读数(只有换表情况下才会有该字段)</li>
  *     <li>operatorName: 读表人名字</li>
  *     <li>operateTime: 读表时间</li>
  *     <li>resetMeterFlag: 是否为复始计量 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
@@ -26,7 +26,7 @@ public class EnergyMeterReadingLogDTO {
     private String meterName;
     private String meterNumber;
     private BigDecimal reading;
-    private BigDecimal lastReading;
+    private BigDecimal oldReading;
     private String operatorName;
     private Timestamp operateTime;
     private Byte resetMeterFlag;
@@ -68,12 +68,12 @@ public class EnergyMeterReadingLogDTO {
         return reading;
     }
 
-    public BigDecimal getLastReading() {
-        return lastReading;
+    public BigDecimal getOldReading() {
+        return oldReading;
     }
 
-    public void setLastReading(BigDecimal lastReading) {
-        this.lastReading = lastReading;
+    public void setOldReading(BigDecimal oldReading) {
+        this.oldReading = oldReading;
     }
 
     public String getOperatorName() {

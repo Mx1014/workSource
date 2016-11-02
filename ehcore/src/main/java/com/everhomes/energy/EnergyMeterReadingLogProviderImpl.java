@@ -5,12 +5,12 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterReadingLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterReadingLogs;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterReadingLogsRecord;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -28,36 +28,42 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
     @Autowired
     private DbProvider dbProvider;
 
-    @Autowired
-    private ShardingProvider shardingProvider;
+    // @Autowired
+    // private ShardingProvider shardingProvider;
 
     @Autowired
     private SequenceProvider sequenceProvider;
 
     @Override
-    public Long createEnergyMeterReadingLog(EnergyMeterReadingLog obj) {
+    public Long createEnergyMeterReadingLog(EnergyMeterReadingLog log) {
         String key = NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeterReadingLogs.class);
-				long id = sequenceProvider.getNextSequence(key);
+		long id = sequenceProvider.getNextSequence(key);
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
-        obj.setId(id);
-        prepareObj(obj);
+        log.setId(id);
+        log.setCreatorUid(UserContext.current().getUser().getId());
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        prepareObj(log);
         EhEnergyMeterReadingLogsDao dao = new EhEnergyMeterReadingLogsDao(context.configuration());
-        dao.insert(obj);
+        dao.insert(log);
         return id;
     }
 
-    @Override
+    /*@Override
     public void updateEnergyMeterReadingLog(EnergyMeterReadingLog obj) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnergyMeterReadingLogsDao dao = new EhEnergyMeterReadingLogsDao(context.configuration());
         dao.update(obj);
-    }
+    }*/
 
     @Override
-    public void deleteEnergyMeterReadingLog(EnergyMeterReadingLog obj) {
+    public void deleteEnergyMeterReadingLog(EnergyMeterReadingLog log) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnergyMeterReadingLogsDao dao = new EhEnergyMeterReadingLogsDao(context.configuration());
-        dao.deleteById(obj.getId());
+        log.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+        prepareObj(log);
+        log.setUpdateUid(UserContext.current().getUser().getId());
+        log.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(log);
     }
 
     @Override
@@ -91,6 +97,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
             query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.ID.gt(locator.getAnchor()));
             }
 
+        query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
         query.addLimit(count);
         List<EnergyMeterReadingLog> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, EnergyMeterReadingLog.class);
@@ -114,11 +121,11 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
                 .where(Tables.EH_ENERGY_METER_READING_LOGS.ID.ge(pageAnchor))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .limit(pageSize).fetchInto(EnergyMeterReadingLog.class);
     }
 
     private void prepareObj(EnergyMeterReadingLog log) {
-        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        log.setCreatorUid(UserContext.current().getUser().getId());
+
     }
 }

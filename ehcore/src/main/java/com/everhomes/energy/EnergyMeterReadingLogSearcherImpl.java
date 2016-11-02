@@ -52,6 +52,9 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private EnergyMeterChangeLogProvider changeLogProvider;
+
     @Override
     public void deleteById(Long id) {
         deleteById(id.toString());
@@ -90,6 +93,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             builder.field("billCategoryId", meter.getBillCategoryId());
             builder.field("serviceCategoryId", meter.getServiceCategoryId());
             builder.field("reading", readingLog.getReading());
+            builder.field("oldReading", readingLog.getOldMeterReading());
             builder.field("resetFlag", readingLog.getResetMeterFlag());
             builder.field("changeFlag", readingLog.getChangeMeterFlag());
             builder.field("meterName", meter.getName());
@@ -148,10 +152,11 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             rangeTime.gte(cmd.getStartTime());
         }
         if (cmd.getEndTime() != null) {
-            rangeTime.gte(cmd.getEndTime());
+            rangeTime.lte(cmd.getEndTime());
         }
         if (cmd.getEndTime() != null || cmd.getEndTime() != null) {
             fb = FilterBuilders.andFilter(fb, rangeTime);
+
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -160,11 +165,15 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             anchor = cmd.getPageAnchor();
         }
 
-        qb = QueryBuilders.filteredQuery(qb, fb);
+        FilteredQueryBuilder filteredQuery = QueryBuilders.filteredQuery(qb, fb);
+        WrapperQueryBuilder query = new WrapperQueryBuilder(filteredQuery.toString());
+
+        // MatchAllQueryBuilder query = QueryBuilders.matchAllQuery();
+
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue() * pageSize)
                 .setSize(pageSize + 1)
-                .setQuery(qb);
+                .setQuery(query);
 
         SearchResponse rsp = builder.execute().actionGet();
         List<EnergyMeterReadingLogDTO> logs = toMeterReadingLogDTOList(rsp);
@@ -184,6 +193,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             EnergyMeterReadingLogDTO dto = new EnergyMeterReadingLogDTO();
             Map<String, Object> source = hit.getSource();
             dto.setReading(BigDecimal.valueOf((Double) source.get("reading")));
+            dto.setOldReading(BigDecimal.valueOf((Double) source.get("oldReading")));
             dto.setId(Long.valueOf(hit.getId()));
             dto.setMeterName((String) source.get("meterName"));
             dto.setResetMeterFlag(Byte.valueOf(source.get("resetFlag")+""));
@@ -194,10 +204,6 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dtoList.add(dto);
         }
         return dtoList;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(System.currentTimeMillis());
     }
 
     @Override

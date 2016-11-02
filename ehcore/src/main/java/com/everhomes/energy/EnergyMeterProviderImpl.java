@@ -3,6 +3,7 @@ package com.everhomes.energy;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMetersDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
@@ -65,6 +66,7 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
     public List<EnergyMeter> listEnergyMeters(Long pageAnchor, Integer pageSize) {
         return context().selectFrom(EH_ENERGY_METERS)
                 .where(EH_ENERGY_METERS.ID.ge(pageAnchor))
+                .and(EH_ENERGY_METERS.STATUS.eq(EnergyMeterStatus.ACTIVE.getCode()))
                 .limit(pageSize).fetchInto(EnergyMeter.class);
     }
 

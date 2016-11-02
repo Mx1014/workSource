@@ -10,7 +10,7 @@ public interface EnergyMeterReadingLogProvider {
 
 	Long createEnergyMeterReadingLog(EnergyMeterReadingLog obj);
 
-	void updateEnergyMeterReadingLog(EnergyMeterReadingLog obj);
+	// void updateEnergyMeterReadingLog(EnergyMeterReadingLog obj);
 
 	void deleteEnergyMeterReadingLog(EnergyMeterReadingLog obj);
 
