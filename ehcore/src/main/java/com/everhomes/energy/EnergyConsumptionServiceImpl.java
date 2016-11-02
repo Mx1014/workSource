@@ -936,9 +936,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
   	  	Timestamp dayBeforeYestBegin = getDayBegin(cal);
 		for(EnergyMeter meter : meters){
 			//拿前天的度数
-			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),yesterdayBegin,dayBeforeYestBegin);
-			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),todayBegin,yesterdayBegin);
-			BigDecimal ReadingAnchor = dayBeforeYestLastLog.getReading();
+			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
+			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
+			BigDecimal ReadingAnchor = meter.getStartReading();
+			BigDecimal dayLastReading = meter.getStartReading();
+			BigDecimal dayCurrReading = meter.getStartReading();
+			if(null != dayBeforeYestLastLog){
+				ReadingAnchor = dayBeforeYestLastLog.getReading();
+				dayLastReading =  dayBeforeYestLastLog.getReading();
+			}
+
+			if(null != yesterdayLastLog){
+				dayCurrReading = yesterdayLastLog.getReading(); 
+			}
 			//拿出单个表前一天所有的读表记录
 			List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);			
 			/**读表用量差*/
@@ -964,7 +974,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 				}
 			}
 			//计算当天走了多少字 量程+昨天最后一次读数-锚点
-			amount = amount.add(yesterdayLastLog.getReading().subtract(ReadingAnchor));
+			amount = amount.add(dayCurrReading.subtract(ReadingAnchor));
 			//获取公式,计算当天的费用
 			EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
 			EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
@@ -1005,8 +1015,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
 			dayStat.setMeterRate(rateSetting.getSettingValue());
 			dayStat.setMeterPrice(priceSetting.getSettingValue());
-			dayStat.setLastReading(dayBeforeYestLastLog.getReading());
-			dayStat.setCurrentReading(yesterdayLastLog.getReading());
+			dayStat.setLastReading(dayLastReading);
+			dayStat.setCurrentReading(dayCurrReading);
 			dayStat.setCurrentAmount(realAmount);
 			dayStat.setCurrentCost(realCost);
 			dayStat.setResetMeterFlag(resetFlag);
