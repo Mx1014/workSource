@@ -7553,17 +7553,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@"));
 		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,sceneToken.getNamespaceId());
 		if(null == organizations || organizations.size() == 0){
-
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_NOT_EXISTS,
-					"organization group type error");
+			return null;
 		}
-		//如果只有一个公司,直接认证,返回空
+		//如果只有一个公司,直接认证
 		if(organizations.size() == 1){
 			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
 			cmd2.setOrganizationId(organizations.get(0).getId());
 			applyForEnterpriseContactByEmail(cmd2);
-			return null;
 		}
+		
 		return organizations.stream().map(r->{
 			return ConvertHelper.convert(r, OrganizationDTO.class); 
 			}).collect(Collectors.toList());
