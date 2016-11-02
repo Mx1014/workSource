@@ -10,5 +10,6 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_METER_NOT_EXIST = 10001;// 表记不存在
     int ERR_METER_CATEGORY_NOT_EXIST = 10002;// 表记分类不存在
     int ERR_METER_FORMULA_NOT_EXIST = 10003;// 公式不存在
+    int ERR_METER_FORMULA_ERROR = 10004;//公式不能计算
 
 }

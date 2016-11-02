@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -48,6 +49,7 @@ import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
 import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
 import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
 import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
 import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
 import com.everhomes.rest.energy.EnergyLocaleStringCode;
 import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
@@ -699,15 +701,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			
 			BigDecimal realAmount = new BigDecimal(0);
 			BigDecimal realCost = new BigDecimal(0);
-			 
-			realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
-			realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
-			 
+
+			try {
+				realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
+				realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+			} catch (ScriptException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				  LOGGER.error("The energy meter error");
+		            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
+		       
+			}
 			//删除昨天的记录（手工刷的时候）
 			energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(),new Date(yesterdayBegin.getTime()));
 			//写数据库
 			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ; 
 //			dayStat.set
+			dayStat.setMeterId(meter.getId());
 			dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
 			dayStat.setMeterName(meter.getName()); 
 			dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
@@ -736,67 +746,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void caculateEnergyMonthStat(){
 		//查出所有的表
 		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
-		Calendar cal = Calendar.getInstance();
-		Timestamp todayBegin = getDayBegin(cal);
+		Calendar cal = Calendar.getInstance(); 
   	  	cal.add(Calendar.DAY_OF_MONTH, -1);
-  	  	Timestamp yesterdayBegin = getDayBegin(cal);
-  	  	cal.add(Calendar.DAY_OF_MONTH, -1);
-  	  	Timestamp dayBeforeYestBegin = getDayBegin(cal);
+  	  	Timestamp monthEnd = getDayBegin(cal);
+  	  	cal.set(Calendar.DAY_OF_MONTH, 1);
+  	  	Timestamp monthBegin = getDayBegin(cal);
 		for(EnergyMeter meter : meters){
-			//拿前天的度数
-			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),yesterdayBegin,dayBeforeYestBegin);
-			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),todayBegin,yesterdayBegin);
-			BigDecimal ReadingAnchor = dayBeforeYestLastLog.getReading();
-			//拿出单个表前一天所有的读表记录
-			List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);			
-			/**读表用量差*/
-			BigDecimal amount = new BigDecimal(0);
 			
-			Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
-			Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
-			//查看是否有换表,是否有归零
-			for(EnergyMeterReadingLog log : meterReadingLogs){
-				
-				//有归零 量程设置为最大值-锚点,锚点设置为0
-				if(TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
-					resetFlag = TrueOrFalseFlag.TRUE.getCode();
-					amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
-					ReadingAnchor = new BigDecimal(0);
-				}
-				//有换表 量程加上旧表读数-锚点,锚点重置为新读数
-				if(TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
-					changeFlag = TrueOrFalseFlag.TRUE.getCode();
-					EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
-					amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
-					ReadingAnchor = changeLog.getNewReading();
-				}
-			}
-			//计算当天走了多少字 量程+昨天最后一次读数-锚点
-			amount = amount.add(yesterdayLastLog.getReading().subtract(ReadingAnchor));
-			//获取公式,计算当天的费用
-			EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
-			EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
-			EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
-			EnergyMeterSettingLog costSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
-			String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-			String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+			//取月初的上次度数和月末的当前读数
+			EnergyDateStatistic monthEndStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(new Date(monthEnd.getTime()));
+			//统计sum 用量和费用
 			
-			ScriptEngineManager manager = new ScriptEngineManager();
-			ScriptEngine engine = manager.getEngineByName("js");
-			
-			engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-			engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
-			engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
-			
-			BigDecimal realAmount = new BigDecimal(0);
-			BigDecimal realCost = new BigDecimal(0);
-			 
-			realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
-			realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
-			 
+			//delete 
+			energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(), new Date(yesterdayBegin.getTime()));
 			//写数据库
 			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ; 
 //			dayStat.set
+			dayStat.setMeterId(meter.getId());
 			dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
 			dayStat.setMeterName(meter.getName()); 
 			dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());

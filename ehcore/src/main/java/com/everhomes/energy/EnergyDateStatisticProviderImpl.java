@@ -1,10 +1,12 @@
 package com.everhomes.energy;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -18,7 +20,7 @@ import com.everhomes.server.schema.tables.pojos.EhEnergyDateStatistics;
 import com.everhomes.server.schema.tables.records.EhEnergyDateStatisticsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-
+@Component
 public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvider {
 	   @Autowired
 	    private DbProvider dbProvider;
@@ -96,4 +98,19 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 
 	    private void prepareObj(EnergyDateStatistic obj) {
 	    }
+
+		@Override
+		public void deleteEnergyDateStatisticByDate(Long meterId, Date date) {
+			// TODO Auto-generated method stub
+			DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			context.delete(Tables.EH_ENERGY_DATE_STATISTICS)
+			.where(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.eq(date))
+			.and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId)).execute();
+		}
+
+		@Override
+		public EnergyDateStatistic getEnergyDateStatisticByStatDate(Date statDate) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 }

@@ -21,4 +21,6 @@ public interface EnergyDateStatisticProvider {
 
 	void deleteEnergyDateStatisticByDate(Long meterId, Date date);
 
+	EnergyDateStatistic getEnergyDateStatisticByStatDate(Date statDate);
+
 }
