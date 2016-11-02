@@ -7610,6 +7610,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dto.setUserId(userId);
 		dto.setEnterpriseId(cmd.getOrganizationId());
 		//TODO: 判断邮箱是否被使用
+		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(cmd.getEmail());
+		if(null != member ){
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_REPEAT,
+					"email already exists");
+		}
 		// 添加联系人
 		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
 		cmd2.setContactType(ContactType.EMAIL.getCode());

@@ -2515,4 +2515,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return results;
  
 	}
+
+	@Override
+	public OrganizationMember getOrganizationMemberByContactToken(String email) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(email); 
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(condition);
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.asc());
+		query.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		if(null == result || result.size() == 0 )
+			return null;
+		return result.get(0);
+	}
 }
