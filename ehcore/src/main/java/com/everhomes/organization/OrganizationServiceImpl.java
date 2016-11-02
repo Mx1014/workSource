@@ -7644,8 +7644,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    .subject(mailSubject)
 	    .text(mailText)
 	    .build();
-
-		new Mailer("smtp.mxhichina.com", 25, "zuolin@zuolin.com", "abc123!@#").sendMail(email);
+		try{
+			new Mailer("smtp.mxhichina.com", 25, "zuolin@zuolin.com", "abc123!@#").sendMail(email);
+		}catch (Exception e){
+			LOGGER.error(e.getLocalizedMessage());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
+					"send email error");
+		}
 		
 	}
 
