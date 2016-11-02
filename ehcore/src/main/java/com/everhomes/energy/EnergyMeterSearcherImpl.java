@@ -1,6 +1,8 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.energy.EnergyLocaleStringCode;
 import com.everhomes.rest.energy.EnergyMeterDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
@@ -43,6 +45,9 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
 
     @Autowired
     private EnergyMeterProvider meterProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
 
     @Override
     public void deleteById(Long id) {
@@ -160,7 +165,11 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     }
 
     private EnergyMeterDTO toMeterDTO(EnergyMeter meter) {
-        return ConvertHelper.convert(meter, EnergyMeterDTO.class);
+        EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
+        String meterStatusLocale = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_STATUS,
+                String.valueOf(meter.getStatus()), UserContext.current().getUser().getLocale(), "");
+        dto.setStatus(meterStatusLocale);
+        return dto;
     }
 
     @Override

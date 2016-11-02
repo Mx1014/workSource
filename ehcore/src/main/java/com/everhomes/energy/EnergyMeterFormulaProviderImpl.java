@@ -8,6 +8,8 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_FORMULAS;
 
 /**
@@ -36,6 +38,14 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
                 .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_FORMULAS.NAME.eq(name))
                 .fetchAnyInto(EnergyMeterFormula.class);
+    }
+
+    @Override
+    public List<EnergyMeterFormula> listMeterFormulas(Integer namespaceId, Byte formulaType) {
+        return context().selectFrom(EH_ENERGY_METER_FORMULAS)
+                .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(formulaType))
+                .fetchInto(EnergyMeterFormula.class);
     }
 
     private DSLContext context() {

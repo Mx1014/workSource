@@ -4,8 +4,11 @@ import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.energy.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
+import com.everhomes.server.schema.tables.records.EhEnergyMeterSettingLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEnergyMetersRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.jooq.Result;
@@ -16,9 +19,11 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METERS;
+import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_SETTING_LOGS;
 
 /**
  * Created by xq.tian on 2016/10/31.
@@ -72,13 +77,15 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     private static final String GET_ENERGY_STATISTIC_BY_YOY_URL = "/energy/getEnergyStatisticByYoy";
     //24. 抄表
     private static final String READ_ENERGY_METER_URL = "/energy/readEnergyMeter";
+    //25. 获取表信息
+    private static final String GET_ENERGY_METER_URL = "/energy/getEnergyMeter";
 
 
     //1. 新建表记(水表,电表等)
     @Test
     public void testCreateEnergyMeter() {
         logon();
-        CreateEnergyMeterRestResponse response = createMeter();
+        CreateEnergyMeterRestResponse response = getMeter();
         assertNotNull(response);
         assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -98,7 +105,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertTrue(logs.size() == 4);
     }
 
-    private CreateEnergyMeterRestResponse createMeter() {
+    private CreateEnergyMeterRestResponse getMeter() {
         CreateEnergyMeterCommand cmd = new CreateEnergyMeterCommand();
         cmd.setOrganizationId(1L);
         cmd.setCommunityId(1L);
@@ -120,7 +127,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     @Test
     public void testUpdateEnergyMeter() {
         logon();
-        createMeter();
+        getMeter();
         EhEnergyMetersRecord meter = context().selectFrom(EH_ENERGY_METERS).fetchAny();
         UpdateEnergyMeterCommand cmd = new UpdateEnergyMeterCommand();
         cmd.setOrganizationId(1L);
@@ -148,7 +155,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
     //3. 搜索表记
     @Test
-    public void testSearchEnergyMeter() throws IOException {
+    public void testSearchEnergyMeter() {
         testImportEnergyMeter();
         logon();
         SearchEnergyMeterCommand cmd = new SearchEnergyMeterCommand();
@@ -172,15 +179,77 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertTrue(myResponse.getMeters().size() > 0);
     }
 
+    //6. 批量修改表记属性
+    @Test
+    public void testBatchUpdateEnergyMeterSettings() {
+        logon();
+        testImportEnergyMeter();
+        List<EhEnergyMeters> metersList = context().selectFrom(EH_ENERGY_METERS).fetchInto(EhEnergyMeters.class);
+        assertNotNull(metersList);
+        assertTrue(metersList.size() > 2);
+
+        BatchUpdateEnergyMeterSettingsCommand cmd = new BatchUpdateEnergyMeterSettingsCommand();
+        cmd.setOrganizationId(1L);
+        List<Long> longList = new ArrayList<>();
+        longList.add(metersList.get(0).getId());
+        longList.add(metersList.get(1).getId());
+        cmd.setMeterIds(longList);
+        cmd.setPrice(new BigDecimal("22"));
+        cmd.setRate(new BigDecimal("33"));
+        cmd.setPriceStart(DateHelper.currentGMTTime().getTime());
+        cmd.setRateStart(DateHelper.currentGMTTime().getTime());
+
+        RestResponseBase response = httpClientService.restPost(BATCH_UPDATE_ENERGY_METER_SETTINGS_URL, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        EhEnergyMeterSettingLogsRecord result = context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(metersList.get(0).getId()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_VALUE.eq(new BigDecimal("22")))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(EnergyMeterSettingType.PRICE.getCode()))
+                .fetchAny();
+
+        assertNotNull("The new price setting log should be not null.", result);
+
+        result = context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(metersList.get(0).getId()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_VALUE.eq(new BigDecimal("33")))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(EnergyMeterSettingType.RATE.getCode()))
+                .fetchAny();
+
+        assertNotNull("The new rate setting log should be not null.", result);
+    }
+
+
     //14. 导入表记(Excel)
     @Test
-    public void testImportEnergyMeter() throws IOException {
+    public void testImportEnergyMeter() {
+        try {
+            logon();
+            ImportEnergyMeterCommand cmd = new ImportEnergyMeterCommand();
+            cmd.setOrganizationId(1L);
+            cmd.setCommunityId(1L);
+            String filePath = null;
+                filePath = new File("").getCanonicalPath()+"\\src\\test\\data\\excel\\energy_meter_template.xlsx";
+            RestResponseBase response = httpClientService.postFile(IMPORT_ENERGY_METER_URL, cmd, new File(filePath), RestResponseBase.class);
+            assertNotNull(response);
+            assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+            Result<EhEnergyMetersRecord> result = context().selectFrom(EH_ENERGY_METERS).fetch();
+            assertTrue(result.size() == 3);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //14. 导入表记(Excel)
+    @Test
+    public void testGetEnergyMeter() {
         logon();
-        ImportEnergyMeterCommand cmd = new ImportEnergyMeterCommand();
+        GetEnergyMeterCommand cmd = new GetEnergyMeterCommand();
         cmd.setOrganizationId(1L);
-        cmd.setCommunityId(1L);
-        String filePath = new File("").getCanonicalPath()+"\\src\\test\\data\\excel\\energy_meter_template.xlsx";
-        RestResponseBase response = httpClientService.postFile(IMPORT_ENERGY_METER_URL, cmd, new File(filePath), RestResponseBase.class);
+        cmd.setMeterId(1L);
+        RestResponseBase response = httpClientService.restPost(GET_ENERGY_METER_URL, cmd, RestResponseBase.class);
         assertNotNull(response);
         assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 

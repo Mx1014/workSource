@@ -2,7 +2,7 @@ package com.everhomes.energy;
 
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterReadingLogs;
 import com.everhomes.util.StringHelper;
-
+ 
 public class EnergyMeterReadingLog extends EhEnergyMeterReadingLogs {
 	 /**
 	 * 
@@ -12,5 +12,5 @@ public class EnergyMeterReadingLog extends EhEnergyMeterReadingLogs {
 	@Override
 	    public String toString() {
 	        return StringHelper.toJsonString(this);
-	    }
+	    } 
 }

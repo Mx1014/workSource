@@ -8,19 +8,19 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.script.ScriptEngineManager;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.script.ScriptEngineService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
@@ -44,7 +45,7 @@ import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
 import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
-import com.everhomes.rest.energy.EnergyLocaleStirngCode;
+import com.everhomes.rest.energy.EnergyLocaleStringCode;
 import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
 import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
 import com.everhomes.rest.energy.EnergyMeterDTO;
@@ -58,6 +59,7 @@ import com.everhomes.rest.energy.EnergyMeterType;
 import com.everhomes.rest.energy.EnergyStatByYearDTO;
 import com.everhomes.rest.energy.EnergyStatCommand;
 import com.everhomes.rest.energy.EnergyStatDTO;
+import com.everhomes.rest.energy.GetEnergyMeterCommand;
 import com.everhomes.rest.energy.ImportEnergyMeterCommand;
 import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
 import com.everhomes.rest.energy.ListEnergyFormulasCommand;
@@ -73,13 +75,16 @@ import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
 import com.everhomes.search.EnergyMeterSearcher;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+ 
 
 /**
  * 能耗管理service
@@ -93,9 +98,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private DbProvider dbProvider;
-
-    @Autowired
-    private EnergyMeterReadingLogProvider meterReadingLogProvider;
+ 
     @Autowired
     private EnergyMeterChangeLogProvider meterChangeLogProvider;
     
@@ -103,7 +106,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private OrganizationProvider organizationProvider;
 
     @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
     private LocaleStringProvider localeStringProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
 
     @Autowired
     private EnergyMeterProvider meterProvider;
@@ -116,6 +125,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterCategoryProvider meterCategoryProvider;
+
+    @Autowired
+    private EnergyMeterReadingLogProvider meterReadingLogProvider;
 
     @Autowired
     private EnergyMeterSearcher meterSearcher;
@@ -174,7 +186,38 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter) {
-        return ConvertHelper.convert(meter, EnergyMeterDTO.class);
+        EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
+
+        // 表的类型
+        String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(meter.getMeterType()), currLocale(), "");
+        dto.setMeterType(meterType);
+
+        // 账单项目
+        EnergyMeterCategory billCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getBillCategoryId());
+        dto.setBillCategory(billCategory.getName());
+
+        // 分类
+        EnergyMeterCategory serviceCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getServiceCategoryId());
+        dto.setServiceCategory(serviceCategory.getName());
+
+        // 当前价格
+        EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
+        dto.setPrice(priceLog.getSettingValue());
+
+        // 当前倍率
+        EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE);
+        dto.setRate(rateLog.getSettingValue());
+
+        // 当前费用公式名称
+        EnergyMeterSettingLog costLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.COST_FORMULA);
+        EnergyMeterFormula costFormula = meterFormulaProvider.findById(currNamespaceId(), costLog.getFormulaId());
+        dto.setCostFormula(toEnergyMeterFormulaDTO(costFormula));
+
+        // 当前用量公式名称
+        EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
+        EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
+        dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
+        return dto;
     }
 
     @Override
@@ -212,16 +255,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setStartTime(cmd.getStartTime());
-        log.setEndTime(cmd.getEndTime());
+        Timestamp endTime = cmd.getEndTime();
+        endTime = endTime == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): endTime;
+        log.setEndTime(endTime);
         log.setMeterId(cmd.getMeterId());
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(currNamespaceId());
         switch (settingType) {
             case PRICE:
+                log.setSettingValue(cmd.getPrice());
+                break;
             case RATE:
                 log.setSettingValue(cmd.getRate());
                 break;
             case AMOUNT_FORMULA:
+                log.setFormulaId(cmd.getAmountFormulaId());
+                break;
             case COST_FORMULA:
                 log.setFormulaId(cmd.getCostFormulaId());
                 break;
@@ -238,22 +287,92 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void changeEnergyMeter(ChangeEnergyMeterCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
 
     }
 
     @Override
     public void updateEnergyMeterStatus(UpdateEnergyMeterStatusCommand cmd) {
-
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+        meter.setStatus(cmd.getStatus());
+        meterProvider.updateEnergyMeter(meter);
     }
 
     @Override
     public EnergyMeterReadingLogDTO readEnergyMeter(ReadEnergyMeterCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+        EnergyMeterReadingLog log = new EnergyMeterReadingLog();
+        log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+        log.setReading(cmd.getCurrReading());
+        log.setCommunityId(cmd.getCommunityId());
+        log.setMeterId(meter.getId());
+        log.setNamespaceId(currNamespaceId());
+        log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        log.setOperatorId(UserContext.current().getUser().getId());
+        log.setResetMeterFlag(cmd.getResetMeterFlag());
+        dbProvider.execute(r -> {
+            meterReadingLogProvider.createEnergyMeterReadingLog(log);
+            meter.setLastReading(log.getReading());
+            meterProvider.updateEnergyMeter(meter);
+            return true;
+        });
+        return toEnergyMeterReadingLogDTO(log);
+    }
+
+    private EnergyMeterReadingLogDTO toEnergyMeterReadingLogDTO(EnergyMeterReadingLog log) {
+        EnergyMeterReadingLogDTO dto = ConvertHelper.convert(log, EnergyMeterReadingLogDTO.class);
+        User user = userProvider.findUserById(log.getOperatorId());
+        dto.setOperatorName(user.getNickName());
+        EnergyMeter meter = this.findMeterById(log.getMeterId());
+        dto.setMeterName(meter.getName());
+        return dto;
     }
 
     @Override
     public void batchUpdateEnergyMeterSettings(BatchUpdateEnergyMeterSettingsCommand cmd) {
-
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeter> meters = meterProvider.listByIds(currNamespaceId(), cmd.getMeterIds());
+        if (meters != null && meters.size() > 0) {
+            meters.forEach(r -> {
+                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
+                updateCmd.setMeterId(r.getId());
+                // 价格
+                if (cmd.getPrice() != null) {
+                    updateCmd.setPrice(cmd.getPrice());
+                    updateCmd.setStartTime(new Timestamp(cmd.getPriceStart()));
+                    updateCmd.setEndTime(cmd.getPriceEnd() != null ? new Timestamp(cmd.getPriceEnd()) : null);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
+                }
+                // 倍率
+                if (cmd.getRate() != null) {
+                    updateCmd.setRate(cmd.getRate());
+                    updateCmd.setStartTime(new Timestamp(cmd.getRateStart()));
+                    updateCmd.setEndTime(cmd.getRateEnd() != null ? new Timestamp(cmd.getRateEnd()) : null);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                }
+                // 费用
+                if (cmd.getCostFormulaId() != null) {
+                    updateCmd.setCostFormulaId(cmd.getCostFormulaId());
+                    updateCmd.setStartTime(new Timestamp(cmd.getCostFormulaStart()));
+                    updateCmd.setEndTime(cmd.getCostFormulaEnd() != null ? new Timestamp(cmd.getCostFormulaEnd()) : null);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+                }
+                // 用量
+                if (cmd.getAmountFormulaId() != null) {
+                    updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
+                    updateCmd.setStartTime(new Timestamp(cmd.getAmountFormulaStart()));
+                    updateCmd.setEndTime(cmd.getAmountFormulaEnd() != null ? new Timestamp(cmd.getAmountFormulaEnd()) : null);
+                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                }
+            });
+        }
     }
 
     @Override
@@ -309,7 +428,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             meter.setNamespaceId(currNamespaceId());
             meter.setName(result.getA());
             meter.setMeterNumber(result.getB());
-            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocaleStirngCode.SCOPE_METER_TYPE, result.getC(), currLocale());
+            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocaleStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
             if (meterTypeLocale != null) {
                 meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
             }
@@ -407,7 +526,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyFormulasCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(currNamespaceId(), cmd.getFormulaType());
+        return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
+    }
+
+    private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
+        return ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
     }
 
     @Override
@@ -422,7 +548,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListMeterCategoriesCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType());
+        return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+        return toEnergyMeterDTO(meter);
+    }
+
+    private EnergyMeterCategoryDTO toMeterCategoryDto(EnergyMeterCategory category) {
+        return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
     }
 
     private void checkCurrentUserNotInOrg(Long orgId) {

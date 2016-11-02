@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 /**
  * <ul>
  *     <li>organizationId: 组织id</li>
+ *     <li>communityId: 小区id</li>
  *     <li>meterId: 表记id</li>
  *     <li>lastReading: 上次读数</li>
  *     <li>currReading: 这次读数</li>
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 public class ReadEnergyMeterCommand {
 
     @NotNull private Long organizationId;
+    @NotNull private Long communityId;
     @NotNull private Long meterId;
     private Byte resetMeterFlag;
     @NotNull private BigDecimal lastReading;
@@ -32,6 +34,14 @@ public class ReadEnergyMeterCommand {
 
     public Byte getResetMeterFlag() {
         return resetMeterFlag;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setResetMeterFlag(Byte resetMeterFlag) {
