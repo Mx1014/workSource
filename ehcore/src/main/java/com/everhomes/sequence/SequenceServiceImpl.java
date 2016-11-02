@@ -865,6 +865,10 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_SEARCH_TYPES.ID.max()).from(Tables.EH_SEARCH_TYPES).fetchOne().value1(); 
         });
         //审批相关表, add by tt, 160907
+        syncTableSequence(null, EhApprovalDayActualTime.class, Tables.EH_APPROVAL_DAY_ACTUAL_TIME.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_APPROVAL_DAY_ACTUAL_TIME.ID.max()).from(Tables.EH_APPROVAL_DAY_ACTUAL_TIME).fetchOne().value1();
+        });
+
         syncTableSequence(null, EhApprovalFlows.class, Tables.EH_APPROVAL_FLOWS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_APPROVAL_FLOWS.ID.max()).from(Tables.EH_APPROVAL_FLOWS).fetchOne().value1();
         });
