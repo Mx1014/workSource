@@ -88,6 +88,9 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     @Autowired
     private SearchProvider searchProvider;
 
+    // @Value("elastic.index")
+    // private String elasticsearchIndex;
+
     //1. 新建表记(水表,电表等)
     @Test
     public void testCreateEnergyMeter() {
@@ -231,22 +234,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     @Test
     public void testSearchEnergyMeterReadingLogs() {
         logon();
-        searchProvider.bulk("energyMeterReadingLog", "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"1\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"2\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"3\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"4\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"5\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"6\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"7\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }\n" +
-                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"8\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"2016-11-01\" }");
+        bulkReadingLogData();
         SearchEnergyMeterReadingLogsCommand cmd = new SearchEnergyMeterReadingLogsCommand();
         cmd.setOrganizationId(1L);
         cmd.setCommunityId(1L);
@@ -255,8 +243,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         // cmd.setBillCategoryId(1L);
         // cmd.setServiceCategoryId(1L);
         // cmd.setMeterType((byte)1);
-        // cmd.setStartTime(DateHelper.currentGMTTime().getTime());
-        // cmd.setEndTime(DateHelper.currentGMTTime().getTime());
+        cmd.setStartTime(1478069824100L);
+        cmd.setEndTime(1478069824300L);
         cmd.setPageAnchor(0L);
         cmd.setPageSize(10);
 
@@ -266,6 +254,27 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
         SearchEnergyMeterReadingLogsResponse myResponse = response.getResponse();
         assertNotNull(myResponse);
+
+        assertTrue(myResponse.getLogs().size() == 3);
+    }
+
+    private void bulkReadingLogData() {
+        searchProvider.bulk("energyMeterReadingLog", "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"1\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"2\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"3\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"4\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824100\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"5\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824200\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"6\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824300\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"7\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"8\" } }\n" +
+                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }");
     }
 
 

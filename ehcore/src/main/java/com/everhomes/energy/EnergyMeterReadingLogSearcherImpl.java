@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +95,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             builder.field("meterName", meter.getName());
             builder.field("meterNumber", meter.getMeterNumber());
             builder.field("operatorName", operator.getNickName());
-            builder.field("operateTime", readingLog.getOperateTime());
+            builder.field("operateTime", readingLog.getOperateTime().getTime());
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -142,13 +143,15 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         if (cmd.getServiceCategoryId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("serviceCategoryId", cmd.getServiceCategoryId()));
         }
+        RangeFilterBuilder rangeTime = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
-            RangeFilterBuilder startTime = new RangeFilterBuilder("operateTime").gte(cmd.getStartTime());
-            fb = FilterBuilders.andFilter(fb, startTime);
+            rangeTime.gte(cmd.getStartTime());
         }
         if (cmd.getEndTime() != null) {
-            RangeFilterBuilder endTime = new RangeFilterBuilder("operateTime").gte(cmd.getEndTime());
-            fb = FilterBuilders.andFilter(fb, endTime);
+            rangeTime.gte(cmd.getEndTime());
+        }
+        if (cmd.getEndTime() != null || cmd.getEndTime() != null) {
+            fb = FilterBuilders.andFilter(fb, rangeTime);
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -183,14 +186,18 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setReading(BigDecimal.valueOf((Double) source.get("reading")));
             dto.setId(Long.valueOf(hit.getId()));
             dto.setMeterName((String) source.get("meterName"));
-            // dto.setResetMeterFlag((Integer) source.get("resetFlag"));
-            // dto.setOperateTime(DateTime);
+            dto.setResetMeterFlag(Byte.valueOf(source.get("resetFlag")+""));
+            dto.setOperateTime(new Timestamp(Long.valueOf(source.get("operateTime")+"")));
             dto.setOperatorName((String) source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
 
             dtoList.add(dto);
         }
         return dtoList;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(System.currentTimeMillis());
     }
 
     @Override
