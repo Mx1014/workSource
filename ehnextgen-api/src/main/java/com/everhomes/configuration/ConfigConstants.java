@@ -74,5 +74,7 @@ public interface ConfigConstants {
 	public static final String PAY_SERVER = "pay.server";
 	
 	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
+	
+	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
      
 }

@@ -34,7 +34,15 @@ public class UpdateGroupCommand {
     private String tag;
     private Integer joinPolicy;
 
-    public UpdateGroupCommand() {
+    public Integer getJoinPolicy() {
+		return joinPolicy;
+	}
+
+	public void setJoinPolicy(Integer joinPolicy) {
+		this.joinPolicy = joinPolicy;
+	}
+
+	public UpdateGroupCommand() {
     }
 
     public Long getGroupId() {

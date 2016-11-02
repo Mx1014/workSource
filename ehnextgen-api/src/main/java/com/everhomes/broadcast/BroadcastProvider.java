@@ -15,4 +15,6 @@ public interface BroadcastProvider {
 
 	List<Broadcast> listBroadcastByOwner(String ownerType, Long ownerId, Long pageAnchor, int pageSize);
 
+	Integer selectBroadcastCountToday(Integer namespaceId, String ownerType, Long ownerId);
+
 }

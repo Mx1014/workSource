@@ -36,9 +36,13 @@ import com.everhomes.rest.group.DeleteGroupCategoryCommand;
 import com.everhomes.rest.group.GetAdminRoleStatusCommand;
 import com.everhomes.rest.group.GetBroadcastByTokenCommand;
 import com.everhomes.rest.group.GetBroadcastByTokenResponse;
+import com.everhomes.rest.group.GetClubPlaceholderNameCommand;
+import com.everhomes.rest.group.GetClubPlaceholderNameResponse;
 import com.everhomes.rest.group.GetGroupCommand;
 import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
 import com.everhomes.rest.group.GetGroupParametersCommand;
+import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
+import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberSnapshotDTO;
@@ -129,12 +133,7 @@ public class GroupController extends ControllerBase {
     @RequestMapping("create")
     @RestReturn(value=GroupDTO.class)
     public RestResponse create(@Valid CreateGroupCommand cmd) {
-        GroupDTO groupDto = this.groupService.createGroup(cmd);
-        
-        RestResponse response = new RestResponse(groupDto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return groupService.createAGroup(cmd);
     }
     
 //    @RequestMapping("test")
@@ -883,4 +882,23 @@ public class GroupController extends ControllerBase {
 		return new RestResponse(groupService.listGroupCategories(cmd));
 	}
 
+	/**
+	 * <p>15.获取$俱乐部$占位符的名称</p>
+	 * <b>URL: /group/getClubPlaceholderName</b>
+	 */
+	@RequestMapping("getClubPlaceholderName")
+	@RestReturn(GetClubPlaceholderNameResponse.class)
+	public RestResponse getClubPlaceholderName(GetClubPlaceholderNameCommand cmd){
+		return new RestResponse(groupService.getClubPlaceholderName(cmd));
+	}
+	
+	/**
+	 * <p>16.剩余可发广播数</p>
+	 * <b>URL: /group/getRemainBroadcastCount</b>
+	 */
+	@RequestMapping("getRemainBroadcastCount")
+	@RestReturn(GetRemainBroadcastCountResponse.class)
+	public RestResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd){
+		return new RestResponse(groupService.getRemainBroadcastCount(cmd));
+	}
 }

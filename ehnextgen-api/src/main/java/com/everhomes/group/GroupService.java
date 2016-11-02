@@ -4,6 +4,7 @@ package com.everhomes.group;
 import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.AcceptJoinGroupInvitation;
@@ -20,9 +21,13 @@ import com.everhomes.rest.group.DeleteGroupCategoryCommand;
 import com.everhomes.rest.group.GetAdminRoleStatusCommand;
 import com.everhomes.rest.group.GetBroadcastByTokenCommand;
 import com.everhomes.rest.group.GetBroadcastByTokenResponse;
+import com.everhomes.rest.group.GetClubPlaceholderNameCommand;
+import com.everhomes.rest.group.GetClubPlaceholderNameResponse;
 import com.everhomes.rest.group.GetGroupCommand;
 import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
 import com.everhomes.rest.group.GetGroupParametersCommand;
+import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
+import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberSnapshotDTO;
@@ -75,7 +80,7 @@ import com.everhomes.rest.group.UpdateGroupMemberCommand;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
 
 public interface GroupService {
-    GroupDTO createGroup(CreateGroupCommand cmd);
+//    GroupDTO createGroup(CreateGroupCommand cmd);
     GroupDTO updateGroup(UpdateGroupCommand cmd);
     GroupDTO getGroup(GetGroupCommand cmd);
     List<GroupDTO> listUserRelatedGroups();
@@ -216,5 +221,8 @@ public interface GroupService {
 
 
 	public ListGroupCategoriesResponse listGroupCategories(ListGroupCategoriesCommand cmd);
+	GetClubPlaceholderNameResponse getClubPlaceholderName(GetClubPlaceholderNameCommand cmd);
+	RestResponse createAGroup(CreateGroupCommand cmd);
+	GetRemainBroadcastCountResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd);
 
 }

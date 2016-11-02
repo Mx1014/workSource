@@ -1,9 +1,14 @@
 // @formatter:off
 package com.everhomes.broadcast;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.tools.ant.taskdefs.condition.And;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -76,6 +81,26 @@ public class BroadcastProviderImpl implements BroadcastProvider {
 			return result.map(r->ConvertHelper.convert(r, Broadcast.class));
 		}
 		return new ArrayList<>();
+	}
+
+	@Override
+	public Integer selectBroadcastCountToday(Integer namespaceId, String ownerType, Long ownerId) {
+		Date now = new Date();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		Timestamp today;
+		try {
+			today = new Timestamp(format.parse(format.format(now)).getTime());
+		} catch (ParseException e) {
+			today = new Timestamp(now.getTime());
+		}
+		
+		//取今天已发的广播数
+		return getReadOnlyContext().selectCount().from(Tables.EH_BROADCASTS)
+			.where(Tables.EH_BROADCASTS.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_BROADCASTS.OWNER_ID.eq(ownerId))
+			.and(Tables.EH_BROADCASTS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_BROADCASTS.CREATE_TIME.ge(today))
+			.fetchAny().value1();
 	}
 
 	private EhBroadcastsDao getReadWriteDao() {
