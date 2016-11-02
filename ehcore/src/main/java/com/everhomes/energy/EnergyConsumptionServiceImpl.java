@@ -1,34 +1,5 @@
 package com.everhomes.energy;
 
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
@@ -36,44 +7,8 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
-import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
-import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
-import com.everhomes.rest.energy.EnergyCommonStatus;
-import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
-import com.everhomes.rest.energy.EnergyLocaleStringCode;
-import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
-import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
-import com.everhomes.rest.energy.EnergyMeterDTO;
-import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
-import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
-import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
-import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
-import com.everhomes.rest.energy.EnergyMeterSettingType;
-import com.everhomes.rest.energy.EnergyMeterStatus;
-import com.everhomes.rest.energy.EnergyMeterType;
-import com.everhomes.rest.energy.EnergyStatByYearDTO;
-import com.everhomes.rest.energy.EnergyStatCommand;
-import com.everhomes.rest.energy.EnergyStatDTO;
-import com.everhomes.rest.energy.GetEnergyMeterCommand;
-import com.everhomes.rest.energy.ImportEnergyMeterCommand;
-import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
-import com.everhomes.rest.energy.ListEnergyFormulasCommand;
-import com.everhomes.rest.energy.ListMeterCategoriesCommand;
-import com.everhomes.rest.energy.ListMeterChangeLogCommand;
-import com.everhomes.rest.energy.ReadEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
-import com.everhomes.rest.energy.SearchEnergyMeterResponse;
-import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.rest.energy.*;
+import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -84,6 +19,30 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
  
 
 /**
@@ -131,6 +90,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterSearcher meterSearcher;
+
+    @Autowired
+    private EnergyMeterReadingLogSearcher readingLogSearcher;
 
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
@@ -217,6 +179,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
         EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
         dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
+
+        // 当前最大量程
+
         return dto;
     }
 
@@ -376,7 +341,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public SearchEnergyMeterReadingLogsResponse searchEnergyMeterReadingLogs(SearchEnergyMeterReadingLogsCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        return readingLogSearcher.queryMeterReadingLogs(cmd);
     }
 
     @Override

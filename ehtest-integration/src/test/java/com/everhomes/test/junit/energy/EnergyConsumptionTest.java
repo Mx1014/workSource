@@ -222,6 +222,31 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertNotNull("The new rate setting log should be not null.", result);
     }
 
+    //7. 搜索读表记录
+    @Test
+    public void testSearchEnergyMeterReadingLogs() {
+        logon();
+        SearchEnergyMeterReadingLogsCommand cmd = new SearchEnergyMeterReadingLogsCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setCommunityId(1L);
+        // cmd.setKeyword("");
+        // cmd.setMeterId(1L);
+        // cmd.setBillCategoryId(1L);
+        // cmd.setServiceCategoryId(1L);
+        // cmd.setMeterType((byte)1);
+        // cmd.setStartTime(DateHelper.currentGMTTime().getTime());
+        // cmd.setEndTime(DateHelper.currentGMTTime().getTime());
+        cmd.setPageAnchor(0L);
+        cmd.setPageSize(10);
+
+        SearchEnergyMeterReadingLogsRestResponse response = httpClientService.restPost(SEARCH_ENERGY_METER_READING_LOGS_URL, cmd, SearchEnergyMeterReadingLogsRestResponse.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        SearchEnergyMeterReadingLogsResponse myResponse = response.getResponse();
+        assertNotNull(myResponse);
+    }
+
 
     //14. 导入表记(Excel)
     @Test

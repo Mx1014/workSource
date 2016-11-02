@@ -64,8 +64,7 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
     @Override
     public List<EnergyMeter> listEnergyMeters(Long pageAnchor, Integer pageSize) {
         return context().selectFrom(EH_ENERGY_METERS)
-                .where(EH_ENERGY_METERS.CREATE_TIME.le(new Timestamp(pageAnchor)))
-                .orderBy(EH_ENERGY_METERS.CREATE_TIME.desc())
+                .where(EH_ENERGY_METERS.ID.ge(pageAnchor))
                 .limit(pageSize).fetchInto(EnergyMeter.class);
     }
 

@@ -45,6 +45,8 @@ public class SearchUtils {
 
     public static final String ENERGY_METER = "energyMeter";
 
+    public static final String ENERGY_METER_READING_LOG = "energyMeterReadingLog";
+
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";
