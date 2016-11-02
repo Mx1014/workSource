@@ -7114,7 +7114,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			List<Long> childOrganizationIds = cmd.getChildOrganizationIds();
+			List<Long> departmentIds = cmd.getDepartmentIds();
+
+			List<Long> jobPositionIds = cmd.getJobPositionIds();
 			
 			OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), finalOrganizationId);
 //			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
@@ -7139,7 +7141,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationMember.setId(desOrgMember.getId());
 				organizationProvider.updateOrganizationMember(organizationMember);
 			}
-			
+
 			// 先把把成员从公司所有部门都删除掉
 			for (Organization organization : childOrganizations) {
 				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
@@ -7147,29 +7149,31 @@ public class OrganizationServiceImpl implements OrganizationService {
 					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
 				}
 			}
-			
+
 			//没有部门要添加
-			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
+			if(null == departmentIds || 0 == departmentIds.size()){
 				return null;
 			}
-			
+
 			// 重新把成员添加到公司多个部门
-			for (Long childOrganizationId : childOrganizationIds) {
+			for (Long childOrganizationId : departmentIds) {
 				Organization group = checkOrganization(childOrganizationId);
-				
+
 				organizationMember.setGroupPath(group.getPath());
-				
+
 				organizationMember.setOrganizationId(childOrganizationId);
-				
+
 				organizationProvider.createOrganizationMember(organizationMember);
-				
+
 				if(OrganizationGroupType.fromCode(finalGroupType) == OrganizationGroupType.GROUP){
 					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
 				}else if(OrganizationGroupType.fromCode(finalGroupType) == OrganizationGroupType.DEPARTMENT){
 					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
 				}
 			}
-			
+
+
+
 			dto.setGroups(groups);
 			
 			dto.setDepartments(departments);

@@ -41,7 +41,7 @@ import com.everhomes.util.StringHelper;
  *  <li>enterpriseContactor: 企业联系人</li>
  *  <li>mobile: 手机号</li>
  * <li>doorplateAddress：门牌地址</li>
- * <li>
+ * <li>managers：经理列表 {@link com.everhomes.rest.organization.OrganizationManagerDTO}</li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -88,6 +88,9 @@ public class OrganizationDTO {
 	private String enterpriseContactor;
 	
 	private String mobile;
+
+	@ItemType(OrganizationManagerDTO.class)
+	private List<OrganizationManagerDTO> managers;
 	
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
@@ -339,6 +342,14 @@ public class OrganizationDTO {
     public void setFeedbackForumId(Long feedbackForumId) {
         this.feedbackForumId = feedbackForumId;
     }
+
+	public List<OrganizationManagerDTO> getManagers() {
+		return managers;
+	}
+
+	public void setManagers(List<OrganizationManagerDTO> managers) {
+		this.managers = managers;
+	}
 
 	@Override
     public String toString() {

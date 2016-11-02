@@ -198,8 +198,16 @@ ALTER TABLE `eh_organizations` MODIFY `group_type` VARCHAR(64) DEFAULT NULL COMM
 -- 增加组织架构大小 目前只用于职级大小
 ALTER TABLE `eh_organizations` ADD `size` INTEGER COMMENT 'job level size';
 
--- 增加组织架构通用名称 目前只有岗位用到
-ALTER TABLE `eh_organizations` ADD `job_position_id` BIGINT COMMENT '';
+-- 机构岗位所属的通用岗位 by sfyan 20161029
+-- DROP TABLE IF EXISTS `eh_organization_job_position_maps`;
+CREATE TABLE `eh_organization_job_position_maps` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `job_position_id` BIGINT NOT NULL,
+  `organization_id` BIGINT NOT NULL COMMENT 'orgnaization member id',
+  `creator_uid`  BIGINT DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 -- 业务模块 by sfyan 20161029
@@ -209,6 +217,8 @@ CREATE TABLE `eh_service_modules` (
   `name` BIGINT NOT NULL COMMENT 'organization',
   `parent_id` BIGINT NOT NUll,
   `path` VARCHAR(128) NOT NUll,
+  `type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: park, 1: organization, 3:manager',
+  `level` INTEGER NOT NULL DEFAULT '0',
   `status` TINYINT NOT NULL DEFAULT '2' COMMENT '0: inactive, 2: active',
   `default_order` INTEGER NULL COMMENT 'order number',
   `create_time` DATETIME DEFAULT NULL,
@@ -227,7 +237,7 @@ CREATE TABLE `eh_service_module_scopes` (
   `default_order` INTEGER NULL COMMENT 'order number',
   `apply_policy` TINYINT NOT NULL DEFAULT '0' COMMENT '0: delete , 1: override, 2: revert',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 业务模块 by sfyan 20161029

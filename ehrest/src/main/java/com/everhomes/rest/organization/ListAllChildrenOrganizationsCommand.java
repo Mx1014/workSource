@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>id : 机构id</li>
  * <li>groupTypes : 机构类型 参考{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
  * <li>naviFlag : 机构类型 参考{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
+ * <li>keywords : 关键字搜索</li>
  *</ul>
  *
  */
@@ -25,6 +26,8 @@ public class ListAllChildrenOrganizationsCommand {
 	private List<String> groupTypes;
 	
 	private Byte naviFlag;
+
+	private String keywords;
 	
 	
 	public Long getId() {
@@ -61,7 +64,13 @@ public class ListAllChildrenOrganizationsCommand {
 		this.naviFlag = naviFlag;
 	}
 
+	public String getKeywords() {
+		return keywords;
+	}
 
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
 
 	@Override
 	public String toString() {

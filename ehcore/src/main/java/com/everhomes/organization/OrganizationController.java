@@ -13,6 +13,7 @@ import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.pm.ChildrenOrganizationJobLevelDTO;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
@@ -945,5 +946,161 @@ public class OrganizationController extends ControllerBase {
 		return res;
 	}
 
+	/**
+	 * <b>URL: /org/createChildrenOrganizationJobPosition</b>
+	 * <p>创建子机构岗位</p>
+	 */
+	@RequestMapping("createChildrenOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse createChildrenOrganizationJobPosition(@Valid CreateOrganizationCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateChildrenOrganizationJobPosition</b>
+	 * <p>修改子机构岗位</p>
+	 */
+	@RequestMapping("updateChildrenOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse updateChildrenOrganizationJobPosition(@Valid UpdateOrganizationsCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/deleteChildrenOrganizationJobPosition</b>
+	 * <p>删除子机构岗位</p>
+	 */
+	@RequestMapping("deleteChildrenOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse deleteChildrenOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listChildrenOrganizationJobPositions</b>
+	 * <p>子机构岗位列表</p>
+	 */
+	@RequestMapping("listChildrenOrganizationJobPositions")
+	@RestReturn(value=ChildrenOrganizationJobPositionDTO.class, collection = true)
+	public RestResponse listChildrenOrganizationJobPositions(@Valid ListAllChildrenOrganizationsCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/createOrganizationJobPosition</b>
+	 * <p>创建通用岗位</p>
+	 */
+	@RequestMapping("createOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse createOrganizationJobPosition(@Valid CreateOrganizationJobPositionCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateOrganizationJobPosition</b>
+	 * <p>修改通用岗位</p>
+	 */
+	@RequestMapping("updateOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse updateOrganizationJobPosition(@Valid UpdateOrganizationJobPositionCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/deleteOrganizationJobPosition</b>
+	 * <p>删除通用岗位</p>
+	 */
+	@RequestMapping("deleteOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse deleteOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationJobPositions</b>
+	 * <p>通用岗位列表</p>
+	 */
+	@RequestMapping("listOrganizationJobPositions")
+	@RestReturn(value=OrganizationJobPositionDTO.class, collection = true)
+	public RestResponse listOrganizationJobPositions(@Valid ListOrganizationJobPositionCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /org/createChildrenOrganizationJobLevel</b>
+	 * <p>创建子机构职级</p>
+	 */
+	@RequestMapping("createChildrenOrganizationJobLevel")
+	@RestReturn(value=String.class)
+	public RestResponse createChildrenOrganizationJobLevel(@Valid CreateOrganizationCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateChildrenOrganizationJobLevel</b>
+	 * <p>修改子机构职级</p>
+	 */
+	@RequestMapping("updateChildrenOrganizationJobLevel")
+	@RestReturn(value=String.class)
+	public RestResponse updateChildrenOrganizationJobLevel(@Valid UpdateOrganizationsCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/deleteChildrenOrganizationJobLevel</b>
+	 * <p>删除子机构职级</p>
+	 */
+	@RequestMapping("deleteChildrenOrganizationJobLevel")
+	@RestReturn(value=String.class)
+	public RestResponse deleteChildrenOrganizationJobLevel(@Valid DeleteOrganizationIdCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listChildrenOrganizationJobLevels</b>
+	 * <p>子机构职级列表</p>
+	 */
+	@RequestMapping("listChildrenOrganizationJobLevels")
+	@RestReturn(value=ChildrenOrganizationJobLevelDTO.class, collection = true)
+	public RestResponse listChildrenOrganizationJobLevels(@Valid ListAllChildrenOrganizationsCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }
