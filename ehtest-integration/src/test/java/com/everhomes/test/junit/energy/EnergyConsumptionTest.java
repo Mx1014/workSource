@@ -245,22 +245,28 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         }
     }
 
-    //14. 导入表记(Excel)
+    //15. get获取表记
     @Test
     public void testGetEnergyMeter() {
         logon();
         testUpdateEnergyMeter();
+        EhEnergyMetersRecord meter = context().selectFrom(EH_ENERGY_METERS).fetchAny();
         GetEnergyMeterCommand cmd = new GetEnergyMeterCommand();
         cmd.setOrganizationId(1L);
-        cmd.setMeterId(1L);
+        cmd.setMeterId(meter.getId());
         GetEnergyMeterRestResponse response = httpClientService.restPost(GET_ENERGY_METER_URL, cmd, GetEnergyMeterRestResponse.class);
         assertNotNull(response);
         assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-        assertNotNull("", response.getResponse());
+        EnergyMeterDTO dto = response.getResponse();
 
-        Result<EhEnergyMetersRecord> result = context().selectFrom(EH_ENERGY_METERS).fetch();
-        assertTrue(result.size() == 3);
+        assertNotNull("The response should be not null.", meter);
+
+        assertEquals(dto.getRate(), new BigDecimal("3.00"));
+        assertEquals(dto.getPrice(), new BigDecimal("3.00"));
+
+        // Result<EhEnergyMetersRecord> result = context().selectFrom(EH_ENERGY_METERS).fetch();
+        // assertTrue(result.size() == 3);
     }
 
     private DSLContext context() {

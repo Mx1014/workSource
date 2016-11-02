@@ -10,11 +10,11 @@ import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_SETTING_LOGS;
 
@@ -46,8 +46,8 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType.getCode()))
-                .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.lt(DSL.currentTimestamp()))
-                .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.gt(DSL.currentTimestamp()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.le(Timestamp.valueOf(LocalDateTime.now())))
+                .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(Timestamp.valueOf(LocalDateTime.now())))
                 .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
                 .fetchAnyInto(EnergyMeterSettingLog.class);
     }
