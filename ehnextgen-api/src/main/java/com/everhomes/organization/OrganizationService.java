@@ -352,8 +352,9 @@ public interface OrganizationService {
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
  
 	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
-	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd);
-	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd); 
+	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd); 
+	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
+  
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
  
