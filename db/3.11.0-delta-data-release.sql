@@ -45,9 +45,9 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 	VALUES ('6', '0', '0', '任务', '任务', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0');
 UPDATE `eh_configurations` SET `value`='6' WHERE `name`='pmtask.category.ancestor';
 
-INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`)
 	VALUES ('1017', '32', '执行人员', '任务管理 执行人员', NULL, '0', 'EhOrganizations', NULL);
-INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`) 
+INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `namespace_id`, `owner_type`, `owner_id`)
 	VALUES ('1018', '32', '维修人员', '任务管理 维修人员', NULL, '0', 'EhOrganizations', NULL);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
@@ -131,7 +131,7 @@ SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'serviceAlliance.serviceDetail.url', 'http://core.zuolin.com/service-alliance/index.html#/service_detail/%s/%s?_k=%s', '服务联盟详情页面URL', '0', NULL);
 
 -- 储能停车充值 add by sunwen 20161025
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ('400', 'parking', '10010', 'zh_CN', '费用已过期，请重新查询费用');
 
 -- 华润OE配search type add by xiongying 20161026
@@ -169,3 +169,35 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- 更新创源 group_id add by sunwen 20161028
 UPDATE eh_organizations r INNER JOIN eh_groups g ON r.id = g.visible_region_id
 SET r.group_id = g.id where r.namespace_id = 999986 and g.visible_region_type = 1;
+
+-- by Janson add qr driver support
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999992, 'aclink.qr_driver_ext', 'phone_visit', 'the driver extend of this namespace.(zuolin/phone_visit)');
+
+
+-- π星球爱特家更新banner by xiongying20161101
+delete from eh_banners where namespace_id = 999988;
+
+SET @banner_id := (SELECT MAX(id) FROM `eh_banners`);
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRwaE1EYzJOR1JtWWpOa1l6ZG1Oemd3WkdGa1l6UTJNbVUxWWpnMk1Ea3hZUQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRwaE1EYzJOR1JtWWpOa1l6ZG1Oemd3WkdGa1l6UTJNbVUxWWpnMk1Ea3hZUQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRveVkySmhabU5pT1RZNE9UQTJZbU5sTmpVMFpUUXlNekJrTlRBMVpHSmlNQQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRveVkySmhabU5pT1RZNE9UQTJZbU5sTmpVMFpUUXlNekJrTlRBMVpHSmlNQQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRvMU56RTFaalUzWlRVM1pEaG1ZMll6T0dNeE5ERTFaakEzWlRsbFl6aG1ZUQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRvMU56RTFaalUzWlRVM1pEaG1ZMll6T0dNeE5ERTFaakEzWlRsbFl6aG1ZUQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRvelpEa3pOV00xTnpFNU5XVXpaRGRtWWpZNVl6ZzBZMkk1T0dabU5XWmpNQQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'default', '0');
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`) 
+    VALUES (@banner_id:=@banner_id+1, '999988', '0', '/home', 'Default', '0', '0', '爱特家迷你居', 'atjia', 'cs://1/image/aW1hZ2UvTVRvelpEa3pOV00xTnpFNU5XVXpaRGRtWWpZNVl6ZzBZMkk1T0dabU5XWmpNQQ', 14, '{"url":"http://core.zuolin.com/zweb/mobile/static/banner/star.html"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
+
+-- 科技园更新服务广场
+UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016110101","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016110101' WHERE `id`=11 AND `namespace_id`=1000000;
+UPDATE `eh_launch_pad_layouts` SET `layout_json`='{"versionCode":"2016110101","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', `version_code` = '2016110101' WHERE `id`=111 AND `namespace_id`=1000000;
+
+
+	

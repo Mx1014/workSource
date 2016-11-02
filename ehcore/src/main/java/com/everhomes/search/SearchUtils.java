@@ -43,6 +43,10 @@ public class SearchUtils {
     
     public static final String SETTLEREQUEST = "settleRequest";
     
+    public static final String RESERVEREQUEST = "reserveRequest";
+
+    public static final String EQUIPMENTSTANDARDMAP = "equipmentStandardMap";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

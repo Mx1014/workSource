@@ -253,6 +253,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 		}
 		
+		
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				//添加子公司的时候默认给公司添加圈 sfyan 20160706
@@ -279,9 +280,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 				enterprise.setAddress(cmd.getAddress());
 				enterprise.setCreateTime(organization.getCreateTime());
 				organizationProvider.createOrganizationDetail(enterprise);
+	            
+	            // 获取父亲公司所入驻的园区，由于创建子公司时在界面上没有指定其所在园区，会导致服务市场上拿不到数据，
+	            // 故需要补充其所在园区 by lqs 20161101
+	            Long communityId = getOrganizationActiveCommunityId(cmd.getParentId());
+	            if(communityId != null) {
+	                createActiveOrganizationCommunityRequest(user.getId(), organization.getId(), communityId);
+	            } else {
+	                LOGGER.error("Community not found, organizationId={}, parentOrgId={}", organization.getId(), cmd.getParentId());
+	            }
 			}else{
 				organizationProvider.createOrganization(organization);
 			}
+			
 			return organization;
 		});
 		
@@ -542,17 +553,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setMemberCount(cmd.getMemberCount());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
-			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
-			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
-			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
-			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
-
-			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
-			organizationCommunityRequest.setCreatorUid(user.getId());
-			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        
-	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
+			createActiveOrganizationCommunityRequest(user.getId(), enterprise.getOrganizationId(), cmd.getCommunityId());
+//			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+//			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
+//			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+//			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
+//
+//			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+//			organizationCommunityRequest.setCreatorUid(user.getId());
+//			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//	        
+//	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 			
 	        // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
 	        //organization.setCommunityId(cmd.getCommunityId());
@@ -573,6 +586,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return ConvertHelper.convert(organization, OrganizationDTO.class);
+	}
+	
+	private void createActiveOrganizationCommunityRequest(Long creatorId, Long organizationId, Long communityId) {
+	    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+        organizationCommunityRequest.setCommunityId(communityId);
+        organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+        organizationCommunityRequest.setMemberId(organizationId);
+
+        organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+        organizationCommunityRequest.setCreatorUid(creatorId);
+        organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 	}
 	
 	/**
@@ -7321,7 +7348,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
 
-		Organization org =  this.checkOrganization(cmd.getOrganizationId());
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null) {
+			return new OrganizationTreeDTO();
+		}
 		List<Organization> organizations = new ArrayList<Organization>();
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
@@ -7425,6 +7455,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd) {
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null){
+			return new OrganizationDTO();
+		}
 		Long userId = UserContext.current().getUser().getId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());

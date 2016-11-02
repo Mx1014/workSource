@@ -17,8 +17,11 @@ import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
+import com.everhomes.equipment.EquipmentStandardMap;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
+import com.everhomes.rest.equipment.EquipmentStatus;
+import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.util.DateHelper;
 
 @Component
@@ -44,16 +47,29 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
+		closeDelayTasks();
+		createTask();
 		
-		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listQualifiedEquipmentStandardEquipments();
+	}
+	
+	private void createTask() {
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
+		}
+		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 		
-		if(equipments != null && equipments.size() > 0) {
-			for(EquipmentInspectionEquipments equipment : equipments) {
-				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId());
+		if(maps != null && maps.size() > 0) {
+			for(EquipmentStandardMap map : maps) {
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
 				if(standard == null || standard.getStatus() == null
-						|| EquipmentStandardStatus.fromStatus(standard.getStatus()) != EquipmentStandardStatus.ACTIVE) {
-					LOGGER.info("EquipmentInspectionScheduleJob standard is not exist or active! standardId = " + equipment.getStandardId());
+						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
+					LOGGER.info("EquipmentInspectionScheduleJob standard is not exist or active! standardId = " + map.getStandardId());
 					continue;
+				} else if(equipment == null || !EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
+						LOGGER.info("EquipmentInspectionScheduleJob equipment is not exist or active! equipmentId = " + map.getTargetId());
+						continue;
+					
 				} else {
 					boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
 					LOGGER.info("EquipmentInspectionScheduleJob: standard id = " + standard.getId() 
@@ -66,7 +82,14 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 				}
 			}
 		}
+	}
+	
+	private void closeDelayTasks() {
+		LOGGER.info("EquipmentInspectionScheduleJob: close delay tasks.");
+		equipmentProvider.closeDelayTasks();
 		
+		LOGGER.info("EquipmentInspectionScheduleJob: close expired review tasks.");
+		equipmentProvider.closeExpiredReviewTasks();
 	}
 
 }

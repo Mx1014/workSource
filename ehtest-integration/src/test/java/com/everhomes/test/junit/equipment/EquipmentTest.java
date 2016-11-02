@@ -20,6 +20,7 @@ import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
+import com.everhomes.rest.equipment.EquipmentStandardMapDTO;
 import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentsDTO;
 import com.everhomes.rest.equipment.FindEquipmentRestResponse;
@@ -84,59 +85,6 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
         super.setUp();
     }
 	
-	@Test @Ignore
-	public void testReviewRelation() {
-		logon(999992, userIdentifier, plainTexPassword);
-		
-		Long equipmentId = 2L;
-		EquipmentsDTO dto = findEquipment(equipmentId);
-		assertEquals(EquipmentReviewStatus.WAITING_FOR_APPROVAL, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		
-		ReviewEquipmentStandardRelationsCommand cmd = new ReviewEquipmentStandardRelationsCommand();
-		cmd.setEquipmentId(equipmentId);
-		cmd.setOwnerId(ownerId);
-		cmd.setOwnerType(ownerType);
-		cmd.setReviewResult(ReviewResult.QUALIFIED.getCode());
-		
-		httpClientService.restPost(REVIEW_RELATION_URI, cmd, StringRestResponse.class);
-		
-		dto = findEquipment(equipmentId);
-		assertEquals(EquipmentReviewStatus.REVIEWED, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		assertEquals(ReviewResult.QUALIFIED, ReviewResult.fromStatus(dto.getReviewResult()));
-		
-	}
-	
-	@Test @Ignore
-	public void testDeleteRelation() {
-		logon(999992, userIdentifier, plainTexPassword);
-		
-		Long equipmentId = 2L;
-		EquipmentsDTO dto = findEquipment(equipmentId);
-		assertEquals(EquipmentReviewStatus.WAITING_FOR_APPROVAL, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		
-		DeleteEquipmentStandardRelationsCommand command = new DeleteEquipmentStandardRelationsCommand();
-		command.setEquipmentId(equipmentId);
-		command.setOwnerId(ownerId);
-		command.setOwnerType(ownerType);
-		
-		StringRestResponse response = httpClientService.restPost(DELETE_RELATION_URI, command, StringRestResponse.class);
-		
-		assertEquals(EquipmentServiceErrorCode.ERROR_EQUIPMENT_REVIEW_STATUS_ONLY_INACTIVE_CAN_DELETE, response.getErrorCode().intValue());
-		
-		DeleteEquipmentsCommand cmd = new DeleteEquipmentsCommand();
-		cmd.setEquipmentId(equipmentId);
-		cmd.setOwnerId(ownerId);
-		cmd.setOwnerType(ownerType);
-		
-		httpClientService.restPost(DELETE_EQUIPMENT_URI, cmd, StringRestResponse.class);
-		
-		httpClientService.restPost(DELETE_RELATION_URI, command, StringRestResponse.class);
-		dto = findEquipment(equipmentId);
-		
-		assertEquals(EquipmentReviewStatus.DELETE, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
-		assertEquals(ReviewResult.NONE, ReviewResult.fromStatus(dto.getReviewResult()));
-		
-	}
 	
 	@Test @Ignore
 	public void testDeleteEquipment() {
@@ -155,7 +103,6 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
 		
 		dto = findEquipment(equipmentId);
 		assertEquals(EquipmentStatus.INACTIVE, EquipmentStatus.fromStatus(dto.getStatus()));
-		assertEquals(EquipmentReviewStatus.INACTIVE, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
 		
 	}
 	
@@ -211,17 +158,11 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
 		
 	}
 	
-	@Test @Ignore
+	@Test
 	 public void testUpdateEquipment() {
 	    	
 	    	// 登录时不传namepsace，默认为左邻域空间
 	    	logon(999992, userIdentifier, plainTexPassword);
-	    	
-	    	List<EquipmentParameterDTO> eqParameter = new ArrayList<EquipmentParameterDTO>();
-	    	EquipmentParameterDTO para = new EquipmentParameterDTO();
-	    	para.setParameterName("湿度");
-	    	para.setParameterUnit("°F");
-	    	eqParameter.add(para);
 	    	
 	    	UpdateEquipmentsCommand cmd = new UpdateEquipmentsCommand();
 	    	cmd.setOwnerId(ownerId);
@@ -234,16 +175,31 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
 	    	cmd.setCategoryId(9L);
 	    	cmd.setCategoryPath("强电");
 	    	cmd.setLocation("金融基地7楼");
-	    	cmd.setLongitude(113.9531430000);
-	    	cmd.setLatitude(22.5497940000);
+	    	cmd.setLongitude(113.908764);
+	    	cmd.setLatitude(22.576676);
 	    	cmd.setQrCodeFlag((byte) 1);
 	    	cmd.setStatus((byte) 2);
 	    	cmd.setInstallationTime(1457244000000L);
 	    	cmd.setRepairTime(1465192800000L);
 	    	cmd.setInitialAssetValue("121000");
 	    	cmd.setManager("大闸蟹");
-	    	cmd.setStandardId(1L);
-	    	cmd.setEqParameter(eqParameter);
+	    	cmd.setId(147L);
+	    	
+	    	List<EquipmentStandardMapDTO> eqStandardMap = new ArrayList<EquipmentStandardMapDTO>();
+	    	EquipmentStandardMapDTO map = new EquipmentStandardMapDTO();
+	    	map.setId(104L);
+	    	map.setStandardId(155L);
+	    	map.setStandardName("空调标准");
+	    	map.setEquipmentId(147L);
+	    	eqStandardMap.add(map);
+	    	
+	    	map = new EquipmentStandardMapDTO();
+	    	map.setStandardId(154L);
+	    	map.setStandardName("测试关联");
+	    	map.setEquipmentId(147L);
+	    	eqStandardMap.add(map);
+	    	
+	    	cmd.setEqStandardMap(eqStandardMap);
 	    	
 	    	UpdateEquipmentsRestResponse response = httpClientService.restGet(UPDATE_EQUIPMENT_URI, cmd, 
 	    			UpdateEquipmentsRestResponse.class, context);
@@ -282,7 +238,7 @@ public class EquipmentTest extends BaseLoginAuthTestCase {
 		
 	}
 	
-	@Test
+	@Test @Ignore
 	public void testSearchEquipment() {
 		
 		// 登录时不传namepsace，默认为左邻域空间
