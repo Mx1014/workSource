@@ -1298,9 +1298,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		final Long userId = getUserId();
 		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
 		checkPrivilege(userId, ownerInfo);
-		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
 
-		return new ListApprovalLogAndFlowOfRequestBySceneResponse(listApprovalLogAndFlow(approvalRequest));
+		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+		return new ListApprovalLogAndFlowOfRequestBySceneResponse(approvalRequest.getApprovalType(),approvalRequest.getApprovalStatus(),
+				handler.ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest) ,listApprovalLogAndFlow(approvalRequest));
 	}
 
 	@Override
