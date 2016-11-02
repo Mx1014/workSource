@@ -163,4 +163,9 @@ public interface EnergyConsumptionService {
      * 获取表记分类列表
      */
     List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListMeterCategoriesCommand cmd);
+    
+    /**
+     * 计算前一天的读表数据
+     * */
+	void caculateEnergyDayStat();
 }

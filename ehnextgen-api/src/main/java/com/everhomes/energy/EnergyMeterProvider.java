@@ -35,4 +35,9 @@ public interface EnergyMeterProvider {
      * @param pageSize  每页大小
      */
     List<EnergyMeter> listEnergyMeters(Long pageAnchor, Integer pageSize);
+
+    /**
+     * 查出所有的表
+     * */
+	List<EnergyMeter> listEnergyMeters();
 }
