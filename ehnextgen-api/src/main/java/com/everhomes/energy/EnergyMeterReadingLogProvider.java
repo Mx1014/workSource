@@ -1,10 +1,10 @@
 package com.everhomes.energy;
  
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 public interface EnergyMeterReadingLogProvider {
 
@@ -22,5 +22,6 @@ public interface EnergyMeterReadingLogProvider {
 	List<EnergyMeterReadingLog> listMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin);
 
 	EnergyMeterReadingLog getLastMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin);
- 
+
+    List<EnergyMeterReadingLog> listMeterReadingLogs(long pageAnchor, int pageSize);
 }

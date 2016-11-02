@@ -109,6 +109,14 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
         return null;
     }
 
+    @Override
+    public List<EnergyMeterReadingLog> listMeterReadingLogs(long pageAnchor, int pageSize) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.ID.ge(pageAnchor))
+                .limit(pageSize).fetchInto(EnergyMeterReadingLog.class);
+    }
+
     private void prepareObj(EnergyMeterReadingLog log) {
         log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         log.setCreatorUid(UserContext.current().getUser().getId());

@@ -10,6 +10,7 @@ import java.sql.Timestamp;
  *     <li>id: 读表记录id</li>
  *     <li>meterId: 表记id</li>
  *     <li>meterName: 表记名称</li>
+ *     <li>meterNumber: 表记编号</li>
  *     <li>reading: 读数</li>
  *     <li>lastReading: 上次读数(旧表读数)</li>
  *     <li>operatorName: 读表人名字</li>
@@ -23,6 +24,7 @@ public class EnergyMeterReadingLogDTO {
     private Long id;
     private Long meterId;
     private String meterName;
+    private String meterNumber;
     private BigDecimal reading;
     private BigDecimal lastReading;
     private String operatorName;
@@ -48,6 +50,14 @@ public class EnergyMeterReadingLogDTO {
 
     public String getMeterName() {
         return meterName;
+    }
+
+    public String getMeterNumber() {
+        return meterNumber;
+    }
+
+    public void setMeterNumber(String meterNumber) {
+        this.meterNumber = meterNumber;
     }
 
     public void setMeterName(String meterName) {

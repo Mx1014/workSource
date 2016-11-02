@@ -3,7 +3,6 @@ package com.everhomes.rest.energy;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -30,21 +29,21 @@ public class SearchEnergyMeterReadingLogsCommand {
     private Long serviceCategoryId;
     private Byte meterType;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private Long startTime;
+    private Long endTime;
 
-    private Integer pageAnchor;
+    private Long pageAnchor;
     private Integer pageSize;
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public Integer getPageAnchor() {
+    public Long getPageAnchor() {
         return pageAnchor;
     }
 
-    public void setPageAnchor(Integer pageAnchor) {
+    public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
 
@@ -108,20 +107,19 @@ public class SearchEnergyMeterReadingLogsCommand {
         this.meterType = meterType;
     }
 
-    public Timestamp getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 
-    public Timestamp getStartTime() {
-
+    public Long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 

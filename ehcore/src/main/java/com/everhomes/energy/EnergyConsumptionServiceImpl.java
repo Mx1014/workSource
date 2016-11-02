@@ -1,5 +1,5 @@
 package com.everhomes.energy;
-
+ 
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
@@ -23,7 +23,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.common.joda.time.Days;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +77,7 @@ import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -138,6 +138,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterSearcher meterSearcher;
+
+    @Autowired
+    private EnergyMeterReadingLogSearcher readingLogSearcher;
 
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
@@ -224,6 +227,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
         EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
         dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
+
+        // 当前最大量程
+
         return dto;
     }
 
@@ -384,7 +390,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public SearchEnergyMeterReadingLogsResponse searchEnergyMeterReadingLogs(SearchEnergyMeterReadingLogsCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        return readingLogSearcher.queryMeterReadingLogs(cmd);
     }
 
     @Override
