@@ -202,6 +202,7 @@ ALTER TABLE `eh_organizations` ADD `size` INTEGER COMMENT 'job level size';
 -- DROP TABLE IF EXISTS `eh_organization_job_position_maps`;
 CREATE TABLE `eh_organization_job_position_maps` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
   `job_position_id` BIGINT NOT NULL,
   `organization_id` BIGINT NOT NULL COMMENT 'orgnaization member id',
   `creator_uid`  BIGINT DEFAULT NULL,
@@ -230,6 +231,7 @@ CREATE TABLE `eh_service_modules` (
 -- DROP TABLE IF EXISTS `eh_service_module_scopes`;
 CREATE TABLE `eh_service_module_scopes` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
   `module_id` BIGINT DEFAULT NULL,
   `module_name` VARCHAR(64) DEFAULT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
@@ -260,6 +262,7 @@ CREATE TABLE `eh_service_module_privileges` (
 -- DROP TABLE IF EXISTS `eh_service_module_assignments`;
 CREATE TABLE `eh_service_module_assignments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
   `organization_id` BIGINT NOT NULL COMMENT 'organization id',
   `target_type` VARCHAR(32) NOT NULL COMMENT 'organization user',
   `target_id` BIGINT NOT NULL ,
