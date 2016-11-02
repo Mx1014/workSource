@@ -7550,7 +7550,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = UserContext.current().getUser().getId();
 		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		//通过namespace和email domain 找企业
-		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@"));
+		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
 		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,sceneToken.getNamespaceId());
 		if(null == organizations || organizations.size() == 0){
 			return null;
