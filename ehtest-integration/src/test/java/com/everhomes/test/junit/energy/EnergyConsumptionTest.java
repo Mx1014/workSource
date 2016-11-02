@@ -19,6 +19,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,8 +140,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         cmd.setPrice(new BigDecimal("3"));
         cmd.setCostFormulaId(1L);
         cmd.setAmountFormulaId(1L);
-        // cmd.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        // cmd.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        cmd.setStartTime(DateHelper.currentGMTTime().getTime());
+        cmd.setEndTime(Timestamp.valueOf(LocalDateTime.now().plusYears(1)).getTime());
 
         UpdateEnergyMeterRestResponse response = httpClientService.restPost(UPDATE_ENERGY_METER_URL, cmd, UpdateEnergyMeterRestResponse.class);
         assertNotNull(response);
@@ -239,6 +241,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
             assertTrue(result.size() == 3);
         } catch (IOException e) {
             e.printStackTrace();
+            assertTrue(false);
         }
     }
 
@@ -246,12 +249,15 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     @Test
     public void testGetEnergyMeter() {
         logon();
+        testUpdateEnergyMeter();
         GetEnergyMeterCommand cmd = new GetEnergyMeterCommand();
         cmd.setOrganizationId(1L);
         cmd.setMeterId(1L);
-        RestResponseBase response = httpClientService.restPost(GET_ENERGY_METER_URL, cmd, RestResponseBase.class);
+        GetEnergyMeterRestResponse response = httpClientService.restPost(GET_ENERGY_METER_URL, cmd, GetEnergyMeterRestResponse.class);
         assertNotNull(response);
         assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        assertNotNull("", response.getResponse());
 
         Result<EhEnergyMetersRecord> result = context().selectFrom(EH_ENERGY_METERS).fetch();
         assertTrue(result.size() == 3);

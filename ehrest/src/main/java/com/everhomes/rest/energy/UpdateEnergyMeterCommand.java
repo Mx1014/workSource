@@ -5,7 +5,6 @@ import com.everhomes.util.StringHelper;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -32,8 +31,8 @@ public class UpdateEnergyMeterCommand {
     private Long costFormulaId;
     private Long amountFormulaId;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private Long startTime;
+    private Long endTime;
 
     public Long getMeterId() {
         return meterId;
@@ -67,19 +66,19 @@ public class UpdateEnergyMeterCommand {
         this.organizationId = organizationId;
     }
 
-    public Timestamp getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 

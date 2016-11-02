@@ -124,7 +124,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setRate(cmd.getRate());
             updateCmd.setCostFormulaId(cmd.getCostFormulaId());
             updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
-            updateCmd.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            updateCmd.setStartTime(DateHelper.currentGMTTime().getTime());
             updateCmd.setMeterId(meter.getId());
             this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
@@ -205,9 +205,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd) {
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-        log.setStartTime(cmd.getStartTime());
-        Timestamp endTime = cmd.getEndTime();
-        endTime = endTime == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): endTime;
+        log.setStartTime(new Timestamp(cmd.getStartTime()));
+        Timestamp endTime = cmd.getEndTime() == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): new Timestamp(cmd.getEndTime());
         log.setEndTime(endTime);
         log.setMeterId(cmd.getMeterId());
         log.setSettingType(settingType.getCode());
@@ -297,29 +296,29 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 // 价格
                 if (cmd.getPrice() != null) {
                     updateCmd.setPrice(cmd.getPrice());
-                    updateCmd.setStartTime(new Timestamp(cmd.getPriceStart()));
-                    updateCmd.setEndTime(cmd.getPriceEnd() != null ? new Timestamp(cmd.getPriceEnd()) : null);
+                    updateCmd.setStartTime(cmd.getPriceStart());
+                    updateCmd.setEndTime(cmd.getPriceEnd());
                     this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                 }
                 // 倍率
                 if (cmd.getRate() != null) {
                     updateCmd.setRate(cmd.getRate());
-                    updateCmd.setStartTime(new Timestamp(cmd.getRateStart()));
-                    updateCmd.setEndTime(cmd.getRateEnd() != null ? new Timestamp(cmd.getRateEnd()) : null);
+                    updateCmd.setStartTime(cmd.getRateStart());
+                    updateCmd.setEndTime(cmd.getRateEnd());
                     this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 }
                 // 费用
                 if (cmd.getCostFormulaId() != null) {
                     updateCmd.setCostFormulaId(cmd.getCostFormulaId());
-                    updateCmd.setStartTime(new Timestamp(cmd.getCostFormulaStart()));
-                    updateCmd.setEndTime(cmd.getCostFormulaEnd() != null ? new Timestamp(cmd.getCostFormulaEnd()) : null);
+                    updateCmd.setStartTime(cmd.getCostFormulaStart());
+                    updateCmd.setEndTime(cmd.getCostFormulaEnd());
                     this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
                 }
                 // 用量
                 if (cmd.getAmountFormulaId() != null) {
                     updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
-                    updateCmd.setStartTime(new Timestamp(cmd.getAmountFormulaStart()));
-                    updateCmd.setEndTime(cmd.getAmountFormulaEnd() != null ? new Timestamp(cmd.getAmountFormulaEnd()) : null);
+                    updateCmd.setStartTime(cmd.getAmountFormulaStart());
+                    updateCmd.setEndTime(cmd.getAmountFormulaEnd());
                     this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
                 }
             });
@@ -419,7 +418,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setRate(meter.getRate());
                 updateCmd.setCostFormulaId(meter.getCostFormulaId());
                 updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
-                updateCmd.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                updateCmd.setStartTime(DateHelper.currentGMTTime().getTime());
                 updateCmd.setMeterId(meter.getId());
                 this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
