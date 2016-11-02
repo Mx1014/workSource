@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -184,8 +183,8 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setReading(BigDecimal.valueOf((Double) source.get("reading")));
             dto.setId(Long.valueOf(hit.getId()));
             dto.setMeterName((String) source.get("meterName"));
-            dto.setResetMeterFlag(Byte.valueOf((String) source.get("resetFlag")));
-            dto.setOperateTime(new Timestamp(Long.valueOf((String) source.get("operateTime"))));
+            // dto.setResetMeterFlag((Integer) source.get("resetFlag"));
+            // dto.setOperateTime(DateTime);
             dto.setOperatorName((String) source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
 
