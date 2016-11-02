@@ -220,7 +220,7 @@ select * from eh_categories c1 JOIN eh_categories c2 on c1.parent_id = c2.id
 DELETE FROM eh_categories where name = '任务' and id != 6;
 -- 威新Link	物业报修2.5菜单 add by sunwen 20161102
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `a   pply_policy`)
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES((@menu_scope_id := @menu_scope_id + 1),28000,'', 'EhNamespaces', 999991,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES((@menu_scope_id := @menu_scope_id + 1),29000,'', 'EhNamespaces', 999991,2);
