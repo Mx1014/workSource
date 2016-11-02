@@ -782,6 +782,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
+				organizationDetail.setEmailDomain(cmd.getEmailDomain());
 				organizationDetail.setAddress(cmd.getAddress());
 				organizationDetail.setDescription(cmd.getDescription());
 				organizationDetail.setAvatar(cmd.getAvatar());
@@ -7608,8 +7609,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
 		dto.setUserId(userId);
 		dto.setEnterpriseId(cmd.getOrganizationId());
+		//TODO: 判断邮箱是否被使用
 		// 添加联系人
 		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
+		cmd2.setContactType(ContactType.EMAIL.getCode());
+		cmd2.setContactToken(cmd.getEmail());
 		cmd2.setOrganizationId(cmd.getOrganizationId());
 		cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
 		cmd2.setTargetId(userId);
