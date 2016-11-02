@@ -269,6 +269,7 @@ CREATE TABLE `eh_service_module_assignments` (
   `owner_type` VARCHAR(32) NOT NULL COMMENT 'community',
   `owner_id` BIGINT NOT NULL,
   `module_id` BIGINT NOT NULL,
+  `create_uid` BIGINT NOT NULL,
   `create_time` DATETIME DEFAULT NULL,
   `update_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
