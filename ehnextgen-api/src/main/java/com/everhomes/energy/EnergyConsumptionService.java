@@ -176,5 +176,6 @@ public interface EnergyConsumptionService {
      */
     EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd);
 
-	void caculateEnergyMonthStat(); 
+	void caculateEnergyMonthStat();
+ 
 }

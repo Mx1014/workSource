@@ -232,7 +232,7 @@ CREATE TABLE `eh_energy_count_statistics` (
   `community_id`          BIGINT,
   `meter_type`            TINYINT COMMENT '1:WATER, 2: ELECTRIC',
   `date_str`              VARCHAR(20),
-  `statistic_type`        TINYINT COMMENT '1:service, 2: bill, 3:burden',
+  `statistic_type`        TINYINT COMMENT '1:bill, 2: service, 3:burden',
   `bill_category_id`      BIGINT COMMENT 'eh_energy_meter_categories id',
   `service_category_id`   BIGINT COMMENT 'eh_energy_meter_categories id',
   `bill_category_name`    VARCHAR(255),
@@ -248,22 +248,30 @@ CREATE TABLE `eh_energy_count_statistics` (
 );
 
 --
--- 年度水电收支
+-- 各项目月水电能耗情况-同比
 --
-CREATE TABLE `eh_energy_year_statistics` (
+CREATE TABLE `eh_energy_yoy_statistics` (
   `id`                BIGINT  NOT NULL,
   `namespace_id`      INTEGER NOT NULL DEFAULT 0,
-  `community_id`      BIGINT,
-  `meter_type`        TINYINT COMMENT '1:WATER, 2: ELECTRIC',
+  `community_id`      BIGINT, 
   `date_str`          VARCHAR(20),
-  `receivable_amount` DECIMAL(10, 1) COMMENT'应收用量',
-  `receivable_cost`   DECIMAL(10, 1) COMMENT'应收费用',
-  `payable_amount`    DECIMAL(10, 1) COMMENT'应付用量',
-  `payable_cost`      DECIMAL(10, 1) COMMENT'应付费用',
-  `burden_amount`     DECIMAL(10, 1) COMMENT'负担公共用量',
-  `burden_cost`       DECIMAL(10, 1) COMMENT'负担公共费用',
   `area_size`         DOUBLE COMMENT 'Community area size',
-  `average_amount`    DECIMAL(10, 1),
+  `water_receivable_amount` DECIMAL(10, 1) COMMENT '水表本月应收用量', 
+  `water_payable_amount`    DECIMAL(10, 1) COMMENT '水表本月应付用量', 
+  `water_burden_amount`     DECIMAL(10, 1) COMMENT '水表本月负担公共用量', 
+  `water_average_amount`    DECIMAL(10, 1) COMMENT '水表本月每平米平均用量', 
+  `water_last_receivable_amount` DECIMAL(10, 1) COMMENT '水表去年同期应收用量', 
+  `water_last_payable_amount`    DECIMAL(10, 1) COMMENT '水表去年同期应付用量',
+  `water_last_burden_amount`     DECIMAL(10, 1) COMMENT '水表去年同期负担公共用量',
+  `water_last_average_amount`    DECIMAL(10, 1) COMMENT '水表去年同期每平米平均用量', 
+  `elestic_receivable_amount` DECIMAL(10, 1) COMMENT '电表应收用量', 
+  `elestic_payable_amount`    DECIMAL(10, 1) COMMENT '电表应付用量', 
+  `elestic_burden_amount`     DECIMAL(10, 1) COMMENT '电表负担公共用量', 
+  `elestic_average_amount`    DECIMAL(10, 1) COMMENT '电表每平米平均用量', 
+  `elestic_last_receivable_amount` DECIMAL(10, 1) COMMENT '电表去年同期应收用量', 
+  `elestic_last_payable_amount`    DECIMAL(10, 1) COMMENT '电表去年同期应付用量',
+  `elestic_last_burden_amount`     DECIMAL(10, 1) COMMENT '电表去年同期负担公共用量',
+  `elestic_last_average_amount`    DECIMAL(10, 1) COMMENT '电表去年同期每平米平均用量', 
   `status`            TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
   `creator_uid`       BIGINT,
   `create_time`       DATETIME,
@@ -271,3 +279,4 @@ CREATE TABLE `eh_energy_year_statistics` (
   `update_time`       DATETIME,
   PRIMARY KEY (`id`)
 );
+

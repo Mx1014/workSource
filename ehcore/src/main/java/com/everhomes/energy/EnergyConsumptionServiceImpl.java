@@ -1,40 +1,13 @@
 package com.everhomes.energy;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.approval.MeterFormulaVariable;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.energy.*;
-import com.everhomes.search.EnergyMeterReadingLogSearcher;
-import com.everhomes.search.EnergyMeterSearcher;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.excel.MySheetContentsHandler;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.SAXHandlerEventUserModel;
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -48,8 +21,82 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.MeterFormulaVariable;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
+import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
+import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
+import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
+import com.everhomes.rest.energy.EnergyLocaleStringCode;
+import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
+import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
+import com.everhomes.rest.energy.EnergyMeterDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
+import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
+import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingType;
+import com.everhomes.rest.energy.EnergyMeterStatus;
+import com.everhomes.rest.energy.EnergyMeterType;
+import com.everhomes.rest.energy.EnergyStatByYearDTO;
+import com.everhomes.rest.energy.EnergyStatCommand;
+import com.everhomes.rest.energy.EnergyStatDTO;
+import com.everhomes.rest.energy.GetEnergyMeterCommand;
+import com.everhomes.rest.energy.ImportEnergyMeterCommand;
+import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
+import com.everhomes.rest.energy.ListEnergyFormulasCommand;
+import com.everhomes.rest.energy.ListMeterCategoriesCommand;
+import com.everhomes.rest.energy.ListMeterChangeLogCommand;
+import com.everhomes.rest.energy.ReadEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterResponse;
+import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.search.EnergyMeterReadingLogSearcher;
+import com.everhomes.search.EnergyMeterSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.MySheetContentsHandler;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.SAXHandlerEventUserModel;
  
 
 /**
@@ -64,8 +111,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
 	SimpleDateFormat monthSF = new SimpleDateFormat("yyyyMM");
     
+	@Autowired
+	private CommunityProvider communityProvider;
+	
     @Autowired
     private EnergyDateStatisticProvider energyDateStatisticProvider;
+
+    @Autowired
+    private EnergyCountStatisticProvider energyCountStatisticProvider;
 
     @Autowired
     private EnergyMonthStatisticProvider energyMonthStatisticProvider;
@@ -635,6 +688,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			//拿前天的度数
 			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
 			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
+			//默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
 			BigDecimal ReadingAnchor = meter.getStartReading();
 			BigDecimal dayLastReading = meter.getStartReading();
 			BigDecimal dayCurrReading = meter.getStartReading();
@@ -756,5 +810,27 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			 
 			energyMonthStatisticProvider.createEnergyMonthStatistic(monthStat);
 		}
-	}
+		//总量记录表 -用sql汇总
+		List<EnergyCountStatistic> countStats = energyMonthStatisticProvider.listEnergyCountStatistic(monthSF.format(monthBegin));
+		if(null != countStats){
+			List<Long> comIds = new ArrayList<Long>();
+			for(EnergyCountStatistic cs : countStats){
+
+				cs.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+				cs.setCreatorUid(UserContext.current().getUser().getId());
+				cs.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				energyCountStatisticProvider.createEnergyCountStatistic(cs);
+				comIds.add(cs.getCommunityId());
+			}
+			//各项目月水电能耗情况-同比
+			for(Long comId : comIds){
+				Community com = communityProvider.findCommunityById(comId);
+				
+			}
+			
+		}
+		 
+	} 
+	
 }

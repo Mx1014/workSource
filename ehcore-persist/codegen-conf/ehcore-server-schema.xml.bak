@@ -112,7 +112,7 @@
         eh_request_templates | eh_request_templates_namespace_mapping | eh_request_attachments | eh_service_alliance_requests | eh_service_alliance_notify_targets | eh_settle_requests |
 		eh_region_codes | eh_stat_active_users |
         eh_energy_meters | eh_energy_meter_reading_logs | eh_energy_meter_change_logs | eh_energy_meter_categories | eh_energy_meter_setting_logs | eh_energy_meter_default_settings | eh_energy_meter_formulas | eh_energy_meter_formula_variables |
-        eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_yoy_statistics |
+        eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_year_statistics |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
