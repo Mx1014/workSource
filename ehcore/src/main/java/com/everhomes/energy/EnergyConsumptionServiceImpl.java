@@ -826,7 +826,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			//各项目月水电能耗情况-同比
 			for(Long comId : comIds){
 				Community com = communityProvider.findCommunityById(comId);
-				
+				EnergyYoyStatistic yoy = new EnergyYoyStatistic();
+				yoy.setNamespaceId(com.getNamespaceId());
+				yoy.setCommunityId(com.getId());
+				yoy.setAreaSize(com.getAreaSize());
+				yoy.setDateStr(monthSF.format(monthBegin));
+				//TODO: 通过sql计算每一个值
 			}
 			
 		}

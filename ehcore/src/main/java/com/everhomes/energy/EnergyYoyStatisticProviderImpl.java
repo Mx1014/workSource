@@ -14,14 +14,14 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhEnergyYearStatisticsDao;
-import com.everhomes.server.schema.tables.pojos.EhEnergyYearStatistics;
-import com.everhomes.server.schema.tables.records.EhEnergyYearStatisticsRecord;
+import com.everhomes.server.schema.tables.daos.EhEnergyYoyStatisticsDao;
+import com.everhomes.server.schema.tables.pojos.EhEnergyYoyStatistics;
+import com.everhomes.server.schema.tables.records.EhEnergyYoyStatisticsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 
 @Component
-public class EnergyYearStatisticProviderImpl implements EnergyYearStatisticProvider {
+public class EnergyYoyStatisticProviderImpl implements EnergyYoyStatisticProvider {
     @Autowired
     private DbProvider dbProvider;
 
@@ -32,41 +32,41 @@ public class EnergyYearStatisticProviderImpl implements EnergyYearStatisticProvi
     private SequenceProvider sequenceProvider;
 
     @Override
-    public Long createEnergyYearStatistic(EnergyYearStatistic obj) {
-        String key = NameMapper.getSequenceDomainFromTablePojo(EhEnergyYearStatistics.class);
+    public Long createEnergyYoyStatistic(EnergyYoyStatistic obj) {
+        String key = NameMapper.getSequenceDomainFromTablePojo(EhEnergyYoyStatistics.class);
 				long id = sequenceProvider.getNextSequence(key);
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         obj.setId(id);
         prepareObj(obj);
-        EhEnergyYearStatisticsDao dao = new EhEnergyYearStatisticsDao(context.configuration());
+        EhEnergyYoyStatisticsDao dao = new EhEnergyYoyStatisticsDao(context.configuration());
         dao.insert(obj);
         return id;
     }
 
     @Override
-    public void updateEnergyYearStatistic(EnergyYearStatistic obj) {
+    public void updateEnergyYoyStatistic(EnergyYoyStatistic obj) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhEnergyYearStatisticsDao dao = new EhEnergyYearStatisticsDao(context.configuration());
+        EhEnergyYoyStatisticsDao dao = new EhEnergyYoyStatisticsDao(context.configuration());
         dao.update(obj);
     }
 
     @Override
-    public void deleteEnergyYearStatistic(EnergyYearStatistic obj) {
+    public void deleteEnergyYoyStatistic(EnergyYoyStatistic obj) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhEnergyYearStatisticsDao dao = new EhEnergyYearStatisticsDao(context.configuration());
+        EhEnergyYoyStatisticsDao dao = new EhEnergyYoyStatisticsDao(context.configuration());
         dao.deleteById(obj.getId());
     }
 
     @Override
-    public EnergyYearStatistic getEnergyYearStatisticById(Long id) {
+    public EnergyYoyStatistic getEnergyYoyStatisticById(Long id) {
         try {
-        EnergyYearStatistic[] result = new EnergyYearStatistic[1];
+        EnergyYoyStatistic[] result = new EnergyYoyStatistic[1];
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 
-        result[0] = context.select().from(Tables.EH_ENERGY_YEAR_STATISTICS)
-            .where(Tables.EH_ENERGY_YEAR_STATISTICS.ID.eq(id))
+        result[0] = context.select().from(Tables.EH_ENERGY_YOY_STATISTICS)
+            .where(Tables.EH_ENERGY_YOY_STATISTICS.ID.eq(id))
             .fetchAny().map((r) -> {
-                return ConvertHelper.convert(r, EnergyYearStatistic.class);
+                return ConvertHelper.convert(r, EnergyYoyStatistic.class);
             });
 
         return result[0];
@@ -77,25 +77,25 @@ public class EnergyYearStatisticProviderImpl implements EnergyYearStatisticProvi
     }
 
     @Override
-    public List<EnergyYearStatistic> queryEnergyYearStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+    public List<EnergyYoyStatistic> queryEnergyYoyStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SelectQuery<EhEnergyYearStatisticsRecord> query = context.selectQuery(Tables.EH_ENERGY_YEAR_STATISTICS);
+        SelectQuery<EhEnergyYoyStatisticsRecord> query = context.selectQuery(Tables.EH_ENERGY_YOY_STATISTICS);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
         if(null != locator && locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ENERGY_YEAR_STATISTICS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_ENERGY_YOY_STATISTICS.ID.gt(locator.getAnchor()));
             }
 
         query.addLimit(count);
-        List<EnergyYearStatistic> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, EnergyYearStatistic.class);
+        List<EnergyYoyStatistic> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnergyYoyStatistic.class);
         });
 
         return objs;
     }
 
-    private void prepareObj(EnergyYearStatistic obj) {
+    private void prepareObj(EnergyYoyStatistic obj) {
     }
 }
