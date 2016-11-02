@@ -113,8 +113,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
-		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate());
-		
+		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate()); 
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {
 			approvalRequest.setId(punchExceptionRequest.getRequestId());
@@ -311,7 +310,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		String scope = ApprovalLogTitleTemplateCode.SCOPE;
 		int code = ApprovalLogTitleTemplateCode.EXCEPTION_TITLE;
 		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
-		map.put("date",processRequestDate(a.getEffectiveDate()));
+		map.put("date",processRequestDate(new Date(a.getLongTag1())));
 		 
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		
@@ -325,8 +324,8 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		 
 		String scope = ApprovalLogTitleTemplateCode.SCOPE;
 		int code = ApprovalLogTitleTemplateCode.EXCEPTION_MAIN_TITLE; 
-		map.put("date",processRequestDate(a.getEffectiveDate()));
-		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
+		map.put("date",processRequestDate(new Date(a.getLongTag1())));
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
 		map.put("punchLog",processPunchDetail(pdl)) ;
 		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay()))
 			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
