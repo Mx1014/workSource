@@ -77,6 +77,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     private static final String GET_ENERGY_STATISTIC_BY_YOY_URL = "/energy/getEnergyStatisticByYoy";
     //24. 抄表
     private static final String READ_ENERGY_METER_URL = "/energy/readEnergyMeter";
+    //25. 获取表信息
+    private static final String GET_ENERGY_METER_URL = "/energy/getEnergyMeter";
 
 
     //1. 新建表记(水表,电表等)
@@ -238,6 +240,21 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    //14. 导入表记(Excel)
+    @Test
+    public void testGetEnergyMeter() {
+        logon();
+        GetEnergyMeterCommand cmd = new GetEnergyMeterCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setMeterId(1L);
+        RestResponseBase response = httpClientService.restPost(GET_ENERGY_METER_URL, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        Result<EhEnergyMetersRecord> result = context().selectFrom(EH_ENERGY_METERS).fetch();
+        assertTrue(result.size() == 3);
     }
 
     private DSLContext context() {

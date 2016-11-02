@@ -1,5 +1,7 @@
 package com.everhomes.energy;
 
+import java.util.List;
+
 /**
  * Created by xq.tian on 2016/10/25.
  */
@@ -14,4 +16,9 @@ public interface EnergyMeterFormulaProvider {
      * 根据名称查找
      */
     EnergyMeterFormula findByName(Integer namespaceId, String name);
+
+    /**
+     * 获取公式列表
+     */
+    List<EnergyMeterFormula> listMeterFormulas(Integer namespaceId, Byte formulaType);
 }

@@ -4,6 +4,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.energy.*;
 import com.everhomes.search.EnergyMeterSearcher;
@@ -29,9 +30,11 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
@@ -58,6 +61,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private LocaleStringProvider localeStringProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
 
     @Autowired
     private EnergyMeterProvider meterProvider;
@@ -131,7 +137,38 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter) {
-        return ConvertHelper.convert(meter, EnergyMeterDTO.class);
+        EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
+
+        // 表的类型
+        String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(meter.getMeterType()), currLocale(), "");
+        dto.setMeterType(meterType);
+
+        // 账单项目
+        EnergyMeterCategory billCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getBillCategoryId());
+        dto.setBillCategory(billCategory.getName());
+
+        // 分类
+        EnergyMeterCategory serviceCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getServiceCategoryId());
+        dto.setServiceCategory(serviceCategory.getName());
+
+        // 当前价格
+        EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
+        dto.setPrice(priceLog.getSettingValue());
+
+        // 当前倍率
+        EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE);
+        dto.setRate(rateLog.getSettingValue());
+
+        // 当前费用公式名称
+        EnergyMeterSettingLog costLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.COST_FORMULA);
+        EnergyMeterFormula costFormula = meterFormulaProvider.findById(currNamespaceId(), costLog.getFormulaId());
+        dto.setCostFormula(toEnergyMeterFormulaDTO(costFormula));
+
+        // 当前用量公式名称
+        EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
+        EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
+        dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
+        return dto;
     }
 
     @Override
@@ -169,7 +206,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setStartTime(cmd.getStartTime());
-        log.setEndTime(cmd.getEndTime());
+        Timestamp endTime = cmd.getEndTime();
+        endTime = endTime == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): endTime;
+        log.setEndTime(endTime);
         log.setMeterId(cmd.getMeterId());
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(currNamespaceId());
@@ -259,28 +298,28 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if (cmd.getPrice() != null) {
                     updateCmd.setPrice(cmd.getPrice());
                     updateCmd.setStartTime(new Timestamp(cmd.getPriceStart()));
-                    // updateCmd.setEndTime(new Timestamp(cmd.getPriceEnd()));
+                    updateCmd.setEndTime(cmd.getPriceEnd() != null ? new Timestamp(cmd.getPriceEnd()) : null);
                     this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                 }
                 // 倍率
                 if (cmd.getRate() != null) {
                     updateCmd.setRate(cmd.getRate());
                     updateCmd.setStartTime(new Timestamp(cmd.getRateStart()));
-                    // updateCmd.setEndTime(new Timestamp(cmd.getRateEnd()));
+                    updateCmd.setEndTime(cmd.getRateEnd() != null ? new Timestamp(cmd.getRateEnd()) : null);
                     this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 }
                 // 费用
                 if (cmd.getCostFormulaId() != null) {
                     updateCmd.setCostFormulaId(cmd.getCostFormulaId());
                     updateCmd.setStartTime(new Timestamp(cmd.getCostFormulaStart()));
-                    // updateCmd.setEndTime(new Timestamp(cmd.getCostFormulaEnd()));
+                    updateCmd.setEndTime(cmd.getCostFormulaEnd() != null ? new Timestamp(cmd.getCostFormulaEnd()) : null);
                     this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
                 }
                 // 用量
                 if (cmd.getAmountFormulaId() != null) {
                     updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
                     updateCmd.setStartTime(new Timestamp(cmd.getAmountFormulaStart()));
-                    // updateCmd.setEndTime(new Timestamp(cmd.getAmountFormulaEnd()));
+                    updateCmd.setEndTime(cmd.getAmountFormulaEnd() != null ? new Timestamp(cmd.getAmountFormulaEnd()) : null);
                     this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
                 }
             });
@@ -438,7 +477,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyFormulasCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(currNamespaceId(), cmd.getFormulaType());
+        return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
+    }
+
+    private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
+        return ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
     }
 
     @Override
@@ -453,7 +499,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListMeterCategoriesCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType());
+        return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+        return toEnergyMeterDTO(meter);
+    }
+
+    private EnergyMeterCategoryDTO toMeterCategoryDto(EnergyMeterCategory category) {
+        return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
     }
 
     private void checkCurrentUserNotInOrg(Long orgId) {

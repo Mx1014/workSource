@@ -8,6 +8,8 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_CATEGORIES;
 
 /**
@@ -36,6 +38,14 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
                 .where(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_CATEGORIES.NAME.eq(name))
                 .fetchAnyInto(EnergyMeterCategory.class);
+    }
+
+    @Override
+    public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType) {
+        return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
+                .where(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType))
+                .fetchInto(EnergyMeterCategory.class);
     }
 
     private DSLContext context() {

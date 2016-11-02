@@ -66,6 +66,16 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>获取表记的信息</p>
+     * <b>URL: /energy/getEnergyMeter</b>
+     */
+    @RestReturn(EnergyMeterDTO.class)
+    @RequestMapping("getEnergyMeter")
+    public RestResponse getEnergyMeter(GetEnergyMeterCommand cmd) {
+        return response(energyConsumptionService.getEnergyMeter(cmd));
+    }
+
+    /**
      * <p>换表</p>
      * <b>URL: /energy/changeEnergyMeter</b>
      */

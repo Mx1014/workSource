@@ -13,17 +13,17 @@ import javax.validation.constraints.NotNull;
 public class ListMeterCategoriesCommand {
 
     @NotNull private Long organizationId;
-    @NotNull private Long categoryType;
+    @NotNull private Byte categoryType;
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public Long getCategoryType() {
+    public Byte getCategoryType() {
         return categoryType;
     }
 
-    public void setCategoryType(Long categoryType) {
+    public void setCategoryType(Byte categoryType) {
         this.categoryType = categoryType;
     }
 
