@@ -217,10 +217,18 @@ public class ParkingServiceImpl implements ParkingService {
 
         if(cardList.size() == 0){
         	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+        			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
+        			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
+        	if(list.size() > parkingLot.getMaxRequestNum()){
+        		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
+    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
+    					"The card request is rather than max request num.");
+        	}
+        	list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
         	if(list.size()>0){
-        		LOGGER.error("PlateNumber is already applied.");
+        		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
     					"plateNumber is already applied.");
         	}
