@@ -180,7 +180,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -515,6 +519,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -655,6 +661,7 @@ import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;import com.everhomes.search.EquipmentAccessoriesSearcher;
@@ -666,6 +673,8 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -740,6 +749,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Autowired
 	private EquipmentStandardMapSearcher equipmentStandardMapSearcher;
+	
+	@Autowired
+	private UserProvider userProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -2847,7 +2859,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(isAdmin) {
 			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), null, null, locator, pageSize + 1);
 		} else {
-			List<OrganizationDTO> groupDtos = qualityService.listUserRelateOrgGroups();
+			List<OrganizationDTO> groupDtos = listUserRelateDepartment(cmd.getOwnerId());
 			List<String> targetTypes = new ArrayList<String>();
 			List<Long> targetIds = new ArrayList<Long>();
 			if(groupDtos != null && groupDtos.size() > 0) {
@@ -2909,6 +2921,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 			response.setTasks(dtos);
         }
 		return response;
+	}
+	
+	private List<OrganizationDTO> listUserRelateDepartment(Long orgId) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		 
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		if(userIdentifier == null) {
+			return new ArrayList<OrganizationDTO>();
+		}
+		
+		Organization org = organizationProvider.findOrganizationById(orgId);
+		if(org == null) {
+			return new ArrayList<OrganizationDTO>();
+		}
+		List<OrganizationDTO> groupDtos =  organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), org.getPath());
+				
+		return groupDtos;
 	}
 
 	@Override
