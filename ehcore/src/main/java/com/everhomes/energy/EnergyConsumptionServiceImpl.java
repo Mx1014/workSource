@@ -909,7 +909,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 				
 
 				//本月-电费-账单项目-应收
-				yoy.setecElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
+				yoy.setElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
 				//本月-电费-账单项目-应付
 				yoy.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
@@ -932,7 +932,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
 				
 				//去年本月-电费-账单项目-应收
-				yoy.setecElectricLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.ELECTRIC.getCode()
+				yoy.setElectricLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.ELECTRIC.getCode()
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
 				//去年本月-电费-账单项目-应付
 				yoy.setElectricLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.ELECTRIC.getCode()
