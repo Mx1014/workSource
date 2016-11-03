@@ -7,6 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
+import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
@@ -17,6 +19,7 @@ import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
@@ -33,6 +36,7 @@ import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
 import com.everhomes.rest.community.admin.CreateCommunityCommand;
 import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
@@ -46,6 +50,7 @@ import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
@@ -127,4 +132,17 @@ public interface CommunityService {
 	void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd);
 
 	ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd);
+	
+	/*--------添加修改资源分类 ------*/
+	void createResourceCategory(CreateResourceCategoryCommand cmd);
+	
+	void updateResourceCategory(UpdateResourceCategoryCommand cmd);
+	
+	void deleteResourceCategory(DeleteResourceCategoryCommand cmd);
+	
+	void createResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
+	
+	void deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
+	
+	ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
 }

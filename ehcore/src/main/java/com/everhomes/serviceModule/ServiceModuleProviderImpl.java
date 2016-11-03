@@ -6,8 +6,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.serviceModule.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhServiceModules;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
@@ -15,6 +17,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -140,7 +143,23 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		return results;
 	}
 
-
+	@Override
+	public List<ServiceModule> listServiceModule(Integer level) {
+		List<ServiceModule> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+		SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+		
+		Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+		if(null != level)
+			cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.eq(level));
+		
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModule.class));
+			return null;
+		});
+		return results;
+	}
 
 //	@Override
 //	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})

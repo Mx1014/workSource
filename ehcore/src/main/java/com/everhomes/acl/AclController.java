@@ -1,6 +1,8 @@
 package com.everhomes.acl;
 
 
+import java.util.List;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -12,9 +14,12 @@ import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.serviceModule.ServiceModuleService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.validation.Valid;
 
 
@@ -25,6 +30,8 @@ public class AclController extends ControllerBase {
     
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
 
     /**
@@ -115,7 +122,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listServiceModules")
     @RestReturn(value=ServiceModuleDTO.class, collection = true)
     public RestResponse listServiceModules(@Valid ListServiceModulesCommand cmd) {
-        RestResponse response = new RestResponse();
+    	List<ServiceModuleDTO> dto = serviceModuleService.listServiceModules(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -128,7 +136,9 @@ public class AclController extends ControllerBase {
     @RequestMapping("listTreeServiceModules")
     @RestReturn(value=ServiceModuleDTO.class, collection = true)
     public RestResponse listTreeServiceModules(@Valid ListServiceModulesCommand cmd) {
-        RestResponse response = new RestResponse();
+    	List<ServiceModuleDTO> dto = serviceModuleService.listTreeServiceModules(cmd);
+
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -8,11 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
@@ -43,6 +45,7 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityGeoPointDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.ResourceCategoryStatus;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -53,18 +56,23 @@ import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
 import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhResourceCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhResourceCategoryAssignmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.server.schema.tables.pojos.EhResourceCategories;
+import com.everhomes.server.schema.tables.pojos.EhResourceCategoryAssignments;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhResourceCategoryAssignmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -1146,4 +1154,135 @@ public class CommunityProviderImpl implements CommunityProvider {
 		return results;
 	}
 
+	@Override
+	public void createResourceCategory(ResourceCategory resourceCategory) {
+		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhResourceCategories.class));
+        
+		resourceCategory.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhResourceCategoriesDao dao = new EhResourceCategoriesDao(context.configuration());
+        dao.insert(resourceCategory);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhResourceCategories.class, null);
+	}
+	
+	@Override
+	public ResourceCategory findResourceCategoryById(Long id) {
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategories.class));
+        EhResourceCategoriesDao dao = new EhResourceCategoriesDao(context.configuration());
+        
+        return ConvertHelper.convert(dao.findById(id), ResourceCategory.class);
+	}
+	
+	@Override
+	public ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name) {
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategories.class));
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_RESOURCE_CATEGORIES);
+        
+        Condition condition = Tables.EH_RESOURCE_CATEGORIES.OWNER_ID.eq(ownerId);
+        condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.NAME.eq(name));
+        condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.STATUS.eq(ResourceCategoryStatus.ACTIVE.getCode()));
+		
+        if(null != parentId)
+            condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.PARENT_ID.eq(parentId));
+
+        return ConvertHelper.convert(query.fetchOne(), ResourceCategory.class);
+	}
+	
+	@Override
+	public void updateResourceCategory(ResourceCategory resourceCategory) {
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhResourceCategoriesDao dao = new EhResourceCategoriesDao(context.configuration());
+        dao.update(resourceCategory);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhResourceCategories.class, null);
+	}
+	
+	@Override
+	public void createResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment) {
+		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhResourceCategoryAssignments.class));
+        
+		resourceCategoryAssignment.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhResourceCategoryAssignmentsDao dao = new EhResourceCategoryAssignmentsDao(context.configuration());
+        dao.insert(resourceCategoryAssignment);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhResourceCategoryAssignments.class, null);
+	}
+	
+	@Override
+	public void updateResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment) {
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhResourceCategoryAssignmentsDao dao = new EhResourceCategoryAssignmentsDao(context.configuration());
+        dao.update(resourceCategoryAssignment);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhResourceCategoryAssignments.class, null);
+	}
+	
+	@Override
+	public ResourceCategoryAssignment findResourceCategoryAssignment(Long resourceId, String resourceType, Integer namespaceId) {
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategoryAssignments.class));
+
+        SelectQuery<EhResourceCategoryAssignmentsRecord> query = context.selectQuery(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS);
+        query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_ID.eq(resourceId));
+        query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_TYPE.eq(resourceType));
+//        query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_CATEGRY_ID.eq(resourceCategoryId));
+        query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.NAMESPACE_ID.eq(namespaceId));
+
+        return ConvertHelper.convert(query.fetchOne(), ResourceCategoryAssignment.class);
+	}
+	
+	@Override
+	public void deleteResourceCategoryAssignmentById(Long id) {
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhResourceCategoryAssignmentsDao dao = new EhResourceCategoryAssignmentsDao(context.configuration());
+        dao.deleteById(id);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhResourceCategoryAssignments.class, null);
+
+	}
+	
+	@Override
+	public List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
+			Integer pageSize) {
+		int namespaceId =UserContext.getCurrentNamespaceId(null);
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
+
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_COMMUNITIES);
+		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(pageAnchor));
+		}
+		if(null != cityId){
+			cond = cond.and(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId));
+		}
+		if(null != areaId){
+			cond = cond.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
+		}
+		if(null != categoryId){
+			query.join(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS).on(
+					Tables.EH_COMMUNITIES.ID.eq(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_ID));
+			cond = cond.and(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_CATEGRY_ID.eq(categoryId));
+		}
+		if(StringUtils.isEmpty(keyword)){
+			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
+		}
+		query.orderBy(Tables.EH_COMMUNITIES.ID.asc());
+		if(null != pageSize)
+			query.limit(pageSize);
+		
+		List<Community> communities = query.fetch().stream().map(r -> ConvertHelper.convert(r, Community.class))
+				.collect(Collectors.toList());
+		
+		return communities;
+	}
 }

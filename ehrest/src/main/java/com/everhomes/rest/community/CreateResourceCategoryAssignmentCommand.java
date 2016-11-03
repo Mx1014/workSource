@@ -17,7 +17,7 @@ public class CreateResourceCategoryAssignmentCommand {
 
     private Long resourceId;
 
-    private String resourceCategoryId;
+    private Long resourceCategoryId;
 
     public CreateResourceCategoryAssignmentCommand() {
     }
@@ -38,11 +38,11 @@ public class CreateResourceCategoryAssignmentCommand {
         this.resourceId = resourceId;
     }
 
-    public String getResourceCategoryId() {
+    public Long getResourceCategoryId() {
         return resourceCategoryId;
     }
 
-    public void setResourceCategoryId(String resourceCategoryId) {
+    public void setResourceCategoryId(Long resourceCategoryId) {
         this.resourceCategoryId = resourceCategoryId;
     }
 

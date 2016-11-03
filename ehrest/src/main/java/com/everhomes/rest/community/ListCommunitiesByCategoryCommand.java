@@ -83,6 +83,22 @@ public class ListCommunitiesByCategoryCommand {
 		this.keywords = keywords;
 	}
 
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

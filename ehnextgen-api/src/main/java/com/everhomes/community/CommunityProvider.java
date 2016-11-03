@@ -77,4 +77,23 @@ public interface CommunityProvider {
 
     List<Community> findCommunitiesByCityId(ListingLocator locator, int count, int namespaceId, long cityId);
 
+    /*--------添加修改资源分类 ------*/
+    void createResourceCategory(ResourceCategory resourceCategory);
+    
+    ResourceCategory findResourceCategoryById(Long id);
+    
+    void updateResourceCategory(ResourceCategory resourceCategory);
+    
+    void createResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
+    
+    ResourceCategoryAssignment findResourceCategoryAssignment(Long resourceId, String resourceType, Integer namespaceId);
+    
+    void deleteResourceCategoryAssignmentById(Long id);
+    
+    ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name);
+    
+    void updateResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
+    
+    List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
+			Integer pageSize);
 }
